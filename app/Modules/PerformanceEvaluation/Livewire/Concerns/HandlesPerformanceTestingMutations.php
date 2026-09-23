@@ -12,10 +12,11 @@ use App\Modules\PerformanceEvaluation\Application\Services\PerformanceTestQuesti
 use App\Modules\PerformanceEvaluation\Exports\PerformanceTestQuestionImportTemplateExport;
 use App\Modules\PerformanceEvaluation\Imports\PerformanceTestQuestionSheetImport;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 trait HandlesPerformanceTestingMutations
 {
-    public function downloadTestQuestionImportTemplate()
+    public function downloadTestQuestionImportTemplate(): BinaryFileResponse
     {
         $this->authorizePerformanceEvaluationManage();
 

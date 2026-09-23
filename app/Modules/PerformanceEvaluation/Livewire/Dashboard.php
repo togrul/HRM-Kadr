@@ -7,6 +7,7 @@ use App\Modules\PerformanceEvaluation\Livewire\Concerns\InteractsWithPerformance
 use App\Modules\PerformanceEvaluation\Livewire\Concerns\InteractsWithPerformanceEvaluationQueries;
 use App\Services\HrPolicies\HrPolicyPackService;
 use App\Support\Livewire\InteractsWithTabbedWorkspace;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
@@ -72,7 +73,7 @@ class Dashboard extends Component
         return app(HrPolicyPackService::class)->workflowTabs('performance_evaluation', $this->tabs);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('performance-evaluation::livewire.performance-evaluation.dashboard');
     }

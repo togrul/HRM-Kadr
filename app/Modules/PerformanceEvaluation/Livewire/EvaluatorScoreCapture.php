@@ -9,6 +9,7 @@ use App\Models\PerformanceFormScore;
 use App\Modules\PerformanceEvaluation\Application\Services\PerformanceWeakAreaTrainingNeedService;
 use App\Modules\PerformanceEvaluation\Livewire\Concerns\InteractsWithEvaluatorScoreCaptureQueries;
 use App\Modules\PerformanceEvaluation\Livewire\Concerns\InteractsWithEvaluatorWorkspaceScoreForm;
+use Illuminate\Contracts\View\View;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Isolate;
 use Livewire\Attributes\On;
@@ -114,7 +115,7 @@ class EvaluatorScoreCapture extends Component
         $this->dispatch('performance-evaluation:score-capture-mutated');
     }
 
-    public function render()
+    public function render(): View
     {
         return view('performance-evaluation::livewire.performance-evaluation.evaluator-score-capture');
     }

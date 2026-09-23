@@ -4,6 +4,7 @@ namespace App\Modules\PerformanceEvaluation\Livewire;
 
 use App\Modules\PerformanceEvaluation\Livewire\Concerns\InteractsWithPerformanceEvaluationAccess;
 use App\Modules\PerformanceEvaluation\Livewire\Concerns\InteractsWithPerformanceEvaluationQueries;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Isolate;
 use Livewire\Component;
 
@@ -36,7 +37,7 @@ class EvaluationsSummary extends Component
         $this->dispatch('performance-evaluation:confirm-delete-form', formId: $formId);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('performance-evaluation::livewire.performance-evaluation.evaluations-summary');
     }

@@ -7,6 +7,7 @@ use App\Models\PerformanceForm;
 use App\Modules\PerformanceEvaluation\Livewire\Concerns\HandlesPerformanceEvaluationFlowMutations;
 use App\Modules\PerformanceEvaluation\Livewire\Concerns\HandlesPerformanceTestingMutations;
 use App\Services\HrPolicies\HrPolicyPackService;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Isolate;
 use Livewire\Attributes\On;
 
@@ -83,7 +84,7 @@ class OperationsWorkspace extends AbstractPerformanceWorkspace
         $this->confirmDeleteEvaluationForm($formId);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('performance-evaluation::livewire.performance-evaluation.operations-workspace');
     }

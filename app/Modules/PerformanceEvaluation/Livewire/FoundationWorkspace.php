@@ -9,6 +9,7 @@ use App\Models\PerformanceFormTemplateItem;
 use App\Models\PerformanceFormTemplateSection;
 use App\Modules\PerformanceEvaluation\Livewire\Concerns\HandlesPerformanceFoundationMutations;
 use App\Services\HrPolicies\HrPolicyPackService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Isolate;
@@ -230,7 +231,7 @@ class FoundationWorkspace extends AbstractPerformanceWorkspace
         );
     }
 
-    public function render()
+    public function render(): View
     {
         return view('performance-evaluation::livewire.performance-evaluation.foundation-workspace');
     }

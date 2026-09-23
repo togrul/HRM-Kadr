@@ -6,6 +6,8 @@ use App\Livewire\Traits\SideModalAction;
 use App\Models\PerformanceCycle;
 use App\Models\Position;
 use App\Modules\PerformanceEvaluation\Application\Services\SuccessionService;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -60,12 +62,12 @@ class SuccessionWorkspace extends Component
         $this->section = in_array($section, ['grid', 'plans', 'pools'], true) ? $section : 'grid';
     }
 
-    public function getPoolsProperty()
+    public function getPoolsProperty(): \Illuminate\Support\Collection
     {
         return app(SuccessionService::class)->pools();
     }
 
-    public function getCyclesProperty()
+    public function getCyclesProperty(): Collection
     {
         return PerformanceCycle::query()->orderByDesc('period_start')->get(['id', 'name']);
     }
@@ -75,7 +77,7 @@ class SuccessionWorkspace extends Component
         return app(SuccessionService::class)->nineBox($this->cycleId);
     }
 
-    public function getPlansProperty()
+    public function getPlansProperty(): \Illuminate\Support\Collection
     {
         return app(SuccessionService::class)->plans();
     }
@@ -304,7 +306,7 @@ class SuccessionWorkspace extends Component
         $this->resetValidation();
     }
 
-    public function render()
+    public function render(): View
     {
         return view('performance-evaluation::livewire.performance-evaluation.succession-workspace');
     }

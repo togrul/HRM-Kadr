@@ -5,8 +5,11 @@ namespace App\Modules\PerformanceEvaluation\Livewire;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\PerformanceCycle;
 use App\Models\PerformanceFeedbackRater;
+use App\Models\PerformanceFeedbackRequest;
 use App\Models\PerformanceFormTemplate;
 use App\Modules\PerformanceEvaluation\Application\Services\Feedback360Service;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -76,22 +79,22 @@ class Feedback360Workspace extends Component
         return $this->service()->summary();
     }
 
-    public function getRequestsProperty()
+    public function getRequestsProperty(): \Illuminate\Support\Collection
     {
         return $this->service()->requests($this->cycleId);
     }
 
-    public function getCyclesProperty()
+    public function getCyclesProperty(): Collection
     {
         return PerformanceCycle::query()->orderByDesc('period_start')->get(['id', 'name']);
     }
 
-    public function getTemplatesProperty()
+    public function getTemplatesProperty(): Collection
     {
         return PerformanceFormTemplate::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']);
     }
 
-    public function getActiveRequestProperty()
+    public function getActiveRequestProperty(): ?PerformanceFeedbackRequest
     {
         return $this->activeRequestId ? $this->service()->find($this->activeRequestId) : null;
     }
@@ -328,7 +331,7 @@ class Feedback360Workspace extends Component
         $this->resetValidation();
     }
 
-    public function render()
+    public function render(): View
     {
         return view('performance-evaluation::livewire.performance-evaluation.feedback-360-workspace');
     }
