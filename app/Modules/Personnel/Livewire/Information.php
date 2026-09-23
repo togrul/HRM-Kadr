@@ -23,6 +23,14 @@ use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
+/**
+ * @property-read Personnel $personnel
+ * @property-read Collection<int, \App\Models\PersonnelContract> $contractRows
+ * @property-read Collection<int, \App\Models\PersonnelEducationRequest> $educationRequestRows
+ * @property-read Collection<int, \App\Models\PersonnelMasterDegree> $masterDegreeRows
+ * @property-read Collection<int, \App\Models\PersonnelPensionCard> $pensionCardRows
+ * @property-read Collection<int, \App\Models\PersonnelDisposal> $disposalRows
+ */
 #[On('contractAdded')]
 class Information extends Component
 {
