@@ -11,10 +11,10 @@
 
     // Tailwind only keeps classes it can see as literals, so the accents are spelled out.
     $accents = [
-        'amber' => ['dot' => 'bg-amber-500', 'chip' => 'bg-[#fef3c7] text-[#b45309]', 'card' => 'bg-[#fffdf7]'],
-        'rose' => ['dot' => 'bg-rose-500', 'chip' => 'bg-[#ffe4e6] text-[#be123c]', 'card' => 'bg-[#fffbfb]'],
-        'green' => ['dot' => 'bg-emerald-500', 'chip' => 'bg-[#d1fae5] text-[#047857]', 'card' => 'bg-[#fafefc]'],
-        'sky' => ['dot' => 'bg-sky-500', 'chip' => 'bg-[#e0f2fe] text-[#0369a1]', 'card' => 'bg-[#fbfdff]'],
+        'amber' => ['dot' => 'bg-amber-500', 'chip' => 'bg-[#fef3c7] text-[#b45309]', 'card' => 'bg-white'],
+        'rose' => ['dot' => 'bg-rose-500', 'chip' => 'bg-[#ffe4e6] text-[#be123c]', 'card' => 'bg-white'],
+        'green' => ['dot' => 'bg-emerald-500', 'chip' => 'bg-[#d1fae5] text-[#047857]', 'card' => 'bg-white'],
+        'sky' => ['dot' => 'bg-sky-500', 'chip' => 'bg-[#e0f2fe] text-[#0369a1]', 'card' => 'bg-white'],
         'neutral' => ['dot' => 'bg-zinc-400', 'chip' => 'bg-[#f4f4f5] text-[#52525b]', 'card' => 'bg-white'],
     ];
 
@@ -27,11 +27,11 @@
 
     $user = auth()->user();
     $quickLinks = [
-        ['key' => 'new_employee', 'route' => 'personnel.index', 'module' => 'personnel', 'permission' => 'add-personnels', 'icon' => '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/>'],
-        ['key' => 'new_order', 'route' => 'orders', 'module' => 'orders', 'permission' => 'add-orders', 'icon' => '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 12v6M9 15h6"/>'],
+        ['key' => 'new_employee', 'route' => 'personnel.index', 'params' => ['create' => 1], 'module' => 'personnel', 'permission' => 'add-personnels', 'icon' => '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/>'],
+        ['key' => 'new_order', 'route' => 'orders', 'params' => ['create' => 1], 'module' => 'orders', 'permission' => 'add-orders', 'icon' => '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 12v6M9 15h6"/>'],
         ['key' => 'vacation_request', 'route' => 'vacations.list', 'module' => 'vacation', 'permission' => 'add-vacations', 'icon' => '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M9 16l2 2 4-4"/>'],
         ['key' => 'export_report', 'route' => 'reports', 'module' => 'reports', 'permission' => null, 'icon' => '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/>'],
-        ['key' => 'today_attendance', 'route' => 'attendance', 'module' => 'attendance', 'permission' => 'show-attendance', 'icon' => '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'],
+        ['key' => 'today_attendance', 'route' => 'attendance', 'params' => ['tab' => 'daily-monitor'], 'module' => 'attendance', 'permission' => 'show-attendance', 'icon' => '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'],
     ];
 
     // Gated in PHP: @can with a null ability would ask the gate about nothing at all.
@@ -78,7 +78,7 @@
                     @module($link['module'])
                         <x-context-panel.item
                             wire:key="home-quick-{{ $link['key'] }}"
-                            :href="route($link['route'])"
+                            :href="route($link['route'], $link['params'] ?? [])"
                             wire:navigate
                         >
                             <x-slot:icon>
@@ -104,11 +104,11 @@
         <x-slot name="actions">
             <span class="inline-flex h-9 items-center gap-2 rounded-[10px] border border-hairline bg-[#fafafa] px-3.5 text-[12.5px] font-semibold text-ink-soft">
                 <svg class="h-3.5 w-3.5 text-ink-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-                {{ now()->translatedFormat('F Y') }}
+                {{ \Illuminate\Support\Str::ucfirst(now()->translatedFormat('F Y')) }}
             </span>
 
             @can('add-personnels')
-                <x-pill-button variant="primary" :href="route('personnel.index')" wire:navigate>
+                <x-pill-button variant="primary" :href="route('personnel.index', ['create' => 1])" wire:navigate>
                     <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
                     {{ __('personnel::home.actions.new_employee') }}
                 </x-pill-button>
@@ -146,10 +146,10 @@
                         <a href="{{ route($card['route']) }}" wire:navigate class="absolute inset-0 rounded-2xl" aria-label="{{ __('personnel::home.attention.cards.'.$card['key'].'.label') }}"></a>
 
                         <div class="flex items-start justify-between gap-3">
-                            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl {{ $accent['chip'] }}">
+                            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl {{ $card['count'] > 0 ? $accent['chip'] : $accents['neutral']['chip'] }}">
                                 <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">{!! $tileIcons[$card['key']] !!}</svg>
                             </span>
-                            <span class="hrm-num text-[30px] font-semibold leading-none tracking-[-0.03em] text-ink">{{ $card['count'] }}</span>
+                            <span @class(['hrm-num text-[30px] font-semibold leading-none tracking-[-0.03em]', 'text-ink' => $card['count'] > 0, 'text-ink-faint' => $card['count'] === 0])>{{ $card['count'] }}</span>
                         </div>
 
                         <p class="mt-3 text-[13px] font-semibold leading-tight text-ink">
@@ -257,7 +257,7 @@
             @endif
         @endif
 
-        <div class="grid gap-4 xl:grid-cols-[1.35fr,1fr]">
+        <div class="grid items-start gap-4 xl:grid-cols-[1.35fr,1fr]">
 
             {{-- ==================== weekly attendance ==================== --}}
             @if ($canAttendance)
@@ -355,13 +355,14 @@
                                     $actor = $row['actor'] ?: __('personnel::home.activity.system_actor');
                                 @endphp
                                 <li class="flex items-start gap-3 py-2.5">
-                                    <x-avatar :name="$actor" size="sm" :tone="$activityTones[$index % count($activityTones)]" />
+                                    <x-avatar :name="$actor" size="sm" :tone="$activityTones[crc32($actor) % count($activityTones)]" />
                                     <div class="min-w-0 flex-1">
                                         <p class="text-[12.5px] leading-snug text-ink-soft">
                                             <span class="font-medium text-ink">{{ $actor }}</span>
                                             <span class="text-ink-muted">{{ $eventLabel }}</span>
                                             @if ($row['subject'] !== '')
-                                                <span class="text-ink-faint">· {{ $row['subject'] }}@if ($row['subject_id']) #{{ $row['subject_id'] }}@endif</span>
+                                                {{-- a model's class name means nothing to a reader; name the kind of record instead --}}
+                                                <span class="text-ink-faint">· {{ Lang::has('personnel::home.subjects.'.\Illuminate\Support\Str::snake($row['subject'])) ? __('personnel::home.subjects.'.\Illuminate\Support\Str::snake($row['subject'])) : __('personnel::home.subjects.other') }}</span>
                                             @endif
                                         </p>
                                         <p class="mt-0.5 text-[11px] text-ink-faint">{{ $row['at']?->diffForHumans() }}</p>

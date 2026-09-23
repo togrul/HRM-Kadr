@@ -267,6 +267,19 @@ class HomeDashboardTest extends TestCase
         $this->assertSame(10, Livewire::test(Home::class)->instance()->structureFill[0]['total']);
     }
 
+    public function test_the_activity_feed_leaves_out_sign_ins_and_profile_views(): void
+    {
+        $this->actingAsViewer(['show-audit-logs']);
+
+        activity('auth')->causedBy(auth()->user())->event('login')->log('User logged in');
+        activity('personnel_access')->causedBy(auth()->user())->event('profile_opened')->log('Personnel profile opened');
+        activity('default')->causedBy(auth()->user())->event('created')->log('created');
+
+        $events = collect(Livewire::test(Home::class)->instance()->activity)->pluck('event')->all();
+
+        $this->assertSame(['created'], $events);
+    }
+
     private function seedBelowTheFold(): void
     {
         Structure::factory()->create(['id' => 5, 'name' => 'Baş idarə', 'shortname' => 'Bİ']);

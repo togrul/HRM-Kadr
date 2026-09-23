@@ -53,6 +53,9 @@ class HomeOverviewService
      */
     private const CACHE_TTL_SECONDS = 60;
 
+    /** Audit log channels that record access rather than work; left out of the feed. */
+    private const ACCESS_LOGS = ['auth', 'personnel_access'];
+
     /**
      * The four "needs attention" tiles, in the order the design lays them out.
      *
@@ -453,6 +456,9 @@ class HomeOverviewService
     {
         $activities = AuditActivity::query()
             ->select(['id', 'log_name', 'event', 'subject_type', 'subject_id', 'causer_type', 'causer_id', 'created_at'])
+            // Sign-ins and profile views are access logs, not work: they drowned out
+            // the orders, leaves and edits the feed is meant to show.
+            ->whereNotIn('log_name', self::ACCESS_LOGS)
             ->latest('created_at')
             ->latest('id')
             ->limit($limit)
