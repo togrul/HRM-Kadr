@@ -348,6 +348,14 @@ body {
   background: transparent;
 }
 
+/* Selection lists: the thin bar stays invisible until the list is hovered, like macOS overlay scrollbars. */
+.hrm-scroll-hover:not(:hover) {
+  scrollbar-color: transparent transparent;
+}
+.hrm-scroll-hover:not(:hover)::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
 /* force legacy blade icons to inherit the surrounding currentColor */
 .hrm-icon svg [stroke]:not([stroke='none']),
 .hrm-rail-link svg [stroke]:not([stroke='none']) {

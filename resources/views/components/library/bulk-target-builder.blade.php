@@ -20,7 +20,7 @@
             @if ($payload['structures'] === [])
                 <p class="mt-4 text-sm text-zinc-500">{{ __($translationNs.'.messages.empty_structures') }}</p>
             @else
-                <div class="mt-4 grid max-h-[18rem] gap-3 overflow-y-auto pr-1">
+                <div class="mt-4 grid max-h-[18rem] gap-3 overflow-y-auto pr-1 hrm-scroll hrm-scroll-hover">
                     @foreach ($payload['structures'] as $structure)
                         @php
                             $isSelected = in_array($structure['id'], $selectedStructureIds, true);
@@ -50,7 +50,7 @@
             @if ($payload['positions'] === [])
                 <p class="mt-4 text-sm text-zinc-500">{{ __($translationNs.'.messages.empty_positions') }}</p>
             @else
-                <div class="mt-4 grid max-h-[18rem] gap-3 overflow-y-auto pr-1">
+                <div class="mt-4 grid max-h-[18rem] gap-3 overflow-y-auto pr-1 hrm-scroll hrm-scroll-hover">
                     @foreach ($payload['positions'] as $position)
                         @php
                             $isSelected = in_array($position['id'], $selectedPositionIds, true);
@@ -84,7 +84,7 @@
         @if ($payload['personnels'] === [])
             <p class="mt-4 text-sm text-zinc-500">{{ __($translationNs.'.messages.empty_personnels') }}</p>
         @else
-            <div class="mt-4 grid max-h-[24rem] gap-3 overflow-y-auto pr-1 md:grid-cols-2 xl:grid-cols-3">
+            <div class="mt-4 grid max-h-[24rem] gap-3 overflow-y-auto pr-1 hrm-scroll hrm-scroll-hover md:grid-cols-2 xl:grid-cols-3">
                 @foreach ($payload['personnels'] as $personnel)
                     @php
                         $isSelected = in_array($personnel['id'], $selectedPersonnelIds, true);
