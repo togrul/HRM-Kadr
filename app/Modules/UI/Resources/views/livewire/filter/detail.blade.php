@@ -25,21 +25,21 @@
             x-transition:leave="ease-in duration-150"
             x-transition:leave-start="opacity-100 scale-100"
             x-transition:leave-end="opacity-0 scale-95"
-            class="w-full max-w-6xl overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl">
-            <header class="flex items-start justify-between border-b border-slate-200 px-6 py-4">
+            class="w-full max-w-6xl overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-2xl">
+            <header class="flex items-start justify-between border-b border-zinc-200 px-6 py-4">
                 <div>
-                    <h2 class="text-[18px] font-semibold tracking-tight text-slate-900">{{ __('ui::filters.titles.advanced_filters') }}</h2>
-                    <p class="mt-1 text-sm text-slate-500">{{ __('ui::filters.descriptions.refine_results') }}</p>
+                    <h2 class="text-[18px] font-semibold tracking-tight text-zinc-900">{{ __('ui::filters.titles.advanced_filters') }}</h2>
+                    <p class="mt-1 text-sm text-zinc-500">{{ __('ui::filters.descriptions.refine_results') }}</p>
                 </div>
 
-                <button type="button" class="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700" @click="open = false">
-                  <x-icons.default.close-icon size="w-6 h-6" color="text-slate-500" hover="text-slate-900"></x-icons.default.close-icon>
+                <button type="button" class="rounded-lg p-2 text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-700" @click="open = false">
+                  <x-icons.default.close-icon size="w-6 h-6" color="text-zinc-500" hover="text-zinc-900"></x-icons.default.close-icon>
                 </button>
             </header>
 
             <div wire:key="filter-detail-open-{{ $openSequence }}" class="max-h-[72vh] space-y-6 overflow-y-auto px-6 py-6">
                 <section class="space-y-3">
-                    <div class="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    <div class="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.14em] text-zinc-500">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 7h18M6 12h12M10 17h4" />
                         </svg>
@@ -64,7 +64,7 @@
                                 searchModel="searchPosition"
                                 load-on-open="position"
                                 load-on-focus="position"
-                                wire:model.defer="filter.position_id"
+                                wire:model="filter.position_id"
                             />
                         </div>
                         <div class="lg:col-span-2 xl:col-span-4">
@@ -74,7 +74,7 @@
                                 searchModel="searchNationality"
                                 load-on-open="nationality"
                                 load-on-focus="nationality"
-                                wire:model.defer="filter.nationality_id"
+                                wire:model="filter.nationality_id"
                             />
                         </div>
                         <div class="lg:col-span-2 xl:col-span-6">
@@ -84,7 +84,7 @@
                                 searchModel="searchPreviousNationality"
                                 load-on-open="bornCountry"
                                 load-on-focus="bornCountry"
-                                wire:model.defer="filter.born_country_id"
+                                wire:model="filter.born_country_id"
                             />
                         </div>
                         <div class="lg:col-span-2 xl:col-span-6">
@@ -94,14 +94,14 @@
                                 searchModel="searchCity"
                                 load-on-open="city"
                                 load-on-focus="city"
-                                wire:model.defer="filter.born_city_id"
+                                wire:model="filter.born_city_id"
                             />
                         </div>
                     </div>
                 </section>
 
                 <section class="space-y-3">
-                    <div class="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    <div class="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.14em] text-zinc-500">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 19a6 6 0 10-12 0m12 0h3m-3 0a6 6 0 0112 0m-6-10a4 4 0 110-8 4 4 0 010 8zM9 11a4 4 0 110-8 4 4 0 010 8z" />
                         </svg>
@@ -111,23 +111,23 @@
                     <div class="grid grid-cols-1 gap-3 lg:grid-cols-8 xl:grid-cols-12">
                         <div class="flex flex-col lg:col-span-2 xl:col-span-2">
                             <x-label for="filter.surname">{{ __('personnel::common.labels.surname') }}</x-label>
-                            <x-livewire-input mode="gray" name="filter.surname" wire:model.defer="filter.surname" />
+                            <x-livewire-input mode="gray" name="filter.surname" wire:model="filter.surname" />
                         </div>
                         <div class="flex flex-col lg:col-span-2 xl:col-span-2">
                             <x-label for="filter.name">{{ __('personnel::common.labels.name') }}</x-label>
-                            <x-livewire-input mode="gray" name="filter.name" wire:model.defer="filter.name" />
+                            <x-livewire-input mode="gray" name="filter.name" wire:model="filter.name" />
                         </div>
                         <div class="flex flex-col lg:col-span-2 xl:col-span-2">
                             <x-label for="filter.patronymic">{{ __('personnel::common.labels.patronymic') }}</x-label>
-                            <x-livewire-input mode="gray" name="filter.patronymic" wire:model.defer="filter.patronymic" />
+                            <x-livewire-input mode="gray" name="filter.patronymic" wire:model="filter.patronymic" />
                         </div>
                         <div class="flex flex-col lg:col-span-2 xl:col-span-2">
                             <x-label for="filter.tabel_no">{{ __('personnel::common.labels.tabel_hash') }}</x-label>
-                            <x-livewire-input mode="gray" name="filter.tabel_no" wire:model.defer="filter.tabel_no" />
+                            <x-livewire-input mode="gray" name="filter.tabel_no" wire:model="filter.tabel_no" />
                         </div>
                         <div class="flex flex-col lg:col-span-2 xl:col-span-2">
                             <x-label for="filter.pin">{{ __('personnel::common.labels.pin') }}</x-label>
-                            <x-livewire-input mode="gray" name="filter.pin" wire:model.defer="filter.pin" />
+                            <x-livewire-input mode="gray" name="filter.pin" wire:model="filter.pin" />
                         </div>
                         <div class="flex flex-col gap-1 lg:col-span-4 xl:col-span-2">
                             <x-label for="filter.is_married">{{ __('personnel::common.labels.family_status') }}</x-label>
@@ -167,16 +167,16 @@
                         <div class="flex flex-col lg:col-span-4 xl:col-span-3">
                             <x-label for="filter.age">{{ __('candidates::common.labels.age') }}</x-label>
                             <div class="flex items-center space-x-1">
-                                <x-livewire-input mode="gray" name="filter.age.min" wire:model.defer="filter.age.min" />
+                                <x-livewire-input mode="gray" name="filter.age.min" wire:model="filter.age.min" />
                                 <span>-</span>
-                                <x-livewire-input mode="gray" name="filter.age.max" wire:model.defer="filter.age.max" />
+                                <x-livewire-input mode="gray" name="filter.age.max" wire:model="filter.age.max" />
                             </div>
                         </div>
                     </div>
                 </section>
 
                 <section class="space-y-3">
-                    <div class="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    <div class="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.14em] text-zinc-500">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12h6m-6 4h6M9 8h6M4 5h16v14H4V5z" />
                         </svg>
@@ -211,12 +211,12 @@
                                 searchModel="searchRank"
                                 load-on-open="rank"
                                 load-on-focus="rank"
-                                wire:model.defer="filter.rank_id"
+                                wire:model="filter.rank_id"
                             />
                         </div>
                         <div class="flex flex-col lg:col-span-2 xl:col-span-2">
                             <x-label for="filter.rank_name">{{ __('personnel::common.labels.rank') }} {{ __('personnel::common.labels.name') }}</x-label>
-                            <x-livewire-input mode="gray" name="filter.rank_name" wire:model.defer="filter.rank_name" />
+                            <x-livewire-input mode="gray" name="filter.rank_name" wire:model="filter.rank_name" />
                         </div>
                         <div class="lg:col-span-2 xl:col-span-2">
                             <x-ui.filter-select
@@ -225,12 +225,12 @@
                                 searchModel="searchEducationDegree"
                                 load-on-open="educationDegree"
                                 load-on-focus="educationDegree"
-                                wire:model.defer="filter.education_degree_id"
+                                wire:model="filter.education_degree_id"
                             />
                         </div>
                         <div class="flex flex-col lg:col-span-2 xl:col-span-2">
                             <x-label for="filter.specialty">{{ __('personnel::common.labels.specialty') }}</x-label>
-                            <x-livewire-input mode="gray" name="filter.specialty" wire:model.defer="filter.specialty" />
+                            <x-livewire-input mode="gray" name="filter.specialty" wire:model="filter.specialty" />
                         </div>
                         <div class="lg:col-span-4 xl:col-span-4">
                             <x-ui.filter-select
@@ -239,7 +239,7 @@
                                 searchModel="searchInstitution"
                                 load-on-open="institution"
                                 load-on-focus="institution"
-                                wire:model.defer="filter.educational_institution_id"
+                                wire:model="filter.educational_institution_id"
                             />
                         </div>
                         <div class="lg:col-span-4 xl:col-span-3">
@@ -249,7 +249,7 @@
                                 searchModel="searchAward"
                                 load-on-open="award"
                                 load-on-focus="award"
-                                wire:model.defer="filter.award_id"
+                                wire:model="filter.award_id"
                             />
                         </div>
                         <div class="lg:col-span-2 xl:col-span-2">
@@ -259,12 +259,12 @@
                                 searchModel="searchPunishment"
                                 load-on-open="punishment"
                                 load-on-focus="punishment"
-                                wire:model.defer="filter.punishment_id"
+                                wire:model="filter.punishment_id"
                             />
                         </div>
                         <div class="flex flex-col lg:col-span-6 xl:col-span-3">
                             <x-label for="filter.punishment_reason">{{ __('personnel::common.labels.punishment') }} {{ __('personnel::common.labels.reason') }}</x-label>
-                            <x-livewire-input mode="gray" name="filter.punishment_reason" wire:model.defer="filter.punishment_reason" />
+                            <x-livewire-input mode="gray" name="filter.punishment_reason" wire:model="filter.punishment_reason" />
                         </div>
                         <div class="flex flex-col lg:col-span-4 xl:col-span-3">
                             <x-label for="filter.join_work_date">{{ __('personnel::common.labels.join_work_date') }}</x-label>
@@ -310,13 +310,13 @@
                 </section>
             </div>
 
-            <footer class="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-6 py-4">
-                <button type="button" wire:click="clearAllFilters" class="rounded-lg px-3 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-700">
+            <footer class="flex items-center justify-between border-t border-zinc-200 bg-zinc-50 px-6 py-4">
+                <button type="button" wire:click="clearAllFilters" class="rounded-lg px-3 py-2 text-sm font-medium text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-700">
                     {{ __('ui::filters.actions.clear_all') }}
                 </button>
 
                 <div class="flex items-center gap-2">
-                    <button type="button" class="rounded-lg border border-slate-200 bg-white px-5 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100" @click="open = false">
+                    <button type="button" class="rounded-lg border border-zinc-200 bg-white px-5 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100" @click="open = false">
                         {{ __('ui::filters.actions.cancel') }}
                     </button>
                     <button

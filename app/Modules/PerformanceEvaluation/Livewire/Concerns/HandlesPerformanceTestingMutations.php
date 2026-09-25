@@ -7,20 +7,21 @@ use App\Models\PerformanceTestAttemptAnswer;
 use App\Models\PerformanceTestBank;
 use App\Models\PerformanceTestQuestion;
 use App\Models\PerformanceTestSession;
-use App\Modules\PerformanceEvaluation\Application\Services\PerformanceTestQuestionImportService;
 use App\Modules\PerformanceEvaluation\Application\Services\PerformanceSkillMeasurementService;
+use App\Modules\PerformanceEvaluation\Application\Services\PerformanceTestQuestionImportService;
 use App\Modules\PerformanceEvaluation\Exports\PerformanceTestQuestionImportTemplateExport;
 use App\Modules\PerformanceEvaluation\Imports\PerformanceTestQuestionSheetImport;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 trait HandlesPerformanceTestingMutations
 {
-    public function downloadTestQuestionImportTemplate()
+    public function downloadTestQuestionImportTemplate(): BinaryFileResponse
     {
         $this->authorizePerformanceEvaluationManage();
 
         return Excel::download(
-            new PerformanceTestQuestionImportTemplateExport(),
+            new PerformanceTestQuestionImportTemplateExport,
             'performance-test-question-import-template.xlsx'
         );
     }
@@ -37,7 +38,7 @@ trait HandlesPerformanceTestingMutations
             'testQuestionImportFile' => __('performance_evaluation::dashboard.fields.import_file'),
         ]);
 
-        $rows = Excel::toArray(new PerformanceTestQuestionSheetImport(), $this->testQuestionImportFile)[0] ?? [];
+        $rows = Excel::toArray(new PerformanceTestQuestionSheetImport, $this->testQuestionImportFile)[0] ?? [];
 
         $result = app(PerformanceTestQuestionImportService::class)->import(
             $rows,
@@ -113,6 +114,7 @@ trait HandlesPerformanceTestingMutations
 
         if (data_get($validated, 'questionForm.question_type') === 'multiple_choice' && blank(data_get($validated, 'questionForm.options_text'))) {
             $this->addError('questionForm.options_text', __('performance_evaluation::dashboard.validation.options_required'));
+
             return;
         }
 
@@ -201,22 +203,26 @@ trait HandlesPerformanceTestingMutations
 
         if ($session->performance_test_bank_id !== $question->performance_test_bank_id) {
             $this->addError('attemptAnswerForm.performance_test_question_id', __('performance_evaluation::dashboard.validation.question_bank_mismatch'));
+
             return;
         }
 
         if ($question->isAutoScored()) {
             if (blank(data_get($validated, 'attemptAnswerForm.selected_option_id'))) {
                 $this->addError('attemptAnswerForm.selected_option_id', __('performance_evaluation::dashboard.validation.option_required'));
+
                 return;
             }
 
             $optionBelongsToQuestion = $question->options->contains('id', (int) data_get($validated, 'attemptAnswerForm.selected_option_id'));
             if (! $optionBelongsToQuestion) {
                 $this->addError('attemptAnswerForm.selected_option_id', __('performance_evaluation::dashboard.validation.invalid_option'));
+
                 return;
             }
         } elseif (blank(data_get($validated, 'attemptAnswerForm.answer_text'))) {
             $this->addError('attemptAnswerForm.answer_text', __('performance_evaluation::dashboard.validation.answer_text_required'));
+
             return;
         }
 

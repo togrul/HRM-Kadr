@@ -4,6 +4,7 @@ namespace App\Modules\TrainingNeeds\Livewire;
 
 use App\Modules\TrainingNeeds\Livewire\Concerns\HandlesTrainingCatalogMutations;
 use App\Services\HrPolicies\HrPolicyPackService;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Isolate;
 use Livewire\WithPagination;
 
@@ -18,7 +19,7 @@ class FoundationWorkspace extends AbstractTrainingNeedsWorkspace
         return app(HrPolicyPackService::class)->workflowTabs('training_needs', ['catalogs', 'matrix', 'profiles']);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('training-needs::livewire.training-needs.foundation-workspace');
     }

@@ -54,7 +54,7 @@ return [
         'order_added' => 'Əmr uğurla əlavə edildi!',
         'order_updated' => 'Əmr uğurla yeniləndi!',
         'order_deleted' => 'Əmr silindi!',
-        'active_metadata_required' => 'Bu əmr tipi üçün mapping-ləri olan aktiv metadata template versiyası tələb olunur.',
+        'active_metadata_required' => 'Bu əmr tipi üçün sahələri uyğunlaşdırılmış aktiv şablon versiyası tələb olunur.',
         'not_enough_vacation_days' => 'Bu məzuniyyət üçün kifayət qədər gün qalmayıb.',
         'less_than_six_months' => ':person 6 aydan az müddətdir işləyir.',
         'vacancy_error' => 'Vakansiya xətası',

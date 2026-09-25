@@ -38,6 +38,7 @@ return [
         'vacation_days' => 'Məzuniyyət günləri',
         'contract_duration' => 'Müqavilə müddəti',
         'next_contract_duration' => 'Növbəti müqavilə müddəti',
+        'vacation_days_per_month' => 'Aylıq məzuniyyət günləri',
         'serial_number' => 'Seriya nömrəsi',
         'capacity' => 'Tutum',
         'production_year' => 'İstehsal ili',
@@ -179,6 +180,8 @@ return [
             'sessions' => 'Sessiyalar',
             'review' => 'Yoxlama',
         ],
+        'no_stored_overrides' => 'Bu deployment üçün ayrıca saxlanmış təsdiq siyasəti yoxdur — sistem standart paket qaydaları ilə işləyir.',
+        'override_subtitle' => 'Bu müraciət növü üçün fərdi qayda.',
     ],
     'labels' => [
         'scope_personnel' => 'Əməkdaş',

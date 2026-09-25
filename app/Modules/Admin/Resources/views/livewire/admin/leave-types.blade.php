@@ -1,35 +1,16 @@
-<div
-    class="flex flex-col"
-    x-data
-    x-init="
-        const root = $el;
-        const paintPaginator = () => {
-            const paginator = root.querySelector('span[aria-current=page]>span');
-            if (paginator) {
-                paginator.classList.add('bg-blue-50', 'text-blue-600');
-            }
-        };
-        paintPaginator();
-        if (typeof Livewire !== 'undefined') {
-            Livewire.hook('commit', ({ component, succeed }) => {
-                if (component.id !== $wire.__instance.id) return;
-                succeed(() => queueMicrotask(paintPaginator));
-            });
-        }
-    "
->
+<div class="flex flex-col">
     <div class="flex flex-col items-center justify-between sm:flex-row filter bg-white py-2 px-2 rounded-xl">
         <div class="flex items-center justify-center space-x-2 action-section">
             <x-button class="space-x-2" mode="primary" wire:click.prevent="openCrud()">
-                <x-icons.add-icon color="text-white" hover="text-gray-50"></x-icons.add-icon>
+                <x-icons.add-icon color="text-white" hover="text-zinc-50"></x-icons.add-icon>
                 <span>{{ __('admin::leave_types.actions.add') }}</span>
             </x-button>
         </div>
     </div>
 
     @if ($isAdded)
-        <div wire:transition class="flex border border-gray-300 rounded-md bg-slate-50 relative px-3 py-2 my-3">
-            <button class="appearance-none absolute top-2 right-2" wire:click="closeCrud()">
+        <div wire:transition class="flex border border-zinc-300 rounded-md bg-zinc-50 relative px-3 py-2 my-3">
+            <button type="button" class="appearance-none absolute top-2 right-2 flex h-10 w-10 items-center justify-center rounded-lg text-ink-muted hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400" aria-label="{{ __('admin::references.actions.close') }}" title="{{ __('admin::references.actions.close') }}" wire:click="closeCrud()">
                 <x-icons.close-icon></x-icons.close-icon>
             </button>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2 mt-4 w-full">
@@ -48,9 +29,9 @@
                         wire:model.live.debounce.150ms="form.attendance_code"
                         placeholder="{{ __('admin::leave_types.placeholders.attendance_code') }}"
                     ></x-livewire-input>
-                    <p class="mt-1 text-xs leading-5 text-slate-500">{{ __('admin::leave_types.hints.attendance_code') }}</p>
+                    <p class="mt-1 text-xs leading-5 text-zinc-500">{{ __('admin::leave_types.hints.attendance_code') }}</p>
                     <div class="mt-2 flex flex-wrap items-center gap-2">
-                        <span class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">
+                        <span class="text-[11px] font-semibold uppercase tracking-tight text-zinc-400">
                             {{ __('admin::leave_types.hints.attendance_code_preview') }}
                         </span>
                         @if(filled($form['attendance_code'] ?? null))
@@ -58,7 +39,7 @@
                                 {{ $form['attendance_code'] }}
                             </span>
                         @else
-                            <span class="text-xs text-slate-500">{{ __('admin::leave_types.hints.attendance_code_empty') }}</span>
+                            <span class="text-xs text-zinc-500">{{ __('admin::leave_types.hints.attendance_code_empty') }}</span>
                         @endif
                     </div>
                     @error('form.attendance_code')
@@ -92,7 +73,7 @@
                         @forelse ($leave_types as $type)
                             <tr wire:key="leave-type-row-{{ $type->id }}">
                                 <x-table.td>
-                                    <span class="text-sm text-gray-500 font-medium">
+                                    <span class="text-sm text-zinc-500 font-medium">
                                         {{ $type->id }}
                                     </span>
                                 </x-table.td>
@@ -113,19 +94,18 @@
                                 </x-table.td>
                                 <x-table.td>
                                     <x-icons.check-icon
-                                        color="{{ $type->requires_document_label ? 'text-emerald-500' : 'text-gray-500' }}"></x-icons.check-icon>
+                                        color="{{ $type->requires_document_label ? 'text-emerald-500' : 'text-zinc-500' }}"></x-icons.check-icon>
                                 </x-table.td>
 
                                 <x-table.td :isButton="true" width="100">
                                     <div class="flex items-center space-x-2">
-                                        <button wire:click.prevent="openCrud({{ $type->id }})"
-                                            class="appearance-none flex items-center justify-center w-8 h-8 text-xs font-medium uppercase rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700">
-                                            <x-icons.edit-icon color="text-slate-400"
-                                                hover="text-slate-500"></x-icons.edit-icon>
+                                        <button type="button" wire:click.prevent="openCrud({{ $type->id }})"
+                                            class="appearance-none flex items-center justify-center w-10 h-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 text-xs font-medium uppercase rounded-lg text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700">
+                                            <x-icons.edit-icon color="text-zinc-400"
+                                                hover="text-zinc-500"></x-icons.edit-icon>
                                         </button>
-                                        <button wire:click.prevent = "deleteModel({{ $type->id }})"
-                                            {{--                                            wire:click="$dispatch('delete-prompt')" --}}
-                                            class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-100 hover:text-gray-700">
+                                        <button type="button" wire:click.prevent = "deleteModel({{ $type->id }})"
+                                            class="flex items-center justify-center w-10 h-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 text-xs font-medium uppercase transition duration-300 rounded-lg text-zinc-500 hover:bg-red-100 hover:text-zinc-700">
                                             <x-icons.delete-icon color="text-rose-500"
                                                 hover="text-rose-600"></x-icons.delete-icon>
                                         </button>
@@ -146,4 +126,3 @@
         </div>
     </div>
 </div>
-@include('includes.sweetalert-push')

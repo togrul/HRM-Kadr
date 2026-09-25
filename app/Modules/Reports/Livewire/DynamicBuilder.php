@@ -7,10 +7,12 @@ use App\Modules\Reports\Application\Services\DynamicReportBuilderService;
 use App\Modules\Reports\Application\Services\ReportsAccessService;
 use App\Modules\Reports\Application\Services\ReportsStructureScopeService;
 use App\Modules\Reports\Exports\ReportsTableExport;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Isolate;
 use Livewire\Component;
-use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Excel as ExcelWriter;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 #[Isolate]
 class DynamicBuilder extends Component
@@ -105,7 +107,7 @@ class DynamicBuilder extends Component
         );
     }
 
-    public function exportExcel()
+    public function exportExcel(): BinaryFileResponse
     {
         app(ReportsAccessService::class)->authorizeExport();
 
@@ -115,7 +117,7 @@ class DynamicBuilder extends Component
         );
     }
 
-    public function exportCsv()
+    public function exportCsv(): BinaryFileResponse
     {
         app(ReportsAccessService::class)->authorizeExport();
 
@@ -138,12 +140,12 @@ class DynamicBuilder extends Component
         ]);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('reports::livewire.reports.dynamic-builder');
     }
 
-    public function placeholder()
+    public function placeholder(): View
     {
         return view('reports::livewire.reports.placeholder');
     }

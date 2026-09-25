@@ -83,9 +83,7 @@ class UserManagementAuthorizationTest extends TestCase
 
         // Regression for the commented-out authz hole: an unprivileged user must not be
         // able to arm the delete component against an arbitrary target.
-        Livewire::test(DeleteUser::class)
-            ->call('setDeleteUser', $victim->id)
-            ->assertForbidden();
+        Livewire::test(DeleteUser::class)->assertForbidden();
 
         $this->assertDatabaseHas('users', ['id' => $victim->id, 'deleted_at' => null]);
     }
@@ -137,5 +135,28 @@ class UserManagementAuthorizationTest extends TestCase
 
         $this->assertDatabaseHas('activity_log', ['log_name' => 'users', 'event' => 'restored']);
         $this->assertDatabaseHas('activity_log', ['log_name' => 'users', 'event' => 'force_deleted']);
+    }
+
+    /**
+     * Roles, permissions, ranks, menus and settings were reachable by any signed-in user:
+     * their authorize() calls were commented out and the route only required auth.
+     */
+    public function test_every_settings_screen_is_forbidden_without_permission(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        foreach ([
+            \App\Modules\Services\Livewire\Roles\ManageRoles::class,
+            \App\Modules\Services\Livewire\Roles\SetPermission::class,
+            \App\Modules\Services\Livewire\Roles\DeleteRole::class,
+            \App\Modules\Services\Livewire\Roles\Permissions::class,
+            \App\Modules\Services\Livewire\Ranks\DeleteRank::class,
+            \App\Modules\Services\Livewire\Menus\DeleteMenu::class,
+            \App\Modules\Services\Livewire\Settings\DeleteSettings::class,
+        ] as $component) {
+            Livewire::test($component)->assertForbidden();
+        }
+
+        $this->get(route('services'))->assertForbidden();
     }
 }

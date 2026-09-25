@@ -2,78 +2,43 @@
 
 namespace App\Modules\Admin\Livewire;
 
-use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait;
-use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
 use App\Models\Weapon;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Support\Arr;
+use App\Modules\Admin\Support\ReferenceCrudComponent;
 use Livewire\Attributes\On;
-use Livewire\Component;
 
+/**
+ * Auto-increment key: no `id` input, and the id is never mass-assigned.
+ */
 #[On(['weaponUpdated', 'deleted'])]
-class Weapons extends Component
+class Weapons extends ReferenceCrudComponent
 {
-    use AdminCrudTrait;
-    use AuthorizesRequests;
-    use CallSwalTrait;
+    protected string $modelClass = Weapon::class;
 
-    public function rules(): array
+    protected string $savedEvent = 'weaponUpdated';
+
+    protected function addLabel(): string
+    {
+        return __('admin::references.buttons.add_weapon');
+    }
+
+    protected function fields(): array
     {
         return [
-            'form.name' => 'required|string|min:2',
-            'form.serial_number' => 'required|string|min:2',
-            'form.capacity' => 'required|int|min:0',
-            'form.production_year' => 'required|int|min:0',
+            'name' => ['label' => __('admin::references.fields.name'), 'rules' => 'required|string|min:2'],
+            'serial_number' => ['label' => __('admin::references.fields.serial_number'), 'rules' => 'required|string|min:2'],
+            'capacity' => ['label' => __('admin::references.fields.capacity'), 'type' => 'number', 'rules' => 'required|int|min:0'],
+            'production_year' => ['label' => __('admin::references.fields.production_year'), 'type' => 'number', 'rules' => 'required|int|min:0'],
         ];
     }
 
-    protected function validationAttributes(): array
+    protected function columns(): array
     {
         return [
-            'form.name' => __('admin::references.fields.name'),
-            'form.serial_number' => __('admin::references.fields.serial_number'),
-            'form.capacity' => __('admin::references.fields.capacity'),
-            'form.production_year' => __('admin::references.fields.production_year'),
+            ['label' => __('admin::references.fields.id'), 'attr' => 'id'],
+            ['label' => __('admin::references.fields.name'), 'attr' => 'name', 'class' => 'text-xs font-medium flex justify-center items-center px-1 py-1 rounded-md border border-gray-300 bg-gray-50 text-gray-700'],
+            ['label' => __('admin::references.fields.serial_number'), 'attr' => 'serial_number'],
+            ['label' => __('admin::references.fields.capacity'), 'attr' => 'capacity'],
+            ['label' => __('admin::references.fields.production_year'), 'attr' => 'production_year'],
         ];
-    }
-
-    public function openCrud(?int $id = null): void
-    {
-        $this->model = $id
-            ? Weapon::find($id)
-            : null;
-
-        $this->form = $this->model ? $this->model->toArray() : [];
-        $this->isAdded = true;
-    }
-
-    public function deleteModel(?int $id = null): void
-    {
-        if ($id) {
-            $this->model = Weapon::find($id);
-
-            if ($this->model) {
-                $this->callDeletePromptSwal();
-            }
-        }
-    }
-
-    public function store(): void
-    {
-        $this->validate();
-        $this->model
-            ? $this->model->update(Arr::except($this->form,'id'))
-            : Weapon::create($this->form);
-
-        $this->callSuccessSwal();
-
-        $this->dispatch('weaponUpdated');
-        $this->closeCrud();
-    }
-
-    public function render()
-    {
-        $weapons = Weapon::all();
-        return view('admin::livewire.admin.weapons', compact('weapons'));
     }
 }

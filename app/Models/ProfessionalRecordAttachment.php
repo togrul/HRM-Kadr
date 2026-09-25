@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * @property string $file_path
+ * @property string $disk
+ */
 class ProfessionalRecordAttachment extends Model
 {
     use HasFactory;

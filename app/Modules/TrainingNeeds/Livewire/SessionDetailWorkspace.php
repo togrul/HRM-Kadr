@@ -8,6 +8,8 @@ use App\Models\TrainingSession;
 use App\Models\TrainingSessionParticipant;
 use App\Modules\TrainingNeeds\Application\Services\TrainingDeliveryService;
 use App\Modules\TrainingNeeds\Livewire\Concerns\InteractsWithTrainingNeedsAccess;
+use Illuminate\Contracts\View\View;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Isolate;
 use Livewire\Component;
@@ -53,7 +55,7 @@ class SessionDetailWorkspace extends Component
         });
     }
 
-    public function getFilteredParticipantsProperty()
+    public function getFilteredParticipantsProperty(): Collection
     {
         if (! $this->selectedSession) {
             return collect();
@@ -223,7 +225,7 @@ class SessionDetailWorkspace extends Component
         $this->resetValidation();
     }
 
-    public function render()
+    public function render(): View
     {
         return view('training-needs::livewire.training-needs.session-detail-workspace');
     }

@@ -2,12 +2,15 @@
 
 namespace App\Modules\Payroll\Application\Services;
 
+use App\Models\PayrollOneOffEarning;
 use App\Models\PayrollPeriod;
 use App\Models\PayrollRun;
 use App\Models\Payslip;
 use App\Modules\Compensation\Domain\Contracts\CompensationReadRepository;
 use App\Modules\Integration\Domain\Contracts\PayrollOwnership;
+use App\Support\Database\InstalledTables;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use RuntimeException;
 
 class PayrollRunService
@@ -80,7 +83,7 @@ class PayrollRunService
             $totals = ['gross' => 0.0, 'deductions' => 0.0, 'net' => 0.0, 'employer' => 0.0, 'count' => 0];
 
             foreach ($this->compensation->activeAssignees($run->regime_id, $onDate) as $tabelNo) {
-                $calc = $this->calculator->calculate($tabelNo, $onDate, $year, $month);
+                $calc = $this->calculator->calculate($tabelNo, $onDate, $year, $month, $run->run_type === 'regular');
 
                 if (! $calc) {
                     continue;
@@ -162,6 +165,32 @@ class PayrollRunService
     /**
      * Lock the run and freeze each payslip's inputs into an immutable snapshot.
      */
+    /**
+     * Locking marks the month's one-off earnings paid, so each of them must be on the
+     * payslips being locked: one handed over or changed after the calculation is not.
+     *
+     * @throws ValidationException
+     */
+    private function guardOneOffsUnchangedSinceCalculation(PayrollRun $run): void
+    {
+        if ($run->run_type !== 'regular' || $run->calculated_at === null || ! InstalledTables::has('payroll_one_off_earnings')) {
+            return;
+        }
+
+        // ponytail: second-precision timestamps; a hand-off in the calculation's own second slips through.
+        $changed = PayrollOneOffEarning::query()
+            ->whereIn('tabel_no', $run->payslips()->select('tabel_no'))
+            ->where('pay_year', (int) $run->period->year)
+            ->where('pay_month', (int) $run->period->month)
+            ->whereNull('paid_payroll_run_id')
+            ->where('updated_at', '>', $run->calculated_at)
+            ->exists();
+
+        if ($changed) {
+            throw ValidationException::withMessages(['run' => __('payroll::dashboard.messages.recalculate_first')]);
+        }
+    }
+
     public function lock(PayrollRun $run): PayrollRun
     {
         $this->guardOwnership('locking');
@@ -169,6 +198,8 @@ class PayrollRunService
         if (! in_array($run->status, ['calculated', 'approved'], true)) {
             throw new RuntimeException('Only a calculated or approved run can be locked.');
         }
+
+        $this->guardOneOffsUnchangedSinceCalculation($run);
 
         return DB::transaction(function () use ($run): PayrollRun {
             $run->payslips()->with('lines')->get()->each(function (Payslip $payslip): void {
@@ -193,6 +224,15 @@ class PayrollRunService
             $this->loans->recordRepaymentsForRun($run);
             $this->retro->recordRetroPayments($run);
 
+            if ($run->run_type === 'regular' && InstalledTables::has('payroll_one_off_earnings')) {
+                PayrollOneOffEarning::query()
+                    ->whereIn('tabel_no', $run->payslips()->pluck('tabel_no'))
+                    ->where('pay_year', (int) $run->period->year)
+                    ->where('pay_month', (int) $run->period->month)
+                    ->whereNull('paid_payroll_run_id')
+                    ->update(['paid_payroll_run_id' => $run->id]);
+            }
+
             $run->update(['status' => 'locked', 'locked_at' => now()]);
 
             return $run->refresh();
@@ -203,6 +243,10 @@ class PayrollRunService
     {
         $this->loans->reverseRepaymentsForRun($run);
         $this->retro->reverseRetroPayments($run);
+
+        if (InstalledTables::has('payroll_one_off_earnings')) {
+            PayrollOneOffEarning::query()->where('paid_payroll_run_id', $run->id)->update(['paid_payroll_run_id' => null]);
+        }
 
         $run->update(['status' => 'calculated', 'approved_at' => null, 'locked_at' => null]);
         $run->payslips()->update(['status' => 'calculated']);

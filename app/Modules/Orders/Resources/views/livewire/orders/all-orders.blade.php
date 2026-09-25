@@ -85,6 +85,8 @@
 
     {{-- ===================== header ===================== --}}
     <x-page-header
+        collapsible-filters
+        :filters-active="$this->hasActiveFilters"
         :title="__('orders::order_list.table.title')"
         :breadcrumb="__('orders::order_list.table.title')"
     >
@@ -133,38 +135,38 @@
         <div class="flex flex-col gap-2">
             <div class="flex flex-wrap items-end gap-3">
                 <label class="w-full flex-1 sm:max-w-[360px]">
-                    <span class="hrm-eyebrow block pb-1">{{ __('orders::order_list.filters.search') }}</span>
+                    <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('orders::order_list.filters.search') }}</span>
                     <span class="relative block">
                         <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
                         <input
                             type="search"
                             wire:model.live.debounce.400ms="search.order_no"
                             placeholder="{{ __('orders::order_list.filters.search_placeholder') }}"
-                            class="h-[34px] w-full rounded-[10px] border border-hairline bg-[#f4f4f5] pl-9 pr-3 text-[12.5px] text-ink placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-0"
+                            class="h-10 w-full rounded-[10px] border border-hairline bg-[#f4f4f5] pl-9 pr-3 text-base sm:text-sm text-ink placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-0"
                         />
                     </span>
                 </label>
 
                 <div class="shrink-0">
-                    <span class="hrm-eyebrow block pb-1">{{ __('orders::order_list.filters.given_date') }}</span>
+                    <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('orders::order_list.filters.given_date') }}</span>
                     <div class="flex items-center gap-2">
                         <input
                             type="date"
                             wire:model.live="search.given_date.min"
                             aria-label="{{ __('orders::order_list.filters.date_start') }}"
-                            class="hrm-num h-[34px] w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[12.5px] text-ink focus:border-ink focus:bg-white focus:ring-0"
+                            class="hrm-num h-10 w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base sm:text-sm text-ink focus:border-ink focus:bg-white focus:ring-0"
                         />
                         <span class="shrink-0 text-ink-faint">&ndash;</span>
                         <input
                             type="date"
                             wire:model.live="search.given_date.max"
                             aria-label="{{ __('orders::order_list.filters.date_end') }}"
-                            class="hrm-num h-[34px] w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[12.5px] text-ink focus:border-ink focus:bg-white focus:ring-0"
+                            class="hrm-num h-10 w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base sm:text-sm text-ink focus:border-ink focus:bg-white focus:ring-0"
                         />
                     </div>
                 </div>
 
-                <x-pill-button wire:click="resetFilter" class="!h-[34px]">{{ __('orders::order_list.filters.reset') }}</x-pill-button>
+                <x-filter.reset :active="$this->hasActiveFilters" />
             </div>
 
             <p class="text-[11.5px] text-ink-faint">{{ __('orders::order_list.hints.docx_only') }}</p>
@@ -172,10 +174,10 @@
     </x-page-header>
 
     {{-- ===================== table ===================== --}}
-    <x-table.tbl :headers="$this->getTableHeaders()">
+    <x-table.tbl sticky :headers="$this->getTableHeaders()">
         @forelse ($this->orders as $_order)
             @php
-                $isDocx = $_order->template_render_mode === \App\Services\Orders\Document\OrderIssueService::RENDER_MODE_DOCX;
+                $isDocx = $_order->template_render_mode === \App\Modules\Orders\Infrastructure\Document\OrderIssueService::RENDER_MODE_DOCX;
             @endphp
             <tr wire:key="order-row-{{ $_order->id }}" @class([
                 'bg-[#fffbeb]/60' => (int) $_order->status_id === 10,
@@ -230,7 +232,7 @@
                             @can('export-orders')
                                 <button wire:click="printOrder('{{ $_order->order_no }}')"
                                     title="{{ __('orders::order_list.actions.download_now') }}" aria-label="{{ __('orders::order_list.actions.download_now') }}"
-                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-teal-50 hover:text-teal-600">
+                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink">
                                     <x-icons.print-file color="text-current" hover="text-current" />
                                 </button>
                             @endcan
@@ -269,7 +271,7 @@
                         @if ($status == 'deleted')
                             @can('edit-orders')
                                 <button wire:click="restoreData('{{ $_order->order_no }}')" title="{{ __('orders::order_list.actions.restore') }}"
-                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-teal-50 hover:text-teal-600">
+                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink">
                                     <x-icons.recover color="text-current" hover="text-current" />
                                 </button>
                             @endcan
@@ -302,7 +304,13 @@
                 </x-table.td>
             </tr>
         @empty
-            <x-table.empty :rows="count($this->getTableHeaders())" />
+            <x-table.empty :rows="count($this->getTableHeaders())" :filtered="$this->hasActiveFilters">
+                <x-slot:action>
+                    @can('add-orders')
+                        <x-pill-button variant="primary" wire:click="openSideMenu('order-composer')">{{ __('orders::order_composer.title') }}</x-pill-button>
+                    @endcan
+                </x-slot:action>
+            </x-table.empty>
         @endforelse
     </x-table.tbl>
 
@@ -311,8 +319,8 @@
     @can('add-orders')
         <x-side-modal size="xx-large">
             @if ($showSideMenu === 'order-composer')
-                <livewire:orders.order-composer :orderId="$modelName ? (int) $modelName : null"
-                    :key="'order-composer-' . ($modelName ?? 'new')" />
+                <livewire:orders.order-composer :orderId="$modelName ? (int) $modelName : null" :presetCode="$secondModel ?? ''"
+                    :key="'order-composer-' . ($modelName ?? 'new') . '-' . ($secondModel ?? 'any')" />
             @endif
         </x-side-modal>
     @endcan

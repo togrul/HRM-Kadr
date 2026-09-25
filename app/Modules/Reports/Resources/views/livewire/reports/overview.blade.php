@@ -89,7 +89,7 @@
     <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         @foreach ($metrics as $metric)
             <div class="rounded-xl border border-hairline bg-white px-4 py-3.5">
-                <p class="hrm-eyebrow">{{ $metric['label'] }}</p>
+                <p class="text-[12px] font-medium text-ink-muted">{{ $metric['label'] }}</p>
                 <div class="mt-1.5 flex items-baseline gap-2">
                     <p class="hrm-num text-[26px] font-semibold leading-none tracking-[-0.035em] text-ink">{{ $metric['value'] }}</p>
 

@@ -5,6 +5,7 @@ namespace App\Modules\Personnel\Livewire\MyHr;
 use App\Modules\Notifications\Support\DispatchesNotificationRefresh;
 use App\Modules\Notifications\Support\NotificationCountCache;
 use App\Modules\Personnel\Support\MyHr\MyHrAccess;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -48,7 +49,7 @@ class MyHrNotifications extends Component
         $this->resetPage();
     }
 
-    public function render()
+    public function render(): View
     {
         $user = Auth::user();
 

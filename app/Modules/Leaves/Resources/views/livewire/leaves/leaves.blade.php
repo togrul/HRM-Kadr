@@ -71,17 +71,13 @@
                     >{{ $leaveTypeLabel }}</x-context-panel.item>
                 @endforeach
             </x-context-panel.section>
-
-            <x-slot name="footer">
-                <button type="button" wire:click="resetFilter" class="text-[12px] font-medium text-ink-muted transition hover:text-ink">
-                    {{ __('leaves::common.labels.reset') }}
-                </button>
-            </x-slot>
         </x-context-panel>
     @endteleport
 
     {{-- ===================== header ===================== --}}
     <x-page-header
+        collapsible-filters
+        :filters-active="$this->hasActiveFilters"
         :title="__('leaves::common.labels.requests_title')"
         :breadcrumb="__('leaves::common.titles.leaves')"
     >
@@ -114,35 +110,30 @@
         <div class="flex flex-col gap-2.5">
             <div class="flex flex-wrap items-end gap-3">
                 <label class="w-full flex-1 sm:max-w-[300px]">
-                    <span class="hrm-eyebrow block pb-1">{{ __('leaves::common.labels.fullname') }}</span>
-                    <x-livewire-input mode="gray" name="filter.fullname" wire:model="filter.fullname"
+                    <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('leaves::common.labels.fullname') }}</span>
+                    <x-livewire-input mode="gray" name="filter.fullname" wire:model.live.debounce.400ms="filter.fullname"
                         placeholder="{{ __('leaves::common.labels.search_by_person') }}" />
                 </label>
 
                 <div class="shrink-0">
-                    <span class="hrm-eyebrow block pb-1">{{ __('leaves::common.labels.dates') }}</span>
+                    <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('leaves::common.labels.dates') }}</span>
                     <div class="flex items-center gap-2">
-                        <input type="date" wire:model="filter.starts_at"
+                        <input type="date" wire:model.live="filter.starts_at"
                             aria-label="{{ __('leaves::common.labels.date_start') }}"
-                            class="hrm-num h-[34px] w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[12.5px] text-ink focus:border-ink focus:bg-white focus:ring-0" />
+                            class="hrm-num h-10 w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base sm:text-sm text-ink focus:border-ink focus:bg-white focus:ring-0" />
                         <span class="shrink-0 text-ink-faint">&ndash;</span>
-                        <input type="date" wire:model="filter.ends_at"
+                        <input type="date" wire:model.live="filter.ends_at"
                             aria-label="{{ __('leaves::common.labels.date_end') }}"
-                            class="hrm-num h-[34px] w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[12.5px] text-ink focus:border-ink focus:bg-white focus:ring-0" />
+                            class="hrm-num h-10 w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base sm:text-sm text-ink focus:border-ink focus:bg-white focus:ring-0" />
                     </div>
                 </div>
 
                 <label class="min-w-[170px] flex-1">
-                    <span class="hrm-eyebrow block pb-1">{{ __('leaves::common.labels.reason') }}</span>
-                    <x-livewire-input mode="gray" type="text" name="filter.reason" wire:model="filter.reason" />
+                    <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('leaves::common.labels.reason') }}</span>
+                    <x-livewire-input mode="gray" type="text" name="filter.reason" wire:model.live.debounce.400ms="filter.reason" />
                 </label>
 
-                <x-pill-button variant="primary" wire:click="searchFilter" wire:loading.attr="disabled" wire:target="searchFilter" class="!h-[34px]">
-                    {{ __('leaves::common.labels.search') }}
-                </x-pill-button>
-                <x-pill-button wire:click="resetFilter" wire:loading.attr="disabled" wire:target="resetFilter" class="!h-[34px]">
-                    {{ __('leaves::common.labels.reset') }}
-                </x-pill-button>
+                <x-filter.reset :active="$this->hasActiveFilters" />
             </div>
 
             <div class="flex flex-wrap items-center gap-2">
@@ -182,7 +173,7 @@
         </div>
     </x-page-header>
 
-    <x-table.tbl :headers="$this->getTableHeaders()">
+    <x-table.tbl sticky :headers="$this->getTableHeaders()">
         @php $authUser = auth()->user(); @endphp
         @forelse ($permits as $leave)
             @php
@@ -315,7 +306,7 @@
                                 <button type="button" wire:click="restoreData('{{ $leave->id }}')"
                                     wire:loading.attr="disabled"
                                     title="{{ __('leaves::common.actions.restore') }}"
-                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-teal-50 hover:text-teal-600">
+                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink">
                                     <x-icons.recover color="text-current" hover="text-current" />
                                 </button>
                             @endcan
@@ -333,7 +324,13 @@
                 </x-table.td>
             </tr>
         @empty
-            <x-table.empty :rows="count($this->getTableHeaders())" />
+            <x-table.empty :rows="count($this->getTableHeaders())" :filtered="$this->hasActiveFilters">
+                <x-slot:action>
+                    @can('create', App\Models\Leave::class)
+                        <x-pill-button variant="primary" wire:click="openAddLeaveModal">{{ __('leaves::common.actions.add_leave') }}</x-pill-button>
+                    @endcan
+                </x-slot:action>
+            </x-table.empty>
         @endforelse
     </x-table.tbl>
 

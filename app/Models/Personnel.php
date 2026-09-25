@@ -37,6 +37,8 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property int|null $work_norm_id
  * @property mixed $join_work_date
  * @property mixed $leave_work_date
+ * @property string|null $probation_unit
+ * @property int|null $probation_amount
  * @property-read Position|null $position
  * @property-read Structure|null $structure
  */

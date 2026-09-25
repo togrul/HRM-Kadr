@@ -5,16 +5,21 @@ namespace App\Modules\Orders\Livewire;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\Order;
 use App\Models\OrderLog;
+use App\Modules\Orders\Application\Document\OrderTemplateProvider;
+use App\Modules\Orders\Contracts\OrderDrafter;
 use App\Modules\Orders\Domain\Contracts\OrderTypeStatusLookupReadRepository;
 use App\Modules\Orders\Exports\OrderExport;
-use App\Services\Orders\Document\OrderTemplateProvider;
 use App\Services\StructureService;
 use Carbon\Carbon;
 use DomainException;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\LazyCollection;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Isolate;
@@ -26,6 +31,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 #[On(['orderAdded', 'orderWasDeleted'])]
 class AllOrders extends Component
@@ -60,10 +66,16 @@ class AllOrders extends Component
         $this->status = request()->query('status') ?? 'all';
     }
 
-    public function resetFilter()
+    public function resetFilter(): void
     {
         $this->reset('search');
         $this->resetPage();
+    }
+
+    #[Computed]
+    public function hasActiveFilters(): bool
+    {
+        return collect(Arr::dot((array) $this->search))->contains(fn ($value): bool => filled($value));
     }
 
     public function getTableHeaders(): array
@@ -78,13 +90,13 @@ class AllOrders extends Component
         ];
     }
 
-    public function setDeleteOrder($order_no)
+    public function setDeleteOrder($order_no): void
     {
         $this->dispatch('setDeleteOrder', $order_no);
     }
 
     #[Renderless]
-    public function restoreData($order_no)
+    public function restoreData($order_no): void
     {
         $orderLog = OrderLog::withTrashed()->where('order_no', $order_no)->first();
         if (! $orderLog) {
@@ -101,7 +113,7 @@ class AllOrders extends Component
     }
 
     #[Renderless]
-    public function forceDeleteData($order_no)
+    public function forceDeleteData($order_no): void
     {
         $model = OrderLog::withTrashed()->where('order_no', $order_no)->first();
 
@@ -116,7 +128,7 @@ class AllOrders extends Component
         $this->dispatch('orderWasDeleted', __('orders::order_form.messages.order_deleted'));
     }
 
-    public function printOrder(string $order_no)
+    public function printOrder(string $order_no): StreamedResponse
     {
         $order = OrderLog::where('order_no', $order_no)->first();
         if (! $order) {
@@ -124,7 +136,7 @@ class AllOrders extends Component
         }
 
         // Only Word-engine orders are printable: they carry their filled .docx.
-        abort_unless((string) $order->template_render_mode === \App\Services\Orders\Document\OrderIssueService::RENDER_MODE_DOCX, 404);
+        abort_unless((string) $order->template_render_mode === \App\Modules\Orders\Infrastructure\Document\OrderIssueService::RENDER_MODE_DOCX, 404);
         abort_unless((bool) auth()->user()?->can('add-orders'), 403);
 
         // Order numbers may contain "/" (e.g. 2026/ƏM-145), which is illegal in a
@@ -171,7 +183,7 @@ class AllOrders extends Component
         abort_unless((bool) auth()->user()?->can('add-orders'), 403);
 
         try {
-            app(\App\Services\Orders\Document\OrderStatusTransitionService::class)->{$action}($order);
+            app(\App\Modules\Orders\Infrastructure\Document\OrderStatusTransitionService::class)->{$action}($order);
         } catch (DomainException $e) {
             $this->dispatch('orderError', $e->getMessage());
 
@@ -205,7 +217,7 @@ class AllOrders extends Component
                     // approval, so they would otherwise be invisible. Scope them by the
                     // target structure frozen in the order snapshot.
                     ->orWhere(fn ($q) => $q
-                        ->where('template_render_mode', \App\Services\Orders\Document\OrderIssueService::RENDER_MODE_DOCX)
+                        ->where('template_render_mode', \App\Modules\Orders\Infrastructure\Document\OrderIssueService::RENDER_MODE_DOCX)
                         ->whereIn('template_snapshot->hire_structure_id', $this->accessibleStructureIds));
             })
             ->filter($this->search ?? []);
@@ -228,7 +240,7 @@ class AllOrders extends Component
         });
     }
 
-    protected function returnData($type = 'normal')
+    protected function returnData($type = 'normal'): LengthAwarePaginator|LazyCollection
     {
         $result = $this->scopedQuery()
             ->with([
@@ -353,7 +365,7 @@ class AllOrders extends Component
     }
 
     #[Isolate]
-    public function getStatusesProperty()
+    public function getStatusesProperty(): Collection
     {
         $locale = config('app.locale');
 
@@ -368,14 +380,22 @@ class AllOrders extends Component
 
     public function mount(
         StructureService $structureService
-    ) {
+    ): void {
         $this->authorize('viewAny', Order::class);
         $this->fillFilter();
         $this->selectedOrder = $this->selectedOrder ?? request()->query('selectedOrder');
         $this->accessibleStructureIds = $structureService->getAccessibleStructures();
+
+        // Deep link from the command palette / quick links: land with the composer open.
+        // ?preset=<template code> lands with that order type already chosen (e.g. a vacation order).
+        if (request()->boolean('create') && (auth()->user()?->can('add-orders') ?? false)) {
+            $preset = (string) request()->query('preset', '');
+            $this->openSideMenu('order-composer', null, $preset !== '' && app(OrderDrafter::class)->hasTemplate($preset) ? $preset : null);
+            $this->forgetDeepLinkParams('create', 'preset');
+        }
     }
 
-    public function render()
+    public function render(): View
     {
         return view('orders::livewire.orders.all-orders');
     }

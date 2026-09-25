@@ -55,17 +55,13 @@
                     @endforeach
                 </x-context-panel.section>
             @endif
-
-            <x-slot name="footer">
-                <button type="button" wire:click="resetFilter" class="text-[12px] font-medium text-ink-muted transition hover:text-ink">
-                    {{ __('business_trips::common.filters.reset') }}
-                </button>
-            </x-slot>
         </x-context-panel>
     @endteleport
 
     {{-- ===================== header ===================== --}}
     <x-page-header
+        collapsible-filters
+        :filters-active="$this->hasActiveFilters"
         :title="__('business_trips::common.table.title')"
         :breadcrumb="__('business_trips::common.table.title')"
     >
@@ -83,7 +79,6 @@
             @can('review-self-service-requests')
                 <x-ui.self-service-review-link />
             @endcan
-            <x-pill-button wire:click="resetFilter">{{ __('business_trips::common.filters.reset') }}</x-pill-button>
             @can('export-business_trips')
                 <x-pill-button variant="emerald" :icon="true" wire:click.prevent="exportExcel"
                     wire:loading.attr="disabled" wire:target="exportExcel"
@@ -96,26 +91,27 @@
         {{-- toolbar --}}
         <div class="flex flex-wrap items-end gap-3">
             <label class="w-full flex-1 sm:max-w-[300px]">
-                <span class="hrm-eyebrow block pb-1">{{ __('business_trips::common.filters.fullname') }}</span>
-                <x-livewire-input mode="gray" name="filter.fullname" wire:model="filter.fullname" />
+                <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('business_trips::common.filters.fullname') }}</span>
+                <x-livewire-input mode="gray" name="filter.fullname" wire:model.live.debounce.400ms="filter.fullname" />
             </label>
 
             <div class="shrink-0">
-                <span class="hrm-eyebrow block pb-1">{{ __('business_trips::common.filters.date_range') }}</span>
+                <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('business_trips::common.filters.date_range') }}</span>
                 <div class="flex items-center gap-2">
                     <input type="date" wire:model.live="filter.date.min"
                         aria-label="{{ __('business_trips::common.filters.date_start') }}"
-                        class="hrm-num h-[34px] w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[12.5px] text-ink focus:border-ink focus:bg-white focus:ring-0" />
+                        class="hrm-num h-10 w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base sm:text-sm text-ink focus:border-ink focus:bg-white focus:ring-0" />
                     <span class="shrink-0 text-ink-faint">&ndash;</span>
                     <input type="date" wire:model.live="filter.date.max"
                         aria-label="{{ __('business_trips::common.filters.date_end') }}"
-                        class="hrm-num h-[34px] w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[12.5px] text-ink focus:border-ink focus:bg-white focus:ring-0" />
+                        class="hrm-num h-10 w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base sm:text-sm text-ink focus:border-ink focus:bg-white focus:ring-0" />
                 </div>
             </div>
 
             <div class="min-w-[190px] flex-1">
-                <span class="hrm-eyebrow block pb-1">{{ __('business_trips::common.filters.structure') }}</span>
+                <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('business_trips::common.filters.structure') }}</span>
                 <x-ui.select-dropdown
+                    :aria-label="__('business_trips::common.filters.structure')"
                     placeholder="---"
                     mode="gray"
                     class="w-full"
@@ -126,8 +122,9 @@
             </div>
 
             <div class="min-w-[170px] flex-1">
-                <span class="hrm-eyebrow block pb-1">{{ __('business_trips::common.filters.order_types') }}</span>
+                <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('business_trips::common.filters.order_types') }}</span>
                 <x-ui.select-dropdown
+                    :aria-label="__('business_trips::common.filters.order_types')"
                     placeholder="---"
                     mode="gray"
                     class="w-full"
@@ -136,12 +133,12 @@
                 />
             </div>
 
-            <x-pill-button variant="primary" wire:click="searchFilter" class="!h-[34px]">{{ __('business_trips::common.filters.search') }}</x-pill-button>
+            <x-filter.reset :active="$this->hasActiveFilters" />
         </div>
     </x-page-header>
 
     {{-- ===================== table ===================== --}}
-    <x-table.tbl :headers="$this->getTableHeaders()">
+    <x-table.tbl sticky :headers="$this->getTableHeaders()">
         @forelse ($this->businessTrips as $_bTrip)
             @php
                 $tripAttributes = is_array($_bTrip->attributes) ? $_bTrip->attributes : [];
@@ -204,7 +201,7 @@
                                 <button type="button"
                                     wire:click="printBusinessTripDocument('{{ $_bTrip->id }}',{{ $_bTrip->is_multi_order_trip ? 'true' : 'false' }})"
                                     title="{{ __('business_trips::common.table.print_document') }}"
-                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-teal-50 hover:text-teal-600">
+                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink">
                                     <x-icons.document-icon color="text-current" hover="text-current" />
                                 </button>
                             @endif
@@ -220,7 +217,7 @@
                 </x-table.td>
             </tr>
         @empty
-            <x-table.empty :rows="count($this->getTableHeaders())" />
+            <x-table.empty :rows="count($this->getTableHeaders())" :filtered="$this->hasActiveFilters" />
         @endforelse
     </x-table.tbl>
 

@@ -9,7 +9,9 @@ use App\Models\NotificationTemplate;
 use App\Modules\Notifications\Livewire\Concerns\InteractsWithNotificationAuthorization;
 use App\Modules\Notifications\Support\NotificationTemplateRenderer;
 use App\Modules\Notifications\Support\NotificationTriggerRegistry;
+use App\Modules\Notifications\Support\SamplePayloads;
 use App\Support\Database\InstalledTables;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
@@ -186,7 +188,7 @@ class OverviewPanel extends Component
         $this->dispatch('notification-rule-changed');
     }
 
-    public function render()
+    public function render(): View
     {
         return view('notification::livewire.notification.overview-panel', [
             'managementTablesReady' => $this->managementTablesReady(),
@@ -262,7 +264,7 @@ class OverviewPanel extends Component
         ]);
     }
 
-    public function placeholder()
+    public function placeholder(): View
     {
         return view('notification::livewire.notification.placeholders.settings-panel');
     }
@@ -440,50 +442,25 @@ class OverviewPanel extends Component
                 'template_key' => 'birthday.default',
                 'category' => 'birthday',
                 'trigger' => NotificationTriggerRegistry::trigger('birthday') ?? 'birthday_due',
-                'payload' => [
-                    'name' => 'Murad Əliyev',
-                    'position' => 'Baş məsləhətçi',
-                    'structure' => 'İnsan resursları şöbəsi',
-                    'birthday_label' => '16.03.2026',
-                ],
+                'payload' => SamplePayloads::for('birthday'),
             ],
             'position_change' => [
                 'template_key' => 'position-change.default',
                 'category' => 'position_change',
                 'trigger' => NotificationTriggerRegistry::trigger('position_change') ?? 'position_changed',
-                'payload' => [
-                    'name' => 'Leyla Məmmədova',
-                    'old_position' => 'Məsləhətçi',
-                    'new_position' => 'Aparıcı məsləhətçi',
-                    'old_structure' => 'Maliyyə şöbəsi',
-                    'new_structure' => 'İnsan resursları şöbəsi',
-                    'change_reason' => 'Daxili rotasiya',
-                    'effective_date' => now()->format('d.m.Y'),
-                ],
+                'payload' => SamplePayloads::for('position_change'),
             ],
             'employment_started' => [
                 'template_key' => 'employment-started.default',
                 'category' => 'employment_started',
                 'trigger' => NotificationTriggerRegistry::trigger('employment_started') ?? 'employment_started',
-                'payload' => [
-                    'name' => 'Murad Əliyev',
-                    'position' => 'Proqramçı',
-                    'structure' => 'Texniki vasitələr və rabitə idarəsi',
-                    'join_work_date_label' => now()->format('d.m.Y'),
-                    'direct_manager' => 'Ələkbərova Ayşən Səməd',
-                ],
+                'payload' => SamplePayloads::for('employment_started'),
             ],
             'holiday' => [
                 'template_key' => 'holiday.default',
                 'category' => 'holiday',
                 'trigger' => NotificationTriggerRegistry::trigger('holiday') ?? 'holiday_due',
-                'payload' => [
-                    'holiday_name' => 'Novruz bayramı',
-                    'holiday_date' => '20.03.2026',
-                    'duration' => '3 gün',
-                    'scope' => 'Bütün əməkdaşlar',
-                    'holiday_rules' => 'Rəsmi qeyri-iş günləri',
-                ],
+                'payload' => SamplePayloads::for('holiday'),
             ],
         ];
 

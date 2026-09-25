@@ -6,7 +6,7 @@
 @php
     $variant = strtolower((string) $mode);
 
-    $baseClasses = 'inline-flex min-w-max items-center justify-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium transition focus:outline-none focus:ring-2 focus:ring-offset-1';
+    $baseClasses = 'inline-flex min-h-10 min-w-max items-center justify-center gap-1.5 whitespace-nowrap rounded-[10px] border px-3 text-[14px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50';
 
     $modeClasses = match ($variant) {
         'rose', 'danger', 'delete' => 'border-rose-200 bg-rose-50 text-rose-700 hover:border-rose-300 hover:bg-rose-100 focus:ring-rose-200',

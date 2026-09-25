@@ -12,6 +12,7 @@ use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadServ
 use App\Services\StructurePathService;
 use App\Traits\NestedStructureTrait;
 use Carbon\CarbonInterface;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -518,7 +519,7 @@ class ShiftManagement extends Component
         });
     }
 
-    public function render()
+    public function render(): View
     {
         return view('attendance::livewire.attendance.shift-management');
     }

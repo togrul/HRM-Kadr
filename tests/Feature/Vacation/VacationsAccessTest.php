@@ -67,7 +67,8 @@ class VacationsAccessTest extends TestCase
     public function test_summary_counts_the_scoped_vacations_and_their_days(): void
     {
         $user = $this->userWith('show-vacations');
-        DB::table('role_structures')->insert(['role_id' => $user->id, 'structure_id' => 1]);
+        $user->assignRole($role = \Spatie\Permission\Models\Role::findOrCreate('structure-scope', 'web'));
+        DB::table('role_structures')->insert(['role_id' => $role->id, 'structure_id' => 1]);
         $this->actingAs($user);
 
         DB::table('countries')->insert(['id' => 1, 'code' => 'AZ']);

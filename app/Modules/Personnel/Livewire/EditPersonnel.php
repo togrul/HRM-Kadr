@@ -62,7 +62,7 @@ class EditPersonnel extends Component
     /** @var array<string> */
     protected array $relationGroupsLoaded = [];
 
-    public function mount(?int $step = null)
+    public function mount(?int $step = null): void
     {
         $personnel = $this->personnelModelDataInstance();
 
@@ -84,7 +84,7 @@ class EditPersonnel extends Component
         $this->dispatch('addError', __('personnel::common.messages.personnel_updated'));
     }
 
-    public function store()
+    public function store(): void
     {
         $personnel = $this->personnelModelDataInstance();
         $this->ensureCurrentStepDataLoaded();
@@ -243,7 +243,7 @@ class EditPersonnel extends Component
                 'laborActivities',
                 'latestDisposal',
                 'currentWork',
-                'structure' => fn ($query) => $query->withRecursive('parent', false),
+                'structure',
                 'ranks',
             ],
             loader: function (): void {

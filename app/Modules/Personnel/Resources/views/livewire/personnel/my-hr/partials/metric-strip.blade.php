@@ -6,7 +6,7 @@
     @foreach ($metrics as $metric)
         <div class="rounded-xl border border-hairline bg-[#fafafa] px-3.5 py-3">
             <div class="flex items-center justify-between gap-2">
-                <span class="hrm-eyebrow">{{ $metric['label'] }}</span>
+                <span class="text-[12.5px] font-medium text-ink-muted">{{ $metric['label'] }}</span>
                 @if (! empty($metric['dot']))
                     <span class="h-1.5 w-1.5 shrink-0 rounded-full {{ $metric['dot'] }}"></span>
                 @endif

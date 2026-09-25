@@ -17,6 +17,7 @@ use App\Models\PerformanceTrainingNeedLink;
 use App\Models\Personnel;
 use App\Models\TrainingCompetency;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 trait InteractsWithPerformanceEvaluationQueries
@@ -337,7 +338,7 @@ trait InteractsWithPerformanceEvaluationQueries
         ];
     }
 
-    public function getRecentCyclesProperty()
+    public function getRecentCyclesProperty(): Collection
     {
         return PerformanceCycle::query()
             ->latest('id')
@@ -345,7 +346,7 @@ trait InteractsWithPerformanceEvaluationQueries
             ->get();
     }
 
-    public function getRecentTemplatesProperty()
+    public function getRecentTemplatesProperty(): Collection
     {
         return PerformanceFormTemplate::query()
             ->withCount('sections')
@@ -354,7 +355,7 @@ trait InteractsWithPerformanceEvaluationQueries
             ->get();
     }
 
-    public function getRecentTemplateSectionsProperty()
+    public function getRecentTemplateSectionsProperty(): Collection
     {
         return PerformanceFormTemplateSection::query()
             ->leftJoin('performance_form_templates', 'performance_form_templates.id', '=', 'performance_form_template_sections.performance_form_template_id')
@@ -368,7 +369,7 @@ trait InteractsWithPerformanceEvaluationQueries
             ->get();
     }
 
-    public function getRecentTemplateItemsProperty()
+    public function getRecentTemplateItemsProperty(): Collection
     {
         return PerformanceFormTemplateItem::query()
             ->leftJoin('performance_form_template_sections', 'performance_form_template_sections.id', '=', 'performance_form_template_items.performance_form_template_section_id')
@@ -385,8 +386,10 @@ trait InteractsWithPerformanceEvaluationQueries
             ->get();
     }
 
-    public function getRecentFormsProperty()
+    public function getRecentFormsProperty(): Collection
     {
+        $formSearch = property_exists($this, 'formSearch') ? trim($this->formSearch) : '';
+
         return PerformanceForm::query()
             ->leftJoin('performance_cycles', 'performance_cycles.id', '=', 'performance_forms.performance_cycle_id')
             ->leftJoin('performance_form_templates', 'performance_form_templates.id', '=', 'performance_forms.performance_form_template_id')
@@ -401,12 +404,18 @@ trait InteractsWithPerformanceEvaluationQueries
                 DB::raw('manager_users.name as manager_name'),
                 DB::raw('hr_users.name as hr_reviewer_name'),
             ])
-            ->latest('id')
-            ->limit(6)
+            ->when(
+                $formSearch !== '',
+                fn ($query) => $query->where(fn ($inner) => $inner
+                    ->where('personnels.surname', 'like', '%'.$formSearch.'%')
+                    ->orWhere('personnels.name', 'like', '%'.$formSearch.'%'))
+            )
+            ->latest('performance_forms.id')
+            ->limit(50)
             ->get();
     }
 
-    public function getRecentWeakLinksProperty()
+    public function getRecentWeakLinksProperty(): Collection
     {
         return PerformanceTrainingNeedLink::query()
             ->with([
@@ -419,7 +428,7 @@ trait InteractsWithPerformanceEvaluationQueries
             ->get();
     }
 
-    public function getRecentTestBanksProperty()
+    public function getRecentTestBanksProperty(): Collection
     {
         return PerformanceTestBank::query()
             ->withCount('questions')
@@ -428,7 +437,7 @@ trait InteractsWithPerformanceEvaluationQueries
             ->get();
     }
 
-    public function getRecentTestAttemptsProperty()
+    public function getRecentTestAttemptsProperty(): Collection
     {
         return PerformanceTestAttempt::query()
             ->with([
@@ -440,7 +449,7 @@ trait InteractsWithPerformanceEvaluationQueries
             ->get();
     }
 
-    public function getPendingReviewAnswersProperty()
+    public function getPendingReviewAnswersProperty(): Collection
     {
         return PerformanceTestAttemptAnswer::query()
             ->leftJoin('performance_test_questions', 'performance_test_questions.id', '=', 'performance_test_attempt_answers.performance_test_question_id')

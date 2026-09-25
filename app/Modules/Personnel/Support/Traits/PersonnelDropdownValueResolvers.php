@@ -24,7 +24,7 @@ trait PersonnelDropdownValueResolvers
         return data_get($source, $key);
     }
 
-    protected function currentRankSelection(string $path)
+    protected function currentRankSelection(string $path): mixed
     {
         if (property_exists($this, 'laborActivityForm') && $this->laborActivityForm) {
             return data_get($this->laborActivityForm->rank ?? [], $path);
@@ -42,7 +42,7 @@ trait PersonnelDropdownValueResolvers
         return data_get($this->laborActivityForm->laborActivity ?? [], $key);
     }
 
-    protected function currentAwardSelection()
+    protected function currentAwardSelection(): mixed
     {
         $form = $this->awardsPunishmentsFormInstance();
 
@@ -53,7 +53,7 @@ trait PersonnelDropdownValueResolvers
         return null;
     }
 
-    protected function currentPunishmentSelection()
+    protected function currentPunishmentSelection(): mixed
     {
         $form = $this->awardsPunishmentsFormInstance();
 
@@ -64,7 +64,7 @@ trait PersonnelDropdownValueResolvers
         return null;
     }
 
-    protected function currentKinshipSelection()
+    protected function currentKinshipSelection(): mixed
     {
         $form = $this->kinshipFormInstance();
 
@@ -75,7 +75,7 @@ trait PersonnelDropdownValueResolvers
         return null;
     }
 
-    protected function currentLanguageSelection()
+    protected function currentLanguageSelection(): mixed
     {
         $form = $this->miscFormInstance();
 
@@ -86,7 +86,7 @@ trait PersonnelDropdownValueResolvers
         return null;
     }
 
-    protected function currentDegreeSelection()
+    protected function currentDegreeSelection(): mixed
     {
         $form = $this->miscFormInstance();
 
@@ -97,7 +97,7 @@ trait PersonnelDropdownValueResolvers
         return null;
     }
 
-    protected function currentDegreeDocumentSelection()
+    protected function currentDegreeDocumentSelection(): mixed
     {
         $form = $this->miscFormInstance();
 
@@ -108,7 +108,7 @@ trait PersonnelDropdownValueResolvers
         return null;
     }
 
-    protected function historyFormSelection(string $path)
+    protected function historyFormSelection(string $path): mixed
     {
         if (property_exists($this, 'historyForm') && $this->historyForm) {
             return data_get($this->historyForm->military ?? [], $path);

@@ -11,6 +11,8 @@ class OrdersCrossModuleReadIsolationTest extends TestCase
     {
         $targets = [
             app_path('Modules/Orders/Livewire/AllOrders.php'),
+            app_path('Modules/Orders/Livewire/OrderComposer.php'),
+            app_path('Modules/Orders/Livewire/Concerns/InteractsWithOrderSubjectPicker.php'),
         ];
 
         $forbiddenTokens = [

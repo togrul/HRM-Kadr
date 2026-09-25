@@ -27,9 +27,10 @@ class RolesDashboardTest extends TestCase
         $role->givePermissionTo($permission);
 
         $user = User::factory()->create(['name' => 'Jane Doe']);
+        $user->givePermissionTo(Permission::findOrCreate('access-settings', 'web'));
         $user->assignRole($role);
 
-        Livewire::test(ManageRoles::class)
+        Livewire::actingAs($user)->test(ManageRoles::class)
             ->assertSee(__('services::roles.dashboard.title'))
             ->assertSee(__('services::roles.dashboard.subtitle'))
             ->assertSee('Administrator')
@@ -40,6 +41,7 @@ class RolesDashboardTest extends TestCase
     public function test_permission_panel_filters_groups_and_saves_selection(): void
     {
         $user = User::factory()->create();
+        $user->givePermissionTo(Permission::findOrCreate('access-settings', 'web'));
         $role = Role::query()->create([
             'name' => 'QA Permission Manager',
             'guard_name' => 'web',
@@ -74,6 +76,7 @@ class RolesDashboardTest extends TestCase
     public function test_checking_a_structure_keeps_it_selected_and_cascades_to_children(): void
     {
         $user = User::factory()->create();
+        $user->givePermissionTo(Permission::findOrCreate('access-settings', 'web'));
         $role = Role::query()->create(['name' => 'Structure Scoper', 'guard_name' => 'web']);
 
         // id=1 is the implicit company root; displayed roots have parent_id = 1.
@@ -99,6 +102,7 @@ class RolesDashboardTest extends TestCase
     public function test_permission_panel_sorts_groups_by_translated_label(): void
     {
         $user = User::factory()->create();
+        $user->givePermissionTo(Permission::findOrCreate('access-settings', 'web'));
         $role = Role::query()->create([
             'name' => 'Sorting Auditor',
             'guard_name' => 'web',

@@ -240,9 +240,6 @@ return [
         'completed' => 'Completed',
         'in_progress' => 'Current step',
         'not_completed' => 'Not completed',
-        'completed_short' => 'Ready',
-        'in_progress_short' => 'Current',
-        'not_completed_short' => 'Later',
     ],
     'employment' => [
         'contract_type' => [
@@ -299,6 +296,7 @@ return [
         'has_disability' => 'has disability?',
     ],
     'messages' => [
+        'required_fields_hint' => 'Fields marked with an asterisk (*) are required. You can complete the other sections later.',
         'confirm_title' => 'Pending record',
         'confirm_message' => 'This personnel record is waiting for confirmation.',
         'confirm_description' => 'After confirmation, the record will fully join the active personnel registry and behave like a normal personnel entry in related flows.',

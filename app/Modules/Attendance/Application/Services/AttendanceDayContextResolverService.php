@@ -7,9 +7,9 @@ use App\Models\AttendanceCalendar;
 use App\Models\Leave;
 use App\Models\PersonnelBusinessTrip;
 use App\Models\PersonnelVacation;
+use App\Support\Database\InstalledTables;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Schema;
 
 class AttendanceDayContextResolverService
 {
@@ -328,7 +328,7 @@ class AttendanceDayContextResolverService
         static $hasAttendanceCode;
 
         if ($hasAttendanceCode === null) {
-            $hasAttendanceCode = Schema::hasColumn('leave_types', 'attendance_code');
+            $hasAttendanceCode = InstalledTables::hasColumn('leave_types', 'attendance_code');
         }
 
         return (bool) $hasAttendanceCode;

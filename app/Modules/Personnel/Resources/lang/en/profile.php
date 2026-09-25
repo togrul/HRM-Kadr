@@ -47,10 +47,18 @@ return [
     ],
 
     'actions' => [
+        'new_action' => 'Action',
+        'add_leave' => 'Add leave',
+        'issue_order' => 'Issue order',
         'more' => 'More',
         'back_to_list' => 'Back to list',
         'print_cv' => 'Print CV',
         'export_word' => 'Export to Word',
         'open_profile' => 'Open personnel file',
+    ],
+    'recent' => [
+        'title' => 'Recent events',
+        'view_all' => 'Full timeline',
+        'empty' => 'No events recorded yet.',
     ],
 ];

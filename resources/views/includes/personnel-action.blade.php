@@ -1,5 +1,5 @@
 <div class="flex flex-col space-y-2 sidemenu-title">
-    <h2 class="text-xl font-semibold text-gray-500 font-title" id="slide-over-title">
+    <h2 class="text-[18px] font-semibold tracking-[-0.02em] text-ink" id="slide-over-title">
       {{ $title ?? ''}}
     </h2>
     @if(auth()->user()->can('confirmation-general') && isset($personnelModel) && ($personnelIsPending ?? false))
@@ -12,25 +12,25 @@
                 <div class="min-w-0 space-y-2">
                     <div class="flex flex-wrap items-center gap-2">
                         <x-small-badge mode="amber">{{ __('personnel::common.states.waiting_for_approval') }}</x-small-badge>
-                        <span class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                        <span class="hrm-eyebrow">
                             {{ __('personnel::common.messages.confirm_title') }}
                         </span>
                     </div>
                     <div class="space-y-1">
-                        <p class="text-sm font-semibold text-slate-800">{{ __('personnel::common.messages.confirm_message') }}</p>
-                        <p class="text-sm leading-6 text-slate-500">{{ __('personnel::common.messages.confirm_description') }}</p>
+                        <p class="text-sm font-semibold text-zinc-800">{{ __('personnel::common.messages.confirm_message') }}</p>
+                        <p class="text-sm leading-6 text-zinc-500">{{ __('personnel::common.messages.confirm_description') }}</p>
                     </div>
                 </div>
             </div>
             <div class="flex shrink-0 items-center gap-3">
-                <p class="hidden max-w-48 text-right text-xs leading-5 text-slate-400 lg:block">
+                <p class="hidden max-w-48 text-right text-xs leading-5 text-zinc-400 lg:block">
                     {{ __('personnel::common.messages.confirm_hint') }}
                 </p>
                 <button
                     wire:click="confirmPersonnel"
                     wire:loading.attr="disabled"
                     wire:target="confirmPersonnel"
-                    class="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                    class="inline-flex items-center justify-center gap-2 rounded-xl bg-zinc-900 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                     <svg wire:loading wire:target="confirmPersonnel" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
@@ -45,42 +45,9 @@
 </div>
 
 <div
+    id="personnel-wizard"
     class="flex flex-col w-full p-5 px-0 mx-auto my-1 mb-4 space-y-8 transition duration-500 ease-in-out transform bg-white"
-    x-data="{
-        currentStep: @entangle('step'),
-        pendingAction: null,
-        pendingStep: null,
-        pendingTimer: null,
-        setPending(action, step = null) {
-            if (this.pendingTimer) clearTimeout(this.pendingTimer);
-            this.pendingAction = action;
-            this.pendingStep = step;
-            this.pendingTimer = setTimeout(() => this.clearPending(), 1800);
-        },
-        clearPending() {
-            if (this.pendingTimer) clearTimeout(this.pendingTimer);
-            this.pendingTimer = null;
-            this.pendingAction = null;
-            this.pendingStep = null;
-        },
-        stepState(step) {
-            if (step < this.currentStep) return 'completed';
-            if (step === this.currentStep) return 'active';
-            return 'upcoming';
-        },
-        progressWidth() {
-            return `${Math.max(0, ((this.currentStep - 1) / 7) * 100)}%`;
-        }
-    }"
-    x-init="
-        if (typeof Livewire !== 'undefined') {
-            Livewire.hook('commit', ({ succeed, fail }) => {
-                succeed(() => queueMicrotask(() => clearPending()));
-                fail(() => queueMicrotask(() => clearPending()));
-            });
-        }
-        $watch('currentStep', () => clearPending());
-    "
+    x-data="{ ...window.personnelWizard(), currentStep: @entangle('step') }"
     x-on:personnel-crud:navigate-approved.window="clearPending()"
     x-on:personnel-crud:save-approved.window="clearPending()"
 >
@@ -93,34 +60,17 @@
 
     @if ($showStepper)
     <div class="space-y-4">
-        <div class="flex items-center justify-between gap-4">
-            <div class="space-y-1">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                    {{ __('personnel::common.labels.status') }}
-                </p>
-                <p class="text-sm font-semibold text-slate-800">
-                    {{ __('personnel::common.labels.number') }} {{ $step }}/{{ count($stepItems) }}
-                    <span class="ml-2 text-slate-400">•</span>
-                    <span class="ml-2 text-slate-500">{{ $stepItems[$step] ?? '' }}</span>
-                </p>
-            </div>
-            <div class="hidden items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-500 xl:flex">
-                <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
-                <span>{{ __('personnel::common.labels.completed_short') }}</span>
-                <span class="mx-1 h-4 w-px bg-slate-200"></span>
-                <span class="h-2 w-2 rounded-full bg-sky-500"></span>
-                <span>{{ __('personnel::common.labels.in_progress_short') }}</span>
-                <span class="mx-1 h-4 w-px bg-slate-200"></span>
-                <span class="h-2 w-2 rounded-full bg-slate-300"></span>
-                <span>{{ __('personnel::common.labels.not_completed_short') }}</span>
-            </div>
-        </div>
+        <p class="text-[12.5px] text-ink-muted">
+            <span class="hrm-num text-ink">{{ $step }}/{{ count($stepItems) }}</span>
+            <span class="mx-1.5 text-ink-faint">·</span>
+            <span class="font-medium text-ink">{{ $stepItems[$step] ?? '' }}</span>
+        </p>
 
-        <div class="rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-card">
+        <div class="rounded-2xl border border-hairline bg-white px-4 py-4">
             <div class="relative mx-auto max-w-full">
-                <div class="absolute left-0 right-0 top-5 h-px bg-slate-200"></div>
+                <div class="absolute left-0 right-0 top-4 hidden h-px bg-hairline md:block"></div>
                 <div
-                    class="absolute left-0 top-5 h-px bg-gradient-to-r from-emerald-500 via-sky-500 to-sky-500 transition-all duration-300 ease-out"
+                    class="absolute left-0 top-4 hidden h-px bg-ink transition-all duration-300 ease-out md:block"
                     :style="{ width: progressWidth() }"
                 ></div>
 
@@ -144,10 +94,10 @@
                         class="group flex min-w-0 flex-col items-center gap-2 text-center transition-all duration-200 disabled:cursor-wait disabled:opacity-75"
                     >
                         <span @class([
-                            'relative flex h-10 w-10 items-center justify-center rounded-full border text-sm font-semibold transition-all duration-200',
-                            'border-emerald-500 bg-emerald-500 text-white shadow-card' => $step > $key,
-                            'border-sky-500 bg-white text-sky-600 shadow-card ring-4 ring-sky-50' => $step == $key,
-                            'border-slate-200 bg-white text-slate-500' => $step < $key,
+                            'relative flex h-8 w-8 items-center justify-center rounded-full border text-[12.5px] font-semibold transition-all duration-200',
+                            'border-ink bg-ink text-white' => $step > $key,
+                            'border-ink bg-white text-ink ring-4 ring-[#f4f4f5]' => $step == $key,
+                            'border-hairline bg-white text-ink-faint group-hover:border-zinc-300 group-hover:text-ink-muted' => $step < $key,
                         ])>
                             <span
                                 x-cloak
@@ -164,7 +114,7 @@
                                 class="flex items-center justify-center"
                             >
                                 @if($step > $key)
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor" class="h-5 w-5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.4" stroke="currentColor" class="h-4 w-4">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                                     </svg>
                                 @else
@@ -173,28 +123,18 @@
                             </span>
                         </span>
 
-                        <span
-                            @class([
-                                'h-2.5 w-2.5 rounded-full transition-all duration-200',
-                                'bg-emerald-500' => $step > $key,
-                                'bg-sky-500' => $step == $key,
-                                'bg-slate-300' => $step < $key,
-                            ])
-                        ></span>
 
-                        <span class="hidden max-w-[120px] text-[11px] font-medium leading-4 text-slate-500 md:block">
-                            {{ $st }}
-                        </span>
+                        <span @class([
+                            'max-w-[120px] text-[12px] leading-[1.3]',
+                            'font-semibold text-ink' => $step == $key,
+                            'font-medium text-ink-muted' => $step != $key,
+                        ])>{{ $st }}</span>
                     </button>
                 @endforeach
                 </div>
             </div>
         </div>
     </div>
-    @endif
-
-    @if ($showStepper)
-        <hr class="py-2" />
     @endif
 
     <div
@@ -224,11 +164,12 @@
         @endif
     </div>
 
-    <div class="flex items-end justify-between w-full">
+    {{-- Sticky: the actions stay in reach however long the step is. --}}
+    <div class="sticky bottom-0 z-20 -mb-4 flex w-full items-center justify-between gap-3 border-t border-hairline bg-white/95 py-3 backdrop-blur supports-[backdrop-filter]:bg-white/80">
         @if(! auth()->user()->can('update-personnels') && isset($personnelModel))
             <div class="flex items-center space-x-2">
                 <x-icons.lock-icon color="text-rose-500" hover="text-rose-600" size="w-7 h-7"></x-icons.lock-icon>
-                <span class="text-sm text-slate-500">{{ __('personnel::common.messages.no_permission_to_edit') }}</span>
+                <span class="text-sm text-zinc-500">{{ __('personnel::common.messages.no_permission_to_edit') }}</span>
             </div>
         @else
             @if($this->activeStepUsesChildComponent)
@@ -240,7 +181,13 @@
                     <span>{{ __('personnel::common.actions.save') }}</span>
                 </x-button>
             @else
-                <x-modal-button>{{ __('personnel::common.actions.save') }}</x-modal-button>
+                <x-button mode="black" wire:click="store" wire:loading.attr="disabled" wire:target="store" x-on:click.capture="setPending('save')">
+                    <svg wire:loading wire:target="store" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
+                        <path class="opacity-75" d="M4 12a8 8 0 0 1 8-8v3a5 5 0 0 0 -5 5H4z" fill="currentColor"></path>
+                    </svg>
+                    <span>{{ __('personnel::common.actions.save') }}</span>
+                </x-button>
             @endif
         @endif
 
@@ -268,7 +215,7 @@
                         <span>{{ __('personnel::common.actions.next') }}</span>
                     </x-button>
                 @else
-                    <x-button mode="step-next" wire:click.prevent="nextStep">{{ __('personnel::common.actions.next') }}</x-button>
+                    <x-button mode="step-next" wire:click.prevent="nextStep" x-on:click="setPending('next', {{ min(array_key_last($stepItems), $step + 1) }})">{{ __('personnel::common.actions.next') }}</x-button>
                 @endif
             @endif
         </div>

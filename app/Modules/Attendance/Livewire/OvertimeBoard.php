@@ -11,6 +11,7 @@ use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadServ
 use App\Services\StructurePathService;
 use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
+use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -367,7 +368,7 @@ class OvertimeBoard extends Component
         return $emptyStateDescription;
     }
 
-    public function render()
+    public function render(): View
     {
         return view('attendance::livewire.attendance.overtime-board');
     }

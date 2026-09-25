@@ -1,22 +1,4 @@
-<div class="flex flex-col"
-     x-data
-     x-init="
-        const root = $el;
-        const paintPaginator = () => {
-            const paginator = root.querySelector('span[aria-current=page]>span');
-            if (paginator) {
-                paginator.classList.add('bg-blue-50', 'text-blue-600');
-            }
-        };
-        paintPaginator();
-        if (typeof Livewire !== 'undefined') {
-            Livewire.hook('commit', ({ component, succeed }) => {
-                if (component.id !== $wire.__instance.id) return;
-                succeed(() => queueMicrotask(paintPaginator));
-            });
-        }
-    "
->
+<div class="flex flex-col">
     {{-- Structure-delete confirmation routed into the global confirm modal: a plain
          prompt when unused, an "in use → cascade" warning when referenced. --}}
     <div x-data
@@ -31,15 +13,15 @@
     <div class="flex flex-col items-center justify-between sm:flex-row filter bg-white py-2 px-2 rounded-xl">
         <div class="flex items-center justify-center space-x-2 action-section">
             <x-button class="space-x-2" mode="primary" wire:click.prevent="openCrud()">
-                <x-icons.add-icon color="text-white" hover="text-gray-50"></x-icons.add-icon>
+                <x-icons.add-icon color="text-white" hover="text-zinc-50"></x-icons.add-icon>
                 <span>{{ __('admin::references.buttons.add_structure') }}</span>
             </x-button>
         </div>
     </div>
 
     @if($isAdded)
-        <div class="flex border border-gray-300 rounded-md bg-slate-50 relative px-3 py-2 my-3">
-            <button class="appearance-none absolute top-2 right-2" wire:click="closeCrud()">
+        <div class="flex border border-zinc-300 rounded-md bg-zinc-50 relative px-3 py-2 my-3">
+            <button type="button" class="appearance-none absolute top-2 right-2 flex h-10 w-10 items-center justify-center rounded-lg text-ink-muted hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400" aria-label="{{ __('admin::references.actions.close') }}" title="{{ __('admin::references.actions.close') }}" wire:click="closeCrud()">
                 <x-icons.close-icon></x-icons.close-icon>
             </button>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mt-4 w-full">
@@ -107,4 +89,3 @@
             @endforeach
         </x-nested.list>
 </div>
-@include('includes.sweetalert-push')

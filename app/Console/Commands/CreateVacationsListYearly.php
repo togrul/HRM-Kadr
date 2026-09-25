@@ -26,7 +26,7 @@ class CreateVacationsListYearly extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         $now = Carbon::now();
         $vacationReset = (bool) cache('settings')['Vacation will reset?'];

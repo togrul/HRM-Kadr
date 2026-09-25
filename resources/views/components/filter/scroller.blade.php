@@ -51,9 +51,8 @@
         x-show="overflowing && ! atStart"
         x-transition.opacity
         @click="nudge(-1)"
-        class="absolute left-0 z-10 inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full border border-hairline bg-white text-ink-muted shadow-card transition hover:text-ink"
+        class="absolute left-0 z-10 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-hairline bg-white text-ink-muted shadow-card transition hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
         aria-label="{{ __('ui::common.pagination.previous') }}"
-        tabindex="-1"
     >
         <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
     </button>
@@ -76,9 +75,8 @@
         x-show="overflowing && ! atEnd"
         x-transition.opacity
         @click="nudge(1)"
-        class="absolute right-0 z-10 inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full border border-hairline bg-white text-ink-muted shadow-card transition hover:text-ink"
+        class="absolute right-0 z-10 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-hairline bg-white text-ink-muted shadow-card transition hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
         aria-label="{{ __('ui::common.pagination.next') }}"
-        tabindex="-1"
     >
         <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
     </button>

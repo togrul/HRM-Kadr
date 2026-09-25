@@ -7,9 +7,11 @@ use App\Models\Personnel;
 use App\Models\StaffSchedule;
 use App\Models\Structure;
 use App\Modules\Staff\Exports\VacancyExport;
+use App\Services\StructurePathService;
 use App\Services\StructureService;
 use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -20,6 +22,7 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 #[On(['staffAdded', 'staffWasDeleted'])]
 class Staffs extends Component
@@ -55,7 +58,7 @@ class Staffs extends Component
 
     protected ?array $structureMap = null;
 
-    protected function queryString()
+    protected function queryString(): array
     {
         return [
             'structure' => [
@@ -64,7 +67,7 @@ class Staffs extends Component
         ];
     }
 
-    public function exportExcel()
+    public function exportExcel(): BinaryFileResponse
     {
         $this->authorize('export', StaffSchedule::class);
 
@@ -74,7 +77,7 @@ class Staffs extends Component
         return Excel::download(new VacancyExport($report), "vakansiyalar-{$name}.xlsx");
     }
 
-    public function showPage($page)
+    public function showPage($page): void
     {
         $this->selectedPage = $page;
     }
@@ -123,7 +126,7 @@ class Staffs extends Component
         return $id > 0 ? $id : null;
     }
 
-    public function setDeleteStaff($staffId)
+    public function setDeleteStaff($staffId): void
     {
         $this->dispatch('setDeleteStaff', $staffId);
     }
@@ -139,14 +142,14 @@ class Staffs extends Component
         $this->openSideMenu('add-staff');
     }
 
-    public function mount(StructureService $structureService)
+    public function mount(StructureService $structureService): void
     {
         $this->authorize('viewAny', StaffSchedule::class);
         $this->selectedPage = request()->query('selectedPage', 'all');
         $this->accessibleStructureIds = $structureService->getAccessibleStructures();
     }
 
-    protected function returnData($type = 'normal')
+    protected function returnData($type = 'normal'): array|Collection
     {
         if ($type === 'normal') {
             return Cache::remember($this->staffListCacheKey(), now()->addSeconds(10), fn () => $this->buildStaffRows());
@@ -157,7 +160,7 @@ class Staffs extends Component
         return $result->toArray();
     }
 
-    protected function buildStaffRows(bool $raw = false)
+    protected function buildStaffRows(bool $raw = false): Collection
     {
         $result = StaffSchedule::with([
             'position',
@@ -208,7 +211,10 @@ class Staffs extends Component
             ->values()
             ->all();
 
-        $nestedIdsByStructure = $this->buildNestedIdsByStructure($structureIds);
+        $paths = app(StructurePathService::class);
+        $nestedIdsByStructure = collect($structureIds)
+            ->mapWithKeys(fn (int $id): array => [$id => $paths->descendantIds($id) ?: [$id]])
+            ->all();
         $relevantStructureIds = collect($nestedIdsByStructure)
             ->flatten()
             ->map(fn ($id) => (int) $id)
@@ -259,46 +265,7 @@ class Staffs extends Component
         });
     }
 
-    protected function buildNestedIdsByStructure(array $structureIds): array
-    {
-        if (empty($structureIds)) {
-            return [];
-        }
-
-        $childrenByParent = [];
-        foreach ($this->resolveStructureMap() as $id => $meta) {
-            $parentId = (int) ($meta['parent_id'] ?? 0);
-            $childrenByParent[$parentId][] = (int) $id;
-        }
-
-        $memo = [];
-        $collectNestedIds = function (int $id) use (&$collectNestedIds, &$memo, $childrenByParent): array {
-            if (isset($memo[$id])) {
-                return $memo[$id];
-            }
-
-            $ids = [$id];
-            foreach ($childrenByParent[$id] ?? [] as $childId) {
-                $ids = array_merge($ids, $collectNestedIds((int) $childId));
-            }
-
-            return $memo[$id] = array_values(array_unique($ids));
-        };
-
-        $nestedIdsByStructure = [];
-        foreach ($structureIds as $structureId) {
-            $structureId = (int) $structureId;
-            if ($structureId <= 0) {
-                continue;
-            }
-
-            $nestedIdsByStructure[$structureId] = $collectNestedIds($structureId);
-        }
-
-        return $nestedIdsByStructure;
-    }
-
-    protected function buildStructureGroups($rows)
+    protected function buildStructureGroups($rows): Collection
     {
         return $rows
             ->groupBy('structure_id')
@@ -534,7 +501,7 @@ class Staffs extends Component
         );
     }
 
-    public function render()
+    public function render(): View
     {
         if ($this->selectedPage === 'all') {
             ['tree' => $staffTree, 'ids' => $staffTreeIds] = $this->cachedStructureTree();

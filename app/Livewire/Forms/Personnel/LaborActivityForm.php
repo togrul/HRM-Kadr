@@ -68,7 +68,7 @@ class LaborActivityForm extends Form
             'laborActivities',
             'latestDisposal',
             'currentWork',
-            'structure' => fn ($query) => $query->withRecursive('parent', false),
+            'structure',
             'ranks.rank',
             'ranks.rankReason',
         ]);

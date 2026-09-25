@@ -8,6 +8,8 @@ use App\Models\Personnel;
 use App\Models\User;
 use App\Models\UserPersonnelLink;
 use App\Modules\PerformanceEvaluation\Livewire\Concerns\InteractsWithPerformanceEvaluationAccess;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
 use Livewire\Component;
 
 class UserPersonnelLinks extends Component
@@ -75,7 +77,7 @@ class UserPersonnelLinks extends Component
         });
     }
 
-    public function getLinksProperty()
+    public function getLinksProperty(): Collection
     {
         return $this->rememberRuntime(
             'performanceEvaluation.userPersonnelLinks.list.'.md5($this->searchLinks),
@@ -262,7 +264,7 @@ class UserPersonnelLinks extends Component
         $this->dispatch('performanceEvaluationSaved', __('performance_evaluation::dashboard.messages.user_personnel_link_deleted'));
     }
 
-    public function render()
+    public function render(): View
     {
         return view('performance-evaluation::livewire.performance-evaluation.user-personnel-links');
     }

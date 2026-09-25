@@ -1,64 +1,6 @@
 <div
-    x-data="{
-        detailPopover: null,
-        openDetail(event, payload) {
-            const rect = event.currentTarget.getBoundingClientRect();
-            this.detailPopover = {
-                lines: payload.lines || [],
-                label: payload.label || '',
-                anchorLeft: rect.left,
-                anchorTop: rect.top,
-                anchorBottom: rect.bottom,
-                anchorWidth: rect.width,
-                left: 12,
-                top: 12,
-                maxHeight: 320,
-            };
-            this.$nextTick(() => {
-                this.positionDetail();
-                requestAnimationFrame(() => this.positionDetail());
-            });
-        },
-        positionDetail() {
-            if (!this.detailPopover || !this.$refs.detailPanel) {
-                return;
-            }
-
-            const margin = 12;
-            const panel = this.$refs.detailPanel;
-            const width = panel.offsetWidth || 256;
-            const height = panel.offsetHeight || 220;
-            const preferredLeft = this.detailPopover.anchorLeft + (this.detailPopover.anchorWidth / 2) - (width / 2);
-            const maxLeft = Math.max(margin, window.innerWidth - width - margin);
-            const left = Math.min(maxLeft, Math.max(margin, preferredLeft));
-            const gap = 8;
-            const availableBelow = Math.max(0, window.innerHeight - this.detailPopover.anchorBottom - margin - gap);
-            const availableAbove = Math.max(0, this.detailPopover.anchorTop - margin - gap);
-            const preferredBelow = availableBelow >= Math.min(height, 220) || availableBelow >= availableAbove;
-            const maxHeight = Math.max(180, Math.min(availableBelow, availableAbove, window.innerHeight - (margin * 2)));
-
-            let top = this.detailPopover.anchorBottom + gap;
-            let constrainedMaxHeight = Math.max(180, preferredBelow ? availableBelow : availableAbove);
-
-            if (!preferredBelow) {
-                top = Math.max(margin, this.detailPopover.anchorTop - Math.min(height, constrainedMaxHeight) - gap);
-            }
-
-            if (preferredBelow && top + Math.min(height, constrainedMaxHeight) > window.innerHeight - margin) {
-                top = Math.max(margin, window.innerHeight - Math.min(height, constrainedMaxHeight) - margin);
-            }
-
-            this.detailPopover = {
-                ...this.detailPopover,
-                left,
-                top,
-                maxHeight: Math.max(180, Math.min(constrainedMaxHeight, window.innerHeight - (margin * 2))),
-            };
-        },
-        closeDetail() {
-            this.detailPopover = null;
-        }
-    }"
+    x-data="puantajGrid()"
+    data-month="{{ $monthStart->format('m.Y') }}"
     x-on:keydown.escape.window="closeDetail()"
     x-on:resize.window.debounce.75ms="positionDetail()"
     x-on:scroll.window.throttle.50ms="positionDetail()"
@@ -87,7 +29,15 @@
         </div>
     @endif
 
-    <div class="relative min-h-[300px] overflow-x-auto">
+    @if($spriteIcons !== [])
+        <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+            @foreach(array_keys($spriteIcons) as $spriteIcon)
+                <symbol id="{{ str_replace('icons.', 'puantaj-', $spriteIcon) }}" viewBox="0 0 24 24"><x-dynamic-component :component="$spriteIcon" size="" color="" hover="" /></symbol>
+            @endforeach
+        </svg>
+    @endif
+
+    <div class="relative min-h-[300px] overflow-x-auto" x-on:click="openCell($event)">
         <div class="inline-block min-w-full py-2 align-middle">
             <div class="overflow-visible">
                 <x-table.tbl :headers="$headers" :title="__('attendance::puantaj.title')" bordered>
@@ -95,7 +45,7 @@
                         @php
                             $personnel = $row['personnel'];
                         @endphp
-                        <tr>
+                        <tr data-name="{{ $row['label'] }}">
                             <x-table.td extraClasses="w-max">
                                 <div class="font-medium text-zinc-800">
                                     {{ $personnel->surname }} {{ $personnel->name }} {{ $personnel->patronymic }}
@@ -110,56 +60,27 @@
                                     </div>
                                 @endif
                             </x-table.td>
-
-                            @foreach($days as $day)
-                                @php
-                                    $cell = $row['cells'][$day] ?? ['display' => '', 'status' => 'none', 'title' => '', 'cell_classes' => 'text-zinc-400 bg-white'];
-                                @endphp
-                                <x-table.td extraClasses="relative text-center text-xs {{ $cell['cell_classes'] }}" title="{{ $cell['title'] }}">
-                                    @php
-                                        $hasDetails = !empty($cell['detail_lines']);
-                                        $cellDateLabel = $monthStart->copy()->day($day)->format('d.m.Y');
-                                        $cellLabel = $personnel->surname.' '.$personnel->name.' '.$personnel->patronymic.' • '.$cellDateLabel;
-                                    @endphp
-                                    <button
-                                        type="button"
-                                        class="w-full min-h-[1.75rem] text-center"
-                                        @if($hasDetails)
-                                            @click="openDetail($event, { label: @js($cellLabel), lines: @js($cell['detail_lines']) })"
-                                        @endif
-                                    >
-                                        @if(!empty($cell['legend_icon']) && (int) ($cell['worked_minutes'] ?? 0) > 0)
-                                            <div class="relative flex min-h-[1.75rem] items-center justify-center">
-                                                <span class="font-medium text-zinc-900">{{ $cell['display'] }}</span>
-                                                <span class="absolute right-0 top-0 inline-flex h-6 w-6 items-center justify-center rounded-md border border-zinc-200 bg-white/95 shadow-sm">
-                                                    <x-dynamic-component :component="$cell['legend_icon']" size="w-4 h-4" :color="$cell['legend_icon_color'] ?? 'text-zinc-600'" />
-                                                </span>
-                                            </div>
-                                        @elseif(!empty($cell['legend_code']) && (int) ($cell['worked_minutes'] ?? 0) > 0)
-                                            <div class="relative flex min-h-[1.75rem] items-center justify-center">
-                                                <span class="font-medium text-zinc-900">{{ $cell['display'] }}</span>
-                                                <span class="absolute right-0 top-0 inline-flex min-w-[1.65rem] items-center justify-center rounded-md border px-1 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm {{ $cell['legend_code_classes'] ?? 'border-zinc-200 bg-zinc-100 text-zinc-700' }}">
-                                                    {{ $cell['legend_code'] }}
-                                                </span>
-                                            </div>
-                                        @elseif(!empty($cell['legend_icon']))
-                                            <div class="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-zinc-200 bg-white/95 shadow-sm">
-                                                <x-dynamic-component :component="$cell['legend_icon']" size="w-4 h-4" :color="$cell['legend_icon_color'] ?? 'text-zinc-600'" />
-                                            </div>
-                                        @elseif(!empty($cell['legend_code']))
-                                            <div class="inline-flex min-w-[2rem] items-center justify-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm {{ $cell['legend_code_classes'] ?? 'border-zinc-200 bg-zinc-100 text-zinc-700' }}">
-                                                {{ $cell['display'] ?: $cell['legend_code'] }}
-                                            </div>
-                                        @elseif(!empty($cell['icon']))
-                                            <div class="inline-flex items-center justify-center">
-                                                <x-dynamic-component :component="$cell['icon']" size="w-4 h-4" :color="$cell['icon_color']" />
-                                            </div>
-                                        @else
-                                            {{ $cell['display'] }}
-                                        @endif
-                                    </button>
-                                </x-table.td>
-                            @endforeach
+@foreach($days as $day)
+@php
+    $cell = $row['cells'][$day] ?? ['display' => '', 'status' => 'none', 'title' => '', 'cell_classes' => 'text-zinc-400 bg-white'];
+    $worked = (int) ($cell['worked_minutes'] ?? 0) > 0;
+@endphp
+<x-table.td extraClasses="relative text-center text-xs {{ $cell['cell_classes'] }}" title="{{ $cell['title'] }}"><button type="button" class="w-full min-h-[1.75rem] text-center"@if(!empty($cell['detail_lines'])) data-d="{{ $day }}"@if(str_contains(implode('', $cell['detail_lines']), '|')) data-lines="{{ json_encode($cell['detail_lines'], JSON_UNESCAPED_UNICODE) }}"@endif @endif>
+@if(!empty($cell['legend_icon']) && $worked)
+<div class="relative flex min-h-[1.75rem] items-center justify-center"><span class="font-medium text-zinc-900">{{ $cell['display'] }}</span><span class="absolute right-0 top-0 inline-flex h-6 w-6 items-center justify-center rounded-md border border-zinc-200 bg-white/95 shadow-sm"><x-puantaj-cell-icon :name="$cell['legend_icon']" :color="$cell['legend_icon_color'] ?? 'text-zinc-600'" :hover="$spriteIcons[$cell['legend_icon']]" /></span></div>
+@elseif(!empty($cell['legend_code']) && $worked)
+<div class="relative flex min-h-[1.75rem] items-center justify-center"><span class="font-medium text-zinc-900">{{ $cell['display'] }}</span><span class="absolute right-0 top-0 inline-flex min-w-[1.65rem] items-center justify-center rounded-md border px-1 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm {{ $cell['legend_code_classes'] ?? 'border-zinc-200 bg-zinc-100 text-zinc-700' }}"> {{ $cell['legend_code'] }} </span></div>
+@elseif(!empty($cell['legend_icon']))
+<div class="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-zinc-200 bg-white/95 shadow-sm"><x-puantaj-cell-icon :name="$cell['legend_icon']" :color="$cell['legend_icon_color'] ?? 'text-zinc-600'" :hover="$spriteIcons[$cell['legend_icon']]" /></div>
+@elseif(!empty($cell['legend_code']))
+<div class="inline-flex min-w-[2rem] items-center justify-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm {{ $cell['legend_code_classes'] ?? 'border-zinc-200 bg-zinc-100 text-zinc-700' }}"> {{ $cell['display'] ?: $cell['legend_code'] }} </div>
+@elseif(!empty($cell['icon']))
+<div class="inline-flex items-center justify-center"><x-puantaj-cell-icon :name="$cell['icon']" :color="$cell['icon_color']" :hover="$spriteIcons[$cell['icon']]" /></div>
+@else
+ {{ $cell['display'] }}
+@endif
+</button></x-table.td>
+@endforeach
                             <x-table.td extraClasses="text-center font-medium text-zinc-700 stats-cell">
                                 {{ $row['total_hours'] }}
                             </x-table.td>

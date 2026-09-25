@@ -4,6 +4,7 @@ namespace App\Modules\Personnel\Livewire;
 
 use App\Models\Personnel;
 use App\Modules\Personnel\Support\Traits\DispatchesPersonnelUiEvents;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -27,7 +28,7 @@ class Files extends Component
 
     public $personnelFiles;
 
-    public function rules()
+    public function rules(): array
     {
         return [
             // svg excluded: it can carry inline <script> (stored XSS when served
@@ -37,7 +38,7 @@ class Files extends Component
         ];
     }
 
-    public function addFile()
+    public function addFile(): void
     {
         $this->validate();
 
@@ -50,7 +51,7 @@ class Files extends Component
         $this->files = ['filename' => null];
     }
 
-    public function deleteFile($key)
+    public function deleteFile($key): void
     {
         $path = $this->file_list[$key]['file'];
 
@@ -62,7 +63,7 @@ class Files extends Component
         $this->file_list = array_values($this->file_list);
     }
 
-    public function store()
+    public function store(): void
     {
         if (! empty($this->file_list)) {
             foreach ($this->file_list as $fileList) {
@@ -84,7 +85,7 @@ class Files extends Component
         $this->dispatchModalCloseEvent();
     }
 
-    public function mount()
+    public function mount(): void
     {
         $this->personnelFiles = Personnel::with('files:tabel_no,file,filename')
             ->where('tabel_no', $this->personnelModel)
@@ -102,7 +103,7 @@ class Files extends Component
         $this->uploadedFile = null;
     }
 
-    public function render()
+    public function render(): View
     {
         return view('personnel::livewire.personnel.files');
     }

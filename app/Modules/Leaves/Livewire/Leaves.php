@@ -9,11 +9,15 @@ use App\Models\Leave;
 use App\Models\OrderStatus;
 use App\Models\Structure;
 use App\Modules\Leaves\Exports\LeaveExport;
+use App\Services\StructurePathService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\LazyCollection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
@@ -21,6 +25,7 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 #[On(['leaveAdded', 'filterSelected', 'leaveWasDeleted', 'leaveApproved', 'leaveRejected'])]
 class Leaves extends Component
@@ -38,8 +43,6 @@ class Leaves extends Component
     public $status;
 
     protected ?array $statsCache = null;
-
-    protected array $structurePathCache = [];
 
     public function applyFilter(?array $payload = null): void
     {
@@ -71,7 +74,7 @@ class Leaves extends Component
         $this->statsCache = null;
     }
 
-    public function exportExcel()
+    public function exportExcel(): BinaryFileResponse
     {
         $this->authorize('export', \App\Models\Leave::class);
 
@@ -108,9 +111,18 @@ class Leaves extends Component
                 $this->filter->starts_at = null;
             }
         }
+
+        // Filters apply as they change; there is no separate "search" step.
+        $this->applyFilter();
     }
 
-    public function setDeleteLeave($leaveId)
+    #[Computed]
+    public function hasActiveFilters(): bool
+    {
+        return collect($this->search->toArray())->contains(fn ($value): bool => filled($value));
+    }
+
+    public function setDeleteLeave($leaveId): void
     {
         $this->dispatch('setDeleteLeave', $leaveId);
     }
@@ -131,7 +143,7 @@ class Leaves extends Component
         $this->dispatch('openSideMenu', showSideMenu: 'edit-leave');
     }
 
-    public function forceDeleteData($id)
+    public function forceDeleteData($id): void
     {
         $model = Leave::withTrashed()->find($id);
         $this->authorize('delete', $model);
@@ -139,7 +151,7 @@ class Leaves extends Component
         $this->dispatch('leaveWasDeleted', __('leaves::common.messages.leave_deleted'));
     }
 
-    public function restoreData($id)
+    public function restoreData($id): void
     {
         $model = Leave::withTrashed()->find($id);
         $this->authorize('restore', $model);
@@ -184,6 +196,12 @@ class Leaves extends Component
         $this->status = request()->query('status', 'all');
         $this->filter = LeaveFilterData::make();
         $this->search = LeaveFilterData::make();
+
+        // Deep link from the command palette / quick links: land with the form open.
+        if (request()->boolean('create') && (auth()->user()?->can('create', \App\Models\Leave::class) ?? false)) {
+            $this->openAddLeaveModal();
+            $this->forgetDeepLinkParams('create');
+        }
     }
 
     /**
@@ -196,7 +214,7 @@ class Leaves extends Component
         return Leave::query()->filter($this->search);
     }
 
-    protected function returnData($type = 'normal')
+    protected function returnData($type = 'normal'): array|LengthAwarePaginator|LazyCollection
     {
         $base = $this->baseQuery()
             ->when(is_numeric($this->status), fn ($q) => $q->where('status_id', $this->status))
@@ -217,7 +235,8 @@ class Leaves extends Component
                         'structure_id',
                         'position_id',
                     ])
-                    ->withStructureTree()   // burada parent zincirini preload eder
+                    // Unit names only; the path comes from StructurePathService's flat map.
+                    ->with('structure:id,name')
                     ->with([
                         'position:id,name',
                         'latestDisposal' => fn ($q) => $q->select(
@@ -340,7 +359,7 @@ class Leaves extends Component
             END)";
     }
 
-    protected function finalizePagination($query, $type)
+    protected function finalizePagination($query, $type): LengthAwarePaginator|LazyCollection
     {
         if ($type === 'cursor') {
             return $query->cursor();
@@ -366,37 +385,10 @@ class Leaves extends Component
 
     protected function resolveStructurePath(?Structure $structure): string
     {
-        if (! $structure) {
-            return '';
-        }
-
-        $cacheKey = (int) $structure->id;
-
-        if (array_key_exists($cacheKey, $this->structurePathCache)) {
-            return $this->structurePathCache[$cacheKey];
-        }
-
-        $segments = [];
-        $cursor = $structure;
-
-        while ($cursor) {
-            if (is_null($cursor->parent_id)) {
-                break;
-            }
-
-            $segments[] = (string) $cursor->name;
-
-            if (! $cursor->relationLoaded('parent')) {
-                break;
-            }
-
-            $cursor = $cursor->parent;
-        }
-
-        return $this->structurePathCache[$cacheKey] = implode(' ', array_reverse($segments));
+        return $structure ? implode(' ', app(StructurePathService::class)->segments((int) $structure->id)) : '';
     }
 
-    public function render()
+    public function render(): View
     {
         $permits = $this->returnData();
         $_appeal_statuses = $this->appealStatuses();
@@ -413,7 +405,7 @@ class Leaves extends Component
     }
 
     #[Computed(cache: true, persist: true)]
-    public function appealStatuses()
+    public function appealStatuses(): Collection
     {
         $locale = config('app.locale');
 

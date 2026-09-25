@@ -4,6 +4,7 @@ namespace App\Modules\TrainingNeeds\Livewire;
 
 use App\Models\TrainingDeliveryRecord;
 use App\Modules\TrainingNeeds\Livewire\Concerns\InteractsWithTrainingNeedsAccess;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Isolate;
 use Livewire\Component;
 
@@ -13,10 +14,15 @@ class CertificateViewer extends Component
     use InteractsWithTrainingNeedsAccess;
 
     public ?int $deliveryRecordId = null;
+
     public array $recordSnapshot = [];
+
     public ?string $temporaryCertificateName = null;
+
     public ?string $temporaryCertificatePreviewUrl = null;
+
     public ?string $temporaryCertificateExtension = null;
+
     public bool $hasPendingUpload = false;
 
     public function mount(
@@ -26,8 +32,7 @@ class CertificateViewer extends Component
         ?string $temporaryCertificatePreviewUrl = null,
         ?string $temporaryCertificateExtension = null,
         bool $hasPendingUpload = false,
-    ): void
-    {
+    ): void {
         $this->authorizeTrainingNeedsView();
         $this->deliveryRecordId = $deliveryRecordId;
         $this->recordSnapshot = $recordSnapshot;
@@ -40,7 +45,7 @@ class CertificateViewer extends Component
     public function getRecordProperty(): ?TrainingDeliveryRecord
     {
         if ($this->recordSnapshot !== []) {
-            $record = new TrainingDeliveryRecord();
+            $record = new TrainingDeliveryRecord;
             $record->forceFill([
                 'id' => data_get($this->recordSnapshot, 'id'),
                 'certificate_path' => data_get($this->recordSnapshot, 'certificate_path'),
@@ -76,7 +81,7 @@ class CertificateViewer extends Component
             ->find($this->deliveryRecordId);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('training-needs::livewire.training-needs.certificate-viewer');
     }

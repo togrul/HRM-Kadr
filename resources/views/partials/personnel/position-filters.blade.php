@@ -16,7 +16,7 @@
                     wire:click.prevent="resetFilter"
                     wire:loading.attr="disabled"
                     wire:target="resetFilter"
-                    class="flex h-[30px] items-center whitespace-nowrap rounded-[9px] px-2.5 text-[12px] font-medium text-[#be123c] transition hover:bg-[#ffe4e6]"
+                    class="flex min-h-10 items-center whitespace-nowrap rounded-[9px] px-3 text-[14px] font-medium text-[#be123c] transition hover:bg-[#ffe4e6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
                 >{{ __('personnel::common.actions.reset') }}</button>
             </li>
         @endif

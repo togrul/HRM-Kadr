@@ -6,16 +6,16 @@
 ])
 
 @php
-    $base = 'inline-flex items-center justify-center rounded-2xl font-semibold transition disabled:cursor-not-allowed disabled:opacity-60';
+    $base = 'inline-flex items-center justify-center rounded-[10px] font-semibold tracking-[-0.01em] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50';
     $width = $fullWidth ? 'w-full' : '';
     $sizes = [
-        'sm' => 'px-3 py-2 text-xs',
-        'md' => 'px-4 py-2.5 text-sm',
-        'lg' => 'px-5 py-3 text-sm',
+        'sm' => 'min-h-10 px-3 text-[14px]',
+        'md' => 'min-h-10 px-4 text-[14px]',
+        'lg' => 'min-h-11 px-5 text-[14px]',
     ];
     $variants = [
-        'primary' => 'bg-zinc-950 text-white hover:bg-zinc-900',
-        'secondary' => 'border border-zinc-200 bg-white text-zinc-800 shadow-sm hover:border-zinc-300 hover:bg-zinc-950 hover:text-white',
+        'primary' => 'bg-ink text-white hover:bg-ink-hover',
+        'secondary' => 'border border-hairline bg-[#f4f4f5] text-ink-soft hover:border-zinc-300 hover:bg-[#e4e4e7] hover:text-ink',
         'danger' => 'border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100',
         'warning' => 'border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100',
         'success' => 'border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100',

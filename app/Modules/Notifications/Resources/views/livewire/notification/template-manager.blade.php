@@ -12,48 +12,48 @@
 <div class="grid gap-5 min-[1700px]:grid-cols-[minmax(0,1.05fr)_minmax(24rem,0.95fr)]">
     <x-surface-card :title="__('notifications::common.titles.templates')" icon="icons.layout-icon">
         <div class="space-y-4">
-            <div class="rounded-[1.6rem] border border-zinc-200 bg-zinc-50/70 p-4">
+            <div class="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4">
                 <div class="flex flex-wrap items-start justify-between gap-3 border-b border-zinc-200/80 pb-4">
                     <div>
                         <p class="text-sm font-semibold text-zinc-950">{{ __('notifications::common.titles.templates') }}</p>
                         <p class="mt-1 text-sm leading-6 text-zinc-500">{{ __('notifications::common.helpers.template_preview_hint') }}</p>
                     </div>
                     <div class="flex flex-wrap gap-2">
-                        <span class="rounded-full border border-zinc-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">{{ $categoryLabels[$form['category']] ?? $form['category'] }}</span>
-                        <span class="rounded-full border border-zinc-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">{{ __('notifications::common.channels.'.$form['channel']) }}</span>
+                        <span class="rounded-full border border-zinc-200 bg-white px-3 py-1 hrm-eyebrow">{{ $categoryLabels[$form['category']] ?? $form['category'] }}</span>
+                        <span class="rounded-full border border-zinc-200 bg-white px-3 py-1 hrm-eyebrow">{{ __('notifications::common.channels.'.$form['channel']) }}</span>
                     </div>
                 </div>
 
                 <div class="mt-4 space-y-4">
                     <div class="grid gap-4 xl:grid-cols-2">
                 <x-ui.input-shell class="space-y-2 xl:col-span-2" :label="__('notifications::common.fields.key')" :error="$errors->first('form.key')">
-                    <input type="text" wire:model.defer="form.key" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
+                    <input type="text" wire:model="form.key" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
                 </x-ui.input-shell>
 
                 <x-ui.input-shell class="space-y-2" :label="__('notifications::common.fields.category')">
-                    <select wire:model.live="form.category" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
+                    <x-ui.select wire:model.live="form.category">
                         @foreach ($categories as $category)
                             <option value="{{ $category }}">{{ $categoryLabels[$category] ?? $category }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                 </x-ui.input-shell>
 
                 <x-ui.input-shell class="space-y-2" :label="__('notifications::common.fields.channel')">
-                    <select wire:model.live="form.channel" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
+                    <x-ui.select wire:model.live="form.channel">
                         <option value="database">{{ __('notifications::common.channels.database') }}</option>
                         <option value="mail">{{ __('notifications::common.channels.mail') }}</option>
-                    </select>
+                    </x-ui.select>
                 </x-ui.input-shell>
 
                 <x-ui.input-shell class="space-y-2" :label="__('notifications::common.fields.format')">
-                    <select wire:model.live="form.format" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
+                    <x-ui.select wire:model.live="form.format">
                         <option value="text">{{ __('notifications::common.formats.text') }}</option>
                         <option value="html">{{ __('notifications::common.formats.html') }}</option>
-                    </select>
+                    </x-ui.select>
                 </x-ui.input-shell>
 
                 <label class="flex items-center gap-3 rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-700">
-                    <input type="checkbox" wire:model.defer="form.is_active" class="rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500">
+                    <input type="checkbox" wire:model="form.is_active" class="rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500">
                     <span>{{ __('notifications::common.helpers.template_active') }}</span>
                 </label>
 
@@ -99,7 +99,7 @@
 
                     <div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_12rem] xl:items-end">
                         <x-ui.input-shell class="space-y-2" :label="__('notifications::common.fields.test_email')" :error="$errors->first('testEmail')">
-                            <input type="email" wire:model.defer="testEmail" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800" placeholder="{{ __('notifications::common.helpers.demo_email') }}">
+                            <input type="email" wire:model="testEmail" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800" placeholder="{{ __('notifications::common.helpers.demo_email') }}">
                         </x-ui.input-shell>
                         <x-ui.async-button type="button" variant="secondary" fullWidth="true" size="lg" wire:click="sendTest" wire:loading.attr="disabled" wire:target="sendTest">
                             {{ __('notifications::common.buttons.send_test') }}

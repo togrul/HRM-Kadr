@@ -1,8 +1,8 @@
-<section class="rounded-[32px] border border-slate-200 bg-white p-6 shadow-overlay">
-    <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">
+<section class="rounded-[32px] border border-zinc-200 bg-white p-6 shadow-overlay">
+    <div class="text-[11px] font-semibold uppercase tracking-tight text-zinc-400">
         {{ __('candidates::recruitment.titles.stage_timeline') }}
     </div>
-    <h2 class="mt-2 text-[18px] font-semibold tracking-tight text-slate-900">
+    <h2 class="mt-2 text-[18px] font-semibold tracking-tight text-zinc-900">
         {{ __('candidates::recruitment.titles.stage_timeline') }}
     </h2>
 
@@ -12,39 +12,39 @@
                 $audit = is_array($event->payload['audit'] ?? null) ? $event->payload['audit'] : [];
                 $profileFieldKeys = collect($audit['profile_field_keys'] ?? [])->filter()->values();
             @endphp
-            <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <article class="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
                 <div class="flex flex-wrap items-center gap-2">
-                    <span class="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">{{ __('candidates::recruitment.stages.'.$event->stage_key) }}</span>
-                    <span class="inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-500">{{ $event->action }}</span>
+                    <span class="inline-flex rounded-full bg-zinc-100 px-3 py-1 text-xs font-semibold text-zinc-700">{{ __('candidates::recruitment.stages.'.$event->stage_key) }}</span>
+                    <span class="inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold text-zinc-500">{{ $event->action }}</span>
                     @if (! empty($audit['from_stage']) || ! empty($audit['to_stage']))
                         <span class="inline-flex rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700">
                             {{ __('candidates::recruitment.stages.'.($audit['from_stage'] ?? $event->stage_key)) }} → {{ __('candidates::recruitment.stages.'.($audit['to_stage'] ?? $event->stage_key)) }}
                         </span>
                     @endif
                 </div>
-                <div class="mt-3 text-sm font-semibold text-slate-900">{{ $event->actor?->name ?? '—' }}</div>
-                <div class="mt-1 text-sm text-slate-500">{{ optional($event->occurred_at)->format('d.m.Y H:i') ?? '—' }}</div>
+                <div class="mt-3 text-sm font-semibold text-zinc-900">{{ $event->actor?->name ?? '—' }}</div>
+                <div class="mt-1 text-sm text-zinc-500">{{ optional($event->occurred_at)->format('d.m.Y H:i') ?? '—' }}</div>
                 @if ($audit !== [])
                     <div class="mt-3 flex flex-wrap gap-2">
                         @if (($audit['assessment_total'] ?? 0) > 0)
-                            <span class="inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-600">
+                            <span class="inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold text-zinc-600">
                                 {{ __('candidates::recruitment.labels.assessment_records') }}: {{ $audit['assessment_passed'] ?? 0 }}/{{ $audit['assessment_total'] }}
                             </span>
                         @endif
                         @if (($audit['document_total'] ?? 0) > 0)
-                            <span class="inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-600">
+                            <span class="inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold text-zinc-600">
                                 {{ __('candidates::recruitment.labels.document_records') }}: {{ $audit['document_provided'] ?? 0 }}/{{ $audit['document_total'] }}
                             </span>
                         @endif
                         @if ($profileFieldKeys->isNotEmpty())
-                            <span class="inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-600">
+                            <span class="inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold text-zinc-600">
                                 {{ __('candidates::recruitment.labels.profile_field_changes') }}: {{ $profileFieldKeys->count() }}
                             </span>
                         @endif
                     </div>
                 @endif
                 @if ($event->decision || $event->score || $event->note)
-                    <div class="mt-3 space-y-1 text-sm text-slate-600">
+                    <div class="mt-3 space-y-1 text-sm text-zinc-600">
                         @if ($event->decision)
                             <div>{{ __('candidates::recruitment.labels.decision') }}: {{ $event->decision }}</div>
                         @endif
@@ -65,7 +65,7 @@
                                     ? $translated
                                     : __('candidates::common.labels.'.$key);
                             @endphp
-                            <span class="inline-flex rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-500">
+                            <span class="inline-flex rounded-full bg-zinc-100 px-3 py-1 text-[11px] font-semibold text-zinc-500">
                                 {{ $fallback !== 'candidates::common.labels.'.$key ? $fallback : $key }}
                             </span>
                         @endforeach

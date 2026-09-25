@@ -3,8 +3,8 @@
 namespace Tests\Feature\Orders;
 
 use App\Models\OrderLog;
-use App\Services\Orders\Document\OrderIssueService;
-use App\Services\Orders\Document\OrderStatusTransitionService;
+use App\Modules\Orders\Infrastructure\Document\OrderIssueService;
+use App\Modules\Orders\Infrastructure\Document\OrderStatusTransitionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Activitylog\Models\Activity;
 use Tests\TestCase;

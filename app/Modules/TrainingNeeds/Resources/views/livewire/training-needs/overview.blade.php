@@ -18,19 +18,18 @@
 @endphp
 
 <div class="flex flex-col gap-4">
-    <section class="rounded-xl border border-hairline bg-white">
-        <div class="grid gap-3 p-3 sm:grid-cols-2 xl:grid-cols-3">
+    {{-- metric tiles sit straight on the page: wrapping them in a card nested a card in a card --}}
+    <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             @foreach ($metrics as $metric)
-                <div class="rounded-xl border border-hairline bg-[#fafafa] px-3.5 py-3">
+                <div class="rounded-2xl border border-hairline bg-white px-4 py-3.5 shadow-card">
                     <div class="flex items-center justify-between gap-2">
-                        <span class="hrm-eyebrow">{{ $metric['label'] }}</span>
+                        <span class="text-[12.5px] font-medium text-ink-muted">{{ $metric['label'] }}</span>
                         <span class="h-1.5 w-1.5 shrink-0 rounded-full {{ $metric['dot'] }}"></span>
                     </div>
                     <p class="hrm-num mt-1.5 text-[22px] font-semibold tracking-[-0.03em] text-ink">{{ $metric['value'] }}</p>
                 </div>
             @endforeach
-        </div>
-    </section>
+    </div>
 
     {{-- ===================== training needs ===================== --}}
     <section class="overflow-hidden rounded-xl border border-hairline bg-white">

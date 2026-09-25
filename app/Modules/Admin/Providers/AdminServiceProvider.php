@@ -92,6 +92,7 @@ class AdminServiceProvider extends ServiceProvider
         return [
             'appeal-statuses' => \App\Modules\Admin\Livewire\AppealStatus::class,
             'award-types' => \App\Modules\Admin\Livewire\AwardTypes::class,
+            'punishment-types' => \App\Modules\Admin\Livewire\PunishmentTypes::class,
             'awards' => \App\Modules\Admin\Livewire\Awards::class,
             'cities' => \App\Modules\Admin\Livewire\Cities::class,
             'countries' => \App\Modules\Admin\Livewire\Countries::class,

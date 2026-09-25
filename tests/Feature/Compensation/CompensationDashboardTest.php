@@ -8,6 +8,12 @@ use App\Models\EmployeeBankAccount;
 use App\Models\EmployeeCompensation;
 use App\Models\Personnel;
 use App\Modules\Compensation\Livewire\Dashboard;
+use App\Modules\Compensation\Livewire\Tabs\AssignmentsTab;
+use App\Modules\Compensation\Livewire\Tabs\BankTab;
+use App\Modules\Compensation\Livewire\Tabs\ComponentsTab;
+use App\Modules\Compensation\Livewire\Tabs\ScalesTab;
+use App\Modules\Compensation\Livewire\Tabs\StatutoryTab;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -47,14 +53,15 @@ class CompensationDashboardTest extends TestCase
         $this->actingAsManager();
         $regimeId = CompensationRegime::where('code', 'private')->value('id');
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(ScalesTab::class)
             ->set('scaleForm.name', 'Mülki şkala 2026')
             ->set('scaleForm.regime_id', $regimeId)
             ->set('scaleForm.currency', 'AZN')
             ->set('scaleForm.effective_from', '2026-01-01')
             ->call('saveScale')
             ->assertHasNoErrors()
-            ->assertDispatched('notify');
+            ->assertDispatched('notify')
+            ->assertDispatched('compensation-updated');
 
         $this->assertDatabaseHas('pay_scales', ['name' => 'Mülki şkala 2026', 'regime_id' => $regimeId]);
     }
@@ -63,8 +70,7 @@ class CompensationDashboardTest extends TestCase
     {
         $this->actingAsManager();
 
-        Livewire::test(Dashboard::class)
-            ->set('activeTab', 'components')
+        Livewire::test(ComponentsTab::class)
             ->set('componentForm.code', 'transport')
             ->set('componentForm.name', 'Nəqliyyat əlavəsi')
             ->set('componentForm.type', 'earning')
@@ -81,9 +87,7 @@ class CompensationDashboardTest extends TestCase
         $personnel = $this->makePersonnel('emp1@example.test');
         $regimeId = CompensationRegime::where('code', 'private')->value('id');
 
-        $component = Livewire::test(Dashboard::class)
-            ->set('activeTab', 'assignments')
-            ->set('selectedTabelNo', $personnel->tabel_no)
+        $component = Livewire::test(AssignmentsTab::class, ['tabelNo' => $personnel->tabel_no])
             ->set('assignmentForm.regime_id', $regimeId)
             ->set('assignmentForm.base_amount', '1000')
             ->set('assignmentForm.currency', 'AZN')
@@ -133,9 +137,7 @@ class CompensationDashboardTest extends TestCase
         $this->actingAsManager();
         $personnel = $this->makePersonnel('emp3@example.test');
 
-        $component = Livewire::test(Dashboard::class)
-            ->set('activeTab', 'bank')
-            ->set('selectedTabelNo', $personnel->tabel_no)
+        $component = Livewire::test(BankTab::class, ['tabelNo' => $personnel->tabel_no])
             ->set('bankForm.iban', 'AZ21NABZ00000000137010001944')
             ->set('bankForm.is_primary', true)
             ->call('saveBank')
@@ -155,8 +157,7 @@ class CompensationDashboardTest extends TestCase
     {
         $this->actingAsManager();
 
-        Livewire::test(Dashboard::class)
-            ->set('activeTab', 'statutory')
+        Livewire::test(StatutoryTab::class)
             ->set('statutoryForm.component_code', 'medical')
             ->set('statutoryForm.payer', 'ee')
             ->set('statutoryForm.base', 'social')
@@ -175,7 +176,7 @@ class CompensationDashboardTest extends TestCase
         $this->actingAsManager();
 
         // Raw attribute path "scale form.name" must NOT leak into the message — the translated label is used.
-        Livewire::test(Dashboard::class)
+        Livewire::test(ScalesTab::class)
             ->call('saveScale')
             ->assertHasErrors('scaleForm.name')
             ->assertDontSee('scale form.name');
@@ -202,7 +203,7 @@ class CompensationDashboardTest extends TestCase
             ]);
         }
 
-        $component = Livewire::test(Dashboard::class);
+        $component = Livewire::test(ScalesTab::class);
         $band = $component->instance()->scaleRange($component->instance()->scales->first());
 
         $this->assertSame(3, $band['grades']);
@@ -216,7 +217,7 @@ class CompensationDashboardTest extends TestCase
         $viewer->givePermissionTo(Permission::findOrCreate('show-compensation', 'web'));
         $this->actingAs($viewer);
 
-        $masked = Livewire::test(Dashboard::class);
+        $masked = Livewire::test(ScalesTab::class);
         $band = $masked->instance()->scaleRange($masked->instance()->scales->first());
 
         $this->assertSame('•••', $band['min']);
@@ -228,12 +229,19 @@ class CompensationDashboardTest extends TestCase
     {
         $this->actingAsManager();
 
-        Livewire::test(Dashboard::class)
+        Livewire::test(ComponentsTab::class)
+            ->assertSet('panel', '')
+            ->call('openPanel', 'component')
+            ->assertSet('panel', 'component')
+            ->call('closePanel')
+            ->assertSet('panel', '');
+
+        Livewire::test(ScalesTab::class)
             ->assertSet('panel', '')
             ->call('openPanel', 'scale')
             ->assertSet('panel', 'scale')
-            ->call('openPanel', 'component')
-            ->assertSet('panel', 'component')
+            ->call('openPanel', 'grade')
+            ->assertSet('panel', 'grade')
             ->call('closePanel')
             ->assertSet('panel', '')
             // Saving closes the panel through the form's own cancel path.
@@ -245,6 +253,63 @@ class CompensationDashboardTest extends TestCase
             ->call('saveScale')
             ->assertHasNoErrors()
             ->assertSet('panel', '');
+    }
+
+    public function test_shell_renders_only_the_active_tab_and_passes_the_picked_employee(): void
+    {
+        $this->actingAsManager();
+        $personnel = $this->makePersonnel('emp4@example.test');
+
+        Livewire::withQueryParams(['tab' => 'components'])->test(Dashboard::class)
+            ->assertSet('activeTab', 'components')
+            ->assertSeeLivewire(ComponentsTab::class)
+            ->assertDontSeeLivewire(ScalesTab::class)
+            ->call('switchTab', 'bank')
+            ->assertSeeLivewire(BankTab::class)
+            ->call('selectPersonnel', $personnel->tabel_no, 'Jane Doe')
+            ->assertSet('selectedTabelNo', $personnel->tabel_no)
+            ->assertSee('Jane Doe');
+    }
+
+    public function test_every_tab_refuses_a_user_without_view_permission(): void
+    {
+        $this->actingAs(\App\Models\User::factory()->create());
+
+        foreach ([ScalesTab::class, ComponentsTab::class, AssignmentsTab::class, BankTab::class, StatutoryTab::class] as $tab) {
+            Livewire::test($tab)->assertForbidden();
+        }
+    }
+
+    public function test_tab_mutators_require_manage_permission_on_their_own(): void
+    {
+        $viewer = \App\Models\User::factory()->create();
+        $viewer->givePermissionTo(Permission::findOrCreate('show-compensation', 'web'));
+        $this->actingAs($viewer);
+        $personnel = $this->makePersonnel('emp5@example.test');
+
+        Livewire::test(ScalesTab::class)->call('saveScale')->assertForbidden();
+        Livewire::test(ComponentsTab::class)->call('saveComponent')->assertForbidden();
+        Livewire::test(StatutoryTab::class)->call('saveStatutoryRate')->assertForbidden();
+        Livewire::test(AssignmentsTab::class, ['tabelNo' => $personnel->tabel_no])->call('saveAssignment')->assertForbidden();
+        Livewire::test(BankTab::class, ['tabelNo' => $personnel->tabel_no])->call('saveBank')->assertForbidden();
+        Livewire::test(BankTab::class, ['tabelNo' => $personnel->tabel_no])->call('openPanel', 'bank')->assertForbidden();
+
+        $this->assertSame(0, EmployeeBankAccount::count());
+    }
+
+    public function test_bank_editor_only_reaches_the_picked_employees_accounts(): void
+    {
+        $this->actingAsManager();
+        $owner = $this->makePersonnel('emp6@example.test');
+        $other = $this->makePersonnel('emp7@example.test');
+        $account = EmployeeBankAccount::create([
+            'tabel_no' => $owner->tabel_no, 'iban' => 'AZ21NABZ00000000137010001944', 'is_primary' => true, 'is_active' => true,
+        ]);
+
+        $this->expectException(ModelNotFoundException::class);
+
+        Livewire::test(BankTab::class, ['tabelNo' => $other->tabel_no])
+            ->call('editBank', $account->id);
     }
 
     public function test_seed_catalog_is_available(): void

@@ -8,6 +8,9 @@ use App\Models\TrainingNeedItem;
 use App\Models\TrainingPlanItem;
 use App\Models\TrainingSession;
 use App\Modules\TrainingNeeds\Livewire\Concerns\InteractsWithTrainingNeedsAccess;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Isolate;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -16,12 +19,15 @@ use Livewire\WithPagination;
 class Lists extends Component
 {
     use InteractsWithTrainingNeedsAccess;
-    use WithRuntimeMemo;
     use WithPagination;
+    use WithRuntimeMemo;
 
     public string $entity = 'needs';
+
     public string $search = '';
+
     public string $statusFilter = 'all';
+
     public ?int $selectedRowId = null;
 
     /**
@@ -110,7 +116,7 @@ class Lists extends Component
         };
     }
 
-    public function getSelectedRowProperty()
+    public function getSelectedRowProperty(): ?Model
     {
         if (! $this->selectedRowId) {
             return null;
@@ -151,7 +157,7 @@ class Lists extends Component
         });
     }
 
-    public function getRowsProperty()
+    public function getRowsProperty(): LengthAwarePaginator
     {
         $search = trim($this->search);
         $pageName = $this->pageNameForEntity();
@@ -239,7 +245,7 @@ class Lists extends Component
         };
     }
 
-    public function render()
+    public function render(): View
     {
         return view('training-needs::livewire.training-needs.lists');
     }

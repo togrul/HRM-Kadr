@@ -13,6 +13,8 @@ use Livewire\Component;
 /**
  * The row-level peek: enough of a personnel file to decide whether to open it.
  * Follows the module convention of addressing personnel by tabel number.
+ *
+ * @property-read Personnel $personnel
  */
 class PersonnelQuickView extends Component
 {
@@ -32,8 +34,7 @@ class PersonnelQuickView extends Component
         return Personnel::with([
             'position',
             'educationDegree',
-            // The panel prints the ancestor chain; a lazy ->parent walk is a query per level.
-            'structure' => fn ($query) => $query->withRecursive('parent', false),
+            'structure',
         ])
             ->withTrashed()
             ->where('tabel_no', $this->personnelModel)

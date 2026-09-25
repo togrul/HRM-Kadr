@@ -28,7 +28,7 @@
     class="relative mt-1"
 >
     <button type="button" @click="open = !open; if (open) $nextTick(() => $refs.search.focus())"
-        class="flex w-full items-center justify-between gap-2 rounded-lg bg-neutral-100 px-3 py-2 text-left text-sm transition focus:outline-none focus:ring-2 focus:ring-blue-500">
+        class="flex w-full items-center justify-between gap-2 rounded-lg bg-neutral-100 px-3 py-2 text-left text-sm transition focus:outline-none focus:ring-2 focus:ring-zinc-400">
         <span class="truncate" :class="selectedLabel ? 'text-zinc-900' : 'text-zinc-400'"
             x-text="selectedLabel || @js($placeholder)"></span>
         <svg class="h-4 w-4 shrink-0 text-zinc-400 transition" :class="open ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>
@@ -37,13 +37,13 @@
     <div x-show="open" x-cloak x-transition.origin.top
         class="absolute z-30 mt-1 w-full overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-lg">
         <div class="border-b border-zinc-100 p-2">
-            <input x-ref="search" x-model="search" type="text" placeholder="Axtar…"
+            <input x-ref="search" x-model="search" type="text" placeholder="{{ __('orders::order_composer.lookup.search') }}"
                 class="w-full rounded-lg border border-zinc-200 px-2.5 py-1.5 text-sm focus:border-zinc-400 focus:ring-0">
         </div>
         <ul class="max-h-64 overflow-auto py-1">
             <template x-if="value">
                 <li><button type="button" @click="clear()"
-                    class="block w-full px-3 py-1.5 text-left text-xs text-zinc-400 hover:bg-zinc-50">— Təmizlə —</button></li>
+                    class="block min-h-10 w-full px-3 text-left text-sm text-zinc-500 hover:bg-zinc-50">{{ __('orders::order_composer.lookup.clear') }}</button></li>
             </template>
             <template x-for="o in filtered" :key="o.id">
                 <li>
@@ -56,7 +56,7 @@
                 </li>
             </template>
             <template x-if="filtered.length === 0">
-                <li class="px-3 py-3 text-center text-xs text-zinc-400">Tapılmadı</li>
+                <li class="px-3 py-3 text-center text-xs text-zinc-400">{{ __('orders::order_composer.lookup.not_found') }}</li>
             </template>
         </ul>
     </div>

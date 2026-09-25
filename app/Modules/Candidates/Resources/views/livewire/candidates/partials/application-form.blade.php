@@ -1,9 +1,9 @@
 <div class="space-y-6">
     <div class="space-y-2">
-        <h2 class="text-[18px] font-semibold tracking-tight text-slate-900">
+        <h2 class="text-[18px] font-semibold tracking-tight text-zinc-900">
             {{ $title }}
         </h2>
-        <p class="text-sm leading-6 text-slate-500">
+        <p class="text-sm leading-6 text-zinc-500">
             {{ __('candidates::recruitment.labels.application_note') }}
         </p>
     </div>
@@ -37,10 +37,10 @@
     </div>
 
     @if ($this->selectedOpening)
-        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.labels.opening') }}</div>
-            <div class="mt-2 text-lg font-semibold tracking-tight text-slate-900">{{ $this->selectedOpening->title }}</div>
-            <div class="mt-2 text-sm text-slate-500">{{ $this->selectedOpening->structure?->name ?? '—' }} / {{ $this->selectedOpening->position?->name ?? '—' }}</div>
+        <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
+            <div class="text-[11px] font-semibold uppercase tracking-tight text-zinc-400">{{ __('candidates::recruitment.labels.opening') }}</div>
+            <div class="mt-2 text-lg font-semibold tracking-tight text-zinc-900">{{ $this->selectedOpening->title }}</div>
+            <div class="mt-2 text-sm text-zinc-500">{{ $this->selectedOpening->structure?->name ?? '—' }} / {{ $this->selectedOpening->position?->name ?? '—' }}</div>
         </div>
     @endif
 

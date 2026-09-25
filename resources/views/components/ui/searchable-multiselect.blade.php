@@ -4,9 +4,9 @@
     'options' => [],
     'selectedOptions' => [],
     'searchModel' => null,
-    'searchPlaceholder' => 'Axtar',
+    'searchPlaceholder' => null,
     'help' => null,
-    'emptyLabel' => 'Nəticə tapılmadı',
+    'emptyLabel' => null,
     'selectedSuffix' => null,
 ])
 
@@ -33,17 +33,17 @@
     class="space-y-3"
 >
     <div class="flex items-center justify-between gap-3">
-        <label class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ $label }}</label>
+        <label class="hrm-eyebrow">{{ $label }}</label>
         <span class="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[11px] font-semibold text-zinc-600" x-text="`${normalize(selected).length} {{ $selectedSuffix ?? __('notifications::common.labels.selected') }}`"></span>
     </div>
 
     @if ($searchModel)
-        <div class="rounded-[1.3rem] border border-zinc-200 bg-white px-3 py-3 shadow-card">
+        <div class="rounded-2xl border border-zinc-200 bg-white px-3 py-3 shadow-card">
             <input
                 type="text"
                 wire:model.live.debounce.300ms="{{ $searchModel }}"
                 class="w-full border-none bg-transparent px-1 py-0 text-sm text-zinc-800 outline-none ring-0 placeholder:text-zinc-400 focus:ring-0"
-                placeholder="{{ $searchPlaceholder }}"
+                placeholder="{{ $searchPlaceholder ?? __('ui::common.actions.search') }}"
             >
         </div>
     @endif
@@ -74,7 +74,7 @@
             @if (($option['group'] ?? null) !== $currentGroup)
                 @php $currentGroup = $option['group'] ?? null; @endphp
                 @if ($currentGroup)
-                    <div class="sticky top-0 z-[1] px-3 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400 backdrop-blur bg-white/95">
+                    <div class="sticky top-0 z-[1] px-3 pb-1 pt-2 hrm-eyebrow backdrop-blur bg-white/95">
                         {{ $currentGroup }}
                     </div>
                 @endif
@@ -95,7 +95,7 @@
             </label>
         @empty
             <div class="rounded-2xl bg-[#f5f5f7] px-4 py-6 text-sm font-semibold text-zinc-500 shadow-card">
-                {{ $emptyLabel }}
+                {{ $emptyLabel ?? __('ui::common.labels.no_results') }}
             </div>
         @endforelse
     </div>

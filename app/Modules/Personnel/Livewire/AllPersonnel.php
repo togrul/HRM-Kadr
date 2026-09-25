@@ -12,14 +12,16 @@ use App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioPer
 use App\Services\StructureService;
 use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 #[On(['personnelAdded', 'fileAdded', 'personnelWasDeleted'])]
 class AllPersonnel extends Component
@@ -58,7 +60,7 @@ class AllPersonnel extends Component
         $this->handleRowAction($type, $payload);
     }
 
-    public function exportExcel()
+    public function exportExcel(): BinaryFileResponse
     {
         $this->authorize('export', Personnel::class);
 
@@ -70,7 +72,7 @@ class AllPersonnel extends Component
     }
 
     #[On('filterSelected')]
-    public function filterSelected(array $filter)
+    public function filterSelected(array $filter): void
     {
         $normalized = $this->normalizeAndPersistFilters($filter);
 
@@ -106,12 +108,12 @@ class AllPersonnel extends Component
         $this->dispatch('setOpenFilter', filter: $this->filters);
     }
 
-    public function setDeletePersonnel($personnelId)
+    public function setDeletePersonnel($personnelId): void
     {
         $this->dispatch('setDeletePersonnel', $personnelId);
     }
 
-    public function restoreData($id)
+    public function restoreData($id): void
     {
         $personnel = Personnel::withTrashed()->where('tabel_no', $id)->first();
 
@@ -128,7 +130,7 @@ class AllPersonnel extends Component
         $this->dispatch('personnelAdded', __('personnel::common.messages.personnel_updated'));
     }
 
-    public function forceDeleteData($id)
+    public function forceDeleteData($id): void
     {
         $model = Personnel::withTrashed()->where('tabel_no', $id)->first();
 
@@ -197,7 +199,7 @@ class AllPersonnel extends Component
         ];
     }
 
-    public function setStatus($newStatus)
+    public function setStatus($newStatus): void
     {
         if (! is_string($newStatus) || ! in_array($newStatus, $this->allowedStatuses, true)) {
             return;
@@ -211,7 +213,7 @@ class AllPersonnel extends Component
         $this->resetPage();
     }
 
-    public function setPosition($new)
+    public function setPosition($new): void
     {
         if (! is_numeric($new)) {
             return;
@@ -227,13 +229,13 @@ class AllPersonnel extends Component
         $this->resetPage();
     }
 
-    public function resetFilter()
+    public function resetFilter(): void
     {
         $this->reset('selectedPosition');
         $this->resetPage();
     }
 
-    public function resetSelectedFilter()
+    public function resetSelectedFilter(): void
     {
         $this->filters = [];
         $this->resetPage();
@@ -243,7 +245,7 @@ class AllPersonnel extends Component
         }
     }
 
-    public function fillFilter()
+    public function fillFilter(): void
     {
         $normalizer = app(PersonnelListStateNormalizer::class);
 
@@ -266,16 +268,22 @@ class AllPersonnel extends Component
     }
 
     #[Computed(persist: true)]
-    public function positions()
+    public function positions(): Collection
     {
         return app(PersonnelLookupService::class)->positions();
     }
 
-    public function mount()
+    public function mount(): void
     {
         $this->authorize('viewAny', Personnel::class);
         $this->fillFilter();
         $this->filters = $this->getSafeFilterPayload();
+
+        // Deep link from the command palette / quick links: land with the form open.
+        if (request()->boolean('create') && (auth()->user()?->can('add-personnels') ?? false)) {
+            $this->openSideMenu('add-personnel');
+            $this->forgetDeepLinkParams('create');
+        }
     }
 
     public function canEditPersonnels(): bool
@@ -453,19 +461,6 @@ class AllPersonnel extends Component
         );
     }
 
-    protected function personnelQuery(bool $withStructureTree = true): Builder
-    {
-        return app(PersonnelQueryService::class)->build(
-            status: $this->status,
-            filters: $this->filters,
-            selectedStructureIds: $this->selectedStructureIds(),
-            accessibleStructureIds: $this->accessibleStructureIds(),
-            selectedPosition: $this->selectedPosition,
-            withStructureTree: $withStructureTree,
-            search: $this->search,
-        );
-    }
-
     protected function personnelExportRows(): iterable
     {
         return app(PersonnelQueryService::class)->buildExport(
@@ -488,7 +483,7 @@ class AllPersonnel extends Component
         return app(PersonnelListStateNormalizer::class)->normalizeStructure($value);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('personnel::livewire.personnel.all-personnel');
     }

@@ -1,6 +1,9 @@
 <?php
 
 namespace App\Modules\Services\Livewire\Roles;
+
+use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
@@ -10,12 +13,13 @@ use Spatie\Permission\Models\Role;
 class DeleteRole extends Component
 {
     use AuthorizesRequests;
+    use AuthorizesSettingsAccess;
 
     #[Locked]
     public ?int $roleId = null;
 
     #[On('setDeleteRole')]
-    public function setDeleteRole($roleId)
+    public function setDeleteRole($roleId): void
     {
         $role = Role::query()
             ->select('id')
@@ -34,7 +38,7 @@ class DeleteRole extends Component
         $this->dispatch('deleteRoleWasSet');
     }
 
-    public function deleteRole()
+    public function deleteRole(): void
     {
         if (! $this->roleId) {
             return;
@@ -59,7 +63,7 @@ class DeleteRole extends Component
         $this->dispatch('roleWasDeleted', __('services::roles.messages.role_deleted'));
     }
 
-    public function render()
+    public function render(): View
     {
         return view('services::livewire.services.roles.delete-role');
     }

@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Orders;
 
-use App\Services\Orders\Document\OrderTemplateProvider;
-use App\Services\Orders\Document\OrderWordTemplateRepository;
+use App\Modules\Orders\Application\Document\OrderTemplateProvider;
+use App\Modules\Orders\Application\Document\OrderWordTemplateRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

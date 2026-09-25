@@ -3,6 +3,7 @@
 namespace App\Modules\Personnel\Livewire\Steps;
 
 use App\Livewire\Forms\Personnel\AwardsPunishmentsForm;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Isolate;
 
 #[Isolate]
@@ -40,7 +41,7 @@ class AwardsPunishmentsStep extends AbstractPersonnelWizardStep
         return 6;
     }
 
-    public function render()
+    public function render(): View
     {
         return view('personnel::livewire.personnel.steps.awards-punishments-step', [
             'stepSearchModels' => $this->activeStepSearchModels(),

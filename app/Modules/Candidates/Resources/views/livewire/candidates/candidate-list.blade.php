@@ -40,6 +40,8 @@
 
     {{-- ===================== header ===================== --}}
     <x-page-header
+        collapsible-filters
+        :filters-active="$this->hasActiveFilters"
         :title="__('candidates::common.titles.candidates')"
         :breadcrumb="__('candidates::common.titles.candidates')"
     >
@@ -74,42 +76,43 @@
             <div class="flex flex-wrap items-end gap-3">
                 @if ($this->filterEnabled('fullname'))
                     <label class="w-full flex-1 sm:max-w-[300px]">
-                        <span class="hrm-eyebrow block pb-1">{{ __('candidates::common.labels.fullname') }}</span>
-                        <x-livewire-input mode="gray" name="filter.fullname" wire:model="filter.fullname" />
+                        <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('candidates::common.labels.fullname') }}</span>
+                        <x-livewire-input mode="gray" name="filter.fullname" wire:model.live.debounce.400ms="filter.fullname" />
                     </label>
                 @endif
 
                 @if ($this->filterEnabled('appeal_date'))
                     <div class="shrink-0">
-                        <span class="hrm-eyebrow block pb-1">{{ __('candidates::common.labels.appeal_date') }}</span>
+                        <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('candidates::common.labels.appeal_date') }}</span>
                         <div class="flex items-center gap-2">
-                            <input type="date" wire:model="filter.appeal_date.min"
-                                class="hrm-num h-[34px] w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[12.5px] text-ink focus:border-ink focus:bg-white focus:ring-0" />
+                            <input type="date" wire:model.live="filter.appeal_date.min"
+                                class="hrm-num h-10 w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base sm:text-sm text-ink focus:border-ink focus:bg-white focus:ring-0" />
                             <span class="shrink-0 text-ink-faint">&ndash;</span>
-                            <input type="date" wire:model="filter.appeal_date.max"
-                                class="hrm-num h-[34px] w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[12.5px] text-ink focus:border-ink focus:bg-white focus:ring-0" />
+                            <input type="date" wire:model.live="filter.appeal_date.max"
+                                class="hrm-num h-10 w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base sm:text-sm text-ink focus:border-ink focus:bg-white focus:ring-0" />
                         </div>
                     </div>
                 @endif
 
                 @if ($this->filterEnabled('age'))
                     <label class="w-[110px] shrink-0">
-                        <span class="hrm-eyebrow block pb-1">{{ __('candidates::common.labels.age') }}</span>
-                        <x-livewire-input mode="gray" type="number" name="filter.age" wire:model="filter.age" />
+                        <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('candidates::common.labels.age') }}</span>
+                        <x-livewire-input mode="gray" type="number" name="filter.age" wire:model.live.debounce.400ms="filter.age" />
                     </label>
                 @endif
 
                 @if ($this->filterEnabled('results') && $this->isMilitaryCandidateMode())
                     <label class="w-[130px] shrink-0">
-                        <span class="hrm-eyebrow block pb-1">{{ __('candidates::common.labels.test_results') }}</span>
-                        <x-livewire-input mode="gray" type="number" name="filter.results" wire:model="filter.results" />
+                        <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('candidates::common.labels.test_results') }}</span>
+                        <x-livewire-input mode="gray" type="number" name="filter.results" wire:model.live.debounce.400ms="filter.results" />
                     </label>
                 @endif
 
                 @if ($this->filterEnabled('document_category'))
                     <div class="min-w-[200px] flex-1">
-                        <span class="hrm-eyebrow block pb-1">{{ __('candidates::common.labels.document_category') }}</span>
+                        <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('candidates::common.labels.document_category') }}</span>
                         <x-ui.select-dropdown
+                            :aria-label="__('candidates::common.labels.document_category')"
                             placeholder="---"
                             mode="gray"
                             class="w-full"
@@ -119,8 +122,7 @@
                     </div>
                 @endif
 
-                <x-pill-button variant="primary" wire:click="searchFilter" class="!h-[34px]">{{ __('candidates::common.labels.search') }}</x-pill-button>
-                <x-pill-button wire:click="resetFilter" class="!h-[34px]">{{ __('candidates::common.labels.reset') }}</x-pill-button>
+                <x-filter.reset :active="$this->hasActiveFilters" />
             </div>
 
             @if ($this->filterEnabled('gender'))
@@ -187,7 +189,7 @@
         </div>
     @endif
 
-    <x-table.tbl :headers="$this->getTableHeaders()">
+    <x-table.tbl sticky :headers="$this->getTableHeaders()">
         @forelse ($this->candidateRows as $_candidate)
             <tr wire:key="candidate-row-{{ $_candidate->id }}">
                 <x-table.td>
@@ -290,7 +292,7 @@
                             @role('Admin')
                                 <button type="button" wire:click="restoreData('{{ $_candidate->id }}')"
                                     title="{{ __('candidates::common.actions.restore_candidate') }}"
-                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-teal-50 hover:text-teal-600">
+                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink">
                                     <x-icons.recover color="text-current" hover="text-current" />
                                 </button>
                             @endrole
@@ -307,7 +309,7 @@
                 </x-table.td>
             </tr>
         @empty
-            <x-table.empty :rows="count($this->getTableHeaders())" />
+            <x-table.empty :rows="count($this->getTableHeaders())" :filtered="$this->hasActiveFilters" />
         @endforelse
     </x-table.tbl>
 

@@ -38,7 +38,7 @@
                                 class="mt-2 block h-11 w-full text-sm font-medium outline-none {{ $errors->has('permission_name') ? 'border-red-600' : '' }}"
                                 type="text"
                                 :value="old('permission_name')"
-                                wire:model.defer="permission_name"
+                                wire:model="permission_name"
                                 autofocus
                             />
                             @error('permission_name')
@@ -51,7 +51,7 @@
                             <textarea
                                 id="permission_description"
                                 name="permission_description"
-                                wire:model.defer="permission_description"
+                                wire:model="permission_description"
                                 rows="5"
                                 class="mt-2 block w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-700 outline-none transition focus:border-zinc-400"
                             ></textarea>
@@ -70,7 +70,7 @@
                             {{ __('services::common.actions.cancel') }}
                         </button>
                         <x-button mode="primary" class="space-x-2" type="submit">
-                            <x-icons.permission-icon color="text-white" hover="text-gray-50"></x-icons.permission-icon>
+                            <x-icons.permission-icon color="text-white" hover="text-zinc-50"></x-icons.permission-icon>
                             <span>{{ __('services::common.actions.save') }}</span>
                         </x-button>
                     </div>

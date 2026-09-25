@@ -18,6 +18,7 @@ class PersonnelAward extends Model
         'tabel_no',
         'award_id',
         'reason',
+        'amount',
         'given_date',
         'is_old',
         'order_no',

@@ -1,6 +1,6 @@
 @props([
     'mode' => 'neutral',
-    'uppercase' => true,
+    'uppercase' => false, // sentence case by default; uppercase chips shouted over the content
     'size' => 'md',
     'as' => 'span',
 ])

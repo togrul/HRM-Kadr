@@ -7,7 +7,9 @@ use App\Modules\OnboardingLibrary\Application\Services\OnboardingLibraryReadServ
 use App\Modules\Personnel\Contracts\OnboardingAssignmentManager;
 use App\Support\Library\LibraryExportAction;
 use App\Support\Livewire\AbstractLibraryDashboard;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Computed;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class Dashboard extends AbstractLibraryDashboard
 {
@@ -186,7 +188,7 @@ class Dashboard extends AbstractLibraryDashboard
         $this->dispatch('notify', type: 'info', message: __('onboarding-library::dashboard.messages.version_prefilled'));
     }
 
-    public function exportTemplates()
+    public function exportTemplates(): BinaryFileResponse
     {
         abort_unless($this->canView(), 403);
 
@@ -206,7 +208,7 @@ class Dashboard extends AbstractLibraryDashboard
         );
     }
 
-    public function exportAssignments()
+    public function exportAssignments(): BinaryFileResponse
     {
         abort_unless($this->canView(), 403);
 
@@ -225,7 +227,7 @@ class Dashboard extends AbstractLibraryDashboard
         );
     }
 
-    public function exportOverdueAssignments()
+    public function exportOverdueAssignments(): BinaryFileResponse
     {
         abort_unless($this->canView(), 403);
 
@@ -242,7 +244,7 @@ class Dashboard extends AbstractLibraryDashboard
         );
     }
 
-    public function exportAcknowledgedAssignments()
+    public function exportAcknowledgedAssignments(): BinaryFileResponse
     {
         abort_unless($this->canView(), 403);
 
@@ -259,7 +261,7 @@ class Dashboard extends AbstractLibraryDashboard
         );
     }
 
-    public function exportVersionHistory()
+    public function exportVersionHistory(): BinaryFileResponse
     {
         abort_unless($this->canView(), 403);
 
@@ -340,7 +342,7 @@ class Dashboard extends AbstractLibraryDashboard
         return auth()->user()?->can('assign-onboarding-documents') ?? false;
     }
 
-    public function render()
+    public function render(): View
     {
         return view('onboarding-library::livewire.onboarding-library.dashboard');
     }

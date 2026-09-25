@@ -120,7 +120,7 @@ class StaffCrudRegressionTest extends TestCase
         $user->assignRole($role);
 
         DB::table('role_structures')->insert(array_map(
-            fn (int $id): array => ['role_id' => $user->id, 'structure_id' => $id],
+            fn (int $id): array => ['role_id' => $role->id, 'structure_id' => $id],
             $structureIds,
         ));
     }

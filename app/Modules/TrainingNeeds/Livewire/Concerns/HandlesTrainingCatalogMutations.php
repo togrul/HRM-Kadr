@@ -11,6 +11,7 @@ use App\Models\TrainingLevel;
 use App\Models\TrainingNeedItem;
 use App\Models\TrainingProgram;
 use App\Models\TrainingProgramCompetency;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Validation\Rule;
 
 trait HandlesTrainingCatalogMutations
@@ -54,7 +55,7 @@ trait HandlesTrainingCatalogMutations
     }
 
     /** Paginated + searchable catalog lists for the Catalogs tab manage tables. */
-    public function getCatalogGroupsProperty()
+    public function getCatalogGroupsProperty(): LengthAwarePaginator
     {
         $term = trim($this->groupListSearch);
 
@@ -66,7 +67,7 @@ trait HandlesTrainingCatalogMutations
             ->paginate(8, ['*'], 'groupsPage');
     }
 
-    public function getCatalogLevelsProperty()
+    public function getCatalogLevelsProperty(): LengthAwarePaginator
     {
         $term = trim($this->levelListSearch);
 
@@ -77,7 +78,7 @@ trait HandlesTrainingCatalogMutations
             ->paginate(8, ['*'], 'levelsPage');
     }
 
-    public function getCatalogCompetenciesProperty()
+    public function getCatalogCompetenciesProperty(): LengthAwarePaginator
     {
         $term = trim($this->competencyListSearch);
 
@@ -88,7 +89,7 @@ trait HandlesTrainingCatalogMutations
             ->paginate(8, ['*'], 'competenciesPage');
     }
 
-    public function getCatalogProgramsProperty()
+    public function getCatalogProgramsProperty(): LengthAwarePaginator
     {
         $term = trim($this->programListSearch);
 

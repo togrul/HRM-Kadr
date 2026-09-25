@@ -9,6 +9,7 @@ use App\Models\JobOpening;
 use App\Modules\Candidates\Application\Services\CandidateApplicationStageService;
 use App\Modules\Candidates\Support\Traits\BuildsRecruitmentOptions;
 use App\Modules\Candidates\Support\Traits\InteractsWithRecruitmentPresentation;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Computed;
@@ -241,7 +242,7 @@ class ApplicationPipeline extends Component
     }
 
     #[Computed]
-    public function currentOpening()
+    public function currentOpening(): ?JobOpening
     {
         if (! is_numeric($this->opening)) {
             return null;
@@ -253,7 +254,7 @@ class ApplicationPipeline extends Component
     }
 
     #[Computed]
-    public function currentCandidate()
+    public function currentCandidate(): ?Candidate
     {
         if (! is_numeric($this->candidate)) {
             return null;
@@ -264,7 +265,7 @@ class ApplicationPipeline extends Component
             ->find((int) $this->candidate);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('candidates::livewire.candidates.application-pipeline');
     }

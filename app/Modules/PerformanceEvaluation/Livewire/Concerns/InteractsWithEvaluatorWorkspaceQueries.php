@@ -6,6 +6,7 @@ use App\Models\PerformanceForm;
 use App\Models\PerformanceFormScore;
 use App\Models\PerformanceFormTemplateItem;
 use App\Models\PerformanceTestAttemptAnswer;
+use Illuminate\Database\Eloquent\Collection;
 
 trait InteractsWithEvaluatorWorkspaceQueries
 {
@@ -13,7 +14,7 @@ trait InteractsWithEvaluatorWorkspaceQueries
 
     private const PENDING_ANSWERS_LIMIT = 18;
 
-    public function getAssignedFormsProperty()
+    public function getAssignedFormsProperty(): Collection
     {
         return $this->rememberRuntime(
             'performanceEvaluation.evaluatorWorkspace.assignedForms.'
@@ -127,7 +128,7 @@ trait InteractsWithEvaluatorWorkspaceQueries
                 ->map(function (PerformanceForm $form) use ($userId): array {
                     return [
                         'id' => (int) $form->id,
-                        'label' => ((string) ($form->personnel_fullname ?: '-')) . ' / ' . ((string) ($form->template_name ?: $form->template_code ?: '-')),
+                        'label' => ((string) ($form->personnel_fullname ?: '-')).' / '.((string) ($form->template_name ?: $form->template_code ?: '-')),
                         'template_id' => (int) $form->performance_form_template_id,
                         'evaluator_type' => (int) $form->manager_id === $userId ? 'manager' : 'hr',
                     ];
@@ -137,7 +138,7 @@ trait InteractsWithEvaluatorWorkspaceQueries
         });
     }
 
-    public function getPendingAnswersProperty()
+    public function getPendingAnswersProperty(): Collection
     {
         return $this->rememberRuntime(
             'performanceEvaluation.evaluatorWorkspace.pendingAnswers.'

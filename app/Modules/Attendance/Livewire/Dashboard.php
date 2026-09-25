@@ -7,6 +7,8 @@ use App\Modules\Attendance\Application\Services\AttendanceOverviewService;
 use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
 use App\Support\Livewire\InteractsWithTabbedWorkspace;
 use Carbon\Carbon;
+use Carbon\CarbonImmutable;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -77,6 +79,16 @@ class Dashboard extends Component
 
     public function updatedMonth(AttendanceOverviewService $overviewService): void
     {
+        $this->refreshOverview($overviewService);
+    }
+
+    /** Steps the period one month back or forward, rolling the year over. */
+    public function shiftMonth(int $step, AttendanceOverviewService $overviewService): void
+    {
+        $period = CarbonImmutable::create((int) $this->year, (int) $this->month, 1)->addMonths($step <=> 0);
+
+        $this->year = $period->year;
+        $this->month = $period->month;
         $this->refreshOverview($overviewService);
     }
 
@@ -168,7 +180,7 @@ class Dashboard extends Component
         return array_values(array_intersect(self::ALLOWED_TABS, $tabs));
     }
 
-    public function render()
+    public function render(): View
     {
         return view('attendance::livewire.attendance.dashboard');
     }

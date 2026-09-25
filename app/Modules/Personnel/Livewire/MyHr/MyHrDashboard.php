@@ -11,6 +11,7 @@ use App\Modules\Personnel\Support\MyHr\MyHrAccess;
 use App\Modules\Personnel\Support\MyHr\MyHrTabs;
 use App\Services\Vacation\VacationBalanceService;
 use App\Support\Livewire\InteractsWithTabbedWorkspace;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -149,7 +150,7 @@ class MyHrDashboard extends Component
         return MyHrTabs::all();
     }
 
-    public function render()
+    public function render(): View
     {
         return view('personnel::livewire.personnel.my-hr.dashboard');
     }

@@ -4,6 +4,7 @@ namespace App\Modules\Services\Livewire\Users;
 
 use App\Livewire\Traits\SideModalAction;
 use App\Models\User;
+use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -16,6 +17,7 @@ use Livewire\WithPagination;
 class AllUsers extends Component
 {
     use AuthorizesRequests,SideModalAction,WithPagination;
+    use AuthorizesSettingsAccess;
 
     #[Url]
     public $status;

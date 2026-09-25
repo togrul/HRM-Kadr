@@ -1,29 +1,29 @@
 <div class="flex flex-col space-y-5">
     <div class="sidemenu-title">
-        <h2 class="font-title text-xl font-semibold text-gray-500" id="slide-over-title">
+        <h2 class="font-title text-xl font-semibold text-zinc-500" id="slide-over-title">
             {{ $title ?? '' }}
         </h2>
     </div>
 
-    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-overlay">
-        <div class="border-b border-slate-200 bg-gradient-to-br from-slate-50 via-white to-slate-100 px-5 py-5">
+    <section class="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-overlay">
+        <div class="border-b border-zinc-200 bg-gradient-to-br from-zinc-50 via-white to-zinc-100 px-5 py-5">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div class="flex items-start gap-4">
-                    <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-sm">
+                    <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-900 text-white shadow-sm">
                         <x-icons.files-icon size="w-8 h-8" color="text-white"></x-icons.files-icon>
                     </div>
                     <div class="space-y-2">
-                        <div class="inline-flex items-center rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-white">
+                        <div class="inline-flex items-center rounded-full bg-zinc-900 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-white">
                             {{ __('personnel::files.labels.document') }}
                         </div>
-                        <h3 class="text-2xl font-semibold text-slate-900">{{ __('personnel::files.titles.all_documents') }}</h3>
-                        <p class="max-w-3xl text-sm text-slate-500">
+                        <h3 class="text-2xl font-semibold text-zinc-900">{{ __('personnel::files.titles.all_documents') }}</h3>
+                        <p class="max-w-3xl text-sm text-zinc-500">
                             {{ __('personnel::files.messages.upload_hint') }}
                         </p>
                     </div>
                 </div>
 
-                <div class="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-500 shadow-sm">
+                <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-500 shadow-sm">
                     {{ count($file_list) }} {{ __('personnel::files.labels.document') }}
                 </div>
             </div>
@@ -31,11 +31,11 @@
 
         <div class="space-y-6 px-5 py-5">
             <div class="grid grid-cols-1 gap-4 xl:grid-cols-[320px,1fr]">
-                <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+                <div class="rounded-2xl border border-zinc-200 bg-zinc-50/80 p-4">
                     <div class="space-y-4">
                         <div class="space-y-2">
-                            <h4 class="text-base font-semibold text-slate-900">{{ __('personnel::files.titles.new_file') }}</h4>
-                            <p class="text-sm text-slate-500">{{ __('personnel::files.messages.upload_hint') }}</p>
+                            <h4 class="text-base font-semibold text-zinc-900">{{ __('personnel::files.titles.new_file') }}</h4>
+                            <p class="text-sm text-zinc-500">{{ __('personnel::files.messages.upload_hint') }}</p>
                         </div>
 
                         <div class="space-y-4">
@@ -74,11 +74,11 @@
                                     $extension = $this->fileExtension($file);
                                     $sizeLabel = $this->fileSizeLabel($file);
                                     $iconTone = match ($extension) {
-                                        'PDF' => 'text-slate-300',
-                                        'DOC', 'DOCX' => 'text-slate-300',
-                                        'XLS', 'XLSX', 'CSV' => 'text-slate-300',
-                                        'PSD', 'AI' => 'text-slate-300',
-                                        default => 'text-slate-300',
+                                        'PDF' => 'text-zinc-300',
+                                        'DOC', 'DOCX' => 'text-zinc-300',
+                                        'XLS', 'XLSX', 'CSV' => 'text-zinc-300',
+                                        'PSD', 'AI' => 'text-zinc-300',
+                                        default => 'text-zinc-300',
                                     };
                                 @endphp
 
@@ -87,9 +87,9 @@
                                         <a href="{{ $route }}"
                                             target="_blank"
                                             rel="noreferrer"
-                                            class="flex h-12 w-12 items-center justify-center rounded-full bg-white text-slate-300 shadow-card transition hover:text-slate-600"
+                                            class="flex h-12 w-12 items-center justify-center rounded-full bg-white text-zinc-300 shadow-card transition hover:text-zinc-600"
                                             title="{{ __('personnel::files.labels.open_file') }}">
-                                            <x-icons.arrow-icon size="w-5 h-5" color="text-slate-300" hover="text-slate-600"></x-icons.arrow-icon>
+                                            <x-icons.arrow-icon size="w-5 h-5" color="text-zinc-300" hover="text-zinc-600"></x-icons.arrow-icon>
                                         </a>
 
                                         <button
@@ -107,24 +107,24 @@
 
                                         <div class="mt-auto space-y-2 pt-12">
                                             <a target="_blank" rel="noreferrer" href="{{ $route }}"
-                                                class="line-clamp-3 break-words text-[20px] font-medium leading-[1.28] tracking-[-0.03em] text-slate-500 transition hover:text-slate-700">
+                                                class="line-clamp-3 break-words text-[20px] font-medium leading-[1.28] tracking-[-0.03em] text-zinc-500 transition hover:text-zinc-700">
                                                 {{ $file['filename'] }}
                                             </a>
-                                            <p class="text-base font-medium text-slate-300">{{ $sizeLabel }}</p>
+                                            <p class="text-base font-medium text-zinc-300">{{ $sizeLabel }}</p>
                                         </div>
                                     </div>
                                 </article>
                             @endforeach
                         </div>
                     @else
-                        <div class="flex min-h-[260px] items-center justify-center rounded-[26px] border border-dashed border-slate-200 bg-slate-50/80 px-6 py-10 text-center">
+                        <div class="flex min-h-[260px] items-center justify-center rounded-[26px] border border-dashed border-zinc-200 bg-zinc-50/80 px-6 py-10 text-center">
                             <div class="flex max-w-sm flex-col items-center space-y-4">
-                                <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-slate-400 shadow-sm">
-                                    <x-icons.document-icon size="w-8 h-8" color="text-slate-400"></x-icons.document-icon>
+                                <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-zinc-400 shadow-sm">
+                                    <x-icons.document-icon size="w-8 h-8" color="text-zinc-400"></x-icons.document-icon>
                                 </div>
                                 <div class="space-y-2">
-                                    <h4 class="text-lg font-semibold text-slate-700">{{ __('personnel::files.messages.no_files_added') }}</h4>
-                                    <p class="text-sm text-slate-500">{{ __('personnel::files.messages.upload_hint') }}</p>
+                                    <h4 class="text-lg font-semibold text-zinc-700">{{ __('personnel::files.messages.no_files_added') }}</h4>
+                                    <p class="text-sm text-zinc-500">{{ __('personnel::files.messages.upload_hint') }}</p>
                                 </div>
                             </div>
                         </div>

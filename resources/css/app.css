@@ -246,12 +246,12 @@
   --hrm-ink-hover: #000000;
   --hrm-body: #27272a;
   --hrm-muted: #52525b;
-  --hrm-faint: #a1a1aa;
+  --hrm-faint: #71717a;
   --hrm-line: #e4e4e7;
   --hrm-line-subtle: #f4f4f5;
   --hrm-surface: #ffffff;
   --hrm-surface-muted: #fafafa;
-  --hrm-rail: 82px;
+  --hrm-rail: 96px;
   --hrm-panel: 300px;
 }
 
@@ -293,6 +293,24 @@ body {
 .hrm-tree-toggle {
   @apply flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-zinc-200/60 hover:text-zinc-600;
 }
+/* Structure sidebar (x-tree.item): one per org unit, so hundreds per render. The
+ * selected state keys off aria-current, which Alpine toggles client-side. */
+.hrm-structure-node {
+  @apply relative flex min-w-0 flex-1 items-start gap-1.5 rounded-lg py-1 pl-2 pr-2 text-left text-[14px] leading-snug transition-colors duration-150 hover:bg-[#fafafa] focus:outline-none;
+}
+.hrm-structure-node[aria-current='true'] {
+  @apply bg-[#f4f4f5] pl-3 font-semibold text-ink;
+}
+.hrm-structure-node[aria-current='true']::before {
+  content: '';
+  @apply absolute left-0 top-1/2 h-[18px] w-[3px] -translate-y-1/2 rounded-full bg-ink;
+}
+.hrm-structure-toggle {
+  @apply flex h-5 w-4 flex-none items-center justify-center rounded text-ink-faint transition-colors hover:text-ink-muted focus:outline-none;
+}
+.hrm-structure-subs {
+  @apply relative ml-[.55rem] flex flex-col border-l border-hairline pl-1;
+}
 
 .hrm-eyebrow {
   font-size: 10.5px;
@@ -330,6 +348,14 @@ body {
   background: transparent;
 }
 
+/* Selection lists: the thin bar stays invisible until the list is hovered, like macOS overlay scrollbars. */
+.hrm-scroll-hover:not(:hover) {
+  scrollbar-color: transparent transparent;
+}
+.hrm-scroll-hover:not(:hover)::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
 /* force legacy blade icons to inherit the surrounding currentColor */
 .hrm-icon svg [stroke]:not([stroke='none']),
 .hrm-rail-link svg [stroke]:not([stroke='none']) {
@@ -347,19 +373,17 @@ body {
 }
 
 /*
- * Rail items: icon with its short name underneath. The column is deliberately narrow,
- * so the label stays on one line and truncates — the full name is in the hover tooltip
- * and in the command palette, so nothing is lost.
+ * Rail items use full labels in the mobile drawer and short labels on desktop.
  */
 .hrm-rail-item {
-  @apply relative flex w-[72px] shrink-0 flex-col items-center gap-0.5 rounded-xl px-1 py-1 transition;
+  @apply relative flex min-h-11 w-full shrink-0 flex-row items-center gap-3 rounded-xl px-3 py-2 transition lg:min-h-0 lg:w-[88px] lg:flex-col lg:gap-0.5 lg:px-1 lg:py-1;
 }
 .hrm-rail-item svg {
   width: 1.2rem;
   height: 1.2rem;
 }
 .hrm-rail-label {
-  @apply w-full truncate text-center text-[9.5px] font-medium leading-[1.15] tracking-[-0.01em];
+  @apply min-w-0 flex-1 truncate text-left text-[14px] font-medium leading-5 tracking-[-0.01em] lg:w-full lg:flex-none lg:text-center lg:text-[11px] lg:leading-[1.2];
 }
 
 /* active-indicator bar next to a pinned rail icon */
@@ -407,9 +431,39 @@ body {
   opacity: 1;
 }
 
+/* Users who ask the OS for less motion get none: slide-overs, toasts, chevrons and
+   skeleton pulses settle instantly instead of animating. */
 @media (prefers-reduced-motion: reduce) {
-  #hrm-rail-tip {
-    transition: none;
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* The vertical scrollbar keeps its gutter, so opening a modal (which locks scrolling) or a
+   page growing past the fold never shifts the layout sideways. */
+html {
+  scrollbar-gutter: stable;
+}
+
+/* Collapsed context panel, known before Alpine boots (see the head script in layouts/app). */
+@media (min-width: 1024px) {
+  html[data-panel-collapsed] #sidebar {
+    width: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+/* A header body that only holds phone-only controls (e.g. the section chips the context
+   panel replaces on desktop) would leave an empty bordered strip under the header. */
+@media (min-width: 1024px) {
+  .hrm-header-body:not(:has(> :not(.lg\:hidden))) {
+    display: none;
   }
 }
 

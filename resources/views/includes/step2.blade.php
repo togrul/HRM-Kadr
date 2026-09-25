@@ -5,7 +5,7 @@
 <div class="flex flex-col space-y-4">
 
     <x-form-card :title="__('personnel::wizard.sections.id_document')">
-        <div class="grid grid-cols-2 gap-2 items-end">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 items-end">
             <div class="flex flex-col">
                 <div class="flex space-x-2">
                     <x-label for="documentForm.document.pin">{{ __('personnel::common.labels.pin') }}</x-label>
@@ -35,12 +35,12 @@
         <div
             wire:loading.remove
             wire:target="getDataByPin"
-            class="grid grid-cols-5 gap-2"
+            class="grid grid-cols-1 md:grid-cols-5 gap-2"
         >
             <div class="flex flex-col">
                 <x-label for="documentForm.document.nationality_id">{{ __('personnel::common.labels.nationality') }}</x-label>
                 <x-ui.select-dropdown
-                    label=""
+                    :aria-label="__('personnel::common.labels.nationality')"
                     placeholder="---"
                     mode="gray"
                     class="w-full"
@@ -71,7 +71,7 @@
             <div class="flex flex-col">
                 <x-label for="documentForm.document.born_country_id">{{ __('personnel::common.labels.born_country') }}</x-label>
                 <x-ui.select-dropdown
-                    label=""
+                    :aria-label="__('personnel::common.labels.born_country')"
                     placeholder="---"
                     mode="gray"
                     class="w-full"
@@ -88,7 +88,7 @@
             <div class="flex flex-col">
                 <x-label for="documentForm.document.born_city_id">{{ __('personnel::common.labels.city') }}</x-label>
                 <x-ui.select-dropdown
-                    label=""
+                    :aria-label="__('personnel::common.labels.city')"
                     placeholder="---"
                     mode="gray"
                     class="w-full"
@@ -103,7 +103,7 @@
                 @enderror
             </div>
         </div>
-        <div class="grid grid-cols-4 gap-2 mt-2">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-2 mt-2">
             <div class="flex flex-col">
                 <x-label for="documentForm.document.birthplace">{{ __('personnel::common.labels.birthplace') }}</x-label>
                 <x-livewire-input mode="gray" name="documentForm.document.birthplace" wire:model="documentForm.document.birthplace"></x-livewire-input>
@@ -115,11 +115,11 @@
             <div class="flex flex-col">
                 <x-label for="documentForm.document.is_married">{{ __('personnel::common.labels.family_status') }}</x-label>
                 <div class="flex items-center">
-                    <label class="inline-flex items-center bg-gray-100 rounded shadow-sm py-2 px-2">
+                    <label class="inline-flex items-center bg-zinc-100 rounded shadow-sm py-2 px-2">
                         <input type="radio" class="form-radio" name="documentForm.document.is_married" wire:model="documentForm.document.is_married" value="0">
                         <span class="ml-2 text-sm font-normal">{{ __('personnel::common.labels.single') }}</span>
                     </label>
-                    <label class="inline-flex items-center ml-4 bg-gray-100 rounded shadow-sm py-2 px-2">
+                    <label class="inline-flex items-center ml-4 bg-zinc-100 rounded shadow-sm py-2 px-2">
                         <input type="radio" class="form-radio" name="documentForm.document.is_married" wire:model="documentForm.document.is_married" value="1">
                         <span class="ml-2 text-sm font-normal">{{ __('personnel::common.labels.married') }}</span>
                     </label>
@@ -165,7 +165,7 @@
     </x-form-card>
 
     <x-form-card :title="__('personnel::wizard.sections.service_cards')">
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
             <div class="flex flex-col">
                 <x-label for="documentForm.serviceCards.card_number">{{ __('personnel::common.labels.card_number') }}</x-label>
                 <x-livewire-input mode="gray" name="documentForm.serviceCards.card_number" wire:model="documentForm.serviceCards.card_number"></x-livewire-input>
@@ -237,7 +237,7 @@
                                 <x-table.td :isButton="true">
                                     <button
                                         x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::common.messages.remove_data_confirm')), confirmText: @js(__('ui::common.actions.delete')), run: () => $wire.removeServiceCard({{ $keyServiceCard }}) })"
-                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
+                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-zinc-500 hover:bg-red-50 hover:text-zinc-700"
                                     >
                                         <x-icons.force-delete></x-icons.force-delete>
                                     </button>
@@ -259,7 +259,7 @@
     </x-form-card>
 
     <x-form-card :title="__('personnel::wizard.sections.foreign_passports')">
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
             <div class="flex flex-col">
                 <x-label for="documentForm.passports.serial_number">{{ __('personnel::common.labels.serial_number') }}</x-label>
                 <x-livewire-input mode="gray" name="documentForm.passports.serial_number" wire:model="documentForm.passports.serial_number"></x-livewire-input>
@@ -331,7 +331,7 @@
                                 <x-table.td :isButton="true">
                                     <button
                                         x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::common.messages.remove_data_confirm')), confirmText: @js(__('ui::common.actions.delete')), run: () => $wire.removePassport({{ $keyPassport }}) })"
-                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-50 hover:text-gray-700"
+                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-zinc-500 hover:bg-red-50 hover:text-zinc-700"
                                     >
                                         <x-icons.force-delete></x-icons.force-delete>
                                     </button>

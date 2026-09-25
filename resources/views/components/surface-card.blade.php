@@ -12,7 +12,7 @@
 @endphp
 
 <div {{ $attributes->merge(['class' => $overflowClass.' rounded-2xl flex flex-col border border-hairline bg-white shadow-card']) }}>
-    <div class="flex items-center justify-between px-3 py-2.5 flex-none">
+    <div class="flex items-center justify-between px-4 py-2.5 flex-none">
         <div class="hrm-eyebrow w-full">
             {{ $title }} 
         </div>
@@ -27,11 +27,11 @@
         @endif
     </div>
 
-    <div class="px-1 pb-1 flex-1">
-        <div class="h-full rounded-xl border border-hairline bg-white {{ $bodyClass }}">
-            <div class="{{ $contentClass }}">
-                {{ $slot }}
-            </div>
+    {{-- one card: the body sits flush under a hairline instead of as a second bordered card
+         inset in the first (the nested frames read as a card hanging inside a card) --}}
+    <div class="h-full flex-1 border-t border-hairline-subtle {{ $bodyClass }}">
+        <div class="{{ $contentClass }}">
+            {{ $slot }}
         </div>
     </div>
 </div>

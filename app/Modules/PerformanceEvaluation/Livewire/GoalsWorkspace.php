@@ -6,6 +6,8 @@ use App\Livewire\Traits\SideModalAction;
 use App\Models\PerformanceCycle;
 use App\Models\PerformanceGoal;
 use App\Modules\PerformanceEvaluation\Application\Services\PerformanceGoalService;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;
 
@@ -19,7 +21,6 @@ class GoalsWorkspace extends Component
     use SideModalAction;
 
     public ?int $cycleId = null;
-
 
     public array $form = [
         'title' => '',
@@ -59,7 +60,7 @@ class GoalsWorkspace extends Component
         $this->cancelCheckin();
     }
 
-    public function getCyclesProperty()
+    public function getCyclesProperty(): Collection
     {
         return PerformanceCycle::query()
             ->orderByDesc('period_start')
@@ -240,7 +241,7 @@ class GoalsWorkspace extends Component
         $this->resetValidation();
     }
 
-    public function render()
+    public function render(): View
     {
         return view('performance-evaluation::livewire.performance-evaluation.goals-workspace');
     }

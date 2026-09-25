@@ -17,7 +17,6 @@ class PersonnelListRegressionTest extends TestCase
             selectedStructureIds: [1],
             accessibleStructureIds: [1],
             selectedPosition: null,
-            withStructureTree: false,
         );
 
         $sql = $query->toSql();
@@ -34,7 +33,6 @@ class PersonnelListRegressionTest extends TestCase
             selectedStructureIds: [1],
             accessibleStructureIds: [1],
             selectedPosition: null,
-            withStructureTree: false,
         );
 
         $sql = $query->toSql();
@@ -66,7 +64,6 @@ class PersonnelListRegressionTest extends TestCase
             selectedStructureIds: [1],
             accessibleStructureIds: [1],
             selectedPosition: null,
-            withStructureTree: false,
         );
 
         $eagerLoads = array_keys($query->getEagerLoads());

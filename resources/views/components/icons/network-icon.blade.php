@@ -5,10 +5,7 @@
     'show' => null,
 ])
 
+{{-- Module icon set: 24px grid, 1.6 stroke, round caps (Lucide geometry) — one weight across the rail. --}}
 <x-icons.root animated="false" x-show="{{ $show ?? 'true' }}" :$size :$color :$hover>
-    <rect x="3" y="17" width="7" height="5" rx="0.6" fill="none" stroke="currentColor" stroke-width="1.5" />
-    <rect x="8.5" y="2" width="7" height="5" rx="0.6" fill="none" stroke="currentColor" stroke-width="1.5" />
-    <rect x="14" y="17" width="7" height="5" rx="0.6" fill="none" stroke="currentColor" stroke-width="1.5" />
-    <path d="M6.5 17V13.5C6.5 12.3954 7.39543 11.5 8.5 11.5H15.5C16.6046 11.5 17.5 12.3954 17.5 13.5V17" fill="none" stroke="currentColor" stroke-width="1.5" />
-    <path d="M12 11.5V7" fill="none" stroke="currentColor" stroke-width="1.5" />
+    <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></g>
 </x-icons.root>

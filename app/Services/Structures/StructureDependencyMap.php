@@ -68,7 +68,7 @@ class StructureDependencyMap
         }
 
         foreach (self::UNCONSTRAINED as [$table, $column]) {
-            if (InstalledTables::has($table) && Schema::hasColumn($table, $column)) {
+            if (InstalledTables::has($table) && InstalledTables::hasColumn($table, $column)) {
                 $refs[$table.'.'.$column] ??= ['table' => $table, 'column' => $column];
             }
         }

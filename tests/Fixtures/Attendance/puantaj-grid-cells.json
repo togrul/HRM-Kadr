@@ -1,0 +1,1858 @@
+[
+    [
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs bg-sky-50/80",
+            "title": "Status: leave | İcazə növü: A | B <x> \"q\" O'N & c",
+            "text": "A|",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex min-w-[2rem] items-center justify-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm border-sky-200 bg-sky-100/90 text-sky-700\"> A| </div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Brown <b> Tom & Co Ray • 01.03.2026",
+                "lines": [
+                    "Status: leave",
+                    "İcazə növü: A | B <x> \"q\" O'N & c"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-900 bg-white",
+            "title": "İşlənib: 9 saat | Status: işdə | İş rejimi: iş günü",
+            "text": "9",
+            "markup": "<!--[if BLOCK]><![endif]--> 9 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Brown <b> Tom & Co Ray • 02.03.2026",
+                "lines": [
+                    "İşlənib: 9 saat",
+                    "Status: işdə",
+                    "İş rejimi: iş günü"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-rose-600 bg-rose-50/70",
+            "title": "Status: late",
+            "text": "0",
+            "markup": "<!--[if BLOCK]><![endif]--> 0 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Brown <b> Tom & Co Ray • 03.03.2026",
+                "lines": [
+                    "Status: late"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs bg-sky-50/80",
+            "title": "Status: leave | İcazə növü: Saat | İcazə pəncərəsi: 14:00 - 16:30",
+            "text": "SA",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex min-w-[2rem] items-center justify-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm border-sky-200 bg-sky-100/90 text-sky-700\"> SA </div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Brown <b> Tom & Co Ray • 04.03.2026",
+                "lines": [
+                    "Status: leave",
+                    "İcazə növü: Saat",
+                    "İcazə pəncərəsi: 14:00 - 16:30"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-sky-700 bg-sky-50/80",
+            "title": "Status: business_trip | İş rejimi: bayram",
+            "text": "",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex items-center justify-center\"><svg class=\"w-4 h-4 text-sky-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g stroke=\"none\" stroke-width=\"1\" fill=\"none\" fill-rule=\"evenodd\"><rect x=\"0\" y=\"0\" width=\"24\" height=\"24\"></rect><path d=\"M5.84026576,8 L18.1597342,8 C19.1999115,8 20.0664437,8.79732479 20.1528258,9.83390904 L20.8194924,17.833909 C20.9112219,18.9346631 20.0932459,19.901362 18.9924919,19.9930915 C18.9372479,19.9976952 18.8818364,20 18.8264009,20 L5.1735991,20 C4.0690296,20 3.1735991,19.1045695 3.1735991,18 C3.1735991,17.9445645 3.17590391,17.889153 3.18050758,17.833909 L3.84717425,9.83390904 C3.93355627,8.79732479 4.80008849,8 5.84026576,8 Z M10.5,10 C10.2238576,10 10,10.2238576 10,10.5 L10,11.5 C10,11.7761424 10.2238576,12 10.5,12 L13.5,12 C13.7761424,12 14,11.7761424 14,11.5 L14,10.5 C14,10.2238576 13.7761424,10 13.5,10 L10.5,10 Z\" fill=\"currentColor\"></path><path d=\"M10,8 L8,8 L8,7 C8,5.34314575 9.34314575,4 11,4 L13,4 C14.6568542,4 16,5.34314575 16,7 L16,8 L14,8 L14,7 C14,6.44771525 13.5522847,6 13,6 L11,6 C10.4477153,6 10,6.44771525 10,7 L10,8 Z\" fill=\"currentColor\" fill-rule=\"nonzero\" opacity=\"0.3\"></path></g></svg></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-sky-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g stroke=\"none\" stroke-width=\"1\" fill=\"none\" fill-rule=\"evenodd\"><rect x=\"0\" y=\"0\" width=\"24\" height=\"24\"></rect><path d=\"M5.84026576,8 L18.1597342,8 C19.1999115,8 20.0664437,8.79732479 20.1528258,9.83390904 L20.8194924,17.833909 C20.9112219,18.9346631 20.0932459,19.901362 18.9924919,19.9930915 C18.9372479,19.9976952 18.8818364,20 18.8264009,20 L5.1735991,20 C4.0690296,20 3.1735991,19.1045695 3.1735991,18 C3.1735991,17.9445645 3.17590391,17.889153 3.18050758,17.833909 L3.84717425,9.83390904 C3.93355627,8.79732479 4.80008849,8 5.84026576,8 Z M10.5,10 C10.2238576,10 10,10.2238576 10,10.5 L10,11.5 C10,11.7761424 10.2238576,12 10.5,12 L13.5,12 C13.7761424,12 14,11.7761424 14,11.5 L14,10.5 C14,10.2238576 13.7761424,10 13.5,10 L10.5,10 Z\" fill=\"currentColor\"></path><path d=\"M10,8 L8,8 L8,7 C8,5.34314575 9.34314575,4 11,4 L13,4 C14.6568542,4 16,5.34314575 16,7 L16,8 L14,8 L14,7 C14,6.44771525 13.5522847,6 13,6 L11,6 C10.4477153,6 10,6.44771525 10,7 L10,8 Z\" fill=\"currentColor\" fill-rule=\"nonzero\" opacity=\"0.3\"></path></g></svg>"
+            ],
+            "detail": {
+                "label": "Brown <b> Tom & Co Ray • 05.03.2026",
+                "lines": [
+                    "Status: business_trip",
+                    "İş rejimi: bayram"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-violet-700 bg-violet-50/80",
+            "title": "Status: vacation | İş rejimi: həftəsonu",
+            "text": "",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex items-center justify-center\"><svg class=\"w-4 h-4 text-violet-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"4\"></circle><path d=\"M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41\"></path></g></svg></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-violet-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"4\"></circle><path d=\"M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41\"></path></g></svg>"
+            ],
+            "detail": {
+                "label": "Brown <b> Tom & Co Ray • 06.03.2026",
+                "lines": [
+                    "Status: vacation",
+                    "İş rejimi: həftəsonu"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-amber-500 bg-amber-50",
+            "title": "İşlənib: 8 saat | Status: işdə",
+            "text": "8",
+            "markup": "<!--[if BLOCK]><![endif]--> 8 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Brown <b> Tom & Co Ray • 07.03.2026",
+                "lines": [
+                    "İşlənib: 8 saat",
+                    "Status: işdə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-sky-700 bg-sky-50/80 font-semibold",
+            "title": "İşlənib: 1 saat | Status: işdə | İcazə növü: Qısa | Müddət: 1.5 saat | İcazə pəncərəsi: 10:00 - 11:30 | Yoxluq: İcazə",
+            "text": "1",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"relative flex min-h-[1.75rem] items-center justify-center\"><span class=\"font-medium text-zinc-900\">1</span><span class=\"absolute right-0 top-0 inline-flex h-6 w-6 items-center justify-center rounded-md border border-zinc-200 bg-white/95 shadow-sm\"><svg class=\"w-4 h-4 text-blue-600 transition-all duration-300 hover:text-zinc-800\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M8 3V11L10.5 9.4L13 11V3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6 17L20 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg></span></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-blue-600 transition-all duration-300 hover:text-zinc-800\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M8 3V11L10.5 9.4L13 11V3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6 17L20 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>"
+            ],
+            "detail": {
+                "label": "Brown <b> Tom & Co Ray • 08.03.2026",
+                "lines": [
+                    "İşlənib: 1 saat",
+                    "Status: işdə",
+                    "İcazə növü: Qısa",
+                    "Müddət: 1.5 saat",
+                    "İcazə pəncərəsi: 10:00 - 11:30",
+                    "Yoxluq: İcazə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs bg-blue-50/80",
+            "title": "Status: leave | İcazə növü: Xəstəlik | Yoxluq: İcazə",
+            "text": "",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex h-7 w-7 items-center justify-center rounded-lg border border-zinc-200 bg-white/95 shadow-sm\"><svg class=\"w-4 h-4 text-blue-600 transition-all duration-300 hover:text-zinc-800\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M8 3V11L10.5 9.4L13 11V3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6 17L20 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-blue-600 transition-all duration-300 hover:text-zinc-800\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M8 3V11L10.5 9.4L13 11V3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6 17L20 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>"
+            ],
+            "detail": {
+                "label": "Brown <b> Tom & Co Ray • 09.03.2026",
+                "lines": [
+                    "Status: leave",
+                    "İcazə növü: Xəstəlik",
+                    "Yoxluq: İcazə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-emerald-600 bg-emerald-50",
+            "title": "İşlənib: 9 saat | Status: işdə",
+            "text": "9",
+            "markup": "<!--[if BLOCK]><![endif]--> 9 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Brown <b> Tom & Co Ray • 10.03.2026",
+                "lines": [
+                    "İşlənib: 9 saat",
+                    "Status: işdə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-400 bg-white",
+            "title": "",
+            "text": "",
+            "markup": "<!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": null
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-900 bg-white",
+            "title": "İşlənib: 9 saat | Status: işdə",
+            "text": "9",
+            "markup": "<!--[if BLOCK]><![endif]--> 9 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Brown <b> Tom & Co Ray • 12.03.2026",
+                "lines": [
+                    "İşlənib: 9 saat",
+                    "Status: işdə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-emerald-600 bg-emerald-50",
+            "title": "İşlənib: 10 saat | Status: işdə",
+            "text": "10",
+            "markup": "<!--[if BLOCK]><![endif]--> 10 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Brown <b> Tom & Co Ray • 13.03.2026",
+                "lines": [
+                    "İşlənib: 10 saat",
+                    "Status: işdə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-amber-500 bg-amber-50",
+            "title": "İşlənib: 5 saat | Status: işdə",
+            "text": "5",
+            "markup": "<!--[if BLOCK]><![endif]--> 5 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Brown <b> Tom & Co Ray • 14.03.2026",
+                "lines": [
+                    "İşlənib: 5 saat",
+                    "Status: işdə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-900 bg-white",
+            "title": "İşlənib: 9 saat | Status: manual işdə",
+            "text": "9",
+            "markup": "<!--[if BLOCK]><![endif]--> 9 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Brown <b> Tom & Co Ray • 15.03.2026",
+                "lines": [
+                    "İşlənib: 9 saat",
+                    "Status: manual işdə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-emerald-700 bg-emerald-50/70",
+            "title": "İşlənib: 8 saat | Status: bayramda işləyib | İş rejimi: bayram",
+            "text": "8",
+            "markup": "<!--[if BLOCK]><![endif]--> 8 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Brown <b> Tom & Co Ray • 16.03.2026",
+                "lines": [
+                    "İşlənib: 8 saat",
+                    "Status: bayramda işləyib",
+                    "İş rejimi: bayram"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-emerald-700 bg-emerald-50/70",
+            "title": "İşlənib: 4 saat | Status: həftəsonu işləyib | İş rejimi: həftəsonu",
+            "text": "4",
+            "markup": "<!--[if BLOCK]><![endif]--> 4 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Brown <b> Tom & Co Ray • 17.03.2026",
+                "lines": [
+                    "İşlənib: 4 saat",
+                    "Status: həftəsonu işləyib",
+                    "İş rejimi: həftəsonu"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-rose-600 bg-rose-50/70",
+            "title": "Status: yoxdur | Yoxluq: X",
+            "text": "X",
+            "markup": "<!--[if BLOCK]><![endif]--> X <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Brown <b> Tom & Co Ray • 18.03.2026",
+                "lines": [
+                    "Status: yoxdur",
+                    "Yoxluq: X"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-rose-600 bg-rose-50/70",
+            "title": "Status: yoxdur",
+            "text": "0",
+            "markup": "<!--[if BLOCK]><![endif]--> 0 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Brown <b> Tom & Co Ray • 19.03.2026",
+                "lines": [
+                    "Status: yoxdur"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-rose-600 bg-rose-50/70",
+            "title": "Status: manual yoxluq | Yoxluq: MA",
+            "text": "MA",
+            "markup": "<!--[if BLOCK]><![endif]--> MA <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Brown <b> Tom & Co Ray • 20.03.2026",
+                "lines": [
+                    "Status: manual yoxluq",
+                    "Yoxluq: MA"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-400 bg-zinc-50/80",
+            "title": "Status: həftəsonu | İş rejimi: həftəsonu",
+            "text": "-",
+            "markup": "<!--[if BLOCK]><![endif]--> - <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Brown <b> Tom & Co Ray • 21.03.2026",
+                "lines": [
+                    "Status: həftəsonu",
+                    "İş rejimi: həftəsonu"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-fuchsia-700 bg-fuchsia-50/80",
+            "title": "Status: bayram | İş rejimi: bayram",
+            "text": "",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex items-center justify-center\"><svg class=\"w-4 h-4 text-fuchsia-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5\"></path><path d=\"M16 2v4M8 2v4M3 10h5\"></path><path d=\"M17.5 17.5 16 16.3V14\"></path><circle cx=\"16\" cy=\"16\" r=\"6\"></circle></g></svg></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-fuchsia-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5\"></path><path d=\"M16 2v4M8 2v4M3 10h5\"></path><path d=\"M17.5 17.5 16 16.3V14\"></path><circle cx=\"16\" cy=\"16\" r=\"6\"></circle></g></svg>"
+            ],
+            "detail": {
+                "label": "Brown <b> Tom & Co Ray • 22.03.2026",
+                "lines": [
+                    "Status: bayram",
+                    "İş rejimi: bayram"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-violet-700 bg-violet-50/80",
+            "title": "Status: vacation",
+            "text": "",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex items-center justify-center\"><svg class=\"w-4 h-4 text-violet-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"4\"></circle><path d=\"M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41\"></path></g></svg></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-violet-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"4\"></circle><path d=\"M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41\"></path></g></svg>"
+            ],
+            "detail": {
+                "label": "Brown <b> Tom & Co Ray • 23.03.2026",
+                "lines": [
+                    "Status: vacation"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-sky-700 bg-sky-50/80",
+            "title": "Status: business_trip",
+            "text": "",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex items-center justify-center\"><svg class=\"w-4 h-4 text-sky-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g stroke=\"none\" stroke-width=\"1\" fill=\"none\" fill-rule=\"evenodd\"><rect x=\"0\" y=\"0\" width=\"24\" height=\"24\"></rect><path d=\"M5.84026576,8 L18.1597342,8 C19.1999115,8 20.0664437,8.79732479 20.1528258,9.83390904 L20.8194924,17.833909 C20.9112219,18.9346631 20.0932459,19.901362 18.9924919,19.9930915 C18.9372479,19.9976952 18.8818364,20 18.8264009,20 L5.1735991,20 C4.0690296,20 3.1735991,19.1045695 3.1735991,18 C3.1735991,17.9445645 3.17590391,17.889153 3.18050758,17.833909 L3.84717425,9.83390904 C3.93355627,8.79732479 4.80008849,8 5.84026576,8 Z M10.5,10 C10.2238576,10 10,10.2238576 10,10.5 L10,11.5 C10,11.7761424 10.2238576,12 10.5,12 L13.5,12 C13.7761424,12 14,11.7761424 14,11.5 L14,10.5 C14,10.2238576 13.7761424,10 13.5,10 L10.5,10 Z\" fill=\"currentColor\"></path><path d=\"M10,8 L8,8 L8,7 C8,5.34314575 9.34314575,4 11,4 L13,4 C14.6568542,4 16,5.34314575 16,7 L16,8 L14,8 L14,7 C14,6.44771525 13.5522847,6 13,6 L11,6 C10.4477153,6 10,6.44771525 10,7 L10,8 Z\" fill=\"currentColor\" fill-rule=\"nonzero\" opacity=\"0.3\"></path></g></svg></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-sky-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g stroke=\"none\" stroke-width=\"1\" fill=\"none\" fill-rule=\"evenodd\"><rect x=\"0\" y=\"0\" width=\"24\" height=\"24\"></rect><path d=\"M5.84026576,8 L18.1597342,8 C19.1999115,8 20.0664437,8.79732479 20.1528258,9.83390904 L20.8194924,17.833909 C20.9112219,18.9346631 20.0932459,19.901362 18.9924919,19.9930915 C18.9372479,19.9976952 18.8818364,20 18.8264009,20 L5.1735991,20 C4.0690296,20 3.1735991,19.1045695 3.1735991,18 C3.1735991,17.9445645 3.17590391,17.889153 3.18050758,17.833909 L3.84717425,9.83390904 C3.93355627,8.79732479 4.80008849,8 5.84026576,8 Z M10.5,10 C10.2238576,10 10,10.2238576 10,10.5 L10,11.5 C10,11.7761424 10.2238576,12 10.5,12 L13.5,12 C13.7761424,12 14,11.7761424 14,11.5 L14,10.5 C14,10.2238576 13.7761424,10 13.5,10 L10.5,10 Z\" fill=\"currentColor\"></path><path d=\"M10,8 L8,8 L8,7 C8,5.34314575 9.34314575,4 11,4 L13,4 C14.6568542,4 16,5.34314575 16,7 L16,8 L14,8 L14,7 C14,6.44771525 13.5522847,6 13,6 L11,6 C10.4477153,6 10,6.44771525 10,7 L10,8 Z\" fill=\"currentColor\" fill-rule=\"nonzero\" opacity=\"0.3\"></path></g></svg>"
+            ],
+            "detail": {
+                "label": "Brown <b> Tom & Co Ray • 24.03.2026",
+                "lines": [
+                    "Status: business_trip"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs bg-emerald-50/80",
+            "title": "Status: leave | İcazə növü: Saatlıq icazə",
+            "text": "SI",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex min-w-[2rem] items-center justify-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm border-emerald-200 bg-emerald-100/90 text-emerald-700\"> SI </div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Brown <b> Tom & Co Ray • 25.03.2026",
+                "lines": [
+                    "Status: leave",
+                    "İcazə növü: Saatlıq icazə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs bg-blue-50/80",
+            "title": "Status: leave | Yoxluq: İcazə",
+            "text": "",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex h-7 w-7 items-center justify-center rounded-lg border border-zinc-200 bg-white/95 shadow-sm\"><svg class=\"w-4 h-4 text-blue-600 transition-all duration-300 hover:text-zinc-800\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M8 3V11L10.5 9.4L13 11V3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6 17L20 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-blue-600 transition-all duration-300 hover:text-zinc-800\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M8 3V11L10.5 9.4L13 11V3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6 17L20 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>"
+            ],
+            "detail": {
+                "label": "Brown <b> Tom & Co Ray • 26.03.2026",
+                "lines": [
+                    "Status: leave",
+                    "Yoxluq: İcazə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs bg-blue-50/80",
+            "title": "Status: leave | İcazə növü: Ailə vəziyyəti ilə",
+            "text": "AV",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex min-w-[2rem] items-center justify-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm border-blue-200 bg-blue-100/90 text-blue-700\"> AV </div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Brown <b> Tom & Co Ray • 27.03.2026",
+                "lines": [
+                    "Status: leave",
+                    "İcazə növü: Ailə vəziyyəti ilə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs bg-violet-50/80",
+            "title": "Status: leave | İcazə növü: Təhsil məzuniyyəti",
+            "text": "TM",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex min-w-[2rem] items-center justify-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm border-violet-200 bg-violet-100/90 text-violet-700\"> TM </div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Brown <b> Tom & Co Ray • 28.03.2026",
+                "lines": [
+                    "Status: leave",
+                    "İcazə növü: Təhsil məzuniyyəti"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-sky-700 bg-sky-50/80 font-semibold",
+            "title": "İşlənib: 6 saat | Status: işdə | İcazə növü: Saatlıq icazə | Müddət: 2.0 saat | İcazə pəncərəsi: 09:00 - 11:00 | İcazə ilə örtülən vaxt: 2 saat",
+            "text": "6 SI",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"relative flex min-h-[1.75rem] items-center justify-center\"><span class=\"font-medium text-zinc-900\">6</span><span class=\"absolute right-0 top-0 inline-flex min-w-[1.65rem] items-center justify-center rounded-md border px-1 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm border-emerald-200 bg-emerald-100/90 text-emerald-700\"> SI </span></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Brown <b> Tom & Co Ray • 29.03.2026",
+                "lines": [
+                    "İşlənib: 6 saat",
+                    "Status: işdə",
+                    "İcazə növü: Saatlıq icazə",
+                    "Müddət: 2.0 saat",
+                    "İcazə pəncərəsi: 09:00 - 11:00",
+                    "İcazə ilə örtülən vaxt: 2 saat"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-sky-700 bg-sky-50/80 font-semibold",
+            "title": "İşlənib: 5 saat | Status: işdə | İcazə növü: Şəxsi iş | Müddət: Yarım gün | İcazə pəncərəsi: Günün ilk yarısı | İcazə ilə örtülən vaxt: 5 saat | Yoxluq: İcazə",
+            "text": "5",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"relative flex min-h-[1.75rem] items-center justify-center\"><span class=\"font-medium text-zinc-900\">5</span><span class=\"absolute right-0 top-0 inline-flex h-6 w-6 items-center justify-center rounded-md border border-zinc-200 bg-white/95 shadow-sm\"><svg class=\"w-4 h-4 text-blue-600 transition-all duration-300 hover:text-zinc-800\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M8 3V11L10.5 9.4L13 11V3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6 17L20 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg></span></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-blue-600 transition-all duration-300 hover:text-zinc-800\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M8 3V11L10.5 9.4L13 11V3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6 17L20 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>"
+            ],
+            "detail": {
+                "label": "Brown <b> Tom & Co Ray • 30.03.2026",
+                "lines": [
+                    "İşlənib: 5 saat",
+                    "Status: işdə",
+                    "İcazə növü: Şəxsi iş",
+                    "Müddət: Yarım gün",
+                    "İcazə pəncərəsi: Günün ilk yarısı",
+                    "İcazə ilə örtülən vaxt: 5 saat",
+                    "Yoxluq: İcazə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs bg-sky-50/80",
+            "title": "Status: yoxdur | İcazə növü: Yarım gün | Müddət: Yarım gün | İcazə pəncərəsi: Günün ikinci yarısı",
+            "text": "YG",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex min-w-[2rem] items-center justify-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm border-sky-200 bg-sky-100/90 text-sky-700\"> YG </div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Brown <b> Tom & Co Ray • 31.03.2026",
+                "lines": [
+                    "Status: yoxdur",
+                    "İcazə növü: Yarım gün",
+                    "Müddət: Yarım gün",
+                    "İcazə pəncərəsi: Günün ikinci yarısı"
+                ]
+            }
+        }
+    ],
+    [
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-400 bg-white",
+            "title": "",
+            "text": "",
+            "markup": "<!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": null
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-900 bg-white",
+            "title": "İşlənib: 9 saat | Status: işdə",
+            "text": "9",
+            "markup": "<!--[if BLOCK]><![endif]--> 9 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Doe John Smith • 02.03.2026",
+                "lines": [
+                    "İşlənib: 9 saat",
+                    "Status: işdə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-emerald-600 bg-emerald-50",
+            "title": "İşlənib: 10 saat | Status: işdə",
+            "text": "10",
+            "markup": "<!--[if BLOCK]><![endif]--> 10 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Doe John Smith • 03.03.2026",
+                "lines": [
+                    "İşlənib: 10 saat",
+                    "Status: işdə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-amber-500 bg-amber-50",
+            "title": "İşlənib: 5 saat | Status: işdə",
+            "text": "5",
+            "markup": "<!--[if BLOCK]><![endif]--> 5 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Doe John Smith • 04.03.2026",
+                "lines": [
+                    "İşlənib: 5 saat",
+                    "Status: işdə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-900 bg-white",
+            "title": "İşlənib: 9 saat | Status: manual işdə",
+            "text": "9",
+            "markup": "<!--[if BLOCK]><![endif]--> 9 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Doe John Smith • 05.03.2026",
+                "lines": [
+                    "İşlənib: 9 saat",
+                    "Status: manual işdə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-emerald-700 bg-emerald-50/70",
+            "title": "İşlənib: 8 saat | Status: bayramda işləyib | İş rejimi: bayram",
+            "text": "8",
+            "markup": "<!--[if BLOCK]><![endif]--> 8 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Doe John Smith • 06.03.2026",
+                "lines": [
+                    "İşlənib: 8 saat",
+                    "Status: bayramda işləyib",
+                    "İş rejimi: bayram"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-emerald-700 bg-emerald-50/70",
+            "title": "İşlənib: 4 saat | Status: həftəsonu işləyib | İş rejimi: həftəsonu",
+            "text": "4",
+            "markup": "<!--[if BLOCK]><![endif]--> 4 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Doe John Smith • 07.03.2026",
+                "lines": [
+                    "İşlənib: 4 saat",
+                    "Status: həftəsonu işləyib",
+                    "İş rejimi: həftəsonu"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-rose-600 bg-rose-50/70",
+            "title": "Status: yoxdur | Yoxluq: X",
+            "text": "X",
+            "markup": "<!--[if BLOCK]><![endif]--> X <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Doe John Smith • 08.03.2026",
+                "lines": [
+                    "Status: yoxdur",
+                    "Yoxluq: X"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-rose-600 bg-rose-50/70",
+            "title": "Status: yoxdur",
+            "text": "0",
+            "markup": "<!--[if BLOCK]><![endif]--> 0 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Doe John Smith • 09.03.2026",
+                "lines": [
+                    "Status: yoxdur"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-rose-600 bg-rose-50/70",
+            "title": "Status: manual yoxluq | Yoxluq: MA",
+            "text": "MA",
+            "markup": "<!--[if BLOCK]><![endif]--> MA <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Doe John Smith • 10.03.2026",
+                "lines": [
+                    "Status: manual yoxluq",
+                    "Yoxluq: MA"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-400 bg-zinc-50/80",
+            "title": "Status: həftəsonu | İş rejimi: həftəsonu",
+            "text": "-",
+            "markup": "<!--[if BLOCK]><![endif]--> - <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Doe John Smith • 11.03.2026",
+                "lines": [
+                    "Status: həftəsonu",
+                    "İş rejimi: həftəsonu"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-fuchsia-700 bg-fuchsia-50/80",
+            "title": "Status: bayram | İş rejimi: bayram",
+            "text": "",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex items-center justify-center\"><svg class=\"w-4 h-4 text-fuchsia-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5\"></path><path d=\"M16 2v4M8 2v4M3 10h5\"></path><path d=\"M17.5 17.5 16 16.3V14\"></path><circle cx=\"16\" cy=\"16\" r=\"6\"></circle></g></svg></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-fuchsia-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5\"></path><path d=\"M16 2v4M8 2v4M3 10h5\"></path><path d=\"M17.5 17.5 16 16.3V14\"></path><circle cx=\"16\" cy=\"16\" r=\"6\"></circle></g></svg>"
+            ],
+            "detail": {
+                "label": "Doe John Smith • 12.03.2026",
+                "lines": [
+                    "Status: bayram",
+                    "İş rejimi: bayram"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-violet-700 bg-violet-50/80",
+            "title": "Status: vacation",
+            "text": "",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex items-center justify-center\"><svg class=\"w-4 h-4 text-violet-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"4\"></circle><path d=\"M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41\"></path></g></svg></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-violet-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"4\"></circle><path d=\"M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41\"></path></g></svg>"
+            ],
+            "detail": {
+                "label": "Doe John Smith • 13.03.2026",
+                "lines": [
+                    "Status: vacation"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-sky-700 bg-sky-50/80",
+            "title": "Status: business_trip",
+            "text": "",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex items-center justify-center\"><svg class=\"w-4 h-4 text-sky-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g stroke=\"none\" stroke-width=\"1\" fill=\"none\" fill-rule=\"evenodd\"><rect x=\"0\" y=\"0\" width=\"24\" height=\"24\"></rect><path d=\"M5.84026576,8 L18.1597342,8 C19.1999115,8 20.0664437,8.79732479 20.1528258,9.83390904 L20.8194924,17.833909 C20.9112219,18.9346631 20.0932459,19.901362 18.9924919,19.9930915 C18.9372479,19.9976952 18.8818364,20 18.8264009,20 L5.1735991,20 C4.0690296,20 3.1735991,19.1045695 3.1735991,18 C3.1735991,17.9445645 3.17590391,17.889153 3.18050758,17.833909 L3.84717425,9.83390904 C3.93355627,8.79732479 4.80008849,8 5.84026576,8 Z M10.5,10 C10.2238576,10 10,10.2238576 10,10.5 L10,11.5 C10,11.7761424 10.2238576,12 10.5,12 L13.5,12 C13.7761424,12 14,11.7761424 14,11.5 L14,10.5 C14,10.2238576 13.7761424,10 13.5,10 L10.5,10 Z\" fill=\"currentColor\"></path><path d=\"M10,8 L8,8 L8,7 C8,5.34314575 9.34314575,4 11,4 L13,4 C14.6568542,4 16,5.34314575 16,7 L16,8 L14,8 L14,7 C14,6.44771525 13.5522847,6 13,6 L11,6 C10.4477153,6 10,6.44771525 10,7 L10,8 Z\" fill=\"currentColor\" fill-rule=\"nonzero\" opacity=\"0.3\"></path></g></svg></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-sky-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g stroke=\"none\" stroke-width=\"1\" fill=\"none\" fill-rule=\"evenodd\"><rect x=\"0\" y=\"0\" width=\"24\" height=\"24\"></rect><path d=\"M5.84026576,8 L18.1597342,8 C19.1999115,8 20.0664437,8.79732479 20.1528258,9.83390904 L20.8194924,17.833909 C20.9112219,18.9346631 20.0932459,19.901362 18.9924919,19.9930915 C18.9372479,19.9976952 18.8818364,20 18.8264009,20 L5.1735991,20 C4.0690296,20 3.1735991,19.1045695 3.1735991,18 C3.1735991,17.9445645 3.17590391,17.889153 3.18050758,17.833909 L3.84717425,9.83390904 C3.93355627,8.79732479 4.80008849,8 5.84026576,8 Z M10.5,10 C10.2238576,10 10,10.2238576 10,10.5 L10,11.5 C10,11.7761424 10.2238576,12 10.5,12 L13.5,12 C13.7761424,12 14,11.7761424 14,11.5 L14,10.5 C14,10.2238576 13.7761424,10 13.5,10 L10.5,10 Z\" fill=\"currentColor\"></path><path d=\"M10,8 L8,8 L8,7 C8,5.34314575 9.34314575,4 11,4 L13,4 C14.6568542,4 16,5.34314575 16,7 L16,8 L14,8 L14,7 C14,6.44771525 13.5522847,6 13,6 L11,6 C10.4477153,6 10,6.44771525 10,7 L10,8 Z\" fill=\"currentColor\" fill-rule=\"nonzero\" opacity=\"0.3\"></path></g></svg>"
+            ],
+            "detail": {
+                "label": "Doe John Smith • 14.03.2026",
+                "lines": [
+                    "Status: business_trip"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs bg-emerald-50/80",
+            "title": "Status: leave | İcazə növü: Saatlıq icazə",
+            "text": "SI",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex min-w-[2rem] items-center justify-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm border-emerald-200 bg-emerald-100/90 text-emerald-700\"> SI </div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Doe John Smith • 15.03.2026",
+                "lines": [
+                    "Status: leave",
+                    "İcazə növü: Saatlıq icazə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs bg-blue-50/80",
+            "title": "Status: leave | Yoxluq: İcazə",
+            "text": "",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex h-7 w-7 items-center justify-center rounded-lg border border-zinc-200 bg-white/95 shadow-sm\"><svg class=\"w-4 h-4 text-blue-600 transition-all duration-300 hover:text-zinc-800\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M8 3V11L10.5 9.4L13 11V3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6 17L20 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-blue-600 transition-all duration-300 hover:text-zinc-800\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M8 3V11L10.5 9.4L13 11V3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6 17L20 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>"
+            ],
+            "detail": {
+                "label": "Doe John Smith • 16.03.2026",
+                "lines": [
+                    "Status: leave",
+                    "Yoxluq: İcazə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs bg-blue-50/80",
+            "title": "Status: leave | İcazə növü: Ailə vəziyyəti ilə",
+            "text": "AV",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex min-w-[2rem] items-center justify-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm border-blue-200 bg-blue-100/90 text-blue-700\"> AV </div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Doe John Smith • 17.03.2026",
+                "lines": [
+                    "Status: leave",
+                    "İcazə növü: Ailə vəziyyəti ilə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs bg-violet-50/80",
+            "title": "Status: leave | İcazə növü: Təhsil məzuniyyəti",
+            "text": "TM",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex min-w-[2rem] items-center justify-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm border-violet-200 bg-violet-100/90 text-violet-700\"> TM </div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Doe John Smith • 18.03.2026",
+                "lines": [
+                    "Status: leave",
+                    "İcazə növü: Təhsil məzuniyyəti"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-sky-700 bg-sky-50/80 font-semibold",
+            "title": "İşlənib: 6 saat | Status: işdə | İcazə növü: Saatlıq icazə | Müddət: 2.0 saat | İcazə pəncərəsi: 09:00 - 11:00 | İcazə ilə örtülən vaxt: 2 saat",
+            "text": "6 SI",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"relative flex min-h-[1.75rem] items-center justify-center\"><span class=\"font-medium text-zinc-900\">6</span><span class=\"absolute right-0 top-0 inline-flex min-w-[1.65rem] items-center justify-center rounded-md border px-1 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm border-emerald-200 bg-emerald-100/90 text-emerald-700\"> SI </span></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Doe John Smith • 19.03.2026",
+                "lines": [
+                    "İşlənib: 6 saat",
+                    "Status: işdə",
+                    "İcazə növü: Saatlıq icazə",
+                    "Müddət: 2.0 saat",
+                    "İcazə pəncərəsi: 09:00 - 11:00",
+                    "İcazə ilə örtülən vaxt: 2 saat"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-sky-700 bg-sky-50/80 font-semibold",
+            "title": "İşlənib: 5 saat | Status: işdə | İcazə növü: Şəxsi iş | Müddət: Yarım gün | İcazə pəncərəsi: Günün ilk yarısı | İcazə ilə örtülən vaxt: 5 saat | Yoxluq: İcazə",
+            "text": "5",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"relative flex min-h-[1.75rem] items-center justify-center\"><span class=\"font-medium text-zinc-900\">5</span><span class=\"absolute right-0 top-0 inline-flex h-6 w-6 items-center justify-center rounded-md border border-zinc-200 bg-white/95 shadow-sm\"><svg class=\"w-4 h-4 text-blue-600 transition-all duration-300 hover:text-zinc-800\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M8 3V11L10.5 9.4L13 11V3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6 17L20 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg></span></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-blue-600 transition-all duration-300 hover:text-zinc-800\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M8 3V11L10.5 9.4L13 11V3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6 17L20 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>"
+            ],
+            "detail": {
+                "label": "Doe John Smith • 20.03.2026",
+                "lines": [
+                    "İşlənib: 5 saat",
+                    "Status: işdə",
+                    "İcazə növü: Şəxsi iş",
+                    "Müddət: Yarım gün",
+                    "İcazə pəncərəsi: Günün ilk yarısı",
+                    "İcazə ilə örtülən vaxt: 5 saat",
+                    "Yoxluq: İcazə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs bg-sky-50/80",
+            "title": "Status: yoxdur | İcazə növü: Yarım gün | Müddət: Yarım gün | İcazə pəncərəsi: Günün ikinci yarısı",
+            "text": "YG",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex min-w-[2rem] items-center justify-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm border-sky-200 bg-sky-100/90 text-sky-700\"> YG </div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Doe John Smith • 21.03.2026",
+                "lines": [
+                    "Status: yoxdur",
+                    "İcazə növü: Yarım gün",
+                    "Müddət: Yarım gün",
+                    "İcazə pəncərəsi: Günün ikinci yarısı"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs bg-sky-50/80",
+            "title": "Status: leave | İcazə növü: A | B <x> \"q\" O'N & c",
+            "text": "A|",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex min-w-[2rem] items-center justify-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm border-sky-200 bg-sky-100/90 text-sky-700\"> A| </div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Doe John Smith • 22.03.2026",
+                "lines": [
+                    "Status: leave",
+                    "İcazə növü: A | B <x> \"q\" O'N & c"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-900 bg-white",
+            "title": "İşlənib: 9 saat | Status: işdə | İş rejimi: iş günü",
+            "text": "9",
+            "markup": "<!--[if BLOCK]><![endif]--> 9 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Doe John Smith • 23.03.2026",
+                "lines": [
+                    "İşlənib: 9 saat",
+                    "Status: işdə",
+                    "İş rejimi: iş günü"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-rose-600 bg-rose-50/70",
+            "title": "Status: late",
+            "text": "0",
+            "markup": "<!--[if BLOCK]><![endif]--> 0 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Doe John Smith • 24.03.2026",
+                "lines": [
+                    "Status: late"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs bg-sky-50/80",
+            "title": "Status: leave | İcazə növü: Saat | İcazə pəncərəsi: 14:00 - 16:30",
+            "text": "SA",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex min-w-[2rem] items-center justify-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm border-sky-200 bg-sky-100/90 text-sky-700\"> SA </div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Doe John Smith • 25.03.2026",
+                "lines": [
+                    "Status: leave",
+                    "İcazə növü: Saat",
+                    "İcazə pəncərəsi: 14:00 - 16:30"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-sky-700 bg-sky-50/80",
+            "title": "Status: business_trip | İş rejimi: bayram",
+            "text": "",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex items-center justify-center\"><svg class=\"w-4 h-4 text-sky-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g stroke=\"none\" stroke-width=\"1\" fill=\"none\" fill-rule=\"evenodd\"><rect x=\"0\" y=\"0\" width=\"24\" height=\"24\"></rect><path d=\"M5.84026576,8 L18.1597342,8 C19.1999115,8 20.0664437,8.79732479 20.1528258,9.83390904 L20.8194924,17.833909 C20.9112219,18.9346631 20.0932459,19.901362 18.9924919,19.9930915 C18.9372479,19.9976952 18.8818364,20 18.8264009,20 L5.1735991,20 C4.0690296,20 3.1735991,19.1045695 3.1735991,18 C3.1735991,17.9445645 3.17590391,17.889153 3.18050758,17.833909 L3.84717425,9.83390904 C3.93355627,8.79732479 4.80008849,8 5.84026576,8 Z M10.5,10 C10.2238576,10 10,10.2238576 10,10.5 L10,11.5 C10,11.7761424 10.2238576,12 10.5,12 L13.5,12 C13.7761424,12 14,11.7761424 14,11.5 L14,10.5 C14,10.2238576 13.7761424,10 13.5,10 L10.5,10 Z\" fill=\"currentColor\"></path><path d=\"M10,8 L8,8 L8,7 C8,5.34314575 9.34314575,4 11,4 L13,4 C14.6568542,4 16,5.34314575 16,7 L16,8 L14,8 L14,7 C14,6.44771525 13.5522847,6 13,6 L11,6 C10.4477153,6 10,6.44771525 10,7 L10,8 Z\" fill=\"currentColor\" fill-rule=\"nonzero\" opacity=\"0.3\"></path></g></svg></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-sky-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g stroke=\"none\" stroke-width=\"1\" fill=\"none\" fill-rule=\"evenodd\"><rect x=\"0\" y=\"0\" width=\"24\" height=\"24\"></rect><path d=\"M5.84026576,8 L18.1597342,8 C19.1999115,8 20.0664437,8.79732479 20.1528258,9.83390904 L20.8194924,17.833909 C20.9112219,18.9346631 20.0932459,19.901362 18.9924919,19.9930915 C18.9372479,19.9976952 18.8818364,20 18.8264009,20 L5.1735991,20 C4.0690296,20 3.1735991,19.1045695 3.1735991,18 C3.1735991,17.9445645 3.17590391,17.889153 3.18050758,17.833909 L3.84717425,9.83390904 C3.93355627,8.79732479 4.80008849,8 5.84026576,8 Z M10.5,10 C10.2238576,10 10,10.2238576 10,10.5 L10,11.5 C10,11.7761424 10.2238576,12 10.5,12 L13.5,12 C13.7761424,12 14,11.7761424 14,11.5 L14,10.5 C14,10.2238576 13.7761424,10 13.5,10 L10.5,10 Z\" fill=\"currentColor\"></path><path d=\"M10,8 L8,8 L8,7 C8,5.34314575 9.34314575,4 11,4 L13,4 C14.6568542,4 16,5.34314575 16,7 L16,8 L14,8 L14,7 C14,6.44771525 13.5522847,6 13,6 L11,6 C10.4477153,6 10,6.44771525 10,7 L10,8 Z\" fill=\"currentColor\" fill-rule=\"nonzero\" opacity=\"0.3\"></path></g></svg>"
+            ],
+            "detail": {
+                "label": "Doe John Smith • 26.03.2026",
+                "lines": [
+                    "Status: business_trip",
+                    "İş rejimi: bayram"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-violet-700 bg-violet-50/80",
+            "title": "Status: vacation | İş rejimi: həftəsonu",
+            "text": "",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex items-center justify-center\"><svg class=\"w-4 h-4 text-violet-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"4\"></circle><path d=\"M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41\"></path></g></svg></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-violet-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"4\"></circle><path d=\"M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41\"></path></g></svg>"
+            ],
+            "detail": {
+                "label": "Doe John Smith • 27.03.2026",
+                "lines": [
+                    "Status: vacation",
+                    "İş rejimi: həftəsonu"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-amber-500 bg-amber-50",
+            "title": "İşlənib: 8 saat | Status: işdə",
+            "text": "8",
+            "markup": "<!--[if BLOCK]><![endif]--> 8 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Doe John Smith • 28.03.2026",
+                "lines": [
+                    "İşlənib: 8 saat",
+                    "Status: işdə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-sky-700 bg-sky-50/80 font-semibold",
+            "title": "İşlənib: 1 saat | Status: işdə | İcazə növü: Qısa | Müddət: 1.5 saat | İcazə pəncərəsi: 10:00 - 11:30 | Yoxluq: İcazə",
+            "text": "1",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"relative flex min-h-[1.75rem] items-center justify-center\"><span class=\"font-medium text-zinc-900\">1</span><span class=\"absolute right-0 top-0 inline-flex h-6 w-6 items-center justify-center rounded-md border border-zinc-200 bg-white/95 shadow-sm\"><svg class=\"w-4 h-4 text-blue-600 transition-all duration-300 hover:text-zinc-800\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M8 3V11L10.5 9.4L13 11V3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6 17L20 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg></span></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-blue-600 transition-all duration-300 hover:text-zinc-800\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M8 3V11L10.5 9.4L13 11V3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6 17L20 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>"
+            ],
+            "detail": {
+                "label": "Doe John Smith • 29.03.2026",
+                "lines": [
+                    "İşlənib: 1 saat",
+                    "Status: işdə",
+                    "İcazə növü: Qısa",
+                    "Müddət: 1.5 saat",
+                    "İcazə pəncərəsi: 10:00 - 11:30",
+                    "Yoxluq: İcazə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs bg-blue-50/80",
+            "title": "Status: leave | İcazə növü: Xəstəlik | Yoxluq: İcazə",
+            "text": "",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex h-7 w-7 items-center justify-center rounded-lg border border-zinc-200 bg-white/95 shadow-sm\"><svg class=\"w-4 h-4 text-blue-600 transition-all duration-300 hover:text-zinc-800\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M8 3V11L10.5 9.4L13 11V3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6 17L20 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-blue-600 transition-all duration-300 hover:text-zinc-800\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M8 3V11L10.5 9.4L13 11V3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6 17L20 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>"
+            ],
+            "detail": {
+                "label": "Doe John Smith • 30.03.2026",
+                "lines": [
+                    "Status: leave",
+                    "İcazə növü: Xəstəlik",
+                    "Yoxluq: İcazə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-emerald-600 bg-emerald-50",
+            "title": "İşlənib: 9 saat | Status: işdə",
+            "text": "9",
+            "markup": "<!--[if BLOCK]><![endif]--> 9 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Doe John Smith • 31.03.2026",
+                "lines": [
+                    "İşlənib: 9 saat",
+                    "Status: işdə"
+                ]
+            }
+        }
+    ],
+    [
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs bg-emerald-50/80",
+            "title": "Status: leave | İcazə növü: Saatlıq icazə",
+            "text": "SI",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex min-w-[2rem] items-center justify-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm border-emerald-200 bg-emerald-100/90 text-emerald-700\"> SI </div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "O'Brien Ann \"Q\" Lee • 01.03.2026",
+                "lines": [
+                    "Status: leave",
+                    "İcazə növü: Saatlıq icazə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs bg-blue-50/80",
+            "title": "Status: leave | Yoxluq: İcazə",
+            "text": "",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex h-7 w-7 items-center justify-center rounded-lg border border-zinc-200 bg-white/95 shadow-sm\"><svg class=\"w-4 h-4 text-blue-600 transition-all duration-300 hover:text-zinc-800\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M8 3V11L10.5 9.4L13 11V3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6 17L20 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-blue-600 transition-all duration-300 hover:text-zinc-800\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M8 3V11L10.5 9.4L13 11V3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6 17L20 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>"
+            ],
+            "detail": {
+                "label": "O'Brien Ann \"Q\" Lee • 02.03.2026",
+                "lines": [
+                    "Status: leave",
+                    "Yoxluq: İcazə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs bg-blue-50/80",
+            "title": "Status: leave | İcazə növü: Ailə vəziyyəti ilə",
+            "text": "AV",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex min-w-[2rem] items-center justify-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm border-blue-200 bg-blue-100/90 text-blue-700\"> AV </div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "O'Brien Ann \"Q\" Lee • 03.03.2026",
+                "lines": [
+                    "Status: leave",
+                    "İcazə növü: Ailə vəziyyəti ilə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs bg-violet-50/80",
+            "title": "Status: leave | İcazə növü: Təhsil məzuniyyəti",
+            "text": "TM",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex min-w-[2rem] items-center justify-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm border-violet-200 bg-violet-100/90 text-violet-700\"> TM </div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "O'Brien Ann \"Q\" Lee • 04.03.2026",
+                "lines": [
+                    "Status: leave",
+                    "İcazə növü: Təhsil məzuniyyəti"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-sky-700 bg-sky-50/80 font-semibold",
+            "title": "İşlənib: 6 saat | Status: işdə | İcazə növü: Saatlıq icazə | Müddət: 2.0 saat | İcazə pəncərəsi: 09:00 - 11:00 | İcazə ilə örtülən vaxt: 2 saat",
+            "text": "6 SI",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"relative flex min-h-[1.75rem] items-center justify-center\"><span class=\"font-medium text-zinc-900\">6</span><span class=\"absolute right-0 top-0 inline-flex min-w-[1.65rem] items-center justify-center rounded-md border px-1 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm border-emerald-200 bg-emerald-100/90 text-emerald-700\"> SI </span></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "O'Brien Ann \"Q\" Lee • 05.03.2026",
+                "lines": [
+                    "İşlənib: 6 saat",
+                    "Status: işdə",
+                    "İcazə növü: Saatlıq icazə",
+                    "Müddət: 2.0 saat",
+                    "İcazə pəncərəsi: 09:00 - 11:00",
+                    "İcazə ilə örtülən vaxt: 2 saat"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-sky-700 bg-sky-50/80 font-semibold",
+            "title": "İşlənib: 5 saat | Status: işdə | İcazə növü: Şəxsi iş | Müddət: Yarım gün | İcazə pəncərəsi: Günün ilk yarısı | İcazə ilə örtülən vaxt: 5 saat | Yoxluq: İcazə",
+            "text": "5",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"relative flex min-h-[1.75rem] items-center justify-center\"><span class=\"font-medium text-zinc-900\">5</span><span class=\"absolute right-0 top-0 inline-flex h-6 w-6 items-center justify-center rounded-md border border-zinc-200 bg-white/95 shadow-sm\"><svg class=\"w-4 h-4 text-blue-600 transition-all duration-300 hover:text-zinc-800\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M8 3V11L10.5 9.4L13 11V3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6 17L20 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg></span></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-blue-600 transition-all duration-300 hover:text-zinc-800\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M8 3V11L10.5 9.4L13 11V3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6 17L20 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>"
+            ],
+            "detail": {
+                "label": "O'Brien Ann \"Q\" Lee • 06.03.2026",
+                "lines": [
+                    "İşlənib: 5 saat",
+                    "Status: işdə",
+                    "İcazə növü: Şəxsi iş",
+                    "Müddət: Yarım gün",
+                    "İcazə pəncərəsi: Günün ilk yarısı",
+                    "İcazə ilə örtülən vaxt: 5 saat",
+                    "Yoxluq: İcazə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs bg-sky-50/80",
+            "title": "Status: yoxdur | İcazə növü: Yarım gün | Müddət: Yarım gün | İcazə pəncərəsi: Günün ikinci yarısı",
+            "text": "YG",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex min-w-[2rem] items-center justify-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm border-sky-200 bg-sky-100/90 text-sky-700\"> YG </div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "O'Brien Ann \"Q\" Lee • 07.03.2026",
+                "lines": [
+                    "Status: yoxdur",
+                    "İcazə növü: Yarım gün",
+                    "Müddət: Yarım gün",
+                    "İcazə pəncərəsi: Günün ikinci yarısı"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs bg-sky-50/80",
+            "title": "Status: leave | İcazə növü: A | B <x> \"q\" O'N & c",
+            "text": "A|",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex min-w-[2rem] items-center justify-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm border-sky-200 bg-sky-100/90 text-sky-700\"> A| </div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "O'Brien Ann \"Q\" Lee • 08.03.2026",
+                "lines": [
+                    "Status: leave",
+                    "İcazə növü: A | B <x> \"q\" O'N & c"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-900 bg-white",
+            "title": "İşlənib: 9 saat | Status: işdə | İş rejimi: iş günü",
+            "text": "9",
+            "markup": "<!--[if BLOCK]><![endif]--> 9 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "O'Brien Ann \"Q\" Lee • 09.03.2026",
+                "lines": [
+                    "İşlənib: 9 saat",
+                    "Status: işdə",
+                    "İş rejimi: iş günü"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-rose-600 bg-rose-50/70",
+            "title": "Status: late",
+            "text": "0",
+            "markup": "<!--[if BLOCK]><![endif]--> 0 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "O'Brien Ann \"Q\" Lee • 10.03.2026",
+                "lines": [
+                    "Status: late"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs bg-sky-50/80",
+            "title": "Status: leave | İcazə növü: Saat | İcazə pəncərəsi: 14:00 - 16:30",
+            "text": "SA",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex min-w-[2rem] items-center justify-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm border-sky-200 bg-sky-100/90 text-sky-700\"> SA </div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "O'Brien Ann \"Q\" Lee • 11.03.2026",
+                "lines": [
+                    "Status: leave",
+                    "İcazə növü: Saat",
+                    "İcazə pəncərəsi: 14:00 - 16:30"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-sky-700 bg-sky-50/80",
+            "title": "Status: business_trip | İş rejimi: bayram",
+            "text": "",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex items-center justify-center\"><svg class=\"w-4 h-4 text-sky-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g stroke=\"none\" stroke-width=\"1\" fill=\"none\" fill-rule=\"evenodd\"><rect x=\"0\" y=\"0\" width=\"24\" height=\"24\"></rect><path d=\"M5.84026576,8 L18.1597342,8 C19.1999115,8 20.0664437,8.79732479 20.1528258,9.83390904 L20.8194924,17.833909 C20.9112219,18.9346631 20.0932459,19.901362 18.9924919,19.9930915 C18.9372479,19.9976952 18.8818364,20 18.8264009,20 L5.1735991,20 C4.0690296,20 3.1735991,19.1045695 3.1735991,18 C3.1735991,17.9445645 3.17590391,17.889153 3.18050758,17.833909 L3.84717425,9.83390904 C3.93355627,8.79732479 4.80008849,8 5.84026576,8 Z M10.5,10 C10.2238576,10 10,10.2238576 10,10.5 L10,11.5 C10,11.7761424 10.2238576,12 10.5,12 L13.5,12 C13.7761424,12 14,11.7761424 14,11.5 L14,10.5 C14,10.2238576 13.7761424,10 13.5,10 L10.5,10 Z\" fill=\"currentColor\"></path><path d=\"M10,8 L8,8 L8,7 C8,5.34314575 9.34314575,4 11,4 L13,4 C14.6568542,4 16,5.34314575 16,7 L16,8 L14,8 L14,7 C14,6.44771525 13.5522847,6 13,6 L11,6 C10.4477153,6 10,6.44771525 10,7 L10,8 Z\" fill=\"currentColor\" fill-rule=\"nonzero\" opacity=\"0.3\"></path></g></svg></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-sky-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g stroke=\"none\" stroke-width=\"1\" fill=\"none\" fill-rule=\"evenodd\"><rect x=\"0\" y=\"0\" width=\"24\" height=\"24\"></rect><path d=\"M5.84026576,8 L18.1597342,8 C19.1999115,8 20.0664437,8.79732479 20.1528258,9.83390904 L20.8194924,17.833909 C20.9112219,18.9346631 20.0932459,19.901362 18.9924919,19.9930915 C18.9372479,19.9976952 18.8818364,20 18.8264009,20 L5.1735991,20 C4.0690296,20 3.1735991,19.1045695 3.1735991,18 C3.1735991,17.9445645 3.17590391,17.889153 3.18050758,17.833909 L3.84717425,9.83390904 C3.93355627,8.79732479 4.80008849,8 5.84026576,8 Z M10.5,10 C10.2238576,10 10,10.2238576 10,10.5 L10,11.5 C10,11.7761424 10.2238576,12 10.5,12 L13.5,12 C13.7761424,12 14,11.7761424 14,11.5 L14,10.5 C14,10.2238576 13.7761424,10 13.5,10 L10.5,10 Z\" fill=\"currentColor\"></path><path d=\"M10,8 L8,8 L8,7 C8,5.34314575 9.34314575,4 11,4 L13,4 C14.6568542,4 16,5.34314575 16,7 L16,8 L14,8 L14,7 C14,6.44771525 13.5522847,6 13,6 L11,6 C10.4477153,6 10,6.44771525 10,7 L10,8 Z\" fill=\"currentColor\" fill-rule=\"nonzero\" opacity=\"0.3\"></path></g></svg>"
+            ],
+            "detail": {
+                "label": "O'Brien Ann \"Q\" Lee • 12.03.2026",
+                "lines": [
+                    "Status: business_trip",
+                    "İş rejimi: bayram"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-violet-700 bg-violet-50/80",
+            "title": "Status: vacation | İş rejimi: həftəsonu",
+            "text": "",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex items-center justify-center\"><svg class=\"w-4 h-4 text-violet-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"4\"></circle><path d=\"M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41\"></path></g></svg></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-violet-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"4\"></circle><path d=\"M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41\"></path></g></svg>"
+            ],
+            "detail": {
+                "label": "O'Brien Ann \"Q\" Lee • 13.03.2026",
+                "lines": [
+                    "Status: vacation",
+                    "İş rejimi: həftəsonu"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-amber-500 bg-amber-50",
+            "title": "İşlənib: 8 saat | Status: işdə",
+            "text": "8",
+            "markup": "<!--[if BLOCK]><![endif]--> 8 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "O'Brien Ann \"Q\" Lee • 14.03.2026",
+                "lines": [
+                    "İşlənib: 8 saat",
+                    "Status: işdə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-sky-700 bg-sky-50/80 font-semibold",
+            "title": "İşlənib: 1 saat | Status: işdə | İcazə növü: Qısa | Müddət: 1.5 saat | İcazə pəncərəsi: 10:00 - 11:30 | Yoxluq: İcazə",
+            "text": "1",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"relative flex min-h-[1.75rem] items-center justify-center\"><span class=\"font-medium text-zinc-900\">1</span><span class=\"absolute right-0 top-0 inline-flex h-6 w-6 items-center justify-center rounded-md border border-zinc-200 bg-white/95 shadow-sm\"><svg class=\"w-4 h-4 text-blue-600 transition-all duration-300 hover:text-zinc-800\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M8 3V11L10.5 9.4L13 11V3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6 17L20 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg></span></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-blue-600 transition-all duration-300 hover:text-zinc-800\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M8 3V11L10.5 9.4L13 11V3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6 17L20 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>"
+            ],
+            "detail": {
+                "label": "O'Brien Ann \"Q\" Lee • 15.03.2026",
+                "lines": [
+                    "İşlənib: 1 saat",
+                    "Status: işdə",
+                    "İcazə növü: Qısa",
+                    "Müddət: 1.5 saat",
+                    "İcazə pəncərəsi: 10:00 - 11:30",
+                    "Yoxluq: İcazə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs bg-blue-50/80",
+            "title": "Status: leave | İcazə növü: Xəstəlik | Yoxluq: İcazə",
+            "text": "",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex h-7 w-7 items-center justify-center rounded-lg border border-zinc-200 bg-white/95 shadow-sm\"><svg class=\"w-4 h-4 text-blue-600 transition-all duration-300 hover:text-zinc-800\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M8 3V11L10.5 9.4L13 11V3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6 17L20 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-blue-600 transition-all duration-300 hover:text-zinc-800\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M8 3V11L10.5 9.4L13 11V3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6 17L20 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>"
+            ],
+            "detail": {
+                "label": "O'Brien Ann \"Q\" Lee • 16.03.2026",
+                "lines": [
+                    "Status: leave",
+                    "İcazə növü: Xəstəlik",
+                    "Yoxluq: İcazə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-emerald-600 bg-emerald-50",
+            "title": "İşlənib: 9 saat | Status: işdə",
+            "text": "9",
+            "markup": "<!--[if BLOCK]><![endif]--> 9 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "O'Brien Ann \"Q\" Lee • 17.03.2026",
+                "lines": [
+                    "İşlənib: 9 saat",
+                    "Status: işdə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-400 bg-white",
+            "title": "",
+            "text": "",
+            "markup": "<!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": null
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-900 bg-white",
+            "title": "İşlənib: 9 saat | Status: işdə",
+            "text": "9",
+            "markup": "<!--[if BLOCK]><![endif]--> 9 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "O'Brien Ann \"Q\" Lee • 19.03.2026",
+                "lines": [
+                    "İşlənib: 9 saat",
+                    "Status: işdə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-emerald-600 bg-emerald-50",
+            "title": "İşlənib: 10 saat | Status: işdə",
+            "text": "10",
+            "markup": "<!--[if BLOCK]><![endif]--> 10 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "O'Brien Ann \"Q\" Lee • 20.03.2026",
+                "lines": [
+                    "İşlənib: 10 saat",
+                    "Status: işdə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-amber-500 bg-amber-50",
+            "title": "İşlənib: 5 saat | Status: işdə",
+            "text": "5",
+            "markup": "<!--[if BLOCK]><![endif]--> 5 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "O'Brien Ann \"Q\" Lee • 21.03.2026",
+                "lines": [
+                    "İşlənib: 5 saat",
+                    "Status: işdə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-900 bg-white",
+            "title": "İşlənib: 9 saat | Status: manual işdə",
+            "text": "9",
+            "markup": "<!--[if BLOCK]><![endif]--> 9 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "O'Brien Ann \"Q\" Lee • 22.03.2026",
+                "lines": [
+                    "İşlənib: 9 saat",
+                    "Status: manual işdə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-emerald-700 bg-emerald-50/70",
+            "title": "İşlənib: 8 saat | Status: bayramda işləyib | İş rejimi: bayram",
+            "text": "8",
+            "markup": "<!--[if BLOCK]><![endif]--> 8 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "O'Brien Ann \"Q\" Lee • 23.03.2026",
+                "lines": [
+                    "İşlənib: 8 saat",
+                    "Status: bayramda işləyib",
+                    "İş rejimi: bayram"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-emerald-700 bg-emerald-50/70",
+            "title": "İşlənib: 4 saat | Status: həftəsonu işləyib | İş rejimi: həftəsonu",
+            "text": "4",
+            "markup": "<!--[if BLOCK]><![endif]--> 4 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "O'Brien Ann \"Q\" Lee • 24.03.2026",
+                "lines": [
+                    "İşlənib: 4 saat",
+                    "Status: həftəsonu işləyib",
+                    "İş rejimi: həftəsonu"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-rose-600 bg-rose-50/70",
+            "title": "Status: yoxdur | Yoxluq: X",
+            "text": "X",
+            "markup": "<!--[if BLOCK]><![endif]--> X <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "O'Brien Ann \"Q\" Lee • 25.03.2026",
+                "lines": [
+                    "Status: yoxdur",
+                    "Yoxluq: X"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-rose-600 bg-rose-50/70",
+            "title": "Status: yoxdur",
+            "text": "0",
+            "markup": "<!--[if BLOCK]><![endif]--> 0 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "O'Brien Ann \"Q\" Lee • 26.03.2026",
+                "lines": [
+                    "Status: yoxdur"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-rose-600 bg-rose-50/70",
+            "title": "Status: manual yoxluq | Yoxluq: MA",
+            "text": "MA",
+            "markup": "<!--[if BLOCK]><![endif]--> MA <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "O'Brien Ann \"Q\" Lee • 27.03.2026",
+                "lines": [
+                    "Status: manual yoxluq",
+                    "Yoxluq: MA"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-400 bg-zinc-50/80",
+            "title": "Status: həftəsonu | İş rejimi: həftəsonu",
+            "text": "-",
+            "markup": "<!--[if BLOCK]><![endif]--> - <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "O'Brien Ann \"Q\" Lee • 28.03.2026",
+                "lines": [
+                    "Status: həftəsonu",
+                    "İş rejimi: həftəsonu"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-fuchsia-700 bg-fuchsia-50/80",
+            "title": "Status: bayram | İş rejimi: bayram",
+            "text": "",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex items-center justify-center\"><svg class=\"w-4 h-4 text-fuchsia-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5\"></path><path d=\"M16 2v4M8 2v4M3 10h5\"></path><path d=\"M17.5 17.5 16 16.3V14\"></path><circle cx=\"16\" cy=\"16\" r=\"6\"></circle></g></svg></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-fuchsia-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5\"></path><path d=\"M16 2v4M8 2v4M3 10h5\"></path><path d=\"M17.5 17.5 16 16.3V14\"></path><circle cx=\"16\" cy=\"16\" r=\"6\"></circle></g></svg>"
+            ],
+            "detail": {
+                "label": "O'Brien Ann \"Q\" Lee • 29.03.2026",
+                "lines": [
+                    "Status: bayram",
+                    "İş rejimi: bayram"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-violet-700 bg-violet-50/80",
+            "title": "Status: vacation",
+            "text": "",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex items-center justify-center\"><svg class=\"w-4 h-4 text-violet-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"4\"></circle><path d=\"M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41\"></path></g></svg></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-violet-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"4\"></circle><path d=\"M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41\"></path></g></svg>"
+            ],
+            "detail": {
+                "label": "O'Brien Ann \"Q\" Lee • 30.03.2026",
+                "lines": [
+                    "Status: vacation"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-sky-700 bg-sky-50/80",
+            "title": "Status: business_trip",
+            "text": "",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex items-center justify-center\"><svg class=\"w-4 h-4 text-sky-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g stroke=\"none\" stroke-width=\"1\" fill=\"none\" fill-rule=\"evenodd\"><rect x=\"0\" y=\"0\" width=\"24\" height=\"24\"></rect><path d=\"M5.84026576,8 L18.1597342,8 C19.1999115,8 20.0664437,8.79732479 20.1528258,9.83390904 L20.8194924,17.833909 C20.9112219,18.9346631 20.0932459,19.901362 18.9924919,19.9930915 C18.9372479,19.9976952 18.8818364,20 18.8264009,20 L5.1735991,20 C4.0690296,20 3.1735991,19.1045695 3.1735991,18 C3.1735991,17.9445645 3.17590391,17.889153 3.18050758,17.833909 L3.84717425,9.83390904 C3.93355627,8.79732479 4.80008849,8 5.84026576,8 Z M10.5,10 C10.2238576,10 10,10.2238576 10,10.5 L10,11.5 C10,11.7761424 10.2238576,12 10.5,12 L13.5,12 C13.7761424,12 14,11.7761424 14,11.5 L14,10.5 C14,10.2238576 13.7761424,10 13.5,10 L10.5,10 Z\" fill=\"currentColor\"></path><path d=\"M10,8 L8,8 L8,7 C8,5.34314575 9.34314575,4 11,4 L13,4 C14.6568542,4 16,5.34314575 16,7 L16,8 L14,8 L14,7 C14,6.44771525 13.5522847,6 13,6 L11,6 C10.4477153,6 10,6.44771525 10,7 L10,8 Z\" fill=\"currentColor\" fill-rule=\"nonzero\" opacity=\"0.3\"></path></g></svg></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-sky-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g stroke=\"none\" stroke-width=\"1\" fill=\"none\" fill-rule=\"evenodd\"><rect x=\"0\" y=\"0\" width=\"24\" height=\"24\"></rect><path d=\"M5.84026576,8 L18.1597342,8 C19.1999115,8 20.0664437,8.79732479 20.1528258,9.83390904 L20.8194924,17.833909 C20.9112219,18.9346631 20.0932459,19.901362 18.9924919,19.9930915 C18.9372479,19.9976952 18.8818364,20 18.8264009,20 L5.1735991,20 C4.0690296,20 3.1735991,19.1045695 3.1735991,18 C3.1735991,17.9445645 3.17590391,17.889153 3.18050758,17.833909 L3.84717425,9.83390904 C3.93355627,8.79732479 4.80008849,8 5.84026576,8 Z M10.5,10 C10.2238576,10 10,10.2238576 10,10.5 L10,11.5 C10,11.7761424 10.2238576,12 10.5,12 L13.5,12 C13.7761424,12 14,11.7761424 14,11.5 L14,10.5 C14,10.2238576 13.7761424,10 13.5,10 L10.5,10 Z\" fill=\"currentColor\"></path><path d=\"M10,8 L8,8 L8,7 C8,5.34314575 9.34314575,4 11,4 L13,4 C14.6568542,4 16,5.34314575 16,7 L16,8 L14,8 L14,7 C14,6.44771525 13.5522847,6 13,6 L11,6 C10.4477153,6 10,6.44771525 10,7 L10,8 Z\" fill=\"currentColor\" fill-rule=\"nonzero\" opacity=\"0.3\"></path></g></svg>"
+            ],
+            "detail": {
+                "label": "O'Brien Ann \"Q\" Lee • 31.03.2026",
+                "lines": [
+                    "Status: business_trip"
+                ]
+            }
+        }
+    ],
+    [
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-rose-600 bg-rose-50/70",
+            "title": "Status: yoxdur | Yoxluq: X",
+            "text": "X",
+            "markup": "<!--[if BLOCK]><![endif]--> X <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Əliyev Şəhla  • 01.03.2026",
+                "lines": [
+                    "Status: yoxdur",
+                    "Yoxluq: X"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-rose-600 bg-rose-50/70",
+            "title": "Status: yoxdur",
+            "text": "0",
+            "markup": "<!--[if BLOCK]><![endif]--> 0 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Əliyev Şəhla  • 02.03.2026",
+                "lines": [
+                    "Status: yoxdur"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-rose-600 bg-rose-50/70",
+            "title": "Status: manual yoxluq | Yoxluq: MA",
+            "text": "MA",
+            "markup": "<!--[if BLOCK]><![endif]--> MA <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Əliyev Şəhla  • 03.03.2026",
+                "lines": [
+                    "Status: manual yoxluq",
+                    "Yoxluq: MA"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-400 bg-zinc-50/80",
+            "title": "Status: həftəsonu | İş rejimi: həftəsonu",
+            "text": "-",
+            "markup": "<!--[if BLOCK]><![endif]--> - <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Əliyev Şəhla  • 04.03.2026",
+                "lines": [
+                    "Status: həftəsonu",
+                    "İş rejimi: həftəsonu"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-fuchsia-700 bg-fuchsia-50/80",
+            "title": "Status: bayram | İş rejimi: bayram",
+            "text": "",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex items-center justify-center\"><svg class=\"w-4 h-4 text-fuchsia-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5\"></path><path d=\"M16 2v4M8 2v4M3 10h5\"></path><path d=\"M17.5 17.5 16 16.3V14\"></path><circle cx=\"16\" cy=\"16\" r=\"6\"></circle></g></svg></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-fuchsia-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5\"></path><path d=\"M16 2v4M8 2v4M3 10h5\"></path><path d=\"M17.5 17.5 16 16.3V14\"></path><circle cx=\"16\" cy=\"16\" r=\"6\"></circle></g></svg>"
+            ],
+            "detail": {
+                "label": "Əliyev Şəhla  • 05.03.2026",
+                "lines": [
+                    "Status: bayram",
+                    "İş rejimi: bayram"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-violet-700 bg-violet-50/80",
+            "title": "Status: vacation",
+            "text": "",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex items-center justify-center\"><svg class=\"w-4 h-4 text-violet-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"4\"></circle><path d=\"M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41\"></path></g></svg></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-violet-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"4\"></circle><path d=\"M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41\"></path></g></svg>"
+            ],
+            "detail": {
+                "label": "Əliyev Şəhla  • 06.03.2026",
+                "lines": [
+                    "Status: vacation"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-sky-700 bg-sky-50/80",
+            "title": "Status: business_trip",
+            "text": "",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex items-center justify-center\"><svg class=\"w-4 h-4 text-sky-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g stroke=\"none\" stroke-width=\"1\" fill=\"none\" fill-rule=\"evenodd\"><rect x=\"0\" y=\"0\" width=\"24\" height=\"24\"></rect><path d=\"M5.84026576,8 L18.1597342,8 C19.1999115,8 20.0664437,8.79732479 20.1528258,9.83390904 L20.8194924,17.833909 C20.9112219,18.9346631 20.0932459,19.901362 18.9924919,19.9930915 C18.9372479,19.9976952 18.8818364,20 18.8264009,20 L5.1735991,20 C4.0690296,20 3.1735991,19.1045695 3.1735991,18 C3.1735991,17.9445645 3.17590391,17.889153 3.18050758,17.833909 L3.84717425,9.83390904 C3.93355627,8.79732479 4.80008849,8 5.84026576,8 Z M10.5,10 C10.2238576,10 10,10.2238576 10,10.5 L10,11.5 C10,11.7761424 10.2238576,12 10.5,12 L13.5,12 C13.7761424,12 14,11.7761424 14,11.5 L14,10.5 C14,10.2238576 13.7761424,10 13.5,10 L10.5,10 Z\" fill=\"currentColor\"></path><path d=\"M10,8 L8,8 L8,7 C8,5.34314575 9.34314575,4 11,4 L13,4 C14.6568542,4 16,5.34314575 16,7 L16,8 L14,8 L14,7 C14,6.44771525 13.5522847,6 13,6 L11,6 C10.4477153,6 10,6.44771525 10,7 L10,8 Z\" fill=\"currentColor\" fill-rule=\"nonzero\" opacity=\"0.3\"></path></g></svg></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-sky-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g stroke=\"none\" stroke-width=\"1\" fill=\"none\" fill-rule=\"evenodd\"><rect x=\"0\" y=\"0\" width=\"24\" height=\"24\"></rect><path d=\"M5.84026576,8 L18.1597342,8 C19.1999115,8 20.0664437,8.79732479 20.1528258,9.83390904 L20.8194924,17.833909 C20.9112219,18.9346631 20.0932459,19.901362 18.9924919,19.9930915 C18.9372479,19.9976952 18.8818364,20 18.8264009,20 L5.1735991,20 C4.0690296,20 3.1735991,19.1045695 3.1735991,18 C3.1735991,17.9445645 3.17590391,17.889153 3.18050758,17.833909 L3.84717425,9.83390904 C3.93355627,8.79732479 4.80008849,8 5.84026576,8 Z M10.5,10 C10.2238576,10 10,10.2238576 10,10.5 L10,11.5 C10,11.7761424 10.2238576,12 10.5,12 L13.5,12 C13.7761424,12 14,11.7761424 14,11.5 L14,10.5 C14,10.2238576 13.7761424,10 13.5,10 L10.5,10 Z\" fill=\"currentColor\"></path><path d=\"M10,8 L8,8 L8,7 C8,5.34314575 9.34314575,4 11,4 L13,4 C14.6568542,4 16,5.34314575 16,7 L16,8 L14,8 L14,7 C14,6.44771525 13.5522847,6 13,6 L11,6 C10.4477153,6 10,6.44771525 10,7 L10,8 Z\" fill=\"currentColor\" fill-rule=\"nonzero\" opacity=\"0.3\"></path></g></svg>"
+            ],
+            "detail": {
+                "label": "Əliyev Şəhla  • 07.03.2026",
+                "lines": [
+                    "Status: business_trip"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs bg-emerald-50/80",
+            "title": "Status: leave | İcazə növü: Saatlıq icazə",
+            "text": "SI",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex min-w-[2rem] items-center justify-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm border-emerald-200 bg-emerald-100/90 text-emerald-700\"> SI </div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Əliyev Şəhla  • 08.03.2026",
+                "lines": [
+                    "Status: leave",
+                    "İcazə növü: Saatlıq icazə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs bg-blue-50/80",
+            "title": "Status: leave | Yoxluq: İcazə",
+            "text": "",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex h-7 w-7 items-center justify-center rounded-lg border border-zinc-200 bg-white/95 shadow-sm\"><svg class=\"w-4 h-4 text-blue-600 transition-all duration-300 hover:text-zinc-800\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M8 3V11L10.5 9.4L13 11V3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6 17L20 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-blue-600 transition-all duration-300 hover:text-zinc-800\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M8 3V11L10.5 9.4L13 11V3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6 17L20 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>"
+            ],
+            "detail": {
+                "label": "Əliyev Şəhla  • 09.03.2026",
+                "lines": [
+                    "Status: leave",
+                    "Yoxluq: İcazə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs bg-blue-50/80",
+            "title": "Status: leave | İcazə növü: Ailə vəziyyəti ilə",
+            "text": "AV",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex min-w-[2rem] items-center justify-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm border-blue-200 bg-blue-100/90 text-blue-700\"> AV </div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Əliyev Şəhla  • 10.03.2026",
+                "lines": [
+                    "Status: leave",
+                    "İcazə növü: Ailə vəziyyəti ilə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs bg-violet-50/80",
+            "title": "Status: leave | İcazə növü: Təhsil məzuniyyəti",
+            "text": "TM",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex min-w-[2rem] items-center justify-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm border-violet-200 bg-violet-100/90 text-violet-700\"> TM </div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Əliyev Şəhla  • 11.03.2026",
+                "lines": [
+                    "Status: leave",
+                    "İcazə növü: Təhsil məzuniyyəti"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-sky-700 bg-sky-50/80 font-semibold",
+            "title": "İşlənib: 6 saat | Status: işdə | İcazə növü: Saatlıq icazə | Müddət: 2.0 saat | İcazə pəncərəsi: 09:00 - 11:00 | İcazə ilə örtülən vaxt: 2 saat",
+            "text": "6 SI",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"relative flex min-h-[1.75rem] items-center justify-center\"><span class=\"font-medium text-zinc-900\">6</span><span class=\"absolute right-0 top-0 inline-flex min-w-[1.65rem] items-center justify-center rounded-md border px-1 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm border-emerald-200 bg-emerald-100/90 text-emerald-700\"> SI </span></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Əliyev Şəhla  • 12.03.2026",
+                "lines": [
+                    "İşlənib: 6 saat",
+                    "Status: işdə",
+                    "İcazə növü: Saatlıq icazə",
+                    "Müddət: 2.0 saat",
+                    "İcazə pəncərəsi: 09:00 - 11:00",
+                    "İcazə ilə örtülən vaxt: 2 saat"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-sky-700 bg-sky-50/80 font-semibold",
+            "title": "İşlənib: 5 saat | Status: işdə | İcazə növü: Şəxsi iş | Müddət: Yarım gün | İcazə pəncərəsi: Günün ilk yarısı | İcazə ilə örtülən vaxt: 5 saat | Yoxluq: İcazə",
+            "text": "5",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"relative flex min-h-[1.75rem] items-center justify-center\"><span class=\"font-medium text-zinc-900\">5</span><span class=\"absolute right-0 top-0 inline-flex h-6 w-6 items-center justify-center rounded-md border border-zinc-200 bg-white/95 shadow-sm\"><svg class=\"w-4 h-4 text-blue-600 transition-all duration-300 hover:text-zinc-800\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M8 3V11L10.5 9.4L13 11V3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6 17L20 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg></span></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-blue-600 transition-all duration-300 hover:text-zinc-800\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M8 3V11L10.5 9.4L13 11V3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6 17L20 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>"
+            ],
+            "detail": {
+                "label": "Əliyev Şəhla  • 13.03.2026",
+                "lines": [
+                    "İşlənib: 5 saat",
+                    "Status: işdə",
+                    "İcazə növü: Şəxsi iş",
+                    "Müddət: Yarım gün",
+                    "İcazə pəncərəsi: Günün ilk yarısı",
+                    "İcazə ilə örtülən vaxt: 5 saat",
+                    "Yoxluq: İcazə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs bg-sky-50/80",
+            "title": "Status: yoxdur | İcazə növü: Yarım gün | Müddət: Yarım gün | İcazə pəncərəsi: Günün ikinci yarısı",
+            "text": "YG",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex min-w-[2rem] items-center justify-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm border-sky-200 bg-sky-100/90 text-sky-700\"> YG </div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Əliyev Şəhla  • 14.03.2026",
+                "lines": [
+                    "Status: yoxdur",
+                    "İcazə növü: Yarım gün",
+                    "Müddət: Yarım gün",
+                    "İcazə pəncərəsi: Günün ikinci yarısı"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs bg-sky-50/80",
+            "title": "Status: leave | İcazə növü: A | B <x> \"q\" O'N & c",
+            "text": "A|",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex min-w-[2rem] items-center justify-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm border-sky-200 bg-sky-100/90 text-sky-700\"> A| </div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Əliyev Şəhla  • 15.03.2026",
+                "lines": [
+                    "Status: leave",
+                    "İcazə növü: A | B <x> \"q\" O'N & c"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-900 bg-white",
+            "title": "İşlənib: 9 saat | Status: işdə | İş rejimi: iş günü",
+            "text": "9",
+            "markup": "<!--[if BLOCK]><![endif]--> 9 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Əliyev Şəhla  • 16.03.2026",
+                "lines": [
+                    "İşlənib: 9 saat",
+                    "Status: işdə",
+                    "İş rejimi: iş günü"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-rose-600 bg-rose-50/70",
+            "title": "Status: late",
+            "text": "0",
+            "markup": "<!--[if BLOCK]><![endif]--> 0 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Əliyev Şəhla  • 17.03.2026",
+                "lines": [
+                    "Status: late"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs bg-sky-50/80",
+            "title": "Status: leave | İcazə növü: Saat | İcazə pəncərəsi: 14:00 - 16:30",
+            "text": "SA",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex min-w-[2rem] items-center justify-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-tight shadow-sm border-sky-200 bg-sky-100/90 text-sky-700\"> SA </div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Əliyev Şəhla  • 18.03.2026",
+                "lines": [
+                    "Status: leave",
+                    "İcazə növü: Saat",
+                    "İcazə pəncərəsi: 14:00 - 16:30"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-sky-700 bg-sky-50/80",
+            "title": "Status: business_trip | İş rejimi: bayram",
+            "text": "",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex items-center justify-center\"><svg class=\"w-4 h-4 text-sky-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g stroke=\"none\" stroke-width=\"1\" fill=\"none\" fill-rule=\"evenodd\"><rect x=\"0\" y=\"0\" width=\"24\" height=\"24\"></rect><path d=\"M5.84026576,8 L18.1597342,8 C19.1999115,8 20.0664437,8.79732479 20.1528258,9.83390904 L20.8194924,17.833909 C20.9112219,18.9346631 20.0932459,19.901362 18.9924919,19.9930915 C18.9372479,19.9976952 18.8818364,20 18.8264009,20 L5.1735991,20 C4.0690296,20 3.1735991,19.1045695 3.1735991,18 C3.1735991,17.9445645 3.17590391,17.889153 3.18050758,17.833909 L3.84717425,9.83390904 C3.93355627,8.79732479 4.80008849,8 5.84026576,8 Z M10.5,10 C10.2238576,10 10,10.2238576 10,10.5 L10,11.5 C10,11.7761424 10.2238576,12 10.5,12 L13.5,12 C13.7761424,12 14,11.7761424 14,11.5 L14,10.5 C14,10.2238576 13.7761424,10 13.5,10 L10.5,10 Z\" fill=\"currentColor\"></path><path d=\"M10,8 L8,8 L8,7 C8,5.34314575 9.34314575,4 11,4 L13,4 C14.6568542,4 16,5.34314575 16,7 L16,8 L14,8 L14,7 C14,6.44771525 13.5522847,6 13,6 L11,6 C10.4477153,6 10,6.44771525 10,7 L10,8 Z\" fill=\"currentColor\" fill-rule=\"nonzero\" opacity=\"0.3\"></path></g></svg></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-sky-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g stroke=\"none\" stroke-width=\"1\" fill=\"none\" fill-rule=\"evenodd\"><rect x=\"0\" y=\"0\" width=\"24\" height=\"24\"></rect><path d=\"M5.84026576,8 L18.1597342,8 C19.1999115,8 20.0664437,8.79732479 20.1528258,9.83390904 L20.8194924,17.833909 C20.9112219,18.9346631 20.0932459,19.901362 18.9924919,19.9930915 C18.9372479,19.9976952 18.8818364,20 18.8264009,20 L5.1735991,20 C4.0690296,20 3.1735991,19.1045695 3.1735991,18 C3.1735991,17.9445645 3.17590391,17.889153 3.18050758,17.833909 L3.84717425,9.83390904 C3.93355627,8.79732479 4.80008849,8 5.84026576,8 Z M10.5,10 C10.2238576,10 10,10.2238576 10,10.5 L10,11.5 C10,11.7761424 10.2238576,12 10.5,12 L13.5,12 C13.7761424,12 14,11.7761424 14,11.5 L14,10.5 C14,10.2238576 13.7761424,10 13.5,10 L10.5,10 Z\" fill=\"currentColor\"></path><path d=\"M10,8 L8,8 L8,7 C8,5.34314575 9.34314575,4 11,4 L13,4 C14.6568542,4 16,5.34314575 16,7 L16,8 L14,8 L14,7 C14,6.44771525 13.5522847,6 13,6 L11,6 C10.4477153,6 10,6.44771525 10,7 L10,8 Z\" fill=\"currentColor\" fill-rule=\"nonzero\" opacity=\"0.3\"></path></g></svg>"
+            ],
+            "detail": {
+                "label": "Əliyev Şəhla  • 19.03.2026",
+                "lines": [
+                    "Status: business_trip",
+                    "İş rejimi: bayram"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-violet-700 bg-violet-50/80",
+            "title": "Status: vacation | İş rejimi: həftəsonu",
+            "text": "",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex items-center justify-center\"><svg class=\"w-4 h-4 text-violet-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"4\"></circle><path d=\"M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41\"></path></g></svg></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-violet-600 transition-all duration-300 hover:text-gray-900\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"4\"></circle><path d=\"M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41\"></path></g></svg>"
+            ],
+            "detail": {
+                "label": "Əliyev Şəhla  • 20.03.2026",
+                "lines": [
+                    "Status: vacation",
+                    "İş rejimi: həftəsonu"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-amber-500 bg-amber-50",
+            "title": "İşlənib: 8 saat | Status: işdə",
+            "text": "8",
+            "markup": "<!--[if BLOCK]><![endif]--> 8 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Əliyev Şəhla  • 21.03.2026",
+                "lines": [
+                    "İşlənib: 8 saat",
+                    "Status: işdə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-sky-700 bg-sky-50/80 font-semibold",
+            "title": "İşlənib: 1 saat | Status: işdə | İcazə növü: Qısa | Müddət: 1.5 saat | İcazə pəncərəsi: 10:00 - 11:30 | Yoxluq: İcazə",
+            "text": "1",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"relative flex min-h-[1.75rem] items-center justify-center\"><span class=\"font-medium text-zinc-900\">1</span><span class=\"absolute right-0 top-0 inline-flex h-6 w-6 items-center justify-center rounded-md border border-zinc-200 bg-white/95 shadow-sm\"><svg class=\"w-4 h-4 text-blue-600 transition-all duration-300 hover:text-zinc-800\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M8 3V11L10.5 9.4L13 11V3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6 17L20 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg></span></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-blue-600 transition-all duration-300 hover:text-zinc-800\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M8 3V11L10.5 9.4L13 11V3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6 17L20 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>"
+            ],
+            "detail": {
+                "label": "Əliyev Şəhla  • 22.03.2026",
+                "lines": [
+                    "İşlənib: 1 saat",
+                    "Status: işdə",
+                    "İcazə növü: Qısa",
+                    "Müddət: 1.5 saat",
+                    "İcazə pəncərəsi: 10:00 - 11:30",
+                    "Yoxluq: İcazə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs bg-blue-50/80",
+            "title": "Status: leave | İcazə növü: Xəstəlik | Yoxluq: İcazə",
+            "text": "",
+            "markup": "<!--[if BLOCK]><![endif]--><div class=\"inline-flex h-7 w-7 items-center justify-center rounded-lg border border-zinc-200 bg-white/95 shadow-sm\"><svg class=\"w-4 h-4 text-blue-600 transition-all duration-300 hover:text-zinc-800\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M8 3V11L10.5 9.4L13 11V3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6 17L20 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg></div><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [
+                "<svg class=\"w-4 h-4 text-blue-600 transition-all duration-300 hover:text-zinc-800\" x-show=\"true\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24px\" height=\"24px\" viewbox=\"0 0 24 24\" x-transition:enter=\"transition ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><path d=\"M4 19V5C4 3.89543 4.89543 3 6 3H19.4C19.7314 3 20 3.26863 20 3.6V16.7143\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M8 3V11L10.5 9.4L13 11V3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M6 17L20 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21L20 21\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"></path><path d=\"M6 21C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>"
+            ],
+            "detail": {
+                "label": "Əliyev Şəhla  • 23.03.2026",
+                "lines": [
+                    "Status: leave",
+                    "İcazə növü: Xəstəlik",
+                    "Yoxluq: İcazə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-emerald-600 bg-emerald-50",
+            "title": "İşlənib: 9 saat | Status: işdə",
+            "text": "9",
+            "markup": "<!--[if BLOCK]><![endif]--> 9 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Əliyev Şəhla  • 24.03.2026",
+                "lines": [
+                    "İşlənib: 9 saat",
+                    "Status: işdə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-400 bg-white",
+            "title": "",
+            "text": "",
+            "markup": "<!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": null
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-900 bg-white",
+            "title": "İşlənib: 9 saat | Status: işdə",
+            "text": "9",
+            "markup": "<!--[if BLOCK]><![endif]--> 9 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Əliyev Şəhla  • 26.03.2026",
+                "lines": [
+                    "İşlənib: 9 saat",
+                    "Status: işdə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-emerald-600 bg-emerald-50",
+            "title": "İşlənib: 10 saat | Status: işdə",
+            "text": "10",
+            "markup": "<!--[if BLOCK]><![endif]--> 10 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Əliyev Şəhla  • 27.03.2026",
+                "lines": [
+                    "İşlənib: 10 saat",
+                    "Status: işdə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-amber-500 bg-amber-50",
+            "title": "İşlənib: 5 saat | Status: işdə",
+            "text": "5",
+            "markup": "<!--[if BLOCK]><![endif]--> 5 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Əliyev Şəhla  • 28.03.2026",
+                "lines": [
+                    "İşlənib: 5 saat",
+                    "Status: işdə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-900 bg-white",
+            "title": "İşlənib: 9 saat | Status: manual işdə",
+            "text": "9",
+            "markup": "<!--[if BLOCK]><![endif]--> 9 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Əliyev Şəhla  • 29.03.2026",
+                "lines": [
+                    "İşlənib: 9 saat",
+                    "Status: manual işdə"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-emerald-700 bg-emerald-50/70",
+            "title": "İşlənib: 8 saat | Status: bayramda işləyib | İş rejimi: bayram",
+            "text": "8",
+            "markup": "<!--[if BLOCK]><![endif]--> 8 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Əliyev Şəhla  • 30.03.2026",
+                "lines": [
+                    "İşlənib: 8 saat",
+                    "Status: bayramda işləyib",
+                    "İş rejimi: bayram"
+                ]
+            }
+        },
+        {
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-emerald-700 bg-emerald-50/70",
+            "title": "İşlənib: 4 saat | Status: həftəsonu işləyib | İş rejimi: həftəsonu",
+            "text": "4",
+            "markup": "<!--[if BLOCK]><![endif]--> 4 <!--[if ENDBLOCK]><![endif]-->",
+            "svgs": [],
+            "detail": {
+                "label": "Əliyev Şəhla  • 31.03.2026",
+                "lines": [
+                    "İşlənib: 4 saat",
+                    "Status: həftəsonu işləyib",
+                    "İş rejimi: həftəsonu"
+                ]
+            }
+        }
+    ]
+]

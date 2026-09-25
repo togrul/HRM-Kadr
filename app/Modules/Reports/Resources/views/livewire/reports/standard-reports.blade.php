@@ -3,40 +3,40 @@
         $chartMax = max(1, (float) collect($this->payload['chart'] ?? [])->max('value'));
     @endphp
 
-    <x-surface-card :title="__('reports::dashboard.standard.title')" icon="icons.report-chart-icon" class="rounded-[2rem] border-zinc-200/90 bg-white shadow-card" bodyClass="rounded-[1.6rem] border-zinc-200/90 bg-[linear-gradient(180deg,#ffffff_0%,#fcfcfd_100%)]" contentClass="p-5 lg:p-6">
+    <x-surface-card :title="__('reports::dashboard.standard.title')" icon="icons.report-chart-icon" class="rounded-2xl border-zinc-200/90 bg-white shadow-card" bodyClass="rounded-b-2xl border-zinc-200/90 bg-[linear-gradient(180deg,#ffffff_0%,#fcfcfd_100%)]" contentClass="p-5 lg:p-6">
         <div class="grid gap-3 xl:grid-cols-[repeat(4,minmax(0,1fr))] xl:items-end">
             <div class="min-w-0">
                 <label class="mb-1 block text-xs font-medium text-zinc-500">{{ __('reports::dashboard.fields.report_type') }}</label>
-                <select wire:model.live="report" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-3 text-sm text-zinc-700 shadow-sm">
+                <x-ui.select wire:model.live="report">
                     @foreach ($reportOptions as $option)
                         <option value="{{ $option['key'] }}">{{ $option['label'] }}</option>
                     @endforeach
-                </select>
+                </x-ui.select>
             </div>
             <div class="min-w-0">
                 <label class="mb-1 block text-xs font-medium text-zinc-500">{{ __('reports::dashboard.fields.year') }}</label>
-                <select wire:model.live="year" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-3 text-sm text-zinc-700 shadow-sm">
+                <x-ui.select wire:model.live="year">
                     @foreach (range(now()->year - 4, now()->year + 1) as $yearOption)
                         <option value="{{ $yearOption }}">{{ $yearOption }}</option>
                     @endforeach
-                </select>
+                </x-ui.select>
             </div>
             <div class="min-w-0">
                 <label class="mb-1 block text-xs font-medium text-zinc-500">{{ __('reports::dashboard.fields.month') }}</label>
-                <select wire:model.live="month" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-3 text-sm text-zinc-700 shadow-sm">
+                <x-ui.select wire:model.live="month">
                     @foreach (range(1, 12) as $monthOption)
                         <option value="{{ $monthOption }}">{{ \Carbon\Carbon::create()->month($monthOption)->translatedFormat('F') }}</option>
                     @endforeach
-                </select>
+                </x-ui.select>
             </div>
             <div class="min-w-0">
                 <label class="mb-1 block text-xs font-medium text-zinc-500">{{ __('reports::dashboard.fields.structure') }}</label>
-                <select wire:model.live="structureId" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-3 text-sm text-zinc-700 shadow-sm">
+                <x-ui.select wire:model.live="structureId">
                     <option value="">{{ __('reports::dashboard.labels.all_structures') }}</option>
                     @foreach ($structureOptions as $option)
                         <option value="{{ $option['id'] }}">{{ $option['label'] }}</option>
                     @endforeach
-                </select>
+                </x-ui.select>
             </div>
         </div>
         @if ($canExport)
@@ -51,7 +51,7 @@
         @endif
     </x-surface-card>
 
-    <x-surface-card :title="$this->payload['title']" icon="icons.pending-icon" class="rounded-[2rem] border-zinc-200/90 bg-white shadow-card" bodyClass="rounded-[1.6rem] border-zinc-200/90 bg-[linear-gradient(180deg,#ffffff_0%,#fcfcfd_100%)]" contentClass="p-5 lg:p-6">
+    <x-surface-card :title="$this->payload['title']" icon="icons.pending-icon" class="rounded-2xl border-zinc-200/90 bg-white shadow-card" bodyClass="rounded-b-2xl border-zinc-200/90 bg-[linear-gradient(180deg,#ffffff_0%,#fcfcfd_100%)]" contentClass="p-5 lg:p-6">
         <div class="space-y-5">
             <p class="text-sm text-zinc-500">{{ $this->payload['description'] }}</p>
 
@@ -65,7 +65,7 @@
             </div>
 
             <div class="grid gap-4 xl:grid-cols-[0.9fr,1.1fr]">
-                <x-surface-card :title="__('reports::dashboard.cards.visualization')" icon="icons.training-icon" class="rounded-[1.75rem] border-zinc-200/90 bg-white shadow-card" bodyClass="rounded-2xl border-zinc-200/90 bg-[linear-gradient(180deg,#ffffff_0%,#fcfcfd_100%)]" contentClass="p-4">
+                <x-surface-card :title="__('reports::dashboard.cards.visualization')" icon="icons.training-icon" class="rounded-2xl border-zinc-200/90 bg-white shadow-card" bodyClass="rounded-b-2xl border-zinc-200/90 bg-[linear-gradient(180deg,#ffffff_0%,#fcfcfd_100%)]" contentClass="p-4">
                     <div class="space-y-3">
                         @forelse ($this->payload['chart'] as $bar)
                             @php
@@ -96,7 +96,7 @@
                     </div>
                 </x-surface-card>
 
-                <x-surface-card :title="__('reports::dashboard.cards.table_view')" icon="icons.document-icon" class="rounded-[1.75rem] border-zinc-200/90 bg-white shadow-card" bodyClass="rounded-2xl border-zinc-200/90 bg-[linear-gradient(180deg,#ffffff_0%,#fcfcfd_100%)]" contentClass="p-4">
+                <x-surface-card :title="__('reports::dashboard.cards.table_view')" icon="icons.document-icon" class="rounded-2xl border-zinc-200/90 bg-white shadow-card" bodyClass="rounded-b-2xl border-zinc-200/90 bg-[linear-gradient(180deg,#ffffff_0%,#fcfcfd_100%)]" contentClass="p-4">
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-zinc-200 text-sm">
                             <thead>

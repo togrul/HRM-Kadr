@@ -5,6 +5,7 @@ namespace App\Modules\Candidates\Livewire;
 use App\Models\Candidate;
 use App\Models\JobOpening;
 use App\Modules\Candidates\Livewire\Concerns\InteractsWithOpeningForm;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;
 
@@ -46,7 +47,7 @@ class EditOpening extends Component
         $this->dispatch('ui:modal-close');
     }
 
-    public function render()
+    public function render(): View
     {
         return view('candidates::livewire.candidates.edit-opening');
     }

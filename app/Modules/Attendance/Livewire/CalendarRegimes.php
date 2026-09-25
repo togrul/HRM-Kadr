@@ -8,6 +8,7 @@ use App\Models\Structure;
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendanceCalendarManagementService;
 use App\Support\Translations\ModuleTranslation;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\Rule;
@@ -30,11 +31,6 @@ class CalendarRegimes extends Component
     public ?string $editingStoredName = null;
 
     public int $perPage = 20;
-
-    /**
-     * @var array<int,array{id:int,name:string}>
-     */
-    public array $structures = [];
 
     /**
      * @var array<string,mixed>
@@ -77,7 +73,6 @@ class CalendarRegimes extends Component
         $this->canManage = $authorization->can('attendance.calendars.manage');
         $this->year = $year ?: (int) now()->year;
         $this->month = $month ?: (int) now()->month;
-        $this->structures = $this->resolveStructures();
         $this->resetForm();
     }
 
@@ -169,9 +164,9 @@ class CalendarRegimes extends Component
         $this->resetForm();
     }
 
-    public function render()
+    public function render(): View
     {
-        $structures = collect($this->structures);
+        $structures = collect($this->resolveStructures());
         $structureNames = $structures
             ->pluck('name', 'id')
             ->all();

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class EmployeeCompetencyProfile extends Model
 {
@@ -37,7 +38,7 @@ class EmployeeCompetencyProfile extends Model
         return $this->belongsTo(TrainingLevel::class, 'current_level_id');
     }
 
-    public function gapRequirements()
+    public function gapRequirements(): HasMany
     {
         return $this->hasMany(RoleCompetencyRequirement::class, 'training_competency_id', 'training_competency_id');
     }

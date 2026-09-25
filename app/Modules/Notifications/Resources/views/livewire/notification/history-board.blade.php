@@ -1,9 +1,5 @@
 @php
-    $normalizeDuplicateText = static function (?string $text): string {
-        $text = (string) $text;
-
-        return trim((string) preg_replace('/(?:\s*(?:\(surət\)|\(copy\)|\(Surət\)|\(Copy\)))+/iu', '', $text));
-    };
+    $normalizeDuplicateText = \App\Modules\Notifications\Support\NotificationTitle::normalize(...);
 
     $approvalBadgeClasses = static function (string $status): string {
         return match ($status) {
@@ -28,36 +24,36 @@
 
 <x-surface-card :title="__('notifications::common.tabs.history')" icon="icons.book-icon">
     <div class="space-y-4">
-        <div class="rounded-[1.6rem] border border-zinc-200 bg-zinc-50/70 p-4">
+        <div class="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4">
             <div class="grid gap-3 lg:grid-cols-[minmax(0,1fr)_14rem]">
                 <x-ui.input-shell>
                     <input type="text" wire:model.live.debounce.300ms="search" placeholder="{{ __('notifications::common.helpers.search_history') }}" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
                 </x-ui.input-shell>
                 <x-ui.input-shell>
-                    <select wire:model.live="categoryFilter" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
+                    <x-ui.select wire:model.live="categoryFilter">
                         <option value="all">{{ __('notifications::common.helpers.all_categories') }}</option>
                         @foreach ($categoryLabels as $category => $label)
                             <option value="{{ $category }}">{{ $label }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                 </x-ui.input-shell>
             </div>
         </div>
 
         <div class="space-y-4">
             @forelse ($campaigns as $campaign)
-                <div class="rounded-[1.75rem] border border-zinc-200 bg-white p-5 shadow-card">
+                <div class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-card">
                     <div class="space-y-5">
                         <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                             <div class="space-y-3">
                                 <div class="flex flex-wrap items-center gap-2.5">
                                     <h4 class="text-xl font-semibold tracking-tight text-zinc-950">{{ $campaign->display_title ?? $campaign->title }}</h4>
                                     @if (($campaign->display_copy_count ?? 0) > 0)
-                                        <x-notification.chip mode="sky" size="sm" uppercase>
+                                        <x-notification.chip mode="sky" size="sm">
                                             {{ __('notifications::common.badges.copy_label') }}{{ $campaign->display_copy_count > 1 ? ' ×'.$campaign->display_copy_count : '' }}
                                         </x-notification.chip>
                                     @endif
-                                    <x-notification.chip mode="muted" size="sm" uppercase>{{ $categoryLabels[$campaign->category] ?? $campaign->category }}</x-notification.chip>
+                                    <x-notification.chip mode="muted" size="sm">{{ $categoryLabels[$campaign->category] ?? $campaign->category }}</x-notification.chip>
                                     <x-notification.chip :mode="$statusChipMode($campaign->status)" size="sm" uppercase>{{ __('notifications::common.statuses.'.$campaign->status) }}</x-notification.chip>
                                 </div>
                                 <div class="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-zinc-500">
@@ -71,24 +67,24 @@
 
                             <div class="grid gap-3 sm:grid-cols-3 xl:min-w-[25rem] xl:max-w-[28rem]">
                                 <div class="rounded-2xl border border-zinc-200 bg-zinc-50/70 px-4 py-3">
-                                    <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.stats.sent') }}</p>
+                                    <p class="hrm-eyebrow">{{ __('notifications::common.stats.sent') }}</p>
                                     <p class="mt-2 text-2xl font-semibold text-emerald-700">{{ $campaign->display_sent_count }}</p>
                                 </div>
                                 <div class="rounded-2xl border border-zinc-200 bg-zinc-50/70 px-4 py-3">
-                                    <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.stats.failed') }}</p>
+                                    <p class="hrm-eyebrow">{{ __('notifications::common.stats.failed') }}</p>
                                     <p class="mt-2 text-2xl font-semibold text-rose-700">{{ $campaign->display_failed_count }}</p>
                                 </div>
                                 <div class="rounded-2xl border border-zinc-200 bg-zinc-50/70 px-4 py-3">
-                                    <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.labels.count') }}</p>
+                                    <p class="hrm-eyebrow">{{ __('notifications::common.labels.count') }}</p>
                                     <p class="mt-2 text-2xl font-semibold text-zinc-900">{{ $campaign->display_total_count }}</p>
                                 </div>
                             </div>
                         </div>
 
                         <div class="grid gap-4 xl:grid-cols-2">
-                            <section class="rounded-[1.45rem] border border-zinc-200 bg-zinc-50/50 p-4">
+                            <section class="rounded-2xl border border-zinc-200 bg-zinc-50/50 p-4">
                                 <div class="flex items-center justify-between gap-3">
-                                    <p class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.titles.audit_timeline') }}</p>
+                                    <p class="hrm-eyebrow">{{ __('notifications::common.titles.audit_timeline') }}</p>
                                     <x-notification.chip mode="neutral" size="sm">{{ $campaign->approvals->count() }}</x-notification.chip>
                                 </div>
 
@@ -116,9 +112,9 @@
                                 </div>
                             </section>
 
-                            <section class="rounded-[1.45rem] border border-zinc-200 bg-zinc-50/50 p-4">
+                            <section class="rounded-2xl border border-zinc-200 bg-zinc-50/50 p-4">
                                 <div class="flex items-center justify-between gap-3">
-                                    <p class="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.titles.delivery_summary') }}</p>
+                                    <p class="hrm-eyebrow">{{ __('notifications::common.titles.delivery_summary') }}</p>
                                     <x-notification.chip mode="neutral" size="sm">
                                         {{ $campaign->dispatches->isNotEmpty() ? $campaign->dispatches->count() : __('notifications::common.statuses.'.$campaign->status) }}
                                     </x-notification.chip>
@@ -159,7 +155,7 @@
                                 @else
                                     <div class="mt-4 space-y-3">
                                         <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-card">
-                                            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.titles.failure_reason') }}</p>
+                                            <p class="hrm-eyebrow">{{ __('notifications::common.titles.failure_reason') }}</p>
                                             <p class="mt-2 text-sm leading-6 text-zinc-600">
                                                 @if ($campaign->status === 'failed')
                                                     {{ $normalizeDuplicateText($campaign->latest_failed_event?->note) ?: __('notifications::common.helpers.dispatch_history_failed_without_recipient') }}
@@ -169,7 +165,7 @@
                                             </p>
                                         </div>
                                         <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-card">
-                                            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('notifications::common.titles.dispatch_history') }}</p>
+                                            <p class="hrm-eyebrow">{{ __('notifications::common.titles.dispatch_history') }}</p>
                                             <p class="mt-2 text-sm leading-6 text-zinc-600">
                                                 @if ($campaign->status === 'failed')
                                                     {{ __('notifications::common.helpers.no_recipients') }}
@@ -185,7 +181,7 @@
                     </div>
                 </div>
             @empty
-                <div class="rounded-[1.7rem] border border-dashed border-zinc-200 bg-zinc-50/70 px-5 py-10 text-center">
+                <div class="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50/70 px-5 py-10 text-center">
                     <p class="text-sm font-semibold text-zinc-900">{{ __('notifications::common.tabs.history') }}</p>
                     <p class="mt-2 text-sm leading-6 text-zinc-500">{{ __('notifications::common.helpers.history_empty') }}</p>
                 </div>

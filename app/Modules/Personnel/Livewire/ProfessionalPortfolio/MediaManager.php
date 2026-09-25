@@ -2,19 +2,23 @@
 
 namespace App\Modules\Personnel\Livewire\ProfessionalPortfolio;
 
-use App\Models\PersonnelMediaMention;
 use App\Models\Personnel;
-use App\Modules\Personnel\Exports\ProfessionalPortfolioMediaExport;
+use App\Models\PersonnelMediaMention;
 use App\Modules\Personnel\Application\Services\ProfessionalPortfolioRegistryFingerprintService;
 use App\Modules\Personnel\Application\Services\ProfessionalPortfolioRegistrySyncService;
 use App\Modules\Personnel\Application\Services\ProfessionalPortfolioWorkflowPolicyService;
+use App\Modules\Personnel\Exports\ProfessionalPortfolioMediaExport;
 use App\Modules\Personnel\Support\ProfessionalPortfolio\HandlesPortfolioAttachments;
 use App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioPermissionMatrix;
-use Maatwebsite\Excel\Excel as ExcelWriter;
-use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Excel as ExcelWriter;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class MediaManager extends Component
 {
@@ -22,15 +26,25 @@ class MediaManager extends Component
     use WithFileUploads;
 
     public int $personnelId;
+
     public string $search = '';
+
     public string $statusFilter = 'all';
+
     public ?string $dateFrom = null;
+
     public ?string $dateTo = null;
+
     public bool $showForm = false;
+
     public ?int $editingId = null;
+
     public ?int $selectedId = null;
+
     public $archiveUpload = null;
+
     public $screenshotUpload = null;
+
     public array $form = [
         'headline' => '',
         'publisher_name' => '',
@@ -52,7 +66,7 @@ class MediaManager extends Component
         $this->statusFilter = 'all';
     }
 
-    public function placeholder()
+    public function placeholder(): View
     {
         return view('personnel::livewire.personnel.placeholders.professional-portfolio-tab');
     }
@@ -187,7 +201,7 @@ class MediaManager extends Component
         $this->dispatch('portfolioRecordSaved');
     }
 
-    public function exportExcel()
+    public function exportExcel(): BinaryFileResponse
     {
         abort_unless(auth()->user()?->canAny(ProfessionalPortfolioPermissionMatrix::mediaViewPermissions()), 403);
 
@@ -197,7 +211,7 @@ class MediaManager extends Component
         );
     }
 
-    public function exportCsv()
+    public function exportCsv(): BinaryFileResponse
     {
         abort_unless(auth()->user()?->canAny(ProfessionalPortfolioPermissionMatrix::mediaViewPermissions()), 403);
 
@@ -208,7 +222,10 @@ class MediaManager extends Component
         );
     }
 
-    public function getRecordsProperty()
+    /**
+     * @return Collection<int, PersonnelMediaMention>
+     */
+    public function getRecordsProperty(): Collection
     {
         return $this->filteredQuery()
             ->with(['archiveAttachment:id,display_name,original_name,file_path,disk', 'screenshotAttachment:id,display_name,original_name,file_path,disk', 'verifier:id,name'])
@@ -227,12 +244,18 @@ class MediaManager extends Component
             ->find($this->selectedId);
     }
 
-    protected function baseQuery()
+    /**
+     * @return Builder<PersonnelMediaMention>
+     */
+    protected function baseQuery(): Builder
     {
         return PersonnelMediaMention::query()->where('personnel_id', $this->personnelId);
     }
 
-    protected function exportRows()
+    /**
+     * @return Collection<int, PersonnelMediaMention>
+     */
+    protected function exportRows(): Collection
     {
         return $this->filteredQuery()
             ->with([
@@ -248,7 +271,10 @@ class MediaManager extends Component
         return Personnel::query()->select(['id', 'surname', 'name', 'patronymic'])->findOrFail($this->personnelId);
     }
 
-    protected function filteredQuery()
+    /**
+     * @return Builder<PersonnelMediaMention>
+     */
+    protected function filteredQuery(): Builder
     {
         return $this->baseQuery()
             ->when($this->statusFilter !== 'all', fn ($query) => $query->where('verification_status', $this->statusFilter))
@@ -336,7 +362,7 @@ class MediaManager extends Component
         abort_unless(auth()->user()?->canAny(ProfessionalPortfolioPermissionMatrix::mediaVerifyPermissions()), 403);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('personnel::livewire.personnel.professional-portfolio.media-manager');
     }

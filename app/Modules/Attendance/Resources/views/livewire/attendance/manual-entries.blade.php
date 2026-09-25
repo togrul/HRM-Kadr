@@ -48,7 +48,7 @@
 
                             <div class="flex items-center justify-between gap-3 rounded-lg bg-zinc-50 px-3 py-2">
                                 <div class="min-w-0">
-                                    <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400">{{ __('attendance::manual_entries.labels.current_mode') }}</p>
+                                    <p class="hrm-eyebrow">{{ __('attendance::manual_entries.labels.current_mode') }}</p>
                                     <p class="text-sm font-medium text-zinc-700">
                                         {{ $manualMetricOverride ? __('attendance::manual_entries.modes.manual_override') : __('attendance::manual_entries.modes.automatic_calculation') }}
                                     </p>
@@ -79,7 +79,7 @@
                             <button
                                 type="button"
                                 wire:click="selectPersonnel('{{ $personnel->tabel_no }}', '{{ addslashes($personnel->fullname) }}')"
-                                class="flex w-full flex-col rounded-md px-2 py-1 text-left text-slate-600 transition-all duration-300 hover:bg-white drop-shadow-sm"
+                                class="flex w-full flex-col rounded-md px-2 py-1 text-left text-zinc-600 transition-all duration-300 hover:bg-white drop-shadow-sm"
                             >
                                 <span>{{ $personnel->fullname }}</span>
                                 <span class="text-xs font-mono text-zinc-500">{{ $personnel->tabel_no }}</span>
@@ -90,7 +90,7 @@
                                 @endif
                             </button>
                         @empty
-                            <span class="mx-auto text-sm font-medium text-slate-500">
+                            <span class="mx-auto text-sm font-medium text-zinc-500">
                                 {{ __('attendance::manual_entries.placeholders.search_personnel') }}
                             </span>
                         @endforelse
@@ -103,7 +103,7 @@
                         id="manual-form-date"
                         wire:model.live="form.date"
                         type="date"
-                        class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500"
+                        class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm"
                     />
                     @error('form.date') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
@@ -113,7 +113,7 @@
                         id="manual-form-check-in"
                         wire:model.live="form.check_in_at"
                         type="time"
-                        class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500"
+                        class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm"
                     />
                     @error('form.check_in_at') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
@@ -123,35 +123,33 @@
                         id="manual-form-check-out"
                         wire:model.live="form.check_out_at"
                         type="time"
-                        class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500"
+                        class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm"
                     />
                     @error('form.check_out_at') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <div>
                     <x-label for="manual-form-shift-source">{{ __('attendance::manual_entries.labels.shift_source') }}</x-label>
-                    <select
+                    <x-ui.select
                         id="manual-form-shift-source"
                         wire:model.live="form.shift_source_mode"
-                        class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500"
                     >
                         <option value="auto">{{ __('attendance::manual_entries.options.shift_source_auto') }}</option>
                         <option value="explicit">{{ __('attendance::manual_entries.options.shift_source_explicit') }}</option>
-                    </select>
+                    </x-ui.select>
                     @error('form.shift_source_mode') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <div>
                     <x-label for="manual-form-explicit-shift">{{ __('attendance::manual_entries.labels.calculation_shift') }}</x-label>
-                    <select
+                    <x-ui.select
                         id="manual-form-explicit-shift"
                         wire:model.live="form.explicit_shift_id"
-                        @disabled($form['shift_source_mode'] !== 'explicit')
-                        class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
+                        :disabled="$form['shift_source_mode'] !== 'explicit'"
                     >
                         <option value="">{{ __('attendance::manual_entries.options.select_shift') }}</option>
                         @foreach($this->availableShifts as $shift)
                             <option value="{{ $shift->id }}">{{ $shift->name }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                     @error('form.explicit_shift_id') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <div class="md:col-span-3">
@@ -198,7 +196,7 @@
                                     id="manual-metric-override"
                                     type="checkbox"
                                     wire:model.live="manualMetricOverride"
-                                    class="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
+                                    class="h-4 w-4 rounded border-hairline text-ink focus:ring-zinc-400"
                                 />
                                 <span>{{ __('attendance::manual_entries.modes.manual_override') }}</span>
                             </label>
@@ -339,27 +337,27 @@
                                 <div class="grid grid-cols-1 gap-3">
                                     <div>
                                         <x-label for="manual-form-worked">{{ __('attendance::manual_entries.labels.worked_minutes') }}</x-label>
-                                        <x-livewire-input id="manual-form-worked" mode="gray" type="number" min="0" name="form.worked_minutes" wire:model.defer="form.worked_minutes" :readonly="!$manualMetricOverride" />
+                                        <x-livewire-input id="manual-form-worked" mode="gray" type="number" min="0" name="form.worked_minutes" wire:model="form.worked_minutes" :readonly="!$manualMetricOverride" />
                                         @error('form.worked_minutes') <x-validation>{{ $message }}</x-validation> @enderror
                                     </div>
                                     <div>
                                         <x-label for="manual-form-overtime">{{ __('attendance::manual_entries.labels.overtime_minutes') }}</x-label>
-                                        <x-livewire-input id="manual-form-overtime" mode="gray" type="number" min="0" name="form.overtime_minutes" wire:model.defer="form.overtime_minutes" :readonly="!$manualMetricOverride" />
+                                        <x-livewire-input id="manual-form-overtime" mode="gray" type="number" min="0" name="form.overtime_minutes" wire:model="form.overtime_minutes" :readonly="!$manualMetricOverride" />
                                         @error('form.overtime_minutes') <x-validation>{{ $message }}</x-validation> @enderror
                                     </div>
                                     <div>
                                         <x-label for="manual-form-late">{{ __('attendance::manual_entries.labels.late_minutes') }}</x-label>
-                                        <x-livewire-input id="manual-form-late" mode="gray" type="number" min="0" name="form.late_minutes" wire:model.defer="form.late_minutes" :readonly="!$manualMetricOverride" />
+                                        <x-livewire-input id="manual-form-late" mode="gray" type="number" min="0" name="form.late_minutes" wire:model="form.late_minutes" :readonly="!$manualMetricOverride" />
                                         @error('form.late_minutes') <x-validation>{{ $message }}</x-validation> @enderror
                                     </div>
                                     <div>
                                         <x-label for="manual-form-early-leave">{{ __('attendance::manual_entries.labels.early_leave_minutes') }}</x-label>
-                                        <x-livewire-input id="manual-form-early-leave" mode="gray" type="number" min="0" name="form.early_leave_minutes" wire:model.defer="form.early_leave_minutes" :readonly="!$manualMetricOverride" />
+                                        <x-livewire-input id="manual-form-early-leave" mode="gray" type="number" min="0" name="form.early_leave_minutes" wire:model="form.early_leave_minutes" :readonly="!$manualMetricOverride" />
                                         @error('form.early_leave_minutes') <x-validation>{{ $message }}</x-validation> @enderror
                                     </div>
                                     <div>
                                         <x-label for="manual-form-absence">{{ __('attendance::manual_entries.labels.absence_code') }}</x-label>
-                                        <x-livewire-input id="manual-form-absence" mode="gray" name="form.absence_code" wire:model.defer="form.absence_code" />
+                                        <x-livewire-input id="manual-form-absence" mode="gray" name="form.absence_code" wire:model="form.absence_code" />
                                     </div>
                                 </div>
                             </div>
@@ -440,9 +438,9 @@
                     <x-label for="manual-form-reason">{{ __('attendance::manual_entries.labels.reason') }}</x-label>
                     <textarea
                         id="manual-form-reason"
-                        wire:model.defer="form.reason"
+                        wire:model="form.reason"
                         rows="3"
-                        class="w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"
+                        class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 px-3 py-2.5 text-base leading-relaxed sm:text-sm"
                     ></textarea>
                 </div>
             </div>
@@ -468,16 +466,15 @@
 
             <div class="w-full sm:w-48">
                 <x-label for="manual-queue-status">{{ __('attendance::manual_entries.labels.status_filter') }}</x-label>
-                <select
+                <x-ui.select
                     id="manual-queue-status"
                     wire:model.live="queueStatus"
-                    class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500"
                 >
                     <option value="pending">{{ __('attendance::manual_entries.statuses.pending') }}</option>
                     <option value="approved">{{ __('attendance::manual_entries.statuses.approved') }}</option>
                     <option value="rejected">{{ __('attendance::manual_entries.statuses.rejected') }}</option>
                     <option value="all">{{ __('attendance::manual_entries.statuses.all') }}</option>
-                </select>
+                </x-ui.select>
             </div>
         </div>
 
@@ -540,7 +537,7 @@
                                     @if($canApprove && $entry->approval_status === 'pending')
                                         <div class="inline-flex items-center gap-2">
                                             <input
-                                                wire:model.defer="rejectNotes.{{ $entry->id }}"
+                                                wire:model="rejectNotes.{{ $entry->id }}"
                                                 type="text"
                                                 placeholder="{{ __('attendance::manual_entries.placeholders.reject_note') }}"
                                                 class="h-8 w-36 rounded-md border border-zinc-200 bg-zinc-100 px-2 text-xs"

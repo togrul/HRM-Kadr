@@ -3,6 +3,9 @@
     'divide' => true,
     'title' => null,
     'bordered' => false,
+    // Long lists: the table scrolls inside a viewport-tall box and its header row stays put.
+    // (The page's content card clips overflow, so a header cannot stick to the window itself.)
+    'sticky' => false,
 ])
 
 @php
@@ -17,11 +20,46 @@
         </div>
     @endif
 
-    <div>
-        <div class="hrm-scroll overflow-x-auto">
+    <div
+        x-data="{
+            overflowing: false,
+            atStart: true,
+            atEnd: true,
+            observer: null,
+            measure() {
+                const scroller = this.$refs.scroller;
+                const max = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+                this.overflowing = max > 4;
+                this.atStart = scroller.scrollLeft <= 2;
+                this.atEnd = scroller.scrollLeft >= max - 2;
+            },
+            nudge(direction) {
+                this.$refs.scroller.scrollBy({ left: direction * Math.max(180, this.$refs.scroller.clientWidth * 0.7), behavior: 'smooth' });
+            },
+            destroy() { this.observer?.disconnect(); },
+        }"
+        x-init="$nextTick(() => {
+            measure();
+            if (window.ResizeObserver) {
+                observer = new ResizeObserver(() => measure());
+                observer.observe($refs.scroller);
+                observer.observe($refs.scroller.querySelector('table'));
+            }
+        })"
+        @resize.window.debounce.150ms="measure()"
+    >
+        <div x-cloak x-show="overflowing" class="flex items-center justify-end gap-1 border-b border-hairline-subtle px-3 py-1.5 lg:hidden">
+            <button type="button" @click="nudge(-1)" :disabled="atStart" aria-label="{{ __('ui::common.pagination.previous') }}" class="inline-flex h-10 w-10 items-center justify-center rounded-[10px] border border-hairline bg-white text-ink-muted transition hover:bg-[#f4f4f5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 disabled:opacity-35">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <button type="button" @click="nudge(1)" :disabled="atEnd" aria-label="{{ __('ui::common.pagination.next') }}" class="inline-flex h-10 w-10 items-center justify-center rounded-[10px] border border-hairline bg-white text-ink-muted transition hover:bg-[#f4f4f5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 disabled:opacity-35">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+        </div>
+        <div x-ref="scroller" @scroll.passive="measure()" @class(['hrm-scroll overflow-x-auto', 'max-h-[calc(100dvh-15rem)] overflow-y-auto' => $sticky])>
         <table {{ $attributes->merge(['class' => 'min-w-full w-full p-[5px] pb-0 border-separate border-spacing-0 bg-white text-sm']) }}>
             <thead class="bg-transparent">
-                <tr class="align-middle text-xs uppercase">
+                <tr class="align-middle text-xs">
                     @foreach ($headers as $header)
                       @php
                         $headerLabel = is_array($header) ? (string) ($header['label'] ?? '') : (string) $header;
@@ -49,7 +87,8 @@
                                 @if($headerDayType) data-day-type="{{ $headerDayType }}" @endif
                                 @if($headerDay !== null) data-day="{{ $headerDay }}" @endif
                                 @class([
-                                  'text-left text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink-faint whitespace-nowrap bg-white border-b border-hairline ',
+                                  'text-left text-[12.5px] font-medium text-ink-muted whitespace-nowrap bg-white border-b border-hairline ',
+                                  'sticky top-0 z-10' => $sticky,
                                   'stats-cell-header py-1 px-4' => $bordered,
                                   'py-2.5 px-4' => !$bordered,
                                   'w-10 min-w-10 max-w-10 text-center !px-0 !py-0' => $bordered && $isDay,
@@ -71,7 +110,7 @@
                                 @endif
                             </th>
                         @else
-                            <th scope="col" class="relative px-4 py-2.5 bg-white border-b border-hairline"></th>
+                            <th scope="col" @class(['px-4 py-2.5 bg-white border-b border-hairline', 'sticky top-0 z-10' => $sticky, 'relative' => ! $sticky])></th>
                         @endif
                     @endforeach
                 </tr>

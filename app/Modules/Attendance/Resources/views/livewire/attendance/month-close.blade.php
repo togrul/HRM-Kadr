@@ -11,7 +11,7 @@
                     <x-button mode="primary" wire:click="snapshotNow">
                         {{ __('attendance::month_close.actions.snapshot_now') }}
                     </x-button>
-                    <x-button mode="light-blue" wire:click="snapshotQueue">
+                    <x-button mode="default" wire:click="snapshotQueue">
                         {{ __('attendance::month_close.actions.snapshot_queue') }}
                     </x-button>
                     <x-button mode="black" wire:click="closePeriod">
@@ -22,10 +22,10 @@
                     </x-button>
                 @endif
                 @if($canExport)
-                    <x-button mode="success" wire:click="exportPayroll">
+                    <x-button mode="default" wire:click="exportPayroll">
                         {{ __('attendance::month_close.actions.export_xlsx') }}
                     </x-button>
-                    <x-button mode="light-green" wire:click="exportPayrollCsv">
+                    <x-button mode="default" wire:click="exportPayrollCsv">
                         {{ __('attendance::month_close.actions.export_csv') }}
                     </x-button>
                 @endif

@@ -9,6 +9,8 @@ use App\Modules\Notifications\Livewire\Concerns\InteractsWithNotificationAuthori
 use App\Modules\Notifications\Support\NotificationAudienceTargetRegistry;
 use App\Modules\Notifications\Support\NotificationCampaignDispatcher;
 use App\Modules\Notifications\Support\NotificationTriggerRegistry;
+use App\Services\StructurePathService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Livewire\Component;
@@ -30,7 +32,7 @@ class AnnouncementComposer extends Component
         'body' => '',
         'holiday_name' => '',
         'holiday_date' => '',
-        'duration' => '1 gün',
+        'duration' => '',
         'scope' => '',
         'holiday_rules' => '',
         'channel' => 'database',
@@ -47,6 +49,7 @@ class AnnouncementComposer extends Component
     public function mount(): void
     {
         $this->authorizeNotificationSettingsView();
+        $this->form['duration'] = __('notifications::common.payload_defaults.one_day');
         $this->applyRuleDefaults();
     }
 
@@ -191,7 +194,7 @@ class AnnouncementComposer extends Component
             'body' => '',
             'holiday_name' => '',
             'holiday_date' => '',
-            'duration' => '1 gün',
+            'duration' => __('notifications::common.payload_defaults.one_day'),
             'scope' => '',
             'holiday_rules' => '',
             'channel' => 'database',
@@ -322,12 +325,12 @@ class AnnouncementComposer extends Component
         ];
     }
 
-    public function placeholder()
+    public function placeholder(): View
     {
         return view('notification::livewire.notification.placeholders.settings-panel');
     }
 
-    public function render()
+    public function render(): View
     {
         $selectedStructureIds = $this->parseIntegerList($this->form['structure_ids'] ?? []);
         $selectedUserIds = $this->parseIntegerList($this->form['user_ids'] ?? []);
@@ -422,7 +425,6 @@ class AnnouncementComposer extends Component
     {
         return Structure::query()
             ->select('id', 'parent_id', 'name', 'level', 'code')
-            ->withRecursive('parent', false)
             ->when($this->structureSearch !== '', function ($query) {
                 $query->where('name', 'like', '%'.$this->structureSearch.'%');
             })
@@ -442,7 +444,6 @@ class AnnouncementComposer extends Component
 
         return Structure::query()
             ->select('id', 'parent_id', 'name')
-            ->withRecursive('parent', false)
             ->whereIn('id', $selectedStructureIds)
             ->orderBy('name')
             ->get()
@@ -505,8 +506,8 @@ class AnnouncementComposer extends Component
 
     protected function buildStructureOption(Structure $structure): array
     {
-        $path = $structure->fullStructurePath(false);
-        $segments = array_values(array_filter(array_map('trim', explode(' / ', $path))));
+        // One flat read of the chart for every option, not a query per ancestor.
+        $segments = app(StructurePathService::class)->segments((int) $structure->id);
         $label = array_pop($segments) ?: $structure->name;
         $meta = count($segments) ? implode(' / ', $segments) : null;
 

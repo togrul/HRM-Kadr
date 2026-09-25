@@ -9,11 +9,9 @@
 @php
     $tag = $href ? 'a' : 'button';
 
-    // Single-line rows keep the prototype's exact 31px height; a row carrying a note needs
-    // to grow instead, otherwise the two lines collide and the list reads as one block.
     $classes = trim(implode(' ', array_filter([
-        'group flex w-full items-center gap-2 rounded-lg px-2.5 text-left transition',
-        $note ? 'py-1.5' : 'h-[31px]',
+        'group flex w-full items-center gap-2 rounded-lg px-2.5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400',
+        $note ? 'min-h-10 py-2' : 'h-10',
         $active ? 'bg-[#f4f4f5] text-ink' : 'text-ink-muted hover:bg-[#fafafa] hover:text-ink',
     ])));
 @endphp
@@ -32,13 +30,13 @@
     @endisset
 
     <span class="min-w-0 flex-1">
-        <span @class(['block truncate text-[12.5px] leading-tight', 'font-semibold' => $active, 'font-medium' => ! $active])>{{ $slot }}</span>
+        <span @class(['block truncate text-[14px] leading-5', 'font-semibold' => $active, 'font-medium' => ! $active])>{{ $slot }}</span>
         @if ($note)
             <span class="mt-0.5 block text-[11px] leading-snug text-ink-faint">{{ $note }}</span>
         @endif
     </span>
 
     @if ($count !== null)
-        <span class="hrm-num shrink-0 rounded-full bg-[#f4f4f5] px-1.5 py-0.5 text-[10.5px] text-ink-muted group-hover:bg-hairline">{{ $count }}</span>
+        <span class="hrm-num shrink-0 rounded-full bg-[#f4f4f5] px-1.5 py-0.5 text-[11px] text-ink-muted group-hover:bg-hairline">{{ $count }}</span>
     @endif
 </{{ $tag }}>

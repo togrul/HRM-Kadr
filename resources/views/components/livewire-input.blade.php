@@ -12,7 +12,10 @@
           'disabled' => 'text-ink-faint',
           default => '',
      };
-     $isError = $errors->has($name) ? 'border-rose-300 bg-[#ffe4e6] focus:bg-[#fff1f2]' : '';
+     $wireModel = collect($attributes->getAttributes())
+          ->first(fn ($value, $key) => str_starts_with($key, 'wire:model'));
+     $hasError = $errors->has($name) || (is_string($wireModel) && $errors->has($wireModel));
+     $isError = $hasError ? 'border-rose-300 bg-[#ffe4e6] focus:bg-[#fff1f2]' : '';
 @endphp
 
 <input
@@ -20,6 +23,6 @@
      id="{{ $name }}"
      name="{{ $name }}"
      @disabled($disabled)
-     @if ($errors->has($name)) aria-invalid="true" @endif
+     @if ($hasError) aria-invalid="true" @endif
      {!! $attributes->merge(['class' => 'mt-1 '.\App\Support\Ui\FieldStyles::input(trim($extra.' '.$isError))]) !!}
 >

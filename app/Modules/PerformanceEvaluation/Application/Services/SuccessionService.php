@@ -66,6 +66,26 @@ class SuccessionService
         );
     }
 
+    /**
+     * Fills the performance axis from the person's KPI result for the cycle
+     * (<90 low · 90–105 medium · >105 high); potential stays HR's call.
+     */
+    public function syncPerformanceFromScore(int $personnelId, int $cycleId, float $score): TalentAssessment
+    {
+        $assessment = TalentAssessment::firstOrNew(
+            ['personnel_id' => $personnelId, 'performance_cycle_id' => $cycleId],
+            ['potential_level' => 2],
+        );
+        $assessment->performance_level = match (true) {
+            $score > 105 => 3,
+            $score >= 90 => 2,
+            default => 1,
+        };
+        $assessment->save();
+
+        return $assessment;
+    }
+
     public function removeAssessment(int $assessmentId): void
     {
         TalentAssessment::whereKey($assessmentId)->delete();

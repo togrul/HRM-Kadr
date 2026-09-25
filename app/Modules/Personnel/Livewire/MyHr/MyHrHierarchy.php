@@ -5,6 +5,7 @@ namespace App\Modules\Personnel\Livewire\MyHr;
 use App\Models\Personnel;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrHierarchyReadService;
 use App\Modules\Personnel\Support\MyHr\MyHrAccess;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -33,13 +34,13 @@ class MyHrHierarchy extends Component
         return Personnel::query()
             ->with([
                 'position:id,name,approval_rank,is_approval_target',
-                'structure' => fn ($query) => $query->select('id', 'parent_id', 'name')->withRecursive('parent', false),
+                'structure:id,parent_id,name',
             ])
             ->select(['id', 'surname', 'name', 'patronymic', 'position_id', 'structure_id'])
             ->findOrFail($this->personnelId);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('personnel::livewire.personnel.my-hr.hierarchy');
     }

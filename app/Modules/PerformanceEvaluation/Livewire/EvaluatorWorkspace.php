@@ -5,6 +5,7 @@ namespace App\Modules\PerformanceEvaluation\Livewire;
 use App\Livewire\Concerns\WithRuntimeMemo;
 use App\Modules\PerformanceEvaluation\Application\Services\PerformanceSkillMeasurementService;
 use App\Modules\PerformanceEvaluation\Livewire\Concerns\InteractsWithEvaluatorWorkspaceQueries;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Isolate;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -112,7 +113,7 @@ class EvaluatorWorkspace extends Component
         $this->resetRuntimeMemo();
     }
 
-    public function render()
+    public function render(): View
     {
         return view('performance-evaluation::livewire.performance-evaluation.evaluator-workspace');
     }

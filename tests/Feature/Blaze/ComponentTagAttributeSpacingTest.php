@@ -13,7 +13,12 @@ use Symfony\Component\Finder\Finder;
  *    uncompiled, emitting literal `@disabled="@disabled"` — Alpine then throws on the
  *    expression, and a long one can even blow up Livewire's morph-marker regex.
  *
- * Plain HTML tags tolerate both; component tags never do.
+ * 3. A bare echo standing as its own attribute. `{{ $editing ? 'disabled' : '' }}` is
+ *    split into junk attributes (`isediting`, `:`, `disabled`), so the control ends up
+ *    permanently disabled and Alpine throws on the `:` binding. Use `:disabled="$editing"`.
+ *    `{{ $attributes }}` forwarding is the one bare echo Blade handles.
+ *
+ * Plain HTML tags tolerate all three; component tags never do.
  */
 
 /**
@@ -93,6 +98,24 @@ function componentTagsWithBladeDirectives(string $source): array
     return $found;
 }
 
+/**
+ * @return array<int, array{line: int, attribute: string}>
+ */
+function componentTagsWithBareEchoes(string $source): array
+{
+    $found = [];
+
+    foreach (componentTags($source) as $tag) {
+        $unquoted = preg_replace('/"[^"]*"|\'[^\']*\'/', '""', $tag['tag']) ?? $tag['tag'];
+
+        if (preg_match('/\{\{(?!\s*\$attributes\b)\s*([^}]{0,40})/', $unquoted, $echo)) {
+            $found[] = ['line' => $tag['line'], 'attribute' => '{{ '.trim($echo[1])];
+        }
+    }
+
+    return $found;
+}
+
 it('never writes a component-tag attribute with whitespace around the equals sign', function (): void {
     $files = Finder::create()
         ->files()
@@ -111,6 +134,10 @@ it('never writes a component-tag attribute with whitespace around the equals sig
 
         foreach (componentTagsWithBladeDirectives($source) as $hit) {
             $offenders[] = $path.':'.$hit['line'].' ('.$hit['attribute'].' — directive is not compiled here)';
+        }
+
+        foreach (componentTagsWithBareEchoes($source) as $hit) {
+            $offenders[] = $path.':'.$hit['line'].' ('.$hit['attribute'].' — bare echo is split into junk attributes)';
         }
     }
 

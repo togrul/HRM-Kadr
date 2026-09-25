@@ -58,7 +58,7 @@ trait DropdownConstructTrait
      * @param  string|null   $searchCol   real column for LIKE (e.g. 'name', 'title_en', 't.title')
      * @param  string|null   $searchTerm
      * @param  int|string|null $selectedId
-     * @param  int           $limit       how many rows when search is empty
+     * @param  int           $limit       max rows returned (the selected row is added on top)
      */
     protected function optionsWithSelected(
         Builder $base,
@@ -82,15 +82,12 @@ trait DropdownConstructTrait
 
         $searchTerm = trim((string) $searchTerm);
 
-        // 1) base (no LIKE) — when search is empty we limit
-        $listQ = clone $base;
-        if ($searchTerm === '') {
-            $listQ->limit($limit);
-        } else {
-            // 2) with LIKE on the REAL column (not alias)
-            if ($searchCol) {
-                $listQ->where($searchCol, 'like', '%'.$searchTerm.'%');
-            }
+        // 1) base, always limited — a one-letter search must not pull the whole table
+        $listQ = (clone $base)->limit($limit);
+
+        // 2) with LIKE on the REAL column (not alias)
+        if ($searchTerm !== '' && $searchCol) {
+            $listQ->where($searchCol, 'like', '%'.$searchTerm.'%');
         }
 
         $list = $listQ->get();

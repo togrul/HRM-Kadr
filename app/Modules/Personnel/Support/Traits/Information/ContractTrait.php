@@ -4,7 +4,8 @@ namespace App\Modules\Personnel\Support\Traits\Information;
 
 use App\Models\PersonnelContract;
 
-trait ContractTrait {
+trait ContractTrait
+{
     public array $contracts = [
         'rank_id' => null,
     ];
@@ -26,7 +27,7 @@ trait ContractTrait {
 
         $modelInstance = new PersonnelContract;
         $contractData = $this->modifyArray($this->contracts, $modelInstance->dateList());
-        $this->personnelModelData->contracts()->create($contractData);
+        $this->personnel->contracts()->create($contractData);
 
         $this->dispatch('contractAdded', __('personnel::information.messages.contract_created'));
         $this->dispatchModalCloseEvent();
@@ -35,6 +36,7 @@ trait ContractTrait {
 
     public function forceDeleteContract(PersonnelContract $contractModel): void
     {
+        $this->ensureOwnRecord($contractModel);
         $contractModel->delete();
         $this->dispatch('contractAdded', __('personnel::information.messages.contract_deleted'));
         $this->dispatchModalCloseEvent();

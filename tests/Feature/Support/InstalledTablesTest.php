@@ -40,4 +40,22 @@ class InstalledTablesTest extends TestCase
     {
         $this->assertSame(app(InstalledTables::class), app(InstalledTables::class));
     }
+
+    public function test_it_answers_columns_from_one_listing_per_table(): void
+    {
+        $this->assertTrue(InstalledTables::hasColumn('personnels', 'tabel_no'));
+        $this->assertFalse(InstalledTables::hasColumn('personnels', 'nope'));
+        $this->assertFalse(InstalledTables::hasColumn('definitely_not_a_table', 'id'));
+
+        $queries = 0;
+        DB::listen(function () use (&$queries): void {
+            $queries++;
+        });
+
+        foreach (['tabel_no', 'name', 'surname', 'nope'] as $column) {
+            InstalledTables::hasColumn('personnels', $column);
+        }
+
+        $this->assertSame(0, $queries);
+    }
 }

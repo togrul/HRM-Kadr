@@ -5,10 +5,11 @@ namespace App\Modules\PerformanceEvaluation\Livewire\Concerns;
 use App\Modules\PerformanceEvaluation\Application\Services\PerformanceEvaluationReportingService;
 use App\Modules\PerformanceEvaluation\Exports\PerformanceEvaluationReportExport;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 trait HandlesPerformanceReportingMutations
 {
-    public function exportPerformanceFormsReport()
+    public function exportPerformanceFormsReport(): BinaryFileResponse
     {
         $this->authorizePerformanceEvaluationExport();
         $rows = app(PerformanceEvaluationReportingService::class)->formRows();
@@ -35,7 +36,7 @@ trait HandlesPerformanceReportingMutations
         );
     }
 
-    public function exportPerformanceSummaryReport()
+    public function exportPerformanceSummaryReport(): BinaryFileResponse
     {
         $this->authorizePerformanceEvaluationExport();
         $rows = app(PerformanceEvaluationReportingService::class)->formSummaryRows();
@@ -58,7 +59,7 @@ trait HandlesPerformanceReportingMutations
         );
     }
 
-    public function exportPerformanceWeakLinksReport()
+    public function exportPerformanceWeakLinksReport(): BinaryFileResponse
     {
         $this->authorizePerformanceEvaluationExport();
         $rows = app(PerformanceEvaluationReportingService::class)->weakLinkRows();
@@ -82,7 +83,7 @@ trait HandlesPerformanceReportingMutations
         );
     }
 
-    public function exportPerformanceWeakPivotReport()
+    public function exportPerformanceWeakPivotReport(): BinaryFileResponse
     {
         $this->authorizePerformanceEvaluationExport();
         $rows = app(PerformanceEvaluationReportingService::class)->weakLinkPivotRows();
@@ -102,7 +103,7 @@ trait HandlesPerformanceReportingMutations
         );
     }
 
-    public function exportPerformanceAuditReport()
+    public function exportPerformanceAuditReport(): BinaryFileResponse
     {
         $this->authorizePerformanceEvaluationExport();
         $rows = app(PerformanceEvaluationReportingService::class)->auditRows();

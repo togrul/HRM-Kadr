@@ -33,7 +33,7 @@ return [
         'all' => 'hamısı',
         'missing_in' => 'giriş yoxdur',
         'missing_out' => 'çıxış yoxdur',
-        'unmatched_punch' => 'uyğunsuz punch',
+        'unmatched_punch' => 'uyğunsuz giriş-çıxış qeydi',
     ],
     'actions' => [
         'resolve' => 'Həll et',

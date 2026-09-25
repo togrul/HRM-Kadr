@@ -19,10 +19,10 @@
 
 <div class="flex flex-col py-1 px-1">
     <div class="flex items-center justify-between space-x-2">
-        <span class="text-xs text-gray-400">
+        <span class="text-xs text-zinc-400">
             {{ $startDate->format('d.m.Y') }}
         </span>
-        <span class="text-xs text-gray-800">
+        <span class="text-xs text-zinc-800">
             {{ $endDate->format('d.m.Y') }}
         </span>
     </div>

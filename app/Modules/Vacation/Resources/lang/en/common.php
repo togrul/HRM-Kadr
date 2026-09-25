@@ -44,6 +44,7 @@ return [
         'order_bound' => 'The self-service vacation request has been linked to an operational order.',
     ],
     'actions' => [
+        'vacation_order' => 'Vacation order',
         'bind_order' => 'Bind order',
         'export_excel' => 'Export to Excel',
         'print_document' => 'Vacation paper',

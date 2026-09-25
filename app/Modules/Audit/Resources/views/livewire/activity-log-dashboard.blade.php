@@ -35,11 +35,11 @@
             <x-context-panel.section :title="__('audit::activity.filters.period')" :padded="false">
                 <div class="space-y-2.5 px-3.5 pb-3.5 pt-1">
                     <label class="block">
-                        <span class="hrm-eyebrow block pb-1">{{ __('audit::activity.filters.from') }}</span>
+                        <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('audit::activity.filters.from') }}</span>
                         <x-ui.input type="date" wire:model.live="dateFrom" />
                     </label>
                     <label class="block">
-                        <span class="hrm-eyebrow block pb-1">{{ __('audit::activity.filters.to') }}</span>
+                        <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('audit::activity.filters.to') }}</span>
                         <x-ui.input type="date" wire:model.live="dateTo" />
                     </label>
                 </div>
@@ -118,10 +118,7 @@
                         @endforeach
                     </x-ui.select>
 
-                    <x-pill-button wire:click="resetFilters" wire:loading.attr="disabled"
-                        title="{{ __('audit::activity.actions.reset_filters') }}">
-                        {{ __('audit::activity.actions.reset_short') }}
-                    </x-pill-button>
+                    <x-filter.reset :active="$search !== '' || $logName !== '' || $event !== '' || $dateFrom !== '' || $dateTo !== ''" action="resetFilters" />
                 </div>
             </div>
 

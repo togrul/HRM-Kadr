@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Modules\Compensation\Application\Services\CompensationService;
+use App\Modules\Compensation\Contracts\OrderCompensationSync;
 use App\Modules\Integration\Domain\Contracts\IntegrationOutbox;
 use App\Modules\Integration\Domain\Contracts\PayrollOwnership;
 use App\Modules\Integration\Infrastructure\NullIntegrationOutbox;
@@ -13,6 +15,7 @@ use App\Services\NumberToWordsService;
 use App\Services\Profiles\ProfileState;
 use App\Services\StructurePathService;
 use App\Services\StructureService;
+use App\Services\UserPersonnelLinkResolver;
 use App\Support\Database\InstalledTables;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -48,6 +51,13 @@ class AppServiceProvider extends ServiceProvider
         // is not loaded when the module is off, and the Payroll module must be
         // able to resolve this either way.
         $this->app->bind(PayrollOwnership::class, ConfiguredPayrollOwnership::class);
+        // Bound here, not in OrdersServiceProvider: BonusService depends on it even when the
+        // orders module is switched off (company mode never drafts an order).
+        $this->app->bind(\App\Modules\Orders\Contracts\OrderDrafter::class, \App\Modules\Orders\Infrastructure\Document\OrderDraftService::class);
+
+        // Same reason: order effects (hire/transfer/termination) resolve this whether or
+        // not the compensation module's provider is loaded.
+        $this->app->bind(OrderCompensationSync::class, CompensationService::class);
 
         $this->app->singleton(NumberToWordsService::class, fn () => new NumberToWordsService);
         $this->app->singleton(StructureService::class, fn () => new StructureService);
@@ -56,6 +66,7 @@ class AppServiceProvider extends ServiceProvider
         // answered from that map. A fresh instance per caller re-reads it — on a table
         // that means once per row.
         $this->app->scoped(StructurePathService::class);
+        $this->app->scoped(UserPersonnelLinkResolver::class);
         $this->app->singleton(FeatureState::class, fn () => new FeatureState($this->app->make(ProfileState::class)->features()));
         $this->app->singleton(HrPolicyPackService::class, fn () => new HrPolicyPackService(
             $this->app->make(ProfileState::class),

@@ -2,7 +2,6 @@
 
 namespace App\Models\Concerns;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -12,26 +11,19 @@ use Illuminate\Database\Eloquent\Builder;
  */
 trait FiltersPersonnel
 {
+    use NormalizesFilterRanges;
+
     protected $likeFilterFields = [
         'surname', 'name', 'patronymic', 'tabel_no', 'pin',
     ];
 
-    public function scopeWithStructureTree($query): void
-    {
-        $query->with([
-            'structure' => fn ($q) => $q
-                ->select('id', 'parent_id', 'name')
-                ->withRecursive('parent', false),
-        ]);
-    }
-
-    public function scopeActive($query)
+    public function scopeActive($query): Builder
     {
         return $query->where('is_pending', false)
             ->whereNull('leave_work_date');
     }
 
-    public function scopeFilter($query, array $filters)
+    public function scopeFilter($query, array $filters): Builder
     {
         foreach ($filters as $field => $value) {
             if ($this->filterValueIsEmpty($value)) {
@@ -63,7 +55,7 @@ trait FiltersPersonnel
         });
     }
 
-    protected function applyRangeFilter($query, $field, array $value)
+    protected function applyRangeFilter($query, $field, array $value): void
     {
         if ($field === 'age') {
             [$minAge, $maxAge] = $this->normalizeNumericRange($value, 0, 150);
@@ -91,7 +83,7 @@ trait FiltersPersonnel
         }
     }
 
-    protected function applyExactFilter($query, $field, $value)
+    protected function applyExactFilter($query, $field, $value): void
     {
         switch ($field) {
             case 'nationality_id':
@@ -143,53 +135,6 @@ trait FiltersPersonnel
         }
     }
 
-    protected function filterValueIsEmpty(mixed $value): bool
-    {
-        if (is_array($value)) {
-            foreach ($value as $item) {
-                if (! $this->filterValueIsEmpty($item)) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        if (is_bool($value)) {
-            return false;
-        }
-
-        if (is_string($value)) {
-            return trim($value) === '';
-        }
-
-        return $value === null;
-    }
-
-    protected function normalizeDateRange(array $value, ?string $defaultMin = null, ?string $defaultMax = null): array
-    {
-        $defaultMin ??= '1990-01-01';
-        $defaultMax ??= Carbon::now()->format('Y-m-d');
-
-        $min = $this->normalizeDateValue($value['min'] ?? null, $defaultMin);
-        $max = $this->normalizeDateValue($value['max'] ?? null, $defaultMax);
-
-        if ($min > $max) {
-            [$min, $max] = [$max, $min];
-        }
-
-        return [$min, $max];
-    }
-
-    protected function normalizeDateValue(?string $value, string $fallback): string
-    {
-        if ($value === null || trim($value) === '') {
-            return $fallback;
-        }
-
-        return Carbon::parse($value)->format('Y-m-d');
-    }
-
     protected function normalizeNumericRange(array $value, int $defaultMin, int $defaultMax): array
     {
         $min = array_key_exists('min', $value) && $value['min'] !== ''
@@ -207,7 +152,7 @@ trait FiltersPersonnel
         return [$min, $max];
     }
 
-    protected function applyStructureFilter($query, $value)
+    protected function applyStructureFilter($query, $value): void
     {
         $structureIds = $this->getNestedStructure($value);
         $query->whereIn($this->qualifiedColumn('structure_id'), $structureIds);

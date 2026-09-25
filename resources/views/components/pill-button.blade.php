@@ -1,5 +1,6 @@
 @props([
-    'variant' => 'primary', // primary | secondary | emerald | danger | ghost
+    // Secondary by default: a page carries ONE primary action, and it must say so explicitly.
+    'variant' => 'secondary', // primary | secondary | emerald | danger | ghost
     'href' => null,
     'icon' => false,        // true → square icon-only button
     'type' => 'button',     // a duplicated type= attribute is ignored by the browser, so it is a prop
@@ -15,8 +16,8 @@
         'ghost' => 'text-ink-muted hover:bg-[#f4f4f5] hover:text-ink',
         default => 'border border-hairline bg-[#f4f4f5] text-ink-soft hover:border-zinc-300 hover:bg-[#e4e4e7] hover:text-ink',
     };
-    $shape = $icon ? 'h-9 w-9 justify-center' : 'h-9 gap-2 px-3.5';
-    $classes = "inline-flex items-center whitespace-nowrap rounded-[10px] text-[12.5px] font-semibold tracking-[-0.01em] transition {$shape} {$tone}";
+    $shape = $icon ? 'h-10 w-10 justify-center' : 'h-10 gap-2 px-4';
+    $classes = "inline-flex items-center whitespace-nowrap rounded-[10px] text-[14px] font-semibold tracking-[-0.01em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 {$shape} {$tone}";
 @endphp
 
 @if ($href)

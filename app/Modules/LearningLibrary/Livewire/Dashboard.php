@@ -7,7 +7,9 @@ use App\Modules\LearningLibrary\Application\Services\LearningLibraryReadService;
 use App\Modules\Personnel\Contracts\LearningAssignmentManager;
 use App\Support\Library\LibraryExportAction;
 use App\Support\Livewire\AbstractLibraryDashboard;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Computed;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class Dashboard extends AbstractLibraryDashboard
 {
@@ -191,7 +193,7 @@ class Dashboard extends AbstractLibraryDashboard
         $this->dispatch('notify', type: 'info', message: __('learning-library::dashboard.messages.version_prefilled'));
     }
 
-    public function exportAssets()
+    public function exportAssets(): BinaryFileResponse
     {
         abort_unless($this->canView(), 403);
 
@@ -211,7 +213,7 @@ class Dashboard extends AbstractLibraryDashboard
         );
     }
 
-    public function exportAssignments()
+    public function exportAssignments(): BinaryFileResponse
     {
         abort_unless($this->canView(), 403);
 
@@ -230,7 +232,7 @@ class Dashboard extends AbstractLibraryDashboard
         );
     }
 
-    public function exportOverdueAssignments()
+    public function exportOverdueAssignments(): BinaryFileResponse
     {
         abort_unless($this->canView(), 403);
 
@@ -247,7 +249,7 @@ class Dashboard extends AbstractLibraryDashboard
         );
     }
 
-    public function exportCompletedAssignments()
+    public function exportCompletedAssignments(): BinaryFileResponse
     {
         abort_unless($this->canView(), 403);
 
@@ -264,7 +266,7 @@ class Dashboard extends AbstractLibraryDashboard
         );
     }
 
-    public function exportVersionHistory()
+    public function exportVersionHistory(): BinaryFileResponse
     {
         abort_unless($this->canView(), 403);
 
@@ -345,7 +347,7 @@ class Dashboard extends AbstractLibraryDashboard
         return auth()->user()?->can('assign-employee-content') ?? false;
     }
 
-    public function render()
+    public function render(): View
     {
         return view('learning-library::livewire.learning-library.dashboard');
     }

@@ -1,0 +1,35 @@
+<?php
+
+namespace App\Modules\Orders\Contracts;
+
+use App\Models\OrderLog;
+use App\Models\Personnel;
+use RuntimeException;
+
+/**
+ * Sanctioned cross-module surface for drafting a pending Word-engine order for one
+ * employee. Other modules depend on THIS interface — never on the concrete Orders
+ * implementation — so the Orders module can evolve its internals freely.
+ *
+ * @see \App\Modules\Orders\Infrastructure\Document\OrderDraftService
+ */
+interface OrderDrafter
+{
+    public function hasTemplate(string $code): bool;
+
+    /**
+     * Active templates that can be issued for an existing employee (hire templates act on
+     * a candidate, so they are left out), keyed by code.
+     *
+     * @param  string|null  $effect  only templates with this effect (e.g. 'vacation')
+     * @return array<string, string> code → label
+     */
+    public function personnelTemplates(?string $effect = null): array;
+
+    /**
+     * @param  array<string, string>  $fieldsByLabel  placeholder label → value
+     *
+     * @throws RuntimeException when the template is not registered
+     */
+    public function draft(string $templateCode, Personnel $personnel, array $fieldsByLabel, string $orderNumber): OrderLog;
+}

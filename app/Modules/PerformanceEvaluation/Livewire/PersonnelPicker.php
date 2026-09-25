@@ -3,6 +3,7 @@
 namespace App\Modules\PerformanceEvaluation\Livewire;
 
 use App\Models\Personnel;
+use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
 /**
@@ -73,7 +74,7 @@ class PersonnelPicker extends Component
         $this->dispatch('personnel-cleared', target: $this->target);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('performance-evaluation::livewire.performance-evaluation.personnel-picker');
     }

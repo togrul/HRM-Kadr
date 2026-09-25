@@ -85,6 +85,7 @@ return [
         'active_process_count' => ':count active processes',
         'no_template' => 'No template',
         'result_count' => ':count processes',
+        'process_unit' => 'processes',
         'overdue' => 'Overdue',
         'event_mix' => 'Process mix',
         'overdue_tasks' => 'Overdue lifecycle tasks',
@@ -157,6 +158,7 @@ return [
         'manage_templates' => 'Templates',
         'start_process' => 'Start process',
         'complete_processes' => 'Complete',
+        'show_more' => 'Show more (:count)',
     ],
     'messages' => [
         'template_created' => 'Lifecycle template was created.',

@@ -6,6 +6,8 @@ use App\Livewire\Concerns\WithRuntimeMemo;
 use App\Modules\TrainingNeeds\Application\Services\TrainingExecutiveReportingService;
 use App\Modules\TrainingNeeds\Application\Services\TrainingNeedCoverageService;
 use App\Modules\TrainingNeeds\Livewire\Concerns\InteractsWithTrainingNeedsAccess;
+use Illuminate\Contracts\View\View;
+use Illuminate\Support\Collection;
 use Livewire\Attributes\Isolate;
 use Livewire\Component;
 
@@ -65,12 +67,12 @@ class Reports extends Component
         );
     }
 
-    public function getAnnualReportRowsProperty()
+    public function getAnnualReportRowsProperty(): Collection
     {
         return $this->rememberRuntime('trainingNeedsReports.annualRows', fn () => app(TrainingExecutiveReportingService::class)->annualRows());
     }
 
-    public function getQuarterlyReportRowsProperty()
+    public function getQuarterlyReportRowsProperty(): Collection
     {
         return $this->rememberRuntime(
             'trainingNeedsReports.quarterlyRows.'.$this->reportYear,
@@ -78,7 +80,7 @@ class Reports extends Component
         );
     }
 
-    public function getEmployeeHoursRowsProperty()
+    public function getEmployeeHoursRowsProperty(): Collection
     {
         return $this->rememberRuntime(
             'trainingNeedsReports.employeeHours.'.$this->reportYear.'.'.($this->reportQuarter ?: 'all'),
@@ -86,7 +88,7 @@ class Reports extends Component
         );
     }
 
-    public function getDeliveryTypeRowsProperty()
+    public function getDeliveryTypeRowsProperty(): Collection
     {
         return $this->rememberRuntime(
             'trainingNeedsReports.deliveryTypes.'.$this->reportYear.'.'.($this->reportQuarter ?: 'all'),
@@ -94,7 +96,7 @@ class Reports extends Component
         );
     }
 
-    public function getOutcomeRowsProperty()
+    public function getOutcomeRowsProperty(): Collection
     {
         return $this->rememberRuntime(
             'trainingNeedsReports.outcomes.'.$this->reportYear.'.'.($this->reportQuarter ?: 'all'),
@@ -110,7 +112,7 @@ class Reports extends Component
         );
     }
 
-    public function getCoverageCompetencyRowsProperty()
+    public function getCoverageCompetencyRowsProperty(): Collection
     {
         return $this->rememberRuntime(
             'trainingNeedsReports.coverageCompetencies.'.$this->reportYear.'.'.($this->reportQuarter ?: 'all'),
@@ -118,7 +120,7 @@ class Reports extends Component
         );
     }
 
-    public function getCoverageProgramRowsProperty()
+    public function getCoverageProgramRowsProperty(): Collection
     {
         return $this->rememberRuntime(
             'trainingNeedsReports.coveragePrograms.'.$this->reportYear.'.'.($this->reportQuarter ?: 'all'),
@@ -126,7 +128,7 @@ class Reports extends Component
         );
     }
 
-    public function render()
+    public function render(): View
     {
         return view('training-needs::livewire.training-needs.reports');
     }

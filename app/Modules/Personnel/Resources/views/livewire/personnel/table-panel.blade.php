@@ -25,7 +25,7 @@
 @endphp
 
 <div class="contents">
-    <x-table.tbl :headers="$this->getTableHeaders()">
+    <x-table.tbl sticky :headers="$this->getTableHeaders()">
         @forelse ($personnels as $personnel)
             @php
                 $rowActions = $this->rowActions($personnel);
@@ -81,7 +81,7 @@
                 <x-personnel.row-actions :actions="$rowActions" :force-up="$loop->last" />
             </tr>
         @empty
-            <x-table.empty :rows="count($this->getTableHeaders())"></x-table.empty>
+            <x-table.empty :rows="count($this->getTableHeaders())" :filtered="$search !== '' || $filters !== [] || $selectedPosition !== null" :resettable="false" />
         @endforelse
     </x-table.tbl>
 

@@ -23,8 +23,9 @@ class MyHrOperationalRequestVisibilityTest extends TestCase
 
         $user = User::factory()->create(['is_active' => true]);
         $user->givePermissionTo(Permission::findOrCreate('show-vacations', 'web'));
+        $user->assignRole($role = \Spatie\Permission\Models\Role::findOrCreate('structure-scope', 'web'));
         DB::table('role_structures')->insert([
-            'role_id' => $user->id,
+            'role_id' => $role->id,
             'structure_id' => 1,
         ]);
 
@@ -78,8 +79,9 @@ class MyHrOperationalRequestVisibilityTest extends TestCase
 
         $user = User::factory()->create(['is_active' => true]);
         $user->givePermissionTo(Permission::findOrCreate('show-business_trips', 'web'));
+        $user->assignRole($role = \Spatie\Permission\Models\Role::findOrCreate('structure-scope', 'web'));
         DB::table('role_structures')->insert([
-            'role_id' => $user->id,
+            'role_id' => $role->id,
             'structure_id' => 1,
         ]);
 

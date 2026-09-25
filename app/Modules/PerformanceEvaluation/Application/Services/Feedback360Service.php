@@ -136,8 +136,8 @@ class Feedback360Service
     /**
      * Persist a rater's scores and mark them submitted.
      *
-     * @param  array<int,int|float|string|null>  $scores   item id => score
-     * @param  array<int,string|null>            $comments item id => comment
+     * @param  array<int,int|float|string|null>  $scores  item id => score
+     * @param  array<int,string|null>  $comments  item id => comment
      */
     public function submitScores(int $raterId, array $scores, array $comments = []): void
     {
@@ -244,7 +244,7 @@ class Feedback360Service
      * Save HR's calibrated per-item scores, compute the weighted final, and (optionally)
      * approve the calibration. Moving to calibration also flips the request status.
      *
-     * @param  array<int,int|float|string|null>  $calibratedScores item id => score
+     * @param  array<int,int|float|string|null>  $calibratedScores  item id => score
      */
     public function calibrate(int $requestId, array $calibratedScores, ?string $note, bool $approve, ?int $userId): void
     {

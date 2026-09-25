@@ -9,9 +9,11 @@ use App\Models\OrderLog;
 use App\Models\Personnel;
 use App\Models\StaffSchedule;
 use App\Models\User;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Livewire\Component;
@@ -92,7 +94,7 @@ class ActivityLogDashboard extends Component
         ], fn ($value) => $value !== ''));
     }
 
-    public function render()
+    public function render(): View
     {
         $activities = $this->filteredQuery()
             ->select([
@@ -134,8 +136,9 @@ class ActivityLogDashboard extends Component
         return AuditActivity::query()
             ->when($this->logName !== '', fn (Builder $query) => $query->where('log_name', $this->logName))
             ->when(! $ignoreEvent && $this->event !== '', fn (Builder $query) => $query->where('event', $this->event))
-            ->when($this->dateFrom !== '', fn (Builder $query) => $query->whereDate('created_at', '>=', $this->dateFrom))
-            ->when($this->dateTo !== '', fn (Builder $query) => $query->whereDate('created_at', '<=', $this->dateTo))
+            // Plain ranges, not whereDate(): DATE(created_at) cannot use the index.
+            ->when($this->dayStart($this->dateFrom), fn (Builder $query, Carbon $from) => $query->where('created_at', '>=', $from))
+            ->when($this->dayStart($this->dateTo), fn (Builder $query, Carbon $to) => $query->where('created_at', '<', $to->addDay()))
             ->when($this->search !== '', function (Builder $query) {
                 $term = '%'.str_replace(['%', '_'], ['\\%', '\\_'], trim($this->search)).'%';
 
@@ -148,6 +151,11 @@ class ActivityLogDashboard extends Component
                         ->orWhere('causer_type', 'like', $term);
                 });
             });
+    }
+
+    private function dayStart(string $date): ?Carbon
+    {
+        return $date === '' ? null : rescue(fn (): Carbon => Carbon::parse($date)->startOfDay(), null, false);
     }
 
     private function selectedActivity(): ?AuditActivity
@@ -434,6 +442,11 @@ class ActivityLogDashboard extends Component
                 $ids = $items->pluck('id')->unique()->values();
                 if ($ids->isEmpty()) {
                     return [];
+                }
+
+                // Only the id to read means the label is the "Class #id" fallback anyway.
+                if ($this->labelColumnsFor($modelClass) === ['id'] && $modelClass !== StaffSchedule::class) {
+                    return $ids->mapWithKeys(fn (int $id): array => [$this->entityKey($modelClass, $id) => class_basename($modelClass).' #'.$id])->all();
                 }
 
                 $models = $modelClass::query()

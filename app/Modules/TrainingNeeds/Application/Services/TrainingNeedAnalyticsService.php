@@ -2,13 +2,9 @@
 
 namespace App\Modules\TrainingNeeds\Application\Services;
 
-use App\Models\RoleCompetencyRequirement;
 use App\Models\TrainingAnnualPlan;
-use App\Models\TrainingDeliveryRecord;
-use App\Models\TrainingFeedbackResponse;
 use App\Models\TrainingNeedItem;
-use App\Models\TrainingPlanItem;
-use App\Models\TrainingSession;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 class TrainingNeedAnalyticsService
@@ -72,7 +68,7 @@ class TrainingNeedAnalyticsService
             ->all();
     }
 
-    public function recentPlans()
+    public function recentPlans(): Collection
     {
         return TrainingAnnualPlan::query()
             ->withCount('items')

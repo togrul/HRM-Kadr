@@ -27,6 +27,11 @@ class StructurePathService
     protected array $segmentCache = [];
 
     /**
+     * @var array<int, list<int>>|null
+     */
+    protected ?array $childrenIndex = null;
+
+    /**
      * The unit and its ancestors, outermost first.
      *
      * Callers join these themselves: unit names contain spaces, so a joined string cannot
@@ -95,6 +100,93 @@ class StructurePathService
     public function resolveFromModel(?Structure $structure): string
     {
         return $this->resolve($structure?->id);
+    }
+
+    /**
+     * The unit, then each ancestor up to and including the root — nearest first.
+     *
+     * @return list<int>
+     */
+    public function lineIds(?int $structureId): array
+    {
+        $map = $this->structureMap();
+        $ids = [];
+        $cursor = (int) $structureId;
+
+        while (isset($map[$cursor]) && ! isset($ids[$cursor])) {
+            $ids[$cursor] = true;
+            $cursor = (int) $map[$cursor]['parent_id'];
+        }
+
+        return array_keys($ids);
+    }
+
+    /**
+     * The unit and every unit below it, from the same flat read — walking `->subs`
+     * lazily costs a query per node. With `$within`, the walk only descends through
+     * those units (the user's accessible set); the unit itself is always included.
+     *
+     * @param  list<int>|null  $within
+     * @return list<int>
+     */
+    public function descendantIds(int $structureId, ?array $within = null): array
+    {
+        if (! isset($this->structureMap()[$structureId])) {
+            return [];
+        }
+
+        $children = $this->childrenIndex();
+        $allowed = $within === null ? null : array_flip($within);
+        $ids = [];
+        $stack = [$structureId];
+
+        while ($stack !== []) {
+            $id = array_pop($stack);
+
+            if (isset($ids[$id])) {
+                continue;
+            }
+
+            $ids[$id] = true;
+
+            foreach ($children[$id] ?? [] as $child) {
+                if ($allowed === null || isset($allowed[$child])) {
+                    $stack[] = $child;
+                }
+            }
+        }
+
+        return array_keys($ids);
+    }
+
+    /**
+     * Drop the cached chart; the next lookup re-reads it. StructureObserver calls this so
+     * a unit created or removed mid-request is seen by the rest of that request.
+     */
+    public function flush(): void
+    {
+        $this->structureMap = null;
+        $this->childrenIndex = null;
+        $this->segmentCache = [];
+    }
+
+    /**
+     * @return array<int, list<int>>
+     */
+    protected function childrenIndex(): array
+    {
+        if ($this->childrenIndex !== null) {
+            return $this->childrenIndex;
+        }
+
+        $children = [];
+        foreach ($this->structureMap() as $id => $node) {
+            if ($node['parent_id'] !== null) {
+                $children[$node['parent_id']][] = $id;
+            }
+        }
+
+        return $this->childrenIndex = $children;
     }
 
     /**

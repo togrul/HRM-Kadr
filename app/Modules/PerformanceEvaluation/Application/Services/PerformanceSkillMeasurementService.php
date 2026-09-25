@@ -6,7 +6,6 @@ use App\Models\EmployeeCompetencyProfile;
 use App\Models\PerformanceTestAttempt;
 use App\Models\PerformanceTestAttemptAnswer;
 use App\Models\PerformanceTestQuestion;
-use App\Models\PerformanceTestQuestionOption;
 use App\Models\PerformanceTestTrainingNeedLink;
 use App\Models\RoleCompetencyRequirement;
 use App\Models\TrainingLevel;
@@ -174,6 +173,7 @@ class PerformanceSkillMeasurementService
                 $threshold = 60.0;
                 if ((float) $result['percentage'] >= $threshold) {
                     $this->deleteExistingNeedLink($existingLinks->get((int) $competencyId));
+
                     continue;
                 }
 
@@ -189,7 +189,7 @@ class PerformanceSkillMeasurementService
 
                 $priority = (float) $result['percentage'] <= 40 ? 'high' : 'medium';
                 $link = $existingLinks->get((int) $competencyId);
-                $need = $link?->trainingNeed ?? new TrainingNeedItem();
+                $need = $link?->trainingNeed ?? new TrainingNeedItem;
 
                 $need->fill([
                     'personnel_id' => $attempt->session->personnel_id,

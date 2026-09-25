@@ -27,11 +27,11 @@
                         </div>
                         <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
                             <x-label for="training-lists-status">{{ __('training_needs::dashboard.fields.status') }}</x-label>
-                            <select id="training-lists-status" wire:model.live="statusFilter" class="mt-2 h-11 w-full rounded-xl border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                            <x-ui.select class="mt-2" id="training-lists-status" wire:model.live="statusFilter">
                                 @foreach ($this->statusOptions as $value => $label)
                                     <option value="{{ $value }}">{{ $label }}</option>
                                 @endforeach
-                            </select>
+                            </x-ui.select>
                         </div>
                         <div class="rounded-2xl border border-zinc-200 bg-white p-4">
                             <p class="text-[11px] font-semibold uppercase tracking-tight text-zinc-400">{{ __('training_needs::dashboard.labels.visible_records') }}</p>

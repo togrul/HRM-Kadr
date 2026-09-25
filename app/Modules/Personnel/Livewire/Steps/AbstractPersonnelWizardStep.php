@@ -52,32 +52,59 @@ abstract class AbstractPersonnelWizardStep extends Component
     public array $personnelExtra = [];
 
     public string $searchNationality = '';
+
     public string $searchPreviousNationality = '';
+
     public string $searchEducationDegree = '';
+
     public string $searchStructure = '';
+
     public string $searchPosition = '';
+
     public string $searchLaborStructure = '';
+
     public string $searchLaborPosition = '';
+
     public string $searchWorkNorm = '';
+
     public string $searchDisability = '';
+
     public string $searchSocialOrigin = '';
+
     public string $searchDocumentNationality = '';
+
     public string $searchDocumentBornCountry = '';
+
     public string $searchDocumentCity = '';
+
     public string $searchEducationInstitution = '';
+
     public string $searchEducationForm = '';
+
     public string $searchExtraEducationInstitution = '';
+
     public string $searchExtraEducationForm = '';
+
     public string $searchEducationType = '';
+
     public string $searchEducationDocumentType = '';
+
     public string $searchRank = '';
+
     public string $searchRankReason = '';
+
     public string $searchMilitaryRank = '';
+
     public string $searchKinship = '';
+
     public string $searchLanguage = '';
+
     public string $searchDegree = '';
+
     public string $searchDegreeDocumentType = '';
+
     public string $searchAward = '';
+
     public string $searchPunishment = '';
 
     public bool $isSpecialService = false;
@@ -399,7 +426,7 @@ abstract class AbstractPersonnelWizardStep extends Component
         }
     }
 
-    public function exceptArray($arrayKey, ?int $step = null)
+    public function exceptArray($arrayKey, ?int $step = null): array
     {
         $step ??= $this->stepNumber();
 

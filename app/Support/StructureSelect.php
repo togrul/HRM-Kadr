@@ -12,7 +12,7 @@ class StructureSelect
         return $service ?? app(WordSuffixService::class);
     }
 
-    public static function levels($levels = null)
+    public static function levels($levels = null): mixed
     {
         return $levels ?? collect(StructureEnum::cases())->mapWithKeys(fn ($c) => [$c->value => strtolower($c->name)]);
     }

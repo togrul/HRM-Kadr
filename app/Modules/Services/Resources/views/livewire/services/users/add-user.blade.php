@@ -1,6 +1,6 @@
 <div>
     <div class="sidemenu-title">
-        <h2 class="text-lg font-medium text-gray-600" id="slide-over-title">
+        <h2 class="text-lg font-medium text-zinc-600" id="slide-over-title">
             {{ $title ?? ''}}
           </h2>
     </div>
@@ -19,7 +19,7 @@
       </div>
       <div class="">
         <x-label for="user.email">{{ __('services::common.labels.email') }}</x-label>
-        <x-livewire-input mode="gray" name="user.email" wire:model.defer="user.email"></x-livewire-input>
+        <x-livewire-input mode="gray" name="user.email" wire:model="user.email"></x-livewire-input>
         @error('user.email')
           <x-validation> {{ $message }} </x-validation>
         @enderror

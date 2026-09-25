@@ -1,33 +1,33 @@
 <div class="space-y-5 px-4 py-3 lg:px-5">
-    <x-surface-card :title="__('reports::dashboard.comparisons.title')" icon="icons.pending-icon" class="rounded-[2rem] border-zinc-200/90 bg-white shadow-card" bodyClass="rounded-[1.6rem] border-zinc-200/90 bg-[linear-gradient(180deg,#ffffff_0%,#fcfcfd_100%)]" contentClass="p-5 lg:p-6">
+    <x-surface-card :title="__('reports::dashboard.comparisons.title')" icon="icons.pending-icon" class="rounded-2xl border-zinc-200/90 bg-white shadow-card" bodyClass="rounded-b-2xl border-zinc-200/90 bg-[linear-gradient(180deg,#ffffff_0%,#fcfcfd_100%)]" contentClass="p-5 lg:p-6">
         <div class="space-y-4">
             <p class="text-sm leading-7 text-zinc-500">{{ __('reports::dashboard.comparisons.description') }}</p>
 
             <div class="grid gap-4 md:grid-cols-3">
                 <div>
                     <label class="mb-1 block text-xs font-medium text-zinc-500">{{ __('reports::dashboard.fields.year') }}</label>
-                    <select wire:model.live="year" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-700">
+                    <x-ui.select wire:model.live="year">
                         @foreach (range(now()->year - 4, now()->year + 1) as $yearOption)
                             <option value="{{ $yearOption }}">{{ $yearOption }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                 </div>
                 <div>
                     <label class="mb-1 block text-xs font-medium text-zinc-500">{{ __('reports::dashboard.fields.month') }}</label>
-                    <select wire:model.live="month" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-700">
+                    <x-ui.select wire:model.live="month">
                         @foreach (range(1, 12) as $monthOption)
                             <option value="{{ $monthOption }}">{{ \Carbon\Carbon::create()->month($monthOption)->translatedFormat('F') }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                 </div>
                 <div>
                     <label class="mb-1 block text-xs font-medium text-zinc-500">{{ __('reports::dashboard.fields.structure') }}</label>
-                    <select wire:model.live="structureId" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-700">
+                    <x-ui.select wire:model.live="structureId">
                         <option value="">{{ __('reports::dashboard.labels.all_structures') }}</option>
                         @foreach ($structureOptions as $option)
                             <option value="{{ $option['id'] }}">{{ $option['label'] }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                 </div>
             </div>
         </div>
@@ -68,11 +68,11 @@
                         <p class="text-sm font-semibold text-zinc-900">{{ $row['label'] }}</p>
                         <div class="mt-4 space-y-4">
                             <div>
-                                <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-400">{{ __('reports::dashboard.overview.cards.attendance_coverage') }}</p>
+                                <p class="hrm-eyebrow">{{ __('reports::dashboard.overview.cards.attendance_coverage') }}</p>
                                 <p class="mt-2 text-3xl font-semibold text-zinc-950">{{ number_format($row['coverage_pct'], 1) }}%</p>
                             </div>
                             <div>
-                                <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-400">{{ __('reports::dashboard.overview.cards.absence_rate') }}</p>
+                                <p class="hrm-eyebrow">{{ __('reports::dashboard.overview.cards.absence_rate') }}</p>
                                 <p class="mt-2 text-2xl font-semibold text-zinc-950">{{ number_format($row['absence_rate_pct'], 1) }}%</p>
                             </div>
                         </div>

@@ -4,12 +4,18 @@ namespace App\Modules\EmployeeLifecycle\Livewire;
 
 use App\Modules\EmployeeLifecycle\Application\Services\LifecycleDashboardReadService;
 use App\Modules\EmployeeLifecycle\Application\Services\LifecyclePlanTemplateService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class Dashboard extends Component
 {
+    use WithPagination;
+
     public string $search = '';
 
     public string $type = '';
@@ -75,6 +81,21 @@ class Dashboard extends Component
         'owner_user_id' => '',
     ];
 
+    /** Rows each queue card shows; "show more" grows one by a page. Locked: the client must not lift the bound. */
+    #[Locked]
+    public array $queueLimits = [
+        'probation' => LifecycleDashboardReadService::QUEUE_PAGE,
+        'movement' => LifecycleDashboardReadService::QUEUE_PAGE,
+        'offboarding' => LifecycleDashboardReadService::QUEUE_PAGE,
+    ];
+
+    /** Search boxes of the completion panel's selects. */
+    public string $probationOptionSearch = '';
+
+    public string $movementOptionSearch = '';
+
+    public string $offboardingOptionSearch = '';
+
     public array $completionForm = [
         'probation_review_id' => '',
         'probation_decision' => 'confirm',
@@ -95,6 +116,14 @@ class Dashboard extends Component
         $this->search = '';
         $this->type = '';
         $this->status = '';
+        $this->resetPage();
+    }
+
+    public function updated(string $property): void
+    {
+        if (in_array($property, ['search', 'type', 'status'], true)) {
+            $this->resetPage();
+        }
     }
 
     public function openPanel(string $panel): void
@@ -109,6 +138,13 @@ class Dashboard extends Component
     {
         $this->panel = '';
         $this->resetErrorBag();
+    }
+
+    public function showMoreQueue(string $queue): void
+    {
+        if (array_key_exists($queue, $this->queueLimits)) {
+            $this->queueLimits[$queue] += LifecycleDashboardReadService::QUEUE_PAGE;
+        }
     }
 
     public function setStartTab(string $tab): void
@@ -450,18 +486,14 @@ class Dashboard extends Component
         $this->dispatch('notify', type: 'success', message: __('employee-lifecycle::dashboard.messages.offboarding_completed'));
     }
 
-    public function render(LifecycleDashboardReadService $service)
+    public function render(LifecycleDashboardReadService $service): View
     {
         return view('employee-lifecycle::livewire.dashboard', [
             ...$service->dashboard([
                 'search' => $this->search,
                 'type' => $this->type,
                 'status' => $this->status,
-            ]),
-            'personnelOptions' => $this->personnelOptions(),
-            'userOptions' => $this->userOptions(),
-            'structureOptions' => $this->structureOptions(),
-            'positionOptions' => $this->positionOptions(),
+            ], LifecycleDashboardReadService::PER_PAGE, $this->queueLimits),
         ]);
     }
 
@@ -564,7 +596,57 @@ class Dashboard extends Component
         ]);
     }
 
-    private function personnelOptions(): Collection
+    /**
+     * Only the completion panel reads the three option lists below: searched, limited, and
+     * always holding the selected row.
+     *
+     * @return array<int, array{id: int, label: string}>
+     */
+    #[Computed]
+    public function probationReviewOptions(): array
+    {
+        return app(LifecycleDashboardReadService::class)->probationReviewOptions(
+            $this->probationOptionSearch,
+            $this->selectedCompletionId('probation_review_id'),
+        );
+    }
+
+    /**
+     * @return array<int, array{id: int, label: string}>
+     */
+    #[Computed]
+    public function movementOptions(): array
+    {
+        return app(LifecycleDashboardReadService::class)->movementOptions(
+            $this->movementOptionSearch,
+            $this->selectedCompletionId('movement_id'),
+        );
+    }
+
+    /**
+     * @return array<int, array{id: int, label: string}>
+     */
+    #[Computed]
+    public function offboardingCaseOptions(): array
+    {
+        return app(LifecycleDashboardReadService::class)->offboardingCaseOptions(
+            $this->offboardingOptionSearch,
+            $this->selectedCompletionId('offboarding_case_id'),
+        );
+    }
+
+    private function selectedCompletionId(string $field): ?int
+    {
+        $value = $this->completionForm[$field] ?? null;
+
+        return is_numeric($value) ? (int) $value : null;
+    }
+
+    /**
+     * Only the launch panel's selects read this; persisted so switching its tabs does not re-query.
+     */
+    #[Computed(persist: true)]
+    public function personnelOptions(): Collection
     {
         return DB::table('personnels')
             ->leftJoin('structures', 'structures.id', '=', 'personnels.structure_id')
@@ -588,7 +670,11 @@ class Dashboard extends Component
             ]);
     }
 
-    private function userOptions(): Collection
+    /**
+     * Only the launch panel's selects read this; persisted so switching its tabs does not re-query.
+     */
+    #[Computed(persist: true)]
+    public function userOptions(): Collection
     {
         return DB::table('users')
             ->where('is_active', true)
@@ -603,7 +689,11 @@ class Dashboard extends Component
             ]);
     }
 
-    private function structureOptions(): Collection
+    /**
+     * Only the launch panel's selects read this; persisted so switching its tabs does not re-query.
+     */
+    #[Computed(persist: true)]
+    public function structureOptions(): Collection
     {
         return DB::table('structures')
             ->orderBy('name')
@@ -612,7 +702,11 @@ class Dashboard extends Component
             ->map(fn ($row): array => ['id' => (int) $row->id, 'label' => (string) $row->name]);
     }
 
-    private function positionOptions(): Collection
+    /**
+     * Only the launch panel's selects read this; persisted so switching its tabs does not re-query.
+     */
+    #[Computed(persist: true)]
+    public function positionOptions(): Collection
     {
         return DB::table('positions')
             ->orderBy('name')

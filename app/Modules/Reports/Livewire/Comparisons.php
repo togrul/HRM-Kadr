@@ -6,6 +6,7 @@ use App\Livewire\Concerns\WithRuntimeMemo;
 use App\Modules\Reports\Application\Services\ComparativeReportService;
 use App\Modules\Reports\Application\Services\ReportsAccessService;
 use App\Modules\Reports\Application\Services\ReportsStructureScopeService;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Isolate;
 use Livewire\Component;
 
@@ -57,12 +58,12 @@ class Comparisons extends Component
         );
     }
 
-    public function render()
+    public function render(): View
     {
         return view('reports::livewire.reports.comparisons');
     }
 
-    public function placeholder()
+    public function placeholder(): View
     {
         return view('reports::livewire.reports.placeholder');
     }

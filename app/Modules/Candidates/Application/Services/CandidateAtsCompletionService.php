@@ -11,7 +11,6 @@ use App\Models\JobRequisition;
 use App\Support\Database\InstalledTables;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 class CandidateAtsCompletionService
 {
@@ -210,7 +209,7 @@ class CandidateAtsCompletionService
 
     public function requisitionAging(int $warningDays = 14): array
     {
-        if (! InstalledTables::has('job_requisitions') || ! Schema::hasColumn('job_requisitions', 'approval_status')) {
+        if (! InstalledTables::has('job_requisitions') || ! InstalledTables::hasColumn('job_requisitions', 'approval_status')) {
             return [
                 'warning_days' => $warningDays,
                 'total_open' => 0,

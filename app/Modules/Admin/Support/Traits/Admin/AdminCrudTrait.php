@@ -7,13 +7,12 @@ use Livewire\Attributes\On;
 
 trait AdminCrudTrait
 {
-    public bool $isAdded;
+    public bool $isAdded = false;
 
     public array $form = [];
 
     public $model;
 
-    #[On('goOn-Delete')]
     public function delete(): void
     {
         // Defense-in-depth: the /admin route group already gates on `can:access-admin`
@@ -23,7 +22,7 @@ trait AdminCrudTrait
 
         if ($this->model) {
             $this->model->delete();
-            $this->dispatch('deleted');
+            $this->callDeletedSwal();
             $this->resetForm();
         }
     }

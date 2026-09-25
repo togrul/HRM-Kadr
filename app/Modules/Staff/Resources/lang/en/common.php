@@ -46,4 +46,10 @@ return [
         'staff_deleted' => 'Staff was deleted!',
         'delete_confirm' => 'Are you sure you want to delete this data?',
     ],
+    'structure_levels' => [
+        'enterprise' => 'ENTERPRISE',
+        'department' => 'DEPARTMENT',
+        'division' => 'DIVISION',
+        'unit' => 'UNIT',
+    ],
 ];

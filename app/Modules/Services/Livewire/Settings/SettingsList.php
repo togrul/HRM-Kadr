@@ -6,9 +6,12 @@ use App\Models\AppealStatus;
 use App\Models\ChiefDelegation;
 use App\Models\Personnel;
 use App\Models\Setting;
+use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
 use App\Services\Chief\ChiefResolver;
 use App\Support\Language\AzerbaijaniDateFormatter;
 use App\Support\Translations\ModuleTranslation;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -17,16 +20,19 @@ use Livewire\Component;
 class SettingsList extends Component
 {
     use AuthorizesRequests;
+    use AuthorizesSettingsAccess;
 
     private const CANDIDATE_FILTER_KEYS = ['fullname', 'gender', 'results', 'age', 'appeal_date'];
 
     public string $section = 'general';
 
     public $setting = [];
+
     public array $candidateStatusWhitelist = [
         'military' => [],
         'civilian' => [],
     ];
+
     public array $candidatePresetSettings = [
         'military' => [
             'default_status' => 'all',
@@ -37,13 +43,18 @@ class SettingsList extends Component
             'show_deleted_tab' => true,
         ],
     ];
+
     public array $candidateEnabledFilters = [
         'military' => [],
         'civilian' => [],
     ];
+
     public array $candidateStatuses = [];
+
     public ?int $chiefPersonnelId = null;
+
     public array $chiefSnapshot = [];
+
     public array $chiefDelegationForm = [
         'delegate_personnel_id' => null,
         'starts_at' => null,
@@ -71,8 +82,13 @@ class SettingsList extends Component
         $this->loadChiefGovernance();
     }
 
-    public function updatedSetting($value, $name)
+    public function updatedSetting($value, $name): void
     {
+        // Only the value is editable; a crafted update to `setting.N.id` must not write.
+        if (! str_ends_with((string) $name, '.value')) {
+            return;
+        }
+
         $_key = explode('.', $name)[0];
         $_setting = Setting::where('id', $this->setting[$_key]['id'])->firstOrFail();
         $_setting->update([
@@ -82,7 +98,7 @@ class SettingsList extends Component
         $this->dispatch('settingsUpdated', __('services::settings.messages.saved'));
     }
 
-    public function setDeleteSettings($settingsId)
+    public function setDeleteSettings($settingsId): void
     {
         $this->dispatch('setDeleteSettings', $settingsId);
     }
@@ -183,11 +199,11 @@ class SettingsList extends Component
             'chiefDelegationForm.reason' => ['nullable', 'string', 'max:255'],
             'chiefDelegationForm.basis_document' => ['nullable', 'string', 'max:255'],
         ], [], [
-            'chiefDelegationForm.delegate_personnel_id' => 'Vəzifəni icra edən əməkdaş',
-            'chiefDelegationForm.starts_at' => 'Başlama tarixi',
-            'chiefDelegationForm.ends_at' => 'Bitmə tarixi',
-            'chiefDelegationForm.reason' => 'Səbəb',
-            'chiefDelegationForm.basis_document' => 'Əsas sənəd',
+            'chiefDelegationForm.delegate_personnel_id' => __('services::settings.labels.delegate'),
+            'chiefDelegationForm.starts_at' => __('services::settings.labels.starts_at'),
+            'chiefDelegationForm.ends_at' => __('services::settings.labels.ends_at'),
+            'chiefDelegationForm.reason' => __('services::settings.labels.reason'),
+            'chiefDelegationForm.basis_document' => __('services::settings.labels.basis_document'),
         ]);
 
         $form = $validated['chiefDelegationForm'];
@@ -198,7 +214,7 @@ class SettingsList extends Component
         $dates = app(AzerbaijaniDateFormatter::class);
         $startsAt = $dates->parse($form['starts_at']);
         if ($startsAt === null) {
-            $this->addError('chiefDelegationForm.starts_at', 'Başlama tarixi düzgün deyil.');
+            $this->addError('chiefDelegationForm.starts_at', __('services::settings.messages.invalid_starts_at'));
 
             return;
         }
@@ -207,12 +223,12 @@ class SettingsList extends Component
         if (filled($form['ends_at'])) {
             $endsAt = $dates->parse($form['ends_at']);
             if ($endsAt === null) {
-                $this->addError('chiefDelegationForm.ends_at', 'Bitmə tarixi düzgün deyil.');
+                $this->addError('chiefDelegationForm.ends_at', __('services::settings.messages.invalid_ends_at'));
 
                 return;
             }
             if ($endsAt->lt($startsAt)) {
-                $this->addError('chiefDelegationForm.ends_at', 'Bitmə tarixi başlama tarixindən əvvəl ola bilməz.');
+                $this->addError('chiefDelegationForm.ends_at', __('services::settings.messages.ends_before_starts'));
 
                 return;
             }
@@ -220,7 +236,7 @@ class SettingsList extends Component
 
         $chiefId = $this->chiefPersonnelId ?: data_get(app(ChiefResolver::class)->current(), 'permanent_chief_personnel_id');
         if (! $chiefId) {
-            $this->addError('chiefDelegationForm.delegate_personnel_id', 'Daimi rəhbər təyin edilməyib.');
+            $this->addError('chiefDelegationForm.delegate_personnel_id', __('services::settings.messages.permanent_chief_missing'));
 
             return;
         }
@@ -241,7 +257,7 @@ class SettingsList extends Component
         $this->syncLegacyChiefSettings();
         $this->loadChiefGovernance();
 
-        $this->dispatch('settingsUpdated', 'Rəhbər həvaləsi yaradıldı.');
+        $this->dispatch('settingsUpdated', __('services::settings.messages.delegation_created'));
     }
 
     public function revokeChiefDelegation(int $delegationId): void
@@ -260,7 +276,7 @@ class SettingsList extends Component
         $this->syncLegacyChiefSettings();
         $this->loadChiefGovernance();
 
-        $this->dispatch('settingsUpdated', 'Rəhbər həvaləsi dayandırıldı.');
+        $this->dispatch('settingsUpdated', __('services::settings.messages.delegation_revoked'));
     }
 
     public function resetChiefDelegationForm(): void
@@ -282,7 +298,7 @@ class SettingsList extends Component
         ];
     }
 
-    public function render()
+    public function render(): View
     {
         $settings = collect();
 
@@ -442,7 +458,7 @@ class SettingsList extends Component
             ->all();
     }
 
-    private function activeChiefDelegations()
+    private function activeChiefDelegations(): Collection
     {
         return ChiefDelegation::query()
             ->with(['chief:id,surname,name,patronymic', 'delegate:id,surname,name,patronymic'])
@@ -569,8 +585,8 @@ class SettingsList extends Component
     public function resolveSettingLabel(string $value): string
     {
         return match ($value) {
-            'Work coefficient' => 'İş əmsalı',
-            'Education coefficient' => 'Təhsil əmsalı',
+            'Work coefficient' => __('services::settings.labels.work_coefficient'),
+            'Education coefficient' => __('services::settings.labels.education_coefficient'),
             default => ModuleTranslation::resolveStoredText($value),
         };
     }

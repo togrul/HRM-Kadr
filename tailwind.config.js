@@ -8,12 +8,13 @@ export default {
         './resources/**/*.{blade.php,js,vue}',
         './app/Livewire/**/*.php',
         './app/View/Components/**/*.php',
+        './app/Support/Ui/**/*.php',
         './app/Modules/**/*.php',
         './app/Modules/**/*.blade.php',
     ],
     safelist: [
         {
-            pattern: /(bg|text|border)-(cyan|orange|rose|amber|indigo|lime|blue|emerald|yellow|slate|neutral|gray|zinc)-(50|100|200|300|400|500|600|700)(\/(50|60|70))?/,
+            pattern: /^(bg|text|border)-(cyan|orange|rose|amber|indigo|lime|blue|emerald|yellow|slate|neutral|gray|zinc)-(50|100|200|300|400|500|600|700)(\/(50|60|70))?$/,
             variants: ['hover'],
         },
     ],
@@ -31,7 +32,7 @@ export default {
                     hover: '#000000',
                     soft: '#27272a',
                     muted: '#52525b',
-                    faint: '#a1a1aa',
+                    faint: '#71717a',
                 },
                 hairline: {
                     DEFAULT: '#e4e4e7',
@@ -46,7 +47,7 @@ export default {
                 card: '0 1px 2px rgba(16,24,40,0.04)',
             },
             spacing: {
-                rail: '82px',
+                rail: '96px',
                 panel: '300px',
             },
             maxWidth: {

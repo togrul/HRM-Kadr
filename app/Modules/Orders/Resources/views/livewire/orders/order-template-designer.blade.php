@@ -5,7 +5,7 @@
             <div class="flex items-center gap-2.5">
                 @if (! $isNew)
                     <a href="{{ route('orders.designer') }}" wire:navigate title="{{ __('orders::order_composer.designer.existing_title') }}"
-                        class="flex h-9 w-9 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-500 transition hover:border-zinc-400 hover:text-zinc-900">
+                        class="flex h-10 w-10 items-center justify-center rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink-muted transition hover:bg-[#e4e4e7] hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
                     </a>
                 @endif
@@ -19,12 +19,12 @@
             </div>
 
             <div class="flex flex-1 flex-wrap items-center gap-2 lg:justify-end">
-                <input type="text" wire:model="label" placeholder="{{ __('orders::order_composer.designer.name') }}"
-                    class="h-8 flex-1 min-w-[180px] rounded-lg border border-zinc-200 bg-zinc-50/80 px-2.5 text-[13px] text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white focus:ring-0">
-                <input type="text" wire:model="code" @disabled(! $isNew) placeholder="{{ __('orders::order_composer.designer.code') }}"
-                    class="h-8 w-32 rounded-lg border border-zinc-200 bg-zinc-50/80 px-2.5 text-[13px] text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white focus:ring-0 disabled:opacity-50">
+                <input type="text" wire:model="label" placeholder="{{ __('orders::order_composer.designer.name') }}" aria-label="{{ __('orders::order_composer.designer.name') }}"
+                    class="h-10 min-w-[180px] flex-1 rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base text-ink placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-zinc-200 sm:text-sm">
+                <input type="text" wire:model="code" @disabled(! $isNew) placeholder="{{ __('orders::order_composer.designer.code') }}" aria-label="{{ __('orders::order_composer.designer.code') }}"
+                    class="h-10 w-32 rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base text-ink placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-zinc-200 disabled:opacity-50 sm:text-sm">
                 <button type="button" wire:click="save" wire:loading.attr="disabled" wire:target="save"
-                    class="inline-flex h-8 items-center gap-1.5 rounded-lg bg-zinc-900 px-3.5 text-[13px] font-medium text-white shadow-sm transition hover:bg-zinc-700 active:scale-[0.98] disabled:opacity-50">
+                    class="inline-flex h-10 items-center gap-1.5 rounded-[10px] bg-ink px-4 text-[14px] font-semibold text-white transition hover:bg-ink-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 disabled:opacity-50">
                     <svg wire:loading.remove wire:target="save" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                     <svg wire:loading wire:target="save" class="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle class="opacity-25" cx="12" cy="12" r="10"/><path class="opacity-75" d="M4 12a8 8 0 018-8"/></svg>
                     {{ __('orders::order_composer.designer.save') }}
@@ -152,12 +152,11 @@
             {{ __('orders::order_composer.designer.effect_title') }}
         </label>
         <p class="mb-3 mt-1 text-[12px] text-zinc-400">{{ __('orders::order_composer.designer.effect_hint') }}</p>
-        <select wire:model.live="effect"
-            class="h-9 w-full rounded-lg border border-zinc-200 bg-white px-2.5 text-[13px] text-zinc-800 focus:border-zinc-400 focus:ring-0 sm:max-w-md">
+        <x-ui.select class="sm:max-w-md" wire:model.live="effect" aria-label="{{ __('orders::order_composer.designer.effect_title') }}">
             @foreach ($this->effectOptions as $opt)
                 <option value="{{ $opt['kind'] }}">{{ $opt['label'] }}</option>
             @endforeach
-        </select>
+        </x-ui.select>
     </div>
 
     {{-- ============ Step 2: map the detected variables ============ --}}
@@ -201,8 +200,7 @@
                         {{-- mapping target --}}
                         <div class="w-full sm:w-72 sm:shrink-0">
                             @if ($v['source'] === 'auto')
-                                <select wire:model="variables.{{ $i }}.auto_key"
-                                    class="h-9 w-full rounded-lg border border-zinc-200 bg-white px-2.5 text-[13px] text-zinc-800 focus:border-zinc-400 focus:ring-0">
+                                <x-ui.select wire:model="variables.{{ $i }}.auto_key" aria-label="{{ __('orders::order_composer.designer.choose_source') }}">
                                     <option value="">— {{ __('orders::order_composer.designer.choose_source') }} —</option>
                                     @foreach ($this->variableGroups as $group => $vars)
                                         <optgroup label="{{ $group }}">
@@ -211,14 +209,13 @@
                                             @endforeach
                                         </optgroup>
                                     @endforeach
-                                </select>
+                                </x-ui.select>
                             @else
-                                <select wire:model="variables.{{ $i }}.field_type"
-                                    class="h-9 w-full rounded-lg border border-zinc-200 bg-white px-2.5 text-[13px] text-zinc-800 focus:border-zinc-400 focus:ring-0">
+                                <x-ui.select wire:model="variables.{{ $i }}.field_type" aria-label="{{ __('orders::order_composer.designer.manual') }}">
                                     @foreach ($this->fieldTypes as $ft)
                                         <option value="{{ $ft['type'] }}">{{ $ft['label'] }}</option>
                                     @endforeach
-                                </select>
+                                </x-ui.select>
                             @endif
                             @error("variables.$i.auto_key") <p class="mt-1 text-[11px] text-red-600">{{ $message }}</p> @enderror
                         </div>
@@ -226,13 +223,12 @@
                         {{-- effect role: only for manual fields when the order has an HR effect --}}
                         @if ($effect !== 'none' && $v['source'] === 'manual' && count($this->effectRoles))
                             <div class="w-full sm:w-56 sm:shrink-0">
-                                <select wire:model="variables.{{ $i }}.effect_role"
-                                    class="h-9 w-full rounded-lg border border-dashed border-zinc-300 bg-white px-2.5 text-[13px] text-zinc-700 focus:border-zinc-400 focus:ring-0">
+                                <x-ui.select wire:model="variables.{{ $i }}.effect_role" aria-label="{{ __('orders::order_composer.designer.effect_role_none') }}">
                                     <option value="">— {{ __('orders::order_composer.designer.effect_role_none') }} —</option>
                                     @foreach ($this->effectRoles as $role)
                                         <option value="{{ $role['key'] }}">{{ $role['label'] }}</option>
                                     @endforeach
-                                </select>
+                                </x-ui.select>
                             </div>
                         @endif
                     </div>
@@ -249,13 +245,13 @@
                 <h3 class="text-sm font-semibold text-zinc-900">{{ __('orders::order_composer.designer.template_view_title') }}</h3>
                 <div class="ml-auto flex flex-wrap items-center gap-2">
                     <button type="button" wire:click="previewTemplate" wire:loading.attr="disabled" wire:target="previewTemplate"
-                        class="inline-flex h-8 items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 text-[13px] font-medium text-zinc-700 transition hover:border-zinc-400 disabled:opacity-50">
+                        class="inline-flex h-10 items-center gap-1.5 rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[14px] font-medium text-ink-soft transition hover:bg-[#e4e4e7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 disabled:opacity-50">
                         <svg wire:loading.remove wire:target="previewTemplate" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                         <svg wire:loading wire:target="previewTemplate" class="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle class="opacity-25" cx="12" cy="12" r="10"/><path class="opacity-75" d="M4 12a8 8 0 018-8"/></svg>
                         {{ __('orders::order_composer.designer.view_template') }}
                     </button>
                     <button type="button" wire:click="downloadTemplate"
-                        class="inline-flex h-8 items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 text-[13px] font-medium text-zinc-700 transition hover:border-zinc-400">
+                        class="inline-flex h-10 items-center gap-1.5 rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[14px] font-medium text-ink-soft transition hover:bg-[#e4e4e7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400">
                         <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                         {{ __('orders::order_composer.designer.edit_in_word') }}
                     </button>

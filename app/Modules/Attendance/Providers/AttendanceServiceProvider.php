@@ -2,12 +2,14 @@
 
 namespace App\Modules\Attendance\Providers;
 
+use App\Modules\Attendance\Application\Services\ManualEntryApproverService;
 use App\Modules\Attendance\Console\Commands\AttendanceMonthlySnapshotCommand;
 use App\Modules\Attendance\Console\Commands\AttendanceProcessPunchesCommand;
 use App\Modules\Attendance\Console\Commands\AttendanceQueryBudgetCommand;
 use App\Modules\Attendance\Console\Commands\AttendanceRecalculateLedgersCommand;
 use App\Modules\Attendance\Console\Commands\AttendanceRenderBenchmarkCommand;
 use App\Modules\Attendance\Console\Commands\AttendanceSeedWeekendCalendarsCommand;
+use App\Modules\Attendance\Contracts\ManualEntryApprover;
 use App\Modules\Attendance\Domain\Contracts\PayrollAttendanceReadRepository;
 use App\Modules\Attendance\Infrastructure\Persistence\Eloquent\EloquentPayrollAttendanceReadRepository;
 use App\Providers\Concerns\RegistersLivewireAliases;
@@ -32,6 +34,7 @@ class AttendanceServiceProvider extends ServiceProvider
         }
 
         $this->app->bind(PayrollAttendanceReadRepository::class, EloquentPayrollAttendanceReadRepository::class);
+        $this->app->bind(ManualEntryApprover::class, ManualEntryApproverService::class);
     }
 
     public function boot(): void

@@ -6,6 +6,7 @@ use App\Models\Personnel;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Carbon;
 
 class AttendanceDailyMonitorReadService
 {
@@ -28,32 +29,44 @@ class AttendanceDailyMonitorReadService
         string $statusFilter,
         array $structureIds = []
     ): array {
+        // One pass with conditional sums instead of four counts over the same join.
+        $row = $this->baseQuery($date, $search, $statusFilter, $structureIds)
+            ->reorder()
+            ->toBase()
+            ->selectRaw("sum(case when l.worked_minutes > 0 or l.attendance_status in ('present', 'manual_present', 'holiday_worked', 'weekend_worked') then 1 else 0 end) as present_count")
+            ->selectRaw('sum(case when l.late_minutes > 0 then 1 else 0 end) as late_count')
+            ->selectRaw("sum(case when l.attendance_status in ('absent', 'manual_absence') then 1 else 0 end) as absent_count")
+            ->selectRaw('sum(case when l.id is null then 1 else 0 end) as missing_count')
+            ->first();
+
         return [
-            'present' => (clone $this->baseQuery($date, $search, $statusFilter, $structureIds))->where(function (Builder $query): void {
-                $query->where('l.worked_minutes', '>', 0)
-                    ->orWhereIn('l.attendance_status', ['present', 'manual_present', 'holiday_worked', 'weekend_worked']);
-            })->count(),
-            'late' => (clone $this->baseQuery($date, $search, $statusFilter, $structureIds))->where('l.late_minutes', '>', 0)->count(),
-            'absent' => (clone $this->baseQuery($date, $search, $statusFilter, $structureIds))->whereIn('l.attendance_status', ['absent', 'manual_absence'])->count(),
-            'missing' => (clone $this->baseQuery($date, $search, $statusFilter, $structureIds))->whereNull('l.id')->count(),
+            'present' => (int) ($row->present_count ?? 0),
+            'late' => (int) ($row->late_count ?? 0),
+            'absent' => (int) ($row->absent_count ?? 0),
+            'missing' => (int) ($row->missing_count ?? 0),
         ];
     }
 
     private function baseQuery(string $date, string $search, string $statusFilter, array $structureIds = []): Builder
     {
+        // Half-open day ranges, not whereDate(): DATE(col) cannot use the (tabel_no, date) index.
+        $day = Carbon::parse($date)->toDateString();
+        $nextDay = Carbon::parse($date)->addDay()->toDateString();
+
         return Personnel::query()
             ->withoutGlobalScope(SoftDeletingScope::class)
             ->from('personnels as p')
-            ->leftJoin('attendance_daily_ledgers as l', function ($join) use ($date): void {
+            ->leftJoin('attendance_daily_ledgers as l', function ($join) use ($day, $nextDay): void {
                 $join->on('p.tabel_no', '=', 'l.tabel_no')
-                    ->whereDate('l.date', $date);
+                    ->where('l.date', '>=', $day)
+                    ->where('l.date', '<', $nextDay);
             })
             ->where('p.is_pending', 0)
             ->whereNull('p.deleted_at')
-            ->whereDate('p.join_work_date', '<=', $date)
-            ->where(function (Builder $query) use ($date): void {
+            ->where('p.join_work_date', '<', $nextDay)
+            ->where(function (Builder $query) use ($day): void {
                 $query->whereNull('p.leave_work_date')
-                    ->orWhereDate('p.leave_work_date', '>=', $date);
+                    ->orWhere('p.leave_work_date', '>=', $day);
             })
             ->when($structureIds !== [], fn (Builder $query) => $query->whereIn('p.structure_id', $structureIds))
             ->when($search !== '', function (Builder $query) use ($search): void {

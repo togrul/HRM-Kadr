@@ -20,26 +20,6 @@ use Throwable;
 
 class NotificationCampaignDispatcher
 {
-    protected function duplicateTitlePattern(): string
-    {
-        $copySuffix = trim((string) __('notifications::common.badges.copy_suffix'));
-        $copyLabel = trim((string) __('notifications::common.badges.copy_label'));
-
-        $parts = array_filter([
-            preg_quote($copySuffix, '/'),
-            '\('.preg_quote($copyLabel, '/').'\)',
-            '\(surət\)',
-            '\(copy\)',
-        ]);
-
-        return '/(?:\s*(?:'.implode('|', $parts).'))+$/iu';
-    }
-
-    protected function baseDuplicateTitle(string $title): string
-    {
-        return trim((string) preg_replace($this->duplicateTitlePattern(), '', $title));
-    }
-
     public function __construct(
         protected NotificationAudienceResolver $audienceResolver,
         protected NotificationTemplateRenderer $templateRenderer,
@@ -72,7 +52,7 @@ class NotificationCampaignDispatcher
                 'category' => 'birthday',
                 'trigger' => $trigger,
                 'template_id' => $rule->template_id,
-                'title' => 'Ad günü bildirişi: '.$personnel->fullname,
+                'title' => __('notifications::common.campaign_titles.birthday', ['name' => $personnel->fullname]),
                 'channel' => $rule->channel,
                 'audience_config' => $rule->audience_config,
                 'payload' => $this->payloads->birthday($personnel),
@@ -117,7 +97,7 @@ class NotificationCampaignDispatcher
                 'category' => 'position_change',
                 'trigger' => $trigger,
                 'template_id' => $rule->template_id,
-                'title' => 'Vəzifə dəyişikliyi: '.$personnel->fullname,
+                'title' => __('notifications::common.campaign_titles.position_change', ['name' => $personnel->fullname]),
                 'channel' => $rule->channel,
                 'audience_config' => $rule->audience_config,
                 'payload' => $payload,
@@ -164,7 +144,7 @@ class NotificationCampaignDispatcher
                 'category' => 'employment_started',
                 'trigger' => $trigger,
                 'template_id' => null,
-                'title' => 'İşə başlayan əməkdaş: '.$personnel->fullname,
+                'title' => __('notifications::common.campaign_titles.new_employee', ['name' => $personnel->fullname]),
                 'channel' => 'database',
                 'audience_config' => [
                     'targets' => ['specific_users'],
@@ -191,7 +171,7 @@ class NotificationCampaignDispatcher
                 'category' => 'employment_started',
                 'trigger' => $trigger,
                 'template_id' => $rule->template_id,
-                'title' => 'İşə başlayan əməkdaş: '.$personnel->fullname,
+                'title' => __('notifications::common.campaign_titles.new_employee', ['name' => $personnel->fullname]),
                 'channel' => $rule->channel,
                 'audience_config' => $rule->audience_config,
                 'payload' => $payload,
@@ -237,7 +217,7 @@ class NotificationCampaignDispatcher
                 'category' => 'holiday',
                 'trigger' => $trigger,
                 'template_id' => $rule->template_id,
-                'title' => 'Bayram / tətil bildirişi: '.($calendar->name ?: $calendar->date?->format('d.m.Y')),
+                'title' => __('notifications::common.campaign_titles.holiday', ['name' => $calendar->name ?: $calendar->date?->format('d.m.Y')]),
                 'channel' => $rule->channel,
                 'audience_config' => $rule->audience_config,
                 'payload' => $payload,
@@ -354,7 +334,7 @@ class NotificationCampaignDispatcher
             'category' => $campaign->category,
             'trigger' => $campaign->trigger,
             'template_id' => $campaign->template_id,
-            'title' => $this->baseDuplicateTitle($campaign->title),
+            'title' => NotificationTitle::normalize($campaign->title, trailingOnly: true),
             'channel' => $campaign->channel,
             'audience_config' => $campaign->audience_config,
             'payload' => $campaign->payload,
@@ -367,7 +347,7 @@ class NotificationCampaignDispatcher
             'created_by' => auth()->id(),
         ]);
 
-        $this->logCampaignAction($copy, 'duplicated', __('notifications::common.helpers.duplicated_from', ['title' => $this->baseDuplicateTitle($campaign->title)]));
+        $this->logCampaignAction($copy, 'duplicated', __('notifications::common.helpers.duplicated_from', ['title' => NotificationTitle::normalize($campaign->title, trailingOnly: true)]));
 
         if ($dispatchNow) {
             $copy->update([
@@ -640,7 +620,7 @@ class NotificationCampaignDispatcher
 
         if ($channel === 'mail') {
             if (blank($recipient->email)) {
-                throw new RuntimeException('Recipient e-poçt ünvanı yoxdur.');
+                throw new RuntimeException(__('notifications::common.messages.recipient_email_missing'));
             }
 
             Mail::to($recipient->email)->send(new NotificationCampaignMail(

@@ -849,7 +849,7 @@
                 <span style="border: 1px solid #d9e4ea; border-radius: 999px; background: #f8fafc; padding: 0.35rem 0.7rem; font-size: 0.72rem; font-weight: 700; color: #64748b;">Menyu</span>
             </summary>
 
-            <div class="mt-4 space-y-4 border-t border-slate-200 pt-4" data-docs-nav-container="mobile">
+            <div class="mt-4 space-y-4 border-t border-zinc-200 pt-4" data-docs-nav-container="mobile">
                 <div class="docs-search-shell">
                     <input type="search" class="docs-search-input" placeholder="Bölmə axtar..." data-docs-nav-search>
                 </div>

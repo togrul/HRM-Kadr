@@ -7,7 +7,7 @@
 ])
 
 @php
-    $extraClass = $hidden ? 'text-gray-400 line-through' : 'text-gray-700';
+    $extraClass = $hidden ? 'text-zinc-400 line-through' : 'text-zinc-700';
 @endphp
 
 <div class="flex items-center">

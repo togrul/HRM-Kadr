@@ -2,10 +2,12 @@
 
 namespace App\Modules\PerformanceEvaluation\Livewire;
 
+use App\Livewire\Traits\SideModalAction;
 use App\Models\PerformanceForm;
 use App\Modules\PerformanceEvaluation\Livewire\Concerns\HandlesPerformanceEvaluationFlowMutations;
 use App\Modules\PerformanceEvaluation\Livewire\Concerns\HandlesPerformanceTestingMutations;
 use App\Services\HrPolicies\HrPolicyPackService;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Isolate;
 use Livewire\Attributes\On;
 
@@ -14,6 +16,7 @@ class OperationsWorkspace extends AbstractPerformanceWorkspace
 {
     use HandlesPerformanceEvaluationFlowMutations;
     use HandlesPerformanceTestingMutations;
+    use SideModalAction;
 
     protected function allowedTabs(): array
     {
@@ -42,6 +45,37 @@ class OperationsWorkspace extends AbstractPerformanceWorkspace
     public function handleEditEvaluationForm(int $formId): void
     {
         $this->editEvaluationForm($formId);
+        $this->openSideMenu('form-assign');
+    }
+
+    public function openAssignForm(): void
+    {
+        $this->authorizePerformanceEvaluationManage();
+        $this->cancelEvaluationEdit();
+        $this->openSideMenu('form-assign');
+    }
+
+    public function saveAssignment(): void
+    {
+        $this->storeEvaluationForm();
+        $this->closeSideMenu();
+    }
+
+    /** Opens score entry for one form, from its row in the list or from the toolbar. */
+    #[On('performance-evaluation:score-form')]
+    public function openScoreForm(?int $formId = null): void
+    {
+        $this->authorizePerformanceEvaluationManage();
+        $this->reset('searchPerformanceForm', 'searchTemplateItem');
+        $this->scoreForm = [...$this->scoreDefaults(), 'performance_form_id' => $formId];
+        $this->resetValidation();
+        $this->openSideMenu('form-score');
+    }
+
+    public function saveScore(): void
+    {
+        $this->storeScore();
+        $this->closeSideMenu();
     }
 
     #[On('performance-evaluation:confirm-delete-form')]
@@ -50,7 +84,7 @@ class OperationsWorkspace extends AbstractPerformanceWorkspace
         $this->confirmDeleteEvaluationForm($formId);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('performance-evaluation::livewire.performance-evaluation.operations-workspace');
     }

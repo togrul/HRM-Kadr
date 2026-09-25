@@ -2,8 +2,10 @@
 
 namespace Tests\Feature\Personnel;
 
+use App\Models\OrderWordTemplate;
 use App\Models\Personnel;
 use App\Models\User;
+use App\Modules\Leaves\Livewire\AddLeave;
 use App\Modules\Personnel\Application\Services\PersonnelProfileReadService;
 use App\Modules\Personnel\Livewire\AllPersonnel;
 use App\Modules\Personnel\Livewire\PersonnelProfile;
@@ -225,6 +227,48 @@ class PersonnelProfilePageTest extends TestCase
             ->assertSee('setSection', escape: false);
     }
 
+    public function test_the_action_menu_offers_leave_and_employee_order_templates(): void
+    {
+        $personnel = $this->seedPersonnel();
+        $this->actingAsEditor(['add-orders', 'add-leaves']);
+
+        OrderWordTemplate::create(['code' => 'leave', 'label' => 'Məzuniyyət', 'docx_path' => 'x.docx', 'variables' => [], 'is_active' => true]);
+        OrderWordTemplate::create(['code' => 'hire', 'label' => 'İşə qəbul', 'effect' => 'hire', 'docx_path' => 'x.docx', 'variables' => [], 'is_active' => true]);
+        OrderWordTemplate::create(['code' => 'old', 'label' => 'Köhnə', 'docx_path' => 'x.docx', 'variables' => [], 'is_active' => false]);
+
+        // Hire orders act on a candidate and inactive templates cannot be issued.
+        Livewire::test(PersonnelProfile::class, ['personnel' => $personnel])
+            ->assertSet('orderTemplates', ['leave' => 'Məzuniyyət'])
+            ->assertSet('canAddLeave', true)
+            ->assertSee(__('personnel::profile.actions.new_action'))
+            ->call('openSideMenu', 'order-composer', 'leave')
+            ->assertSet('showSideMenu', 'order-composer')
+            ->assertSet('modelName', 'leave');
+    }
+
+    public function test_the_action_menu_is_hidden_without_order_or_leave_permissions(): void
+    {
+        $personnel = $this->seedPersonnel();
+        $this->actingAsEditor();
+
+        OrderWordTemplate::create(['code' => 'leave', 'label' => 'Məzuniyyət', 'docx_path' => 'x.docx', 'variables' => [], 'is_active' => true]);
+
+        Livewire::test(PersonnelProfile::class, ['personnel' => $personnel])
+            ->assertSet('orderTemplates', [])
+            ->assertSet('canAddLeave', false)
+            ->assertDontSee(__('personnel::profile.actions.new_action'));
+    }
+
+    public function test_the_leave_form_opened_from_the_file_preselects_the_employee(): void
+    {
+        $personnel = $this->seedPersonnel();
+        $this->actingAsEditor(['add-leaves']);
+
+        Livewire::test(AddLeave::class, ['tabelNo' => $personnel->tabel_no])
+            ->assertSet('leave.tabel_no.tabel_no', 'T-900')
+            ->assertSet('leave.tabel_no.fullname', $personnel->fullname);
+    }
+
     private function actingAsViewer(): void
     {
         $user = User::factory()->create();
@@ -233,15 +277,19 @@ class PersonnelProfilePageTest extends TestCase
         $this->actingAs($user);
     }
 
-    private function actingAsEditor(): void
+    /**
+     * @param  list<string>  $extra
+     */
+    private function actingAsEditor(array $extra = []): void
     {
         $user = User::factory()->create();
+        $permissions = ['show-personnels', 'edit-personnels', ...$extra];
 
-        foreach (['show-personnels', 'edit-personnels'] as $permission) {
+        foreach ($permissions as $permission) {
             Permission::findOrCreate($permission, 'web');
         }
 
-        $user->givePermissionTo(['show-personnels', 'edit-personnels']);
+        $user->givePermissionTo($permissions);
         $this->actingAs($user);
     }
 

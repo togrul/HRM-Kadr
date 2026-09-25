@@ -22,6 +22,7 @@ use App\Modules\TrainingNeeds\Application\Services\TrainingNeedAnalyticsService;
 use App\Modules\TrainingNeeds\Application\Services\TrainingNeedReportingService;
 use App\Modules\TrainingNeeds\Application\Services\TrainingNeedSuggestionService;
 use App\Modules\TrainingNeeds\Application\Services\TrainingSessionProposalService;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -242,7 +243,7 @@ trait InteractsWithTrainingNeedsQueries
         });
     }
 
-    public function getRecentCompetenciesProperty()
+    public function getRecentCompetenciesProperty(): Collection
     {
         return TrainingCompetency::query()
             ->with('group:id,name')
@@ -251,7 +252,7 @@ trait InteractsWithTrainingNeedsQueries
             ->get();
     }
 
-    public function getRecentProgramsProperty()
+    public function getRecentProgramsProperty(): Collection
     {
         return TrainingProgram::query()
             ->latest('id')
@@ -259,7 +260,7 @@ trait InteractsWithTrainingNeedsQueries
             ->get();
     }
 
-    public function getRecentRequirementsProperty()
+    public function getRecentRequirementsProperty(): Collection
     {
         return RoleCompetencyRequirement::query()
             ->with([
@@ -272,7 +273,7 @@ trait InteractsWithTrainingNeedsQueries
             ->get();
     }
 
-    public function getRecentProfilesProperty()
+    public function getRecentProfilesProperty(): Collection
     {
         return EmployeeCompetencyProfile::query()
             ->with([
@@ -285,7 +286,7 @@ trait InteractsWithTrainingNeedsQueries
             ->get();
     }
 
-    public function getRecentNeedsProperty()
+    public function getRecentNeedsProperty(): Collection
     {
         return TrainingNeedItem::query()
             ->with([
@@ -300,12 +301,12 @@ trait InteractsWithTrainingNeedsQueries
             ->get();
     }
 
-    public function getRecentPlansProperty()
+    public function getRecentPlansProperty(): Collection
     {
         return $this->rememberRuntime('trainingNeeds.recentPlans', fn () => app(TrainingNeedAnalyticsService::class)->recentPlans());
     }
 
-    public function getRecentPlanItemsProperty()
+    public function getRecentPlanItemsProperty(): Collection
     {
         return TrainingPlanItem::query()
             ->with([
@@ -341,7 +342,7 @@ trait InteractsWithTrainingNeedsQueries
         });
     }
 
-    public function getSuggestedPlanGroupsProperty()
+    public function getSuggestedPlanGroupsProperty(): \Illuminate\Support\Collection
     {
         return $this->rememberRuntime('trainingNeeds.suggestedPlanGroups', function () {
             return app(TrainingNeedSuggestionService::class)->suggestions(
@@ -352,12 +353,12 @@ trait InteractsWithTrainingNeedsQueries
         });
     }
 
-    public function getRecentSessionsProperty()
+    public function getRecentSessionsProperty(): Collection
     {
         return app(TrainingNeedReportingService::class)->upcomingSessions();
     }
 
-    public function getSessionProposalsProperty()
+    public function getSessionProposalsProperty(): \Illuminate\Support\Collection
     {
         return $this->rememberRuntime('trainingNeeds.sessionProposals', fn () => app(TrainingSessionProposalService::class)->proposals(limit: 6));
     }
@@ -388,7 +389,7 @@ trait InteractsWithTrainingNeedsQueries
         });
     }
 
-    public function getFilteredSelectedParticipantsProperty()
+    public function getFilteredSelectedParticipantsProperty(): \Illuminate\Support\Collection
     {
         if (! $this->selectedSession) {
             return collect();
@@ -422,7 +423,7 @@ trait InteractsWithTrainingNeedsQueries
         })->values();
     }
 
-    public function getRecentDeliveryRecordsProperty()
+    public function getRecentDeliveryRecordsProperty(): Collection
     {
         return TrainingDeliveryRecord::query()
             ->with([
@@ -458,7 +459,7 @@ trait InteractsWithTrainingNeedsQueries
             ->find($selectedId);
     }
 
-    public function getRecentFeedbackFormsProperty()
+    public function getRecentFeedbackFormsProperty(): Collection
     {
         return TrainingFeedbackForm::query()
             ->with(['session:id,title'])
@@ -468,7 +469,7 @@ trait InteractsWithTrainingNeedsQueries
             ->get();
     }
 
-    public function getRecentFeedbackResponsesProperty()
+    public function getRecentFeedbackResponsesProperty(): Collection
     {
         return TrainingFeedbackResponse::query()
             ->with(['form:id,title', 'personnel:id,tabel_no,surname,name,patronymic'])
@@ -477,7 +478,7 @@ trait InteractsWithTrainingNeedsQueries
             ->get();
     }
 
-    public function getFeedbackSessionSummariesProperty()
+    public function getFeedbackSessionSummariesProperty(): Collection
     {
         return $this->rememberRuntime('trainingNeeds.feedbackSessionSummaries', fn () => app(TrainingNeedReportingService::class)->feedbackSessionSummaries());
     }

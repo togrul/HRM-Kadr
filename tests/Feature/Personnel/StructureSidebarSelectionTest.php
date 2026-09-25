@@ -1,8 +1,8 @@
 <?php
 
-use App\Models\Structure;
 use App\Models\User;
 use App\Modules\SidebarStructure\Livewire\Sidebar;
+use App\Services\StructurePathService;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 
@@ -17,13 +17,35 @@ function seedTree(): array
     return [1, 2, 3];
 }
 
-it('keeps the clicked node highlighted after selection', function (): void {
+it('selects client-side and hands the host the same payload the server dispatch sent', function (): void {
     seedTree();
     $this->actingAs(User::factory()->create());
 
+    // No wire:click: the highlight moves in Alpine; hosts still get selectStructure(<id>).
     Livewire::test(Sidebar::class)
-        ->call('selectStructure', 2)
-        ->assertSet('selectedStructure', 2);
+        ->assertSeeHtml('x-on:click="pick(2)"')
+        ->assertSeeHtml("Livewire.dispatch('selectStructure', [id])")
+        ->assertSeeHtml('this.$wire.selectedStructure = id')
+        ->assertDontSeeHtml('wire:click');
+});
+
+it('clears the highlight on a host filter reset without re-rendering the tree', function (): void {
+    seedTree();
+    $this->actingAs(User::factory()->create());
+
+    $component = Livewire::test(Sidebar::class, ['selected' => 2])
+        ->dispatch('filterSelected')
+        ->assertSet('selectedStructure', null);
+
+    expect($component->effects['html'] ?? null)->toBeNull();
+});
+
+it('opens only the roots plus the path down to the selection', function (): void {
+    seedTree();
+    $this->actingAs(User::factory()->create());
+
+    expect((array) Livewire::test(Sidebar::class)->viewData('openIds'))->toBe([1 => true])
+        ->and((array) Livewire::test(Sidebar::class, ['selected' => 3])->viewData('openIds'))->toBe([1 => true, 2 => true]);
 });
 
 it('restores the highlight from a nested structure query string', function (): void {
@@ -31,7 +53,7 @@ it('restores the highlight from a nested structure query string', function (): v
     $this->actingAs(User::factory()->create());
 
     // What AllPersonnel writes to the URL: the clicked node plus every descendant.
-    $nested = Structure::withRecursive('subs')->find(2)->getAllNestedIds();
+    $nested = app(StructurePathService::class)->descendantIds(2);
 
     Livewire::withQueryParams(['structure' => $nested])
         ->test(Sidebar::class)
@@ -43,7 +65,7 @@ it('renders the selected marker on the clicked node', function (): void {
     $this->actingAs(User::factory()->create());
 
     Livewire::test(Sidebar::class)
-        ->call('selectStructure', 2)
+        ->set('selectedStructure', 2)
         ->assertSeeHtml('aria-current="true"');
 });
 
@@ -57,7 +79,7 @@ it('keeps the highlight on a real page load carrying the nested structure filter
     $user->givePermissionTo('show-personnels');
     $this->actingAs($user);
 
-    $nested = Structure::withRecursive('subs')->find(2)->getAllNestedIds();
+    $nested = app(StructurePathService::class)->descendantIds(2);
 
     $this->get(route('personnel.index', ['structure' => $nested]))
         ->assertOk()
@@ -87,7 +109,7 @@ it('takes no selection when the host has no structure filter', function (): void
 it('hands the clicked unit to the host as the head of the nested filter', function (): void {
     seedTree();
 
-    $nested = Structure::withRecursive('subs')->find(2)->getAllNestedIds();
+    $nested = app(StructurePathService::class)->descendantIds(2);
 
     // The host highlights $structure[0]; that contract only holds while the clicked unit
     // stays first in the descendant list.

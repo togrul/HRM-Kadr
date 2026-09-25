@@ -127,7 +127,7 @@
         <div class="rounded-xl border border-zinc-200 bg-white px-4 py-4">
             <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
                 <div>
-                    <button type="button" wire:click="backToList" class="text-xs font-medium text-zinc-400 hover:text-zinc-600">← {{ __('performance_evaluation::feedback.actions.back') }}</button>
+                    <button type="button" wire:click="backToList" class="text-[14px] font-medium text-zinc-400 hover:text-zinc-600">← {{ __('performance_evaluation::feedback.actions.back') }}</button>
                     <h2 class="mt-1 text-xl font-semibold text-zinc-900">{{ $request->subject?->fullname }}</h2>
                     <p class="text-xs text-zinc-500">{{ $request->cycle?->name }} · {{ $request->template?->name }}
                         @if ($request->is_anonymous) · <span class="text-zinc-400">{{ __('performance_evaluation::feedback.fields.anonymous') }}</span> @endif
@@ -231,7 +231,7 @@
         <div class="rounded-xl border border-zinc-200 bg-white px-4 py-4">
             <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
                 <div>
-                    <button type="button" wire:click="backToList" class="text-xs font-medium text-zinc-400 hover:text-zinc-600">← {{ __('performance_evaluation::feedback.actions.back') }}</button>
+                    <button type="button" wire:click="backToList" class="text-[14px] font-medium text-zinc-400 hover:text-zinc-600">← {{ __('performance_evaluation::feedback.actions.back') }}</button>
                     <h2 class="mt-1 text-xl font-semibold text-zinc-900">{{ __('performance_evaluation::feedback.calibrate.title') }} — {{ $request->subject?->fullname }}</h2>
                     <p class="text-xs text-zinc-500">{{ __('performance_evaluation::feedback.calibrate.description') }}</p>
                 </div>
@@ -308,7 +308,7 @@
             @if ($showSideMenu === 'create')
                 <div class="flex h-full flex-col">
                     <div class="mb-7">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-zinc-400">{{ __('performance_evaluation::feedback.eyebrow') }}</p>
+                        <p class="hrm-eyebrow">{{ __('performance_evaluation::feedback.eyebrow') }}</p>
                         <h2 class="mt-1.5 text-[18px] font-semibold tracking-tight text-zinc-950">{{ __('performance_evaluation::feedback.actions.new_request') }}</h2>
                     </div>
                     <div class="grid grid-cols-1 gap-5">
@@ -365,7 +365,7 @@
             @if ($showSideMenu === 'scoring')
                 <div class="flex h-full flex-col">
                     <div class="mb-7">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-zinc-400">{{ __('performance_evaluation::feedback.eyebrow') }}</p>
+                        <p class="hrm-eyebrow">{{ __('performance_evaluation::feedback.eyebrow') }}</p>
                         <h2 class="mt-1.5 text-[18px] font-semibold tracking-tight text-zinc-950">{{ __('performance_evaluation::feedback.actions.enter_scores') }}</h2>
                     </div>
                     <div class="flex-1 space-y-4 overflow-y-auto">
@@ -378,11 +378,11 @@
                                     </div>
                                     <input type="number" min="0" max="100" step="0.5"
                                         wire:model="scoreInputs.{{ $item['id'] }}"
-                                        class="w-24 rounded-lg border border-zinc-200 px-2 py-1.5 text-center text-sm focus:border-sky-400 focus:ring-sky-400" />
+                                        class="w-24 rounded-lg border border-zinc-200 px-2 py-1.5 text-center text-sm focus:border-ink focus:ring-[#e4e4e7]" />
                                 </div>
                                 <input type="text" wire:model="commentInputs.{{ $item['id'] }}"
                                     placeholder="{{ __('performance_evaluation::feedback.fields.comment') }}"
-                                    class="mt-2 w-full rounded-lg border border-zinc-200 px-2 py-1.5 text-sm focus:border-sky-400 focus:ring-sky-400" />
+                                    class="mt-2 w-full rounded-lg border border-zinc-200 px-2 py-1.5 text-sm focus:border-ink focus:ring-[#e4e4e7]" />
                             </div>
                         @empty
                             <p class="py-8 text-center text-sm text-zinc-400">{{ __('performance_evaluation::feedback.empty.items') }}</p>

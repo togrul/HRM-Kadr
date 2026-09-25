@@ -6,6 +6,7 @@ use App\Livewire\Concerns\WithRuntimeMemo;
 use App\Modules\Reports\Application\Services\ReportsAccessService;
 use App\Modules\Reports\Application\Services\ReportsOverviewService;
 use App\Modules\Reports\Application\Services\ReportsStructureScopeService;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Isolate;
 use Livewire\Component;
 
@@ -71,12 +72,12 @@ class Overview extends Component
         );
     }
 
-    public function render()
+    public function render(): View
     {
         return view('reports::livewire.reports.overview');
     }
 
-    public function placeholder()
+    public function placeholder(): View
     {
         return view('reports::livewire.reports.placeholder');
     }

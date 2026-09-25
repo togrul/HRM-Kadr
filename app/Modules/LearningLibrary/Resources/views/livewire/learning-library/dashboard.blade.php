@@ -1,4 +1,4 @@
-<div class="space-y-6 px-6 py-6">
+<div class="flex flex-col">
     {{-- ===================== contextual panel ===================== --}}
     @php
         $contextTabs = ['general', 'library', 'reports'];
@@ -19,30 +19,26 @@
         </x-context-panel>
     @endteleport
 
-    <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-6 shadow-sm">
-        <div class="space-y-2">
-            <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('ui::menu.items.learning_library') }}</x-ui.field-label>
-            <h1 class="text-[19px] font-semibold tracking-tight text-zinc-950">{{ __('learning-library::dashboard.title') }}</h1>
-            <p class="max-w-3xl text-sm leading-6 text-zinc-500">{{ __('learning-library::dashboard.description') }}</p>
-        </div>
+    <x-page-header :title="__('learning-library::dashboard.title')" :breadcrumb="__('ui::menu.items.learning_library')">
+        <x-slot:icon>
+            <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m16 6 4 14"/><path d="M12 6v14"/><path d="M8 8v12"/><path d="M4 4v16"/></svg>
+        </x-slot:icon>
 
+        <p class="max-w-3xl text-[12.5px] leading-relaxed text-ink-muted">{{ __('learning-library::dashboard.description') }}</p>
+    </x-page-header>
+
+    <div class="space-y-6 px-4 py-4 sm:px-5">
         @php
-
             $summary = $activeTab === 'general' ? $this->generalPayload['summary'] : $this->summaryPayload['summary'];
-
         @endphp
-        <div class="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7">
+        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7">
             @foreach (['asset_total', 'required_assets', 'active_assets', 'auto_assign_assets', 'active_assignments', 'completed_assignments', 'overdue_assignments'] as $metric)
-                <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-4">
-                    <x-ui.field-label as="div" class="tracking-tight">{{ __('learning-library::dashboard.summary.'.$metric) }}</x-ui.field-label>
-                    <p class="mt-2 text-2xl font-semibold tracking-tight text-zinc-950">{{ $summary[$metric] }}</p>
-                </div>
+                <x-ui.metric-tile :label="__('learning-library::dashboard.summary.'.$metric)" :value="$summary[$metric]" />
             @endforeach
         </div>
-    </div>
 
-    <div class="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-        <x-filter.nav class="min-w-0 lg:hidden">
+    <div class="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm lg:hidden">
+        <x-filter.nav class="min-w-0">
             @foreach ($contextTabs as $tab)
                 <x-filter.item wire:click.prevent="switchTab('{{ $tab }}')" :active="$activeTab === $tab">
                     {{ __('learning-library::dashboard.tabs.'.$tab) }}
@@ -73,7 +69,7 @@
                         <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('learning-library::dashboard.sections.create_asset') }}</x-ui.field-label>
                         <div class="mt-4 grid gap-4 md:grid-cols-2">
                             <x-ui.input-shell :label="__('learning-library::dashboard.fields.asset_title')" :error="$errors->first('assetForm.title')" labelClass="tracking-tight text-zinc-500">
-                                <x-ui.filter-input wire:model.live="assetForm.title" type="text" />
+                                <x-ui.filter-input wire:model="assetForm.title" type="text" />
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('learning-library::dashboard.fields.content_type')" :error="$errors->first('assetForm.content_type')" labelClass="tracking-tight text-zinc-500">
                                 <x-ui.filter-native-select wire:model.live="assetForm.content_type">
@@ -83,7 +79,7 @@
                                 </x-ui.filter-native-select>
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('learning-library::dashboard.fields.version')" :error="$errors->first('assetForm.version')" labelClass="tracking-tight text-zinc-500">
-                                <x-ui.filter-input wire:model.live="assetForm.version" type="text" />
+                                <x-ui.filter-input wire:model="assetForm.version" type="text" />
                             </x-ui.input-shell>
                             <x-ui.input-shell :label="__('learning-library::dashboard.fields.visibility')" :error="$errors->first('assetForm.visibility')" labelClass="tracking-tight text-zinc-500">
                                 <x-ui.filter-native-select wire:model.live="assetForm.visibility">
@@ -94,16 +90,16 @@
                             </x-ui.input-shell>
                             <div class="md:col-span-2">
                                 <x-ui.input-shell :label="__('learning-library::dashboard.fields.description')" :error="$errors->first('assetForm.description')" labelClass="tracking-tight text-zinc-500">
-                                    <x-ui.filter-textarea wire:model.live="assetForm.description" rows="4" />
+                                    <x-ui.filter-textarea wire:model="assetForm.description" rows="4" />
                                 </x-ui.input-shell>
                             </div>
                             <x-ui.file-upload-shell wire:model="assetUpload" :label="__('learning-library::dashboard.fields.file')" :error="$errors->first('assetUpload')" :upload="$assetUpload" />
                             <div class="space-y-4">
                                 <x-ui.input-shell :label="__('learning-library::dashboard.fields.estimated_minutes')" :error="$errors->first('assetForm.estimated_minutes')" labelClass="tracking-tight text-zinc-500">
-                                    <x-ui.filter-input wire:model.live="assetForm.estimated_minutes" type="number" min="1" max="600" />
+                                    <x-ui.filter-input wire:model="assetForm.estimated_minutes" type="number" min="1" max="600" />
                                 </x-ui.input-shell>
                                 <x-ui.input-shell :label="__('learning-library::dashboard.fields.external_url')" :error="$errors->first('assetForm.external_url')" labelClass="tracking-tight text-zinc-500">
-                                    <x-ui.filter-input wire:model.live="assetForm.external_url" type="url" />
+                                    <x-ui.filter-input wire:model="assetForm.external_url" type="url" />
                                 </x-ui.input-shell>
                             </div>
                         </div>
@@ -191,7 +187,7 @@
                         </x-ui.input-shell>
 
                         <x-ui.input-shell :label="__('learning-library::dashboard.fields.due_at')" :error="$errors->first('assignmentForm.due_at')" labelClass="tracking-tight text-zinc-500">
-                            <x-ui.filter-input wire:model.live="assignmentForm.due_at" type="date" />
+                            <x-ui.filter-input wire:model="assignmentForm.due_at" type="date" />
                         </x-ui.input-shell>
                     </div>
 
@@ -306,4 +302,5 @@
             </div>
         @endif
     </div>
+</div>
 </div>

@@ -1,10 +1,10 @@
 <section class="space-y-6">
     <header>
-        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+        <h2 class="text-lg font-medium text-zinc-900 dark:text-zinc-100">
             {{ __('ui::profile.titles.delete_account') }}
         </h2>
 
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+        <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
             {{ __('ui::profile.descriptions.delete_account') }}
         </p>
     </header>
@@ -19,11 +19,11 @@
             @csrf
             @method('delete')
 
-            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+            <h2 class="text-lg font-medium text-zinc-900 dark:text-zinc-100">
                 {{ __('ui::profile.descriptions.delete_account_confirmation') }}
             </h2>
 
-            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
                 {{ __('ui::profile.descriptions.delete_account_password_confirmation') }}
             </p>
 

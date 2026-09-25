@@ -7,26 +7,34 @@ use App\Models\EmployeeLoan;
 use App\Models\PayrollPeriod;
 use App\Models\PayrollRun;
 use App\Models\Payslip;
-use App\Models\PayslipLine;
-use App\Models\Personnel;
-use App\Modules\Payroll\Application\Services\LoanService;
 use App\Modules\Payroll\Application\Services\PayrollExportService;
 use App\Modules\Payroll\Application\Services\PayrollPeriodService;
 use App\Modules\Payroll\Application\Services\PayrollRunService;
 use App\Support\Livewire\DownloadsReportsTable;
 use App\Support\Livewire\InteractsWithTabbedWorkspace;
+use App\Support\Livewire\LabelsValidationFields;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/**
+ * Workspace shell: tabs, period / regime filters, counters, period + run creation and the
+ * export toolbar. Runs, payslips and loans are their own components under Livewire\Tabs.
+ *
+ * @property-read \App\Models\PayrollPeriod|null $activePeriod
+ * @property-read \Illuminate\Support\Collection<int, \App\Models\PayrollPeriod> $periods
+ * @property-read \Illuminate\Support\Collection<int, int> $runIds
+ */
 class Dashboard extends Component
 {
     use DownloadsReportsTable;
     use InteractsWithTabbedWorkspace;
+    use LabelsValidationFields;
 
     public string $activeTab = 'runs';
 
@@ -47,25 +55,15 @@ class Dashboard extends Component
         'run_type' => 'regular',
     ];
 
+    #[Locked]
     public ?int $selectedRunId = null;
 
-    public ?int $selectedPayslipId = null;
+    /** Employee the loans tab opens on when reached from the runs overview. */
+    #[Locked]
+    public ?string $loanTabelNo = null;
 
-    // --- Loans tab ---
-    public string $personnelSearch = '';
-
-    public ?string $selectedTabelNo = null;
-
-    public ?string $selectedPersonnelLabel = null;
-
-    public array $loanForm = [
-        'type' => 'loan',
-        'principal' => '',
-        'monthly_installment' => '',
-        'currency' => 'AZN',
-        'start_on' => '',
-        'note' => '',
-    ];
+    #[Locked]
+    public ?string $loanPersonnelLabel = null;
 
     public function mount(): void
     {
@@ -115,25 +113,19 @@ class Dashboard extends Component
         return auth()->user()?->can('manage-payroll') ?? false;
     }
 
-    public function canApprove(): bool
-    {
-        return auth()->user()?->can('approve-payroll') ?? false;
-    }
-
-    public function canLock(): bool
-    {
-        return auth()->user()?->can('lock-payroll') ?? false;
-    }
-
-    public function canViewAmounts(): bool
-    {
-        return auth()->user()?->can('view-compensation-amounts') ?? false;
-    }
-
     public function canExport(): bool
     {
         return auth()->user()?->can('export-payroll') ?? false;
     }
+
+    protected function fieldLabelPrefix(): string
+    {
+        return 'payroll::dashboard.fields.';
+    }
+
+    // ----------------------------------------------------------------
+    // Exports (sidebar, header and the payslips tab all call these)
+    // ----------------------------------------------------------------
 
     public function exportBankFile(int $runId, PayrollExportService $service): BinaryFileResponse
     {
@@ -211,26 +203,9 @@ class Dashboard extends Component
         );
     }
 
-    /**
-     * @param  array<string,string>  $map
-     * @return array<string,string>
-     */
-    protected function fieldLabels(array $map): array
-    {
-        $labels = [];
-
-        foreach ($map as $path => $key) {
-            $labels[$path] = __('payroll::dashboard.fields.'.$key);
-        }
-
-        return $labels;
-    }
-
-    #[Computed]
-    public function forecastBaseTotal(): float
-    {
-        return (float) \App\Models\EmployeeCompensation::query()->where('status', 'active')->sum('base_amount');
-    }
+    // ----------------------------------------------------------------
+    // Read models
+    // ----------------------------------------------------------------
 
     #[Computed]
     public function summaryStats(): array
@@ -262,7 +237,22 @@ class Dashboard extends Component
 
     public function periodLabel(?PayrollPeriod $period): string
     {
-        return $period?->starts_on?->translatedFormat('F Y') ?? ($period?->code ?? '—');
+        return $period?->starts_on?->translatedFormat('F Y') ?? ($period->code ?? '—');
+    }
+
+    /**
+     * Ids of the runs the runs tab lists (same filters and cap) — enough for the tab
+     * counter and the export fallback without loading the rows twice.
+     */
+    #[Computed]
+    public function runIds(): Collection
+    {
+        return PayrollRun::query()
+            ->when($this->periodFilter, fn ($query) => $query->where('payroll_period_id', $this->periodFilter))
+            ->when($this->regimeFilter, fn ($query) => $query->where('regime_id', $this->regimeFilter))
+            ->orderByDesc('id')
+            ->limit(40)
+            ->pluck('id');
     }
 
     /**
@@ -272,56 +262,10 @@ class Dashboard extends Component
     public function tabCounts(): array
     {
         return [
-            'runs' => $this->runs->count(),
+            'runs' => $this->runIds->count(),
             'payslips' => Payslip::query()->count(),
             'loans' => EmployeeLoan::query()->where('status', 'active')->count(),
         ];
-    }
-
-    /**
-     * Statutory deductions of the selected period, biggest first — the legal split the
-     * finance team reconciles before a run is locked.
-     *
-     * @return array<int,array{label:string,amount:float,pct:float}>
-     */
-    #[Computed]
-    public function statutoryTotals(): array
-    {
-        $period = $this->activePeriod;
-
-        if (! $period) {
-            return [];
-        }
-
-        $rows = PayslipLine::query()
-            ->join('payslips', 'payslips.id', '=', 'payslip_lines.payslip_id')
-            ->join('payroll_runs', 'payroll_runs.id', '=', 'payslips.payroll_run_id')
-            ->where('payroll_runs.payroll_period_id', $period->id)
-            ->where('payslip_lines.is_statutory', true)
-            ->where('payslip_lines.kind', 'deduction')
-            ->groupBy('payslip_lines.code')
-            ->orderByDesc('total')
-            ->limit(6)
-            ->get([DB::raw('payslip_lines.code as code'), DB::raw('sum(payslip_lines.amount) as total')]);
-
-        $max = (float) $rows->max('total');
-
-        return $rows->map(fn (PayslipLine $row): array => [
-            'label' => __('payroll::dashboard.statutory.'.preg_replace('/_(ee|er)$/', '', (string) $row->code)),
-            'amount' => (float) $row->total,
-            'pct' => $max > 0 ? round((float) $row->total / $max * 100, 1) : 0.0,
-        ])->all();
-    }
-
-    #[Computed]
-    public function activeLoans(): Collection
-    {
-        return EmployeeLoan::query()
-            ->where('status', 'active')
-            ->with('personnel:tabel_no,surname,name')
-            ->orderByDesc('id')
-            ->limit(8)
-            ->get();
     }
 
     /**
@@ -331,13 +275,7 @@ class Dashboard extends Component
     #[Computed]
     public function exportRunId(): ?int
     {
-        return $this->selectedRunId ?? $this->runs->first()?->id;
-    }
-
-    public function manageLoans(string $tabelNo, string $label): void
-    {
-        $this->selectPersonnel($tabelNo, $label);
-        $this->activeTab = 'loans';
+        return $this->selectedRunId ?? $this->runIds->first();
     }
 
     #[Computed]
@@ -357,66 +295,9 @@ class Dashboard extends Component
         return PayrollPeriod::query()->orderByDesc('year')->orderByDesc('month')->limit(24)->get();
     }
 
-    #[Computed]
-    public function runs(): Collection
-    {
-        return PayrollRun::query()
-            ->with(['period', 'regime'])
-            ->when($this->periodFilter, fn ($query) => $query->where('payroll_period_id', $this->periodFilter))
-            ->when($this->regimeFilter, fn ($query) => $query->where('regime_id', $this->regimeFilter))
-            ->orderByDesc('id')
-            ->limit(40)
-            ->get();
-    }
-
-    #[Computed]
-    public function selectedRun(): ?PayrollRun
-    {
-        if (! $this->selectedRunId) {
-            return null;
-        }
-
-        return PayrollRun::query()->with(['period', 'regime'])->find($this->selectedRunId);
-    }
-
-    #[Computed]
-    public function runPayslips(): Collection
-    {
-        if (! $this->selectedRunId) {
-            return collect();
-        }
-
-        return Payslip::query()
-            ->where('payroll_run_id', $this->selectedRunId)
-            ->with('personnel:tabel_no,surname,name')
-            ->orderBy('tabel_no')
-            ->get();
-    }
-
-    #[Computed]
-    public function selectedPayslip(): ?Payslip
-    {
-        if (! $this->selectedPayslipId) {
-            return null;
-        }
-
-        return Payslip::query()->with(['lines', 'personnel:tabel_no,surname,name'])->find($this->selectedPayslipId);
-    }
-
-    /**
-     * @return array{lines:array<int,array<string,mixed>>,total:float}
-     */
-    #[Computed]
-    public function retro(): array
-    {
-        $payslip = $this->selectedPayslip;
-
-        if (! $payslip) {
-            return ['lines' => [], 'total' => 0.0];
-        }
-
-        return app(\App\Modules\Payroll\Application\Services\RetroService::class)->pendingRetro($payslip->tabel_no);
-    }
+    // ----------------------------------------------------------------
+    // Periods and runs (header actions)
+    // ----------------------------------------------------------------
 
     public function createPeriod(PayrollPeriodService $service): void
     {
@@ -463,39 +344,6 @@ class Dashboard extends Component
         $this->dispatch('notify', type: 'success', message: __('payroll::dashboard.messages.run_created'));
     }
 
-    public function calculateRun(int $runId, PayrollRunService $service): void
-    {
-        abort_unless($this->canManage(), 403);
-
-        $service->calculate(PayrollRun::findOrFail($runId));
-        $this->selectedRunId = $runId;
-        $this->dispatch('notify', type: 'success', message: __('payroll::dashboard.messages.calculated'));
-    }
-
-    public function approveRun(int $runId, PayrollRunService $service): void
-    {
-        abort_unless($this->canApprove(), 403);
-
-        $service->approve(PayrollRun::findOrFail($runId));
-        $this->dispatch('notify', type: 'success', message: __('payroll::dashboard.messages.approved'));
-    }
-
-    public function lockRun(int $runId, PayrollRunService $service): void
-    {
-        abort_unless($this->canLock(), 403);
-
-        $service->lock(PayrollRun::findOrFail($runId));
-        $this->dispatch('notify', type: 'success', message: __('payroll::dashboard.messages.locked'));
-    }
-
-    public function reopenRun(int $runId, PayrollRunService $service): void
-    {
-        abort_unless($this->canLock(), 403);
-
-        $service->reopen(PayrollRun::findOrFail($runId));
-        $this->dispatch('notify', type: 'success', message: __('payroll::dashboard.messages.reopened'));
-    }
-
     public function deletePeriod(int $periodId): void
     {
         abort_unless($this->canManage(), 403);
@@ -504,138 +352,39 @@ class Dashboard extends Component
         $this->dispatch('notify', type: 'success', message: __('payroll::dashboard.messages.deleted'));
     }
 
-    public function deleteRun(int $runId): void
-    {
-        abort_unless($this->canManage(), 403);
-
-        PayrollRun::whereKey($runId)->delete();
-
-        if ($this->selectedRunId === $runId) {
-            $this->selectedRunId = null;
-            $this->selectedPayslipId = null;
-        }
-
-        $this->dispatch('notify', type: 'success', message: __('payroll::dashboard.messages.deleted'));
-    }
-
-    public function deletePayslip(int $payslipId): void
-    {
-        abort_unless($this->canManage(), 403);
-
-        $payslip = Payslip::with('run')->findOrFail($payslipId);
-        abort_if($payslip->run?->isLocked(), 422);
-
-        $payslip->delete();
-
-        if ($this->selectedPayslipId === $payslipId) {
-            $this->selectedPayslipId = null;
-        }
-
-        $this->dispatch('notify', type: 'success', message: __('payroll::dashboard.messages.deleted'));
-    }
+    // ----------------------------------------------------------------
+    // Navigation and tab events
+    // ----------------------------------------------------------------
 
     public function selectRun(int $runId): void
     {
         $this->selectedRunId = $runId;
-        $this->selectedPayslipId = null;
         $this->activeTab = 'payslips';
     }
 
-    public function viewPayslip(int $payslipId): void
+    public function manageLoans(string $tabelNo, string $label): void
     {
-        $this->selectedPayslipId = $payslipId;
+        $this->loanTabelNo = $tabelNo;
+        $this->loanPersonnelLabel = $label;
+        $this->activeTab = 'loans';
     }
 
-    public function closePayslip(): void
+    /** A tab changed data — re-render so the counters follow. */
+    #[On('payroll-updated')]
+    public function refreshSummary(): void {}
+
+    #[On('payroll-run-focused')]
+    public function focusRun(int $runId): void
     {
-        $this->selectedPayslipId = null;
+        $this->selectedRunId = $runId;
     }
 
-    // ----------------------------------------------------------------
-    // Loans / advances
-    // ----------------------------------------------------------------
-
-    #[Computed]
-    public function personnelResults(): array
+    #[On('payroll-run-deleted')]
+    public function forgetRun(int $runId): void
     {
-        $term = trim($this->personnelSearch);
-
-        if (mb_strlen($term) < 2) {
-            return [];
+        if ($this->selectedRunId === $runId) {
+            $this->selectedRunId = null;
         }
-
-        return Personnel::query()
-            ->where(fn ($q) => $q
-                ->where('surname', 'like', "%{$term}%")
-                ->orWhere('name', 'like', "%{$term}%")
-                ->orWhere('tabel_no', 'like', "%{$term}%"))
-            ->orderBy('surname')
-            ->limit(8)
-            ->get(['tabel_no', 'surname', 'name'])
-            ->map(fn (Personnel $p): array => [
-                'tabel_no' => $p->tabel_no,
-                'label' => trim("{$p->tabel_no} — {$p->surname} {$p->name}"),
-            ])
-            ->all();
-    }
-
-    public function selectPersonnel(string $tabelNo, string $label): void
-    {
-        $this->selectedTabelNo = $tabelNo;
-        $this->selectedPersonnelLabel = $label;
-        $this->personnelSearch = '';
-    }
-
-    public function clearPersonnel(): void
-    {
-        $this->selectedTabelNo = null;
-        $this->selectedPersonnelLabel = null;
-    }
-
-    #[Computed]
-    public function loans(): Collection
-    {
-        if (! $this->selectedTabelNo) {
-            return collect();
-        }
-
-        return EmployeeLoan::query()
-            ->where('tabel_no', $this->selectedTabelNo)
-            ->orderByDesc('id')
-            ->get();
-    }
-
-    public function saveLoan(LoanService $service): void
-    {
-        abort_unless($this->canManage(), 403);
-        abort_unless($this->selectedTabelNo !== null, 422);
-
-        $data = $this->validate([
-            'loanForm.type' => 'required|in:loan,advance',
-            'loanForm.principal' => 'required|numeric|min:0.01',
-            'loanForm.monthly_installment' => 'required|numeric|min:0.01',
-            'loanForm.currency' => 'required|string|size:3',
-            'loanForm.start_on' => 'required|date',
-            'loanForm.note' => 'nullable|string|max:2000',
-        ], attributes: $this->fieldLabels([
-            'loanForm.type' => 'loan_type',
-            'loanForm.principal' => 'principal',
-            'loanForm.monthly_installment' => 'monthly_installment',
-            'loanForm.currency' => 'currency',
-            'loanForm.start_on' => 'start_on',
-        ]))['loanForm'];
-
-        $service->createLoan($this->selectedTabelNo, $data);
-
-        $this->loanForm = ['type' => 'loan', 'principal' => '', 'monthly_installment' => '', 'currency' => 'AZN', 'start_on' => '', 'note' => ''];
-        $this->dispatch('notify', type: 'success', message: __('payroll::dashboard.messages.saved'));
-    }
-
-    public function deleteLoan(int $loanId): void
-    {
-        abort_unless($this->canManage(), 403);
-        EmployeeLoan::whereKey($loanId)->delete();
-        $this->dispatch('notify', type: 'success', message: __('payroll::dashboard.messages.deleted'));
     }
 
     public function render(): View

@@ -6,6 +6,7 @@ use App\Models\OnboardingDocumentAssignment;
 use App\Models\Personnel;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrOnboardingReadService;
 use App\Modules\Personnel\Support\MyHr\MyHrAccess;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -23,7 +24,7 @@ class MyHrOnboarding extends Component
         $this->personnelId = $personnelId;
     }
 
-    public function openDocument(int $assignmentId)
+    public function openDocument(int $assignmentId): void
     {
         $assignment = $this->assignment($assignmentId);
 
@@ -47,7 +48,7 @@ class MyHrOnboarding extends Component
             return;
         }
 
-        return $this->redirect($url, navigate: false);
+        $this->redirect($url, navigate: false);
     }
 
     public function acknowledge(int $assignmentId): void
@@ -93,7 +94,7 @@ class MyHrOnboarding extends Component
             ->findOrFail($this->personnelId);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('personnel::livewire.personnel.my-hr.onboarding');
     }

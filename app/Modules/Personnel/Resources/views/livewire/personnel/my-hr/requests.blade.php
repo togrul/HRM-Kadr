@@ -165,7 +165,7 @@
 
                     <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.supporting_document')" :error="$errors->first('leaveDocument')" containerClass="!space-y-0 sm:col-span-2" :labelClass="$labelClass">
                         <input wire:model.live="leaveDocument" type="file"
-                            class="block h-9 w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 py-1.5 text-[12.5px] text-ink-muted shadow-sm file:mr-3 file:rounded-lg file:border-0 file:bg-ink file:px-3 file:py-1 file:text-[12px] file:font-semibold file:text-white" />
+                            class="block min-h-10 w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 py-1.5 text-base text-ink-muted shadow-sm file:mr-3 file:rounded-lg file:border-0 file:bg-ink file:px-3 file:py-1 file:text-[14px] file:font-semibold file:text-white sm:text-sm" />
                     </x-ui.input-shell>
                 </div>
 

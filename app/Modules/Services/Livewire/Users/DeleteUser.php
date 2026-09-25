@@ -3,6 +3,7 @@
 namespace App\Modules\Services\Livewire\Users;
 
 use App\Models\User;
+use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Locked;
@@ -12,6 +13,7 @@ use Livewire\Component;
 class DeleteUser extends Component
 {
     use AuthorizesRequests;
+    use AuthorizesSettingsAccess;
 
     #[Locked]
     public ?int $userId = null;

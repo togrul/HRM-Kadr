@@ -2,12 +2,14 @@
 
 namespace App\Modules\Admin\Livewire;
 
-use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait;
-use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
 use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\Structure;
+use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait;
+use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -99,6 +101,8 @@ class Structures extends Component
 
     public function performDelete(): void
     {
+        Gate::authorize('access-admin');
+
         if (! $this->model) {
             return;
         }
@@ -108,12 +112,13 @@ class Structures extends Component
         app(\App\Services\Structures\StructureDeletionService::class)->cascadeDelete((int) $this->model->id);
 
         $this->resetForm();
-        $this->dispatch('deleted');
         $this->callSuccessSwal();
     }
 
     public function store(): void
     {
+        Gate::authorize('access-admin');
+
         $this->form['code'] = blank($this->form['code'] ?? null) ? 1 : (int) $this->form['code'];
         $this->form['level'] = blank($this->form['level'] ?? null) ? 1 : (int) $this->form['level'];
         $this->form['coefficient'] = blank($this->form['coefficient'] ?? null) ? 1 : (int) $this->form['coefficient'];
@@ -136,9 +141,9 @@ class Structures extends Component
         $this->closeCrud();
     }
 
-    public function render()
+    public function render(): View
     {
-        $structureList = Cache::rememberForever('structures', function () {
+        $structureList = Cache::rememberForever(\App\Support\OrderLookupCache::key('structures', 'admin-tree'), function () {
             return Structure::withRecursive('subs', false)
                 ->whereNull('parent_id')
                 ->orderBy('code')

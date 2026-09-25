@@ -3,6 +3,8 @@
 namespace App\Modules\Services\Livewire\Ranks;
 
 use App\Models\Rank;
+use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
@@ -11,12 +13,13 @@ use Livewire\Component;
 class DeleteRank extends Component
 {
     use AuthorizesRequests;
+    use AuthorizesSettingsAccess;
 
     #[Locked]
     public ?int $rankId = null;
 
     #[On('setDeleteRank')]
-    public function setDeleteRank($rankId)
+    public function setDeleteRank($rankId): void
     {
         $rank = Rank::query()
             ->select('id')
@@ -35,7 +38,7 @@ class DeleteRank extends Component
         $this->dispatch('deleteRankWasSet');
     }
 
-    public function deleteRank()
+    public function deleteRank(): void
     {
         if (! $this->rankId) {
             return;
@@ -60,7 +63,7 @@ class DeleteRank extends Component
         $this->dispatch('rankWasDeleted', __('services::ranks.messages.deleted'));
     }
 
-    public function render()
+    public function render(): View
     {
         return view('services::livewire.services.ranks.delete-rank');
     }

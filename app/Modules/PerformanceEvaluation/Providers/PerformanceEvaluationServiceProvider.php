@@ -2,6 +2,7 @@
 
 namespace App\Modules\PerformanceEvaluation\Providers;
 
+use App\Modules\PerformanceEvaluation\Console\Commands\KpiDailyCommand;
 use App\Modules\PerformanceEvaluation\Console\Commands\PerformanceEvaluationQueryBudgetCommand;
 use App\Modules\PerformanceEvaluation\Console\Commands\PerformanceEvaluationRenderBenchmarkCommand;
 use App\Providers\Concerns\RegistersLivewireAliases;
@@ -26,6 +27,7 @@ class PerformanceEvaluationServiceProvider extends ServiceProvider
             $this->commands([
                 PerformanceEvaluationQueryBudgetCommand::class,
                 PerformanceEvaluationRenderBenchmarkCommand::class,
+                KpiDailyCommand::class,
             ]);
         }
     }
@@ -54,6 +56,10 @@ class PerformanceEvaluationServiceProvider extends ServiceProvider
             'succession-workspace' => \App\Modules\PerformanceEvaluation\Livewire\SuccessionWorkspace::class,
             'feedback-360-workspace' => \App\Modules\PerformanceEvaluation\Livewire\Feedback360Workspace::class,
             'personnel-picker' => \App\Modules\PerformanceEvaluation\Livewire\PersonnelPicker::class,
+            'kpi-library' => \App\Modules\PerformanceEvaluation\Livewire\Kpi\KpiLibraryWorkspace::class,
+            'kpi-bonus' => \App\Modules\PerformanceEvaluation\Livewire\Kpi\BonusWorkspace::class,
+            'kpi-analytics' => \App\Modules\PerformanceEvaluation\Livewire\Kpi\AnalyticsWorkspace::class,
+            'kpi-scorecards' => \App\Modules\PerformanceEvaluation\Livewire\Kpi\ScorecardsWorkspace::class,
         ];
     }
 }

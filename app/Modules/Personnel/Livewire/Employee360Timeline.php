@@ -4,7 +4,9 @@ namespace App\Modules\Personnel\Livewire;
 
 use App\Models\Personnel;
 use App\Modules\Personnel\Application\Services\Personnel360TimelineService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Collection;
 use Livewire\Component;
 
 class Employee360Timeline extends Component
@@ -30,7 +32,7 @@ class Employee360Timeline extends Component
         $this->personnelId = $personnel->id;
     }
 
-    public function getTimelineItemsProperty()
+    public function getTimelineItemsProperty(): Collection
     {
         return app(Personnel360TimelineService::class)->build(
             Personnel::query()->findOrFail($this->personnelId),
@@ -69,7 +71,7 @@ class Employee360Timeline extends Component
         ];
     }
 
-    public function render()
+    public function render(): View
     {
         return view('personnel::livewire.personnel.professional-portfolio.timeline-panel', [
             'panelTitle' => __('personnel::information.tabs.employee_360'),

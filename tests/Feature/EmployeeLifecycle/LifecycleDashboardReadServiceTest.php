@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Modules\EmployeeLifecycle\Application\Services\LifecycleDashboardReadService;
 use App\Modules\EmployeeLifecycle\Application\Services\LifecyclePlanTemplateService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -476,6 +477,184 @@ class LifecycleDashboardReadServiceTest extends TestCase
         // The status facet keeps the type filter, so its numbers match the list behind them.
         $this->assertSame(2, $payload['statusCounts']['']);
         $this->assertSame(1, $payload['statusCounts']['planned']);
+    }
+
+    public function test_events_are_filtered_in_sql_with_search_matching_the_visible_row_text(): void
+    {
+        app()->setLocale('az');
+
+        $owner = User::factory()->create(['name' => 'Search Owner']);
+        $personnel = $this->makePersonnel();
+
+        $insert = fn (array $attributes): int => DB::table('employee_lifecycle_events')->insertGetId([
+            'personnel_id' => $personnel->id,
+            'tabel_no' => $personnel->tabel_no,
+            'type' => 'onboarding',
+            'status' => 'planned',
+            'title' => 'Plain title',
+            'owner_user_id' => $owner->id,
+            'created_at' => now(),
+            'updated_at' => now(),
+            ...$attributes,
+        ]);
+
+        $legacyProbation = $insert(['type' => 'probation', 'title' => 'Probation review']);
+        $order = $insert(['title' => 'Hired by order', 'source_type' => 'order_employment', 'source_id' => 77, 'meta' => json_encode(['order_no' => 'ƏMR-4512'])]);
+        $unlinked = $insert(['personnel_id' => null, 'tabel_no' => null, 'owner_user_id' => null, 'title' => 'Nobody attached']);
+
+        $service = app(LifecycleDashboardReadService::class);
+        $ids = fn (array $filters): array => $service->events($filters)->pluck('id')->sort()->values()->all();
+
+        // Full name spans three columns, like the PHP haystack did.
+        $this->assertNotContains($unlinked, $ids(['search' => 'lifecycle employee test']));
+        $this->assertCount(2, $ids(['search' => 'lifecycle employee test']));
+        $this->assertSame([$legacyProbation, $order], $ids(['search' => strtolower($personnel->tabel_no)]));
+        // Localized title of a legacy English title, the order number from meta, and the structure name.
+        $this->assertSame([$legacyProbation], $ids(['search' => 'sınaq müddəti']));
+        $this->assertSame([$order], $ids(['search' => '4512']));
+        $this->assertSame([$legacyProbation, $order], $ids(['search' => 'lifecycle hq']));
+        $this->assertSame([$order], $ids(['search' => 'hired', 'type' => 'onboarding', 'status' => 'planned']));
+        $this->assertSame([], $ids(['search' => 'hired', 'type' => 'probation']));
+
+        $payload = $service->dashboard(['search' => 'lifecycle hq', 'type' => 'probation']);
+
+        $this->assertSame(1, $payload['events']->total());
+        $this->assertSame(['' => 2, 'onboarding' => 1, 'probation' => 1], $payload['typeCounts']->sortKeys()->all());
+        $this->assertSame(['' => 1, 'planned' => 1], $payload['statusCounts']->sortKeys()->all());
+    }
+
+    public function test_events_are_paginated_with_null_deadlines_last_then_deadline_then_newest(): void
+    {
+        $personnel = $this->makePersonnel();
+
+        $insert = fn (?string $deadline): int => DB::table('employee_lifecycle_events')->insertGetId([
+            'personnel_id' => $personnel->id,
+            'tabel_no' => $personnel->tabel_no,
+            'type' => 'onboarding',
+            'status' => 'planned',
+            'title' => 'Paged',
+            'deadline_at' => $deadline,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $noDeadline = $insert(null);
+        $late = $insert('2026-06-01');
+        $earlyOld = $insert('2026-05-01');
+        $earlyNew = $insert('2026-05-01');
+
+        $service = app(LifecycleDashboardReadService::class);
+        $first = $service->events([], 3);
+
+        $this->assertSame(4, $first->total());
+        $this->assertSame(2, $first->lastPage());
+        $this->assertSame([$earlyNew, $earlyOld, $late], $first->pluck('id')->all());
+
+        Paginator::currentPageResolver(fn (): int => 2);
+
+        $this->assertSame([$noDeadline], $service->events([], 3)->pluck('id')->all());
+    }
+
+    public function test_dashboard_pages_events_and_resets_the_page_when_a_filter_changes(): void
+    {
+        Permission::findOrCreate('show-employee-lifecycle', 'web');
+
+        $user = User::factory()->create(['is_active' => true]);
+        $user->givePermissionTo('show-employee-lifecycle');
+        $personnel = $this->makePersonnel();
+
+        foreach (range(1, LifecycleDashboardReadService::PER_PAGE + 2) as $index) {
+            DB::table('employee_lifecycle_events')->insert([
+                'personnel_id' => $personnel->id,
+                'tabel_no' => $personnel->tabel_no,
+                'type' => 'onboarding',
+                'status' => 'planned',
+                'title' => 'Paged event '.$index,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        Livewire::actingAs($user);
+
+        Livewire::test(\App\Modules\EmployeeLifecycle\Livewire\Dashboard::class)
+            ->assertSee('Paged event 17')
+            ->assertDontSee('Paged event 2<', false)
+            ->call('gotoPage', 2)
+            ->assertSee('Paged event 1<', false)
+            ->assertDontSee('Paged event 17')
+            ->set('search', 'paged')
+            ->assertSee('Paged event 17');
+    }
+
+    public function test_overdue_tasks_are_counted_in_full_but_listed_bounded(): void
+    {
+        Carbon::setTestNow('2026-05-03 10:00:00');
+
+        $personnel = $this->makePersonnel();
+        $eventId = DB::table('employee_lifecycle_events')->insertGetId([
+            'personnel_id' => $personnel->id,
+            'tabel_no' => $personnel->tabel_no,
+            'type' => 'onboarding',
+            'status' => 'in_progress',
+            'title' => 'Tasks',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $rows = collect(range(1, 55))->map(fn (int $index): array => [
+            'event_id' => $eventId,
+            'title' => 'Overdue '.$index,
+            'owner_type' => 'hr',
+            'due_at' => '2026-05-01',
+            'status' => 'open',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ])->push([
+            'event_id' => $eventId,
+            'title' => 'Future',
+            'owner_type' => 'hr',
+            'due_at' => '2026-05-10',
+            'status' => 'open',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ])->push([
+            'event_id' => $eventId,
+            'title' => 'Done late',
+            'owner_type' => 'hr',
+            'due_at' => '2026-04-01',
+            'status' => 'completed',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ])->all();
+
+        DB::table('employee_lifecycle_tasks')->insert($rows);
+
+        $payload = app(LifecycleDashboardReadService::class)->dashboard();
+
+        $this->assertSame(55, $payload['summary']['overdue_tasks']);
+        $this->assertCount(50, $payload['overdueTasks']);
+        $this->assertSame('Lifecycle Employee Test', $payload['overdueTasks']->first()['employee_name']);
+    }
+
+    public function test_personnel_falls_back_to_tabel_no_when_the_event_has_no_personnel_id(): void
+    {
+        $personnel = $this->makePersonnel();
+
+        DB::table('employee_lifecycle_events')->insert([
+            'personnel_id' => null,
+            'tabel_no' => $personnel->tabel_no,
+            'type' => 'onboarding',
+            'status' => 'planned',
+            'title' => 'Legacy row',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $event = app(LifecycleDashboardReadService::class)->events()->first();
+
+        $this->assertSame('Lifecycle Employee Test', $event['employee_name']);
+        $this->assertSame('Lifecycle HQ', $event['structure_name']);
     }
 
     public function test_context_panel_filters_survive_the_teleport(): void

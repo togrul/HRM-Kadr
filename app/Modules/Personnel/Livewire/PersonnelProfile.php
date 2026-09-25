@@ -3,7 +3,10 @@
 namespace App\Modules\Personnel\Livewire;
 
 use App\Livewire\Traits\SideModalAction;
+use App\Models\Leave;
 use App\Models\Personnel;
+use App\Modules\Orders\Contracts\OrderDrafter;
+use App\Modules\Personnel\Application\Services\Personnel360TimelineService;
 use App\Modules\Personnel\Application\Services\PersonnelProfileReadService;
 use App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioPermissionMatrix;
 use Illuminate\Contracts\View\View;
@@ -130,6 +133,43 @@ class PersonnelProfile extends Component
     {
         return (auth()->user()?->can('assign-employee-content') ?? false)
             || (auth()->user()?->can('manage-employee-content-library') ?? false);
+    }
+
+    /**
+     * Order templates the header's action menu offers for this employee.
+     *
+     * @return array<string, string> code → label
+     */
+    #[Computed]
+    public function orderTemplates(): array
+    {
+        if (! (auth()->user()?->can('add-orders') ?? false)) {
+            return [];
+        }
+
+        return app(OrderDrafter::class)->personnelTemplates();
+    }
+
+    #[Computed]
+    public function canAddLeave(): bool
+    {
+        return auth()->user()?->can('create', Leave::class) ?? false;
+    }
+
+    /**
+     * The latest few entries of the employee's 360 timeline (orders, leaves, vacations,
+     * training, changes) for the overview. Read inside a lazy island only.
+     *
+     * @return list<array<string, mixed>>
+     */
+    #[Computed]
+    public function recentEvents(): array
+    {
+        return app(Personnel360TimelineService::class)
+            ->build(Personnel::withTrashed()->findOrFail($this->personnelId), null, 10)
+            ->take(6)
+            ->values()
+            ->all();
     }
 
     #[Computed]

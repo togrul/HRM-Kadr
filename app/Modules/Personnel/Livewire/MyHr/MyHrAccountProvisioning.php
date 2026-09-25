@@ -4,6 +4,7 @@ namespace App\Modules\Personnel\Livewire\MyHr;
 
 use App\Models\Personnel;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrAccountProvisioningService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
@@ -101,7 +102,7 @@ class MyHrAccountProvisioning extends Component
         $this->manualLink['user_id'] = $this->snapshot['user']?->id;
     }
 
-    public function render()
+    public function render(): View
     {
         return view('personnel::livewire.personnel.my-hr.account-provisioning');
     }

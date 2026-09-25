@@ -9,11 +9,13 @@ use App\Models\Structure;
 use App\Modules\BusinessTrips\Exports\BusinessTripExport;
 use App\Services\StructureService;
 use Carbon\Carbon;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\LazyCollection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
@@ -21,6 +23,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpWord\TemplateProcessor;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class BusinessTrips extends Component
 {
@@ -43,7 +46,7 @@ class BusinessTrips extends Component
     #[Url(as: 'location')]
     public $selectedLocation;
 
-    public function exportExcel()
+    public function exportExcel(): BinaryFileResponse
     {
         $this->authorize('export', PersonnelBusinessTrip::class);
         $report = $this->returnData(type: 'excel');
@@ -52,12 +55,26 @@ class BusinessTrips extends Component
         return Excel::download(new BusinessTripExport($report), "businessTrips-{$name}.xlsx");
     }
 
-    public function searchFilter()
+    public function searchFilter(): void
     {
         $this->search = $this->filter;
+        $this->resetPage();
     }
 
-    public function resetFilter()
+    /** Filters apply as they change; there is no separate "search" step. */
+    public function updatedFilter(): void
+    {
+        $this->searchFilter();
+    }
+
+    #[Computed]
+    public function hasActiveFilters(): bool
+    {
+        return $this->selectedLocation !== null
+            || collect(Arr::dot($this->search))->except('business_trip_status')->contains(fn ($value): bool => filled($value));
+    }
+
+    public function resetFilter(): void
     {
         $this->fillFilter();
         $this->search = $this->filter;
@@ -78,7 +95,7 @@ class BusinessTrips extends Component
         $this->resetPage();
     }
 
-    protected function fillFilter()
+    protected function fillFilter(): void
     {
         $this->filter = [
             'structure_id' => null,
@@ -98,7 +115,7 @@ class BusinessTrips extends Component
         ];
     }
 
-    public function printBusinessTripDocument(PersonnelBusinessTrip $model, $multi = false)
+    public function printBusinessTripDocument(PersonnelBusinessTrip $model, $multi = false): ?BinaryFileResponse
     {
         $model->load(['personnel', 'order.orderType', 'order.attributes', 'personnel.idDocuments']);
 
@@ -209,7 +226,7 @@ class BusinessTrips extends Component
             ->when($this->selectedLocation, fn ($query) => $query->where('location', $this->selectedLocation));
     }
 
-    protected function returnData($type = 'normal')
+    protected function returnData($type = 'normal'): LengthAwarePaginator|LazyCollection
     {
         $result = $this->scopedQuery()
             ->with([
@@ -254,7 +271,7 @@ class BusinessTrips extends Component
     }
 
     #[Computed]
-    public function businessTrips()
+    public function businessTrips(): LengthAwarePaginator|LazyCollection
     {
         return $this->returnData();
     }
@@ -325,14 +342,14 @@ class BusinessTrips extends Component
             ->all();
     }
 
-    public function mount(StructureService $structureService)
+    public function mount(StructureService $structureService): void
     {
         $this->authorize('viewAny', PersonnelBusinessTrip::class);
         $this->accessibleStructureIds = $structureService->getAccessibleStructures();
         $this->fillFilter();
     }
 
-    public function render()
+    public function render(): View
     {
         return view('business-trips::livewire.business-trips.business-trips');
     }

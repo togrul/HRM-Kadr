@@ -10,9 +10,9 @@
     <x-context-panel.progress>; put it in a page's <x-slot name="sidebar">.
 --}}
 
-<div {{ $attributes->merge(['class' => 'flex min-h-[calc(100vh-1.5rem)] flex-col overflow-hidden rounded-2xl border border-hairline bg-white shadow-card']) }}>
+<div {{ $attributes->merge(['class' => 'flex flex-col overflow-hidden rounded-2xl border border-hairline bg-white shadow-card lg:min-h-[calc(100vh-1.5rem)]']) }}>
     @if ($title)
-        <div class="border-b border-hairline px-3.5 py-3">
+        <div class="border-b border-hairline py-3 pl-3.5 pr-14">
             <p class="truncate text-[13.5px] font-semibold tracking-[-0.02em] text-ink">{{ $title }}</p>
             @if ($subtitle)
                 <p class="mt-0.5 truncate text-[11.5px] text-ink-faint">{{ $subtitle }}</p>

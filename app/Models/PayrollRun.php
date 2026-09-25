@@ -9,6 +9,25 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * @property int $id
+ * @property int $payroll_period_id
+ * @property int|null $regime_id
+ * @property string $run_type
+ * @property string $status
+ * @property float|string $gross_total
+ * @property float|string $deduction_total
+ * @property float|string $net_total
+ * @property float|string $employer_total
+ * @property int $employee_count
+ * @property \Illuminate\Support\Carbon|null $calculated_at
+ * @property \Illuminate\Support\Carbon|null $approved_at
+ * @property \Illuminate\Support\Carbon|null $locked_at
+ * @property int|null $created_by
+ * @property string|null $note
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class PayrollRun extends Model
 {
     use HasFactory;
@@ -42,6 +61,7 @@ class PayrollRun extends Model
         'locked_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<PayrollPeriod, $this> */
     public function period(): BelongsTo
     {
         return $this->belongsTo(PayrollPeriod::class, 'payroll_period_id');

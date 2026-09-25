@@ -85,6 +85,7 @@ return [
         'active_process_count' => ':count aktiv proses',
         'no_template' => 'Şablonsuz',
         'result_count' => ':count proses',
+        'process_unit' => 'proses',
         'overdue' => 'Gecikir',
         'event_mix' => 'Proses bölgüsü',
         'overdue_tasks' => 'Gecikmiş həyat dövrü tapşırıqları',
@@ -157,6 +158,7 @@ return [
         'manage_templates' => 'Şablonlar',
         'start_process' => 'Proses başlat',
         'complete_processes' => 'Tamamla',
+        'show_more' => 'Daha çox göstər (:count)',
     ],
     'messages' => [
         'template_created' => 'Həyat dövrü şablonu yaradıldı.',

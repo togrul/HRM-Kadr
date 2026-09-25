@@ -32,7 +32,7 @@
             <x-context-panel.section :title="__('reports::dashboard.fields.period')" :padded="false">
                 <div class="space-y-2.5 px-3.5 pb-3.5 pt-1">
                     <label class="block">
-                        <span class="hrm-eyebrow block pb-1">{{ __('reports::dashboard.fields.year') }}</span>
+                        <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('reports::dashboard.fields.year') }}</span>
                         <x-ui.select wire:model.live="year">
                             @foreach (range(now()->year - 4, now()->year + 1) as $yearOption)
                                 <option value="{{ $yearOption }}">{{ $yearOption }}</option>
@@ -41,7 +41,7 @@
                     </label>
 
                     <label class="block">
-                        <span class="hrm-eyebrow block pb-1">{{ __('reports::dashboard.fields.month') }}</span>
+                        <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('reports::dashboard.fields.month') }}</span>
                         <x-ui.select wire:model.live="month">
                             @foreach (range(1, 12) as $monthOption)
                                 <option value="{{ $monthOption }}">{{ \Carbon\Carbon::create()->month($monthOption)->translatedFormat('F') }}</option>
@@ -50,7 +50,7 @@
                     </label>
 
                     <label class="block">
-                        <span class="hrm-eyebrow block pb-1">{{ __('reports::dashboard.fields.structure') }}</span>
+                        <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('reports::dashboard.fields.structure') }}</span>
                         <x-ui.select wire:model.live="structureId">
                             <option value="">{{ __('reports::dashboard.labels.all_structures') }}</option>
                             @foreach ($structureOptions as $option)
@@ -73,7 +73,7 @@
         </x-slot:icon>
 
         <x-slot:actions>
-            <x-pill-button :href="$tabRoute('dynamic')" wire:navigate>
+            <x-pill-button variant="primary" :href="$tabRoute('dynamic')" wire:navigate>
                 {{ __('reports::dashboard.actions.build_report') }}
             </x-pill-button>
 
@@ -85,7 +85,7 @@
                 </x-pill-button>
             @endif
 
-            <x-pill-button variant="primary" :href="$this->printUrl()" target="_blank">
+            <x-pill-button :href="$this->printUrl()" target="_blank">
                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
                 {{ __('reports::dashboard.actions.print') }}
             </x-pill-button>

@@ -7,14 +7,28 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property string $headline
+ * @property string $publisher_name
+ * @property string $publisher_type
+ * @property string $mention_type
+ * @property \Illuminate\Support\Carbon $published_at
+ * @property string $summary
+ * @property string $sentiment
+ * @property string $visibility
+ */
 class PersonnelMediaMention extends Model
 {
     use HasFactory;
 
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_VERIFIED = 'verified';
+
     public const STATUS_REJECTED = 'rejected';
+
     public const STATUS_BROKEN_LINK = 'broken_link';
+
     public const STATUS_ARCHIVED_ONLY = 'archived_only';
 
     protected $fillable = [
@@ -58,11 +72,13 @@ class PersonnelMediaMention extends Model
         return $this->belongsTo(Personnel::class);
     }
 
+    /** @return BelongsTo<ProfessionalRecordAttachment, $this> */
     public function archiveAttachment(): BelongsTo
     {
         return $this->belongsTo(ProfessionalRecordAttachment::class, 'archive_attachment_id');
     }
 
+    /** @return BelongsTo<ProfessionalRecordAttachment, $this> */
     public function screenshotAttachment(): BelongsTo
     {
         return $this->belongsTo(ProfessionalRecordAttachment::class, 'screenshot_attachment_id');

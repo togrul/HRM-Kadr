@@ -1,26 +1,8 @@
-<div class="flex flex-col"
-     x-data
-     x-init="
-        const root = $el;
-        const paintPaginator = () => {
-            const paginator = root.querySelector('span[aria-current=page]>span');
-            if (paginator) {
-                paginator.classList.add('bg-blue-50', 'text-blue-600');
-            }
-        };
-        paintPaginator();
-        if (typeof Livewire !== 'undefined') {
-            Livewire.hook('commit', ({ component, succeed }) => {
-                if (component.id !== $wire.__instance.id) return;
-                succeed(() => queueMicrotask(paintPaginator));
-            });
-        }
-    "
->
+<div class="flex flex-col">
     <div class="flex flex-col items-center justify-between sm:flex-row filter bg-white py-2 px-2 rounded-xl">
         <div class="flex items-center justify-center space-x-2 action-section">
             <x-button class="space-x-2" mode="primary" wire:click.prevent="openCrud()">
-                <x-icons.add-icon color="text-white" hover="text-gray-50"></x-icons.add-icon>
+                <x-icons.add-icon color="text-white" hover="text-zinc-50"></x-icons.add-icon>
                 <span>{{ __('admin::references.buttons.add_position') }}</span>
             </x-button>
         </div>
@@ -70,8 +52,8 @@
                 </div>
                 <div class="flex flex-col justify-end">
                     <label class="inline-flex items-center gap-2 pb-2">
-                        <input type="checkbox" wire:model.live="form.is_approval_target" class="rounded border-gray-300 text-slate-700 focus:ring-slate-300">
-                        <span class="text-sm text-gray-700">{{ __('admin::references.fields.is_approval_target') }}</span>
+                        <input type="checkbox" wire:model.live="form.is_approval_target" class="rounded border-zinc-300 text-zinc-700 focus:ring-zinc-300">
+                        <span class="text-sm text-zinc-700">{{ __('admin::references.fields.is_approval_target') }}</span>
                     </label>
                     @error('form.is_approval_target')
                         <x-validation> {{ $message }} </x-validation>
@@ -92,25 +74,25 @@
                         @forelse ($positions as $position)
                             <tr>
                                 <x-table.td>
-                                      <span class="text-sm text-gray-500 font-medium">
+                                      <span class="text-sm text-zinc-500 font-medium">
                                           {{ $position->id }}
                                       </span>
                                 </x-table.td>
                                 <x-table.td>
                                       <span @class([
                                             'text-sm font-medium text-blue-500',
-                                            'bg-slate-100 rounded-sm px-3 py-1' => $position->rankCategory
+                                            'bg-zinc-100 rounded-sm px-3 py-1' => $position->rankCategory
                                       ])>
                                           {{ $position->rankCategory?->name }}
                                       </span>
                                 </x-table.td>
                                 <x-table.td>
-                                      <span class="text-sm text-gray-500 font-medium">
+                                      <span class="text-sm text-zinc-500 font-medium">
                                           {{ $position->name }}
                                       </span>
                                 </x-table.td>
                                 <x-table.td>
-                                      <span class="text-sm text-gray-500 font-medium">
+                                      <span class="text-sm text-zinc-500 font-medium">
                                           {{ $position->approval_rank ?? 0 }}
                                       </span>
                                 </x-table.td>
@@ -118,7 +100,7 @@
                                       <span @class([
                                             'text-sm font-medium rounded-sm px-3 py-1',
                                             'text-emerald-600 bg-emerald-50' => $position->is_approval_target,
-                                            'text-zinc-500 bg-slate-100' => ! $position->is_approval_target,
+                                            'text-zinc-500 bg-zinc-100' => ! $position->is_approval_target,
                                       ])>
                                           {{ $position->is_approval_target ? __('admin::references.fields.is_active') : '—' }}
                                       </span>
@@ -130,7 +112,7 @@
                                             class="h-9 w-9 hover:bg-zinc-100"
                                             :title="__('admin::references.actions.edit')"
                                         >
-                                            <x-icons.edit-icon color="text-slate-400" hover="text-slate-500"></x-icons.edit-icon>
+                                            <x-icons.edit-icon color="text-zinc-400" hover="text-zinc-500"></x-icons.edit-icon>
                                         </x-action-button>
                                         <x-action-button
                                             wire:click.prevent="deleteModel({{ $position->id }})"
@@ -154,4 +136,3 @@
         </div>
     </div>
 </div>
-@include('includes.sweetalert-push')

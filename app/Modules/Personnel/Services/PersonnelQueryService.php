@@ -4,6 +4,7 @@ namespace App\Modules\Personnel\Services;
 
 use App\Models\Personnel;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
 class PersonnelQueryService
 {
@@ -20,7 +21,6 @@ class PersonnelQueryService
         array $selectedStructureIds,
         array $accessibleStructureIds,
         ?int $selectedPosition = null,
-        bool $withStructureTree = true,
         ?string $search = null
     ): Builder {
         $query = Personnel::query()
@@ -42,8 +42,7 @@ class PersonnelQueryService
             ])
             ->leftJoin('positions as position_sort', 'position_sort.id', '=', 'personnels.position_id')
             ->leftJoin('structures as structure_sort', 'structure_sort.id', '=', 'personnels.structure_id')
-            ->with($this->listingRelations($status))
-            ->when($withStructureTree, fn (Builder $builder) => $builder->withStructureTree());
+            ->with($this->listingRelations($status));
 
         $this->applySharedScopes(
             query: $query,
@@ -231,6 +230,39 @@ class PersonnelQueryService
         }
 
         $this->applyQuickSearch($query, $search);
+    }
+
+    /**
+     * Command-palette lookup: every word must match one of the quick-search columns, so
+     * "Məmmədov Elçin" finds the person; current employees come before those who left.
+     *
+     * @param  array<int, int>  $accessibleStructureIds
+     * @return Collection<int, Personnel>
+     */
+    public function quickFind(string $term, array $accessibleStructureIds, int $limit = 8): Collection
+    {
+        $words = preg_split('/\s+/u', trim($term), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+
+        if ($words === [] || $accessibleStructureIds === []) {
+            return collect();
+        }
+
+        $query = Personnel::query()
+            ->select(['personnels.id', 'personnels.tabel_no', 'personnels.surname', 'personnels.name', 'personnels.patronymic', 'personnels.position_id', 'personnels.leave_work_date'])
+            ->with('position:id,name')
+            ->whereIn('personnels.structure_id', $accessibleStructureIds)
+            ->where('personnels.is_pending', false);
+
+        foreach (array_slice($words, 0, 4) as $word) {
+            $this->applyQuickSearch($query, $word);
+        }
+
+        return $query
+            ->orderByRaw('personnels.leave_work_date is not null')
+            ->orderBy('personnels.surname')
+            ->orderBy('personnels.name')
+            ->limit($limit)
+            ->get();
     }
 
     /**

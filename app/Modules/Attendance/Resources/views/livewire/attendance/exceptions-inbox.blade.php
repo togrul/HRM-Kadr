@@ -9,28 +9,28 @@
             <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
                 <div>
                     <x-label for="attendance-ex-status">{{ __('attendance::exceptions.filters.status') }}</x-label>
-                    <select id="attendance-ex-status" wire:model.live="status" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                    <x-ui.select id="attendance-ex-status" wire:model.live="status">
                         <option value="open">{{ __('attendance::exceptions.statuses.open') }}</option>
                         <option value="resolved">{{ __('attendance::exceptions.statuses.resolved') }}</option>
                         <option value="all">{{ __('attendance::exceptions.statuses.all') }}</option>
-                    </select>
+                    </x-ui.select>
                 </div>
                 <div>
                     <x-label for="attendance-ex-type">{{ __('attendance::exceptions.filters.type') }}</x-label>
-                    <select id="attendance-ex-type" wire:model.live="type" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                    <x-ui.select id="attendance-ex-type" wire:model.live="type">
                         <option value="all">{{ __('attendance::exceptions.types.all') }}</option>
                         <option value="missing_in">{{ __('attendance::exceptions.types.missing_in') }}</option>
                         <option value="missing_out">{{ __('attendance::exceptions.types.missing_out') }}</option>
                         <option value="unmatched_punch">{{ __('attendance::exceptions.types.unmatched_punch') }}</option>
-                    </select>
+                    </x-ui.select>
                 </div>
                 <div>
                     <x-label for="attendance-ex-from">{{ __('attendance::exceptions.filters.from') }}</x-label>
-                    <input id="attendance-ex-from" wire:model.live="fromDate" type="date" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                    <input id="attendance-ex-from" wire:model.live="fromDate" type="date" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
                 </div>
                 <div>
                     <x-label for="attendance-ex-to">{{ __('attendance::exceptions.filters.to') }}</x-label>
-                    <input id="attendance-ex-to" wire:model.live="toDate" type="date" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                    <input id="attendance-ex-to" wire:model.live="toDate" type="date" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
                 </div>
             </div>
         </div>

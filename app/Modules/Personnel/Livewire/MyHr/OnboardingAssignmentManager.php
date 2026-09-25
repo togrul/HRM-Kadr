@@ -8,6 +8,7 @@ use App\Models\Personnel;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrOnboardingReadService;
 use App\Modules\Personnel\Application\Services\MyHr\OnboardingAdminReportReadService;
 use App\Modules\Personnel\Application\Services\MyHr\OnboardingAssignmentManagerService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -194,7 +195,7 @@ class OnboardingAssignmentManager extends Component
             ->findOrFail($assignmentId);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('personnel::livewire.personnel.my-hr.onboarding-assignment-manager');
     }

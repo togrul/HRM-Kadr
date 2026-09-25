@@ -6,20 +6,23 @@ use App\Helpers\UsefulHelpers;
 use App\Models\Personnel;
 use App\Services\CvWordExportService;
 use App\Services\PersonnelServiceBookWordExportService;
+use App\Services\StructurePathService;
 use App\Services\WordSuffixService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class PrintController extends Controller
 {
-    public function personnel_service_book($personnelId)
+    public function personnel_service_book($personnelId): View
     {
         $personnel = $this->loadPersonnelServiceBook($personnelId);
 
         return view('prints.personnel', compact('personnel'));
     }
 
-    public function personnelServiceBookWord($personnelId)
+    public function personnelServiceBookWord($personnelId): BinaryFileResponse
     {
         $personnel = $this->loadPersonnelServiceBook($personnelId);
         $path = app(PersonnelServiceBookWordExportService::class)->export($personnel);
@@ -29,14 +32,14 @@ class PrintController extends Controller
             ->deleteFileAfterSend(true);
     }
 
-    public function cv($personnelId)
+    public function cv($personnelId): View
     {
         [, $cvData] = $this->buildCvData($personnelId);
 
         return view('prints.cv', compact('cvData'));
     }
 
-    public function cvWord($personnelId)
+    public function cvWord($personnelId): BinaryFileResponse
     {
         [$personnel, $cvData] = $this->buildCvData($personnelId);
 
@@ -98,7 +101,9 @@ class PrintController extends Controller
         $suffixService = app(WordSuffixService::class);
         $birthdate = $personnel->birthdate;
         $birthDateYear = optional($birthdate)?->year;
-        $structureNames = $personnel->structure?->getAllParentName(isCoded: false) ?? [];
+        $structureNames = $personnel->structure
+            ? (app(StructurePathService::class)->segments((int) $personnel->structure_id) ?: [$personnel->structure->name])
+            : [];
         $structureLabel = collect($structureNames)
             ->map(fn ($structure, $idx) => $suffixService->getStructureSuffix($structure, false, $idx < 1, true).' ')
             ->implode('');

@@ -1,6 +1,6 @@
 <div class="flex flex-col space-y-4">
     <header class="sidemenu-title">
-        <h2 class="text-xl font-semibold text-gray-500 font-title" id="slide-over-title">
+        <h2 class="text-xl font-semibold text-zinc-500 font-title" id="slide-over-title">
             {{ $title ?? ''}}
         </h2>
     </header>
@@ -20,12 +20,12 @@
                 @forelse($this->applicantPersonnelList as $pl)
                     <p
                         wire:click="selectPersonnel('{{ $pl->tabel_no }}', '{{ $pl->fullname }}','tabel_no')"
-                        class="flex flex-col px-2 py-1 transition-all duration-300 rounded-md cursor-pointer hover:bg-white text-slate-600 drop-shadow-sm"
+                        class="flex flex-col px-2 py-1 transition-all duration-300 rounded-md cursor-pointer hover:bg-white text-zinc-600 drop-shadow-sm"
                     >
                         <span>{{ $pl->fullname }}</span>
                     </p>
                 @empty
-                    <span class="mx-auto text-sm font-medium text-slate-500">
+                    <span class="mx-auto text-sm font-medium text-zinc-500">
                         {{ __('leaves::common.labels.search_personnel') }}
                     </span>
                 @endforelse
@@ -41,7 +41,7 @@
                 placeholder="---"
                 mode="gray"
                 class="w-full"
-                wire:model.defer="leave.leave_type_id"
+                wire:model="leave.leave_type_id"
                 :model="$this->leaveTypes"
             />
             
@@ -103,7 +103,7 @@
         @if ($leave->duration_unit === 'hour')
             <div class="flex flex-col">
                 <x-label for="leave.starts_time">{{ __('leaves::common.labels.start_time') }}</x-label>
-                <input id="leave.starts_time" type="time" wire:model.live="leave.starts_time" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                <input id="leave.starts_time" type="time" wire:model.live="leave.starts_time" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
                 @error('leave.starts_time')
                     <x-validation>{{ $message }}</x-validation>
                 @enderror
@@ -111,7 +111,7 @@
 
             <div class="flex flex-col">
                 <x-label for="leave.ends_time">{{ __('leaves::common.labels.end_time') }}</x-label>
-                <input id="leave.ends_time" type="time" wire:model.live="leave.ends_time" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                <input id="leave.ends_time" type="time" wire:model.live="leave.ends_time" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
                 @error('leave.ends_time')
                     <x-validation>{{ $message }}</x-validation>
                 @enderror
@@ -193,7 +193,7 @@
                     placeholder="---"
                     mode="gray"
                     class="w-full"
-                    wire:model.defer="leave.status_id"
+                    wire:model="leave.status_id"
                     :model="$this->statuses"
                 />
 
@@ -222,7 +222,7 @@
                         type="button"
                         wire:click="setAssignmentMode('auto')"
                         @class([
-                            'inline-flex items-center rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-tight transition',
+                            'inline-flex h-10 items-center rounded-full border px-4 text-sm font-semibold uppercase tracking-tight transition',
                             'border-zinc-950 bg-zinc-950 text-white shadow-sm' => $leave->assignment_mode === 'auto',
                             'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:text-zinc-900' => $leave->assignment_mode !== 'auto',
                         ])
@@ -233,7 +233,7 @@
                         type="button"
                         wire:click="setAssignmentMode('manual')"
                         @class([
-                            'inline-flex items-center rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-tight transition',
+                            'inline-flex h-10 items-center rounded-full border px-4 text-sm font-semibold uppercase tracking-tight transition',
                             'border-zinc-950 bg-zinc-950 text-white shadow-sm' => $leave->assignment_mode === 'manual',
                             'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:text-zinc-900' => $leave->assignment_mode !== 'manual',
                         ])
@@ -335,12 +335,12 @@
                             @forelse($this->assignedPersonnelList as $pl)
                                 <p
                                     wire:click="selectPersonnel('{{ $pl->tabel_no }}', '{{ $pl->fullname }}','assigned_to', {{ $pl->id }})"
-                                    class="flex flex-col rounded-md px-2 py-1 text-slate-600 transition-all duration-300 drop-shadow-sm hover:bg-white"
+                                    class="flex flex-col rounded-md px-2 py-1 text-zinc-600 transition-all duration-300 drop-shadow-sm hover:bg-white"
                                 >
                                     <span>{{ $pl->fullname }}</span>
                                 </p>
                             @empty
-                                <span class="mx-auto text-sm font-medium text-slate-500">
+                                <span class="mx-auto text-sm font-medium text-zinc-500">
                                     {{ __('leaves::common.labels.search_personnel') }}
                                 </span>
                             @endforelse

@@ -4,6 +4,7 @@ namespace App\Modules\Candidates\Livewire;
 
 use App\Models\Candidate;
 use App\Models\CandidateDocument;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -235,7 +236,7 @@ class CandidateFiles extends Component
         $this->dispatch('closeSideMenu');
     }
 
-    public function render()
+    public function render(): View
     {
         return view('candidates::livewire.candidates.candidate-files', [
             'categoryOptions' => collect((array) config('candidates.documents.categories', ['other']))

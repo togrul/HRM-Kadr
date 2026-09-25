@@ -4,7 +4,6 @@ namespace App\Modules\PerformanceEvaluation\Application\Services;
 
 use App\Models\PerformanceGoal;
 use App\Models\PerformanceGoalCheckin;
-use Illuminate\Support\Collection;
 
 /**
  * Goals / OKR for a performance cycle: builds the aligned goal tree (objective →

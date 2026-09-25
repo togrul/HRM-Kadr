@@ -1,14 +1,16 @@
 <?php
 
+use App\Models\PerformanceTestAttempt;
+use App\Modules\PerformanceEvaluation\Application\Services\Kpi\ScorecardReviewService;
+use App\Modules\PerformanceEvaluation\Application\Services\Kpi\ScorecardService;
+use App\Modules\PerformanceEvaluation\Application\Services\PerformanceEvaluationReportingService;
+use App\Modules\PerformanceEvaluation\Application\Services\PerformanceTestTranscriptService;
 use App\Modules\PerformanceEvaluation\Livewire\Dashboard;
 use App\Modules\PerformanceEvaluation\Livewire\EvaluatorWorkspace;
 use App\Modules\PerformanceEvaluation\Livewire\GoalsWorkspace;
 use App\Modules\PerformanceEvaluation\Livewire\SuccessionWorkspace;
 use App\Modules\PerformanceEvaluation\Livewire\TestWorkspace;
 use App\Modules\PerformanceEvaluation\Livewire\UserPersonnelLinks;
-use App\Modules\PerformanceEvaluation\Application\Services\PerformanceEvaluationReportingService;
-use App\Modules\PerformanceEvaluation\Application\Services\PerformanceTestTranscriptService;
-use App\Models\PerformanceTestAttempt;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['web', 'auth'])->group(function () {
@@ -33,6 +35,16 @@ Route::middleware(['web', 'auth'])->group(function () {
             'analytics' => $analytics,
         ]);
     })->name('performance-evaluation.test-transcript');
+    Route::get('/performance-evaluation/scorecards/{scorecard}/print', function (int $scorecard, ScorecardService $scorecards, ScorecardReviewService $review) {
+        $card = $scorecards->visibleQuery(auth()->user())
+            ->with(['personnel', 'position:id,name', 'manager:id,surname,name,patronymic', 'cycle', 'items.kpi', 'bonus', 'calibrations', 'events.user:id,name'])
+            ->findOrFail($scorecard);
+
+        return response()->view('performance-evaluation::print.scorecard', [
+            'card' => $card,
+            'competencies' => $review->competencies($card),
+        ]);
+    })->whereNumber('scorecard')->name('performance-evaluation.scorecard-print');
     Route::get('/performance-evaluation/print-summary', function (PerformanceEvaluationReportingService $reporting) {
         abort_unless(auth()->user()?->canAny(['show-performance-evaluation', 'manage-performance-evaluation', 'export-performance-evaluation']), 403);
 

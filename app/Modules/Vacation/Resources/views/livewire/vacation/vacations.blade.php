@@ -56,28 +56,23 @@
 
             <x-context-panel.section :title="__('vacation::common.labels.year')">
                 <div class="px-1 pb-1">
-                    <select
+                    <x-ui.select
                         wire:model.live="selectedYear"
-                        @disabled(! empty($filter['date']['min'] ?? null) || ! empty($filter['date']['max'] ?? null))
-                        class="hrm-num h-[31px] w-full rounded-lg border border-hairline bg-white px-2 text-[12.5px] text-ink focus:border-ink focus:ring-0 disabled:opacity-50"
+                        :disabled="! empty($filter['date']['min'] ?? null) || ! empty($filter['date']['max'] ?? null)"
                     >
                         @foreach ($years as $year)
                             <option value="{{ $year }}">{{ $year }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                 </div>
             </x-context-panel.section>
-
-            <x-slot name="footer">
-                <button type="button" wire:click="resetFilter" class="text-[12px] font-medium text-ink-muted transition hover:text-ink">
-                    {{ __('vacation::common.labels.reset') }}
-                </button>
-            </x-slot>
         </x-context-panel>
     @endteleport
 
     {{-- ===================== header ===================== --}}
     <x-page-header
+        collapsible-filters
+        :filters-active="$this->hasActiveFilters"
         :title="__('vacation::common.titles.requests')"
         :breadcrumb="__('vacation::common.titles.vacations')"
     >
@@ -95,6 +90,31 @@
             @can('review-self-service-requests')
                 <x-ui.self-service-review-link />
             @endcan
+            @can('add-orders')
+                @php
+                    // One vacation template: the button opens it. Several: it lists them. None: the plain composer.
+                    $vacationTemplates = $this->vacationOrderTemplates;
+                    $pickTemplate = count($vacationTemplates) > 1;
+                @endphp
+                <div class="relative" x-data="{ open: false }" @keydown.escape.window="open = false">
+                    <x-pill-button
+                        variant="primary"
+                        :href="$pickTemplate ? null : route('orders', array_filter(['create' => 1, 'preset' => array_key_first($vacationTemplates)]))"
+                        :wire:navigate="! $pickTemplate"
+                        x-on:click="{{ $pickTemplate ? 'open = ! open' : '' }}"
+                    >
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                        {{ __('vacation::common.actions.vacation_order') }}
+                    </x-pill-button>
+                    @if ($pickTemplate)
+                        <div x-cloak x-show="open" x-transition.opacity.duration.100ms @click.outside="open = false" class="absolute right-0 z-40 mt-1.5 w-64 overflow-hidden rounded-xl border border-hairline bg-white py-1 shadow-overlay">
+                            @foreach ($vacationTemplates as $code => $label)
+                                <a href="{{ route('orders', ['create' => 1, 'preset' => $code]) }}" wire:navigate class="flex w-full items-center px-3.5 py-2 text-left text-[12.5px] text-ink-soft transition hover:bg-[#fafafa] hover:text-ink">{{ $label }}</a>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            @endcan
             @can('export-vacations')
                 <x-pill-button variant="emerald" :icon="true" wire:click.prevent="exportExcel"
                     wire:loading.attr="disabled" wire:target="exportExcel"
@@ -108,35 +128,35 @@
         <div class="flex flex-col gap-2.5">
             <div class="flex flex-wrap items-end gap-3">
                 <label class="w-full flex-1 sm:max-w-[360px]">
-                    <span class="hrm-eyebrow block pb-1">{{ __('vacation::common.labels.fullname') }}</span>
+                    <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('vacation::common.labels.fullname') }}</span>
                     <span class="relative block">
                         <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
                         <input
                             type="search"
                             wire:model.live.debounce.400ms="filter.fullname"
-                            wire:keydown.enter="searchFilter"
                             placeholder="{{ __('vacation::common.labels.search_placeholder') }}"
-                            class="h-[34px] w-full rounded-[10px] border border-hairline bg-[#f4f4f5] pl-9 pr-3 text-[12.5px] text-ink placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-0"
+                            class="h-10 w-full rounded-[10px] border border-hairline bg-[#f4f4f5] pl-9 pr-3 text-base sm:text-sm text-ink placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-0"
                         />
                     </span>
                 </label>
 
                 <div class="shrink-0">
-                    <span class="hrm-eyebrow block pb-1">{{ __('vacation::common.labels.date_range') }}</span>
+                    <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('vacation::common.labels.date_range') }}</span>
                     <div class="flex items-center gap-2">
-                        <input type="date" wire:model="filter.date.min"
+                        <input type="date" wire:model.live="filter.date.min"
                             aria-label="{{ __('vacation::common.labels.date_start') }}"
-                            class="hrm-num h-[34px] w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[12.5px] text-ink focus:border-ink focus:bg-white focus:ring-0" />
+                            class="hrm-num h-10 w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base sm:text-sm text-ink focus:border-ink focus:bg-white focus:ring-0" />
                         <span class="shrink-0 text-ink-faint">&ndash;</span>
-                        <input type="date" wire:model="filter.date.max"
+                        <input type="date" wire:model.live="filter.date.max"
                             aria-label="{{ __('vacation::common.labels.date_end') }}"
-                            class="hrm-num h-[34px] w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[12.5px] text-ink focus:border-ink focus:bg-white focus:ring-0" />
+                            class="hrm-num h-10 w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base sm:text-sm text-ink focus:border-ink focus:bg-white focus:ring-0" />
                     </div>
                 </div>
 
                 <div class="min-w-[200px] flex-1">
-                    <span class="hrm-eyebrow block pb-1">{{ __('vacation::common.labels.structure') }}</span>
+                    <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('vacation::common.labels.structure') }}</span>
                     <x-ui.select-dropdown
+                        :aria-label="__('vacation::common.labels.structure')"
                         placeholder="---"
                         mode="gray"
                         class="w-full"
@@ -146,8 +166,7 @@
                     />
                 </div>
 
-                <x-pill-button variant="primary" wire:click="searchFilter" class="!h-[34px]">{{ __('vacation::common.labels.search') }}</x-pill-button>
-                <x-pill-button wire:click="resetFilter" class="!h-[34px]">{{ __('vacation::common.labels.reset') }}</x-pill-button>
+                <x-filter.reset :active="$this->hasActiveFilters" />
             </div>
 
             <p class="text-[11.5px] text-ink-faint">{{ __('vacation::common.hints.approval_note') }}</p>
@@ -155,7 +174,7 @@
     </x-page-header>
 
     {{-- ===================== table ===================== --}}
-    <x-table.tbl :headers="$this->getTableHeaders()">
+    <x-table.tbl sticky :headers="$this->getTableHeaders()">
         @forelse ($this->vacations as $_vacation)
             @php
                 $startDate = \Carbon\Carbon::parse($_vacation->start_date);
@@ -266,7 +285,7 @@
                             @can('export-vacations')
                                 <button type="button" wire:click="printVacationDocument('{{ $_vacation->id }}')"
                                     title="{{ __('vacation::common.actions.print_document') }}"
-                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-teal-50 hover:text-teal-600">
+                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink">
                                     <x-icons.document-icon color="text-current" hover="text-current" />
                                 </button>
                             @endcan
@@ -281,7 +300,7 @@
                 </x-table.td>
             </tr>
         @empty
-            <x-table.empty :rows="count($this->getTableHeaders())" />
+            <x-table.empty :rows="count($this->getTableHeaders())" :filtered="$this->hasActiveFilters" />
         @endforelse
     </x-table.tbl>
 

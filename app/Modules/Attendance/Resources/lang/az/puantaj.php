@@ -6,7 +6,7 @@ return [
         'personnel' => 'Tabel no / Ad soyad',
         'total_hours' => 'Cəmi saat',
         'total_days' => 'Cəmi gün',
-        'workday_override' => 'İş günü override',
+        'workday_override' => 'İş günü istisnası',
     ],
     'search' => [
         'label' => 'Axtarış (ad və ya tabel nömrəsi)',
@@ -54,7 +54,7 @@ return [
         'sections' => [
             'colors' => 'Rənglərin mənası',
             'leave_types' => 'İcazə işarələri',
-            'calendar' => 'İş rejimi təqvim override-ları',
+            'calendar' => 'İş rejimi təqvimi istisnaları',
         ],
         'items' => [
             'full_day' => 'Tam iş günü',

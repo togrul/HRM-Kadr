@@ -3,13 +3,17 @@
 namespace App\Modules\Services\Livewire\Settings;
 
 use App\Models\Setting;
+use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
+use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
 class AddSettings extends Component
 {
+    use AuthorizesSettingsAccess;
+
     public $settings = [];
 
-    protected function rules()
+    protected function rules(): array
     {
         return [
             'settings.name' => 'required|string',
@@ -17,7 +21,7 @@ class AddSettings extends Component
         ];
     }
 
-    protected function validationAttributes()
+    protected function validationAttributes(): array
     {
         return [
             'settings.name' => __('services::common.labels.name'),
@@ -25,7 +29,7 @@ class AddSettings extends Component
         ];
     }
 
-    public function store()
+    public function store(): void
     {
         $this->validate();
 
@@ -36,7 +40,7 @@ class AddSettings extends Component
         $this->settings = [];
     }
 
-    public function render()
+    public function render(): View
     {
         return view('services::livewire.services.settings.add-settings');
     }

@@ -32,6 +32,8 @@
 
     {{-- ===================== header ===================== --}}
     <x-page-header
+        collapsible-filters
+        :filters-active="$search !== '' || $filters !== [] || $selectedPosition !== null"
         :title="__('personnel::common.titles.personnels')"
         :breadcrumb="__('personnel::common.titles.personnels')"
     >
@@ -60,7 +62,7 @@
                         type="search"
                         wire:model.live.debounce.400ms="search"
                         placeholder="{{ __('personnel::common.placeholders.quick_search') }}"
-                        class="h-[34px] w-full rounded-[10px] border border-hairline bg-[#f4f4f5] pl-9 pr-3 text-[12.5px] text-ink placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-0"
+                        class="{{ \App\Support\Ui\FieldStyles::input('pl-9') }}"
                     />
                 </label>
 

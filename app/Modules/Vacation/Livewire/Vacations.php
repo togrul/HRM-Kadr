@@ -7,6 +7,7 @@ use App\Livewire\Traits\SideModalAction;
 use App\Models\OrderType;
 use App\Models\PersonnelVacation;
 use App\Models\Structure;
+use App\Modules\Orders\Contracts\OrderDrafter;
 use App\Modules\Personnel\Contracts\MyHrRequestReview;
 use App\Modules\Vacation\Exports\VacationExport;
 use App\Services\Chief\ChiefResolver;
@@ -14,11 +15,13 @@ use App\Services\NumberToWordsService;
 use App\Services\StructureService;
 use App\Services\WordSuffixService;
 use Carbon\Carbon;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\LazyCollection;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
@@ -27,6 +30,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpWord\TemplateProcessor;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class Vacations extends Component
 {
@@ -54,7 +58,7 @@ class Vacations extends Component
 
     protected array $runtimeStructureOptionsCache = [];
 
-    public function exportExcel()
+    public function exportExcel(): BinaryFileResponse
     {
         $this->authorize('export', PersonnelVacation::class);
 
@@ -64,12 +68,38 @@ class Vacations extends Component
         return Excel::download(new VacationExport($report), "vacation-{$name}.xlsx");
     }
 
-    public function searchFilter()
+    public function searchFilter(): void
     {
         $this->search = $this->filter;
+        $this->resetPage();
     }
 
-    public function resetFilter()
+    /** Filters apply as they change; there is no separate "search" step. */
+    public function updatedFilter(): void
+    {
+        $this->searchFilter();
+    }
+
+    /**
+     * Vacations are granted by an order: the header's "Vacation order" opens the order
+     * composer on the vacation template(s).
+     *
+     * @return array<string, string> code → label
+     */
+    #[Computed]
+    public function vacationOrderTemplates(): array
+    {
+        return app(OrderDrafter::class)->personnelTemplates('vacation');
+    }
+
+    #[Computed]
+    public function hasActiveFilters(): bool
+    {
+        return $this->selectedType !== null
+            || collect(Arr::dot($this->search))->except('vacation_status')->contains(fn ($value): bool => filled($value));
+    }
+
+    public function resetFilter(): void
     {
         $this->fillFilter();
         $this->search = $this->filter;
@@ -90,7 +120,7 @@ class Vacations extends Component
         ];
     }
 
-    public function printVacationDocument(PersonnelVacation $model)
+    public function printVacationDocument(PersonnelVacation $model): ?BinaryFileResponse
     {
         $model->load([
             'personnel',
@@ -237,7 +267,7 @@ class Vacations extends Component
             ));
     }
 
-    protected function returnData($type = 'normal')
+    protected function returnData($type = 'normal'): LengthAwarePaginator|LazyCollection
     {
         $result = $this->scopedQuery()
             ->with([
@@ -286,7 +316,7 @@ class Vacations extends Component
     }
 
     #[Computed]
-    public function vacations()
+    public function vacations(): LengthAwarePaginator|LazyCollection
     {
         return $this->returnData();
     }
@@ -405,7 +435,7 @@ class Vacations extends Component
         $this->selectedYear = request()->has('year') ? request()->get('year') : $this->years->first();
     }
 
-    public function mount()
+    public function mount(): void
     {
         $this->authorize('viewAny', PersonnelVacation::class);
         $this->accessibleStructureIds = resolve(StructureService::class)->getAccessibleStructures();
@@ -421,7 +451,7 @@ class Vacations extends Component
         }
     }
 
-    public function render()
+    public function render(): View
     {
         return view('vacation::livewire.vacation.vacations');
     }

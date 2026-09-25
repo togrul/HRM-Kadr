@@ -28,7 +28,7 @@
 @endphp
 <x-surface-card :title="__('notifications::common.tabs.campaigns')" icon="icons.clock-icon">
     <div class="space-y-4">
-        <div class="rounded-[1.6rem] border border-zinc-200 bg-zinc-50/70 p-4">
+        <div class="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4">
             <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                 <div>
                     <p class="text-sm font-semibold text-zinc-950">{{ __('notifications::common.tabs.campaigns') }}</p>
@@ -39,14 +39,14 @@
                         <input type="text" wire:model.live.debounce.300ms="search" placeholder="{{ __('notifications::common.helpers.search_campaigns') }}" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
                     </x-ui.input-shell>
                     <x-ui.input-shell>
-                        <select wire:model.live="statusFilter" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
+                        <x-ui.select wire:model.live="statusFilter">
                             <option value="all">{{ __('notifications::common.helpers.all_statuses') }}</option>
                             <option value="draft">{{ __('notifications::common.statuses.draft') }}</option>
                             <option value="queued">{{ __('notifications::common.statuses.queued') }}</option>
                             <option value="sent">{{ __('notifications::common.statuses.sent') }}</option>
                             <option value="failed">{{ __('notifications::common.statuses.failed') }}</option>
                             <option value="cancelled">{{ __('notifications::common.statuses.cancelled') }}</option>
-                        </select>
+                        </x-ui.select>
                     </x-ui.input-shell>
                 </div>
             </div>
@@ -54,17 +54,17 @@
 
         <div class="space-y-3">
             @forelse ($campaigns as $campaign)
-                <div class="rounded-[1.6rem] border border-zinc-200 bg-white px-4 py-4 shadow-card">
+                <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-4 shadow-card">
                     <div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_auto]">
                         <div class="space-y-3">
                             <div class="flex flex-wrap items-center gap-2">
                                 <h4 class="text-base font-semibold tracking-tight text-zinc-950">{{ $campaign->display_title ?? $campaign->title }}</h4>
                                 @if (($campaign->display_copy_count ?? 0) > 0)
-                                    <x-notification.chip mode="sky" size="sm" uppercase>
+                                    <x-notification.chip mode="sky" size="sm">
                                         {{ __('notifications::common.badges.copy_label') }}{{ $campaign->display_copy_count > 1 ? ' ×'.$campaign->display_copy_count : '' }}
                                     </x-notification.chip>
                                 @endif
-                                <x-notification.chip mode="muted" size="sm" uppercase>{{ $categoryLabels[$campaign->category] ?? $campaign->category }}</x-notification.chip>
+                                <x-notification.chip mode="muted" size="sm">{{ $categoryLabels[$campaign->category] ?? $campaign->category }}</x-notification.chip>
                                 <x-notification.chip :mode="$statusChipMode($campaign->status)" size="sm" uppercase>{{ __('notifications::common.statuses.'.$campaign->status) }}</x-notification.chip>
                                 @if ($campaign->scheduled_at)
                                     <x-notification.chip mode="amber" size="sm">
@@ -163,7 +163,7 @@
                     </div>
                 </div>
             @empty
-                <div class="rounded-[1.7rem] border border-dashed border-zinc-200 bg-zinc-50/70 px-5 py-10 text-center">
+                <div class="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50/70 px-5 py-10 text-center">
                     <p class="text-sm font-semibold text-zinc-900">{{ __('notifications::common.tabs.campaigns') }}</p>
                     <p class="mt-2 text-sm leading-6 text-zinc-500">{{ __('notifications::common.helpers.campaign_none') }}</p>
                 </div>

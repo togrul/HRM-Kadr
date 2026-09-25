@@ -9,7 +9,6 @@ use App\Support\Database\InstalledTables;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class Personnel360TimelineService
@@ -603,11 +602,11 @@ class Personnel360TimelineService
         $locale = app()->getLocale() ?: 'az';
         $column = $baseColumn.'_'.($locale === 'az' ? 'az' : $locale);
 
-        if (! Schema::hasColumn($table, $column)) {
+        if (! InstalledTables::hasColumn($table, $column)) {
             $column = $baseColumn.'_az';
         }
 
-        if (! Schema::hasColumn($table, $column)) {
+        if (! InstalledTables::hasColumn($table, $column)) {
             return null;
         }
 
@@ -616,7 +615,7 @@ class Personnel360TimelineService
 
     private function tableLabel(string $table, mixed $id, string $column): ?string
     {
-        if (! InstalledTables::has($table) || ! Schema::hasColumn($table, $column)) {
+        if (! InstalledTables::has($table) || ! InstalledTables::hasColumn($table, $column)) {
             return null;
         }
 

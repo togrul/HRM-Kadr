@@ -20,7 +20,7 @@
             @if ($payload['structures'] === [])
                 <p class="mt-4 text-sm text-zinc-500">{{ __($translationNs.'.messages.empty_structures') }}</p>
             @else
-                <div class="mt-4 grid max-h-[18rem] gap-3 overflow-y-auto pr-1">
+                <div class="mt-4 grid max-h-[18rem] gap-3 overflow-y-auto pr-1 hrm-scroll hrm-scroll-hover">
                     @foreach ($payload['structures'] as $structure)
                         @php
                             $isSelected = in_array($structure['id'], $selectedStructureIds, true);
@@ -50,7 +50,7 @@
             @if ($payload['positions'] === [])
                 <p class="mt-4 text-sm text-zinc-500">{{ __($translationNs.'.messages.empty_positions') }}</p>
             @else
-                <div class="mt-4 grid max-h-[18rem] gap-3 overflow-y-auto pr-1">
+                <div class="mt-4 grid max-h-[18rem] gap-3 overflow-y-auto pr-1 hrm-scroll hrm-scroll-hover">
                     @foreach ($payload['positions'] as $position)
                         @php
                             $isSelected = in_array($position['id'], $selectedPositionIds, true);
@@ -76,7 +76,7 @@
                 <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __($translationNs.'.sections.target_people') }}</x-ui.field-label>
                 <span class="inline-flex min-w-7 items-center justify-center rounded-full bg-white px-2 py-1 text-[11px] font-semibold tracking-tight text-zinc-500">{{ count($selectedPersonnelIds) }}</span>
             </div>
-            <button type="button" wire:click="clearSelection" class="inline-flex items-center justify-center self-start rounded-full bg-white px-3 py-1.5 text-xs font-semibold tracking-tight text-zinc-600 shadow-sm transition hover:text-zinc-950">{{ __($translationNs.'.actions.clear_selection') }}</button>
+            <button type="button" wire:click="clearSelection" class="inline-flex h-10 items-center justify-center self-start rounded-full bg-white px-3 text-sm font-semibold tracking-tight text-zinc-600 shadow-sm transition hover:text-zinc-950">{{ __($translationNs.'.actions.clear_selection') }}</button>
         </div>
         <div class="mt-3">
             <x-ui.filter-input wire:model.live.debounce.300ms="searchPersonnel" type="text" placeholder="{{ __($translationNs.'.messages.search_personnel_placeholder') }}" />
@@ -84,7 +84,7 @@
         @if ($payload['personnels'] === [])
             <p class="mt-4 text-sm text-zinc-500">{{ __($translationNs.'.messages.empty_personnels') }}</p>
         @else
-            <div class="mt-4 grid max-h-[24rem] gap-3 overflow-y-auto pr-1 md:grid-cols-2 xl:grid-cols-3">
+            <div class="mt-4 grid max-h-[24rem] gap-3 overflow-y-auto pr-1 hrm-scroll hrm-scroll-hover md:grid-cols-2 xl:grid-cols-3">
                 @foreach ($payload['personnels'] as $personnel)
                     @php
                         $isSelected = in_array($personnel['id'], $selectedPersonnelIds, true);

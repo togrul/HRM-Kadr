@@ -28,7 +28,7 @@
                 <input
                     type="search"
                     wire:model.live.debounce.250ms="permissionSearch"
-                    class="h-16 w-full rounded-2xl border border-zinc-300 bg-white pl-14 pr-5 text-base font-semibold text-zinc-950 shadow-sm outline-none transition placeholder:text-zinc-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    class="h-16 w-full rounded-2xl border border-zinc-300 bg-white pl-14 pr-5 text-base font-semibold text-zinc-950 shadow-sm outline-none transition placeholder:text-zinc-500 focus:border-ink focus:ring-2 focus:ring-blue-100"
                     placeholder="{{ __('services::roles.actions.search_permission') }}"
                 />
             </label>
@@ -130,7 +130,7 @@
                                         value="{{ $permission['id'] }}"
                                         id="permission_{{ $permission['id'] }}"
                                         type="checkbox"
-                                        class="mt-1 h-5 w-5 rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
+                                        class="mt-1 h-5 w-5 rounded border-hairline text-ink focus:ring-zinc-400"
                                     />
 
                                     <span class="min-w-0">
@@ -159,7 +159,7 @@
                 </div>
 
                 <label class="inline-flex h-12 items-center gap-3 rounded-2xl bg-[#f5f5f7] px-4 text-sm font-bold text-zinc-950">
-                    <input wire:model.live="selectAllStructure" type="checkbox" class="h-5 w-5 rounded border-zinc-300 text-blue-600 focus:ring-blue-500" />
+                    <input wire:model.live="selectAllStructure" type="checkbox" class="h-5 w-5 rounded border-hairline text-ink focus:ring-zinc-400" />
                     <span>{{ __('services::permissions.sections.select_all') }}</span>
                 </label>
             </div>
@@ -177,7 +177,7 @@
                             wire:change="updatePermissionStructureList({{ $structure->id }})"
                             id="permission_{{ $structure->id }}_{{ $structure->shortname }}"
                             type="checkbox"
-                            class="mt-1 h-5 w-5 rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
+                            class="mt-1 h-5 w-5 rounded border-hairline text-ink focus:ring-zinc-400"
                         />
 
                         <span class="min-w-0">

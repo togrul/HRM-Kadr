@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="{{ asset('assets/css/pikaday.min.css') }}">
     <script src="{{ asset('assets/js/moment.min.js') }}"></script>
     <script src="{{ asset('assets/js/pikaday.min.js') }}"></script>
+    {{-- read before first paint, so a collapsed context panel never flashes open and shifts the page --}}
+    <script>try { if (localStorage.getItem('hrm.panelCollapsed') === '1') document.documentElement.setAttribute('data-panel-collapsed', ''); } catch (e) {}</script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
     @stack('css')

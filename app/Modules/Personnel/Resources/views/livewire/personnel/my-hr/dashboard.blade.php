@@ -113,6 +113,12 @@
                 <h2 class="mt-1.5 text-[15px] font-semibold tracking-[-0.02em] text-ink">{{ __('personnel::my_hr.empty_state.title') }}</h2>
                 <p class="mt-1 max-w-3xl text-[12.5px] leading-relaxed text-ink-muted">{{ __('personnel::my_hr.empty_state.body') }}</p>
                 <p class="mt-3 rounded-xl border border-hairline bg-white px-3.5 py-2.5 text-[12.5px] text-ink-soft">{{ __('personnel::my_hr.empty_state.hint') }}</p>
+                @can('manage-my-hr-accounts')
+                    <div class="mt-3 flex flex-wrap items-center gap-3">
+                        <p class="text-[12px] text-ink-muted">{{ __('personnel::my_hr.empty_state.admin_hint') }}</p>
+                        <x-pill-button :href="route('personnel.index')" wire:navigate>{{ __('personnel::my_hr.empty_state.admin_action') }}</x-pill-button>
+                    </div>
+                @endcan
             </div>
         @elseif ($activeTab === 'overview')
             <livewire:personnel.my-hr.summary :personnel-id="$personnelId" :key="'my-hr-summary-'.$personnelId" />

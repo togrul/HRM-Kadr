@@ -226,7 +226,7 @@
                                     x-ref="closeBtn"
                                     type="button"
                                     @click="close()"
-                                    class="inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-hairline bg-white text-ink-muted transition hover:bg-[#f4f4f5] hover:text-ink focus:outline-none focus:ring-2 focus:ring-zinc-300"
+                                    class="inline-flex h-10 w-10 items-center justify-center rounded-[10px] border border-hairline bg-white text-ink-muted transition hover:bg-[#f4f4f5] hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
                                 >
                                     <span class="sr-only">{{ __('ui::common.actions.close') }}</span>
                                     <x-icons.default.close-icon size="w-4 h-4" color="text-zinc-500" hover="text-zinc-950"></x-icons.default.close-icon>

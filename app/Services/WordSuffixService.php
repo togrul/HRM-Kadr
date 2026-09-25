@@ -93,7 +93,7 @@ class WordSuffixService
         };
     }
 
-    private function checkSpecialChar(string $lastChar, string $text)
+    private function checkSpecialChar(string $lastChar, string $text): string
     {
         if ($lastChar === 'k') {
             $text = str_replace($lastChar, 'y', $text);

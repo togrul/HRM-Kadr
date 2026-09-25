@@ -2,7 +2,7 @@
     <div class="flex flex-col items-center justify-between rounded-xl bg-white px-2 py-2 sm:flex-row">
         <div class="flex items-center justify-center space-x-2">
             <x-button class="space-x-2" mode="primary" wire:click.prevent="openCrud()">
-                <x-icons.add-icon color="text-white" hover="text-gray-50"></x-icons.add-icon>
+                <x-icons.add-icon color="text-white" hover="text-zinc-50"></x-icons.add-icon>
                 <span>{{ __('admin::references.buttons.add_approval_route') }}</span>
             </x-button>
         </div>
@@ -10,7 +10,7 @@
 
     @if($isAdded)
         <div wire:transition class="relative my-3 rounded-2xl border border-zinc-200 bg-zinc-50 p-5 shadow-sm">
-            <button class="absolute right-4 top-4 appearance-none" wire:click="closeCrud()">
+            <button type="button" class="absolute right-4 top-4 appearance-none flex h-10 w-10 items-center justify-center rounded-lg text-ink-muted hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400" aria-label="{{ __('admin::references.actions.close') }}" title="{{ __('admin::references.actions.close') }}" wire:click="closeCrud()">
                 <x-icons.close-icon></x-icons.close-icon>
             </button>
 
@@ -99,7 +99,7 @@
                             wire:click.prevent="openCrud({{ $route->id ?: 'null' }}, '{{ $route->request_type }}')"
                             class="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-zinc-200 bg-white text-zinc-600 transition hover:border-zinc-300 hover:text-zinc-900"
                         >
-                            <x-icons.edit-icon color="text-slate-400" hover="text-slate-500"></x-icons.edit-icon>
+                            <x-icons.edit-icon color="text-zinc-400" hover="text-zinc-500"></x-icons.edit-icon>
                         </button>
                     </div>
 
@@ -127,4 +127,3 @@
         </div>
     </div>
 </div>
-@include('includes.sweetalert-push')

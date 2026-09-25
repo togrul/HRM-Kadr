@@ -1,4 +1,9 @@
 {
+    "settings": {
+        "http": {
+            "idle_timeout": 305
+        }
+    },
     "listeners": {
         "*:8000": {
             "pass": "routes"

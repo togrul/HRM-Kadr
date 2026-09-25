@@ -8,12 +8,12 @@
             <div class="grid gap-1 lg:grid-cols-2 2xl:grid-cols-4">
                 <x-ui.input-shell :label="__('personnel::portfolio.fields.search')" labelClass="tracking-tight text-zinc-500"><input wire:model.live.debounce.300ms="search" type="text" placeholder="{{ __('personnel::portfolio.messages.search_placeholder') }}" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-2 text-sm text-zinc-800 placeholder:text-zinc-400 focus:border-zinc-300 focus:outline-none" /></x-ui.input-shell>
                 <x-ui.input-shell :label="__('personnel::portfolio.fields.status')" labelClass="tracking-tight text-zinc-500">
-                    <select wire:model.live="statusFilter" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-2 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none">
-                        <option value="all">Hamısı</option>
+                    <x-ui.select wire:model.live="statusFilter">
+                        <option value="all">{{ __('personnel::common.labels.all') }}</option>
                         @foreach ($options::mediaStatuses() as $status)
                             <option value="{{ $status }}">{{ __('personnel::portfolio.status.'.$status) }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                 </x-ui.input-shell>
                 <x-ui.input-shell :label="__('personnel::portfolio.fields.date_from')" labelClass="tracking-tight text-zinc-500">
                   <input wire:model.live="dateFrom" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-1.5 text-[13px] text-zinc-800 focus:border-zinc-300 focus:outline-none" /></x-ui.input-shell>
@@ -155,50 +155,50 @@
                     <x-ui.async-button variant="secondary" size="sm" wire:click="cancelForm" wire:target="cancelForm" wire:loading.attr="disabled">{{ __('personnel::portfolio.actions.cancel') }}</x-ui.async-button>
                 </div>
                 <div class="mt-4 space-y-3">
-                    <x-ui.input-shell :label="__('personnel::portfolio.fields.headline')" :error="$errors->first('form.headline')"><input wire:model.defer="form.headline" type="text" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
+                    <x-ui.input-shell :label="__('personnel::portfolio.fields.headline')" :error="$errors->first('form.headline')"><input wire:model="form.headline" type="text" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
                     <div class="grid gap-3 md:grid-cols-2">
-                        <x-ui.input-shell :label="__('personnel::portfolio.fields.publisher_name')" :error="$errors->first('form.publisher_name')"><input wire:model.defer="form.publisher_name" type="text" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
-                        <x-ui.input-shell :label="__('personnel::portfolio.fields.published_at')" :error="$errors->first('form.published_at')"><input wire:model.defer="form.published_at" type="datetime-local" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
+                        <x-ui.input-shell :label="__('personnel::portfolio.fields.publisher_name')" :error="$errors->first('form.publisher_name')"><input wire:model="form.publisher_name" type="text" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
+                        <x-ui.input-shell :label="__('personnel::portfolio.fields.published_at')" :error="$errors->first('form.published_at')"><input wire:model="form.published_at" type="datetime-local" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
                     </div>
                     <div class="grid gap-3 md:grid-cols-2">
                         <x-ui.input-shell :label="__('personnel::portfolio.fields.publisher_type')">
-                            <select wire:model.defer="form.publisher_type" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm">
+                            <x-ui.select wire:model="form.publisher_type">
                                 @foreach ($options::mediaPublisherTypes() as $option)
                                     <option value="{{ $option }}">{{ __('personnel::portfolio.options.publisher_type.'.$option) }}</option>
                                 @endforeach
-                            </select>
+                            </x-ui.select>
                         </x-ui.input-shell>
                         <x-ui.input-shell :label="__('personnel::portfolio.fields.mention_type')">
-                            <select wire:model.defer="form.mention_type" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm">
+                            <x-ui.select wire:model="form.mention_type">
                                 @foreach ($options::mediaMentionTypes() as $option)
                                     <option value="{{ $option }}">{{ __('personnel::portfolio.options.mention_type.'.$option) }}</option>
                                 @endforeach
-                            </select>
+                            </x-ui.select>
                         </x-ui.input-shell>
                     </div>
                     <div class="grid gap-3 md:grid-cols-2">
                         <x-ui.input-shell :label="__('personnel::portfolio.fields.sentiment')">
-                            <select wire:model.defer="form.sentiment" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm">
+                            <x-ui.select wire:model="form.sentiment">
                                 @foreach ($options::mediaSentiments() as $option)
                                     <option value="{{ $option }}">{{ __('personnel::portfolio.options.sentiment.'.$option) }}</option>
                                 @endforeach
-                            </select>
+                            </x-ui.select>
                         </x-ui.input-shell>
                         <x-ui.input-shell :label="__('personnel::portfolio.fields.visibility')">
-                            <select wire:model.defer="form.visibility" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm">
+                            <x-ui.select wire:model="form.visibility">
                                 @foreach ($options::mediaVisibilities() as $option)
                                     <option value="{{ $option }}">{{ __('personnel::portfolio.options.visibility.'.$option) }}</option>
                                 @endforeach
-                            </select>
+                            </x-ui.select>
                         </x-ui.input-shell>
                     </div>
-                    <x-ui.input-shell :label="__('personnel::portfolio.fields.url')" :error="$errors->first('form.url')"><input wire:model.defer="form.url" type="url" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
-                    <x-ui.input-shell :label="__('personnel::portfolio.fields.summary')" :error="$errors->first('form.summary')"><textarea wire:model.defer="form.summary" rows="4" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm"></textarea></x-ui.input-shell>
+                    <x-ui.input-shell :label="__('personnel::portfolio.fields.url')" :error="$errors->first('form.url')"><input wire:model="form.url" type="url" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
+                    <x-ui.input-shell :label="__('personnel::portfolio.fields.summary')" :error="$errors->first('form.summary')"><textarea wire:model="form.summary" rows="4" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm"></textarea></x-ui.input-shell>
                     <div class="grid gap-3 md:grid-cols-2">
                         <x-ui.file-upload-shell wire:model="archiveUpload" :label="__('personnel::portfolio.fields.archive')" :error="$errors->first('archiveUpload')" :upload="$archiveUpload" :existing-name="$editingId && $this->selectedRecord?->archiveAttachment ? $this->selectedRecord->archiveAttachment->original_name : null" />
                         <x-ui.file-upload-shell wire:model="screenshotUpload" :label="__('personnel::portfolio.fields.screenshot')" :error="$errors->first('screenshotUpload')" :upload="$screenshotUpload" :existing-name="$editingId && $this->selectedRecord?->screenshotAttachment ? $this->selectedRecord->screenshotAttachment->original_name : null" />
                     </div>
-                    <x-ui.input-shell :label="__('personnel::portfolio.fields.notes')" :error="$errors->first('form.notes')"><textarea wire:model.defer="form.notes" rows="2" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm"></textarea></x-ui.input-shell>
+                    <x-ui.input-shell :label="__('personnel::portfolio.fields.notes')" :error="$errors->first('form.notes')"><textarea wire:model="form.notes" rows="2" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm"></textarea></x-ui.input-shell>
                 </div>
                 <div class="mt-4">
                     <x-ui.async-button variant="primary" fullWidth="true" wire:click="save" wire:target="save" wire:loading.attr="disabled">{{ __('personnel::portfolio.actions.save_record') }}</x-ui.async-button>

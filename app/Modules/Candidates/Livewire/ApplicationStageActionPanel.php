@@ -9,6 +9,7 @@ use App\Modules\Candidates\Application\Services\CandidateApplicationReadService;
 use App\Modules\Candidates\Application\Services\CandidateApplicationStageArtifactService;
 use App\Modules\Candidates\Application\Services\CandidateApplicationStageService;
 use App\Modules\Candidates\Support\Traits\InteractsWithRecruitmentPresentation;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -427,7 +428,7 @@ class ApplicationStageActionPanel extends Component
         $this->dispatch('candidate-application-saved', applicationId: $this->application->id);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('candidates::livewire.candidates.application-stage-action-panel');
     }

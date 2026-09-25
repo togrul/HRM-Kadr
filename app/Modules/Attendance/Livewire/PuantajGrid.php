@@ -10,6 +10,7 @@ use App\Services\StructurePathService;
 use App\Support\Translations\ModuleTranslation;
 use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
+use Illuminate\Contracts\View\View;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -27,6 +28,18 @@ class PuantajGrid extends Component
     public int $perPage = 20;
 
     public ?int $selectedStructureId = null;
+
+    /**
+     * Default hover class of each icon component a cell can show. Cell icons render as the
+     * icon's root <svg> around a <use> of a <symbol> defined once per grid, so the root
+     * needs the same hover class the component would give it (text-gray-900 otherwise).
+     */
+    private const SPRITE_ICON_HOVERS = [
+        'icons.personal-affair-icon' => 'text-zinc-800',
+        'icons.vacation-icon' => 'text-gray-900',
+        'icons.briefcase-icon' => 'text-gray-900',
+        'icons.calendar-icon' => 'text-gray-900',
+    ];
 
     private ?LeaveLegendPresenter $leaveLegendPresenter = null;
 
@@ -59,7 +72,7 @@ class PuantajGrid extends Component
         $this->resetPage();
     }
 
-    public function render()
+    public function render(): View
     {
         $from = Carbon::createFromDate($this->year, $this->month, 1)->startOfMonth();
         $to = $from->copy()->endOfMonth();
@@ -81,9 +94,13 @@ class PuantajGrid extends Component
         $calendarDayTypeByDate = $readService->globalCalendarDayTypeByDate($from, $to);
         $calendarOverrides = $readService->calendarOverrides($from, $to, $structureIds);
 
+        $dateByDay = [];
+        foreach ($days as $day) {
+            $dateByDay[$day] = $from->copy()->day($day)->toDateString();
+        }
+
         $rows = $personnels->getCollection()->map(function ($personnel) use (
-            $days,
-            $from,
+            $dateByDay,
             $ledgerByTabelAndDate,
             $structurePathService
         ): array {
@@ -91,8 +108,7 @@ class PuantajGrid extends Component
             $totalWorkedMinutes = 0;
             $totalPresentDays = 0;
 
-            foreach ($days as $day) {
-                $date = $from->copy()->day($day)->toDateString();
+            foreach ($dateByDay as $day => $date) {
                 $ledger = $ledgerByTabelAndDate[$personnel->tabel_no][$date] ?? null;
 
                 $rowCells[$day] = $this->buildCellData($ledger);
@@ -105,6 +121,7 @@ class PuantajGrid extends Component
 
             return [
                 'personnel' => $personnel,
+                'label' => $personnel->surname.' '.$personnel->name.' '.$personnel->patronymic,
                 'structure_path' => $structurePathService->resolve((int) $personnel->structure_id),
                 'structure_name' => $structurePathService->current((int) $personnel->structure_id),
                 'cells' => $rowCells,
@@ -123,6 +140,7 @@ class PuantajGrid extends Component
             'statusLegend' => $this->buildStatusLegend(),
             'leaveLegend' => $this->buildLeaveLegend($rows->all()),
             'monthStart' => $from,
+            'spriteIcons' => $this->usedSpriteIcons($rows->all()),
             'selectedStructureLabel' => $structureScopeRead->label($this->selectedStructureId),
         ]);
     }
@@ -443,6 +461,28 @@ class PuantajGrid extends Component
             ->sortBy(fn (array $item) => mb_strtolower($item['label']))
             ->values()
             ->all();
+    }
+
+    /**
+     * Icons shown on this page, each mapped to its component's default hover class.
+     *
+     * @param  array<int,array<string,mixed>>  $rows
+     * @return array<string,string>
+     */
+    private function usedSpriteIcons(array $rows): array
+    {
+        $used = [];
+        foreach ($rows as $row) {
+            foreach ($row['cells'] as $cell) {
+                foreach ([$cell['legend_icon'] ?? null, $cell['icon'] ?? null] as $icon) {
+                    if (is_string($icon) && $icon !== '') {
+                        $used[$icon] = self::SPRITE_ICON_HOVERS[$icon] ?? 'text-gray-900';
+                    }
+                }
+            }
+        }
+
+        return $used;
     }
 
     private function buildLeaveDurationSummary(string $durationUnit, ?int $totalMinutes): string

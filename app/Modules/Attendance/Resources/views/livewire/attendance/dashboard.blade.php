@@ -23,6 +23,17 @@
             'shifts' => 'shifts',
             'calendar-regimes' => 'calendar_regimes',
         ];
+
+        // Configuration, not daily work: rendered as a separate group after the work tabs.
+        $settingsTabs = ['settings', 'shifts', 'calendar-regimes'];
+
+        // Durations read as hours ("198", "7:30"); the unit sits beside the number as a suffix.
+        $asHours = function (int|float|null $minutes): string {
+            $minutes = (int) round((float) $minutes);
+            $rest = $minutes % 60;
+
+            return number_format(intdiv($minutes, 60), 0, ',', ' ').($rest > 0 ? ':'.str_pad((string) $rest, 2, '0', STR_PAD_LEFT) : '');
+        };
     @endphp
 
     {{-- The panel carries the structure tree; the section nav is a horizontal strip in the page. --}}
@@ -46,29 +57,17 @@
         </x-slot:icon>
 
         <x-slot:actions>
-            {{-- period control: one pill instead of two labelled form fields --}}
-            <div class="inline-flex h-9 items-center gap-1 rounded-[10px] border border-hairline bg-[#f4f4f5] px-2">
-                <svg class="h-3.5 w-3.5 shrink-0 text-ink-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 11h18"/></svg>
-                <label class="sr-only" for="attendance-month">{{ __('attendance::dashboard.filters.month') }}</label>
-                <select
-                    id="attendance-month"
-                    wire:model.live="month"
-                    class="hrm-num h-7 border-0 bg-transparent py-0 pl-1 pr-5 text-[12.5px] text-ink focus:ring-0"
-                >
-                    @for ($m = 1; $m <= 12; $m++)
-                        <option value="{{ $m }}">{{ str_pad((string) $m, 2, '0', STR_PAD_LEFT) }}</option>
-                    @endfor
-                </select>
-                <span class="text-ink-faint">.</span>
-                <label class="sr-only" for="attendance-year">{{ __('attendance::dashboard.filters.year') }}</label>
-                <input
-                    id="attendance-year"
-                    type="number"
-                    min="2000"
-                    max="2100"
-                    wire:model.live="year"
-                    class="hrm-num h-7 w-[62px] border-0 bg-transparent px-1 py-0 text-[12.5px] text-ink focus:ring-0"
-                />
+            {{-- period control: step month by month; the label reads as a date, not two fields --}}
+            <div class="inline-flex h-10 items-center rounded-[10px] border border-hairline bg-[#f4f4f5]" role="group" aria-label="{{ __('attendance::dashboard.filters.month') }}">
+                <button type="button" wire:click="shiftMonth(-1)" wire:loading.attr="disabled" wire:target="shiftMonth" class="flex h-10 w-9 items-center justify-center rounded-l-[10px] text-ink-muted transition hover:bg-[#e4e4e7] hover:text-ink" aria-label="{{ __('attendance::dashboard.filters.previous_month') }}">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                </button>
+                <span class="min-w-[124px] px-1 text-center text-[13.5px] font-semibold capitalize text-ink" aria-live="polite">
+                    {{ \Carbon\Carbon::create((int) $year, (int) $month, 1)->translatedFormat('F Y') }}
+                </span>
+                <button type="button" wire:click="shiftMonth(1)" wire:loading.attr="disabled" wire:target="shiftMonth" class="flex h-10 w-9 items-center justify-center rounded-r-[10px] text-ink-muted transition hover:bg-[#e4e4e7] hover:text-ink" aria-label="{{ __('attendance::dashboard.filters.next_month') }}">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
             </div>
 
             <x-pill-button variant="secondary" :href="route('docs.guide', ['focus' => 'attendance']).'#attendance-module'">
@@ -78,14 +77,35 @@
 
         {{-- section nav: stays on the page so the panel can give the structure tree its
              full height, and wraps instead of scrolling so every section is reachable --}}
-        <x-filter.nav wrap class="min-w-0">
-            @foreach ($attendanceTabs as $tab => $labelKey)
-                @continue(! in_array($tab, $availableTabs, true))
-                <x-filter.item wire:navigate href="{{ $attendanceTabRoute($tab) }}" :active="$activeTab === $tab">
-                    {{ __('attendance::dashboard.tabs.'.$labelKey) }}
-                </x-filter.item>
-            @endforeach
-        </x-filter.nav>
+        {{-- day-to-day sections first; configuration sits apart as a quieter second group --}}
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <x-filter.nav wrap class="min-w-0">
+                @foreach ($attendanceTabs as $tab => $labelKey)
+                    @continue(! in_array($tab, $availableTabs, true) || in_array($tab, $settingsTabs, true))
+                    <x-filter.item wire:navigate href="{{ $attendanceTabRoute($tab) }}" :active="$activeTab === $tab">
+                        {{ __('attendance::dashboard.tabs.'.$labelKey) }}
+                    </x-filter.item>
+                @endforeach
+            </x-filter.nav>
+
+            @if (array_intersect($settingsTabs, $availableTabs) !== [])
+                <div class="flex flex-wrap items-center gap-2 border-l border-hairline pl-3">
+                    <span class="flex items-center gap-1 text-[11.5px] font-medium text-ink-faint">
+                        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        {{ __('attendance::dashboard.tabs.settings_group') }}
+                    </span>
+                    {{-- x-filter.item renders an <li>; outside its <ul> every item grows a list bullet --}}
+                    <x-filter.nav wrap class="min-w-0">
+                        @foreach ($settingsTabs as $tab)
+                            @continue(! in_array($tab, $availableTabs, true))
+                            <x-filter.item wire:navigate href="{{ $attendanceTabRoute($tab) }}" :active="$activeTab === $tab" class="text-ink-muted">
+                                {{ __('attendance::dashboard.tabs.'.$attendanceTabs[$tab]) }}
+                            </x-filter.item>
+                        @endforeach
+                    </x-filter.nav>
+                </div>
+            @endif
+        </div>
     </x-page-header>
 
     <div class="space-y-4 px-4 py-4 sm:px-5">
@@ -101,14 +121,38 @@
             };
         @endphp
 
+        {{-- work waiting on someone comes first, and each count opens the list behind it --}}
+        @php
+            $queueTiles = [
+                ['metric' => 'manual_pending', 'value' => (int) ($overview['manual_pending_count'] ?? 0), 'tone' => 'amber', 'tab' => 'manual'],
+                ['metric' => 'unprocessed_punches', 'value' => (int) ($overview['raw_pending_count'] ?? 0), 'tone' => 'amber', 'tab' => 'daily-monitor'],
+                ['metric' => 'open_exceptions', 'value' => (int) ($overview['open_exception_count'] ?? 0), 'tone' => 'rose', 'tab' => 'exceptions'],
+                ['metric' => 'pending_overtime', 'value' => (int) ($overview['pending_overtime_count'] ?? 0), 'tone' => 'amber', 'tab' => 'overtime'],
+            ];
+        @endphp
+
+        <section class="space-y-3">
+            <p class="hrm-eyebrow">{{ __('attendance::dashboard.cards.needs_attention') }}</p>
+            <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                @foreach ($queueTiles as $tile)
+                    <x-ui.metric-tile
+                        :label="__('attendance::dashboard.metrics.'.$tile['metric'])"
+                        :value="$tile['value']"
+                        :tone="$tile['value'] > 0 ? $tile['tone'] : 'ink'"
+                        :href="in_array($tile['tab'], $availableTabs, true) ? $attendanceTabRoute($tile['tab']) : null"
+                    />
+                @endforeach
+            </div>
+        </section>
+
         <section class="space-y-3">
             <p class="hrm-eyebrow">{{ __('attendance::dashboard.cards.attendance_statistics') }}</p>
             <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
                 <x-ui.metric-tile :label="__('attendance::dashboard.metrics.workdays')" :value="$overview['workdays'] ?? 0" />
                 <x-ui.metric-tile :label="__('attendance::dashboard.metrics.holiday_weekend')" :value="$overview['holidays'] ?? 0" />
-                <x-ui.metric-tile :label="__('attendance::dashboard.metrics.scheduled_minutes')" :value="$overview['scheduled_minutes'] ?? 0" />
-                <x-ui.metric-tile :label="__('attendance::dashboard.metrics.worked_minutes')" :value="$overview['worked_minutes'] ?? 0" />
-                <x-ui.metric-tile :label="__('attendance::dashboard.metrics.overtime_minutes')" :value="$overview['overtime_minutes'] ?? 0" tone="amber" />
+                <x-ui.metric-tile :label="__('attendance::dashboard.metrics.scheduled_minutes')" :value="$asHours($overview['scheduled_minutes'] ?? 0)" :suffix="__('attendance::dashboard.units.hours')" />
+                <x-ui.metric-tile :label="__('attendance::dashboard.metrics.worked_minutes')" :value="$asHours($overview['worked_minutes'] ?? 0)" :suffix="__('attendance::dashboard.units.hours')" />
+                <x-ui.metric-tile :label="__('attendance::dashboard.metrics.overtime_minutes')" :value="$asHours($overview['overtime_minutes'] ?? 0)" :suffix="__('attendance::dashboard.units.hours')" />
             </div>
         </section>
 
@@ -135,15 +179,8 @@
                     :label="__('attendance::dashboard.metrics.overtime_trend')"
                     :value="($kpi['overtime_trend_pct'] ?? 0).'%'"
                     :tone="$trendTone"
-                    :hint="__('attendance::dashboard.metrics.overtime_trend_hint', ['minutes' => $kpi['overtime_previous_minutes'] ?? 0])"
+                    :hint="__('attendance::dashboard.metrics.overtime_trend_hint', ['hours' => $asHours($kpi['overtime_previous_minutes'] ?? 0)])"
                 />
-            </div>
-
-            <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                <x-ui.metric-tile :label="__('attendance::dashboard.metrics.manual_pending')" :value="$overview['manual_pending_count'] ?? 0" tone="amber" />
-                <x-ui.metric-tile :label="__('attendance::dashboard.metrics.unprocessed_punches')" :value="$overview['raw_pending_count'] ?? 0" tone="blue" />
-                <x-ui.metric-tile :label="__('attendance::dashboard.metrics.open_exceptions')" :value="$overview['open_exception_count'] ?? 0" tone="rose" />
-                <x-ui.metric-tile :label="__('attendance::dashboard.metrics.pending_overtime')" :value="$overview['pending_overtime_count'] ?? 0" tone="amber" />
             </div>
         </section>
     @endif

@@ -2,16 +2,19 @@
 
 namespace App\Modules\Services\Livewire\Menus;
 
-use App\Models\Menu;
-use Livewire\Component;
-use Illuminate\Support\Facades\DB;
-use Spatie\Permission\Models\Permission;
 use App\Livewire\Traits\DropdownConstructTrait;
+use App\Models\Menu;
+use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\DB;
+use Livewire\Component;
+use Spatie\Permission\Models\Permission;
 
 class EditMenu extends Component
 {
     use AuthorizesRequests;
+    use AuthorizesSettingsAccess;
     use DropdownConstructTrait;
 
     public $menuModel;
@@ -22,7 +25,7 @@ class EditMenu extends Component
 
     public string $searchPermission = '';
 
-    protected function rules()
+    protected function rules(): array
     {
         return [
             'menu.name' => 'required|string|min:1',
@@ -30,11 +33,11 @@ class EditMenu extends Component
             'menu.order' => 'required|integer',
             'menu.url' => 'required|string|min:1',
             'menu.icon' => 'required|string|min:1',
-            'menu.permission_id' => 'required|integer|exists:permissions,id'
+            'menu.permission_id' => 'required|integer|exists:permissions,id',
         ];
     }
 
-    protected function validationAttributes()
+    protected function validationAttributes(): array
     {
         return [
             'menu.name' => __('services::common.labels.name'),
@@ -46,7 +49,7 @@ class EditMenu extends Component
         ];
     }
 
-    public function mount()
+    public function mount(): void
     {
         // $this->authorize('manage-settings',$this->user);
         $this->title = __('services::menus.titles.edit');
@@ -65,7 +68,7 @@ class EditMenu extends Component
         $this->menu['permission_id'] = $this->menuModel->permission_id;
     }
 
-    public function store()
+    public function store(): void
     {
         $this->validate();
         $this->menuModel->update($this->menu);
@@ -73,7 +76,7 @@ class EditMenu extends Component
         $this->dispatch('menuAdded', __('services::menus.messages.updated'));
     }
 
-    public function render()
+    public function render(): View
     {
         return view('services::livewire.services.menus.edit-menu');
     }

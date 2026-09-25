@@ -3,6 +3,7 @@
 namespace App\Modules\Personnel\Livewire\Steps;
 
 use App\Livewire\Forms\Personnel\EducationForm;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Isolate;
 
 #[Isolate]
@@ -34,7 +35,7 @@ class EducationStep extends AbstractPersonnelWizardStep
         return 3;
     }
 
-    public function render()
+    public function render(): View
     {
         return view('personnel::livewire.personnel.steps.education-step', [
             'stepSearchModels' => $this->activeStepSearchModels(),

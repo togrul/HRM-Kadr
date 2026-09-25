@@ -26,3 +26,10 @@ yarn-error.log
 # OS / editor / agent cruft
 .DS_Store
 /.claude
+
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/
+
+# Local browser-automation output (Playwright MCP snapshots, screenshots)
+/.playwright-mcp/
+/*.png

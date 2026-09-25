@@ -20,7 +20,7 @@
     {{-- header --}}
     <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-zinc-400">{{ __('performance_evaluation::succession.eyebrow') }}</p>
+            <p class="hrm-eyebrow">{{ __('performance_evaluation::succession.eyebrow') }}</p>
             <h1 class="mt-1.5 text-[1.75rem] font-semibold leading-none tracking-tight text-zinc-950">{{ __('performance_evaluation::succession.title') }}</h1>
             <p class="mt-2 max-w-xl text-[13px] leading-6 text-zinc-500">{{ __('performance_evaluation::succession.subtitle') }}</p>
         </div>
@@ -81,7 +81,7 @@
             <div class="flex gap-3">
                 {{-- y axis --}}
                 <div class="flex w-6 items-center justify-center">
-                    <span class="-rotate-90 whitespace-nowrap text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-400">{{ __('performance_evaluation::succession.axes.potential') }} →</span>
+                    <span class="-rotate-90 whitespace-nowrap hrm-eyebrow">{{ __('performance_evaluation::succession.axes.potential') }} →</span>
                 </div>
                 <div class="flex-1">
                     <div class="grid grid-cols-3 gap-3">
@@ -110,7 +110,7 @@
                         <span>{{ __('performance_evaluation::succession.axes.medium') }}</span>
                         <span>{{ __('performance_evaluation::succession.axes.high') }}</span>
                     </div>
-                    <p class="mt-1 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-400">{{ __('performance_evaluation::succession.axes.performance') }} →</p>
+                    <p class="mt-1 text-center hrm-eyebrow">{{ __('performance_evaluation::succession.axes.performance') }} →</p>
                 </div>
             </div>
         </div>
@@ -154,12 +154,12 @@
                                     <div class="flex items-center gap-2">
                                         @can('manage-performance-evaluation')
                                             <div class="relative">
-                                                <select wire:change="setCandidateReadiness({{ $candidate->id }}, $event.target.value)"
+                                                <x-ui.select wire:change="setCandidateReadiness({{ $candidate->id }}, $event.target.value)"
                                                     class="h-7 cursor-pointer appearance-none rounded-lg border-0 py-0 pl-2.5 pr-7 align-middle text-[11px] font-semibold leading-7 {{ $readinessChip[$candidate->readiness] ?? 'bg-zinc-100 text-zinc-500' }} focus:outline-none focus:ring-2 focus:ring-zinc-200">
                                                     @foreach ($readiness as $r)
                                                         <option value="{{ $r }}" @selected($candidate->readiness === $r)>{{ __('performance_evaluation::succession.readiness.'.$r) }}</option>
                                                     @endforeach
-                                                </select>
+                                                </x-ui.select>
                                                 <svg class="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                                             </div>
                                             <button type="button" wire:click="removeCandidate({{ $candidate->id }})" class="text-zinc-300 transition hover:text-rose-500">✕</button>
@@ -182,7 +182,7 @@
                                         :placeholder="__('performance_evaluation::succession.fields.personnel_search')"
                                         wire:key="succ-picker-cand-{{ $plan->id }}" />
                                 @else
-                                    <button type="button" wire:click="startAddCandidate({{ $plan->id }})" class="inline-flex items-center gap-1.5 rounded-lg border border-dashed border-zinc-300 px-3 py-1.5 text-[12px] font-medium text-zinc-500 transition hover:border-zinc-400 hover:text-zinc-700">
+                                    <button type="button" wire:click="startAddCandidate({{ $plan->id }})" class="inline-flex items-center gap-1.5 rounded-lg border border-dashed border-zinc-300 px-3 h-10 text-[14px] font-medium text-zinc-500 transition hover:border-zinc-400 hover:text-zinc-700">
                                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
                                         {{ __('performance_evaluation::succession.actions.add_candidate') }}
                                     </button>
@@ -241,7 +241,7 @@
                                     :placeholder="__('performance_evaluation::succession.fields.personnel_search')"
                                     wire:key="succ-picker-member-{{ $pool->id }}" />
                             @else
-                                <button type="button" wire:click="startAddMember({{ $pool->id }})" class="inline-flex items-center gap-1.5 rounded-lg border border-dashed border-zinc-300 px-3 py-1.5 text-[12px] font-medium text-zinc-500 transition hover:border-zinc-400 hover:text-zinc-700">
+                                <button type="button" wire:click="startAddMember({{ $pool->id }})" class="inline-flex items-center gap-1.5 rounded-lg border border-dashed border-zinc-300 px-3 h-10 text-[14px] font-medium text-zinc-500 transition hover:border-zinc-400 hover:text-zinc-700">
                                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
                                     {{ __('performance_evaluation::succession.actions.add_member') }}
                                 </button>
@@ -264,7 +264,7 @@
             @if ($showSideMenu === 'assess')
                 <div class="flex h-full flex-col">
                     <div class="mb-7">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-zinc-400">{{ __('performance_evaluation::succession.eyebrow') }}</p>
+                        <p class="hrm-eyebrow">{{ __('performance_evaluation::succession.eyebrow') }}</p>
                         <h2 class="mt-1.5 text-[18px] font-semibold tracking-tight text-zinc-950">{{ __('performance_evaluation::succession.actions.assess') }}</h2>
                     </div>
                     <div class="grid grid-cols-1 gap-5">
@@ -319,7 +319,7 @@
             @if ($showSideMenu === 'plan')
                 <div class="flex h-full flex-col">
                     <div class="mb-7">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-zinc-400">{{ __('performance_evaluation::succession.eyebrow') }}</p>
+                        <p class="hrm-eyebrow">{{ __('performance_evaluation::succession.eyebrow') }}</p>
                         <h2 class="mt-1.5 text-[18px] font-semibold tracking-tight text-zinc-950">{{ __('performance_evaluation::succession.actions.add_plan') }}</h2>
                     </div>
                     <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -385,7 +385,7 @@
             @if ($showSideMenu === 'pool')
                 <div class="flex h-full flex-col">
                     <div class="mb-7">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-zinc-400">{{ __('performance_evaluation::succession.eyebrow') }}</p>
+                        <p class="hrm-eyebrow">{{ __('performance_evaluation::succession.eyebrow') }}</p>
                         <h2 class="mt-1.5 text-[18px] font-semibold tracking-tight text-zinc-950">{{ __('performance_evaluation::succession.actions.add_pool') }}</h2>
                     </div>
                     <div class="grid grid-cols-1 gap-5">

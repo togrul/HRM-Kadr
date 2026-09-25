@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Observers\MenuObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,15 +24,15 @@ class Menu extends Model
         'order',
         'is_active',
         'url',
-        'permission_id'
+        'permission_id',
     ];
 
-    public function scopeActive($query)
+    public function scopeActive($query): Builder
     {
         return $query->where('is_active', 1);
     }
 
-    public function scopeOrdered($query)
+    public function scopeOrdered($query): Builder
     {
         return $query->orderBy('order');
     }

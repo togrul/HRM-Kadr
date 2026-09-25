@@ -25,6 +25,11 @@ class PayrollServiceProvider extends ServiceProvider
             \App\Modules\Payroll\Domain\Contracts\PayslipReadRepository::class,
             \App\Modules\Payroll\Infrastructure\Persistence\Eloquent\EloquentPayslipReadRepository::class,
         );
+
+        $this->app->bind(
+            \App\Modules\Payroll\Domain\Contracts\PayrollOneOffEarnings::class,
+            \App\Modules\Payroll\Infrastructure\Persistence\Eloquent\EloquentPayrollOneOffEarnings::class,
+        );
     }
 
     public function boot(): void
@@ -53,6 +58,9 @@ class PayrollServiceProvider extends ServiceProvider
     {
         return [
             'dashboard' => \App\Modules\Payroll\Livewire\Dashboard::class,
+            'tabs.runs' => \App\Modules\Payroll\Livewire\Tabs\RunsTab::class,
+            'tabs.payslips' => \App\Modules\Payroll\Livewire\Tabs\PayslipsTab::class,
+            'tabs.loans' => \App\Modules\Payroll\Livewire\Tabs\LoansTab::class,
         ];
     }
 }

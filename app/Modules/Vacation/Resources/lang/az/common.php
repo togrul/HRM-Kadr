@@ -44,6 +44,7 @@ return [
         'order_bound' => 'Self-service məzuniyyət üçün əmrlə bağlama tamamlandı.',
     ],
     'actions' => [
+        'vacation_order' => 'Məzuniyyət əmri',
         'bind_order' => 'Əmr bağla',
         'export_excel' => 'Excel-ə çıxar',
         'print_document' => 'Məzuniyyət kağızı',

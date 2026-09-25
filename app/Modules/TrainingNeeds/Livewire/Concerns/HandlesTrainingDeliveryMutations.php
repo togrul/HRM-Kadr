@@ -8,6 +8,7 @@ use App\Modules\TrainingNeeds\Exports\TrainingNeedsReportExport;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 trait HandlesTrainingDeliveryMutations
@@ -46,7 +47,7 @@ trait HandlesTrainingDeliveryMutations
         $this->dispatch('trainingNeedsSaved', __('training_needs::dashboard.messages.certificate_saved'));
     }
 
-    public function previewDeliveryCertificate(int $deliveryRecordId)
+    public function previewDeliveryCertificate(int $deliveryRecordId): BinaryFileResponse
     {
         $this->authorizeTrainingNeedsView();
         $record = TrainingDeliveryRecord::query()->findOrFail($deliveryRecordId);
@@ -95,7 +96,7 @@ trait HandlesTrainingDeliveryMutations
         $this->dispatch('trainingNeedsSaved', __('training_needs::dashboard.messages.certificate_deleted'));
     }
 
-    public function exportDeliveryReport()
+    public function exportDeliveryReport(): BinaryFileResponse
     {
         $this->authorizeTrainingNeedsExport();
         $rows = app(TrainingNeedReportingService::class)->deliveryRows();
@@ -121,7 +122,7 @@ trait HandlesTrainingDeliveryMutations
         );
     }
 
-    public function exportDeliverySummaryReport()
+    public function exportDeliverySummaryReport(): BinaryFileResponse
     {
         $this->authorizeTrainingNeedsExport();
         $rows = app(TrainingNeedReportingService::class)->deliverySummaryRows();
@@ -145,7 +146,7 @@ trait HandlesTrainingDeliveryMutations
         );
     }
 
-    public function exportDeliveryPivotReport()
+    public function exportDeliveryPivotReport(): BinaryFileResponse
     {
         $this->authorizeTrainingNeedsExport();
         $rows = app(TrainingNeedReportingService::class)->deliveryPivotRows();
@@ -168,7 +169,7 @@ trait HandlesTrainingDeliveryMutations
         );
     }
 
-    public function exportFeedbackReport()
+    public function exportFeedbackReport(): BinaryFileResponse
     {
         $this->authorizeTrainingNeedsExport();
         $rows = app(TrainingNeedReportingService::class)->feedbackRows();
@@ -191,7 +192,7 @@ trait HandlesTrainingDeliveryMutations
         );
     }
 
-    public function exportAuditReport()
+    public function exportAuditReport(): BinaryFileResponse
     {
         $this->authorizeTrainingNeedsExport();
         $rows = app(TrainingNeedReportingService::class)->auditRows();

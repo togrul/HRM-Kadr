@@ -6,7 +6,6 @@ use App\Models\PerformanceTestAttempt;
 use App\Models\User;
 use App\Services\UserPersonnelLinkResolver;
 use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Support\Collection;
 
 class PerformanceTestTranscriptService
 {
@@ -126,6 +125,6 @@ class PerformanceTestTranscriptService
             return;
         }
 
-        throw new AuthorizationException();
+        throw new AuthorizationException;
     }
 }

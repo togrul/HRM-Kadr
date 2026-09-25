@@ -70,6 +70,10 @@ return [
                 'response_bytes' => (int) env('ATTENDANCE_RENDER_BUDGET_MONTH_CLOSE_RESPONSE', 160000),
                 'render_ms' => (int) env('ATTENDANCE_RENDER_BUDGET_MONTH_CLOSE_MS', 180),
             ],
+            'puantaj_grid_render' => [
+                'response_bytes' => (int) env('ATTENDANCE_RENDER_BUDGET_PUANTAJ_RESPONSE', 600000),
+                'render_ms' => (int) env('ATTENDANCE_RENDER_BUDGET_PUANTAJ_MS', 250),
+            ],
         ],
     ],
     'observability' => [

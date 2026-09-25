@@ -5,6 +5,7 @@ namespace App\Modules\Leaves\Livewire;
 use App\Livewire\Forms\LeaveForm;
 use App\Models\Leave;
 use App\Modules\Leaves\Livewire\Concerns\InteractsWithLeaveForm;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Locked;
@@ -16,13 +17,14 @@ use Livewire\WithFileUploads;
 class EditLeave extends Component
 {
     use AuthorizesRequests;
-    use WithFileUploads;
     use InteractsWithLeaveForm;
+    use WithFileUploads;
 
     #[Locked]
     public string $title = '';
 
     public LeaveForm $leave;
+
     public ?int $leaveModel = null;
 
     public function mount(?int $leaveModel = null): void
@@ -109,7 +111,7 @@ class EditLeave extends Component
         $this->reset('personnelName', 'assignedSearch');
     }
 
-    public function render()
+    public function render(): View
     {
         return view('leaves::livewire.leaves.edit-leave');
     }

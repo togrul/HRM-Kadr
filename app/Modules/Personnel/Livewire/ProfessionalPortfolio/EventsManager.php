@@ -5,17 +5,21 @@ namespace App\Modules\Personnel\Livewire\ProfessionalPortfolio;
 use App\Models\Country;
 use App\Models\Personnel;
 use App\Models\PersonnelEventRecord;
-use App\Modules\Personnel\Exports\ProfessionalPortfolioEventsExport;
 use App\Modules\Personnel\Application\Services\ProfessionalPortfolioRegistryFingerprintService;
 use App\Modules\Personnel\Application\Services\ProfessionalPortfolioRegistrySyncService;
 use App\Modules\Personnel\Application\Services\ProfessionalPortfolioWorkflowPolicyService;
+use App\Modules\Personnel\Exports\ProfessionalPortfolioEventsExport;
 use App\Modules\Personnel\Support\ProfessionalPortfolio\HandlesPortfolioAttachments;
 use App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioPermissionMatrix;
-use Maatwebsite\Excel\Excel as ExcelWriter;
-use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Excel as ExcelWriter;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class EventsManager extends Component
 {
@@ -70,7 +74,7 @@ class EventsManager extends Component
         $this->statusFilter = 'all';
     }
 
-    public function placeholder()
+    public function placeholder(): View
     {
         return view('personnel::livewire.personnel.placeholders.professional-portfolio-tab');
     }
@@ -175,7 +179,7 @@ class EventsManager extends Component
         $this->dispatch('portfolioRecordSaved');
     }
 
-    public function exportExcel()
+    public function exportExcel(): BinaryFileResponse
     {
         abort_unless(auth()->user()?->canAny(ProfessionalPortfolioPermissionMatrix::eventViewPermissions()), 403);
 
@@ -185,7 +189,7 @@ class EventsManager extends Component
         );
     }
 
-    public function exportCsv()
+    public function exportCsv(): BinaryFileResponse
     {
         abort_unless(auth()->user()?->canAny(ProfessionalPortfolioPermissionMatrix::eventViewPermissions()), 403);
 
@@ -211,7 +215,10 @@ class EventsManager extends Component
         $this->dispatch('portfolioRecordSaved');
     }
 
-    public function getRecordsProperty()
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, PersonnelEventRecord>
+     */
+    public function getRecordsProperty(): \Illuminate\Database\Eloquent\Collection
     {
         return $this->filteredQuery()
             ->with([
@@ -240,7 +247,7 @@ class EventsManager extends Component
             ->find($this->selectedId);
     }
 
-    public function getCountryOptionsProperty()
+    public function getCountryOptionsProperty(): Collection
     {
         return Country::query()
             ->select(['countries.id', 'translations.title'])
@@ -257,7 +264,10 @@ class EventsManager extends Component
             ]);
     }
 
-    protected function filteredQuery()
+    /**
+     * @return Builder<PersonnelEventRecord>
+     */
+    protected function filteredQuery(): Builder
     {
         return $this->baseQuery()
             ->when($this->statusFilter !== 'all', fn ($query) => $query->where('verification_status', $this->statusFilter))
@@ -276,12 +286,18 @@ class EventsManager extends Component
             ->latest('start_date');
     }
 
-    protected function baseQuery()
+    /**
+     * @return Builder<PersonnelEventRecord>
+     */
+    protected function baseQuery(): Builder
     {
         return PersonnelEventRecord::query()->where('personnel_id', $this->personnelId);
     }
 
-    protected function exportRows()
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, PersonnelEventRecord>
+     */
+    protected function exportRows(): \Illuminate\Database\Eloquent\Collection
     {
         return $this->filteredQuery()
             ->with([
@@ -390,7 +406,7 @@ class EventsManager extends Component
         abort_unless(auth()->user()?->canAny(ProfessionalPortfolioPermissionMatrix::eventVerifyPermissions()), 403);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('personnel::livewire.personnel.professional-portfolio.events-manager');
     }

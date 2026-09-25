@@ -47,10 +47,18 @@ return [
     ],
 
     'actions' => [
+        'new_action' => 'Əməliyyat',
+        'add_leave' => 'İcazə əlavə et',
+        'issue_order' => 'Əmr ver',
         'more' => 'Daha çox',
         'back_to_list' => 'Siyahıya qayıt',
         'print_cv' => 'CV çap et',
         'export_word' => 'Word-ə ixrac',
         'open_profile' => 'Şəxsi işi aç',
+    ],
+    'recent' => [
+        'title' => 'Son hadisələr',
+        'view_all' => 'Bütün xronologiya',
+        'empty' => 'Hələ qeydə alınmış hadisə yoxdur.',
     ],
 ];

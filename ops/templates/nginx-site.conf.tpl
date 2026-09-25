@@ -15,6 +15,12 @@ server {
 
     charset utf-8;
 
+    # Keep idle keep-alive connections open longer than browsers do (Chrome ~300 s), so the
+    # browser always closes first. If nginx closed one first, Safari could send a POST on the
+    # dead connection and fail it with "The network connection was lost" without retrying —
+    # every Livewire update is a POST. (The app also retries such a failure once, client side.)
+    keepalive_timeout 305s;
+
     location / {
         try_files $uri $uri/ /index.php?$query_string;
     }

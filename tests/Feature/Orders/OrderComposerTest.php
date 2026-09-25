@@ -9,15 +9,15 @@ use App\Models\Personnel;
 use App\Models\Position;
 use App\Models\Structure;
 use App\Models\User;
+use App\Modules\Orders\Infrastructure\Document\OrderIssueService;
 use App\Modules\Orders\Livewire\OrderComposer;
-use App\Services\Orders\Document\OrderIssueService;
+use DomainException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\PhpWord;
-use PhpOffice\PhpWord\TemplateProcessor;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 use ZipArchive;
@@ -222,10 +222,10 @@ class OrderComposerTest extends TestCase
         $order = OrderLog::where('order_no', '700-IQ')->firstOrFail();
         $this->assertSame(OrderIssueService::STATUS_PENDING, $order->status_id);
 
-        app(\App\Services\Orders\Document\OrderApprovalService::class)->approve($order);
+        app(\App\Modules\Orders\Infrastructure\Document\OrderApprovalService::class)->approve($order);
 
         $this->assertSame(
-            \App\Services\Orders\Document\OrderApprovalService::STATUS_APPROVED,
+            \App\Modules\Orders\Infrastructure\Document\OrderApprovalService::STATUS_APPROVED,
             $order->fresh()->status_id
         );
     }
@@ -259,7 +259,7 @@ class OrderComposerTest extends TestCase
 
         // No leave yet while pending; approval creates the record.
         $this->assertCount(0, $personnel->vacations()->get());
-        app(\App\Services\Orders\Document\OrderApprovalService::class)->approve($order);
+        app(\App\Modules\Orders\Infrastructure\Document\OrderApprovalService::class)->approve($order);
 
         $vacation = $personnel->vacations()->first();
         $this->assertNotNull($vacation);
@@ -324,7 +324,7 @@ class OrderComposerTest extends TestCase
         $this->assertSame($candidate->id, data_get($order->template_snapshot, 'candidate_id'));
         $this->assertSame(0, Personnel::query()->where('surname', 'Hüseynov')->count());
 
-        app(\App\Services\Orders\Document\OrderApprovalService::class)->approve($order);
+        app(\App\Modules\Orders\Infrastructure\Document\OrderApprovalService::class)->approve($order);
 
         // The candidate is now an active employee in the chosen structure + position.
         $personnel = Personnel::query()->where('surname', 'Hüseynov')->first();
@@ -444,7 +444,7 @@ class OrderComposerTest extends TestCase
         $component->set('fields', ['var_2' => $start, 'var_3' => $end, 'var_4' => '5'])->call('issue');
         $order = OrderLog::where('order_no', '930-M')->firstOrFail();
 
-        $transitions = app(\App\Services\Orders\Document\OrderStatusTransitionService::class);
+        $transitions = app(\App\Modules\Orders\Infrastructure\Document\OrderStatusTransitionService::class);
 
         // Approval deducts the days from the balance…
         $transitions->approve($order);
@@ -628,6 +628,53 @@ class OrderComposerTest extends TestCase
         $this->assertSame('permanent', data_get($outside->signatory_snapshot, 'mode'));
     }
 
+    public function test_the_pickers_search_active_employees_and_ready_candidates(): void
+    {
+        $this->seedTemplate();
+        $personnel = $this->makePersonnel();
+        $structure = Structure::query()->create(['name' => 'Anbar', 'shortname' => 'AN']);
+        $ready = \App\Models\Candidate::query()->create([
+            'surname' => 'Bayramlı', 'name' => 'Ramin', 'patronymic' => 'X', 'height' => 175,
+            'structure_id' => $structure->id, 'status_id' => 30, 'gender' => 1, 'birthdate' => '1995-01-01',
+        ]);
+        \App\Models\Candidate::query()->create([
+            'surname' => 'Bayramlı', 'name' => 'Elvin', 'patronymic' => 'X', 'height' => 175,
+            'structure_id' => $structure->id, 'status_id' => 10, 'gender' => 1, 'birthdate' => '1995-01-01',
+        ]);
+        $this->actingAs($this->userWith('add-orders'));
+
+        $component = Livewire::test(OrderComposer::class)
+            ->set('personnelQuery', 'B')
+            ->assertSet('personnelResults', [])
+            ->set('personnelQuery', 'Bayram')
+            ->set('candidateQuery', 'Bayram');
+
+        $this->assertSame([$personnel->id], array_column($component->get('personnelResults'), 'id'));
+        $this->assertSame([$ready->id], array_column($component->get('candidateResults'), 'id'));
+
+        $component->call('selectCandidate', $ready->id)
+            ->assertSet('candidateId', $ready->id)
+            ->assertSet('hireStructureId', $structure->id)
+            ->assertSet('candidateQuery', '')
+            ->call('clearCandidate')
+            ->assertSet('candidateId', null);
+    }
+
+    public function test_server_set_ids_cannot_be_forged_by_the_client(): void
+    {
+        $this->seedTemplate();
+        $this->actingAs($this->userWith('add-orders'));
+
+        foreach (['editOrderId', 'personnelId', 'candidateId'] as $property) {
+            try {
+                Livewire::test(OrderComposer::class, ['presetCode' => 'leave'])->set($property, 1);
+                $this->fail("{$property} should be locked.");
+            } catch (\Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException) {
+                $this->addToAssertionCount(1);
+            }
+        }
+    }
+
     public function test_unknown_type_surfaces_an_error(): void
     {
         $this->actingAs($this->userWith('add-orders'));
@@ -641,7 +688,7 @@ class OrderComposerTest extends TestCase
     {
         [$order, $personnel] = $this->issueVacationOrder('801-M');
 
-        app(\App\Services\Orders\Document\OrderStatusTransitionService::class)->cancel($order);
+        app(\App\Modules\Orders\Infrastructure\Document\OrderStatusTransitionService::class)->cancel($order);
 
         $this->assertSame(\App\Enums\OrderStatusEnum::CANCELLED->value, (int) $order->fresh()->status_id);
         $this->assertCount(0, $personnel->vacations()->get());
@@ -650,7 +697,7 @@ class OrderComposerTest extends TestCase
     public function test_reverting_an_approved_vacation_order_removes_the_leave(): void
     {
         [$order, $personnel] = $this->issueVacationOrder('802-M');
-        $transitions = app(\App\Services\Orders\Document\OrderStatusTransitionService::class);
+        $transitions = app(\App\Modules\Orders\Infrastructure\Document\OrderStatusTransitionService::class);
 
         $transitions->approve($order);
         $this->assertCount(1, $personnel->vacations()->get());
@@ -664,7 +711,7 @@ class OrderComposerTest extends TestCase
     public function test_cancelling_an_approved_order_reverses_its_effect(): void
     {
         [$order, $personnel] = $this->issueVacationOrder('803-M');
-        $transitions = app(\App\Services\Orders\Document\OrderStatusTransitionService::class);
+        $transitions = app(\App\Modules\Orders\Infrastructure\Document\OrderStatusTransitionService::class);
 
         $transitions->approve($order);
         $transitions->cancel($order);
@@ -676,7 +723,7 @@ class OrderComposerTest extends TestCase
     public function test_reopening_a_cancelled_order_returns_it_to_pending(): void
     {
         [$order] = $this->issueVacationOrder('804-M');
-        $transitions = app(\App\Services\Orders\Document\OrderStatusTransitionService::class);
+        $transitions = app(\App\Modules\Orders\Infrastructure\Document\OrderStatusTransitionService::class);
 
         $transitions->cancel($order);
         $transitions->reopen($order);
@@ -687,11 +734,11 @@ class OrderComposerTest extends TestCase
     public function test_an_illegal_status_jump_is_rejected(): void
     {
         [$order] = $this->issueVacationOrder('805-M');
-        $transitions = app(\App\Services\Orders\Document\OrderStatusTransitionService::class);
+        $transitions = app(\App\Modules\Orders\Infrastructure\Document\OrderStatusTransitionService::class);
         $transitions->cancel($order);
 
         // cancelled → approved is not a permitted move.
-        $this->expectException(\DomainException::class);
+        $this->expectException(DomainException::class);
         $transitions->transition($order->fresh(), \App\Enums\OrderStatusEnum::APPROVED);
     }
 

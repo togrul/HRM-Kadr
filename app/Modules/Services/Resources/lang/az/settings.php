@@ -44,6 +44,8 @@ return [
         'statuses' => 'Statuslar',
         'selected_count' => 'seçim',
         'active_filters_count' => 'filtr',
+        'work_coefficient' => 'İş əmsalı',
+        'education_coefficient' => 'Təhsil əmsalı',
     ],
     'messages' => [
         'general_description' => 'Sistem üzrə ümumi parametrlər və dəyərlər.',
@@ -60,5 +62,11 @@ return [
         'pick_statuses_help' => 'Statusları birbaşa ada görə seçin. Boş seçim bütün statusların görünməsi deməkdir.',
         'candidate_presets_description' => 'Namizəd siyahısında hərbi və mülki rejimlər üçün görünəcək statusları, standart tab məntiqini və aktiv filtrləri ayrıca idarə edin.',
         'mode_hint' => 'Bu panel seçilən rejim üçün namizəd siyahısının görünüş və davranış qaydasını idarə edir.',
+        'invalid_starts_at' => 'Başlama tarixi düzgün deyil.',
+        'invalid_ends_at' => 'Bitmə tarixi düzgün deyil.',
+        'ends_before_starts' => 'Bitmə tarixi başlama tarixindən əvvəl ola bilməz.',
+        'permanent_chief_missing' => 'Daimi rəhbər təyin edilməyib.',
+        'delegation_created' => 'Rəhbər həvaləsi yaradıldı.',
+        'delegation_revoked' => 'Rəhbər həvaləsi dayandırıldı.',
     ],
 ];

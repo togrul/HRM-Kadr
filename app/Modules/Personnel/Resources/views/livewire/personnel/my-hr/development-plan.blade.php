@@ -71,7 +71,7 @@
 
                 @if ($row['plan_note'])
                     <div class="rounded-xl border border-hairline bg-[#fafafa] px-3.5 py-3">
-                        <p class="hrm-eyebrow">{{ __('personnel::my_hr.development_plan.labels.plan_note') }}</p>
+                        <p class="text-[12.5px] font-medium text-ink-muted">{{ __('personnel::my_hr.development_plan.labels.plan_note') }}</p>
                         <p class="mt-1.5 text-[12.5px] leading-relaxed text-ink-soft">{{ $row['plan_note'] }}</p>
                     </div>
                 @endif

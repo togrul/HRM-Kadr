@@ -25,39 +25,39 @@
 
             <div>
                 <x-label for="attendance-calendar-day-type">{{ __('attendance::calendar_regimes.fields.day_type') }}</x-label>
-                <select id="attendance-calendar-day-type" wire:model.live="form.day_type" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                <x-ui.select id="attendance-calendar-day-type" wire:model.live="form.day_type">
                     <option value="workday">{{ __('attendance::calendar_regimes.options.workday') }}</option>
                     <option value="weekend">{{ __('attendance::calendar_regimes.options.weekend') }}</option>
                     <option value="holiday">{{ __('attendance::calendar_regimes.options.holiday') }}</option>
-                </select>
+                </x-ui.select>
                 @error('form.day_type') <x-validation>{{ $message }}</x-validation> @enderror
             </div>
 
             <div>
                 <x-label for="attendance-calendar-scope-type">{{ __('attendance::calendar_regimes.fields.scope_type') }}</x-label>
-                <select id="attendance-calendar-scope-type" wire:model.live="form.scope_type" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                <x-ui.select id="attendance-calendar-scope-type" wire:model.live="form.scope_type">
                     <option value="global">{{ __('attendance::calendar_regimes.options.global') }}</option>
                     <option value="structure">{{ __('attendance::calendar_regimes.options.structure') }}</option>
-                </select>
+                </x-ui.select>
                 @error('form.scope_type') <x-validation>{{ $message }}</x-validation> @enderror
             </div>
 
             @if(($form['scope_type'] ?? 'global') === 'structure')
                 <div>
                     <x-label for="attendance-calendar-structure">{{ __('attendance::calendar_regimes.fields.structure') }}</x-label>
-                    <select id="attendance-calendar-structure" wire:model.live="form.scope_id" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                    <x-ui.select id="attendance-calendar-structure" wire:model.live="form.scope_id">
                         <option value="">{{ __('attendance::calendar_regimes.options.select_structure') }}</option>
                         @foreach($structures as $structure)
                             <option value="{{ $structure->id }}">{{ $structure->name }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                     @error('form.scope_id') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
             @endif
 
             <div>
                 <x-label for="attendance-calendar-name">{{ __('attendance::calendar_regimes.fields.name') }}</x-label>
-                <x-livewire-input id="attendance-calendar-name" mode="gray" name="form.name" wire:model.live="form.name" />
+                <x-livewire-input id="attendance-calendar-name" mode="gray" name="form.name" wire:model="form.name" />
                 @error('form.name') <x-validation>{{ $message }}</x-validation> @enderror
             </div>
 
@@ -100,15 +100,15 @@
                         <div class="flex items-center space-x-2">
                             <a
                                 href="{{ route('attendance', ['tab' => 'history', 'history_type' => 'calendar', 'history_subject_id' => $calendar->id]) }}"
-                                class="appearance-none flex items-center justify-center w-8 h-8 text-xs font-medium uppercase rounded-lg text-gray-500 hover:bg-blue-50 hover:text-blue-700"
+                                class="appearance-none flex items-center justify-center w-8 h-8 text-xs font-medium uppercase rounded-lg text-zinc-500 hover:bg-blue-50 hover:text-blue-700"
                                 title="{{ __('attendance::history.actions.open_filtered_history') }}"
                             >
                                 <x-icons.info-circle-icon color="text-sky-500" hover="text-sky-600"></x-icons.info-circle-icon>
                             </a>
-                            <button wire:click.prevent="edit({{ $calendar->id }})" class="appearance-none flex items-center justify-center w-8 h-8 text-xs font-medium uppercase rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700">
-                                <x-icons.edit-icon color="text-slate-400" hover="text-slate-500"></x-icons.edit-icon>
+                            <button wire:click.prevent="edit({{ $calendar->id }})" class="appearance-none flex items-center justify-center w-8 h-8 text-xs font-medium uppercase rounded-lg text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700">
+                                <x-icons.edit-icon color="text-zinc-400" hover="text-zinc-500"></x-icons.edit-icon>
                             </button>
-                            <button wire:click.prevent="confirmRemove({{ $calendar->id }})" class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-100 hover:text-gray-700">
+                            <button wire:click.prevent="confirmRemove({{ $calendar->id }})" class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-zinc-500 hover:bg-red-100 hover:text-zinc-700">
                                 <x-icons.delete-icon color="text-rose-500" hover="text-rose-600"></x-icons.delete-icon>
                             </button>
                         </div>

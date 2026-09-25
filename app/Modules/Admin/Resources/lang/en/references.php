@@ -38,6 +38,7 @@ return [
         'vacation_days' => 'Vacation days',
         'contract_duration' => 'Contract duration',
         'next_contract_duration' => 'Next contract duration',
+        'vacation_days_per_month' => 'Vacation days per month',
         'serial_number' => 'Serial number',
         'capacity' => 'Capacity',
         'production_year' => 'Production year',
@@ -179,6 +180,8 @@ return [
             'sessions' => 'Sessions',
             'review' => 'Review',
         ],
+        'no_stored_overrides' => 'No approval policy is stored separately for this deployment — the system runs on the standard pack rules.',
+        'override_subtitle' => 'Custom rule for this request type.',
     ],
     'labels' => [
         'scope_personnel' => 'Personnel',

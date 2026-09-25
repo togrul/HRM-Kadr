@@ -82,6 +82,18 @@ final class NotificationTriggerRegistry
         return $categories;
     }
 
+    /**
+     * Labels for the categories campaigns and templates are filed under.
+     *
+     * @return array<string, string>
+     */
+    public static function campaignCategoryLabels(): array
+    {
+        return collect(['birthday', 'position_change', 'holiday', 'announcement', 'training_result', 'leave_status'])
+            ->mapWithKeys(fn (string $category): array => [$category => __('notifications::common.categories.'.$category)])
+            ->all();
+    }
+
     public static function label(string $trigger): string
     {
         return __('notifications::common.triggers.'.$trigger);
