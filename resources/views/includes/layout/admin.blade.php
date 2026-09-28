@@ -89,7 +89,7 @@
                             x-show="@js(mb_strtolower(__($menuItem['label']))).includes(query.trim().toLocaleLowerCase())"
                             @class([
                                 'flex min-h-10 items-center rounded-[10px] px-3 text-[14px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400',
-                                'bg-ink font-semibold text-white' => $active,
+                                'bg-[#ececee] font-semibold text-ink' => $active,
                                 'text-ink-muted hover:bg-[#f4f4f5]' => ! $active,
                             ])
                         >{{ __($menuItem['label']) }}</a>

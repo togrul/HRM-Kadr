@@ -51,7 +51,7 @@
                     @class([
                         $link,
                         'hrm-num',
-                        'bg-ink font-semibold text-white' => $page === $current,
+                        'border border-zinc-300 bg-[#f4f4f5] font-semibold text-ink' => $page === $current,
                         'border border-hairline text-ink-muted hover:bg-[#fafafa] hover:text-ink' => $page !== $current,
                     ])
                     @if ($page === $current) aria-current="page" @endif

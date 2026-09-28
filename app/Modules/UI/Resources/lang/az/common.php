@@ -42,6 +42,7 @@ return [
         'expand_panel' => 'Paneli aç',
         'open_menu' => 'Menyunu aç',
         'breadcrumb_root' => 'Kadr İdarəetməsi',
+        'more_actions' => 'Digər əməliyyatlar',
         'status' => 'Status',
         'saved_views' => 'Saxlanmış görünüşlər',
         'results' => 'nəticə',
