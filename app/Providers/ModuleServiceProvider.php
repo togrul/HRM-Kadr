@@ -3,8 +3,8 @@
 namespace App\Providers;
 
 use App\Services\Modules\ModuleState;
-use App\Support\Translations\ModuleTranslation;
 use App\Services\Profiles\ProfileState;
+use App\Support\Translations\ModuleTranslation;
 use Illuminate\Support\ServiceProvider;
 
 class ModuleServiceProvider extends ServiceProvider

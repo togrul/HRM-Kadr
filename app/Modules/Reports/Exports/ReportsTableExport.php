@@ -16,8 +16,7 @@ class ReportsTableExport implements FromCollection, WithHeadings, WithMapping
     public function __construct(
         protected Collection $rows,
         protected array $columns
-    ) {
-    }
+    ) {}
 
     public function collection(): Collection
     {

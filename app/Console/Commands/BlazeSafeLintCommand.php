@@ -23,6 +23,7 @@ class BlazeSafeLintCommand extends Command
         $moduleBladeFiles = collect(File::allFiles(app_path('Modules')))
             ->filter(function ($file) {
                 $path = str_replace('\\', '/', $file->getPathname());
+
                 return str_contains($path, '/Resources/views/')
                     && str_ends_with($file->getFilename(), '.blade.php');
             })
@@ -92,8 +93,8 @@ class BlazeSafeLintCommand extends Command
     }
 
     /**
-     * @param array<int, string> $lines
-     * @param array<int, array<string, mixed>> $findings
+     * @param  array<int, string>  $lines
+     * @param  array<int, array<string, mixed>>  $findings
      */
     private function scanPropsForKebabCase(array $lines, string $relativePath, array &$findings): void
     {
@@ -129,8 +130,8 @@ class BlazeSafeLintCommand extends Command
     }
 
     /**
-     * @param array<int, string> $lines
-     * @param array<int, array<string, mixed>> $findings
+     * @param  array<int, string>  $lines
+     * @param  array<int, array<string, mixed>>  $findings
      */
     private function scanShortPhpDirective(array $lines, string $relativePath, array &$findings): void
     {
@@ -148,8 +149,8 @@ class BlazeSafeLintCommand extends Command
     }
 
     /**
-     * @param array<int, string> $lines
-     * @param array<int, array<string, mixed>> $findings
+     * @param  array<int, string>  $lines
+     * @param  array<int, array<string, mixed>>  $findings
      */
     private function scanForbiddenIconIncludes(array $lines, string $relativePath, array &$findings): void
     {

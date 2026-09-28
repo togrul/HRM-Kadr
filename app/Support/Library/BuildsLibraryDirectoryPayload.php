@@ -9,6 +9,7 @@ use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 trait BuildsLibraryDirectoryPayload
 {
@@ -153,7 +154,7 @@ trait BuildsLibraryDirectoryPayload
 
         try {
             return now()->make($value);
-        } catch (\Throwable) {
+        } catch (Throwable) {
             return null;
         }
     }

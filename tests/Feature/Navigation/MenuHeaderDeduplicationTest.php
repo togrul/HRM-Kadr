@@ -33,6 +33,6 @@ it('deduplicates canonical menus and ignores unknown rail items', function () {
         ]),
     ])->render();
 
-    expect(substr_count($html, 'href="' . route('staffs') . '"'))->toBe(2)
+    expect(substr_count($html, 'href="'.route('staffs').'"'))->toBe(2)
         ->and($html)->not->toContain('Service');
 });

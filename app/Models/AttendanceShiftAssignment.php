@@ -34,4 +34,3 @@ class AttendanceShiftAssignment extends Model
         return $this->belongsTo(AttendanceShift::class, 'shift_id');
     }
 }
-

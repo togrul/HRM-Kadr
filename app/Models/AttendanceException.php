@@ -33,4 +33,3 @@ class AttendanceException extends Model
         return $this->belongsTo(User::class, 'resolved_by');
     }
 }
-

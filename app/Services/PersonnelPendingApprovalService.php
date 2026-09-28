@@ -12,8 +12,7 @@ class PersonnelPendingApprovalService
 {
     public function __construct(
         protected PersonnelTabelNoGeneratorService $tabelNoGenerator
-    ) {
-    }
+    ) {}
 
     public function approve(Personnel $personnel): void
     {

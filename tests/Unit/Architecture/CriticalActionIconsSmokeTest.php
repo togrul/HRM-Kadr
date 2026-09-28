@@ -121,6 +121,7 @@ class CriticalActionIconsSmokeTest extends TestCase
 
             if (str_ends_with($sample, 'root.blade.php')) {
                 $this->assertStringContainsString('<svg', $content, sprintf('%s does not contain svg markup', $relative));
+
                 continue;
             }
 

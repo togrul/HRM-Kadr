@@ -52,7 +52,7 @@ class SeedDincerCarciogluStructureCommand extends Command
     }
 
     /**
-     * @param array{name:string,children?:array<int,array>} $node
+     * @param  array{name:string,children?:array<int,array>}  $node
      * @return array{0:int,1:int}
      */
     private function syncNode(array $node, ?int $parentId, int $code, int $level): array
@@ -212,7 +212,7 @@ class SeedDincerCarciogluStructureCommand extends Command
     }
 
     /**
-     * @param array<int,array{name:string,children?:array<int,array>}> $nodes
+     * @param  array<int,array{name:string,children?:array<int,array>}>  $nodes
      */
     private function printTree(array $nodes, int $level = 0): void
     {

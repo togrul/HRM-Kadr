@@ -130,7 +130,7 @@ trait HandlesTrainingSessionWorkbenchMutations
         $existingSession = $this->editingSessionId
             ? TrainingSession::query()->findOrFail($this->editingSessionId)
             : null;
-        $session = $existingSession ?? new TrainingSession();
+        $session = $existingSession ?? new TrainingSession;
 
         $session->fill([
             ...$payload,

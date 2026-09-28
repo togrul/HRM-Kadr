@@ -42,4 +42,3 @@ class AttendanceShift extends Model
         return $this->hasMany(AttendanceShiftAssignment::class, 'shift_id');
     }
 }
-

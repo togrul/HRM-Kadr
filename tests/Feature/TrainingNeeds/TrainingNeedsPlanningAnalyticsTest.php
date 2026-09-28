@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\TrainingNeeds;
 
+use App\Models\EmployeeCompetencyProfile;
 use App\Models\Personnel;
 use App\Models\Position;
-use App\Models\EmployeeCompetencyProfile;
 use App\Models\RoleCompetencyRequirement;
 use App\Models\TrainingAnnualPlan;
 use App\Models\TrainingCompetency;

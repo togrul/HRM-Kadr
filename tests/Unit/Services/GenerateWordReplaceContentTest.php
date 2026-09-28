@@ -51,7 +51,7 @@ class GenerateWordReplaceContentTest extends TestCase
         );
 
         $this->assertSame('Məzuniyyət', $result['title']);
-        $this->assertSame('Aysel' . PHP_EOL . 'Kamil' . PHP_EOL, $result['content']);
+        $this->assertSame('Aysel'.PHP_EOL.'Kamil'.PHP_EOL, $result['content']);
     }
 
     public function test_business_trip_blade_formats_car_transport_row_and_keeps_row_newlines(): void
@@ -94,4 +94,3 @@ class GenerateWordReplaceContentTest extends TestCase
         $this->assertStringEndsWith(PHP_EOL, $result['content']);
     }
 }
-

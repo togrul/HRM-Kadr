@@ -55,5 +55,4 @@ class StaffServiceProvider extends ServiceProvider
             'show-staff' => \App\Modules\Staff\Livewire\ShowStaff::class,
         ];
     }
-
 }

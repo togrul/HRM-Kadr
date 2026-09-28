@@ -1,8 +1,7 @@
 <?php
 
-use App\Http\Controllers\TrainingPerformanceGuideController;
 use App\Http\Controllers\ProfileController;
-use App\Livewire\Services\Service;
+use App\Http\Controllers\TrainingPerformanceGuideController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -30,4 +29,4 @@ Route::middleware('auth')->group(function () {
         ->name('docs.section');
 });
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';

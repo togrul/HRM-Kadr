@@ -10,9 +10,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PersonnelContract extends Model
 {
+    use DateCastTrait;
     use HasFactory;
     use PersonnelTrait;
-    use DateCastTrait;
 
     protected $fillable = [
         'tabel_no',

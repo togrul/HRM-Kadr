@@ -34,6 +34,7 @@ class BuildAssetManifestCheckCommand extends Command
         foreach ($manifest as $entry => $payload) {
             if (! is_array($payload)) {
                 $errors[] = "Manifest entry [{$entry}] is not an object.";
+
                 continue;
             }
 

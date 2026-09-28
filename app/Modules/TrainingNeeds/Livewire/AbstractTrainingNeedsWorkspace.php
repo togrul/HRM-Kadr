@@ -5,7 +5,6 @@ namespace App\Modules\TrainingNeeds\Livewire;
 use App\Livewire\Concerns\ConfirmsDestructiveActions;
 use App\Livewire\Concerns\WithRuntimeMemo;
 use App\Livewire\Traits\DropdownConstructTrait;
-use App\Models\TrainingAnnualPlan;
 use App\Modules\TrainingNeeds\Application\Services\TrainingSessionProposalService;
 use App\Modules\TrainingNeeds\Livewire\Concerns\InteractsWithTrainingNeedsAccess;
 use App\Modules\TrainingNeeds\Livewire\Concerns\InteractsWithTrainingNeedsFormState;
@@ -19,11 +18,11 @@ abstract class AbstractTrainingNeedsWorkspace extends Component
 {
     use ConfirmsDestructiveActions;
     use DropdownConstructTrait;
+    use InteractsWithTabbedWorkspace;
     use InteractsWithTrainingNeedsAccess;
     use InteractsWithTrainingNeedsFormState;
     use InteractsWithTrainingNeedsQueries;
     use InteractsWithTrainingNeedsState;
-    use InteractsWithTabbedWorkspace;
     use WithRuntimeMemo;
 
     public string $activeTab = 'catalogs';

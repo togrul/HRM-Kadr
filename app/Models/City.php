@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -34,7 +35,7 @@ class City extends Model
         parent::boot();
         static::creating(function ($city) {
             if (! $city->country_id) {
-                throw new \Exception('Country ID is required to generate city ID.');
+                throw new Exception('Country ID is required to generate city ID.');
             }
             $lastCity = City::where('country_id', $city->country_id)
                 ->orderBy('id', 'desc')

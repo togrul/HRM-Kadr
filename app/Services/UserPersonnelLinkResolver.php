@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Personnel;
 use App\Models\User;
 use App\Models\UserPersonnelLink;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 class UserPersonnelLinkResolver

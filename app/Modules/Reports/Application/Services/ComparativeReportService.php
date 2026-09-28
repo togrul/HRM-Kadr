@@ -13,8 +13,7 @@ class ComparativeReportService
 {
     public function __construct(
         protected ReportsStructureScopeService $structureScope
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<string,mixed>

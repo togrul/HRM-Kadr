@@ -6,8 +6,7 @@ class EducationDurationService
 {
     public function __construct(
         private readonly CalculateSeniorityService $seniorityService,
-    ) {
-    }
+    ) {}
 
     /**
      * @var array<string, array<string, mixed>>
@@ -60,4 +59,3 @@ class EducationDurationService
         return md5(json_encode($payload, JSON_THROW_ON_ERROR));
     }
 }
-

@@ -9,7 +9,6 @@ use App\Models\PersonnelLaborActivity;
 use App\Models\TrainingDeliveryRecord;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class StandardReportService
@@ -17,8 +16,7 @@ class StandardReportService
     public function __construct(
         protected ReportsStructureScopeService $structureScope,
         protected ReportsSqlDialectService $sql
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array<string,mixed>  $filters
@@ -95,7 +93,7 @@ class StandardReportService
         $genderRows = DB::query()
             ->fromSub(clone $base, 'personnel_gender')
             ->selectRaw('? as dimension', [__('reports::dashboard.fields.gender_distribution')])
-            ->selectRaw("CASE WHEN gender = 2 THEN ? ELSE ? END as bucket", [__('reports::dashboard.labels.female'), __('reports::dashboard.labels.male')])
+            ->selectRaw('CASE WHEN gender = 2 THEN ? ELSE ? END as bucket', [__('reports::dashboard.labels.female'), __('reports::dashboard.labels.male')])
             ->selectRaw('COUNT(*) as employee_count')
             ->groupBy('bucket')
             ->get();
@@ -339,7 +337,7 @@ class StandardReportService
             'summary' => [
                 ['label' => __('reports::dashboard.cards.delivered_trainings'), 'value' => (int) ($summary['delivered_trainings_count'] ?? 0)],
                 ['label' => __('reports::dashboard.cards.attended_hours'), 'value' => (float) ($summary['attended_hours'] ?? 0)],
-                ['label' => __('reports::dashboard.cards.attendance_rate'), 'value' => ($summary['attendance_rate'] ?? 0).'%' ],
+                ['label' => __('reports::dashboard.cards.attendance_rate'), 'value' => ($summary['attendance_rate'] ?? 0).'%'],
             ],
             'chart' => $rows->map(fn ($row) => ['label' => $row['period'], 'value' => $row['sessions_count']])->all(),
         ];

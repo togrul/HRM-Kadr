@@ -3,8 +3,8 @@
 namespace App\Providers;
 
 use App\Events\StaffScheduleUpdated;
-use App\Listeners\LogSuccessfulLogout;
 use App\Listeners\LogSuccessfulLogin;
+use App\Listeners\LogSuccessfulLogout;
 use App\Listeners\UpdateStaffSchedule;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;

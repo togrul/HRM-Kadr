@@ -8,6 +8,7 @@ use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\Settings;
 use PhpOffice\PhpWord\Shared\Converter;
+use Throwable;
 
 abstract class BaseWordExportService
 {
@@ -16,7 +17,7 @@ abstract class BaseWordExportService
         Settings::setDefaultFontName($fontName);
         Settings::setDefaultFontSize($fontSize);
 
-        $phpWord = new PhpWord();
+        $phpWord = new PhpWord;
         $section = $phpWord->addSection($sectionOptions);
 
         return [$phpWord, $section];
@@ -56,7 +57,7 @@ abstract class BaseWordExportService
         if (is_string($value)) {
             try {
                 return \Carbon\Carbon::parse($value)->format('d.m.Y');
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 return $value;
             }
         }
