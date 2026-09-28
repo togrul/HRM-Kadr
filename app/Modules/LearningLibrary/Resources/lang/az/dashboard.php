@@ -42,7 +42,7 @@ return [
         'target_structure' => 'Struktur',
         'target_positions' => 'Vəzifə seçimi',
         'target_position' => 'Vəzifə',
-        'include_recent_hires' => 'Yeni əməkdaş cohort-unu da daxil et',
+        'include_recent_hires' => 'Son işə qəbul olunanları da daxil et',
         'recent_hire_days' => 'Son neçə günün yeni əməkdaşları',
         'archived' => 'Arxivdədir',
     ],
@@ -98,6 +98,7 @@ return [
     'catalog' => [
         'add' => 'Material əlavə et',
         'create_title' => 'Yeni material',
+        'version_title' => 'Yeni versiya',
         'assign_title' => 'Material təyin et',
         'save' => 'Materialı yarat',
         'assign' => 'Təyin et',

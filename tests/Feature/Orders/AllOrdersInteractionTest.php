@@ -12,6 +12,7 @@ use App\Modules\Orders\Livewire\AllOrders;
 use App\Modules\Orders\Livewire\OrderPreview;
 use App\Services\StructureService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Maatwebsite\Excel\Facades\Excel;
 use Spatie\Permission\Models\Permission;
@@ -144,6 +145,26 @@ class AllOrdersInteractionTest extends TestCase
             ->assertSee("\$wire.deleteOrder('DONE-1')")
             ->assertSee("openSideMenu('order-preview'", false)
             ->assertDontSee('wire:confirm', false);
+    }
+
+    public function test_download_needs_the_same_export_permission_that_shows_the_button(): void
+    {
+        $user = $this->actAsOrderManager();
+        $this->docxOrder('DL-1', 20, 'order-documents/dl.docx', $user);
+        Storage::fake('local')->put('order-documents/dl.docx', 'docx');
+
+        Livewire::test(AllOrders::class)->call('printOrder', 'DL-1')->assertFileDownloaded('DL-1.docx');
+
+        $user->revokePermissionTo('export-orders');
+        Livewire::test(AllOrders::class)
+            ->assertDontSee("printOrder('DL-1')", false)
+            ->call('printOrder', 'DL-1')
+            ->assertForbidden();
+
+        $exportOnly = User::factory()->create();
+        $exportOnly->givePermissionTo(['show-orders', 'export-orders']);
+        $this->actingAs($exportOnly);
+        Livewire::test(AllOrders::class)->call('printOrder', 'DL-1')->assertFileDownloaded('DL-1.docx');
     }
 
     public function test_a_draft_cannot_be_approved_from_the_list(): void

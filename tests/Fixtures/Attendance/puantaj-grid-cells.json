@@ -206,7 +206,7 @@
         },
         {
             "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-900 bg-white",
-            "title": "İşlənib: 9 saat | Status: manual işdə",
+            "title": "İşlənib: 9 saat | Status: işdə (əl ilə qeyd)",
             "text": "9",
             "markup": "<!--[if BLOCK]><![endif]--> 9 <!--[if ENDBLOCK]><![endif]-->",
             "svgs": [],
@@ -214,7 +214,7 @@
                 "label": "Brown <b> Tom & Co Ray • 15.03.2026",
                 "lines": [
                     "İşlənib: 9 saat",
-                    "Status: manual işdə"
+                    "Status: işdə (əl ilə qeyd)"
                 ]
             }
         },
@@ -277,14 +277,14 @@
         },
         {
             "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-rose-600 bg-rose-50/70",
-            "title": "Status: manual yoxluq | Yoxluq: MA",
+            "title": "Status: yoxluq (əl ilə qeyd) | Yoxluq: MA",
             "text": "MA",
             "markup": "<!--[if BLOCK]><![endif]--> MA <!--[if ENDBLOCK]><![endif]-->",
             "svgs": [],
             "detail": {
                 "label": "Brown <b> Tom & Co Ray • 20.03.2026",
                 "lines": [
-                    "Status: manual yoxluq",
+                    "Status: yoxluq (əl ilə qeyd)",
                     "Yoxluq: MA"
                 ]
             }
@@ -516,7 +516,7 @@
         },
         {
             "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-900 bg-white",
-            "title": "İşlənib: 9 saat | Status: manual işdə",
+            "title": "İşlənib: 9 saat | Status: işdə (əl ilə qeyd)",
             "text": "9",
             "markup": "<!--[if BLOCK]><![endif]--> 9 <!--[if ENDBLOCK]><![endif]-->",
             "svgs": [],
@@ -524,7 +524,7 @@
                 "label": "Doe John Smith • 05.03.2026",
                 "lines": [
                     "İşlənib: 9 saat",
-                    "Status: manual işdə"
+                    "Status: işdə (əl ilə qeyd)"
                 ]
             }
         },
@@ -587,14 +587,14 @@
         },
         {
             "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-rose-600 bg-rose-50/70",
-            "title": "Status: manual yoxluq | Yoxluq: MA",
+            "title": "Status: yoxluq (əl ilə qeyd) | Yoxluq: MA",
             "text": "MA",
             "markup": "<!--[if BLOCK]><![endif]--> MA <!--[if ENDBLOCK]><![endif]-->",
             "svgs": [],
             "detail": {
                 "label": "Doe John Smith • 10.03.2026",
                 "lines": [
-                    "Status: manual yoxluq",
+                    "Status: yoxluq (əl ilə qeyd)",
                     "Yoxluq: MA"
                 ]
             }
@@ -1247,7 +1247,7 @@
         },
         {
             "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-900 bg-white",
-            "title": "İşlənib: 9 saat | Status: manual işdə",
+            "title": "İşlənib: 9 saat | Status: işdə (əl ilə qeyd)",
             "text": "9",
             "markup": "<!--[if BLOCK]><![endif]--> 9 <!--[if ENDBLOCK]><![endif]-->",
             "svgs": [],
@@ -1255,7 +1255,7 @@
                 "label": "O'Brien Ann \"Q\" Lee • 22.03.2026",
                 "lines": [
                     "İşlənib: 9 saat",
-                    "Status: manual işdə"
+                    "Status: işdə (əl ilə qeyd)"
                 ]
             }
         },
@@ -1318,14 +1318,14 @@
         },
         {
             "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-rose-600 bg-rose-50/70",
-            "title": "Status: manual yoxluq | Yoxluq: MA",
+            "title": "Status: yoxluq (əl ilə qeyd) | Yoxluq: MA",
             "text": "MA",
             "markup": "<!--[if BLOCK]><![endif]--> MA <!--[if ENDBLOCK]><![endif]-->",
             "svgs": [],
             "detail": {
                 "label": "O'Brien Ann \"Q\" Lee • 27.03.2026",
                 "lines": [
-                    "Status: manual yoxluq",
+                    "Status: yoxluq (əl ilə qeyd)",
                     "Yoxluq: MA"
                 ]
             }
@@ -1421,14 +1421,14 @@
         },
         {
             "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-rose-600 bg-rose-50/70",
-            "title": "Status: manual yoxluq | Yoxluq: MA",
+            "title": "Status: yoxluq (əl ilə qeyd) | Yoxluq: MA",
             "text": "MA",
             "markup": "<!--[if BLOCK]><![endif]--> MA <!--[if ENDBLOCK]><![endif]-->",
             "svgs": [],
             "detail": {
                 "label": "Əliyev Şəhla  • 03.03.2026",
                 "lines": [
-                    "Status: manual yoxluq",
+                    "Status: yoxluq (əl ilə qeyd)",
                     "Yoxluq: MA"
                 ]
             }
@@ -1812,7 +1812,7 @@
         },
         {
             "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-900 bg-white",
-            "title": "İşlənib: 9 saat | Status: manual işdə",
+            "title": "İşlənib: 9 saat | Status: işdə (əl ilə qeyd)",
             "text": "9",
             "markup": "<!--[if BLOCK]><![endif]--> 9 <!--[if ENDBLOCK]><![endif]-->",
             "svgs": [],
@@ -1820,7 +1820,7 @@
                 "label": "Əliyev Şəhla  • 29.03.2026",
                 "lines": [
                     "İşlənib: 9 saat",
-                    "Status: manual işdə"
+                    "Status: işdə (əl ilə qeyd)"
                 ]
             }
         },

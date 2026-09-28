@@ -57,6 +57,12 @@ return [
         'approve' => 'Approve',
         'reject' => 'Reject',
     ],
+    'labels' => [
+        'reject_reason' => 'Rejection reason',
+    ],
+    'placeholders' => [
+        'reject_reason' => 'Write the rejection reason',
+    ],
     'empty' => [
         'title' => 'No overtime requests found.',
         'description_filtered' => 'No overtime requests match the current filters. Adjust the filters or create a manual request.',

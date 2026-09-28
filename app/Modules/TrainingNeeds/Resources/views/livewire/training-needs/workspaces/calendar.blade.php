@@ -3,6 +3,7 @@
             <div class="mb-4 rounded-2xl border border-zinc-200 bg-zinc-50/90 px-4 py-3 text-xs leading-6 text-zinc-500">
                 {{ __('training_needs::dashboard.labels.session_proposal_applied_hint') }}
             </div>
+            @if ($this->canManageTrainingNeeds)
             @if (count($this->sessionProposals))
                 <div class="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-zinc-50/90 px-4 py-3">
                     <div class="space-y-1">
@@ -15,6 +16,7 @@
                         <x-ui.action-pill wire:click="createSelectedSessionProposals" icon="icons.calendar-icon">{{ __('training_needs::dashboard.actions.create_selected_sessions') }}</x-ui.action-pill>
                     </div>
                 </div>
+            @endif
             @endif
             <div class="grid gap-3 xl:grid-cols-2">
                 @forelse ($this->sessionProposals as $proposal)
@@ -45,8 +47,10 @@
                                 </div>
                             </div>
                             <div class="flex flex-wrap gap-2 border-t border-sky-200/80 pt-3">
+                                @if ($this->canManageTrainingNeeds)
                                 <x-ui.action-pill mode="secondary" wire:click="applySessionProposal({{ $proposal['plan_item_id'] }})" icon="icons.edit-icon">{{ __('training_needs::dashboard.actions.apply_session_proposal') }}</x-ui.action-pill>
                                 <x-ui.action-pill wire:click="createSessionFromProposal({{ $proposal['plan_item_id'] }})" icon="icons.calendar-icon">{{ __('training_needs::dashboard.actions.create_session_from_proposal') }}</x-ui.action-pill>
+                                @endif
                             </div>
                         </div>
                     </x-ui.list-card>
@@ -56,6 +60,7 @@
             </div>
         </x-surface-card>
 
+        @if ($this->canManageTrainingNeeds)
         <div class="grid gap-4 xl:grid-cols-2">
             <x-surface-card :title="__('training_needs::dashboard.cards.training_calendar')" icon="icons.training-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
                 @if ($editingSessionId)
@@ -223,6 +228,7 @@
                 </div>
             </x-surface-card>
         </div>
+        @endif
 
         <div class="grid gap-4 xl:grid-cols-2">
             <x-surface-card :title="__('training_needs::dashboard.cards.upcoming_sessions')" icon="icons.clock-icon">
@@ -240,8 +246,10 @@
                             <p class="mt-2 text-xs text-zinc-500">{{ __('training_needs::dashboard.labels.session_meta', ['location' => $session->location ?: '—', 'trainer' => $session->trainer_name ?: '—', 'participants' => $session->participants->count()]) }}</p>
                             </button>
                             <div class="mt-3 flex flex-wrap gap-2 border-t border-zinc-200/80 pt-3">
+                                @if ($this->canManageTrainingNeeds)
                                 <x-ui.action-pill mode="secondary" wire:click="editSession({{ $session->id }})" icon="icons.edit-icon">{{ __('training_needs::dashboard.actions.edit') }}</x-ui.action-pill>
                                 <x-ui.action-pill mode="delete" wire:click="confirmDeleteSession({{ $session->id }})" icon="icons.delete-icon">{{ __('training_needs::dashboard.actions.delete') }}</x-ui.action-pill>
+                                @endif
                             </div>
                         </x-ui.list-card>
                     @empty

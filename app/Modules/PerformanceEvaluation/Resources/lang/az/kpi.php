@@ -26,7 +26,7 @@ return [
         'perspective' => 'Perspektiv',
         'indicator_kind' => 'Göstərici növü',
         'source_metric' => 'Məlumat mənbəyi',
-        'evidence_required' => 'Manual dəyər üçün sübut faylı məcburidir',
+        'evidence_required' => 'Əl ilə daxil edilən dəyər üçün sübut faylı məcburidir',
         'status' => 'Status',
         'version' => 'Versiya',
         'period_type' => 'Dövr tipi',
@@ -187,7 +187,7 @@ return [
     'actions' => [
         'add_kpi' => 'Yeni KPI',
         'edit_kpi' => 'KPI-ı redaktə et',
-        'add_template' => 'Yeni şablon',
+        'add_template' => 'Yeni KPI şablonu',
         'edit_template' => 'Şablonu redaktə et',
         'add_item' => 'Bənd əlavə et',
         'add_actual' => 'Faktiki dəyər',
@@ -596,7 +596,7 @@ return [
             'out_of_range' => ':min ilə :max arasında rəqəm olmalıdır.',
             'not_a_number' => 'Müsbət rəqəm olmalıdır.',
             'wrong_mode' => 'Bu əməliyyat cari xidmət növü üçün nəzərdə tutulmayıb.',
-            'order_template_missing' => '"Pul mükafatı" əmr şablonu tapılmadı. Administrator onu əlavə etməlidir (php artisan orders:seed-word-templates --only=pul_mukafati).',
+            'order_template_missing' => '"Pul mükafatı" əmr şablonu tapılmadı. Sistem administratoruna müraciət edin ki, bu şablonu əmr şablonlarına əlavə etsin.',
         ],
     ],
 

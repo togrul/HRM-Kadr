@@ -12,6 +12,7 @@
         {{-- ═════════════ COMPETENCY GROUPS ═════════════ --}}
         @php $groups = $this->catalogGroups; @endphp
         <x-surface-card :title="__('training_needs::dashboard.cards.competency_groups')" icon="icons.folder-plus-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
+            @if ($this->canManageTrainingNeeds)
             @if ($editingGroupId)
                 <div class="mb-3 flex items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
                     <span class="truncate">{{ __('training_needs::dashboard.actions.edit') }}: <span class="font-semibold">{{ $groupForm['name'] }}</span></span>
@@ -45,6 +46,7 @@
                     @endif
                 </div>
             </div>
+            @endif
 
             <div class="mt-4 border-t border-zinc-100 pt-3">
                 <div class="mb-2 flex items-center justify-between gap-2">
@@ -61,6 +63,7 @@
                                 <span class="text-sm font-medium text-zinc-800">{{ $group->name }}</span>
                                 <span class="block text-xs text-zinc-400">{{ $group->competencies_count }} · {{ $group->is_active ? __('training_needs::dashboard.fields.is_active') : '—' }}</span>
                             </div>
+                            @if ($this->canManageTrainingNeeds)
                             <div class="flex flex-none items-center gap-1">
                                 <button type="button" wire:click="editGroup({{ $group->id }})" title="{{ __('training_needs::dashboard.actions.edit') }}" class="{{ $editBtn }}">{!! $editIcon !!}</button>
                                 <button type="button"
@@ -68,6 +71,7 @@
                                     title="{{ __('training_needs::dashboard.actions.delete') }}"
                                     class="{{ $deleteBtn }}">{!! $trashIcon !!}</button>
                             </div>
+                            @endif
                         </div>
                     @empty
                         <div class="px-3 py-4 text-center text-xs text-zinc-400">{{ __('training_needs::dashboard.empty.full_lists') }}</div>
@@ -88,6 +92,7 @@
         {{-- ═════════════ COMPETENCY LEVELS ═════════════ --}}
         @php $levels = $this->catalogLevels; @endphp
         <x-surface-card :title="__('training_needs::dashboard.cards.competency_levels')" icon="icons.profile-outline-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
+            @if ($this->canManageTrainingNeeds)
             @if ($editingLevelId)
                 <div class="mb-3 flex items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
                     <span class="truncate">{{ __('training_needs::dashboard.actions.edit') }}: <span class="font-semibold">{{ $levelForm['name'] }}</span></span>
@@ -126,6 +131,7 @@
                     @endif
                 </div>
             </div>
+            @endif
 
             <div class="mt-4 border-t border-zinc-100 pt-3">
                 <div class="mb-2 flex items-center justify-between gap-2">
@@ -142,6 +148,7 @@
                                 <span class="text-sm font-medium text-zinc-800">{{ $level->name }}</span>
                                 <span class="block text-xs text-zinc-400">{{ __('training_needs::dashboard.fields.score') }}: {{ $level->score }}{{ $level->is_default ? ' · '.__('training_needs::dashboard.fields.is_default') : '' }}</span>
                             </div>
+                            @if ($this->canManageTrainingNeeds)
                             <div class="flex flex-none items-center gap-1">
                                 <button type="button" wire:click="editLevel({{ $level->id }})" title="{{ __('training_needs::dashboard.actions.edit') }}" class="{{ $editBtn }}">{!! $editIcon !!}</button>
                                 <button type="button"
@@ -149,6 +156,7 @@
                                     title="{{ __('training_needs::dashboard.actions.delete') }}"
                                     class="{{ $deleteBtn }}">{!! $trashIcon !!}</button>
                             </div>
+                            @endif
                         </div>
                     @empty
                         <div class="px-3 py-4 text-center text-xs text-zinc-400">{{ __('training_needs::dashboard.empty.full_lists') }}</div>
@@ -169,6 +177,7 @@
         {{-- ═════════════ COMPETENCIES ═════════════ --}}
         @php $competencies = $this->catalogCompetencies; @endphp
         <x-surface-card :title="__('training_needs::dashboard.cards.competencies')" icon="icons.profile-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
+            @if ($this->canManageTrainingNeeds)
             @if ($editingCompetencyId)
                 <div class="mb-3 flex items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
                     <span class="truncate">{{ __('training_needs::dashboard.actions.edit') }}: <span class="font-semibold">{{ $competencyForm['name'] }}</span></span>
@@ -214,6 +223,7 @@
                     @endif
                 </div>
             </div>
+            @endif
 
             <div class="mt-4 border-t border-zinc-100 pt-3">
                 <div class="mb-2 flex items-center justify-between gap-2">
@@ -230,6 +240,7 @@
                                 <span class="text-sm font-medium text-zinc-800">{{ $competency->name }}</span>
                                 <span class="block text-xs text-zinc-400">{{ $competency->group?->name ?? '—' }}{{ $competency->is_mandatory ? ' · '.__('training_needs::dashboard.fields.is_mandatory') : '' }}</span>
                             </div>
+                            @if ($this->canManageTrainingNeeds)
                             <div class="flex flex-none items-center gap-1">
                                 <button type="button" wire:click="editCompetency({{ $competency->id }})" title="{{ __('training_needs::dashboard.actions.edit') }}" class="{{ $editBtn }}">{!! $editIcon !!}</button>
                                 <button type="button"
@@ -237,6 +248,7 @@
                                     title="{{ __('training_needs::dashboard.actions.delete') }}"
                                     class="{{ $deleteBtn }}">{!! $trashIcon !!}</button>
                             </div>
+                            @endif
                         </div>
                     @empty
                         <div class="px-3 py-4 text-center text-xs text-zinc-400">{{ __('training_needs::dashboard.empty.full_lists') }}</div>
@@ -257,6 +269,7 @@
         {{-- ═════════════ PROGRAMS ═════════════ --}}
         @php $programs = $this->catalogPrograms; @endphp
         <x-surface-card :title="__('training_needs::dashboard.cards.programs')" icon="icons.clock-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
+            @if ($this->canManageTrainingNeeds)
             @if ($editingProgramId)
                 <div class="mb-3 flex items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
                     <span class="truncate">{{ __('training_needs::dashboard.actions.edit') }}: <span class="font-semibold">{{ $programForm['title'] }}</span></span>
@@ -304,6 +317,7 @@
                     @endif
                 </div>
             </div>
+            @endif
 
             <div class="mt-4 border-t border-zinc-100 pt-3">
                 <div class="mb-2 flex items-center justify-between gap-2">
@@ -320,6 +334,7 @@
                                 <span class="text-sm font-medium text-zinc-800">{{ $program->title }}</span>
                                 <span class="block text-xs text-zinc-400">{{ $program->code ? $program->code.' · ' : '' }}{{ __('training_needs::dashboard.delivery_types.'.$program->delivery_type) }}{{ $program->duration_hours ? ' · '.$program->duration_hours.' '.__('training_needs::dashboard.fields.duration_hours') : '' }}</span>
                             </div>
+                            @if ($this->canManageTrainingNeeds)
                             <div class="flex flex-none items-center gap-1">
                                 <button type="button" wire:click="editProgram({{ $program->id }})" title="{{ __('training_needs::dashboard.actions.edit') }}" class="{{ $editBtn }}">{!! $editIcon !!}</button>
                                 <button type="button"
@@ -327,6 +342,7 @@
                                     title="{{ __('training_needs::dashboard.actions.delete') }}"
                                     class="{{ $deleteBtn }}">{!! $trashIcon !!}</button>
                             </div>
+                            @endif
                         </div>
                     @empty
                         <div class="px-3 py-4 text-center text-xs text-zinc-400">{{ __('training_needs::dashboard.empty.full_lists') }}</div>
@@ -345,6 +361,7 @@
         </x-surface-card>
     </div>
 
+    @if ($this->canManageTrainingNeeds)
     <x-surface-card :title="__('training_needs::dashboard.cards.program_competency_map')" icon="icons.pending-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
         <div class="grid gap-3 md:grid-cols-3 xl:grid-cols-4">
             <div>
@@ -391,4 +408,5 @@
             </div>
         </div>
     </x-surface-card>
+    @endif
 @endif

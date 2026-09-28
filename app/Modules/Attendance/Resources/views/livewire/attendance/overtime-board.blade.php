@@ -177,17 +177,40 @@
                                         <span>{{ __('attendance::overtime.table.pending_approval_hint') }}</span>
                                     @endif
                                 </div>
+                                @if($item->status === 'rejected' && filled($item->rejection_reason))
+                                    <p class="line-clamp-2 max-w-[18rem] whitespace-normal text-[12px] leading-snug text-ink-muted" title="{{ $item->rejection_reason }}">
+                                        <span class="font-medium">{{ __('attendance::overtime.labels.reject_reason') }}:</span> {{ $item->rejection_reason }}
+                                    </p>
+                                @endif
                             </div>
                         </x-table.td>
                         <x-table.td :isButton="true">
                             @if($canApprove && $item->status === 'pending')
-                                <div class="inline-flex items-center gap-2">
-                                    <x-button mode="success" class="!h-8 !px-3 !text-xs" wire:click="approve({{ $item->id }})">
-                                        {{ __('attendance::overtime.actions.approve') }}
-                                    </x-button>
-                                    <x-button mode="danger" class="!h-8 !px-3 !text-xs" wire:click="reject({{ $item->id }})">
-                                        {{ __('attendance::overtime.actions.reject') }}
-                                    </x-button>
+                                <div class="flex flex-col items-end gap-1">
+                                    <div class="inline-flex items-center gap-2">
+                                        <input
+                                            wire:model="rejectReasons.{{ $item->id }}"
+                                            type="text"
+                                            required
+                                            maxlength="1000"
+                                            aria-label="{{ __('attendance::overtime.labels.reject_reason') }}"
+                                            placeholder="{{ __('attendance::overtime.placeholders.reject_reason') }}"
+                                            @class([
+                                                'h-8 w-44 rounded-[10px] border bg-[#f4f4f5] px-2.5 text-xs text-ink outline-none transition placeholder:text-ink-faint focus:bg-white focus:border-ink',
+                                                'border-rose-300' => $errors->has('rejectReasons.'.$item->id),
+                                                'border-hairline' => ! $errors->has('rejectReasons.'.$item->id),
+                                            ])
+                                        />
+                                        <x-button mode="success" class="!h-8 !px-3 !text-xs" wire:click="approve({{ $item->id }})">
+                                            {{ __('attendance::overtime.actions.approve') }}
+                                        </x-button>
+                                        <x-button mode="danger" class="!h-8 !px-3 !text-xs" wire:click="reject({{ $item->id }})">
+                                            {{ __('attendance::overtime.actions.reject') }}
+                                        </x-button>
+                                    </div>
+                                    @error('rejectReasons.'.$item->id)
+                                        <span class="text-[11px] text-rose-600">{{ $message }}</span>
+                                    @enderror
                                 </div>
                             @else
                                 <span class="text-xs text-zinc-500">

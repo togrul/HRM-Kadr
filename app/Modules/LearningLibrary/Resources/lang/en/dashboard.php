@@ -42,7 +42,7 @@ return [
         'target_structure' => 'Structure',
         'target_positions' => 'Position selection',
         'target_position' => 'Position',
-        'include_recent_hires' => 'Include recent-hire cohort',
+        'include_recent_hires' => 'Also include recent hires',
         'recent_hire_days' => 'Recent-hire lookback days',
         'archived' => 'Archived',
     ],
@@ -98,6 +98,7 @@ return [
     'catalog' => [
         'add' => 'Add material',
         'create_title' => 'New material',
+        'version_title' => 'New version',
         'assign_title' => 'Assign material',
         'save' => 'Create material',
         'assign' => 'Assign',

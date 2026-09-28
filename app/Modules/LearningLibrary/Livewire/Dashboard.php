@@ -359,6 +359,7 @@ class Dashboard extends AbstractLibraryDashboard
             'toggle_active' => 'toggleAssetActive',
             'toggle_archived' => 'toggleAssetArchived',
             'new_version' => 'prepareNextAssetVersion',
+            'is_new_version' => $this->versionSourceAssetId !== null,
             'assign_key' => 'asset_id',
             'assign_items' => 'assignment_assets',
             'can_manage' => $this->canManageLibrary(),

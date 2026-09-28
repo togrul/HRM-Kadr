@@ -28,11 +28,11 @@ return [
     ],
     'statuses' => [
         'present' => 'işdə',
-        'manual_present' => 'manual işdə',
+        'manual_present' => 'işdə (əl ilə qeyd)',
         'holiday_worked' => 'bayramda işləyib',
         'weekend_worked' => 'həftəsonu işləyib',
         'absent' => 'yoxdur',
-        'manual_absence' => 'manual yoxluq',
+        'manual_absence' => 'yoxluq (əl ilə qeyd)',
         'weekend' => 'həftəsonu',
         'holiday' => 'bayram',
         'workday' => 'iş günü',
@@ -66,7 +66,7 @@ return [
         'descriptions' => [
             'full_day' => '9 saat işlənən günlər ağ fonda qara yazı ilə göstərilir.',
             'partial_day' => 'Yarım gün və ya saatlıq icazə ilə birlikdə işlənən günləri göstərir.',
-            'absence' => 'İş günü üçün yoxluq və ya manual yoxluq qeydidir.',
+            'absence' => 'İş günü üçün yoxluq və ya əl ilə qeyd edilmiş yoxluqdur.',
             'weekend' => 'Həftəsonu günləri legenddə bir təqvim işarəsi ilə göstərilir.',
             'holiday' => 'Bayram günləri təqvim ikonu ilə göstərilir.',
         ],

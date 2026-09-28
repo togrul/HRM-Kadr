@@ -106,7 +106,12 @@ class LearningLibraryDashboardTest extends TestCase
 
         $assetId = (int) $component->get('assignmentForm.asset_id');
 
+        $component->call('openCreate')
+            ->assertSeeHtml('>'.__('learning-library::dashboard.catalog.create_title').'</h2>')
+            ->assertDontSeeHtml('>'.__('learning-library::dashboard.catalog.version_title').'</h2>');
+
         $component->call('prepareNextAssetVersion', $assetId)
+            ->assertSeeHtml('>'.__('learning-library::dashboard.catalog.version_title').'</h2>')
             ->set('assetUpload', UploadedFile::fake()->create('welcome-v2.pdf', 100, 'application/pdf'))
             ->call('saveAsset')
             ->call('exportVersionHistory');

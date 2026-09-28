@@ -87,4 +87,8 @@ return [
         'active_assignments_exist' => 'This shift has active personnel assignments. Deactivate assignments first.',
         'assignment_overlap' => 'There is already an active shift assignment overlapping this date range.',
     ],
+    'confirm' => [
+        'deactivate_shift' => 'Deactivate this shift? It can no longer be picked for new assignments.',
+        'deactivate_assignment' => 'Deactivate this employee\'s shift assignment?',
+    ],
 ];

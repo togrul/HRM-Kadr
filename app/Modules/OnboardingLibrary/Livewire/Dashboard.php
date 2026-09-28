@@ -354,6 +354,7 @@ class Dashboard extends AbstractLibraryDashboard
             'toggle_active' => 'toggleTemplateActive',
             'toggle_archived' => 'toggleTemplateArchived',
             'new_version' => 'prepareNextTemplateVersion',
+            'is_new_version' => $this->versionSourceTemplateId !== null,
             'assign_key' => 'template_id',
             'assign_items' => 'assignment_templates',
             'can_manage' => $this->canManageTemplates(),

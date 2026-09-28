@@ -114,6 +114,22 @@ class SuccessionTest extends TestCase
             ->assertDontSeeHtml('wire:click="removeMember(');
     }
 
+    public function test_plan_and_pool_delete_icons_are_labelled(): void
+    {
+        $this->cycle();
+        $service = app(SuccessionService::class);
+        $service->createPlan(['role_title' => 'Şöbə müdiri', 'risk_of_loss' => 'high', 'impact_of_loss' => 'high']);
+        $service->createPool(['name' => 'HiPo 2026', 'pool_type' => 'hipo']);
+        $this->actingAs($this->userWith(['show-performance-evaluation', 'manage-performance-evaluation']));
+
+        Livewire::test(SuccessionWorkspace::class)
+            ->call('setSection', 'plans')
+            ->assertSeeHtml('aria-label="'.e(__('performance_evaluation::succession.remove.plan', ['plan' => 'Şöbə müdiri'])).'"')
+            ->call('setSection', 'pools')
+            ->assertSeeHtml('aria-label="'.e(__('performance_evaluation::succession.remove.pool', ['pool' => 'HiPo 2026'])).'"')
+            ->assertDontSeeHtml('bg-emerald-600');
+    }
+
     public function test_viewing_requires_permission(): void
     {
         $this->cycle();

@@ -5,10 +5,10 @@ return [
     'description' => 'Davamiyyət üçün gecikmə/erkən çıxış güzəştlərini və hesablama siyasətlərini konfiqurasiya edin.',
     'global_policy' => 'Qlobal siyasət',
     'default_shift' => [
-        'current_title' => 'Cari default növbə',
+        'current_title' => 'Cari standart növbə',
         'current_description' => 'Əməkdaş üçün aktiv təyinat olmadıqda bu növbə istifadə olunur.',
         'none_badge' => 'Standart növbə təyin edilməyib',
-        'none_description' => 'Manual hesablamalar əməkdaşa xüsusi təyinat olmadan işləməlidirsə, burada default növbə seçin.',
+        'none_description' => 'Əməkdaşa ayrıca növbə təyin edilməyibsə, hesablamalarda istifadə olunacaq standart növbəni burada seçin.',
         'option_none' => 'Standart növbə yoxdur',
     ],
     'fields' => [

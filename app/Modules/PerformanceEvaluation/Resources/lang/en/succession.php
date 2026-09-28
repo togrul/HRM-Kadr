@@ -92,6 +92,9 @@ return [
     'empty_pools_subtitle' => 'Create your first talent pool (high potential, successor or critical role).',
     'confirm_delete_plan' => 'Are you sure you want to delete this succession plan?',
     'remove' => [
+        'plan' => 'Delete the ":plan" plan',
+        'pool' => 'Delete the ":pool" pool',
+        'delete_action' => 'Delete',
         'action' => 'Remove',
         'assessment' => 'Remove :name from the 9-box',
         'assessment_confirm' => 'The 9-box assessment for :name will be deleted. Continue?',

@@ -92,6 +92,9 @@ return [
     'empty_pools_subtitle' => 'İlk istedad hovuzunu yaradın (yüksək potensial, varis və ya kritik vəzifə).',
     'confirm_delete_plan' => 'Bu varislik planını silmək istədiyinizə əminsiniz?',
     'remove' => [
+        'plan' => '":plan" planını sil',
+        'pool' => '":pool" hovuzunu sil',
+        'delete_action' => 'Sil',
         'action' => 'Çıxar',
         'assessment' => ':name — 9-box-dan çıxar',
         'assessment_confirm' => ':name üçün 9-box qiymətləndirməsi silinəcək. Davam edilsin?',
