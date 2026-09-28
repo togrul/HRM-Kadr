@@ -13,6 +13,7 @@ class OnboardingLibraryQueryBudgetCommand extends AbstractQueryBudgetCommand
         {--allow-empty : Return success when onboarding dataset is empty}
         {--general-budget= : Max query count for general tab}
         {--library-budget= : Max query count for library tab}
+        {--catalog-budget= : Max query count for the catalog page (metrics, chip counts, one card page)}
         {--reports-budget= : Max query count for reports tab}
         {--json : Print report as JSON}';
 
@@ -47,12 +48,14 @@ class OnboardingLibraryQueryBudgetCommand extends AbstractQueryBudgetCommand
         $budgets = [
             'general_build' => max(1, (int) ($this->option('general-budget') ?: 16)),
             'library_build' => max(1, (int) ($this->option('library-budget') ?: 10)),
+            'catalog_build' => max(1, (int) ($this->option('catalog-budget') ?: 8)),
             'reports_build' => max(1, (int) ($this->option('reports-budget') ?: 10)),
         ];
 
         $results = [
             $this->probe('general_build', $budgets['general_build'], fn () => $service->buildGeneral('', '', '', 'onboardingLibraryQueryBudgetPage')),
             $this->probe('library_build', $budgets['library_build'], fn () => $service->buildLibrary('')),
+            $this->probe('catalog_build', $budgets['catalog_build'], fn () => $service->buildCatalog('', '', 'all', 'onboardingLibraryQueryBudgetCatalogPage')),
             $this->probe('reports_build', $budgets['reports_build'], fn () => $service->buildReports()),
         ];
 
