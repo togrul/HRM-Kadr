@@ -91,7 +91,7 @@
                 type="button"
                 @click="filtersOpen = ! filtersOpen"
                 :aria-expanded="filtersOpen.toString()"
-                class="inline-flex h-10 items-center gap-2 rounded-[10px] border border-hairline bg-[#f4f4f5] px-3.5 text-[13.5px] font-semibold text-ink-soft transition hover:bg-[#e4e4e7] sm:hidden"
+                class="inline-flex h-9 items-center gap-2 rounded-full border border-hairline bg-[#f4f4f5] px-3.5 text-[13px] font-semibold text-ink-soft transition hover:bg-[#e4e4e7] sm:hidden"
             >
                 <svg class="h-4 w-4 text-ink-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18M6 12h12M10 19h4"/></svg>
                 {{ __('ui::common.labels.filters') }}

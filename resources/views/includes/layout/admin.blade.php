@@ -72,7 +72,7 @@
                     <span class="truncate">{{ $activeAdminItem ? __($activeAdminItem['label']) : __('ui::common.labels.admin_panel') }}</span>
                     <svg class="h-4 w-4 shrink-0 text-ink-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
                 </button>
-                <a href="{{ route('home') }}" wire:navigate class="inline-flex h-10 shrink-0 items-center rounded-[10px] border border-hairline px-3 text-[14px] font-medium text-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400">
+                <a href="{{ route('home') }}" wire:navigate class="inline-flex h-9 shrink-0 items-center rounded-full border border-hairline px-3 text-[13px] font-medium text-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400">
                     {{ __('ui::common.labels.return_to_dashboard') }}
                 </a>
             </div>

@@ -137,10 +137,10 @@
                     </x-ui.input-shell>
 
                     <div class="mt-4 flex flex-wrap gap-2">
-                        <button type="button" wire:click="approve('{{ $row['request_type'] }}', {{ $row['record_id'] }})" class="inline-flex h-9 items-center justify-center rounded-[10px] bg-ink px-4 text-[13px] font-semibold text-white transition hover:bg-ink-hover">
+                        <button type="button" wire:click="approve('{{ $row['request_type'] }}', {{ $row['record_id'] }})" class="inline-flex h-9 items-center justify-center rounded-full bg-ink px-4 text-[13px] font-semibold text-white transition hover:bg-ink-hover">
                             {{ __('personnel::my_hr.review.actions.approve') }}
                         </button>
-                        <button type="button" wire:click="reject('{{ $row['request_type'] }}', {{ $row['record_id'] }})" class="inline-flex h-9 items-center justify-center rounded-[10px] px-4 text-[13px] font-semibold text-ink-muted transition hover:bg-[#ffe4e6] hover:text-[#be123c]">
+                        <button type="button" wire:click="reject('{{ $row['request_type'] }}', {{ $row['record_id'] }})" class="inline-flex h-9 items-center justify-center rounded-full px-4 text-[13px] font-semibold text-ink-muted transition hover:bg-[#ffe4e6] hover:text-[#be123c]">
                             {{ __('personnel::my_hr.review.actions.reject') }}
                         </button>
                     </div>
