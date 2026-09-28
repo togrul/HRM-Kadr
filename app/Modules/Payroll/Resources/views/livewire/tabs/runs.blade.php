@@ -54,7 +54,12 @@
                             @endif
 
                             @if ($this->canApprove() && $run->status === 'calculated')
-                                <x-pill-button variant="secondary" wire:click="approveRun({{ $run->id }})">{{ __('payroll::dashboard.actions.approve') }}</x-pill-button>
+                                <x-pill-button variant="secondary" x-on:click="{{ $confirm('emerald', $this->canViewAmounts() ? 'approve' : 'approve_masked', 'approve', 'approveRun('.$run->id.')', [
+                                    'period' => $this->periodLabel($run->period),
+                                    'count' => $num($run->employee_count),
+                                    'total' => $money($run->net_total),
+                                    'currency' => $periodCurrency ?? 'AZN',
+                                ]) }}">{{ __('payroll::dashboard.actions.approve') }}</x-pill-button>
                             @endif
 
                             @if ($this->canLock() && in_array($run->status, ['calculated', 'approved'], true))

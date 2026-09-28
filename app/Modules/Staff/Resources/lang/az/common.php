@@ -28,7 +28,6 @@ return [
     ],
     'actions' => [
         'show_all' => 'Hamısını göstər',
-        'add' => 'Əlavə et',
         'add_staff' => 'Ştat əlavə et',
         'save' => 'Yadda saxla',
         'delete' => 'Sil',
@@ -37,9 +36,19 @@ return [
         'all_data' => 'Bütün məlumatlar',
         'expand_all' => 'Hamısını aç',
         'collapse_all' => 'Bağla',
-        'edit_mode' => 'Redaktə rejimi',
+        'edit' => 'Redaktə et',
+        'done' => 'Bitir',
+        'add_row' => 'Sətir əlavə et',
+        'delete_row' => 'Sətri sil',
+        'search_tree' => 'Bölmə/vəzifə axtar',
+    ],
+    'filters' => [
+        'all' => 'Hamısı',
+        'only_vacant' => 'Yalnız vakant olanlar',
     ],
     'messages' => [
+        'edit_mode_on' => 'Redaktə rejimindəsiniz',
+        'no_match' => 'Uyğun bölmə və ya vəzifə tapılmadı',
         'structure_exists' => 'Bu struktur artıq əlavə edilib!',
         'staff_added' => 'Ştat uğurla əlavə edildi!',
         'staff_updated' => 'Ştat uğurla yeniləndi!',

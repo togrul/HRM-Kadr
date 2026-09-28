@@ -28,7 +28,6 @@ return [
     ],
     'actions' => [
         'show_all' => 'Show all',
-        'add' => 'Add',
         'add_staff' => 'Add staff',
         'save' => 'Save',
         'delete' => 'Delete',
@@ -37,9 +36,19 @@ return [
         'all_data' => 'All data',
         'expand_all' => 'Expand all',
         'collapse_all' => 'Collapse all',
-        'edit_mode' => 'Edit mode',
+        'edit' => 'Edit',
+        'done' => 'Done',
+        'add_row' => 'Add row',
+        'delete_row' => 'Delete row',
+        'search_tree' => 'Search unit/position',
+    ],
+    'filters' => [
+        'all' => 'All',
+        'only_vacant' => 'Only with vacancies',
     ],
     'messages' => [
+        'edit_mode_on' => 'You are in edit mode',
+        'no_match' => 'No matching unit or position found',
         'structure_exists' => 'This structure has already been added!',
         'staff_added' => 'Staff was added successfully!',
         'staff_updated' => 'Staff was updated successfully!',

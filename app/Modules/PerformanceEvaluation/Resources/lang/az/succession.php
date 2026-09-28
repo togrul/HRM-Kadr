@@ -91,6 +91,15 @@ return [
     'empty_pools' => 'İstedad hovuzu yoxdur.',
     'empty_pools_subtitle' => 'İlk istedad hovuzunu yaradın (yüksək potensial, varis və ya kritik vəzifə).',
     'confirm_delete_plan' => 'Bu varislik planını silmək istədiyinizə əminsiniz?',
+    'remove' => [
+        'action' => 'Çıxar',
+        'assessment' => ':name — 9-box-dan çıxar',
+        'assessment_confirm' => ':name üçün 9-box qiymətləndirməsi silinəcək. Davam edilsin?',
+        'candidate' => ':name — namizədlikdən çıxar',
+        'candidate_confirm' => ':name ":plan" planının namizədlərindən çıxarılacaq. Davam edilsin?',
+        'member' => ':name — hovuzdan çıxar',
+        'member_confirm' => ':name ":pool" hovuzundan çıxarılacaq. Davam edilsin?',
+    ],
     'confirm_delete_pool' => 'Bu istedad hovuzunu silmək istədiyinizə əminsiniz?',
 
     'messages' => [

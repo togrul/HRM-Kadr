@@ -1,5 +1,12 @@
 @php
-    $contextTabs = ['overview', 'catalogs', 'matrix', 'profiles', 'planning', 'calendar', 'results', 'analytics', 'reports', 'lists'];
+    // The panel (and its small-screen chips) group the ten screens by job: set-up, needs, delivery, insight.
+    $navGroups = [
+        'home' => ['overview'],
+        'foundation' => ['catalogs', 'matrix'],
+        'needs' => ['profiles', 'planning'],
+        'delivery' => ['calendar', 'results'],
+        'insight' => ['analytics', 'reports', 'lists'],
+    ];
     $stats = $this->stats;
     $plan = $this->annualPlan;
 
@@ -21,18 +28,21 @@
             :title="__('training_needs::dashboard.panel.title')"
             :subtitle="$plan['title'] ?? null"
         >
-            <x-context-panel.section :title="__('training_needs::dashboard.panel.sections')">
-                @foreach ($contextTabs as $tab)
-                    <x-context-panel.item
-                        wire:key="training-panel-tab-{{ $tab }}"
-                        wire:click.prevent="switchTab('{{ $tab }}')"
-                        wire:loading.attr="disabled"
-                        wire:target="switchTab"
-                        :active="$activeTab === $tab"
-                        :count="$tabCounts[$tab] ?? null"
-                    >{{ __('training_needs::dashboard.tabs.'.$tab) }}</x-context-panel.item>
-                @endforeach
-            </x-context-panel.section>
+            @foreach ($navGroups as $group => $groupTabs)
+                @continue(array_intersect($groupTabs, $tabs) === [])
+                <x-context-panel.section :title="$group === 'home' ? null : __('training_needs::dashboard.nav_groups.'.$group)">
+                    @foreach (array_intersect($groupTabs, $tabs) as $tab)
+                        <x-context-panel.item
+                            wire:key="training-panel-tab-{{ $tab }}"
+                            wire:click.prevent="switchTab('{{ $tab }}')"
+                            wire:loading.attr="disabled"
+                            wire:target="switchTab"
+                            :active="$activeTab === $tab"
+                            :count="$tabCounts[$tab] ?? null"
+                        >{{ __('training_needs::dashboard.tabs.'.$tab) }}</x-context-panel.item>
+                    @endforeach
+                </x-context-panel.section>
+            @endforeach
 
             @if ($plan)
                 <x-context-panel.section :title="__('training_needs::dashboard.panel.annual_plan')" :padded="false">
@@ -84,20 +94,26 @@
                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
             </x-pill-button>
 
-            <x-pill-button variant="primary" wire:click.prevent="switchTab('profiles')" wire:loading.attr="disabled" wire:target="switchTab">
-                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-                {{ __('training_needs::dashboard.title') }}
+            {{-- ponytail: no create action lives outside the tabs (their forms are inline), so this stays a secondary shortcut, not a primary. --}}
+            <x-pill-button wire:click.prevent="switchTab('profiles')" wire:loading.attr="disabled" wire:target="switchTab">
+                {{ __('training_needs::dashboard.tabs.profiles') }}
             </x-pill-button>
         </x-slot:actions>
 
         {{-- small-screen fallback for the panel's section list --}}
         <x-filter.nav wrap class="min-w-0 lg:hidden">
-            @foreach ($contextTabs as $tab)
-                <x-filter.item
-                    wire:key="training-chip-{{ $tab }}"
-                    wire:click.prevent="switchTab('{{ $tab }}')"
-                    :active="$activeTab === $tab"
-                >{{ __('training_needs::dashboard.tabs.'.$tab) }}</x-filter.item>
+            @foreach ($navGroups as $group => $groupTabs)
+                @continue(array_intersect($groupTabs, $tabs) === [])
+                @if ($group !== 'home')
+                    <li class="hrm-eyebrow shrink-0 pl-2 pr-0.5" wire:key="training-chip-group-{{ $group }}">{{ __('training_needs::dashboard.nav_groups.'.$group) }}</li>
+                @endif
+                @foreach (array_intersect($groupTabs, $tabs) as $tab)
+                    <x-filter.item
+                        wire:key="training-chip-{{ $tab }}"
+                        wire:click.prevent="switchTab('{{ $tab }}')"
+                        :active="$activeTab === $tab"
+                    >{{ __('training_needs::dashboard.tabs.'.$tab) }}</x-filter.item>
+                @endforeach
             @endforeach
         </x-filter.nav>
     </x-page-header>

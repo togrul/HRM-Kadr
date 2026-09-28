@@ -26,7 +26,7 @@
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div class="flex flex-wrap items-center gap-2.5">
             <div class="min-w-[13rem]">
-                <x-ui.filter-native-select wire:model.live="cycleId">
+                <x-ui.filter-native-select wire:model.live="cycleId" aria-label="{{ __($t.'.a11y.cycle') }}" title="{{ __($t.'.a11y.cycle') }}">
                     @foreach ($this->cycles as $cycle)
                         <option value="{{ $cycle->id }}">{{ $cycle->name }}</option>
                     @endforeach
@@ -34,7 +34,7 @@
             </div>
             @unless ($card)
                 <div class="min-w-[12rem]">
-                    <x-ui.filter-native-select wire:model.live="statusFilter">
+                    <x-ui.filter-native-select wire:model.live="statusFilter" aria-label="{{ __($t.'.a11y.status_filter') }}" title="{{ __($t.'.a11y.status_filter') }}">
                         <option value="">{{ __($t.'.all_statuses') }}</option>
                         @foreach (\App\Models\PerformanceScorecard::STATUSES as $status)
                             <option value="{{ $status }}">{{ __($t.'.card_statuses.'.$status) }}</option>
@@ -86,51 +86,7 @@
         @endcan
     </div>
 
-    @if ($showImport && ! $card)
-        {{-- ───────────── Excel import ───────────── --}}
-        <div class="{{ $section }}">
-            <div class="{{ $sectionHead }}">
-                <p class="text-[13px] font-semibold text-ink">{{ __($t.'.import.title') }}</p>
-                <button type="button" wire:click="toggleImport" class="text-[14px] font-medium text-ink-faint hover:text-ink">{{ __($t.'.actions.cancel') }}</button>
-            </div>
-            <div class="grid gap-4 p-5 md:grid-cols-3">
-                @foreach ([1, 2, 3] as $step)
-                    <div class="flex gap-3">
-                        <span class="hrm-num flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-ink text-[12px] font-semibold text-white">{{ $step }}</span>
-                        <div class="min-w-0">
-                            <p class="text-[13px] font-semibold text-ink">{{ __($t.'.import.steps.'.$step.'.title') }}</p>
-                            <p class="mt-0.5 text-[12px] leading-5 text-ink-muted">{{ __($t.'.import.steps.'.$step.'.body') }}</p>
-                            @if ($step === 1)
-                                <button type="button" wire:click="downloadActualsTemplate" class="mt-2 inline-flex h-10 items-center gap-1.5 rounded-lg border border-hairline bg-white px-3 text-[14px] font-semibold text-ink-soft hover:border-zinc-300 hover:text-ink">
-                                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg>
-                                    {{ __($t.'.import.download') }}
-                                </button>
-                            @elseif ($step === 3)
-                                <div class="mt-2 flex flex-wrap items-center gap-2">
-                                    <label class="inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-lg border border-dashed border-zinc-300 bg-[#fafafa] px-3 text-[14px] font-medium text-ink-soft hover:border-zinc-400">
-                                        <input type="file" wire:model="importFile" accept=".xlsx,.xls,.csv" class="hidden">
-                                        <span class="max-w-[10rem] truncate">{{ $importFile ? $importFile->getClientOriginalName() : __($t.'.import.choose') }}</span>
-                                    </label>
-                                    <button type="button" wire:click="importActuals" wire:loading.attr="disabled" wire:target="importActuals,importFile" @disabled(! $importFile) class="inline-flex h-10 items-center rounded-lg bg-ink px-3 text-[14px] font-semibold text-white hover:bg-ink-hover disabled:opacity-40">{{ __($t.'.import.submit') }}</button>
-                                </div>
-                                @error('importFile') <x-validation>{{ $message }}</x-validation> @enderror
-                            @endif
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-            @if ($importErrors !== [])
-                <div class="border-t border-hairline-subtle bg-rose-50/50 px-5 py-3">
-                    <p class="text-[12.5px] font-semibold text-rose-700">{{ __($t.'.import.failed', ['count' => count($importErrors)]) }}</p>
-                    <ul class="mt-1.5 max-h-40 space-y-0.5 overflow-y-auto text-[12px] text-rose-700">
-                        @foreach ($importErrors as $line => $message)
-                            <li><span class="hrm-num font-semibold">{{ __($t.'.import.row', ['row' => $line]) }}</span> — {{ $message }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-        </div>
-    @endif
+    @include('performance-evaluation::livewire.performance-evaluation.kpi.partials.scorecards.import')
 
     @if ($card)
         @php
@@ -327,8 +283,12 @@
                 </div>
 
                 <div x-show="asking" x-cloak class="mt-3 flex flex-col gap-2 sm:flex-row sm:items-start">
-                    <textarea wire:model="transitionReason" rows="2" placeholder="{{ __($t.'.reason_placeholder') }}" class="w-full rounded-xl border border-hairline bg-white px-3 py-2 text-base focus:border-zinc-400 focus:outline-none sm:text-sm"></textarea>
-                    <button type="button" x-on:click="$wire.moveCard(asking)" class="h-10 shrink-0 rounded-xl bg-ink px-4 text-[14px] font-semibold text-white hover:bg-ink-hover">{{ __($t.'.actions.confirm') }}</button>
+                    <textarea wire:model="transitionReason" rows="2" aria-label="{{ __($t.'.a11y.transition_reason') }}" placeholder="{{ __($t.'.reason_placeholder') }}" class="w-full rounded-xl border border-hairline bg-white px-3 py-2 text-base focus:border-zinc-400 focus:outline-none sm:text-sm"></textarea>
+                    @foreach (array_intersect($this->actions, $reasonActions) as $action)
+                        <button type="button" wire:key="card-action-confirm-{{ $action }}" x-show="asking === @js($action)"
+                            x-on:click="$dispatch('confirm-action', { title: @js(__($t.'.transitions.'.$action)), message: @js(__($t.'.confirm_transition.'.$action)), confirmText: @js(__($t.'.transitions.'.$action)), tone: 'rose', run: () => $wire.moveCard(@js($action)) })"
+                            class="h-10 shrink-0 rounded-xl bg-ink px-4 text-[14px] font-semibold text-white hover:bg-ink-hover">{{ __($t.'.actions.confirm') }}</button>
+                    @endforeach
                 </div>
                 @error('reason') <x-validation>{{ $message }}</x-validation> @enderror
                 @error('scorecard') <x-validation>{{ $message }}</x-validation> @enderror
@@ -351,8 +311,8 @@
                             <p class="mt-0.5 text-ink-muted">{{ $change->reason }} · <span class="text-ink-faint">{{ $change->requester?->name }}, {{ $change->created_at?->format('d.m.Y') }}</span></p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2 lg:justify-end">
-                            <input type="text" wire:model="decisionNote" placeholder="{{ __($t.'.change_requests.note_placeholder') }}" class="h-10 w-full rounded-lg border border-hairline bg-white px-2.5 text-base focus:border-zinc-400 focus:outline-none sm:w-48 sm:text-sm">
-                            <button type="button" wire:click="rejectChange({{ $change->id }})" class="h-10 rounded-lg border border-hairline bg-white px-3 text-[14px] font-medium text-ink-soft hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600">{{ __($t.'.change_requests.reject') }}</button>
+                            <input type="text" wire:model="decisionNote" aria-label="{{ __($t.'.a11y.decision_note') }}" placeholder="{{ __($t.'.change_requests.note_placeholder') }}" class="h-10 w-full rounded-lg border border-hairline bg-white px-2.5 text-base focus:border-zinc-400 focus:outline-none sm:w-48 sm:text-sm">
+                            <button type="button" x-on:click="$dispatch('confirm-action', { title: @js(__($t.'.change_requests.reject')), message: @js(__($t.'.change_requests.confirm_reject')), confirmText: @js(__($t.'.change_requests.reject')), tone: 'rose', run: () => $wire.rejectChange({{ $change->id }}) })" class="h-10 rounded-lg border border-hairline bg-white px-3 text-[14px] font-medium text-ink-soft hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600">{{ __($t.'.change_requests.reject') }}</button>
                             <button type="button" wire:click="approveChange({{ $change->id }})" class="h-10 rounded-lg bg-ink px-3 text-[14px] font-semibold text-white hover:bg-ink-hover">{{ __($t.'.change_requests.approve') }}</button>
                         </div>
                     </div>
@@ -361,454 +321,13 @@
             </div>
         @endif
 
-        {{-- ───────────── KPI items ───────────── --}}
-        <div class="{{ $section }}">
-            <div class="{{ $sectionHead }}">
-                <p class="text-[13px] font-semibold text-ink">{{ __($t.'.sections.card_kpis') }}</p>
-                <span class="hrm-num text-[11.5px] text-ink-faint">{{ (float) $card->kpi_weight_share }}%</span>
-            </div>
-            <div class="hrm-scroll overflow-x-auto">
-                <table class="w-full min-w-[820px] text-left text-[13px]">
-                    <thead class="hrm-eyebrow whitespace-nowrap border-b border-hairline-subtle">
-                        <tr>
-                            <th class="px-5 py-2.5">{{ __($t.'.fields.kpi') }}</th>
-                            <th class="px-3 py-2.5 text-right">{{ __($t.'.fields.weight') }}</th>
-                            <th class="px-3 py-2.5 text-right">{{ __($t.'.fields.target') }}</th>
-                            <th class="px-3 py-2.5 text-right" title="{{ __($t.'.band_title') }}">{{ __($t.'.fields.band') }}</th>
-                            <th class="px-3 py-2.5 text-right">{{ __($t.'.fields.actual') }}</th>
-                            <th class="px-3 py-2.5 text-right">{{ __($t.'.fields.achievement') }}</th>
-                            <th class="px-3 py-2.5 text-right">{{ __($t.'.fields.score') }}</th>
-                            <th class="px-5 py-2.5"></th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-hairline-subtle">
-                        @foreach ($card->items as $item)
-                            <tr wire:key="card-item-{{ $item->id }}" class="align-top text-ink-soft">
-                                <td class="px-5 py-3">
-                                    <p class="font-semibold text-ink">
-                                        {{ $item->kpi?->name }}
-                                        @if ($item->kpi?->source_metric)
-                                            <span class="ml-1 rounded-md bg-sky-50 px-1.5 py-px text-[10.5px] font-medium text-sky-700">{{ __($t.'.metrics.auto_badge') }}</span>
-                                        @endif
-                                        @if ($item->kpi?->integration_error)
-                                            <span class="ml-1 rounded-md bg-rose-50 px-1.5 py-px text-[10.5px] font-medium text-rose-700" title="{{ $item->kpi->integration_error }}">{{ __($t.'.connector.stale') }}</span>
-                                        @endif
-                                    </p>
-                                    <p class="mt-0.5 text-[11.5px] text-ink-faint"><span class="hrm-num">{{ $item->kpi?->code }}</span> · {{ __($t.'.directions_short.'.$item->kpi?->direction) }} · {{ __($t.'.units.'.$item->kpi?->unit) }}</p>
-                                    @if ($card->status === 'draft' && in_array($role, ['hr', 'manager'], true) && $this->goalOptions !== [])
-                                        <x-ui.select wire:change="linkGoal({{ $item->id }}, $event.target.value)" class="mt-1.5 h-10 max-w-[260px] rounded-lg border border-hairline bg-white px-2 text-base text-ink-muted focus:outline-none sm:text-sm">
-                                            <option value="">{{ __($t.'.no_goal') }}</option>
-                                            @foreach ($this->goalOptions as $goalId => $goalTitle)
-                                                <option value="{{ $goalId }}" @selected((int) $item->performance_goal_id === (int) $goalId)>{{ $goalTitle }}</option>
-                                            @endforeach
-                                        </x-ui.select>
-                                    @elseif ($item->goal)
-                                        <p class="mt-1 inline-flex items-center gap-1 rounded-md bg-[#f4f4f5] px-1.5 py-0.5 text-[11px] text-ink-muted">
-                                            <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>
-                                            {{ $item->goal->title }}
-                                        </p>
-                                    @endif
-                                </td>
-                                <td class="hrm-num px-3 py-3 text-right">{{ $fmt($item->weight) }}%</td>
-                                <td class="px-3 py-3 text-right">
-                                    @if ($card->status === 'draft' && ($role === 'hr' || ($role === 'manager' && $item->target_editable)))
-                                        <div class="ml-auto inline-flex h-10 items-center overflow-hidden rounded-lg border border-hairline bg-white transition focus-within:border-zinc-400 focus-within:ring-2 focus-within:ring-zinc-900/5">
-                                            <input type="number" step="any" wire:model="targets.{{ $item->id }}" wire:keydown.enter="saveTarget({{ $item->id }})" aria-label="{{ __($t.'.fields.target') }}"
-                                                class="hrm-num h-full w-24 border-0 bg-transparent px-2 text-right text-base text-ink focus:outline-none focus:ring-0 sm:text-sm [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none">
-                                            <button type="button" wire:click="saveTarget({{ $item->id }})" title="{{ __($t.'.actions.save') }}" aria-label="{{ __($t.'.actions.save') }}"
-                                                class="flex h-full w-10 items-center justify-center border-l border-hairline text-ink-faint transition hover:bg-emerald-50 hover:text-emerald-700">
-                                                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
-                                            </button>
-                                        </div>
-                                        @error('targets.'.$item->id) <x-validation>{{ $message }}</x-validation> @enderror
-                                    @elseif ($item->kpi?->direction === 'range')
-                                        <span class="hrm-num">{{ $fmt($item->range_min) }} – {{ $fmt($item->range_max) }}</span>
-                                    @else
-                                        <span class="hrm-num">{{ $fmt($item->target) }}</span>
-                                        @if ($item->original_target !== null)
-                                            <span class="block text-[11px] text-ink-faint line-through decoration-ink-faint/60" title="{{ __($t.'.leave.original', ['value' => $fmt($item->original_target)]) }}">{{ $fmt($item->original_target) }}</span>
-                                        @endif
-                                        @php $pendingChange = $item->changeRequests->firstWhere('status', 'pending'); @endphp
-                                        @if ($pendingChange)
-                                            <span class="mt-1 block whitespace-nowrap rounded-md bg-violet-50 px-1.5 py-0.5 text-[11px] font-medium text-violet-700" title="{{ $pendingChange->reason }}">{{ __($t.'.change_requests.pending_badge', ['to' => $fmt($pendingChange->proposed_target)]) }}</span>
-                                        @elseif ($card->status === 'active' && $role !== null && $item->kpi?->type === 'quantitative' && $changeItemId !== $item->id)
-                                            <button type="button" wire:click="startChange({{ $item->id }})" class="mt-1 block w-full text-right text-[11px] font-medium text-ink-faint underline-offset-2 hover:text-ink hover:underline">{{ __($t.'.change_requests.ask') }}</button>
-                                        @endif
-                                    @endif
-                                </td>
-                                <td class="hrm-num whitespace-nowrap px-3 py-3 text-right text-[12px] text-ink-faint" title="{{ __($t.'.band_title') }}">{{ $fmt($item->threshold) }} · {{ $fmt($item->stretch) }} · {{ $fmt($item->cap) }}</td>
-                                <td class="hrm-num px-3 py-3 text-right">{{ $fmt($item->actual) }}</td>
-                                <td class="hrm-num px-3 py-3 text-right">
-                                    {{ $item->achievement === null ? '—' : $fmt($item->achievement).'%' }}
-                                    @if ($item->forecast_achievement !== null && $card->status === 'active')
-                                        @php $red = $item->threshold !== null && (float) $item->forecast_achievement < (float) $item->threshold; @endphp
-                                        <span class="mt-0.5 block whitespace-nowrap text-[11px] {{ $red ? 'font-semibold text-rose-600' : 'text-ink-faint' }}" title="{{ __($t.'.forecast.hint', ['value' => $fmt($item->forecast)]) }}">{{ __($t.'.forecast.label', ['value' => $fmt($item->forecast_achievement, 1)]) }}</span>
-                                    @endif
-                                </td>
-                                <td class="hrm-num px-3 py-3 text-right font-semibold {{ $scoreTone($item->score, $item->threshold) }}">{{ $item->score === null ? '—' : $fmt($item->score).'%' }}</td>
-                                <td class="px-5 py-3 text-right">
-                                    @if ($card->status === 'active' && $role !== null && $actualItemId !== $item->id && $item->kpi?->data_source !== 'calculated')
-                                        <button type="button" wire:click="startActual({{ $item->id }})" class="whitespace-nowrap rounded-lg border border-hairline px-2.5 h-10 text-[14px] font-medium text-ink-soft hover:bg-[#f4f4f5]">{{ __($t.'.actions.add_actual') }}</button>
-                                    @endif
-                                </td>
-                            </tr>
+        @include('performance-evaluation::livewire.performance-evaluation.kpi.partials.scorecards.card-items')
 
-                            @if ($changeItemId === $item->id)
-                                <tr wire:key="card-item-change-{{ $item->id }}">
-                                    <td colspan="8" class="bg-violet-50/40 px-5 py-3">
-                                        <p class="text-[12px] font-semibold text-ink">{{ __($t.'.change_requests.form_title', ['kpi' => $item->kpi?->name]) }}</p>
-                                        <p class="mt-0.5 text-[11.5px] text-ink-muted">{{ __($t.'.change_requests.form_hint') }}</p>
-                                        <div class="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-[160px_minmax(0,1fr)_auto] sm:items-start">
-                                            <label class="block">
-                                                <span class="text-[11px] text-ink-muted">{{ __($t.'.change_requests.proposed') }}</span>
-                                                <input type="number" step="any" wire:model="changeTarget" class="{{ $field }}">
-                                                @error('changeTarget') <x-validation>{{ $message }}</x-validation> @enderror
-                                            </label>
-                                            <label class="block">
-                                                <span class="text-[11px] text-ink-muted">{{ __($t.'.change_requests.reason') }}</span>
-                                                <input type="text" wire:model="changeReason" class="{{ $field }}" placeholder="{{ __($t.'.reason_placeholder') }}">
-                                                @error('reason') <x-validation>{{ $message }}</x-validation> @enderror
-                                                @error('change') <x-validation>{{ $message }}</x-validation> @enderror
-                                            </label>
-                                            <div class="flex items-center gap-2 sm:pt-5">
-                                                <button type="button" wire:click="cancelChange" class="h-10 rounded-xl px-3 text-[14px] font-medium text-ink-muted hover:bg-white">{{ __($t.'.actions.cancel') }}</button>
-                                                <button type="button" wire:click="submitChange" class="h-10 rounded-xl bg-ink px-4 text-[14px] font-semibold text-white hover:bg-ink-hover">{{ __($t.'.change_requests.send') }}</button>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endif
-
-                            @if ($actualItemId === $item->id)
-                                <tr wire:key="card-item-form-{{ $item->id }}">
-                                    <td colspan="8" class="bg-[#fafafa] px-5 py-3">
-                                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-4">
-                                            <label class="block">
-                                                <span class="text-[11px] text-ink-muted">{{ __($t.'.fields.actual') }}</span>
-                                                <input type="number" step="any" wire:model="actualValue" class="{{ $field }}">
-                                                @error('actualValue') <x-validation>{{ $message }}</x-validation> @enderror
-                                                @error('actual') <x-validation>{{ $message }}</x-validation> @enderror
-                                            </label>
-                                            <label class="block sm:col-span-2">
-                                                <span class="text-[11px] text-ink-muted">{{ __($t.'.fields.note') }}</span>
-                                                <input type="text" wire:model="actualNote" class="{{ $field }}">
-                                            </label>
-                                            <label class="block">
-                                                <span class="text-[11px] text-ink-muted">
-                                                    {{ __($t.'.fields.evidence') }}
-                                                    @if ($item->kpi?->evidence_required) <span class="text-rose-600">*</span> @endif
-                                                </span>
-                                                <input type="file" wire:model="evidence" class="block w-full text-[12px] text-ink-muted file:mr-2 file:rounded-lg file:border-0 file:bg-[#f4f4f5] file:px-2 file:py-1.5">
-                                                @error('evidence') <x-validation>{{ $message }}</x-validation> @enderror
-                                            </label>
-                                        </div>
-                                        <div class="mt-3 flex items-center justify-between gap-2">
-                                            <p class="text-[11px] text-ink-faint">{{ $role === 'employee' ? __($t.'.actual_pending_hint') : '' }}</p>
-                                            <div class="flex gap-2">
-                                                <button type="button" wire:click="cancelActual" class="h-10 rounded-xl border border-hairline px-4 text-[14px] text-ink-soft hover:bg-white">{{ __($t.'.actions.cancel') }}</button>
-                                                <button type="button" wire:click="saveActual" wire:loading.attr="disabled" wire:target="saveActual,evidence" class="h-10 rounded-xl bg-ink px-4 text-[14px] font-semibold text-white hover:bg-ink-hover">{{ __($t.'.actions.save') }}</button>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endif
-
-                            @if ($item->actuals->isNotEmpty())
-                                <tr wire:key="card-item-history-{{ $item->id }}">
-                                    <td colspan="8" class="px-5 pb-3 pt-0">
-                                        <div class="flex flex-col gap-1 border-l-2 border-hairline pl-3">
-                                            @foreach ($item->actuals->take(5) as $actual)
-                                                <div wire:key="actual-{{ $actual->id }}" class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11.5px] text-ink-muted">
-                                                    <span class="hrm-num font-medium text-ink">{{ $fmt($actual->value, 4) }}</span>
-                                                    <span>{{ $actual->enteredBy?->name ?? '—' }} · <span class="hrm-num">{{ $actual->created_at?->format('d.m.Y H:i') }}</span></span>
-                                                    @if ($actual->evidence_name)
-                                                        <span class="text-ink-faint">{{ __($t.'.fields.evidence') }}: {{ $actual->evidence_name }}</span>
-                                                    @endif
-                                                    @if ($actual->note)
-                                                        <span class="text-ink-faint">“{{ $actual->note }}”</span>
-                                                    @endif
-                                                    @if ($actual->approved_at)
-                                                        <span class="rounded-full bg-emerald-50 px-1.5 text-emerald-700">{{ __($t.'.actual_approved') }}</span>
-                                                    @else
-                                                        <span class="rounded-full bg-amber-50 px-1.5 text-amber-700">{{ __($t.'.actual_pending') }}</span>
-                                                        @if (in_array($role, ['hr', 'manager'], true) && $card->status === 'active')
-                                                            <button type="button" wire:click="approveActual({{ $actual->id }})" class="font-semibold text-emerald-700 hover:underline">{{ __($t.'.actions.approve') }}</button>
-                                                        @endif
-                                                    @endif
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endif
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        {{-- ───────────── competencies ───────────── --}}
-        @if ($competencies->isNotEmpty())
-            @php
-                $canSelf = $card->status === 'self_review' && $role === 'employee';
-                $canManager = $card->status === 'manager_review' && in_array($role, ['manager', 'hr'], true);
-                $showSelf = $role !== 'employee' || in_array($card->status, ['self_review', 'manager_review', 'calibration', 'approved', 'closed'], true);
-            @endphp
-            <div class="{{ $section }}">
-                <div class="{{ $sectionHead }}">
-                    <p class="text-[13px] font-semibold text-ink">{{ __($t.'.sections.competencies') }}</p>
-                    <span class="hrm-num text-[11.5px] text-ink-faint">{{ (float) $card->competency_weight_share }}%</span>
-                </div>
-                <p class="px-5 pt-3 text-[12px] text-ink-faint">{{ __($t.'.competency_hint') }}</p>
-                @error('competency') <div class="px-5"><x-validation>{{ $message }}</x-validation></div> @enderror
-                <div class="divide-y divide-hairline-subtle">
-                    @foreach ($competencies as $competency)
-                        <div wire:key="competency-{{ $competency['id'] }}" class="grid grid-cols-1 gap-3 px-5 py-3 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1fr)] md:items-center">
-                            <div class="min-w-0">
-                                <p class="truncate text-[13px] font-semibold text-ink">{{ $competency['name'] }}</p>
-                                <p class="text-[11.5px] text-ink-faint">{{ $competency['section'] }}</p>
-                            </div>
-                            @foreach (['self' => [$canSelf, $showSelf], 'manager' => [$canManager, true]] as $evaluator => [$editable, $visible])
-                                <div>
-                                    <p class="hrm-eyebrow mb-1">{{ __($t.'.evaluators.'.$evaluator) }}</p>
-                                    @if ($visible)
-                                        <div class="flex gap-1">
-                                            @foreach (range(1, 5) as $rating)
-                                                @php $on = $competency[$evaluator] === $rating; @endphp
-                                                @if ($editable)
-                                                    <button type="button" wire:click="rate({{ $competency['id'] }}, '{{ $evaluator }}', {{ $rating }})"
-                                                        class="hrm-num h-10 w-10 rounded-[10px] border text-[14px] font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 {{ $on ? 'border-ink bg-ink text-white' : 'border-hairline bg-white text-ink-muted hover:border-zinc-400 hover:text-ink' }}">{{ $rating }}</button>
-                                                @else
-                                                    <span class="hrm-num flex h-10 w-10 items-center justify-center rounded-[10px] text-[14px] font-semibold {{ $on ? 'bg-ink text-white' : 'bg-[#f4f4f5] text-ink-faint' }}">{{ $rating }}</span>
-                                                @endif
-                                            @endforeach
-                                        </div>
-                                    @else
-                                        <p class="text-[12px] text-ink-faint">{{ __($t.'.hidden_until_self_review') }}</p>
-                                    @endif
-                                </div>
-                            @endforeach
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        @endif
-
-        <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            {{-- ───────────── check-ins ───────────── --}}
-            <div class="{{ $section }}">
-                <div class="{{ $sectionHead }}">
-                    <p class="text-[13px] font-semibold text-ink">{{ __($t.'.sections.checkins') }}</p>
-                    <span class="hrm-num text-[11.5px] {{ $card->checkins->count() >= $expectedCheckins ? 'text-emerald-700' : 'text-ink-faint' }}">{{ $card->checkins->count() }} / {{ $expectedCheckins }}</span>
-                </div>
-                @if ($card->status === 'active' && $role !== null)
-                    <div class="grid grid-cols-1 gap-2 border-b border-hairline-subtle px-5 py-3">
-                        <div class="grid grid-cols-[140px_minmax(0,1fr)] gap-2">
-                            <input type="date" wire:model="checkinDate" class="{{ $field }}">
-                            <input type="text" wire:model="checkinProgress" placeholder="{{ __($t.'.checkin_progress_placeholder') }}" class="{{ $field }}">
-                        </div>
-                        <input type="text" wire:model="checkinRisks" placeholder="{{ __($t.'.checkin_risks_placeholder') }}" class="{{ $field }}">
-                        @error('checkinProgress') <x-validation>{{ $message }}</x-validation> @enderror
-                        @error('checkin') <x-validation>{{ $message }}</x-validation> @enderror
-                        <div class="flex justify-end">
-                            <button type="button" wire:click="saveCheckin" class="h-10 rounded-xl bg-ink px-4 text-[14px] font-semibold text-white hover:bg-ink-hover">{{ __($t.'.actions.add_checkin') }}</button>
-                        </div>
-                    </div>
-                @endif
-                <div class="hrm-scroll max-h-72 divide-y divide-hairline-subtle overflow-y-auto">
-                    @forelse ($card->checkins as $checkin)
-                        <div wire:key="checkin-{{ $checkin->id }}" class="px-5 py-3">
-                            <p class="text-[11.5px] text-ink-faint"><span class="hrm-num">{{ $checkin->checkin_date?->format('d.m.Y') }}</span> · {{ $checkin->author?->name ?? '—' }}</p>
-                            <p class="mt-1 text-[13px] text-ink-soft">{{ $checkin->progress }}</p>
-                            @if ($checkin->risks)
-                                <p class="mt-1 text-[12px] text-amber-700">{{ __($t.'.risks') }}: {{ $checkin->risks }}</p>
-                            @endif
-                        </div>
-                    @empty
-                        <p class="px-5 py-6 text-center text-[12.5px] text-ink-faint">{{ __($t.'.no_checkins') }}</p>
-                    @endforelse
-                </div>
-            </div>
-
-            {{-- ───────────── history (+ calibration) ───────────── --}}
-            <div class="flex flex-col gap-4">
-                @if ($card->status === 'calibration' && $role === 'hr')
-                    <div class="{{ $section }}">
-                        <div class="{{ $sectionHead }}">
-                            <p class="text-[13px] font-semibold text-ink">{{ __($t.'.sections.calibration') }}</p>
-                            <span class="text-[11.5px] text-ink-faint">± {{ \App\Modules\PerformanceEvaluation\Application\Services\Kpi\ScorecardReviewService::MAX_CALIBRATION_DELTA }}</span>
-                        </div>
-                        <div class="grid grid-cols-1 gap-2 px-5 py-3">
-                            <div class="grid grid-cols-[120px_minmax(0,1fr)] gap-2">
-                                <input type="number" step="0.5" wire:model="calibrationDelta" placeholder="+/-" class="{{ $field }} hrm-num">
-                                <input type="text" wire:model="calibrationReason" placeholder="{{ __($t.'.reason_placeholder') }}" class="{{ $field }}">
-                            </div>
-                            @error('calibrationDelta') <x-validation>{{ $message }}</x-validation> @enderror
-                            @error('calibrationReason') <x-validation>{{ $message }}</x-validation> @enderror
-                            @error('calibration') <x-validation>{{ $message }}</x-validation> @enderror
-                            <div class="flex justify-end">
-                                <button type="button" wire:click="saveCalibration" class="h-10 rounded-xl bg-ink px-4 text-[14px] font-semibold text-white hover:bg-ink-hover">{{ __($t.'.actions.calibrate') }}</button>
-                            </div>
-                        </div>
-                    </div>
-                @endif
-
-                <div class="{{ $section }}">
-                    <div class="{{ $sectionHead }}">
-                        <p class="text-[13px] font-semibold text-ink">{{ __($t.'.sections.history') }}</p>
-                    </div>
-                    <ol class="hrm-scroll max-h-72 overflow-y-auto px-5 py-3">
-                        @foreach ($card->calibrations as $adjustment)
-                            <li wire:key="calibration-{{ $adjustment->id }}" class="relative border-l border-hairline pb-3 pl-4">
-                                <span class="absolute -left-[4.5px] top-1.5 h-2 w-2 rounded-full bg-orange-500"></span>
-                                <p class="text-[12.5px] font-medium text-ink">{{ __($t.'.calibration_entry', ['delta' => ((float) $adjustment->delta > 0 ? '+' : '').$fmt($adjustment->delta)]) }}</p>
-                                <p class="text-[11.5px] text-ink-faint">{{ $adjustment->adjustedBy?->name ?? '—' }} · <span class="hrm-num">{{ $adjustment->created_at?->format('d.m.Y H:i') }}</span></p>
-                                <p class="mt-0.5 text-[12px] text-ink-muted">{{ $adjustment->reason }}</p>
-                            </li>
-                        @endforeach
-                        @foreach ($card->events as $event)
-                            <li wire:key="event-{{ $event->id }}" class="relative border-l border-hairline pb-3 pl-4 last:pb-0">
-                                <span class="absolute -left-[4.5px] top-1.5 h-2 w-2 rounded-full {{ $cardBadge[$event->to_status][1] ?? 'bg-zinc-400' }}"></span>
-                                <p class="text-[12.5px] font-medium text-ink">{{ __($t.'.events.'.$event->action) }}</p>
-                                <p class="text-[11.5px] text-ink-faint">{{ $event->user?->name ?? __($t.'.system') }} · <span class="hrm-num">{{ $event->created_at?->format('d.m.Y H:i') }}</span></p>
-                                @if ($event->reason)
-                                    <p class="mt-0.5 text-[12px] text-ink-muted">{{ $event->action === 'closed_early' ? __($t.'.closure_reasons.'.$event->reason) : $event->reason }}</p>
-                                @endif
-                            </li>
-                        @endforeach
-                    </ol>
-                </div>
-            </div>
-        </div>
+        @include('performance-evaluation::livewire.performance-evaluation.kpi.partials.scorecards.card-reviews')
     @else
-        {{-- ───────────── calibration spread + cascade gaps (HR) ───────────── --}}
-        @php $spread = $this->distribution; $spreadTotal = collect($spread)->sum('count'); @endphp
-        @if ($spreadTotal > 0 || $this->unlinkedItems > 0)
-            <div class="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-                @if ($spreadTotal > 0)
-                    <div class="{{ $section }} px-5 py-4">
-                        <div class="flex items-center justify-between">
-                            <p class="text-[13px] font-semibold text-ink">{{ __($t.'.sections.distribution') }}</p>
-                            <span class="hrm-num text-[11.5px] text-ink-faint">{{ $spreadTotal }}</span>
-                        </div>
-                        <div class="mt-3 grid grid-cols-5 gap-3">
-                            @foreach ($spread as $category => $row)
-                                <div>
-                                    <div class="relative h-20 overflow-hidden rounded-lg bg-[#f4f4f5]">
-                                        <div class="absolute inset-x-0 bottom-0 bg-ink" style="height: {{ min(100, $row['share']) }}%"></div>
-                                        <div class="absolute inset-x-0 border-t-2 border-dashed border-orange-500" style="bottom: {{ $row['target'] }}%"></div>
-                                    </div>
-                                    <p class="hrm-num mt-1.5 text-[12px] font-semibold text-ink">{{ $row['share'] }}% <span class="font-normal text-ink-faint">/ {{ $row['target'] }}%</span></p>
-                                    <p class="text-[11px] leading-tight text-ink-faint">{{ __($t.'.ratings.'.$category) }}</p>
-                                </div>
-                            @endforeach
-                        </div>
-                        <p class="mt-2 text-[11px] text-ink-faint">{{ __($t.'.distribution_hint') }}</p>
-                    </div>
-                @endif
-                @if ($this->unlinkedItems > 0)
-                    <div class="{{ $section }} px-5 py-4">
-                        <p class="text-[13px] font-semibold text-ink">{{ __($t.'.sections.cascade_gaps') }}</p>
-                        <p class="hrm-num mt-2 text-[28px] font-semibold leading-none text-amber-600">{{ $this->unlinkedItems }}</p>
-                        <p class="mt-1.5 text-[12px] text-ink-muted">{{ __($t.'.cascade_gaps_hint') }}</p>
-                    </div>
-                @endif
-            </div>
-        @endif
-
-        {{-- ───────────── card list ───────────── --}}
-        @php $cardColumns = 'md:grid md:grid-cols-[minmax(0,2fr)_minmax(0,1.3fr)_minmax(0,1.3fr)_150px_88px_88px] md:items-center md:gap-4'; @endphp
-        <div class="overflow-hidden rounded-2xl border border-hairline bg-white shadow-card">
-            <div class="{{ $cardColumns }} hidden border-b border-hairline-subtle bg-[#fafafa] px-5 py-2.5">
-                <span class="hrm-eyebrow">{{ __($t.'.fields.personnel') }}</span>
-                <span class="hrm-eyebrow">{{ __($t.'.fields.position') }}</span>
-                <span class="hrm-eyebrow">{{ __($t.'.fields.manager') }}</span>
-                <span class="hrm-eyebrow">{{ __($t.'.fields.status') }}</span>
-                <span class="hrm-eyebrow text-right">{{ __($t.'.fields.kpi_score') }}</span>
-                <span class="hrm-eyebrow text-right">{{ __($t.'.fields.final_score') }}</span>
-            </div>
-
-            @forelse ($this->cards as $row)
-                @php [$badgeTone, $badgeDot] = $cardBadge[$row->status] ?? $cardBadge['draft']; @endphp
-                <button type="button" wire:key="card-row-{{ $row->id }}" wire:click="openCard({{ $row->id }})"
-                    class="{{ $cardColumns }} flex w-full flex-col gap-2 border-b border-hairline-subtle px-5 py-3 text-left transition-colors last:border-b-0 hover:bg-[#fafafa] focus-visible:bg-[#fafafa] focus-visible:outline-none">
-                    <span class="flex min-w-0 items-center gap-3">
-                        <x-avatar size="sm" :name="$row->personnel?->fullname ?? '—'" />
-                        <span class="truncate text-[13.5px] font-semibold tracking-[-0.01em] text-ink">{{ $row->personnel?->fullname }}</span>
-                    </span>
-                    <span class="truncate text-[12.5px] text-ink-soft">{{ $row->position?->name ?? '—' }}</span>
-                    <span class="truncate text-[12.5px] text-ink-muted">{{ $row->manager ? trim($row->manager->surname.' '.$row->manager->name) : '—' }}</span>
-                    <span>
-                        <span class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-0.5 text-[11.5px] font-medium {{ $badgeTone }}">
-                            <span class="h-1.5 w-1.5 rounded-full {{ $badgeDot }}"></span>
-                            {{ __($t.'.card_statuses.'.$row->status) }}
-                        </span>
-                    </span>
-                    <span class="hrm-num text-[13px] md:text-right {{ $scoreTone($row->kpi_score) }}">{{ $row->kpi_score === null ? '—' : $fmt($row->kpi_score).'%' }}</span>
-                    <span class="hrm-num text-[13px] font-semibold md:text-right {{ $scoreTone($row->final_score) }}">{{ $row->final_score === null ? '—' : $fmt($row->final_score).'%' }}</span>
-                </button>
-            @empty
-                <div class="px-6 py-16 text-center">
-                    <p class="text-[13.5px] font-medium text-ink">{{ $cycleId ? __($t.'.empty_cards') : __($t.'.no_cycle') }}</p>
-                </div>
-            @endforelse
-        </div>
+        @include('performance-evaluation::livewire.performance-evaluation.kpi.partials.scorecards.card-list')
     @endif
 
-    @can('manage-performance-evaluation')
-        <x-side-modal size="large">
-            @if ($showSideMenu === 'extra-card')
-                @php
-                    $chosenPerson = collect($this->extraPersonnelOptions)->firstWhere('id', (int) $extraPersonnelId);
-                    $chosenPosition = collect($this->extraPositionOptions)->firstWhere('id', (int) $extraPositionId);
-                @endphp
-                <div class="flex h-full flex-col">
-                    <p class="hrm-eyebrow">{{ __($t.'.extra.open') }}</p>
-                    <h2 class="mt-1 text-[18px] font-semibold tracking-[-0.02em] text-ink">{{ __($t.'.extra.title') }}</h2>
-                    <p class="mt-3 rounded-xl bg-[#fafafa] px-3 py-2.5 text-[12.5px] leading-5 text-ink-muted">{{ __($t.'.extra.hint') }}</p>
-
-                    <div class="mt-6 flex flex-col gap-5">
-                        <div>
-                            <x-ui.select-dropdown :label="__($t.'.extra.person')" :placeholder="__($t.'.extra.search')" mode="gray" class="w-full" instance="kpi-extra-person" direction="auto"
-                                wire:model.live="extraPersonnelId" :model="$this->extraPersonnelOptions" search-model="extraSearch"></x-ui.select-dropdown>
-                            @error('extraPersonnelId') <x-validation>{{ $message }}</x-validation> @enderror
-                        </div>
-
-                        <div>
-                            <x-ui.select-dropdown :label="__($t.'.extra.position')" placeholder="—" mode="gray" class="w-full" instance="kpi-extra-position" direction="auto"
-                                wire:model.live="extraPositionId" :model="$this->extraPositionOptions"></x-ui.select-dropdown>
-                            <p class="mt-1.5 text-[11.5px] text-ink-faint">{{ __($t.'.extra.position_hint') }}</p>
-                            @error('extraPositionId') <x-validation>{{ $message }}</x-validation> @enderror
-                        </div>
-
-                        <div>
-                            <x-label value="{{ __($t.'.extra.fte') }}" />
-                            <div class="mt-1.5 grid grid-cols-4 gap-1 rounded-xl bg-[#f4f4f5] p-1">
-                                @foreach ([0.25, 0.5, 0.75, 1.0] as $share)
-                                    <button type="button" wire:click="$set('extraFte', {{ $share }})"
-                                        class="hrm-num h-10 rounded-lg text-[14px] font-semibold transition {{ abs((float) $extraFte - $share) < 0.001 ? 'bg-white text-ink shadow-sm' : 'text-ink-muted hover:text-ink' }}">
-                                        {{ rtrim(rtrim(number_format($share, 2, '.', ''), '0'), '.') }}
-                                    </button>
-                                @endforeach
-                            </div>
-                            <p class="mt-1.5 text-[11.5px] text-ink-faint">{{ __($t.'.extra.fte_hint') }}</p>
-                            @error('extraFte') <x-validation>{{ $message }}</x-validation> @enderror
-                        </div>
-                    </div>
-
-                    @if ($chosenPerson && $chosenPosition)
-                        <div class="mt-6 flex items-start gap-3 rounded-xl border border-hairline bg-white p-4">
-                            <x-avatar :name="$chosenPerson['label']" size="md" />
-                            <p class="text-[12.5px] leading-5 text-ink-soft">{{ __($t.'.extra.summary', ['person' => \Illuminate\Support\Str::before($chosenPerson['label'], ' ·'), 'position' => $chosenPosition['label'], 'fte' => rtrim(rtrim(number_format((float) $extraFte, 2, '.', ''), '0'), '.')]) }}</p>
-                        </div>
-                    @endif
-
-                    <div class="mt-auto flex items-center justify-end gap-2.5 border-t border-hairline-subtle pt-5">
-                        <button type="button" wire:click="closeSideMenu" class="h-11 rounded-xl border border-hairline px-5 text-sm font-medium text-ink-soft hover:bg-[#fafafa]">{{ __($t.'.actions.cancel') }}</button>
-                        <button type="button" wire:click="openExtraCard" wire:loading.attr="disabled" wire:target="openExtraCard" class="h-11 rounded-xl bg-ink px-6 text-sm font-semibold text-white hover:bg-ink-hover disabled:opacity-50">{{ __($t.'.extra.submit') }}</button>
-                    </div>
-                </div>
-            @endif
-        </x-side-modal>
-    @endcan
+    @include('performance-evaluation::livewire.performance-evaluation.kpi.partials.scorecards.extra-card-modal')
 </div>
+

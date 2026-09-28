@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Modules\Staff\Livewire\AddStaff;
 use App\Modules\Staff\Livewire\Staffs;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
@@ -91,6 +92,109 @@ class StaffCrudRegressionTest extends TestCase
         $component->call('toggleNode', 3)->assertDontSee($row(4), escape: false);
         $component->call('expandAllNodes')->assertSee($row(4), escape: false);
         $component->call('collapseAllNodes')->assertDontSee($row(2), escape: false);
+    }
+
+    public function test_search_keeps_only_matching_branches_opened_and_highlighted(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo(Permission::findOrCreate('show-staff', 'web'));
+        $this->actingAs($user);
+        $this->seedDeepStructureTree();
+        $this->grantStructureScope($user, [1, 2, 3, 4, 5]);
+
+        DB::table('structures')->insert(['id' => 5, 'name' => 'Side Branch', 'shortname' => 'SB', 'parent_id' => 1]);
+        DB::table('positions')->insert(['id' => 2, 'name' => 'Driver']);
+        DB::table('staff_schedules')->insert(['structure_id' => 5, 'position_id' => 2, 'total' => 1, 'filled' => 0, 'vacant' => 1]);
+
+        $row = fn (int $id): string => 'wire:key="staff-node-'.$id.'"';
+
+        // Level Four sits below the eager depth, yet a hit there opens the whole path to it.
+        Livewire::test(Staffs::class)
+            ->set('search', 'four')
+            ->assertSee($row(4), escape: false)
+            ->assertDontSee($row(5), escape: false)
+            ->assertSee('Level <mark class="rounded bg-amber-100 px-0.5 text-ink">Four</mark>', escape: false)
+            ->set('search', 'driv')
+            ->assertSee($row(5), escape: false)
+            ->assertDontSee($row(2), escape: false)
+            ->set('search', 'nothing-like-this')
+            ->assertSee(__('staff::common.messages.no_match'));
+    }
+
+    public function test_filter_tree_matches_units_and_positions_and_only_vacant(): void
+    {
+        $node = fn (int $id, string $name, array $positions, array $children, int $vacant): array => [
+            'id' => $id, 'name' => $name, 'level' => 1, 'positions' => $positions, 'children' => $children,
+            'agg' => ['total' => 0, 'filled' => 0, 'vacant' => $vacant, 'rate' => 0],
+        ];
+        $position = fn (string $title, int $vacant): array => ['title' => $title, 'vacant' => $vacant];
+
+        $tree = [
+            $node(1, 'Maliyyə', [$position('Mühasib', 0)], [
+                $node(2, 'Kassa', [$position('Kassir', 2), $position('Mühasib', 0)], [], 2),
+            ], 2),
+            $node(3, 'Hüquq', [$position('Hüquqşünas', 0)], [], 0),
+        ];
+
+        $filter = fn (string $search, bool $onlyVacant): array => (new Staffs)->filterTree($tree, $search, $onlyVacant);
+        $ids = function (array $nodes) use (&$ids): array {
+            $out = [];
+            foreach ($nodes as $n) {
+                $out = [...$out, $n['id'], ...$ids($n['children'])];
+            }
+
+            return $out;
+        };
+
+        $this->assertSame($tree, $filter('', false));
+
+        // unit-name hit keeps the whole subtree
+        $this->assertSame([1, 2], $ids($filter('maliyyə', false)));
+        $this->assertCount(2, $filter('maliyyə', false)[0]['children'][0]['positions']);
+
+        // position hit keeps only the matching positions and the path to them
+        $kassir = $filter('kassir', false);
+        $this->assertSame(1, $kassir[0]['id']);
+        $this->assertSame([], $kassir[0]['positions']);
+        $this->assertSame(['Kassir'], array_column($kassir[0]['children'][0]['positions'], 'title'));
+
+        // only vacant drops closed branches and filled positions
+        $vacant = $filter('', true);
+        $this->assertSame([1, 2], $ids($vacant));
+        $this->assertSame(['Kassir'], array_column($vacant[0]['children'][0]['positions'], 'title'));
+
+        $this->assertSame([], $filter('hüquq', true));
+    }
+
+    public function test_search_folds_azerbaijani_dotted_and_dotless_i(): void
+    {
+        $this->assertSame('iqtisadiyyat', Staffs::foldCase('İQTİSADİYYAT'));
+        $this->assertSame('ıslahat', Staffs::foldCase('ISLAHAT'));
+        $this->assertStringContainsString(Staffs::foldCase('iqtisad'), Staffs::foldCase('İqtisadiyyat şöbəsi'));
+        $this->assertStringContainsString(Staffs::foldCase('ıslahat'), Staffs::foldCase('Islahat'));
+
+        $html = Blade::render('<x-staff.highlight :text="$text" :query="$query" />', ['text' => 'İqtisadiyyat şöbəsi', 'query' => 'iqtisad']);
+        $this->assertStringContainsString('<mark class="rounded bg-amber-100 px-0.5 text-ink">İqtisad</mark>iyyat', $html);
+    }
+
+    public function test_only_vacant_chip_hides_fully_staffed_branches(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo(Permission::findOrCreate('show-staff', 'web'));
+        $this->actingAs($user);
+        $this->seedDeepStructureTree();
+        $this->grantStructureScope($user, [1, 2, 3, 4, 5]);
+
+        DB::table('structures')->insert(['id' => 5, 'name' => 'Side Branch', 'shortname' => 'SB', 'parent_id' => 1]);
+        DB::table('staff_schedules')->insert(['structure_id' => 5, 'position_id' => 1, 'total' => 0, 'filled' => 0, 'vacant' => 0]);
+
+        $row = fn (int $id): string => 'wire:key="staff-node-'.$id.'"';
+
+        Livewire::test(Staffs::class)
+            ->assertSee($row(5), escape: false)
+            ->set('onlyVacant', true)
+            ->assertDontSee($row(5), escape: false)
+            ->assertSee($row(2), escape: false);
     }
 
     private function seedDeepStructureTree(): void

@@ -39,6 +39,11 @@ class AttendanceMonthLockService
      */
     public function closeMonth(int $year, int $month): array
     {
+        // Closing twice would re-snapshot a month payroll may already be reading from.
+        if ($this->periodStatus($year, $month)['is_locked']) {
+            throw new DomainException("Attendance for {$month}/{$year} is already closed.");
+        }
+
         $stats = $this->snapshotMonth($year, $month, true);
         $this->forgetPeriodLock($year, $month);
 
@@ -77,7 +82,14 @@ class AttendanceMonthLockService
             ->groupBy('tabel_no')
             ->get();
 
-        $summaryPayload = $this->buildMonthlySummaryPayload($grouped, $year, $month, $lock);
+        // A plain snapshot of a closed month must not quietly clear its lock.
+        $keepLocked = $lock || AttendanceMonthlySummary::query()
+            ->where('year', $year)
+            ->where('month', $month)
+            ->where('is_locked', true)
+            ->exists();
+
+        $summaryPayload = $this->buildMonthlySummaryPayload($grouped, $year, $month, $keepLocked);
         $summaryUpserts = count($summaryPayload);
         $deletedStaleSummaries = 0;
         $lockedLedgers = 0;
@@ -185,6 +197,10 @@ class AttendanceMonthLockService
                 "Attendance for {$month}/{$year} has already been handed to the finance system. ".
                 'Reopening it there is a deliberate correction: coordinate with payroll first.'
             );
+        }
+
+        if (! $this->periodStatus($year, $month)['is_locked']) {
+            throw new DomainException("Attendance for {$month}/{$year} is not closed; there is nothing to reopen.");
         }
 
         [$from, $to] = $this->periodBounds($year, $month);

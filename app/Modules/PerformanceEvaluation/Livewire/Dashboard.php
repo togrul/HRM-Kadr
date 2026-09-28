@@ -15,9 +15,14 @@ class Dashboard extends Component
 {
     use InteractsWithPerformanceEvaluationAccess;
     use InteractsWithPerformanceEvaluationQueries;
-    use InteractsWithTabbedWorkspace;
+    use InteractsWithTabbedWorkspace {
+        switchTab as switchWorkspaceTab;
+    }
 
     public string $activeTab = 'overview';
+
+    /** Set by the header's primary action: the evaluations workspace opens its assign form on arrival. */
+    public bool $assignOnOpen = false;
 
     /**
      * @var array<int, string>
@@ -28,6 +33,37 @@ class Dashboard extends Component
     {
         $this->authorizePerformanceEvaluationView();
         $this->bootActiveTabFromRequest();
+    }
+
+    public function switchTab(string $tab): void
+    {
+        $this->assignOnOpen = false;
+        $this->switchWorkspaceTab($tab);
+    }
+
+    /**
+     * The header's primary action: go to the evaluations tab with the assign form already open.
+     */
+    public function startAssignment(): void
+    {
+        $this->authorizePerformanceEvaluationManage();
+
+        if ($this->assignOnOpen && $this->activeTab === 'evaluations') {
+            $this->dispatch('performance-evaluation:open-assign');
+
+            return;
+        }
+
+        $this->switchWorkspaceTab('evaluations');
+        $this->assignOnOpen = $this->activeTab === 'evaluations';
+    }
+
+    #[Computed]
+    public function canStartAssignment(): bool
+    {
+        return in_array('evaluations', $this->allowedTabs(), true)
+            && app(HrPolicyPackService::class)->permissionEnabled('performance_evaluation.manage')
+            && (bool) auth()->user()?->can('manage-performance-evaluation');
     }
 
     /**

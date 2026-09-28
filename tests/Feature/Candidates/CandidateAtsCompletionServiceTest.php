@@ -225,6 +225,48 @@ class CandidateAtsCompletionServiceTest extends TestCase
         ]);
     }
 
+    public function test_application_ats_panel_shows_one_form_per_tab_and_toasts_saves(): void
+    {
+        Carbon::setTestNow('2026-05-09 10:00:00');
+
+        $actor = $this->recruitmentUser();
+        $application = $this->makeApplication($actor);
+
+        Livewire::actingAs($actor);
+
+        Livewire::test(ApplicationAtsPanel::class, ['application' => $application])
+            ->assertSeeHtml('wire:submit="scheduleInterview"')
+            ->assertDontSeeHtml('wire:submit="createOffer"')
+            ->call('setTab', 'offers')
+            ->assertSeeHtml('wire:submit="createOffer"')
+            ->assertDontSeeHtml('wire:submit="scheduleInterview"')
+            ->call('setTab', 'bogus')
+            ->assertSet('tab', 'interviews')
+            ->set('interviewForm.scheduled_at', '2026-05-10T14:30')
+            ->call('scheduleInterview')
+            ->assertHasNoErrors()
+            ->assertDispatched('notify', type: 'success', message: __('candidates::recruitment.messages.interview_scheduled'));
+    }
+
+    public function test_requisition_reject_is_confirmed_and_toasted(): void
+    {
+        Carbon::setTestNow('2026-05-09 10:00:00');
+
+        $actor = $this->recruitmentUser();
+        $requisition = $this->makeApplication($actor)->opening->requisition;
+
+        Livewire::actingAs($actor);
+
+        Livewire::test(RequisitionDetail::class, ['requisition' => $requisition])
+            ->assertSeeHtml("\$dispatch('confirm-action'")
+            ->assertSee(__('candidates::recruitment.messages.reject_requisition_confirm', ['title' => $requisition->title]))
+            ->assertSeeHtml('run: () => $wire.reject()')
+            ->call('reject')
+            ->assertDispatched('notify', type: 'success', message: __('candidates::recruitment.messages.requisition_rejected'));
+
+        $this->assertDatabaseHas('job_requisitions', ['id' => $requisition->id, 'approval_status' => 'rejected']);
+    }
+
     private function makeApplication(User $actor): CandidateApplication
     {
         $structure = Structure::query()->create(['name' => 'ATS HQ', 'shortname' => 'ATS']);

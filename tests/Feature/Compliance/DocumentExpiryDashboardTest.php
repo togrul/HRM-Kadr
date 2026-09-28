@@ -7,6 +7,7 @@ use App\Modules\Compliance\Livewire\DocumentExpiryDashboard;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
+use Tests\Feature\EmployeeLifecycle\LifecycleDashboardBoundedQueuesTest;
 use Tests\TestCase;
 
 class DocumentExpiryDashboardTest extends TestCase
@@ -32,5 +33,28 @@ class DocumentExpiryDashboardTest extends TestCase
             ->assertSee("\$set('status', 'expired')", false)
             ->assertSee("\$set('type', 'passport')", false)
             ->assertSee(__('compliance::documents.summary.compliance_score'));
+    }
+
+    public function test_document_table_is_paginated_and_filters_reset_the_page(): void
+    {
+        // 12 personnel without documents -> 36 synthesized "missing" rows.
+        LifecycleDashboardBoundedQueuesTest::seedLargeFixture(12);
+        $user = User::factory()->create();
+        $user->givePermissionTo(Permission::findOrCreate('show-document-compliance', 'web'));
+
+        $component = Livewire::actingAs($user)->test(DocumentExpiryDashboard::class);
+
+        $rows = $component->viewData('rows');
+        $this->assertSame(DocumentExpiryDashboard::PER_PAGE, $rows->count());
+        $this->assertGreaterThan(DocumentExpiryDashboard::PER_PAGE, $rows->total());
+
+        $component->call('gotoPage', 2);
+        $this->assertSame($rows->total() - DocumentExpiryDashboard::PER_PAGE, $component->viewData('rows')->count());
+
+        $component->set('search', 'Surname1');
+        $this->assertSame(1, $component->viewData('rows')->currentPage());
+        foreach ($component->viewData('rows') as $row) {
+            $this->assertStringContainsString('Surname1', $row['personnel_name']);
+        }
     }
 }

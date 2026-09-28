@@ -127,7 +127,6 @@ class CandidateList extends Component
             __('candidates::common.labels.structure'),
             __('candidates::common.labels.dates'),
             __('candidates::common.labels.status'),
-            __('candidates::common.labels.files'),
             __('personnel::common.labels.action'),
         ];
 

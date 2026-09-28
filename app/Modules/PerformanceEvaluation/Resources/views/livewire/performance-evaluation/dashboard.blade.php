@@ -1,6 +1,5 @@
 @php
-    $contextTabs = ['overview', 'kpi_scorecards', 'kpi_analytics', 'kpi_bonus', 'kpi_library', 'goals', 'succession', 'feedback', 'cycles', 'templates', 'evaluations', 'tests', 'reports', 'lists'];
-    // The panel groups the module's twelve screens by job, so the list reads as a map, not a wall.
+    // The panel (and its small-screen chips) group the module's screens by job, so the list reads as a map, not a wall.
     $navGroups = [
         'home' => ['overview'],
         'kpi' => ['kpi_scorecards', 'kpi_analytics', 'kpi_bonus', 'kpi_library'],
@@ -114,20 +113,28 @@
                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
             </x-pill-button>
 
-            <x-pill-button variant="primary" wire:click.prevent="switchTab('evaluations')" wire:loading.attr="disabled" wire:target="switchTab">
-                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-                {{ __('performance_evaluation::dashboard.panel.assign_form') }}
-            </x-pill-button>
+            @if ($this->canStartAssignment)
+                <x-pill-button variant="primary" wire:click.prevent="startAssignment" wire:loading.attr="disabled" wire:target="startAssignment,switchTab">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                    {{ __('performance_evaluation::dashboard.panel.assign_form') }}
+                </x-pill-button>
+            @endif
         </x-slot:actions>
 
         {{-- small-screen fallback for the panel's section list --}}
         <x-filter.nav wrap class="min-w-0 lg:hidden">
-            @foreach ($contextTabs as $tab)
-                <x-filter.item
-                    wire:key="performance-chip-{{ $tab }}"
-                    wire:click.prevent="switchTab('{{ $tab }}')"
-                    :active="$activeTab === $tab"
-                >{{ __('performance_evaluation::dashboard.tabs.'.$tab) }}</x-filter.item>
+            @foreach ($navGroups as $group => $groupTabs)
+                @continue(array_intersect($groupTabs, $tabs) === [])
+                @if ($group !== 'home')
+                    <li class="hrm-eyebrow shrink-0 pl-2 pr-0.5" wire:key="performance-chip-group-{{ $group }}">{{ __('performance_evaluation::dashboard.nav_groups.'.$group) }}</li>
+                @endif
+                @foreach (array_intersect($groupTabs, $tabs) as $tab)
+                    <x-filter.item
+                        wire:key="performance-chip-{{ $tab }}"
+                        wire:click.prevent="switchTab('{{ $tab }}')"
+                        :active="$activeTab === $tab"
+                    >{{ __('performance_evaluation::dashboard.tabs.'.$tab) }}</x-filter.item>
+                @endforeach
             @endforeach
         </x-filter.nav>
     </x-page-header>
@@ -171,7 +178,7 @@
         @endif
 
         @if (in_array($activeTab, ['evaluations', 'tests'], true))
-            <livewire:performance-evaluation.operations-workspace :tab="$activeTab" :tests-view="request()->query('tests_view')" :key="'performance-evaluation-operations-'.$activeTab.'-'.request()->query('tests_view', 'banks')" lazy />
+            <livewire:performance-evaluation.operations-workspace :tab="$activeTab" :tests-view="request()->query('tests_view')" :open-assign="$assignOnOpen" :key="'performance-evaluation-operations-'.$activeTab.'-'.request()->query('tests_view', 'banks').($assignOnOpen ? '-assign' : '')" lazy />
         @endif
 
         @if ($activeTab === 'reports')

@@ -123,6 +123,37 @@ class LifecycleDashboardBoundedQueuesTest extends TestCase
             ->assertSee('Surname12 Name12');
     }
 
+    public function test_queue_row_action_opens_the_completion_panel_prefilled(): void
+    {
+        self::seedLargeFixture(5);
+        $this->actingAs($this->manager());
+        $reviewId = (int) DB::table('employee_lifecycle_probation_reviews')->where('status', 'pending')->value('id');
+        $caseId = (int) DB::table('employee_lifecycle_offboarding_cases')->value('id');
+
+        Livewire::test(Dashboard::class)
+            ->assertSeeHtml("completeFromQueue('probation', {$reviewId})")
+            ->call('completeFromQueue', 'probation', $reviewId)
+            ->assertSet('panel', 'complete')
+            ->assertSet('completionForm.probation_review_id', $reviewId)
+            ->call('completeFromQueue', 'offboarding', $caseId)
+            ->assertSet('completionForm.offboarding_case_id', $caseId)
+            ->call('completeFromQueue', 'bogus', 1)
+            ->assertSet('completionForm.movement_id', '');
+    }
+
+    public function test_probation_terminate_decision_is_confirmed_with_the_employee_name(): void
+    {
+        self::seedLargeFixture(3);
+        $this->actingAs($this->manager());
+        $reviewId = (int) DB::table('employee_lifecycle_probation_reviews')->where('status', 'pending')->value('id');
+
+        Livewire::test(Dashboard::class)
+            ->call('completeFromQueue', 'probation', $reviewId)
+            ->assertSeeHtml("probation_decision === 'terminate'")
+            ->assertSeeHtml('run: () => $wire.completeProbationReview()')
+            ->assertSeeHtml('Surname');
+    }
+
     private function manager(): User
     {
         foreach (['show-employee-lifecycle', 'manage-employee-lifecycle'] as $permission) {

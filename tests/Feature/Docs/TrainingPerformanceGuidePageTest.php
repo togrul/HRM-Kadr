@@ -24,8 +24,8 @@ class TrainingPerformanceGuidePageTest extends TestCase
             ->assertSee('Bildirişlər')
             ->assertSee('Peşəkar portfel')
             ->assertSee('Şəxsi kabinet')
-            ->assertSee('Uyğunlaşma kitabxanası')
-            ->assertSee('Öyrənmə kitabxanası');
+            ->assertSee('Adaptasiya kitabxanası')
+            ->assertSee('Tədris kitabxanası');
     }
 
     public function test_focus_parameter_loads_requested_module_on_initial_render(): void
@@ -85,7 +85,7 @@ class TrainingPerformanceGuidePageTest extends TestCase
         $this->actingAs($user)
             ->get(route('docs.guide', ['focus' => 'onboarding-library']))
             ->assertOk()
-            ->assertSee('Uyğunlaşma kitabxanası')
+            ->assertSee('Adaptasiya kitabxanası')
             ->assertSee('Yeni şablon')
             ->assertSee('Toplu təyinat')
             ->assertDontSee('Təlim ehtiyacı istifadəçi bələdçisi');
@@ -98,7 +98,7 @@ class TrainingPerformanceGuidePageTest extends TestCase
         $this->actingAs($user)
             ->get(route('docs.guide', ['focus' => 'learning-library']))
             ->assertOk()
-            ->assertSee('Öyrənmə kitabxanası')
+            ->assertSee('Tədris kitabxanası')
             ->assertSee('Yeni material')
             ->assertSee('Toplu təyinat')
             ->assertDontSee('Təlim ehtiyacı istifadəçi bələdçisi');

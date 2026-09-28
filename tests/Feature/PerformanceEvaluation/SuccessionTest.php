@@ -5,8 +5,8 @@ namespace Tests\Feature\PerformanceEvaluation;
 use App\Models\PerformanceCycle;
 use App\Models\Personnel;
 use App\Models\Position;
-use App\Models\SuccessionPlan;
 use App\Models\Structure;
+use App\Models\SuccessionPlan;
 use App\Models\TalentAssessment;
 use App\Models\User;
 use App\Modules\PerformanceEvaluation\Application\Services\SuccessionService;
@@ -94,6 +94,24 @@ class SuccessionTest extends TestCase
         $pool = \App\Models\TalentPool::with('members')->find($pool->id);
         $this->assertCount(1, $pool->members);
         $this->assertSame($member->id, (int) $pool->members->first()->personnel_id);
+    }
+
+    public function test_remove_buttons_name_what_they_remove_and_ask_first(): void
+    {
+        $this->cycle();
+        $member = $this->makePersonnel('Hüseynov');
+        $service = app(SuccessionService::class);
+        $pool = $service->createPool(['name' => 'HiPo 2026', 'pool_type' => 'hipo']);
+        $service->addMember($pool->id, $member->id);
+        $this->actingAs($this->userWith(['show-performance-evaluation', 'manage-performance-evaluation']));
+
+        $label = __('performance_evaluation::succession.remove.member', ['name' => 'Hüseynov Ad', 'pool' => 'HiPo 2026']);
+
+        Livewire::test(SuccessionWorkspace::class)
+            ->call('setSection', 'pools')
+            ->assertSeeHtml('aria-label="'.e($label).'"')
+            ->assertSeeHtml("\$dispatch('confirm-action'")
+            ->assertDontSeeHtml('wire:click="removeMember(');
     }
 
     public function test_viewing_requires_permission(): void

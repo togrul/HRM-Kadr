@@ -8,18 +8,48 @@
 
             <div class="flex flex-wrap items-center gap-2">
                 @if($canManage)
-                    <x-button mode="primary" wire:click="snapshotNow">
-                        {{ __('attendance::month_close.actions.snapshot_now') }}
-                    </x-button>
-                    <x-button mode="default" wire:click="snapshotQueue">
-                        {{ __('attendance::month_close.actions.snapshot_queue') }}
-                    </x-button>
-                    <x-button mode="black" wire:click="closePeriod">
-                        {{ __('attendance::month_close.actions.close_month') }}
-                    </x-button>
-                    <x-button mode="warning" wire:click="unlockPeriod">
-                        {{ __('attendance::month_close.actions.unlock_month') }}
-                    </x-button>
+                    @php
+                        $monthLabel = \Carbon\Carbon::create((int) $year, (int) $month, 1)->translatedFormat('F Y');
+                        // the js directive breaks inside a component-tag attribute, so the payloads are built here
+                        $unlockConfirm = \Illuminate\Support\Js::from([
+                            'title' => __('attendance::month_close.confirm.unlock_title'),
+                            'message' => __('attendance::month_close.confirm.unlock_message', ['month' => $monthLabel]),
+                            'confirmText' => __('attendance::month_close.actions.unlock_month'),
+                            'tone' => 'rose',
+                        ]);
+                        $closeConfirm = \Illuminate\Support\Js::from([
+                            'title' => __('attendance::month_close.confirm.close_title'),
+                            'message' => __('attendance::month_close.confirm.close_message', ['month' => $monthLabel]),
+                            'confirmText' => __('attendance::month_close.actions.close_month'),
+                            'tone' => 'amber',
+                        ]);
+                    @endphp
+                    {{-- only the transition that applies to the current state is offered; the service refuses the other one --}}
+                    @if($status['is_locked'] ?? false)
+                        <x-button
+                            mode="warning"
+                            wire:loading.attr="disabled"
+                            wire:target="unlockPeriod"
+                            x-on:click="$dispatch('confirm-action', { ...{{ $unlockConfirm }}, run: () => $wire.unlockPeriod() })"
+                        >
+                            {{ __('attendance::month_close.actions.unlock_month') }}
+                        </x-button>
+                    @else
+                        <x-button
+                            mode="primary"
+                            wire:loading.attr="disabled"
+                            wire:target="closePeriod"
+                            x-on:click="$dispatch('confirm-action', { ...{{ $closeConfirm }}, run: () => $wire.closePeriod() })"
+                        >
+                            {{ __('attendance::month_close.actions.close_month') }}
+                        </x-button>
+                        <x-button mode="secondary" wire:click="snapshotNow">
+                            {{ __('attendance::month_close.actions.snapshot_now') }}
+                        </x-button>
+                        <x-button mode="default" wire:click="snapshotQueue">
+                            {{ __('attendance::month_close.actions.snapshot_queue') }}
+                        </x-button>
+                    @endif
                 @endif
                 @if($canExport)
                     <x-button mode="default" wire:click="exportPayroll">

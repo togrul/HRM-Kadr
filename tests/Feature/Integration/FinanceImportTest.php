@@ -3,6 +3,7 @@
 namespace Tests\Feature\Integration;
 
 use App\Models\AttendanceCalendar;
+use App\Models\AttendanceMonthlySummary;
 use App\Models\Country;
 use App\Models\EducationDegree;
 use App\Models\FinancePayslip;
@@ -144,6 +145,13 @@ class FinanceImportTest extends TestCase
     {
         $this->fake(['periods' => [['year' => 2026, 'month' => 8, 'closed' => false]]]);
         app(FinanceImportService::class)->periodState();
+        // unlocking needs a closed month: reopening an open one is refused on its own
+        AttendanceMonthlySummary::query()->create([
+            'tabel_no' => 'TB-1', 'year' => 2026, 'month' => 8,
+            'total_scheduled_minutes' => 0, 'total_worked_minutes' => 0, 'total_overtime_minutes' => 0,
+            'total_absence_minutes' => 0, 'total_workdays' => 0, 'total_present_days' => 0,
+            'total_absence_days' => 0, 'is_locked' => true,
+        ]);
 
         $stats = app(AttendanceMonthLockService::class)->unlockMonth(2026, 8);
 

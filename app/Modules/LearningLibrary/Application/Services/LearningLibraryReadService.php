@@ -7,6 +7,7 @@ use App\Models\EmployeeContentAssignment;
 use App\Support\Library\AbstractLibraryReadService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -112,6 +113,43 @@ class LearningLibraryReadService extends AbstractLibraryReadService
     protected function libraryCachePrefix(): string
     {
         return 'learning-library';
+    }
+
+    protected function libraryModel(): string
+    {
+        return EmployeeContentAsset::class;
+    }
+
+    protected function assignmentModel(): string
+    {
+        return EmployeeContentAssignment::class;
+    }
+
+    protected function completionRelation(): array
+    {
+        return ['view', 'completed_at'];
+    }
+
+    protected function typeColumn(): string
+    {
+        return 'content_type';
+    }
+
+    protected function typeLabel(string $type): string
+    {
+        return __('personnel::my_hr.learning.content_types.'.($type ?: 'other'));
+    }
+
+    protected function itemMeta(Model $item): ?string
+    {
+        return filled($item->estimated_minutes)
+            ? __('learning-library::dashboard.catalog.minutes', ['count' => (int) $item->estimated_minutes])
+            : null;
+    }
+
+    protected function itemUrl(Model $item): ?string
+    {
+        return $item->contentUrl();
     }
 
     protected function summaryData(): array

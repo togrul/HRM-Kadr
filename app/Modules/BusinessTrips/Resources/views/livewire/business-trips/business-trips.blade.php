@@ -217,7 +217,13 @@
                 </x-table.td>
             </tr>
         @empty
-            <x-table.empty :rows="count($this->getTableHeaders())" :filtered="$this->hasActiveFilters" />
+            <x-table.empty :rows="count($this->getTableHeaders())" :filtered="$this->hasActiveFilters" :hint="__('business_trips::common.hints.from_orders')">
+                <x-slot:action>
+                    @can('viewAny', App\Models\Order::class)
+                        <x-pill-button variant="secondary" :href="route('orders')" wire:navigate>{{ __('business_trips::common.actions.go_to_orders') }}</x-pill-button>
+                    @endcan
+                </x-slot:action>
+            </x-table.empty>
         @endforelse
     </x-table.tbl>
 

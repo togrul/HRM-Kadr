@@ -69,6 +69,15 @@ class HomeDashboardTest extends TestCase
         $this->assertSame(1, $counts['expiring_documents']);
     }
 
+    public function test_all_zero_attention_tiles_collapse_into_one_calm_line(): void
+    {
+        $this->actingAsViewer(['show-attendance-manual', 'show-orders', 'show-vacations', 'show-document-compliance']);
+
+        Livewire::test(Home::class)
+            ->assertSee(__('personnel::home.attention.all_clear'))
+            ->assertDontSee(__('personnel::home.attention.cards.unsigned_orders.label'));
+    }
+
     public function test_today_rail_lists_queues_birthdays_and_upcoming_leaves(): void
     {
         $this->actingAsViewer([

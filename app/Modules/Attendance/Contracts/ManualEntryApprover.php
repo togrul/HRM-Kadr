@@ -21,7 +21,9 @@ interface ManualEntryApprover
     public function approve(int $entryId, User $approver): void;
 
     /**
-     * @throws ValidationException when the entry can no longer be rejected
+     * The reason is required and stored on the entry, like the attendance page's own reject.
+     *
+     * @throws ValidationException when the reason is missing or the entry can no longer be rejected
      */
-    public function reject(int $entryId, User $approver): void;
+    public function reject(int $entryId, User $approver, string $reason): void;
 }

@@ -28,7 +28,7 @@
                             @if ($campaign->scheduled_at)
                                 <span>{{ __('notifications::common.fields.scheduled_at') }}: {{ $campaign->scheduled_at->format('d.m.Y H:i') }}</span>
                             @endif
-                            <span>{{ __('notifications::common.fields.creator') }}: {{ $campaign->created_at?->format('d.m.Y H:i') }}</span>
+                            <span>{{ __('notifications::common.fields.creator') }}: {{ $campaign->creator?->name ?? '—' }} · {{ $campaign->created_at?->format('d.m.Y H:i') }}</span>
                         </div>
                     </div>
 

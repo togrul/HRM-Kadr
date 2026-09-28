@@ -9,6 +9,7 @@ use App\Modules\Orders\Application\Document\OrderTemplateProvider;
 use App\Modules\Orders\Contracts\OrderDrafter;
 use App\Modules\Orders\Domain\Contracts\OrderTypeStatusLookupReadRepository;
 use App\Modules\Orders\Exports\OrderExport;
+use App\Modules\Orders\Infrastructure\Document\OrderIssueService;
 use App\Services\StructureService;
 use Carbon\Carbon;
 use DomainException;
@@ -90,9 +91,59 @@ class AllOrders extends Component
         ];
     }
 
-    public function setDeleteOrder($order_no): void
+    /** Soft-delete an order (the row menu's "Sil", confirmed in the global modal). */
+    #[Renderless]
+    public function deleteOrder(string $order_no): void
     {
-        $this->dispatch('setDeleteOrder', $order_no);
+        $order = OrderLog::where('order_no', $order_no)->first();
+        if (! $order) {
+            return;
+        }
+
+        $this->authorize('delete', $order);
+
+        $order->delete();
+
+        $this->dispatch('orderWasDeleted', __('orders::order_form.messages.order_deleted'));
+    }
+
+    /** Copy a Word-engine order as a new draft the author then continues in the composer. */
+    #[Renderless]
+    public function duplicateOrder(string $order_no, OrderIssueService $issuer): void
+    {
+        $order = OrderLog::where('order_no', $order_no)->first();
+        if (! $order) {
+            return;
+        }
+
+        abort_unless((bool) auth()->user()?->can('add-orders'), 403);
+
+        $issuer->duplicateWord($order);
+
+        $this->dispatch('orderAdded', __('orders::order_list.messages.order_duplicated'));
+    }
+
+    /**
+     * The list/preview status badge as [x-status color id, label]. A pending order with no
+     * stored document is shown as a draft ("Qaralama"); a pending one with its document is
+     * ready for approval.
+     *
+     * @return array{0:int,1:string}
+     */
+    public static function statusBadge(OrderLog $order): array
+    {
+        if (OrderIssueService::isDraft($order)) {
+            return [10, __('orders::order_list.status.draft')];
+        }
+
+        $color = match ((int) $order->status_id) {
+            10 => 20,
+            20 => 70,
+            30 => 90,
+            default => (int) $order->status_id,
+        };
+
+        return [$color, (string) ($order->status?->name ?? '—')];
     }
 
     #[Renderless]
@@ -136,7 +187,7 @@ class AllOrders extends Component
         }
 
         // Only Word-engine orders are printable: they carry their filled .docx.
-        abort_unless((string) $order->template_render_mode === \App\Modules\Orders\Infrastructure\Document\OrderIssueService::RENDER_MODE_DOCX, 404);
+        abort_unless((string) $order->template_render_mode === OrderIssueService::RENDER_MODE_DOCX, 404);
         abort_unless((bool) auth()->user()?->can('add-orders'), 403);
 
         // Order numbers may contain "/" (e.g. 2026/ƏM-145), which is illegal in a
@@ -151,6 +202,13 @@ class AllOrders extends Component
 
     public function approveOrder(string $order_no): void
     {
+        // A draft has no document yet — it is finished in the composer first.
+        if (($order = OrderLog::where('order_no', $order_no)->first()) && OrderIssueService::isDraft($order)) {
+            $this->dispatch('orderError', __('orders::order_list.messages.draft_not_ready'));
+
+            return;
+        }
+
         $this->changeStatus($order_no, 'approve', 'order_approved');
     }
 
@@ -217,7 +275,7 @@ class AllOrders extends Component
                     // approval, so they would otherwise be invisible. Scope them by the
                     // target structure frozen in the order snapshot.
                     ->orWhere(fn ($q) => $q
-                        ->where('template_render_mode', \App\Modules\Orders\Infrastructure\Document\OrderIssueService::RENDER_MODE_DOCX)
+                        ->where('template_render_mode', OrderIssueService::RENDER_MODE_DOCX)
                         ->whereIn('template_snapshot->hire_structure_id', $this->accessibleStructureIds));
             })
             ->filter($this->search ?? []);
@@ -262,11 +320,7 @@ class AllOrders extends Component
     {
         $paginated->setCollection(
             $paginated->getCollection()->values()->map(function (OrderLog $order) {
-                $order->status_color_id = match ((int) $order->status_id) {
-                    20 => 70,
-                    30 => 90,
-                    default => (int) $order->status_id,
-                };
+                [$order->status_color_id, $order->status_label] = self::statusBadge($order);
 
                 return $order;
             })

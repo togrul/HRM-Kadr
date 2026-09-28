@@ -71,6 +71,18 @@ class PersonnelProfilePageTest extends TestCase
             ->assertNotDispatched('personnel-profile:goto-step');
     }
 
+    public function test_the_edit_slot_turns_into_back_to_overview_in_edit_mode(): void
+    {
+        $personnel = $this->seedPersonnel();
+        $this->actingAsEditor();
+
+        Livewire::test(PersonnelProfile::class, ['personnel' => $personnel])
+            ->assertSee(__('personnel::common.actions.edit'))
+            ->assertDontSee(__('personnel::profile.actions.back_to_overview'))
+            ->call('setSection', 'career')
+            ->assertSee(__('personnel::profile.actions.back_to_overview'));
+    }
+
     public function test_moving_between_editable_sections_asks_the_wizard_first(): void
     {
         $personnel = $this->seedPersonnel();

@@ -102,11 +102,6 @@
         </x-slot>
 
         <x-slot name="actions">
-            <span class="inline-flex h-9 items-center gap-2 rounded-[10px] border border-hairline bg-[#fafafa] px-3.5 text-[12.5px] font-semibold text-ink-soft">
-                <svg class="h-3.5 w-3.5 text-ink-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-                {{ \Illuminate\Support\Str::ucfirst(now()->translatedFormat('F Y')) }}
-            </span>
-
             @can('add-personnels')
                 <x-pill-button variant="primary" :href="route('personnel.index', ['create' => 1])" wire:navigate>
                     <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
@@ -119,7 +114,13 @@
     <div class="space-y-4 px-4 py-4 sm:px-5">
 
         {{-- ==================== needs attention ==================== --}}
-        @if (filled($attention))
+        @if (filled($attention) && collect($attention)->sum('count') === 0)
+            {{-- Four zero tiles are noise; one calm line says the same. --}}
+            <p class="flex items-center gap-2 rounded-2xl border border-hairline bg-white px-4 py-3 text-[12.5px] font-medium text-ink-soft shadow-card">
+                <svg class="h-4 w-4 shrink-0 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                {{ __('personnel::home.attention.all_clear') }}
+            </p>
+        @elseif (filled($attention))
             <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 @foreach ($attention as $card)
                     @php
@@ -139,7 +140,7 @@
                     <div @class([
                         'group relative flex flex-col rounded-2xl border p-4 shadow-card transition hover:shadow-md',
                         $accent['card'],
-                        'border-ink ring-1 ring-ink' => $open,
+                        'border-zinc-300 ring-1 ring-zinc-300' => $open,
                         'border-hairline' => ! $open,
                     ])>
                         {{-- The whole card still opens the module; the buttons sit above this link. --}}
@@ -168,7 +169,7 @@
                                     aria-controls="home-queue"
                                     @class([
                                         'inline-flex h-8 items-center gap-1.5 rounded-[10px] px-3 text-[12px] font-semibold transition',
-                                        'bg-ink text-white hover:bg-ink-hover' => $open,
+                                        'bg-[#ececee] text-ink' => $open,
                                         'border border-hairline bg-white text-ink-soft hover:border-zinc-300 hover:text-ink' => ! $open,
                                     ])
                                 >
@@ -210,7 +211,10 @@
                     </header>
 
                     @forelse ($this->queueItems as $item)
-                        <div wire:key="home-queue-item-{{ $queue }}-{{ $item['id'] }}" class="flex items-center gap-3 border-b border-hairline-subtle px-4 py-2.5 last:border-b-0">
+                        {{-- A manual attendance entry needs a written reason to be rejected, so its reject
+                             opens an inline reason row instead of the plain confirmation. --}}
+                        <div wire:key="home-queue-item-{{ $queue }}-{{ $item['id'] }}" x-data="{ rejecting: false, reason: '' }" class="border-b border-hairline-subtle last:border-b-0">
+                        <div class="flex items-center gap-3 px-4 py-2.5">
                             @if ($queue === 'unsigned_orders')
                                 <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#f4f4f5] text-ink-muted">
                                     <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
@@ -230,14 +234,19 @@
                                 <div class="flex shrink-0 items-center gap-1.5">
                                     <button
                                         type="button"
-                                        x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::home.queue.reject_confirm', ['name' => $item['title']])), confirmText: @js(__('personnel::home.queue.reject')), run: () => $wire.decide({{ $item['id'] }}, false) })"
+                                        @if ($queue === 'attendance_pending')
+                                            x-on:click="rejecting = ! rejecting; $nextTick(() => rejecting && $refs.reason.focus())"
+                                            x-bind:aria-expanded="rejecting.toString()"
+                                        @else
+                                            x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::home.queue.reject_confirm', ['name' => $item['title']])), confirmText: @js(__('personnel::home.queue.reject')), run: () => $wire.decide({{ $item['id'] }}, false) })"
+                                        @endif
                                         wire:loading.attr="disabled"
                                         wire:target="decide"
                                         class="inline-flex h-8 items-center rounded-[10px] px-3 text-[12px] font-semibold text-ink-muted transition hover:bg-[#ffe4e6] hover:text-[#be123c]"
                                     >{{ __('personnel::home.queue.reject') }}</button>
                                     <button
                                         type="button"
-                                        wire:click="decide({{ $item['id'] }}, true)"
+                                        x-on:click="$dispatch('confirm-action', { tone: 'emerald', message: @js(__('personnel::home.queue.approve_confirm', ['name' => $item['title']])), confirmText: @js(__('personnel::home.queue.approve')), run: () => $wire.decide({{ $item['id'] }}, true) })"
                                         wire:loading.attr="disabled"
                                         wire:target="decide"
                                         class="inline-flex h-8 items-center gap-1.5 rounded-[10px] bg-ink px-3 text-[12px] font-semibold text-white transition hover:bg-ink-hover disabled:opacity-60"
@@ -249,6 +258,15 @@
                             @elseif (isset($item['url']))
                                 <a href="{{ $item['url'] }}" wire:navigate class="inline-flex h-8 shrink-0 items-center rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[12px] font-semibold text-ink-soft transition hover:bg-[#e4e4e7] hover:text-ink">{{ __('personnel::home.queue.open') }}</a>
                             @endif
+                        </div>
+
+                        @if ($decidable && $queue === 'attendance_pending')
+                            <form x-cloak x-show="rejecting" x-on:submit.prevent="$wire.decide({{ $item['id'] }}, false, reason)" class="flex items-center gap-2 px-4 pb-3 pl-14">
+                                <label for="home-reject-reason-{{ $item['id'] }}" class="sr-only">{{ __('personnel::home.queue.reason') }}</label>
+                                <input id="home-reject-reason-{{ $item['id'] }}" x-ref="reason" x-model="reason" type="text" maxlength="1000" placeholder="{{ __('personnel::home.queue.reason_placeholder') }}" class="{{ \App\Support\Ui\FieldStyles::input() }} !mt-0 flex-1" />
+                                <button type="submit" x-bind:disabled="reason.trim().length < 3" wire:loading.attr="disabled" wire:target="decide" class="inline-flex h-9 shrink-0 items-center rounded-full bg-[#fff1f2] px-3.5 text-[12.5px] font-semibold text-[#e11d48] transition hover:bg-[#ffe4e6] disabled:opacity-50">{{ __('personnel::home.queue.reject') }}</button>
+                            </form>
+                        @endif
                         </div>
                     @empty
                         <p class="px-4 py-6 text-center text-[12.5px] text-ink-faint">{{ __('personnel::home.queue.empty') }}</p>

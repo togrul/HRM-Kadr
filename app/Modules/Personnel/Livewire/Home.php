@@ -56,7 +56,7 @@ class Home extends Component
         };
     }
 
-    public function decide(int $id, bool $approve): void
+    public function decide(int $id, bool $approve, string $reason = ''): void
     {
         $user = auth()->user();
 
@@ -64,7 +64,7 @@ class Home extends Component
             match ($this->queue) {
                 'attendance_pending' => $approve
                     ? app(ManualEntryApprover::class)->approve($id, $user)
-                    : app(ManualEntryApprover::class)->reject($id, $user),
+                    : app(ManualEntryApprover::class)->reject($id, $user, $reason),
                 'vacation_requests' => $this->decideVacation($id, $approve),
                 default => abort(404),
             };

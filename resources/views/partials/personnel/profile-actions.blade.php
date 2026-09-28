@@ -26,17 +26,8 @@
     $hasWorkActions = $canAddLeave || $orderTemplates !== [];
 @endphp
 
-{{-- On large screens the context panel's footer already offers the way back. --}}
-<x-pill-button
-    variant="secondary"
-    :href="route('personnel.index')"
-    wire:navigate
-    class="shrink-0 lg:hidden"
->
-    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-    <span>{{ __('personnel::profile.actions.back_to_list') }}</span>
-</x-pill-button>
-
+{{-- Fixed order, left to right: Daha çox · Redaktə et / Baxışa qayıt · Əməliyyat (the one primary).
+     Nothing appears or disappears between overview and edit mode, so no button moves. --}}
 @if ($menu->isNotEmpty() || filled($links))
     <div class="relative" x-data="{ open: false }" @keydown.escape.window="open = false">
         <x-pill-button variant="secondary" @click="open = ! open" :aria-expanded="false" x-bind:aria-expanded="open.toString()">
@@ -89,10 +80,16 @@
     </div>
 @endif
 
-@if ($this->canEdit && $section === 'overview')
-    <x-pill-button :variant="$hasWorkActions ? 'secondary' : 'primary'" wire:click="setSection('personal')" wire:loading.attr="disabled" wire:target="setSection">
-        {{ __('personnel::common.actions.edit') }}
-    </x-pill-button>
+@if ($this->canEdit)
+    @if ($section === 'overview')
+        <x-pill-button variant="secondary" wire:click="setSection('personal')" wire:loading.attr="disabled" wire:target="setSection">
+            {{ __('personnel::common.actions.edit') }}
+        </x-pill-button>
+    @else
+        <x-pill-button variant="secondary" wire:click="setSection('overview')" wire:loading.attr="disabled" wire:target="setSection">
+            {{ __('personnel::profile.actions.back_to_overview') }}
+        </x-pill-button>
+    @endif
 @endif
 
 @if ($hasWorkActions)

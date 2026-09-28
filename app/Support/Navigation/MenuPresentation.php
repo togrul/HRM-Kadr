@@ -202,6 +202,8 @@ class MenuPresentation
             'Şəxsi kabinet müraciətləri' => 'ui::menu.items.self_service_reviews',
             'Uyğunlaşma kitabxanası' => 'ui::menu.items.onboarding_library',
             'Öyrənmə kitabxanası' => 'ui::menu.items.learning_library',
+            'Adaptasiya kitabxanası' => 'ui::menu.items.onboarding_library',
+            'Tədris kitabxanası' => 'ui::menu.items.learning_library',
             'Davamiyyət' => 'ui::menu.items.attendance',
             'Təlim' => 'ui::menu.items.training',
             'Performans' => 'ui::menu.items.performance',

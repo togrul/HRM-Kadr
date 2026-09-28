@@ -94,7 +94,10 @@
                                         <span class="group inline-flex items-center gap-1 rounded-full bg-white px-2 py-1 text-[12px] font-medium text-zinc-700 shadow-sm ring-1 ring-zinc-200/70">
                                             {{ $person['name'] }}
                                             @can('manage-performance-evaluation')
-                                                <button type="button" wire:click="removeAssessment({{ $person['assessment_id'] }})" class="text-zinc-300 transition hover:text-rose-500">✕</button>
+                                                @php $removeLabel = __('performance_evaluation::succession.remove.assessment', ['name' => $person['name']]); $removeConfirm = __('performance_evaluation::succession.remove.assessment_confirm', ['name' => $person['name']]); @endphp
+                                                <button type="button" aria-label="{{ $removeLabel }}" title="{{ $removeLabel }}"
+                                                    x-on:click="$dispatch('confirm-action', { title: @js($removeLabel), message: @js($removeConfirm), confirmText: @js(__('performance_evaluation::succession.remove.action')), tone: 'rose', run: () => $wire.removeAssessment({{ $person['assessment_id'] }}) })"
+                                                    class="-mr-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-ink-faint transition hover:bg-rose-50 hover:text-rose-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
                                             @endcan
                                         </span>
                                     @empty
@@ -162,7 +165,10 @@
                                                 </x-ui.select>
                                                 <svg class="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                                             </div>
-                                            <button type="button" wire:click="removeCandidate({{ $candidate->id }})" class="text-zinc-300 transition hover:text-rose-500">✕</button>
+                                            @php $removeLabel = __('performance_evaluation::succession.remove.candidate', ['name' => trim($candidate->personnel->surname.' '.$candidate->personnel->name), 'plan' => $plan->role_title]); $removeConfirm = __('performance_evaluation::succession.remove.candidate_confirm', ['name' => trim($candidate->personnel->surname.' '.$candidate->personnel->name), 'plan' => $plan->role_title]); @endphp
+                                            <button type="button" aria-label="{{ $removeLabel }}" title="{{ $removeLabel }}"
+                                                x-on:click="$dispatch('confirm-action', { title: @js($removeLabel), message: @js($removeConfirm), confirmText: @js(__('performance_evaluation::succession.remove.action')), tone: 'rose', run: () => $wire.removeCandidate({{ $candidate->id }}) })"
+                                                class="-mr-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-ink-faint transition hover:bg-rose-50 hover:text-rose-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
                                         @else
                                             <span class="rounded-md px-2 py-0.5 text-[11px] font-semibold {{ $readinessChip[$candidate->readiness] ?? 'bg-zinc-100 text-zinc-500' }}">{{ __('performance_evaluation::succession.readiness.'.$candidate->readiness) }}</span>
                                         @endcan
@@ -225,7 +231,10 @@
                             <span class="inline-flex items-center gap-1 rounded-full bg-zinc-50 px-2.5 py-1 text-[12px] font-medium text-zinc-700 ring-1 ring-inset ring-zinc-200/70">
                                 {{ trim($member->personnel->surname.' '.$member->personnel->name) }}
                                 @can('manage-performance-evaluation')
-                                    <button type="button" wire:click="removeMember({{ $member->id }})" class="text-zinc-300 transition hover:text-rose-500">✕</button>
+                                    @php $removeLabel = __('performance_evaluation::succession.remove.member', ['name' => trim($member->personnel->surname.' '.$member->personnel->name), 'pool' => $pool->name]); $removeConfirm = __('performance_evaluation::succession.remove.member_confirm', ['name' => trim($member->personnel->surname.' '.$member->personnel->name), 'pool' => $pool->name]); @endphp
+                                    <button type="button" aria-label="{{ $removeLabel }}" title="{{ $removeLabel }}"
+                                        x-on:click="$dispatch('confirm-action', { title: @js($removeLabel), message: @js($removeConfirm), confirmText: @js(__('performance_evaluation::succession.remove.action')), tone: 'rose', run: () => $wire.removeMember({{ $member->id }}) })"
+                                        class="-mr-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-ink-faint transition hover:bg-rose-50 hover:text-rose-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300"><svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
                                 @endcan
                             </span>
                         @empty

@@ -36,6 +36,18 @@ class AttendancePuantajHeaderCalendarMarkersTest extends TestCase
             ->assertSeeHtml('data-day-type="holiday"');
     }
 
+    public function test_the_header_row_and_the_name_column_stay_pinned_while_days_scroll(): void
+    {
+        $this->actingAs($this->authorizedUser());
+
+        $html = Livewire::test(PuantajGrid::class, ['year' => 2026, 'month' => 3])->html();
+
+        // the table's own scroller scrolls both axes, so sticky resolves against it
+        $this->assertStringContainsString('max-h-[calc(100dvh-15rem)] overflow-y-auto', $html);
+        $this->assertMatchesRegularExpression('/<th[^>]*class="[^"]*sticky top-0 z-10[^"]*left-0 z-20/s', $html);
+        $this->assertStringNotContainsString('inline-block min-w-full', $html);
+    }
+
     private function authorizedUser(): User
     {
         $role = Role::query()->firstOrCreate([

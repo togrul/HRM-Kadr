@@ -44,13 +44,13 @@ return [
         'present' => 'hazırda',
         'years' => ':count il',
         'months' => ':count ay',
-        'not_set' => 'Qeyd edilməyib',
     ],
 
     'actions' => [
         'new_action' => 'Əməliyyat',
         'add_leave' => 'İcazə əlavə et',
         'issue_order' => 'Əmr ver',
+        'back_to_overview' => 'Baxışa qayıt',
         'more' => 'Daha çox',
         'back_to_list' => 'Siyahıya qayıt',
         'print_cv' => 'CV çap et',

@@ -7,6 +7,7 @@ use App\Models\OnboardingDocumentTemplate;
 use App\Support\Library\AbstractLibraryReadService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -111,6 +112,44 @@ class OnboardingLibraryReadService extends AbstractLibraryReadService
     protected function libraryCachePrefix(): string
     {
         return 'onboarding-library';
+    }
+
+    protected function libraryModel(): string
+    {
+        return OnboardingDocumentTemplate::class;
+    }
+
+    protected function assignmentModel(): string
+    {
+        return OnboardingDocumentAssignment::class;
+    }
+
+    protected function completionRelation(): array
+    {
+        return ['receipt', 'acknowledged_at'];
+    }
+
+    protected function typeColumn(): string
+    {
+        return 'document_type';
+    }
+
+    protected function typeLabel(string $type): string
+    {
+        return __('personnel::my_hr.onboarding.document_types.'.($type ?: 'other'));
+    }
+
+    /**
+     * Documents carry no duration; the version is the next most useful fact on a card.
+     */
+    protected function itemMeta(Model $item): ?string
+    {
+        return filled($item->version) ? 'v'.$item->version : null;
+    }
+
+    protected function itemUrl(Model $item): ?string
+    {
+        return $item->fileUrl();
     }
 
     protected function summaryData(): array

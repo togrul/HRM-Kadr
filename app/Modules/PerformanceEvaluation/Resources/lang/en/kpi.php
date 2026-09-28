@@ -151,7 +151,21 @@ return [
         'approve' => 'Approve',
     ],
 
+    'a11y' => [
+        'cycle' => 'Cycle',
+        'status_filter' => 'Filter by status',
+        'goal' => 'Linked goal for ":kpi"',
+        'transition_reason' => 'Reason',
+        'decision_note' => 'HR note',
+        'checkin_date' => 'Date',
+        'checkin_progress' => 'Progress',
+        'checkin_risks' => 'Risks',
+        'calibration_delta' => 'Adjustment, points',
+    ],
+
     'confirm_transition' => [
+        'reject' => 'You are objecting to the targets: the card goes back to draft with your reason. Continue?',
+        'return' => 'The card goes back to manager review with your reason. Continue?',
         'activate' => 'The agreement step is skipped and the card becomes active now. Continue?',
         'close' => 'The card closes and becomes read-only. Continue?',
         'send_for_agreement' => 'The card goes to the employee for agreement. Without an answer in 3 working days it is accepted automatically. Continue?',
@@ -623,6 +637,7 @@ return [
     ],
     'manager_changed_note' => 'Manager changed: :from → :to. The right to evaluate moved to the new manager.',
     'change_requests' => [
+        'confirm_reject' => 'The target change request will be rejected. Continue?',
         'errors' => [
             'already_decided' => 'This request was already answered.',
             'same_target' => 'The new target equals the current one.',

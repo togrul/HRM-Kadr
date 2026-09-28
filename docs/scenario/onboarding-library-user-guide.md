@@ -1,10 +1,10 @@
-# Uyğunlaşma kitabxanası istifadəçi bələdçisi
+# Adaptasiya kitabxanası istifadəçi bələdçisi
 
 ## Bu modul nə üçündür?
-Uyğunlaşma kitabxanası HR və inzibatçı istifadəçilər üçündür. Burada əməkdaşlara göndərilən tanışlıq və qayda sənədləri hazırlanır, paylanır və izlənir.
+Adaptasiya kitabxanası HR və inzibatçı istifadəçilər üçündür. Burada əməkdaşlara göndərilən tanışlıq və qayda sənədləri hazırlanır, paylanır və izlənir.
 
 ## Harada açılır?
-Sol menyudan `Uyğunlaşma kitabxanası` bölməsini açın.
+Sol menyudan `Adaptasiya kitabxanası` bölməsini açın.
 
 ## Bu modulda əsasən nə edirsiniz?
 - yeni sənəd şablonu yaradırsınız

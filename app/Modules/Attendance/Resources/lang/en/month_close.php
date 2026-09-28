@@ -43,6 +43,15 @@ return [
         'snapshot_queued' => 'Monthly snapshot queued.',
         'export_requires_snapshot' => 'Export requires a fresh monthly snapshot for this period.',
         'export_requires_fresh_snapshot' => 'Export blocked. Ledger changes were detected after the last snapshot; generate a new snapshot first.',
+        'already_closed' => 'This month is already closed.',
+        'already_open' => 'This month is already open — there is nothing to reopen.',
+        'unlock_refused_handed_over' => 'This month has already been handed to, or closed in, the finance system. Coordinate with payroll before reopening it.',
+    ],
+    'confirm' => [
+        'close_title' => 'Close month',
+        'close_message' => ':month will be closed: the monthly summary is regenerated and every daily record of the month is locked. A closed month cannot be edited.',
+        'unlock_title' => 'Reopen month',
+        'unlock_message' => ':month will be reopened and its locks removed. If payroll has already been calculated from it, the two systems may drift apart.',
     ],
     'payroll_headers' => [
         'tabel_no' => 'Tabel no',

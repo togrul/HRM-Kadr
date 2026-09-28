@@ -91,11 +91,34 @@ class SettingsList extends Component
 
         $_key = explode('.', $name)[0];
         $_setting = Setting::where('id', $this->setting[$_key]['id'])->firstOrFail();
+
+        // The stored type, not the client's copy, decides what a valid value is.
+        $this->validate(
+            ["setting.{$_key}.value" => self::valueRules((string) $_setting->type)],
+            [],
+            ["setting.{$_key}.value" => __('services::common.labels.value')],
+        );
+
         $_setting->update([
             'value' => $value,
         ]);
 
         $this->dispatch('settingsUpdated', __('services::settings.messages.saved'));
+    }
+
+    /**
+     * Rules per setting type; the model casts with "{type}val", so anything not bool/string is numeric.
+     *
+     * @return list<string>
+     */
+    public static function valueRules(string $type): array
+    {
+        return match ($type) {
+            'bool' => ['boolean'],
+            'string' => ['nullable', 'string', 'max:255'],
+            'int', 'integer' => ['required', 'integer'],
+            default => ['required', 'numeric'],
+        };
     }
 
     public function setDeleteSettings($settingsId): void

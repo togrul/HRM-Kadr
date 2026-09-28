@@ -29,14 +29,29 @@ return [
     'messages' => [
         'force_delete_confirm' => 'Bu məlumatı silmək istədiyinizə əminsiniz?',
         'delete_order_confirm' => 'Bu əmri silmək istədiyinizə əminsiniz?',
+        'order_duplicated' => 'Əmrin surəti qaralama kimi yaradıldı.',
+        'draft_not_ready' => 'Qaralama əmr təsdiqlənə bilməz — əvvəlcə onu tamamlayıb yadda saxlayın.',
     ],
     'actions' => [
         'open_user_guide' => 'İstifadəçi bələdçisi',
-        'download_now' => 'DOCX faylını indi yüklə',
         'force_delete' => 'Tamamilə sil',
         'restore' => 'Bərpa et',
         'delete' => 'Sil',
         'export_excel' => 'Excel-ə çıxar',
+        'more' => 'Digər əməliyyatlar',
+        'continue' => 'Davam et',
+        'preview' => 'Önizlə',
+        'edit' => 'Redaktə',
+        'duplicate' => 'Kopyala',
+        'download' => 'Yüklə',
+    ],
+    'status' => [
+        'draft' => 'Qaralama',
+    ],
+    'preview' => [
+        'loading' => 'Önizləmə hazırlanır…',
+        'unavailable' => 'Önizləmə yaradıla bilmədi. Sənədi “Yüklə” ilə endirib baxın.',
+        'no_document' => 'Bu əmrin hələ sənədi yoxdur.',
     ],
     'hints' => [
         'docx_only' => 'Yalnız DOCX əmrləri redaktə oluna bilər',

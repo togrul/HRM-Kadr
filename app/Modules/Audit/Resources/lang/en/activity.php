@@ -7,6 +7,7 @@ return [
         'subtitle' => 'Read sign-ins, profile views, and data changes from the audit database. This screen is read-only.',
     ],
     'metrics' => [
+        'filter_hint' => 'Apply as a filter, or clear it',
         'total' => 'Total logs',
         'today' => 'Today',
         'profile_opened' => 'Profile views',

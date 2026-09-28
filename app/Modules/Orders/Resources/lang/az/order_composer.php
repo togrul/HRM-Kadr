@@ -29,7 +29,6 @@ return [
     'actions' => [
         'generate' => 'Önizləməni yarat',
         'download' => 'Word sənədini yüklə',
-        'issue' => 'Əmri yarat və yüklə',
         'preview_word' => 'Önizləmə',
         'download_word' => 'Word yüklə',
         'approve' => 'Təsdiqlə',
@@ -38,6 +37,8 @@ return [
         'revert' => 'Təsdiqi geri al',
         'edit' => 'Əmri redaktə et',
         'save' => 'Dəyişiklikləri yadda saxla',
+        'publish' => 'Nəşr et',
+        'preparing' => 'Hazırlanır',
         'create' => 'Yeni əmr',
         'upload_replace' => 'Word faylını əvəz et',
     ],

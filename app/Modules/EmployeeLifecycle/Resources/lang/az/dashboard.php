@@ -136,6 +136,7 @@ return [
         'start' => 'Başlanğıc',
     ],
     'actions' => [
+        'complete_row' => 'Tamamla',
         'reset_filters' => 'Filterləri sıfırla',
         'reset_short' => 'Sıfırla',
         'create_template' => 'Şablonu yarat',
@@ -161,6 +162,8 @@ return [
         'show_more' => 'Daha çox göstər (:count)',
     ],
     'messages' => [
+        'probation_terminate_title' => 'Sınaq müddətinə xitam verilsin?',
+        'probation_terminate_confirm' => ':name üçün sınaq baxışı «Xitam» qərarı ilə tamamlanacaq. Bu addım əməkdaşın işdən ayrılma prosesinə təsir edir.',
         'template_created' => 'Həyat dövrü şablonu yaradıldı.',
         'template_updated' => 'Həyat dövrü şablonu yeniləndi.',
         'template_task_added' => 'Yeni tapşırıq sətri əlavə olundu.',

@@ -17,17 +17,17 @@ class NotificationList extends Component
 
     const NOTIFICATION_THRESHOLD = 20;
 
-    public function mount(): void
+    /** Opening the inbox no longer marks everything read; the reader does it on purpose. */
+    public function markAllAsRead(): void
     {
         $user = auth()->user();
-        $user
-            ?->unreadNotifications()
-            ->update(['read_at' => now()]);
-
-        if ($user) {
-            app(NotificationCountCache::class)->forgetUser((int) $user->id);
-            $this->dispatchNotificationRefresh();
+        if (! $user) {
+            return;
         }
+
+        $user->unreadNotifications()->update(['read_at' => now()]);
+        app(NotificationCountCache::class)->forgetUser((int) $user->id);
+        $this->dispatchNotificationRefresh();
     }
 
     public function clearNotifications(): void
@@ -99,6 +99,7 @@ class NotificationList extends Component
             return view('notification::livewire.notification.notification-list', [
                 'notifications' => $notifications,
                 'groupedNotifications' => collect([]),
+                'unreadCount' => 0,
             ]);
         }
 
@@ -111,6 +112,8 @@ class NotificationList extends Component
         return view('notification::livewire.notification.notification-list', [
             'notifications' => $notifications,
             'groupedNotifications' => $this->groupedNotifications($notifications->getCollection()),
+            // The whole unread set, not just this page: one cached count query.
+            'unreadCount' => app(NotificationCountCache::class)->unreadCount((int) $user->id),
         ]);
     }
 }

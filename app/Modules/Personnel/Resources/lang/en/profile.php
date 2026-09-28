@@ -44,13 +44,13 @@ return [
         'present' => 'present',
         'years' => ':count y',
         'months' => ':count m',
-        'not_set' => 'Not set',
     ],
 
     'actions' => [
         'new_action' => 'Action',
         'add_leave' => 'Add leave',
         'issue_order' => 'Issue order',
+        'back_to_overview' => 'Back to overview',
         'more' => 'More',
         'back_to_list' => 'Back to list',
         'print_cv' => 'Print CV',

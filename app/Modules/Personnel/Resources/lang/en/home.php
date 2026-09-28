@@ -45,7 +45,7 @@ return [
 
     'attention' => [
         'title' => 'Needs attention',
-        'all_clear' => 'Nothing is waiting on you.',
+        'all_clear' => 'Everything is in order',
         'open' => 'Open',
         'waiting' => 'oldest is :days days old',
         'waiting_today' => 'all filed today',
@@ -127,6 +127,9 @@ return [
         'open' => 'Open',
         'empty' => 'Nothing here is waiting for your decision.',
         'reject_confirm' => ':name — reject this request?',
+        'reason' => 'Rejection reason',
+        'reason_placeholder' => 'Rejection reason (required)',
+        'approve_confirm' => ':name — approve this request?',
         'approved' => 'Approved',
         'rejected' => 'Rejected',
     ],

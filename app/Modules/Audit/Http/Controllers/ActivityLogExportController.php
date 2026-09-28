@@ -17,7 +17,7 @@ class ActivityLogExportController
             ? (string) $request->query('format')
             : 'xlsx';
 
-        $filters = $request->only(['search', 'log_name', 'event', 'date_from', 'date_to']);
+        $filters = $request->only(['search', 'log_name', 'event', 'date_from', 'date_to', 'users_only']);
         $fileName = 'audit-logs-'.now()->format('Ymd-His').'.'.$format;
         $writer = $format === 'csv' ? \Maatwebsite\Excel\Excel::CSV : \Maatwebsite\Excel\Excel::XLSX;
 

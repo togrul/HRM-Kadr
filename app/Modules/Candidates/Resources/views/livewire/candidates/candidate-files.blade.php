@@ -92,7 +92,7 @@
                     <div class="grid gap-3 xl:grid-cols-[minmax(0,1fr),220px]">
                         <div class="space-y-2">
                             <x-label for="draft.display_name">{{ __('candidates::files.labels.display_name') }}</x-label>
-                            <x-livewire-input mode="gray" name="draft.display_name" wire:model.live="draft.display_name"></x-livewire-input>
+                            <x-livewire-input mode="gray" name="draft.display_name" wire:model="draft.display_name"></x-livewire-input>
                             @error('draft.display_name')
                                 <x-validation>{{ $message }}</x-validation>
                             @enderror
@@ -114,7 +114,7 @@
 
                         <div class="space-y-2 xl:col-span-2">
                             <x-label for="draft.notes">{{ __('candidates::files.labels.notes') }}</x-label>
-                            <x-textarea class="!min-h-[64px]" mode="gray" name="draft.notes" wire:model.live="draft.notes"></x-textarea>
+                            <x-textarea class="!min-h-[64px]" mode="gray" name="draft.notes" wire:model="draft.notes"></x-textarea>
                             @error('draft.notes')
                                 <x-validation>{{ $message }}</x-validation>
                             @enderror
@@ -179,13 +179,13 @@
                                             </x-ui.select>
                                             <div class="space-y-1">
                                               <x-label for="files.{{ $key }}.display_name">{{ __('candidates::files.labels.display_name') }}</x-label>
-                                              <x-livewire-input mode="gray" name="files.{{ $key }}.display_name" wire:model.live="files.{{ $key }}.display_name"></x-livewire-input>
+                                              <x-livewire-input mode="gray" name="files.{{ $key }}.display_name" wire:model="files.{{ $key }}.display_name"></x-livewire-input>
                                             </div>
                                         </div>
 
                                         <div class="space-y-1">
                                           <x-label for="files.{{ $key }}.notes">{{ __('candidates::files.labels.notes') }}</x-label>
-                                          <x-textarea class="!min-h-[56px]" mode="gray" name="files.{{ $key }}.notes" wire:model.live="files.{{ $key }}.notes"></x-textarea>
+                                          <x-textarea class="!min-h-[56px]" mode="gray" name="files.{{ $key }}.notes" wire:model="files.{{ $key }}.notes"></x-textarea>
                                         </div>
 
                                         <div class="rounded-[20px] border border-zinc-200 bg-zinc-50 px-3 py-2 shadow-sm">

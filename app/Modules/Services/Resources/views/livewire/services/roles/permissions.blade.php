@@ -1,18 +1,18 @@
-<div class="flex flex-col space-y-4 z-1" x-data="{ openPermissionModal: @entangle('showPermissionModal').live }" wire:key="permissions">
+<div class="flex flex-col space-y-4 z-1" x-data="{ openPermissionModal: @entangle('showPermissionModal').live }" x-init="$watch('openPermissionModal', (open) => open && $nextTick(() => $refs.permissionDialog?.focus()))" wire:key="permissions">
 
     <div
         x-cloak
         x-show="openPermissionModal"
         class="fixed inset-0 z-50 overflow-y-auto !mt-0"
-        x-on:keydown.escape.window="openPermissionModal = false; $wire.closePermissionModal()"
+        x-on:keydown.escape.window="if (openPermissionModal) { openPermissionModal = false; $wire.closePermissionModal() }"
         style="display: none;"
     >
         <div class="flex min-h-screen items-center justify-center px-4 pb-6 pt-8 md:pt-10">
             <div class="absolute inset-0 bg-zinc-900/50" @click="openPermissionModal = false; $wire.closePermissionModal()"></div>
-            <div class="relative z-10 w-full max-w-3xl rounded-2xl border border-zinc-200 bg-white shadow-2xl">
+            <div x-ref="permissionDialog" role="dialog" aria-modal="true" aria-labelledby="permission-modal-title" tabindex="-1" class="relative z-10 w-full max-w-3xl rounded-2xl border border-zinc-200 bg-white shadow-2xl focus:outline-none">
                 <div class="flex items-center justify-between border-b border-zinc-200 px-6 py-3">
                     <div>
-                        <h3 class="text-xl font-semibold text-zinc-800">
+                        <h3 id="permission-modal-title" class="text-xl font-semibold text-zinc-800">
                             {{ $permission_id ? __('services::roles.titles.edit_permission') : __('services::roles.titles.add_permission') }}
                         </h3>
                     </div>

@@ -24,8 +24,24 @@
             'calendar-regimes' => 'calendar_regimes',
         ];
 
-        // Configuration, not daily work: rendered as a separate group after the work tabs.
-        $settingsTabs = ['settings', 'shifts', 'calendar-regimes'];
+        // Three groups, by what the user comes to do: daily work, review/approval, configuration.
+        $tabGroups = [
+            'work_group' => ['overview', 'daily-monitor', 'manager-summary', 'puantaj', 'manual'],
+            'review_group' => ['exceptions', 'overtime', 'month-close', 'history'],
+            'settings_group' => ['settings', 'shifts', 'calendar-regimes'],
+        ];
+        $tabGroups = array_filter(array_map(
+            fn (array $tabs) => array_values(array_intersect($tabs, $availableTabs)),
+            $tabGroups
+        ));
+
+        // Work waiting in a section, shown as the tab's count (real overview figures only).
+        $tabCounts = array_filter([
+            'manual' => (int) ($overview['manual_pending_count'] ?? 0),
+            'daily-monitor' => (int) ($overview['raw_pending_count'] ?? 0),
+            'exceptions' => (int) ($overview['open_exception_count'] ?? 0),
+            'overtime' => (int) ($overview['pending_overtime_count'] ?? 0),
+        ]);
 
         // Durations read as hours ("198", "7:30"); the unit sits beside the number as a suffix.
         $asHours = function (int|float|null $minutes): string {
@@ -36,7 +52,8 @@
         };
     @endphp
 
-    {{-- The panel carries the structure tree; the section nav is a horizontal strip in the page. --}}
+    {{-- The panel carries ONE thing, the structure tree; the section nav lives in the page
+         header, so the two never compete in the same column. --}}
     <x-slot name="sidebar">
         <x-context-panel>
             <livewire:structure.sidebar :selected="$selectedStructureId" wire:key="attendance-structure-sidebar" />
@@ -75,37 +92,70 @@
             </x-pill-button>
         </x-slot:actions>
 
-        {{-- section nav: stays on the page so the panel can give the structure tree its
-             full height, and wraps instead of scrolling so every section is reachable --}}
-        {{-- day-to-day sections first; configuration sits apart as a quieter second group --}}
-        <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <x-filter.nav wrap class="min-w-0">
-                @foreach ($attendanceTabs as $tab => $labelKey)
-                    @continue(! in_array($tab, $availableTabs, true) || in_array($tab, $settingsTabs, true))
-                    <x-filter.item wire:navigate href="{{ $attendanceTabRoute($tab) }}" :active="$activeTab === $tab">
-                        {{ __('attendance::dashboard.tabs.'.$labelKey) }}
-                    </x-filter.item>
+        {{-- Two-level section nav: a segmented control picks the group (İş / Yoxlama / Ayarlar),
+             the underline tabs beside it are that group's sections. Switching a group only
+             reveals its sections (no request); every permitted section stays in the markup.
+             Counts are real pending figures from the overview. --}}
+        @php
+            $activeGroup = collect($tabGroups)->search(fn (array $tabs) => in_array($activeTab, $tabs, true)) ?: array_key_first($tabGroups);
+        @endphp
+        <nav x-data="{ group: @js($activeGroup) }" class="flex flex-col gap-3 md:flex-row md:items-center md:gap-4" aria-label="{{ __('attendance::dashboard.title') }}">
+            <div class="inline-flex shrink-0 self-start rounded-full bg-[#f4f4f5] p-1" role="tablist">
+                @foreach ($tabGroups as $groupKey => $groupTabs)
+                    @php $groupHasWork = collect($groupTabs)->contains(fn (string $tab) => isset($tabCounts[$tab])); @endphp
+                    <button
+                        type="button"
+                        role="tab"
+                        id="attendance-group-{{ $groupKey }}"
+                        aria-controls="attendance-group-panel-{{ $groupKey }}"
+                        x-on:click="group = '{{ $groupKey }}'"
+                        x-bind:aria-selected="(group === '{{ $groupKey }}').toString()"
+                        aria-selected="{{ $groupKey === $activeGroup ? 'true' : 'false' }}"
+                        class="relative inline-flex h-8 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-medium text-ink-muted transition hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 aria-selected:bg-white aria-selected:font-semibold aria-selected:text-ink aria-selected:shadow-[0_1px_2px_rgba(0,0,0,0.08)]"
+                    >
+                        {{ __('attendance::dashboard.tabs.'.$groupKey) }}
+                        @if ($groupHasWork)
+                            <span class="h-1.5 w-1.5 rounded-full bg-[#f97316]" aria-hidden="true"></span>
+                        @endif
+                    </button>
                 @endforeach
-            </x-filter.nav>
+            </div>
 
-            @if (array_intersect($settingsTabs, $availableTabs) !== [])
-                <div class="flex flex-wrap items-center gap-2 border-l border-hairline pl-3">
-                    <span class="flex items-center gap-1 text-[11.5px] font-medium text-ink-faint">
-                        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                        {{ __('attendance::dashboard.tabs.settings_group') }}
-                    </span>
-                    {{-- x-filter.item renders an <li>; outside its <ul> every item grows a list bullet --}}
-                    <x-filter.nav wrap class="min-w-0">
-                        @foreach ($settingsTabs as $tab)
-                            @continue(! in_array($tab, $availableTabs, true))
-                            <x-filter.item wire:navigate href="{{ $attendanceTabRoute($tab) }}" :active="$activeTab === $tab" class="text-ink-muted">
+            <span class="hidden h-5 w-px shrink-0 bg-hairline md:block" aria-hidden="true"></span>
+
+            @foreach ($tabGroups as $groupKey => $groupTabs)
+                <ul
+                    id="attendance-group-panel-{{ $groupKey }}"
+                    role="tabpanel"
+                    aria-labelledby="attendance-group-{{ $groupKey }}"
+                    data-group="{{ $groupKey }}"
+                    x-show="group === '{{ $groupKey }}'"
+                    @if ($groupKey !== $activeGroup) style="display: none" @endif
+                    class="hrm-scroll-hidden -mb-3.5 flex min-w-0 items-stretch gap-5 overflow-x-auto"
+                >
+                    @foreach ($groupTabs as $tab)
+                        @php $isActive = $activeTab === $tab; @endphp
+                        <li class="shrink-0">
+                            <a
+                                href="{{ $attendanceTabRoute($tab) }}"
+                                wire:navigate
+                                @if ($isActive) aria-current="page" @endif
+                                @class([
+                                    'inline-flex h-10 items-center gap-1.5 border-b-2 text-[13px] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400',
+                                    'border-ink font-semibold text-ink' => $isActive,
+                                    'border-transparent font-medium text-ink-muted hover:border-hairline hover:text-ink' => ! $isActive,
+                                ])
+                            >
                                 {{ __('attendance::dashboard.tabs.'.$attendanceTabs[$tab]) }}
-                            </x-filter.item>
-                        @endforeach
-                    </x-filter.nav>
-                </div>
-            @endif
-        </div>
+                                @if (isset($tabCounts[$tab]))
+                                    <span class="hrm-num rounded-full bg-[#fff7ed] px-1.5 text-[11px] font-semibold leading-[18px] text-[#c2410c]">{{ $tabCounts[$tab] }}</span>
+                                @endif
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+            @endforeach
+        </nav>
     </x-page-header>
 
     <div class="space-y-4 px-4 py-4 sm:px-5">
@@ -135,12 +185,38 @@
             <p class="hrm-eyebrow">{{ __('attendance::dashboard.cards.needs_attention') }}</p>
             <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 @foreach ($queueTiles as $tile)
-                    <x-ui.metric-tile
-                        :label="__('attendance::dashboard.metrics.'.$tile['metric'])"
-                        :value="$tile['value']"
-                        :tone="$tile['value'] > 0 ? $tile['tone'] : 'ink'"
-                        :href="in_array($tile['tab'], $availableTabs, true) ? $attendanceTabRoute($tile['tab']) : null"
-                    />
+                    @php
+                        $tileHref = in_array($tile['tab'], $availableTabs, true) ? $attendanceTabRoute($tile['tab']) : null;
+                        $tileEmpty = $tile['value'] === 0;
+                        $tileDot = $tileEmpty ? 'bg-zinc-300' : ($tile['tone'] === 'rose' ? 'bg-[#e11d48]' : 'bg-[#d97706]');
+                        $tileNumber = $tileEmpty ? 'text-ink-faint' : ($tile['tone'] === 'rose' ? 'text-[#be123c]' : 'text-[#b45309]');
+                    @endphp
+                    {{-- the whole card is the link to the queue behind the number; an empty queue
+                         reads quieter but still opens its section --}}
+                    <{{ $tileHref ? 'a' : 'div' }}
+                        @if ($tileHref) href="{{ $tileHref }}" wire:navigate @endif
+                        @class([
+                            'group flex flex-col rounded-2xl border px-4 py-3.5 transition',
+                            'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-2' => $tileHref,
+                            'border-hairline bg-white shadow-card hover:border-zinc-300 hover:shadow-md' => ! $tileEmpty,
+                            'border-hairline bg-[#fafafa] hover:border-zinc-300 hover:bg-white' => $tileEmpty,
+                        ])
+                    >
+                        <div class="flex items-center gap-1.5">
+                            <span class="h-1.5 w-1.5 shrink-0 rounded-full {{ $tileDot }}" aria-hidden="true"></span>
+                            <x-ui.field-label as="div" class="tracking-tight">{{ __('attendance::dashboard.metrics.'.$tile['metric']) }}</x-ui.field-label>
+                        </div>
+                        <p class="hrm-num mt-auto pt-2 text-[21px] font-semibold tracking-[-0.03em] {{ $tileNumber }}">{{ $tile['value'] }}</p>
+                        @if ($tileHref)
+                            <div class="mt-2 flex items-center justify-between gap-2 border-t border-hairline-subtle pt-2 text-[12px]">
+                                <span class="text-ink-faint">{{ $tileEmpty ? __('attendance::dashboard.cards.queue_empty') : '' }}</span>
+                                <span class="inline-flex items-center gap-0.5 font-medium text-ink-muted transition group-hover:text-ink">
+                                    {{ __('attendance::dashboard.cards.open_queue') }}
+                                    <svg class="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                                </span>
+                            </div>
+                        @endif
+                    </{{ $tileHref ? 'a' : 'div' }}>
                 @endforeach
             </div>
         </section>

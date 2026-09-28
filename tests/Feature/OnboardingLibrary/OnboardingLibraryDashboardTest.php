@@ -226,6 +226,39 @@ class OnboardingLibraryDashboardTest extends TestCase
         $this->assertNotSame('—', $recentAssignment['acknowledged_at']);
     }
 
+    public function test_catalog_renders_cards_and_side_panels(): void
+    {
+        Storage::fake('public');
+        $this->seedReferenceData();
+
+        $user = User::factory()->create(['is_active' => true]);
+        $user->givePermissionTo(
+            Permission::findOrCreate('view-onboarding-library', 'web'),
+            Permission::findOrCreate('manage-onboarding-document-templates', 'web'),
+            Permission::findOrCreate('assign-onboarding-documents', 'web'),
+        );
+        $this->actingAs($user);
+
+        Livewire::test(Dashboard::class)
+            ->assertSee('İlk sənədi əlavə edin');
+
+        $component = Livewire::test(Dashboard::class)
+            ->set('templateForm.title', 'Daxili qaydalar')
+            ->set('templateUpload', UploadedFile::fake()->create('rules.pdf', 100, 'application/pdf'))
+            ->call('saveTemplate')
+            ->assertSee('Daxili qaydalar')
+            ->assertSee('v1.0');
+
+        $templateId = (int) $component->get('assignmentForm.template_id');
+
+        $component->call('openAssign', $templateId)
+            ->assertSet('showSideMenu', 'library-assign')
+            ->assertSee('Sənəd təyin et')
+            ->call('prepareNextTemplateVersion', $templateId)
+            ->assertSet('showSideMenu', 'library-create')
+            ->assertSet('templateForm.version', '1.1');
+    }
+
     public function test_dashboard_render_stays_within_query_budget(): void
     {
         Storage::fake('public');

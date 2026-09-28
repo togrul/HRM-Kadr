@@ -147,6 +147,26 @@ class Dashboard extends Component
         }
     }
 
+    /**
+     * Row action on a queue item: opens the completion panel with that item already selected.
+     */
+    public function completeFromQueue(string $queue, int $id): void
+    {
+        $field = match ($queue) {
+            'probation' => 'probation_review_id',
+            'movement' => 'movement_id',
+            'offboarding' => 'offboarding_case_id',
+            default => null,
+        };
+
+        if ($field === null) {
+            return;
+        }
+
+        $this->openPanel('complete');
+        $this->completionForm[$field] = $id;
+    }
+
     public function setStartTab(string $tab): void
     {
         $this->startTab = in_array($tab, ['plan', 'probation', 'movement', 'offboarding'], true) ? $tab : 'plan';

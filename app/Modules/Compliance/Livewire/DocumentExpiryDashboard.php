@@ -5,10 +5,15 @@ namespace App\Modules\Compliance\Livewire;
 use App\Modules\Compliance\Application\Services\DocumentExpiryReadService;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
+use Livewire\WithPagination;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DocumentExpiryDashboard extends Component
 {
+    use WithPagination;
+
+    public const PER_PAGE = DocumentExpiryReadService::PER_PAGE;
+
     public string $search = '';
 
     public string $status = '';
@@ -25,6 +30,14 @@ class DocumentExpiryDashboard extends Component
         $this->search = '';
         $this->status = '';
         $this->type = '';
+        $this->resetPage();
+    }
+
+    public function updated(string $property): void
+    {
+        if (in_array($property, ['search', 'status', 'type'], true)) {
+            $this->resetPage();
+        }
     }
 
     public function exportCsv(DocumentExpiryReadService $service): StreamedResponse
@@ -76,7 +89,7 @@ class DocumentExpiryDashboard extends Component
             'search' => $this->search,
             'status' => $this->status,
             'type' => $this->type,
-        ]);
+        ], $this->getPage(), self::PER_PAGE);
 
         return view('compliance::livewire.document-expiry-dashboard', $payload);
     }

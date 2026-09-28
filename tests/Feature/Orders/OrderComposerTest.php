@@ -57,7 +57,7 @@ class OrderComposerTest extends TestCase
             'personnelId' => $personnel->id,
         ])
             ->set('orderNumber', '214-M')
-            ->set('orderDate', '14 may 2026-cı il')
+            ->set('orderDate', '2026-05-14')
             ->set('fields', ['var_2' => '19.05.2026-cı il'])
             ->call('issue')
             ->assertFileDownloaded('leave_214-M.docx');
@@ -74,6 +74,32 @@ class OrderComposerTest extends TestCase
         $this->assertStringContainsString('Bayramov Ruslan Bəxtiyar oğluna', $text);
         $this->assertStringContainsString('19.05.2026-cı il', $text);
         $this->assertStringNotContainsString('${', $text);
+    }
+
+    public function test_the_native_date_is_required_and_printed_in_long_form(): void
+    {
+        $this->seedTemplate();
+        $personnel = $this->makePersonnel();
+        $this->actingAs($this->userWith('add-orders'));
+
+        $composer = Livewire::test(OrderComposer::class, ['presetCode' => 'leave', 'personnelId' => $personnel->id])
+            ->assertSet('orderDate', now()->format('Y-m-d'))
+            ->set('orderNumber', 'DT-1')
+            ->set('fields', ['var_2' => '19.05.2026'])
+            ->set('orderDate', '')
+            ->call('issue')
+            ->assertHasErrors('orderDate');
+
+        $this->assertFalse(OrderLog::where('order_no', 'DT-1')->exists());
+
+        $composer->set('orderDate', '2026-05-14')->call('issue')->assertHasNoErrors();
+
+        $order = OrderLog::where('order_no', 'DT-1')->firstOrFail();
+        $this->assertSame('14.05.2026-cı il', data_get($order->template_snapshot, 'order_date_text'));
+
+        // Editing reads the stored long form back into the date input.
+        Livewire::test(OrderComposer::class, ['orderId' => $order->id])
+            ->assertSet('orderDate', '2026-05-14');
     }
 
     public function test_issuing_an_order_whose_number_contains_a_slash_downloads_a_safe_filename(): void
@@ -607,7 +633,7 @@ class OrderComposerTest extends TestCase
         // freezes that — re-reading it later still names whoever acted then.
         Livewire::test(OrderComposer::class, ['presetCode' => 'leave', 'personnelId' => $subject->id])
             ->set('orderNumber', 'DLG-IN')
-            ->set('orderDate', '20.05.2026')
+            ->set('orderDate', '2026-05-20')
             ->set('fields', ['var_2' => '20.05.2026'])
             ->call('issue');
 
@@ -619,7 +645,7 @@ class OrderComposerTest extends TestCase
         // An order dated after the window reverts to the permanent chief.
         Livewire::test(OrderComposer::class, ['presetCode' => 'leave', 'personnelId' => $subject->id])
             ->set('orderNumber', 'DLG-OUT')
-            ->set('orderDate', '15.07.2026')
+            ->set('orderDate', '2026-07-15')
             ->set('fields', ['var_2' => '15.07.2026'])
             ->call('issue');
 

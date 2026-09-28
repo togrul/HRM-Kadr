@@ -257,8 +257,8 @@
                         @click="$store.hrmShell.railOpen = false"
                         @class([
                             'hrm-rail-item hrm-rail-link',
-                            'hrm-rail-link--active bg-ink text-[#fafafa]' => $menu->isActive,
-                            'text-ink-muted hover:bg-[#fafafa] hover:text-ink' => ! $menu->isActive,
+                            'hrm-rail-link--active bg-[#ececee] font-semibold text-ink' => $menu->isActive,
+                            'text-ink-muted hover:bg-[#f4f4f5] hover:text-ink' => ! $menu->isActive,
                         ])
                         @if ($menu->isActive) aria-current="page" @endif
                     >
@@ -294,8 +294,8 @@
                             @click="$store.hrmShell.railOpen = false"
                             @class([
                                 'hrm-rail-item hrm-rail-link',
-                                'hrm-rail-link--active bg-ink text-[#fafafa]' => $menu->isActive,
-                                'text-ink-faint hover:bg-[#fafafa] hover:text-ink' => ! $menu->isActive,
+                                'hrm-rail-link--active bg-[#ececee] font-semibold text-ink' => $menu->isActive,
+                                'text-ink-faint hover:bg-[#f4f4f5] hover:text-ink' => ! $menu->isActive,
                             ])
                             @if ($menu->isActive) aria-current="page" @endif
                         >
@@ -324,9 +324,10 @@
                     data-rail-tip="{{ __('ui::menu.items.settings') }}"
                     @class([
                         'hrm-rail-item hrm-rail-link',
-                        'bg-ink text-[#fafafa]' => $settingsActive,
-                        'text-ink-muted hover:bg-[#fafafa] hover:text-ink' => ! $settingsActive,
+                        'hrm-rail-link--active bg-[#ececee] font-semibold text-ink' => $settingsActive,
+                        'text-ink-muted hover:bg-[#f4f4f5] hover:text-ink' => ! $settingsActive,
                     ])
+                    @if ($settingsActive) aria-current="page" @endif
                 >
                     <x-icons.line-settings-icon color="text-current" hover="text-current" size="w-[18px] h-[18px]" />
                     <span class="hrm-rail-label">{{ __('ui::menu.rail.settings') }}</span>

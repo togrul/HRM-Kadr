@@ -136,6 +136,7 @@ return [
         'start' => 'Start',
     ],
     'actions' => [
+        'complete_row' => 'Complete',
         'reset_filters' => 'Reset filters',
         'reset_short' => 'Reset',
         'create_template' => 'Create template',
@@ -161,6 +162,8 @@ return [
         'show_more' => 'Show more (:count)',
     ],
     'messages' => [
+        'probation_terminate_title' => 'Terminate the probation?',
+        'probation_terminate_confirm' => 'The probation review for :name will be completed with a “Terminate” decision. This affects the employee\'s separation process.',
         'template_created' => 'Lifecycle template was created.',
         'template_updated' => 'Lifecycle template was updated.',
         'template_task_added' => 'New task row was added.',

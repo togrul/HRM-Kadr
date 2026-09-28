@@ -152,7 +152,11 @@ class PuantajGrid extends Component
      */
     private function buildHeaders(array $days, Carbon $from, array $calendarOverrides): array
     {
-        $headers = [__('attendance::puantaj.headers.personnel')];
+        // Pinned left (and, through the table's sticky header, top) so the name stays in view.
+        $headers = [[
+            'label' => __('attendance::puantaj.headers.personnel'),
+            'th_classes' => 'left-0 z-20',
+        ]];
 
         foreach ($days as $day) {
             $date = $from->copy()->day($day);

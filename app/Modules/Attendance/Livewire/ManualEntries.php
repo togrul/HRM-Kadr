@@ -266,13 +266,21 @@ class ManualEntries extends Component
             abort(403);
         }
 
+        // The person whose entry is turned down has to be told why: the reason is stored on the
+        // entry and in the audit log, so it cannot be skipped.
+        $this->validate(
+            ['rejectNotes.'.$entryId => ['required', 'string', 'min:3', 'max:1000']],
+            [],
+            ['rejectNotes.'.$entryId => __('attendance::manual_entries.labels.reject_note')]
+        );
+
         $entry = AttendanceManualEntry::query()->find($entryId);
         if (! $entry) {
             return;
         }
 
         try {
-            $service->reject($entry, (int) Auth::id(), (string) ($this->rejectNotes[$entryId] ?? ''));
+            $service->reject($entry, (int) Auth::id(), trim((string) $this->rejectNotes[$entryId]));
         } catch (ValidationException $exception) {
             $message = collect($exception->errors())->flatten()->first() ?: __('attendance::manual_entries.messages.validation_failed');
             $this->dispatch('notify', type: 'error', message: $message);

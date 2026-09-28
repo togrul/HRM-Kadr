@@ -86,11 +86,31 @@
 
     {{-- ===================== body ===================== --}}
     <div class="flex flex-col gap-4 px-4 py-4 sm:px-5">
-        <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            <x-ui.metric-tile :label="__('audit::activity.metrics.total')" :value="$num($summary['total'])" />
-            <x-ui.metric-tile :label="__('audit::activity.metrics.today')" :value="$num($summary['today'])" tone="green" />
-            <x-ui.metric-tile :label="__('audit::activity.metrics.profile_opened')" :value="$num($summary['profile_opened'])" tone="blue" />
-            <x-ui.metric-tile :label="__('audit::activity.metrics.users')" :value="$num($summary['users'])" tone="violet" />
+        {{-- the metric cards double as filters: click applies, a second click clears --}}
+        <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            @foreach ([
+                'total' => 'ink',
+                'today' => 'green',
+                'profile_opened' => 'blue',
+                'users' => 'violet',
+            ] as $metric => $tone)
+                @php $metricOn = $this->metricActive($metric); @endphp
+                <button
+                    type="button"
+                    wire:key="audit-metric-{{ $metric }}"
+                    wire:click="toggleMetric('{{ $metric }}')"
+                    aria-pressed="{{ $metricOn ? 'true' : 'false' }}"
+                    title="{{ __('audit::activity.metrics.filter_hint') }}"
+                    class="rounded-2xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
+                >
+                    <x-ui.metric-tile
+                        :label="__('audit::activity.metrics.'.$metric)"
+                        :value="$num($summary[$metric])"
+                        :tone="$tone"
+                        class="h-full transition hover:border-zinc-300 {{ $metricOn ? '!border-ink !bg-[#f4f4f5]' : '' }}"
+                    />
+                </button>
+            @endforeach
         </section>
 
         <section class="overflow-hidden rounded-xl border border-hairline bg-white">

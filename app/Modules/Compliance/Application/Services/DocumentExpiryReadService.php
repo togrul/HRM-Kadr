@@ -4,48 +4,82 @@ namespace App\Modules\Compliance\Application\Services;
 
 use App\Support\Database\InstalledTables;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Document compliance rows, built as ONE SQL union so the database filters, sorts and
+ * pages them: existing documents (service cards, passports, contracts) with their status
+ * computed in a CASE, plus one "missing" branch per required document type
+ * (personnel with no such document). The dashboard never loads more than a page of rows.
+ */
 class DocumentExpiryReadService
 {
-    public function dashboard(array $filters = []): array
+    public const PER_PAGE = 25;
+
+    /**
+     * Document type => source table and expiry column. The array order is also the
+     * tie-break order of the rows (cards, passports, contracts, then missing rows).
+     */
+    private const DOCUMENT_SOURCES = [
+        'service_card' => ['table' => 'personnel_cards', 'expires' => 'valid_date'],
+        'passport' => ['table' => 'personnel_passports', 'expires' => 'valid_date'],
+        'contract' => ['table' => 'personnel_contracts', 'expires' => 'contract_ends_at'],
+    ];
+
+    private const STATUSES = ['expired', 'expiring_30', 'expiring_60', 'valid', 'missing'];
+
+    public function dashboard(array $filters = [], int $page = 1, int $perPage = self::PER_PAGE): array
     {
-        $allRows = $this->allRows();
-        $rows = $this->applyFilters($allRows, $filters);
-        $structureScores = $this->structureScoresFromRows($allRows);
-        $requiredTotal = $allRows->whereIn('status', ['expired', 'valid', 'expiring_30', 'expiring_60', 'missing'])->count();
-        $healthyTotal = $allRows->whereIn('status', ['valid', 'expiring_30', 'expiring_60'])->count();
+        $base = $this->unionQuery();
+        $status = (string) ($filters['status'] ?? '');
+        $type = (string) ($filters['type'] ?? '');
 
         // A facet counts inside the OTHER filters but not inside itself: status numbers keep
         // the type filter and drop the status one, and vice versa. Counting the fully
         // filtered set instead would leave the selected row as the only non-zero one, and
         // the facet could never be clicked back out of.
-        $statusScope = $this->applyFilters($allRows, ['search' => $filters['search'] ?? '', 'type' => $filters['type'] ?? '']);
-        $typeScope = $this->applyFilters($allRows, ['search' => $filters['search'] ?? '', 'status' => $filters['status'] ?? '']);
+        $facets = $base === null ? collect() : $this->applySearch(clone $base, $filters['search'] ?? '')
+            ->selectRaw('status, document_type, COUNT(*) as aggregate')
+            ->groupBy('status', 'document_type')
+            ->get();
+
+        $statusScope = $facets->when($type !== '', fn (Collection $rows) => $rows->where('document_type', $type));
+        $typeScope = $facets->when($status !== '', fn (Collection $rows) => $rows->where('status', $status));
+
+        $structureStatus = $this->structureStatusCounts($base);
+        $requiredTotal = $structureStatus->whereIn('status', self::STATUSES)->sum('aggregate');
+        $healthyTotal = $structureStatus->whereIn('status', ['valid', 'expiring_30', 'expiring_60'])->sum('aggregate');
 
         return [
             'summary' => [
-                'total' => $statusScope->count(),
-                'expired' => $statusScope->where('status', 'expired')->count(),
-                'expiring_30' => $statusScope->where('status', 'expiring_30')->count(),
-                'expiring_60' => $statusScope->where('status', 'expiring_60')->count(),
-                'valid' => $statusScope->where('status', 'valid')->count(),
-                'missing' => $statusScope->where('status', 'missing')->count(),
+                'total' => (int) $statusScope->sum('aggregate'),
+                'expired' => (int) $statusScope->where('status', 'expired')->sum('aggregate'),
+                'expiring_30' => (int) $statusScope->where('status', 'expiring_30')->sum('aggregate'),
+                'expiring_60' => (int) $statusScope->where('status', 'expiring_60')->sum('aggregate'),
+                'valid' => (int) $statusScope->where('status', 'valid')->sum('aggregate'),
+                'missing' => (int) $statusScope->where('status', 'missing')->sum('aggregate'),
                 'compliance_score' => $requiredTotal > 0 ? (int) round(($healthyTotal / $requiredTotal) * 100) : 100,
             ],
-            'typeCounts' => collect(['service_card', 'passport', 'contract'])
-                ->mapWithKeys(fn (string $type): array => [$type => $typeScope->where('document_type', $type)->count()])
+            'typeCounts' => collect(array_keys(self::DOCUMENT_SOURCES))
+                ->mapWithKeys(fn (string $key): array => [$key => (int) $typeScope->where('document_type', $key)->sum('aggregate')])
                 ->all(),
-            'rows' => $rows,
-            'structureScores' => $structureScores,
+            'rows' => $this->paginate($base === null ? null : $this->filtered(clone $base, $filters), $page, $perPage),
+            'structureScores' => $this->scoresFromCounts($structureStatus),
         ];
     }
 
     public function rows(array $filters = []): Collection
     {
-        return $this->applyFilters($this->allRows(), $filters);
+        $base = $this->unionQuery();
+
+        if ($base === null) {
+            return collect();
+        }
+
+        return $this->filtered($base, $filters)->get()->map(fn (object $row): array => $this->shape($row));
     }
 
     public function exportRows(array $filters = []): Collection
@@ -72,67 +106,87 @@ class DocumentExpiryReadService
             ->values();
     }
 
-    private function allRows(): Collection
+    public function structureScores(): Collection
     {
-        $sourceRows = $this->sourceRows();
-        $requirements = $this->requirements()->where('is_required', true);
-
-        return $sourceRows
-            ->concat($this->missingRows($sourceRows, $requirements))
-            ->values();
+        return $this->scoresFromCounts($this->structureStatusCounts($this->unionQuery()));
     }
 
-    private function applyFilters(Collection $rows, array $filters = []): Collection
+    private function paginate(?Builder $query, int $page, int $perPage): LengthAwarePaginator
     {
-        $search = mb_strtolower(trim((string) ($filters['search'] ?? '')));
+        $total = $query === null ? 0 : $query->getCountForPagination();
+        $page = min(max(1, $page), max(1, (int) ceil($total / $perPage)));
+
+        $rows = $total === 0
+            ? collect()
+            : $query->forPage($page, $perPage)->get()->map(fn (object $row): array => $this->shape($row));
+
+        return new LengthAwarePaginator($rows, $total, $perPage, $page);
+    }
+
+    private function filtered(Builder $query, array $filters): Builder
+    {
         $status = (string) ($filters['status'] ?? '');
         $type = (string) ($filters['type'] ?? '');
 
-        return $rows
-            ->when($search !== '', fn (Collection $rows) => $rows->filter(fn (array $row): bool => str_contains(mb_strtolower(implode(' ', [
-                $row['personnel_name'],
-                $row['tabel_no'],
-                $row['document_label'],
-                $row['document_number'],
-                $row['structure_name'],
-                $row['position_name'],
-            ])), $search)))
-            ->when($status !== '', fn (Collection $rows) => $rows->where('status', $status))
-            ->when($type !== '', fn (Collection $rows) => $rows->where('document_type', $type))
-            ->sortBy(fn (array $row): string => ($row['expires_at_sort'] ?? '9999-12-31').'|'.$row['personnel_name'].'|'.$row['document_label'])
-            ->values();
+        return $this->applySearch($query, $filters['search'] ?? '')
+            ->when($status !== '', fn (Builder $query) => $query->where('status', $status))
+            ->when($type !== '', fn (Builder $query) => $query->where('document_type', $type))
+            // Byte order, like the old PHP string sort — MySQL's unicode_ci would put Ə next to E.
+            ->orderByRaw($this->isMysql() ? 'CAST(sort_text AS BINARY)' : 'sort_text')
+            ->orderBy('branch')
+            ->orderBy('row_id')
+            ->select([
+                'record_id', 'document_type', 'document_label', 'document_number', 'expires_on',
+                'status', 'tabel_no', 'personnel_name', 'structure_name', 'position_name',
+            ]);
     }
 
-    private function sourceRows(): Collection
+    private function applySearch(Builder $query, mixed $search): Builder
     {
-        return collect()
-            ->concat($this->serviceCards())
-            ->concat($this->passports())
-            ->concat($this->contracts())
-            ->values();
+        $search = trim((string) $search);
+
+        if ($search === '') {
+            return $query;
+        }
+
+        // ponytail: LOWER()+LIKE folds case per DB — MySQL (unicode_ci) also folds non-ASCII
+        // and accents, SQLite only folds ASCII. PHP's mb_strtolower() sat between the two.
+        return $query->whereRaw(
+            "LOWER(haystack) LIKE LOWER(?) ESCAPE '!'",
+            ['%'.str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $search).'%']
+        );
     }
 
-    public function structureScores(): Collection
+    private function structureStatusCounts(?Builder $base): Collection
     {
-        return $this->structureScoresFromRows($this->allRows());
+        if ($base === null) {
+            return collect();
+        }
+
+        return (clone $base)
+            ->selectRaw('structure_name, status, COUNT(*) as aggregate')
+            ->groupBy('structure_name', 'status')
+            ->get()
+            ->map(fn (object $row): object => (object) [
+                'structure_name' => (string) $row->structure_name,
+                'status' => (string) $row->status,
+                'aggregate' => (int) $row->aggregate,
+            ]);
     }
 
-    private function structureScoresFromRows(Collection $rows): Collection
+    private function scoresFromCounts(Collection $counts): Collection
     {
-        return $rows->groupBy('structure_name')
+        return $counts->groupBy('structure_name')
             ->map(function (Collection $rows, string $structureName): array {
-                $total = $rows->count();
-                $missing = $rows->where('status', 'missing')->count();
-                $expired = $rows->where('status', 'expired')->count();
-                $atRisk = $rows->whereIn('status', ['missing', 'expired', 'expiring_30'])->count();
-                $healthy = $rows->whereIn('status', ['valid', 'expiring_30', 'expiring_60'])->count();
+                $total = $rows->sum('aggregate');
+                $healthy = $rows->whereIn('status', ['valid', 'expiring_30', 'expiring_60'])->sum('aggregate');
 
                 return [
                     'structure_name' => $structureName,
                     'total' => $total,
-                    'missing' => $missing,
-                    'expired' => $expired,
-                    'at_risk' => $atRisk,
+                    'missing' => $rows->where('status', 'missing')->sum('aggregate'),
+                    'expired' => $rows->where('status', 'expired')->sum('aggregate'),
+                    'at_risk' => $rows->whereIn('status', ['missing', 'expired', 'expiring_30'])->sum('aggregate'),
                     'score' => $total > 0 ? (int) round(($healthy / $total) * 100) : 100,
                 ];
             })
@@ -144,127 +198,229 @@ class DocumentExpiryReadService
             ->values();
     }
 
-    private function serviceCards(): Collection
+    /**
+     * The union of every document branch and every missing-document branch, wrapped so
+     * the caller can filter, aggregate and page it. Null when there is nothing to read.
+     */
+    private function unionQuery(): ?Builder
     {
-        if (! InstalledTables::has('personnel_cards')) {
-            return collect();
+        if (! InstalledTables::has('personnels')) {
+            return null;
         }
 
-        return $this->basePersonnelQuery('personnel_cards')
-            ->select([
-                'personnel_cards.id',
-                'personnel_cards.card_number as document_number',
-                'personnel_cards.valid_date as expires_at',
-                'personnels.tabel_no',
-                'personnels.surname',
-                'personnels.name',
-                'personnels.patronymic',
-                'structures.name as structure_name',
-                'positions.name as position_name',
-            ])
-            ->get()
-            ->map(fn ($row): array => $this->row($row, 'service_card', __('compliance::documents.types.service_card')));
+        $branches = [];
+        $branch = 0;
+
+        foreach (self::DOCUMENT_SOURCES as $type => $source) {
+            if (InstalledTables::has($source['table'])) {
+                $branches[] = $this->documentBranch($branch, $type, $source['table'], $source['expires']);
+            }
+            $branch++;
+        }
+
+        foreach ($this->requirements()->where('is_required', true) as $requirement) {
+            $branches[] = $this->missingBranch($branch++, $requirement);
+        }
+
+        if ($branches === []) {
+            return null;
+        }
+
+        $union = array_shift($branches);
+
+        foreach ($branches as $query) {
+            $union->unionAll($query);
+        }
+
+        return DB::query()->fromSub($union, 'compliance_rows');
     }
 
-    private function passports(): Collection
+    private function documentBranch(int $branch, string $type, string $table, string $expiresColumn): Builder
     {
-        if (! InstalledTables::has('personnel_passports')) {
-            return collect();
+        $label = __('compliance::documents.types.'.$type);
+        $expires = "NULLIF(SUBSTR({$table}.{$expiresColumn}, 1, 10), '')";
+        [$number, $numberBindings] = $this->documentNumberSql($type, $table);
+
+        // Same thresholds as the old PHP match on days left: < 0 expired, <= 30, <= 60, else
+        // valid; no expiry date is valid. Compared as Y-m-d strings against PHP's today().
+        $status = "CASE WHEN {$expires} IS NULL THEN 'valid'"
+            ." WHEN {$expires} < ? THEN 'expired'"
+            ." WHEN {$expires} <= ? THEN 'expiring_30'"
+            ." WHEN {$expires} <= ? THEN 'expiring_60'"
+            ." ELSE 'valid' END";
+        $statusBindings = [
+            today()->toDateString(),
+            today()->addDays(30)->toDateString(),
+            today()->addDays(60)->toDateString(),
+        ];
+
+        $query = DB::table($table)
+            ->join('personnels', 'personnels.tabel_no', '=', "{$table}.tabel_no")
+            ->leftJoin('structures', 'structures.id', '=', 'personnels.structure_id')
+            ->leftJoin('positions', 'positions.id', '=', 'personnels.position_id')
+            ->whereNull('personnels.deleted_at');
+
+        if ($type === 'contract') {
+            $query->leftJoin('ranks', 'ranks.id', '=', "{$table}.rank_id");
         }
 
-        return $this->basePersonnelQuery('personnel_passports')
-            ->select([
-                'personnel_passports.id',
-                'personnel_passports.serial_number as document_number',
-                'personnel_passports.valid_date as expires_at',
-                'personnels.tabel_no',
-                'personnels.surname',
-                'personnels.name',
-                'personnels.patronymic',
-                'structures.name as structure_name',
-                'positions.name as position_name',
-            ])
-            ->get()
-            ->map(fn ($row): array => $this->row($row, 'passport', __('compliance::documents.types.passport')));
+        return $this->selectColumns($query, [
+            'branch' => ['?', [$branch]],
+            'row_id' => ["{$table}.id", []],
+            'record_id' => ["{$table}.id", []],
+            'document_type' => ['?', [$type]],
+            'document_label' => ['?', [$label]],
+            'document_number' => [$number, $numberBindings],
+            'expires_on' => [$expires, []],
+            'status' => [$status, $statusBindings],
+            'sort_key' => ["COALESCE({$expires}, '9999-12-31')", []],
+        ]);
     }
 
-    private function contracts(): Collection
+    private function missingBranch(int $branch, array $requirement): Builder
     {
-        if (! InstalledTables::has('personnel_contracts')) {
-            return collect();
+        $query = DB::table('personnels')
+            ->leftJoin('structures', 'structures.id', '=', 'personnels.structure_id')
+            ->leftJoin('positions', 'positions.id', '=', 'personnels.position_id')
+            ->whereNull('personnels.deleted_at');
+
+        $source = self::DOCUMENT_SOURCES[$requirement['key']] ?? null;
+
+        if ($source !== null && InstalledTables::has($source['table'])) {
+            $query->whereNotExists(fn (Builder $documents) => $documents
+                ->selectRaw('1')
+                ->from($source['table'])
+                ->whereColumn("{$source['table']}.tabel_no", 'personnels.tabel_no'));
         }
 
-        return $this->basePersonnelQuery('personnel_contracts')
-            ->leftJoin('ranks', 'ranks.id', '=', 'personnel_contracts.rank_id')
-            ->select([
-                'personnel_contracts.id',
-                'personnel_contracts.contract_ends_at as expires_at',
-                'personnel_contracts.contract_date',
-                'personnel_contracts.contract_duration',
-                'personnels.tabel_no',
-                'personnels.surname',
-                'personnels.name',
-                'personnels.patronymic',
-                'structures.name as structure_name',
-                'positions.name as position_name',
-                'ranks.name_az as rank_name',
-            ])
-            ->get()
-            ->map(function ($row): array {
-                $row->document_number = trim(implode(' · ', array_filter([
-                    $row->rank_name,
-                    $row->contract_date ? __('compliance::documents.labels.contract_from', ['date' => $row->contract_date]) : null,
-                    $row->contract_duration ? __('compliance::documents.labels.contract_duration', ['months' => $row->contract_duration]) : null,
-                ])));
-
-                return $this->row($row, 'contract', __('compliance::documents.types.contract'));
-            });
+        return $this->selectColumns($query, [
+            'branch' => ['?', [$branch]],
+            'row_id' => ['personnels.id', []],
+            'record_id' => ['NULL', []],
+            'document_type' => ['?', [$requirement['key']]],
+            'document_label' => ['?', [$requirement['label']]],
+            'document_number' => ['?', [__('compliance::documents.labels.required_document')]],
+            'expires_on' => ['NULL', []],
+            'status' => ["'missing'", []],
+            'sort_key' => ["'0000-00-00'", []],
+        ]);
     }
 
-    private function missingRows(?Collection $sourceRows = null, ?Collection $requirements = null): Collection
+    /**
+     * Adds the personnel columns plus the derived sort / search columns, so every branch
+     * selects the same column list in the same order.
+     *
+     * @param  array<string, array{0: string, 1: array<int, mixed>}>  $columns
+     */
+    private function selectColumns(Builder $query, array $columns): Builder
     {
-        $sourceRows ??= $this->sourceRows();
-        $requirements ??= $this->requirements()->where('is_required', true);
+        $unassigned = __('compliance::documents.labels.unassigned');
 
-        if ($requirements->isEmpty()) {
-            return collect();
+        $columns += [
+            'tabel_no' => ["COALESCE(personnels.tabel_no, '')", []],
+            'personnel_name' => [$this->personnelNameSql(), []],
+            'structure_name' => ["COALESCE(NULLIF(structures.name, ''), ?)", [$unassigned]],
+            'position_name' => ["COALESCE(NULLIF(positions.name, ''), ?)", [$unassigned]],
+        ];
+
+        // Old PHP sort key: expires_at_sort|personnel_name|document_label.
+        $columns['sort_text'] = [
+            $this->concat($columns['sort_key'][0], "'|'", $columns['personnel_name'][0], "'|'", $columns['document_label'][0]),
+            [...$columns['sort_key'][1], ...$columns['personnel_name'][1], ...$columns['document_label'][1]],
+        ];
+
+        // Old PHP search haystack: the six visible fields joined by a space.
+        $haystackParts = ['personnel_name', 'tabel_no', 'document_label', 'document_number', 'structure_name', 'position_name'];
+        $haystackSql = [];
+        $haystackBindings = [];
+        foreach ($haystackParts as $index => $part) {
+            if ($index > 0) {
+                $haystackSql[] = "' '";
+            }
+            $haystackSql[] = $columns[$part][0];
+            array_push($haystackBindings, ...$columns[$part][1]);
+        }
+        $columns['haystack'] = [$this->concat(...$haystackSql), $haystackBindings];
+
+        unset($columns['sort_key']);
+
+        $sql = [];
+        $bindings = [];
+        foreach ($columns as $alias => [$expression, $expressionBindings]) {
+            $sql[] = "{$expression} as {$alias}";
+            array_push($bindings, ...$expressionBindings);
         }
 
-        $present = $sourceRows
-            ->groupBy('tabel_no')
-            ->map(fn (Collection $rows): array => $rows->pluck('document_type')->unique()->values()->all());
+        return $query->selectRaw(implode(', ', $sql), $bindings);
+    }
 
-        return $this->personnelRows()
-            ->flatMap(function ($personnel) use ($requirements, $present): Collection {
-                $presentTypes = $present->get((string) $personnel->tabel_no, []);
+    /**
+     * @return array{0: string, 1: array<int, string>}
+     */
+    private function documentNumberSql(string $type, string $table): array
+    {
+        return match ($type) {
+            'service_card' => ["COALESCE({$table}.card_number, '')", []],
+            'passport' => ["COALESCE({$table}.serial_number, '')", []],
+            'contract' => $this->contractNumberSql($table),
+        };
+    }
 
-                return $requirements
-                    ->reject(fn (array $requirement): bool => in_array($requirement['key'], $presentTypes, true))
-                    ->map(fn (array $requirement): array => [
-                        'document_type' => $requirement['key'],
-                        'document_label' => $requirement['label'],
-                        'record_id' => null,
-                        'document_number' => __('compliance::documents.labels.required_document'),
-                        'expires_at' => __('compliance::documents.labels.not_available'),
-                        'expires_at_sort' => '0000-00-00',
-                        'days_left' => null,
-                        'status' => 'missing',
-                        'tabel_no' => (string) $personnel->tabel_no,
-                        'personnel_name' => $this->personnelName($personnel),
-                        'structure_name' => $personnel->structure_name ?: __('compliance::documents.labels.unassigned'),
-                        'position_name' => $personnel->position_name ?: __('compliance::documents.labels.unassigned'),
-                    ]);
-            })
-            ->values();
+    /**
+     * "rank · From <date> · <n> months", skipping empty parts — the old PHP
+     * implode(' · ', array_filter([...])), with the translated templates split around
+     * their placeholder.
+     *
+     * @return array{0: string, 1: array<int, string>}
+     */
+    private function contractNumberSql(string $table): array
+    {
+        [$fromPrefix, $fromSuffix] = explode("\u{0}", __('compliance::documents.labels.contract_from', ['date' => "\u{0}"]), 2) + [1 => ''];
+        [$durationPrefix, $durationSuffix] = explode("\u{0}", __('compliance::documents.labels.contract_duration', ['months' => "\u{0}"]), 2) + [1 => ''];
+
+        $separator = "' · '";
+        $rank = "CASE WHEN COALESCE(ranks.name_az, '') = '' THEN '' ELSE ".$this->concat($separator, 'ranks.name_az').' END';
+        $from = "CASE WHEN {$table}.contract_date IS NULL THEN '' ELSE ".$this->concat($separator, '?', "{$table}.contract_date", '?').' END';
+        $duration = "CASE WHEN COALESCE({$table}.contract_duration, 0) = 0 THEN '' ELSE "
+            .$this->concat($separator, '?', "CAST({$table}.contract_duration AS CHAR)", '?').' END';
+
+        return [
+            'TRIM(SUBSTR('.$this->concat($rank, $from, $duration).', 4))',
+            [$fromPrefix, $fromSuffix, $durationPrefix, $durationSuffix],
+        ];
+    }
+
+    private function personnelNameSql(): string
+    {
+        $part = fn (string $column): string => "CASE WHEN COALESCE(personnels.{$column}, '') = '' THEN '' ELSE "
+            .$this->concat("' '", "personnels.{$column}").' END';
+
+        return 'TRIM('.$this->concat($part('surname'), $part('name'), $part('patronymic')).')';
+    }
+
+    /**
+     * MySQL concatenates with CONCAT(), SQLite with ||.
+     * Every part must already be non-null.
+     */
+    private function concat(string ...$parts): string
+    {
+        return $this->isMysql()
+            ? 'CONCAT('.implode(', ', $parts).')'
+            : '('.implode(' || ', $parts).')';
+    }
+
+    private function isMysql(): bool
+    {
+        return in_array(DB::connection()->getDriverName(), ['mysql', 'mariadb'], true);
     }
 
     private function requirements(): Collection
     {
         if (! InstalledTables::has('compliance_document_requirements')) {
-            return collect([
-                ['key' => 'service_card', 'label' => __('compliance::documents.types.service_card'), 'is_required' => true],
-                ['key' => 'passport', 'label' => __('compliance::documents.types.passport'), 'is_required' => true],
-                ['key' => 'contract', 'label' => __('compliance::documents.types.contract'), 'is_required' => true],
+            return collect(array_keys(self::DOCUMENT_SOURCES))->map(fn (string $key): array => [
+                'key' => $key,
+                'label' => __('compliance::documents.types.'.$key),
+                'is_required' => true,
             ]);
         }
 
@@ -281,69 +437,26 @@ class DocumentExpiryReadService
             ]);
     }
 
-    private function personnelRows(): Collection
+    private function shape(object $row): array
     {
-        if (! InstalledTables::has('personnels')) {
-            return collect();
-        }
-
-        return DB::table('personnels')
-            ->leftJoin('structures', 'structures.id', '=', 'personnels.structure_id')
-            ->leftJoin('positions', 'positions.id', '=', 'personnels.position_id')
-            ->whereNull('personnels.deleted_at')
-            ->select([
-                'personnels.tabel_no',
-                'personnels.surname',
-                'personnels.name',
-                'personnels.patronymic',
-                'structures.name as structure_name',
-                'positions.name as position_name',
-            ])
-            ->get();
-    }
-
-    private function basePersonnelQuery(string $table): Builder
-    {
-        return DB::table($table)
-            ->join('personnels', 'personnels.tabel_no', '=', "{$table}.tabel_no")
-            ->leftJoin('structures', 'structures.id', '=', 'personnels.structure_id')
-            ->leftJoin('positions', 'positions.id', '=', 'personnels.position_id')
-            ->whereNull('personnels.deleted_at');
-    }
-
-    private function row(object $row, string $type, string $label): array
-    {
-        $expiresAt = $row->expires_at ? Carbon::parse($row->expires_at)->startOfDay() : null;
-        $daysLeft = $expiresAt ? today()->diffInDays($expiresAt, false) : null;
+        $missing = $row->status === 'missing';
+        $expiresAt = $row->expires_on !== null ? Carbon::parse($row->expires_on)->startOfDay() : null;
 
         return [
-            'document_type' => $type,
-            'document_label' => $label,
-            'record_id' => (int) $row->id,
+            'document_type' => (string) $row->document_type,
+            'document_label' => (string) $row->document_label,
+            'record_id' => $row->record_id !== null ? (int) $row->record_id : null,
             'document_number' => (string) $row->document_number,
-            'expires_at' => $expiresAt?->toDateString() ?: __('compliance::documents.labels.indefinite'),
-            'expires_at_sort' => $expiresAt?->toDateString() ?: '9999-12-31',
-            'days_left' => $daysLeft !== null ? (int) $daysLeft : null,
-            'status' => $daysLeft !== null ? $this->status($daysLeft) : 'valid',
+            'expires_at' => $missing
+                ? __('compliance::documents.labels.not_available')
+                : ($expiresAt?->toDateString() ?: __('compliance::documents.labels.indefinite')),
+            'expires_at_sort' => $missing ? '0000-00-00' : ($expiresAt?->toDateString() ?: '9999-12-31'),
+            'days_left' => $expiresAt !== null ? (int) today()->diffInDays($expiresAt, false) : null,
+            'status' => (string) $row->status,
             'tabel_no' => (string) $row->tabel_no,
-            'personnel_name' => $this->personnelName($row),
-            'structure_name' => $row->structure_name ?: __('compliance::documents.labels.unassigned'),
-            'position_name' => $row->position_name ?: __('compliance::documents.labels.unassigned'),
+            'personnel_name' => (string) $row->personnel_name,
+            'structure_name' => (string) $row->structure_name,
+            'position_name' => (string) $row->position_name,
         ];
-    }
-
-    private function personnelName(object $row): string
-    {
-        return trim(implode(' ', array_filter([$row->surname, $row->name, $row->patronymic])));
-    }
-
-    private function status(int $daysLeft): string
-    {
-        return match (true) {
-            $daysLeft < 0 => 'expired',
-            $daysLeft <= 30 => 'expiring_30',
-            $daysLeft <= 60 => 'expiring_60',
-            default => 'valid',
-        };
     }
 }

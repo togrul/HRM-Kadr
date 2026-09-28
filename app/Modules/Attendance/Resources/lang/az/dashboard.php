@@ -20,6 +20,8 @@ return [
         'open_user_guide' => 'İstifadəçi bələdçisi',
     ],
     'tabs' => [
+        'work_group' => 'İş',
+        'review_group' => 'Yoxlama',
         'settings_group' => 'Ayarlar',
         'overview' => 'Xülasə',
         'daily_monitor' => 'Günlük monitor',
@@ -38,6 +40,8 @@ return [
         'needs_attention' => 'Diqqət tələb edir',
         'attendance_statistics' => 'Davamiyyət statistikası',
         'process_statistics' => 'Proses statistikası',
+        'open_queue' => 'Bax',
+        'queue_empty' => 'Gözləyən yoxdur',
     ],
     'metrics' => [
         'workdays' => 'İş günləri',

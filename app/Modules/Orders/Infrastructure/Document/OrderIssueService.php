@@ -108,6 +108,53 @@ class OrderIssueService
         });
     }
 
+    /**
+     * Copy a Word-engine order as a new draft: same type, subject and manual fields, a
+     * fresh "-kopya" number, pending status and no document yet — the author opens it in
+     * the composer ("Davam et"), adjusts it and saves, which renders its own .docx.
+     */
+    public function duplicateWord(OrderLog $source): OrderLog
+    {
+        if ((string) $source->template_render_mode !== self::RENDER_MODE_DOCX) {
+            throw new RuntimeException('Only docx-engine orders can be duplicated.');
+        }
+
+        $snapshot = $source->template_snapshot ?? [];
+
+        return $this->issueWord([
+            'template_code' => (string) ($snapshot['template_code'] ?? ''),
+            'label' => $snapshot['label'] ?? null,
+            'personnel_id' => $snapshot['personnel_id'] ?? null,
+            'candidate_id' => $snapshot['candidate_id'] ?? null,
+            'hire_structure_id' => $snapshot['hire_structure_id'] ?? null,
+            'hire_position_id' => $snapshot['hire_position_id'] ?? null,
+            'fields' => $snapshot['fields'] ?? [],
+            'order_number' => $this->copyNumber((string) $source->order_no),
+            'order_date' => $snapshot['order_date_text'] ?? '',
+            'signatory' => $source->signatory_snapshot,
+        ]);
+    }
+
+    /** A pending order without a stored document is still a draft (e.g. a fresh copy). */
+    public static function isDraft(OrderLog $order): bool
+    {
+        return (int) $order->status_id === self::STATUS_PENDING
+            && empty(data_get($order->template_snapshot, 'docx_path'));
+    }
+
+    /** "214-M" → "214-M-kopya", then "214-M-kopya-2", … (order_no is unique). */
+    private function copyNumber(string $orderNo): string
+    {
+        $base = $orderNo.'-kopya';
+        $candidate = $base;
+
+        for ($n = 2; OrderLog::withTrashed()->where('order_no', $candidate)->exists(); $n++) {
+            $candidate = $base.'-'.$n;
+        }
+
+        return $candidate;
+    }
+
     private function syncPersonnel(OrderLog $orderLog, ?int $personnelId, bool $attach): void
     {
         $personnel = ! empty($personnelId) ? Personnel::find($personnelId) : null;

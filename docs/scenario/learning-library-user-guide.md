@@ -1,10 +1,10 @@
-# Öyrənmə kitabxanası istifadəçi bələdçisi
+# Tədris kitabxanası istifadəçi bələdçisi
 
 ## Bu modul nə üçündür?
-Öyrənmə kitabxanası HR, təlim və inkişaf, həmçinin inzibatçı istifadəçilər üçündür. Burada materiallar hazırlanır, əməkdaşlara göndərilir və onların tamamlanma vəziyyəti izlənir.
+Tədris kitabxanası HR, təlim və inkişaf, həmçinin inzibatçı istifadəçilər üçündür. Burada materiallar hazırlanır, əməkdaşlara göndərilir və onların tamamlanma vəziyyəti izlənir.
 
 ## Harada açılır?
-Sol menyudan `Öyrənmə kitabxanası` bölməsini açın.
+Sol menyudan `Tədris kitabxanası` bölməsini açın.
 
 ## Bu modulda əsasən nə edirsiniz?
 - yeni material yaradırsınız

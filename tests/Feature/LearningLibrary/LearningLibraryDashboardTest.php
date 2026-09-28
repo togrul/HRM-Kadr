@@ -220,6 +220,73 @@ class LearningLibraryDashboardTest extends TestCase
         $this->assertNotSame('—', $recentAssignment['completed_at']);
     }
 
+    public function test_catalog_shows_empty_state_then_cards_filters_and_side_panels(): void
+    {
+        Storage::fake('employee_content');
+        $this->seedReferenceData();
+
+        $user = User::factory()->create(['is_active' => true]);
+        $user->givePermissionTo(
+            Permission::findOrCreate('view-learning-library', 'web'),
+            Permission::findOrCreate('manage-employee-content-library', 'web'),
+            Permission::findOrCreate('assign-employee-content', 'web'),
+        );
+        $this->actingAs($user);
+
+        Livewire::test(Dashboard::class)
+            ->assertSee('İlk materialı əlavə edin')
+            ->assertDontSee('Material adı ilə axtarın');
+
+        $asset = EmployeeContentAsset::query()->create([
+            'title' => 'Təhlükəsizlik videosu',
+            'content_type' => 'video',
+            'version' => '1.0',
+            'estimated_minutes' => 45,
+            'is_required' => true,
+            'is_active' => true,
+            'created_by' => $user->id,
+        ]);
+        EmployeeContentAsset::query()->create([
+            'title' => 'Köhnə təlimat',
+            'content_type' => 'pdf',
+            'version' => '1.0',
+            'is_active' => false,
+            'archived_at' => now(),
+            'created_by' => $user->id,
+        ]);
+
+        $component = Livewire::test(Dashboard::class)
+            ->assertDontSee('İlk materialı əlavə edin')
+            ->assertSee('Təhlükəsizlik videosu')
+            ->assertSee('45 dəq')
+            ->assertDontSee('Köhnə təlimat')
+            ->assertSee('Təyin et');
+
+        $this->assertSame(['active' => 1, 'assigned_this_month' => 0, 'completion' => 0], $component->instance()->catalogPayload['metrics']);
+        $this->assertSame(1, $component->instance()->catalogPayload['status_counts']['archived']);
+
+        $component->set('statusFilter', 'archived')
+            ->assertSee('Köhnə təlimat')
+            ->assertDontSee('Təhlükəsizlik videosu')
+            ->set('statusFilter', 'all')
+            ->set('typeFilter', 'pdf')
+            ->assertDontSee('Təhlükəsizlik videosu')
+            ->set('typeFilter', '')
+            ->call('openAssign', $asset->id)
+            ->assertSet('showSideMenu', 'library-assign')
+            ->assertSet('assignmentForm.asset_id', $asset->id)
+            ->assertSee('Material təyin et')
+            ->call('closeSideMenu')
+            ->call('openCreate')
+            ->assertSet('showSideMenu', 'library-create')
+            ->assertSee('Materialı yarat')
+            ->call('closeSideMenu')
+            ->call('switchTab', 'assignments')
+            ->assertSee('Son təyinatlar')
+            ->call('switchTab', 'reports')
+            ->assertSee('Materialları ixrac et');
+    }
+
     public function test_dashboard_render_stays_within_query_budget(): void
     {
         Storage::fake('employee_content');

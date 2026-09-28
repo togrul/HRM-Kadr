@@ -94,7 +94,7 @@
             ],
         ],
         [
-            'label' => 'Uyğunlaşma kitabxanası',
+            'label' => 'Adaptasiya kitabxanası',
             'tone' => 'amber',
             'icon' => 'menu_book',
             'items' => [
@@ -106,7 +106,7 @@
             ],
         ],
         [
-            'label' => 'Öyrənmə kitabxanası',
+            'label' => 'Tədris kitabxanası',
             'tone' => 'emerald',
             'icon' => 'library_books',
             'items' => [
@@ -130,8 +130,8 @@
                 'Bildirişlər' => 'notifications',
                 'Peşəkar portfel' => 'professional-portfolio',
                 'Şəxsi kabinet' => 'my-hr',
-                'Uyğunlaşma kitabxanası' => 'onboarding-library',
-                'Öyrənmə kitabxanası' => 'learning-library',
+                'Adaptasiya kitabxanası' => 'onboarding-library',
+                'Tədris kitabxanası' => 'learning-library',
                 default => 'overview',
             };
 
@@ -894,8 +894,8 @@
                         'notifications' => 'Bildirişlər',
                         'professional-portfolio' => 'Peşəkar portfel',
                         'my-hr' => 'Şəxsi kabinet',
-                        'onboarding-library' => 'Uyğunlaşma kitabxanası',
-                        'learning-library' => 'Öyrənmə kitabxanası',
+                        'onboarding-library' => 'Adaptasiya kitabxanası',
+                        'learning-library' => 'Tədris kitabxanası',
                         default => 'Ümumi baxış',
                     } }}</span>
                 </div>
@@ -910,8 +910,8 @@
                         'notifications' => 'Bildirişlər',
                         'professional-portfolio' => 'Peşəkar portfel',
                         'my-hr' => 'Şəxsi kabinet',
-                        'onboarding-library' => 'Uyğunlaşma kitabxanası',
-                        'learning-library' => 'Öyrənmə kitabxanası',
+                        'onboarding-library' => 'Adaptasiya kitabxanası',
+                        'learning-library' => 'Tədris kitabxanası',
                         default => 'HR bələdçisi',
                     } }}</h1>
                     <p class="docs-lead">
@@ -938,8 +938,8 @@
                                     'notifications' => 'Bildirişlər',
                                     'professional-portfolio' => 'Peşəkar portfel',
                                     'my-hr' => 'Şəxsi kabinet',
-                                    'onboarding-library' => 'Uyğunlaşma kitabxanası',
-                                    'learning-library' => 'Öyrənmə kitabxanası',
+                                    'onboarding-library' => 'Adaptasiya kitabxanası',
+                                    'learning-library' => 'Tədris kitabxanası',
                                     default => 'Modul',
                                 } }}</p>
                                 <p class="docs-lazy-placeholder-text">

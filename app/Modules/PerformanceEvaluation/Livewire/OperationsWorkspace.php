@@ -23,6 +23,15 @@ class OperationsWorkspace extends AbstractPerformanceWorkspace
         return app(HrPolicyPackService::class)->workflowTabs('performance_evaluation', ['evaluations', 'tests']);
     }
 
+    public function mount(?string $tab = null, ?string $testsView = null, bool $openAssign = false): void
+    {
+        parent::mount($tab, $testsView);
+
+        if ($openAssign && $this->activeTab === 'evaluations') {
+            $this->openAssignForm();
+        }
+    }
+
     public function confirmDeleteEvaluationForm(int $id): void
     {
         $form = PerformanceForm::query()->with(['personnel', 'cycle:id,name'])->findOrFail($id);
@@ -48,6 +57,7 @@ class OperationsWorkspace extends AbstractPerformanceWorkspace
         $this->openSideMenu('form-assign');
     }
 
+    #[On('performance-evaluation:open-assign')]
     public function openAssignForm(): void
     {
         $this->authorizePerformanceEvaluationManage();

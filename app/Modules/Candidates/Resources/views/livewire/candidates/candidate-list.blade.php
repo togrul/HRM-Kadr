@@ -207,16 +207,6 @@
                                     <x-small-badge mode="blue" dot>{{ $this->recruitmentStageLabel($_candidate->latestApplication->current_stage) }}</x-small-badge>
                                     <x-small-badge mode="secondary">{{ $_candidate->latestApplication->opening?->title ?? __('candidates::recruitment.labels.latest_opening') }}</x-small-badge>
                                 </div>
-                                <div class="mt-1 flex flex-wrap items-center gap-2 text-[11px]">
-                                    <a href="{{ route('candidates.applications.show', $_candidate->latestApplication) }}" wire:navigate
-                                        class="font-medium text-[#0369a1] transition hover:underline">{{ __('candidates::recruitment.actions.open_latest_application') }}</a>
-                                    @if ($_candidate->latestApplication->opening)
-                                        <a href="{{ route('candidates.openings.show', $_candidate->latestApplication->opening) }}" wire:navigate
-                                            class="font-medium text-[#0369a1] transition hover:underline">{{ __('candidates::recruitment.actions.open_latest_opening') }}</a>
-                                    @endif
-                                    <a href="{{ route('candidates.applications', ['candidate' => $_candidate->id]) }}" wire:navigate
-                                        class="font-medium text-[#0369a1] transition hover:underline">{{ __('candidates::recruitment.actions.open_candidate_pipeline') }}</a>
-                                </div>
                             @endif
 
                             @if (! empty($_candidate->deleted_at))
@@ -258,19 +248,6 @@
                     <x-status design="modern" :status-id="$_candidate->status_id" :label="$_candidate->status?->name" />
                 </x-table.td>
 
-                <x-table.td>
-                    @can('update', $_candidate)
-                        <button type="button" wire:click="openSideMenu('candidate-files',{{ $_candidate->id }})"
-                            title="{{ __('candidates::common.actions.open_files') }}"
-                            class="relative flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink">
-                            <x-icons.document-icon color="text-current" hover="text-current" />
-                            <span class="hrm-num absolute -right-1 -top-1 inline-flex min-w-[18px] items-center justify-center rounded-full bg-[#f4f4f5] px-1 py-0.5 text-[10px] font-semibold text-ink-muted">
-                                {{ (int) ($_candidate->documents_count ?? 0) }}
-                            </span>
-                        </button>
-                    @endcan
-                </x-table.td>
-
                 <x-table.td :isButton="true">
                     <div class="flex items-center justify-end gap-1">
                         @if ($status != 'deleted')
@@ -281,13 +258,26 @@
                                     <x-icons.profile-icon color="text-current" hover="text-current" />
                                 </button>
                             @endcan
-                            @can('delete', $_candidate)
-                                <button type="button" wire:click="setDeleteCandidate('{{ $_candidate->id }}')"
-                                    title="{{ __('candidates::common.actions.delete') }}"
-                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-rose-50 hover:text-rose-600">
-                                    <x-icons.delete-icon color="text-current" hover="text-current" />
-                                </button>
-                            @endcan
+                            <x-ui.row-menu>
+                                @if ($_candidate->latestApplication)
+                                    <x-ui.row-menu.item :href="route('candidates.applications.show', $_candidate->latestApplication)" wire:navigate>{{ __('candidates::recruitment.actions.open_latest_application') }}</x-ui.row-menu.item>
+                                    @if ($_candidate->latestApplication->opening)
+                                        <x-ui.row-menu.item :href="route('candidates.openings.show', $_candidate->latestApplication->opening)" wire:navigate>{{ __('candidates::recruitment.actions.open_latest_opening') }}</x-ui.row-menu.item>
+                                    @endif
+                                    <x-ui.row-menu.item :href="route('candidates.applications', ['candidate' => $_candidate->id])" wire:navigate>{{ __('candidates::recruitment.actions.open_candidate_pipeline') }}</x-ui.row-menu.item>
+                                @endif
+                                @can('update', $_candidate)
+                                    <x-ui.row-menu.item wire:click="openSideMenu('candidate-files',{{ $_candidate->id }})">
+                                        <x-icons.document-icon color="text-current" hover="text-current" />
+                                        {{ __('candidates::common.actions.open_files') }}
+                                        <span class="hrm-num ml-auto text-[11px] text-ink-faint">{{ (int) ($_candidate->documents_count ?? 0) }}</span>
+                                    </x-ui.row-menu.item>
+                                @endcan
+                                @can('delete', $_candidate)
+                                    <x-ui.row-menu.separator />
+                                    <x-ui.row-menu.item danger wire:click="setDeleteCandidate('{{ $_candidate->id }}')"><x-icons.delete-icon color="text-current" hover="text-current" />{{ __('candidates::common.actions.delete') }}</x-ui.row-menu.item>
+                                @endcan
+                            </x-ui.row-menu>
                         @else
                             @role('Admin')
                                 <button type="button" wire:click="restoreData('{{ $_candidate->id }}')"
@@ -297,12 +287,13 @@
                                 </button>
                             @endrole
                             @can('delete', $_candidate)
-                                <button type="button"
-                                    x-on:click="$dispatch('confirm-action', { title: @js(__('candidates::common.actions.force_delete')), message: @js(__('candidates::common.messages.remove_confirm')), confirmText: @js(__('candidates::common.actions.force_delete')), tone: 'rose', run: () => $wire.forceDeleteData('{{ $_candidate->id }}') })"
-                                    title="{{ __('candidates::common.actions.force_delete') }}"
-                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-rose-50 hover:text-rose-600">
-                                    <x-icons.force-delete />
-                                </button>
+                                <x-ui.row-menu>
+                                    <x-ui.row-menu.item danger
+                                        data-title="{{ __('candidates::common.actions.force_delete') }}"
+                                        data-message="{{ __('candidates::common.messages.remove_confirm') }}"
+                                        x-on:click="$dispatch('confirm-action', { title: $el.dataset.title, message: $el.dataset.message, confirmText: $el.dataset.title, tone: 'rose', run: () => $wire.forceDeleteData('{{ $_candidate->id }}') })"
+                                    ><x-icons.force-delete />{{ __('candidates::common.actions.force_delete') }}</x-ui.row-menu.item>
+                                </x-ui.row-menu>
                             @endcan
                         @endif
                     </div>
