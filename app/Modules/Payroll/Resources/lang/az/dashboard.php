@@ -17,6 +17,7 @@ return [
         'empty' => 'Kredit yoxdur',
         'active' => ':count aktiv',
         'select_personnel' => 'Kreditləri idarə etmək üçün əməkdaş seçin.',
+        'search_personnel' => 'Kredit və ya avans üçün əməkdaş axtarın',
         'types' => [
             'loan' => 'Kredit',
             'advance' => 'Avans',
@@ -91,6 +92,8 @@ return [
         'lock' => 'Kilidlə',
         'reopen' => 'Yenidən aç',
         'close' => 'Bağla',
+        'clear' => 'Təmizlə',
+        'print' => 'Çap et',
         'save' => 'Yadda saxla',
         'delete' => 'Sil',
     ],
@@ -166,6 +169,10 @@ return [
         'reopened' => 'Yenidən açıldı',
         'deleted' => 'Silindi',
         'saved' => 'Yadda saxlanıldı',
-        'recalculate_first' => 'Hesablama aparılandan sonra birdəfəlik ödənişlər dəyişib — kilidləmədən əvvəl yenidən hesablayın',
+        'not_editable' => 'Təsdiqlənmiş və ya kilidlənmiş hesablama yenidən hesablana və silinə bilməz',
+        'approve_requires_calculated' => 'Yalnız hesablanmış hesablama təsdiqlənə bilər',
+        'lock_requires_approval' => 'Kilidləmədən əvvəl hesablama təsdiqlənməlidir',
+        'reopen_not_allowed' => 'Yalnız təsdiqlənmiş və ya kilidlənmiş hesablama yenidən açıla bilər',
+        'recalculate_first' => 'Hesablama aparılandan sonra birdəfəlik ödənişlər dəyişib — hesablamanı yenidən açıb yenidən hesablayın',
     ],
 ];

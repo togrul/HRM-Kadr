@@ -84,9 +84,10 @@ class PayrollRun extends Model
         return $this->status === 'locked';
     }
 
+    /** Only draft / calculated runs may be recalculated or deleted; approval freezes them. */
     public function isEditable(): bool
     {
-        return ! in_array($this->status, ['locked'], true);
+        return in_array($this->status, ['draft', 'calculated'], true);
     }
 
     public function getActivitylogOptions(): LogOptions

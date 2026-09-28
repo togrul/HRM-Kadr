@@ -58,7 +58,7 @@ class ProrationRetroTest extends TestCase
         // Pay & lock January at the old rate.
         $period = app(PayrollPeriodService::class)->createPeriod(2026, 1);
         $runService = app(PayrollRunService::class);
-        $run = $runService->lock($runService->calculate($runService->createRun($period, $regimeId)));
+        $run = $runService->lock($runService->approve($runService->calculate($runService->createRun($period, $regimeId))));
         $paidNet = (float) $run->payslips()->value('net');
 
         // Back-date a raise to the same effective date.

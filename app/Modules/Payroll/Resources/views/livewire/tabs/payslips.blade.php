@@ -1,10 +1,8 @@
 @php
-    $exports = [
-        ['bank', 'exportBankFile'],
-        ['bank_csv', 'exportBankCsv'],
-        ['gl', 'exportGl'],
-        ['state', 'exportStateReport'],
-    ];
+    // Bank file, GL and state report are meaningless without amounts — the shell refuses them too.
+    $exports = $this->canViewAmounts()
+        ? [['bank', 'exportBankFile'], ['bank_csv', 'exportBankCsv'], ['gl', 'exportGl'], ['state', 'exportStateReport']]
+        : [['bank_csv', 'exportBankCsv']];
 @endphp
 
 <div class="contents">
@@ -67,7 +65,7 @@
                         <x-table.td><span class="hrm-num text-[13px] text-ink-soft">{{ $money($payslip->total_deductions) }}</span></x-table.td>
                         <x-table.td><span class="hrm-num text-[13px] font-semibold text-ink">{{ $payslip->mask($payslip->net) }} {{ $payslip->currency }}</span></x-table.td>
                         <x-table.td :isButton="true">
-                            @if ($canManage && ! $run->isLocked())
+                            @if ($canManage && $run->isEditable())
                                 <button type="button" x-on:click="{{ $confirmDelete('deletePayslip('.$payslip->id.')') }}" title="{{ __('payroll::dashboard.actions.delete') }}" class="{{ $delBtn }} ml-auto">{!! $delIcon !!}</button>
                             @endif
                         </x-table.td>
@@ -92,7 +90,7 @@
                     </div>
                     <div class="flex items-center gap-2">
                         @if ($ps->status === 'locked')
-                            <x-pill-button variant="secondary" :href="route('payroll.payslip.print', $ps->id)" target="_blank">{{ __('payroll::dashboard.export.title') }} (PDF)</x-pill-button>
+                            <x-pill-button variant="secondary" :href="route('payroll.payslip.print', $ps->id)" target="_blank">{{ __('payroll::dashboard.actions.print') }}</x-pill-button>
                         @endif
                         <x-pill-button variant="secondary" wire:click="closePayslip">{{ __('payroll::dashboard.actions.close') }}</x-pill-button>
                     </div>

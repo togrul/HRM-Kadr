@@ -42,7 +42,7 @@ class PayrollOneOffEarningsTest extends TestCase
         $this->assertSame(450.0, (float) $payslip->lines->firstWhere('code', 'kpi_bonus')?->amount);
         $this->assertSame(3450.0, (float) $payslip->gross);
 
-        $runs->lock($run);
+        $runs->lock($runs->approve($run));
         $this->assertSame($run->id, PayrollOneOffEarning::query()->value('paid_payroll_run_id'));
 
         // A paid line is final, and a late hand-off for the locked month moves to the next one.
@@ -61,7 +61,7 @@ class PayrollOneOffEarningsTest extends TestCase
         $regimeId = CompensationRegime::where('code', 'private')->value('id');
         app(CompensationService::class)->assignCompensation($personnel->tabel_no, ['regime_id' => $regimeId, 'base_amount' => 3000, 'effective_from' => '2026-01-01']);
         $runs = app(PayrollRunService::class);
-        $run = $runs->calculate($runs->createRun(app(PayrollPeriodService::class)->createPeriod(2026, 6), $regimeId));
+        $run = $runs->approve($runs->calculate($runs->createRun(app(PayrollPeriodService::class)->createPeriod(2026, 6), $regimeId)));
 
         $this->travel(1)->minutes();
         app(PayrollOneOffEarnings::class)->record($personnel->tabel_no, 'kpi_bonus', 'KPI bonusu', 450, 2026, 6, 'performance_bonus:2');
@@ -74,7 +74,8 @@ class PayrollOneOffEarningsTest extends TestCase
         }
         $this->assertNull(PayrollOneOffEarning::query()->value('paid_payroll_run_id'));
 
-        $runs->lock($runs->calculate($run->fresh()));
+        // Approved runs are frozen: reopen, recalculate, approve again, then lock.
+        $runs->lock($runs->approve($runs->calculate($runs->reopen($run->fresh()))));
         $this->assertSame($run->id, PayrollOneOffEarning::query()->value('paid_payroll_run_id'));
     }
 

@@ -71,7 +71,7 @@
     <section class="overflow-hidden rounded-xl border border-hairline bg-white">
         <div class="flex items-center justify-between gap-3 border-b border-hairline-subtle px-4 py-3">
             <h2 class="text-[13.5px] font-semibold tracking-[-0.02em] text-ink">{{ __('compensation::dashboard.grades.title') }}</h2>
-            @if ($canManage && $selectedScaleId)
+            @if ($canManage && $selectedScaleId && $this->canViewAmounts())
                 <x-pill-button variant="primary" wire:click="openPanel('grade')">{{ __('compensation::dashboard.actions.add_grade') }}</x-pill-button>
             @endif
         </div>
@@ -156,9 +156,11 @@
                         <x-ui.input-shell :label="__('compensation::dashboard.fields.code')" :error="$errors->first('gradeForm.code')">
                             <x-ui.input wire:model="gradeForm.code" />
                         </x-ui.input-shell>
-                        <x-ui.input-shell :label="__('compensation::dashboard.fields.base_amount')" :error="$errors->first('gradeForm.base_amount')">
-                            <x-ui.input type="number" step="0.01" wire:model="gradeForm.base_amount" />
-                        </x-ui.input-shell>
+                        @if ($this->canViewAmounts())
+                            <x-ui.input-shell :label="__('compensation::dashboard.fields.base_amount')" :error="$errors->first('gradeForm.base_amount')">
+                                <x-ui.input type="number" step="0.01" wire:model="gradeForm.base_amount" />
+                            </x-ui.input-shell>
+                        @endif
                         <x-ui.input-shell class="sm:col-span-2" :label="__('compensation::dashboard.fields.name')" :error="$errors->first('gradeForm.name')">
                             <x-ui.input wire:model="gradeForm.name" />
                         </x-ui.input-shell>

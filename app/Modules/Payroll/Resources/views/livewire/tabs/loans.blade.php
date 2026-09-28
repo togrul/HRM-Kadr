@@ -7,11 +7,11 @@
                 @if ($selectedTabelNo)
                     <div class="flex items-center justify-between gap-3 rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 py-2">
                         <span class="truncate text-[12.5px] font-semibold text-ink">{{ $selectedPersonnelLabel }}</span>
-                        <button type="button" wire:click="clearPersonnel" class="shrink-0 text-[11.5px] font-medium text-ink-faint transition hover:text-rose-600">{{ __('payroll::dashboard.actions.close') }}</button>
+                        <button type="button" wire:click="clearPersonnel" class="shrink-0 text-[11.5px] font-medium text-ink-faint transition hover:text-rose-600">{{ __('payroll::dashboard.actions.clear') }}</button>
                     </div>
                 @else
                     <div class="relative" x-data="{ open: false }" x-on:click.outside="open = false">
-                        <x-ui.input icon="search" wire:model.live.debounce.300ms="personnelSearch" x-on:focus="open = true" placeholder="{{ __('compensation::dashboard.actions.search_personnel') }}" />
+                        <x-ui.input icon="search" wire:model.live.debounce.300ms="personnelSearch" x-on:focus="open = true" placeholder="{{ __('payroll::dashboard.loans.search_personnel') }}" aria-label="{{ __('payroll::dashboard.loans.search_personnel') }}" />
                         @if (count($this->personnelResults))
                             <div x-show="open" class="absolute z-20 mt-1 max-h-64 w-full overflow-auto rounded-xl border border-hairline bg-white p-1 shadow-lg">
                                 @foreach ($this->personnelResults as $res)

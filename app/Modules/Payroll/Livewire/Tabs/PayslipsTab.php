@@ -4,6 +4,7 @@ namespace App\Modules\Payroll\Livewire\Tabs;
 
 use App\Models\PayrollRun;
 use App\Models\Payslip;
+use App\Modules\Payroll\Application\Services\PayrollRunService;
 use App\Modules\Payroll\Application\Services\RetroService;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
@@ -87,14 +88,13 @@ class PayslipsTab extends PayrollTab
         $this->selectedPayslipId = null;
     }
 
-    public function deletePayslip(int $payslipId): void
+    public function deletePayslip(int $payslipId, PayrollRunService $service): void
     {
         abort_unless($this->canManage(), 403);
 
-        $payslip = Payslip::with('run')->findOrFail($payslipId);
-        abort_if($payslip->run?->isLocked(), 422);
-
-        $payslip->delete();
+        if (! $this->attempt(fn () => $service->deletePayslip(Payslip::with('run')->findOrFail($payslipId)))) {
+            return;
+        }
 
         if ($this->selectedPayslipId === $payslipId) {
             $this->selectedPayslipId = null;

@@ -48,7 +48,7 @@ class LoanPayrollTest extends TestCase
         $run = $runService->calculate($runService->createRun($period, $regimeId));
 
         // Lock applies the repayment: remaining 500 → 300, one ledger row.
-        $run = $runService->lock($run);
+        $run = $runService->lock($runService->approve($run));
         $this->assertSame('300.00', $loan->fresh()->remaining);
         $this->assertSame(1, $loan->repayments()->count());
 
@@ -74,7 +74,7 @@ class LoanPayrollTest extends TestCase
 
         $period = app(PayrollPeriodService::class)->createPeriod(2026, 7);
         $runService = app(PayrollRunService::class);
-        $run = $runService->lock($runService->calculate($runService->createRun($period, $regimeId)));
+        $run = $runService->lock($runService->approve($runService->calculate($runService->createRun($period, $regimeId))));
 
         $loan->refresh();
         $this->assertSame('0.00', $loan->remaining);
