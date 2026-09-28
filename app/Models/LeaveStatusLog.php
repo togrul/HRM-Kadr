@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class LeaveStatusLog extends Model
 {
@@ -15,7 +15,7 @@ class LeaveStatusLog extends Model
         'status_id',
         'changed_by',
         'comment',
-        'changed_at'
+        'changed_at',
     ];
 
     public $timestamps = false;
@@ -32,6 +32,6 @@ class LeaveStatusLog extends Model
 
     public function changedBy(): BelongsTo
     {
-         return $this->belongsTo(Personnel::class, 'changed_by', 'id');
+        return $this->belongsTo(Personnel::class, 'changed_by', 'id');
     }
 }

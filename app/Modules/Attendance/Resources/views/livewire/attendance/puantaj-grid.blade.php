@@ -4,6 +4,7 @@
     x-on:keydown.escape.window="closeDetail()"
     x-on:resize.window.debounce.75ms="positionDetail()"
     x-on:scroll.window.throttle.50ms="positionDetail()"
+    x-on:scroll.capture.throttle.50ms="positionDetail()"
     class="space-y-4"
 >
     <x-surface-card :title="__('attendance::puantaj.title')" icon="icons.calendar-icon">

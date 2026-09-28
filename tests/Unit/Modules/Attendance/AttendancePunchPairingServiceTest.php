@@ -11,7 +11,7 @@ class AttendancePunchPairingServiceTest extends TestCase
 {
     public function test_pairs_in_and_out_events(): void
     {
-        $service = new AttendancePunchPairingService();
+        $service = new AttendancePunchPairingService;
 
         $punches = collect([
             new AttendanceRawPunch([
@@ -39,7 +39,7 @@ class AttendancePunchPairingServiceTest extends TestCase
 
     public function test_counts_break_minutes_when_break_events_exist(): void
     {
-        $service = new AttendancePunchPairingService();
+        $service = new AttendancePunchPairingService;
 
         $punches = collect([
             new AttendanceRawPunch([
@@ -75,7 +75,7 @@ class AttendancePunchPairingServiceTest extends TestCase
 
     public function test_marks_missing_out_when_day_ends_with_open_in(): void
     {
-        $service = new AttendancePunchPairingService();
+        $service = new AttendancePunchPairingService;
 
         $punches = collect([
             new AttendanceRawPunch([

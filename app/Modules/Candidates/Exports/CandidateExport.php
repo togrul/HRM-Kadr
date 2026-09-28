@@ -9,6 +9,7 @@ use Maatwebsite\Excel\Concerns\FromView;
 class CandidateExport implements FromView
 {
     public iterable $report;
+
     public string $candidateMode;
 
     public function __construct(iterable $report, string $candidateMode = CandidateModeResolver::MILITARY)

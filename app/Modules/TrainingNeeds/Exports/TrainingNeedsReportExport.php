@@ -13,8 +13,7 @@ class TrainingNeedsReportExport implements FromCollection, WithHeadings, WithMap
         protected Collection $rows,
         protected array $headings,
         protected string $type
-    ) {
-    }
+    ) {}
 
     public function collection(): Collection
     {

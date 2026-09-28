@@ -14,8 +14,8 @@ class StaffScheduleUpdated
     /**
      * Create a new event instance.
      *
-     * @param int $structure_id The ID of the structure (department) where the schedule is updated.
-     * @param int $position_id The ID of the position within the structure where the schedule is updated.
+     * @param  int  $structure_id  The ID of the structure (department) where the schedule is updated.
+     * @param  int  $position_id  The ID of the position within the structure where the schedule is updated.
      */
     public function __construct(
         public int $structure_id,

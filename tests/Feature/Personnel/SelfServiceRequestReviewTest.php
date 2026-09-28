@@ -6,7 +6,6 @@ use App\Enums\OrderStatusEnum;
 use App\Models\Leave;
 use App\Models\Order;
 use App\Models\OrderStatus;
-use App\Models\OrderType;
 use App\Models\Personnel;
 use App\Models\Role;
 use App\Models\User;

@@ -24,4 +24,3 @@ return new class extends Migration
         Schema::dropIfExists('personnel_tabel_no_counters');
     }
 };
-

@@ -1,12 +1,12 @@
 <?php
 
 use App\Modules\Candidates\Http\Controllers\CandidateDocumentDownloadController;
-use App\Modules\Candidates\Livewire\CandidateList;
-use App\Modules\Candidates\Livewire\ApplicationPipeline;
 use App\Modules\Candidates\Livewire\ApplicationDetail;
-use App\Modules\Candidates\Livewire\RecruitmentAnalytics;
+use App\Modules\Candidates\Livewire\ApplicationPipeline;
+use App\Modules\Candidates\Livewire\CandidateList;
 use App\Modules\Candidates\Livewire\OpeningDetail;
 use App\Modules\Candidates\Livewire\OpeningList;
+use App\Modules\Candidates\Livewire\RecruitmentAnalytics;
 use App\Modules\Candidates\Livewire\RequisitionDetail;
 use App\Modules\Candidates\Livewire\RequisitionList;
 use Illuminate\Support\Facades\Route;

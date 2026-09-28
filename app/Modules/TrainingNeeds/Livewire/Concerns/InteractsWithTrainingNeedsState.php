@@ -2,7 +2,6 @@
 
 namespace App\Modules\TrainingNeeds\Livewire\Concerns;
 
-use App\Models\TrainingAnnualPlan;
 use App\Models\TrainingPlanItem;
 
 trait InteractsWithTrainingNeedsState

@@ -63,4 +63,3 @@ class OrdersDomainApplicationBoundaryTest extends TestCase
         $this->assertSame([], $violations, implode(PHP_EOL, $violations));
     }
 }
-

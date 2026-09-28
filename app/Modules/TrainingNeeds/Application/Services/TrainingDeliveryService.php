@@ -5,7 +5,6 @@ namespace App\Modules\TrainingNeeds\Application\Services;
 use App\Models\TrainingDeliveryRecord;
 use App\Models\TrainingNeedItem;
 use App\Models\TrainingSession;
-use App\Models\TrainingSessionParticipant;
 use Illuminate\Support\Facades\DB;
 
 class TrainingDeliveryService

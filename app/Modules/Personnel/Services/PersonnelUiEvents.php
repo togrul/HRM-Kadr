@@ -5,6 +5,7 @@ namespace App\Modules\Personnel\Services;
 class PersonnelUiEvents
 {
     public const MODAL_CLOSE = 'ui:modal-close';
+
     public const PERSONNEL_SAVED = 'personnelAdded';
 
     public function personnelSavedEvent(): string

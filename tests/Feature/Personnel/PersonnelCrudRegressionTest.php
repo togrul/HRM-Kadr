@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Personnel;
 
-use App\Models\User;
 use App\Models\Personnel;
+use App\Models\User;
 use App\Modules\Personnel\Livewire\AddPersonnel;
 use App\Modules\Personnel\Livewire\EditPersonnel;
 use App\Modules\Personnel\Services\PersonnelCrudBenchmarkFixtureService;

@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Modules\Attendance\Livewire\ManualEntries;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use ReflectionMethod;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
@@ -43,7 +44,7 @@ class AttendanceManualEntriesIslandTest extends TestCase
         app()->setLocale('az');
 
         $component = app(ManualEntries::class);
-        $method = new \ReflectionMethod($component, 'validationAttributes');
+        $method = new ReflectionMethod($component, 'validationAttributes');
         $method->setAccessible(true);
 
         $attributes = $method->invoke($component);

@@ -12,8 +12,7 @@ class ProfessionalPortfolioProjectsExport implements FromView
     public function __construct(
         public Personnel $personnel,
         public Collection $rows,
-    ) {
-    }
+    ) {}
 
     public function view(): View
     {

@@ -1,7 +1,7 @@
 <?php
 
-use App\Modules\TrainingNeeds\Livewire\Dashboard;
 use App\Modules\TrainingNeeds\Application\Services\TrainingNeedReportingService;
+use App\Modules\TrainingNeeds\Livewire\Dashboard;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['web', 'auth'])->group(function () {

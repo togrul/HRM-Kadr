@@ -21,4 +21,3 @@ class LogSuccessfulLogin
             ->log('User logged in');
     }
 }
-

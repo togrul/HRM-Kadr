@@ -130,6 +130,47 @@ class DocumentExpiryPaginationTest extends TestCase
         }
     }
 
+    public function test_status_windows_come_from_each_types_requirement_row(): void
+    {
+        DocumentExpiryFixture::seedMixed();
+
+        // Passport: critical 10 / warning 20. Service card: warning below critical (a warning
+        // window that cannot hold anything). Contract: no requirement row → 30 / 60 fallback.
+        DB::table('compliance_document_requirements')->where('key', 'passport')->update(['critical_days' => 10, 'warning_days' => 20]);
+        DB::table('compliance_document_requirements')->where('key', 'service_card')->update(['critical_days' => 40, 'warning_days' => 20]);
+        DB::table('compliance_document_requirements')->where('key', 'contract')->delete();
+        DB::table('personnel_passports')->insert([
+            'tabel_no' => 'P000001', 'serial_number' => 'AZE-15', 'given_date' => '2020-01-01',
+            'valid_date' => today()->addDays(15)->toDateString(), 'created_at' => now(), 'updated_at' => now(),
+        ]);
+
+        $service = app(DocumentExpiryReadService::class);
+        $windows = ['passport' => [10, 20], 'service_card' => [40, 40], 'contract' => [30, 60]];
+
+        $this->assertSame(
+            ['service_card' => ['critical' => 40, 'warning' => 40], 'passport' => ['critical' => 10, 'warning' => 20], 'contract' => ['critical' => 30, 'warning' => 60]],
+            $service->dashboard()['typeWindows']
+        );
+        $this->assertSame('expiring_60', $service->rows(['search' => 'AZE-15'])->sole()['status']);
+
+        $rows = $service->rows()->where('status', '!=', 'missing');
+        foreach ($rows as $row) {
+            [$critical, $warning] = $windows[$row['document_type']];
+            $expected = match (true) {
+                $row['days_left'] === null => 'valid',
+                $row['days_left'] < 0 => 'expired',
+                $row['days_left'] <= $critical => 'expiring_30',
+                $row['days_left'] <= $warning => 'expiring_60',
+                default => 'valid',
+            };
+
+            $this->assertSame($expected, $row['status'], $row['tabel_no'].' '.$row['document_type'].' '.$row['days_left']);
+        }
+
+        // Sanity: a 59-day service card is past its 40-day window (valid), not the default "approaching".
+        $this->assertTrue($rows->contains(fn (array $row): bool => $row['document_type'] === 'service_card' && $row['days_left'] === 59 && $row['status'] === 'valid'));
+    }
+
     public function test_query_count_does_not_grow_with_the_dataset(): void
     {
         DocumentExpiryFixture::seedMixed(10);

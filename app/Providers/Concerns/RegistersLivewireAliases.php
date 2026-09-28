@@ -32,7 +32,7 @@ trait RegistersLivewireAliases
             return;
         }
 
-        $finder = (new Finder())->files()->in($directory)->name('*.php');
+        $finder = (new Finder)->files()->in($directory)->name('*.php');
 
         foreach ($finder as $file) {
             $relativePath = Str::after($file->getRealPath(), rtrim($directory, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR);

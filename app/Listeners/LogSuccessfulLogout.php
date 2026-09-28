@@ -24,4 +24,3 @@ class LogSuccessfulLogout
             ->log('User logged out');
     }
 }
-

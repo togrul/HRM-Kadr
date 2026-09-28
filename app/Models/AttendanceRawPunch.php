@@ -31,4 +31,3 @@ class AttendanceRawPunch extends Model
         'meta' => 'array',
     ];
 }
-

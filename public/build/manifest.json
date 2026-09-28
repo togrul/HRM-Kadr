@@ -41,7 +41,7 @@
     "src": "resources/fonts/IBMPlexMono-SemiBold.woff2"
   },
   "resources/js/app.js": {
-    "file": "assets/app-4f1f5a0f.js",
+    "file": "assets/app-6598b64a.js",
     "isEntry": true,
     "src": "resources/js/app.js"
   }

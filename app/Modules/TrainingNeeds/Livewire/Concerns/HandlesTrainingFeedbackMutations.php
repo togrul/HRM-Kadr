@@ -62,7 +62,7 @@ trait HandlesTrainingFeedbackMutations
 
         $form = $this->editingFeedbackFormId
             ? TrainingFeedbackForm::query()->findOrFail($this->editingFeedbackFormId)
-            : new TrainingFeedbackForm();
+            : new TrainingFeedbackForm;
 
         $form->fill([
             'training_session_id' => (int) data_get($validated, 'feedbackForm.training_session_id'),

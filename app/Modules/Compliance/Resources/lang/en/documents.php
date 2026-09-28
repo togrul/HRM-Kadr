@@ -7,8 +7,8 @@ return [
     'summary' => [
         'total' => 'Total documents',
         'expired' => 'Expired',
-        'expiring_30' => 'Expires in 30 days',
-        'expiring_60' => 'Expires in 60 days',
+        'expiring_30' => 'Critical',
+        'expiring_60' => 'Approaching',
         'valid' => 'Valid',
         'missing' => 'Missing',
         'compliance_score' => 'Compliance score',
@@ -43,6 +43,7 @@ return [
         'export_csv' => 'Export CSV',
     ],
     'labels' => [
+        'type_window' => 'Critical ≤ :critical · Approaching ≤ :warning days',
         'unassigned' => 'Unassigned',
         'result_count' => ':count results',
         'document_count' => ':count documents',

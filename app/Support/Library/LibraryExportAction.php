@@ -7,8 +7,7 @@ final readonly class LibraryExportAction
     public function __construct(
         public string $method,
         public string $label,
-    ) {
-    }
+    ) {}
 
     public static function make(string $method, string $label): self
     {

@@ -13,9 +13,7 @@ class LeaveStatusChanged extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(protected Leave $leave)
-    {
-    }
+    public function __construct(protected Leave $leave) {}
 
     public function via(object $notifiable): array
     {
@@ -46,18 +44,18 @@ class LeaveStatusChanged extends Notification implements ShouldQueue
         $ends = optional($this->leave->ends_at)->format('d.m.Y');
 
         return [
-            'type'       => class_basename(Leave::class),
-            'name'       => $fullname,
-            'action'     => 'leaveStatusChanged',
-            'message'    => 'notifications::common.messages.leave_request_status_changed',
-            'category'   => 'notifications::common.categories.leave',
+            'type' => class_basename(Leave::class),
+            'name' => $fullname,
+            'action' => 'leaveStatusChanged',
+            'message' => 'notifications::common.messages.leave_request_status_changed',
+            'category' => 'notifications::common.categories.leave',
             'leave_type' => $type,
             'duration_summary' => $this->leave->durationSummary(),
             'duration_window' => $this->leave->durationWindowLabel(),
             'leave_period' => trim(implode(' - ', array_filter([$starts, $ends]))),
-            'tabel_no'   => $this->leave->tabel_no,
-            'status'     => $status,
-            'added_by'   => null
+            'tabel_no' => $this->leave->tabel_no,
+            'status' => $status,
+            'added_by' => null,
         ];
     }
 

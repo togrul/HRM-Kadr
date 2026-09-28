@@ -158,8 +158,8 @@ class CvWordExportService extends BaseWordExportService
         $tabStop = Converter::cmToTwip(6.2);
         $this->addInfoLines($section, 'Doğulduğu gün, ay, il və yer:', $birthLine, $labelStyle, $valueStyle, $tabStop);
         $this->addInfoLines($section, 'Təhsili:', $educationLine, $labelStyle, $valueStyle, $tabStop);
-        $this->addInfoLines($section, 'Mükafatlandırılıb:', (string)($cvData['awards_count'] ?? ''), $labelStyle, $valueStyle, $tabStop);
-        $this->addInfoLines($section, 'İntizam cəzaları:', (string)($cvData['punishments_count'] ?? ''), $labelStyle, $valueStyle, $tabStop);
+        $this->addInfoLines($section, 'Mükafatlandırılıb:', (string) ($cvData['awards_count'] ?? ''), $labelStyle, $valueStyle, $tabStop);
+        $this->addInfoLines($section, 'İntizam cəzaları:', (string) ($cvData['punishments_count'] ?? ''), $labelStyle, $valueStyle, $tabStop);
         $this->addInfoLines($section, 'Ailə vəziyyəti:', $cvData['family_status'] ?? '', $labelStyle, $valueStyle, $tabStop);
         $this->addInfoLines($section, 'Ünvan:', $addressLine, $labelStyle, $valueStyle, $tabStop);
 
@@ -240,7 +240,7 @@ class CvWordExportService extends BaseWordExportService
 
     private function addInfoLines($section, string $label, string $value, array $labelStyle, array $valueStyle, int $tabStop): void
     {
-        $lines = preg_split("/\\r\\n|\\r|\\n/", $value) ?: [''];
+        $lines = preg_split('/\\r\\n|\\r|\\n/', $value) ?: [''];
         foreach ($lines as $index => $line) {
             $currentLabel = $index === 0 ? $label : '';
             $this->addInfoLine($section, $currentLabel, $line, $labelStyle, $valueStyle, $tabStop);

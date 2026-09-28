@@ -114,9 +114,9 @@ class PolicyAuthorizationMatrixTest extends TestCase
     ): void {
         Permission::findOrCreate($permission, 'web');
 
-        $policy = new $policyClass();
+        $policy = new $policyClass;
         $args = in_array($method, self::MODEL_METHODS, true) && $modelClass !== null
-            ? [new $modelClass()]
+            ? [new $modelClass]
             : [];
 
         $granted = User::factory()->create();

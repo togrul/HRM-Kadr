@@ -7,8 +7,8 @@ return [
     'summary' => [
         'total' => 'Ümumi sənəd',
         'expired' => 'Vaxtı bitib',
-        'expiring_30' => '30 günə bitir',
-        'expiring_60' => '60 günə bitir',
+        'expiring_30' => 'Kritik',
+        'expiring_60' => 'Yaxınlaşır',
         'valid' => 'Qüvvədədir',
         'missing' => 'Çatışmayan',
         'compliance_score' => 'Uyğunluq balı',
@@ -43,6 +43,7 @@ return [
         'export_csv' => 'CSV-yə ixrac et',
     ],
     'labels' => [
+        'type_window' => 'Kritik ≤ :critical · Yaxınlaşır ≤ :warning gün',
         'unassigned' => 'Təyin edilməyib',
         'result_count' => ':count nəticə',
         'document_count' => ':count sənəd',

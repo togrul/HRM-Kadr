@@ -39,4 +39,3 @@ class AttendanceSetting extends Model
         return $this->belongsTo(AttendanceShift::class, 'default_shift_id');
     }
 }
-

@@ -28,4 +28,3 @@ class PersonnelPersistenceService
         return Arr::only($payloads, $allowedKeys);
     }
 }
-

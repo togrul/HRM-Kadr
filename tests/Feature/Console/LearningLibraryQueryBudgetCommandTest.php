@@ -72,7 +72,8 @@ class LearningLibraryQueryBudgetCommandTest extends TestCase
         $this->assertSame(0, $exitCode);
         $this->assertSame(0, data_get($payload, 'summary.failed_probes'));
         $this->assertSame(0, data_get($payload, 'summary.over_budget_probes'));
-        $this->assertCount(3, data_get($payload, 'results', []));
+        $this->assertCount(4, data_get($payload, 'results', []));
+        $this->assertContains('catalog_build', array_column(data_get($payload, 'results', []), 'flow'));
     }
 
     private function makePersonnel(string $email): Personnel

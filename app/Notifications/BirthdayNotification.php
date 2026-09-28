@@ -55,16 +55,16 @@ class BirthdayNotification extends Notification
                 'action' => 'birthday',
             ], $this->payload)
             : [
-            'type' => 'Birthday',
-            'tabel_no' => $this->personnel->tabel_no,
-            'name' => $this->personnel->fullname,
-            'birthdate' => optional($this->personnel->birthdate)->format('Y-m-d'),
-            'birthday_label' => optional($this->personnel->birthdate)->format('d.m.Y'),
-            'position' => $this->personnel->position?->name,
-            'structure' => $this->personnel->structure?->fullStructureName(),
-            'message' => __('notifications::common.messages.birthday_today'),
-            'category' => __('notifications::common.categories.birthday'),
-            'action' => 'birthday',
-        ];
+                'type' => 'Birthday',
+                'tabel_no' => $this->personnel->tabel_no,
+                'name' => $this->personnel->fullname,
+                'birthdate' => optional($this->personnel->birthdate)->format('Y-m-d'),
+                'birthday_label' => optional($this->personnel->birthdate)->format('d.m.Y'),
+                'position' => $this->personnel->position?->name,
+                'structure' => $this->personnel->structure?->fullStructureName(),
+                'message' => __('notifications::common.messages.birthday_today'),
+                'category' => __('notifications::common.categories.birthday'),
+                'action' => 'birthday',
+            ];
     }
 }

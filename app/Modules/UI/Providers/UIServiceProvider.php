@@ -5,7 +5,6 @@ namespace App\Modules\UI\Providers;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
 use Illuminate\Support\ServiceProvider;
-use Livewire\Livewire;
 
 class UIServiceProvider extends ServiceProvider
 {

@@ -72,7 +72,7 @@ class ComplianceReminderNotifier
                         '%s · %s · %s',
                         $row['personnel_name'],
                         $row['document_label'],
-                        $row['status'],
+                        __('compliance::documents.status.'.$row['status']),
                     ))->all(),
                 );
             }
@@ -100,7 +100,7 @@ class ComplianceReminderNotifier
         $body = $docRows->map(function (array $row): string {
             $days = (is_int($row['days_left'] ?? null)) ? ' ('.$row['days_left'].')' : '';
 
-            return sprintf('%s · %s%s', $row['document_label'], $row['status'], $days);
+            return sprintf('%s · %s%s', $row['document_label'], __('compliance::documents.status.'.$row['status']), $days);
         })->implode("\n");
 
         return new PlatformNotification('database', [

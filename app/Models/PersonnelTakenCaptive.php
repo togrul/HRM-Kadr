@@ -22,7 +22,7 @@ class PersonnelTakenCaptive extends Model
             ->dontSubmitEmptyLogs();
     }
 
-    protected static $recordEvents = ['deleted','created','updated'];
+    protected static $recordEvents = ['deleted', 'created', 'updated'];
 
     public function getDescriptionForEvent(string $eventName): string
     {

@@ -17,11 +17,13 @@ class Country extends Model
     ];
 
     protected $table = 'countries';
+
     protected $primaryKey = 'id';
 
     public $timestamps = false;
 
     public $incrementing = false;
+
     protected $keyType = 'int';
 
     public function countryTranslations(): HasMany

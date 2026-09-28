@@ -65,6 +65,7 @@ class HrPolicyPackSeedCommand extends Command
 
             if ((bool) $this->option('dry-run')) {
                 $result['skipped']++;
+
                 continue;
             }
 

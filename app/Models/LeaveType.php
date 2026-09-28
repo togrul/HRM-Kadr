@@ -13,11 +13,11 @@ class LeaveType extends Model
         'name',
         'attendance_code',
         'max_days',
-        'requires_document'
+        'requires_document',
     ];
 
     protected $casts = [
-        'requires_document' => 'boolean'
+        'requires_document' => 'boolean',
     ];
 
     public function setAttendanceCodeAttribute(mixed $value): void

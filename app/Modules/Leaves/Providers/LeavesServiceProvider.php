@@ -2,14 +2,14 @@
 
 namespace App\Modules\Leaves\Providers;
 
+use App\Models\Leave;
 use App\Modules\Leaves\Console\Commands\LeavesQueryBudgetCommand;
 use App\Modules\Leaves\Console\Commands\LeavesRenderBenchmarkCommand;
+use App\Observers\LeaveObserver;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
-use App\Models\Leave;
-use App\Observers\LeaveObserver;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\ServiceProvider;
 
 class LeavesServiceProvider extends ServiceProvider
 {

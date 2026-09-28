@@ -7,9 +7,7 @@ use Illuminate\Support\Arr;
 
 class FeatureState implements ToggleStateInterface
 {
-    public function __construct(private array $flags = [])
-    {
-    }
+    public function __construct(private array $flags = []) {}
 
     public function enabled(string $feature): bool
     {
