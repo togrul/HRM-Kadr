@@ -76,7 +76,7 @@ abstract class PayrollTab extends Component
     public function render(): View
     {
         $chip = 'inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium';
-        $confirm = fn (string $tone, string $messageKey, string $actionKey, string $call): string => "\$dispatch('confirm-action', { tone: '{$tone}', message: ".Js::from(__('payroll::dashboard.confirm.'.$messageKey)).', confirmText: '.Js::from(__('payroll::dashboard.actions.'.$actionKey)).", run: () => \$wire.{$call} })";
+        $confirm = fn (string $tone, string $messageKey, string $actionKey, string $call, array $replace = []): string => "\$dispatch('confirm-action', { tone: '{$tone}', message: ".Js::from(__('payroll::dashboard.confirm.'.$messageKey, $replace)).', confirmText: '.Js::from(__('payroll::dashboard.actions.'.$actionKey)).", run: () => \$wire.{$call} })";
 
         return view('payroll::livewire.tabs.'.$this->viewName(), [
             'canManage' => $this->canManage(),

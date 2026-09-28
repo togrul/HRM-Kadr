@@ -150,6 +150,8 @@ return [
     ],
 
     'confirm' => [
+        'approve' => ':period dövrü üzrə hesablama təsdiqlənəcək — :count işçi, xalis cəmi :total :currency. Davam edilsin?',
+        'approve_masked' => ':period dövrü üzrə hesablama təsdiqlənəcək — :count işçi. Davam edilsin?',
         'lock' => 'Hesablama kilidlənəcək və maaş vərəqələri dondurulacaq. Davam edilsin?',
         'reopen' => 'Hesablama yenidən açılacaq. Davam edilsin?',
         'delete' => 'Bu qeydi silmək istədiyinizə əminsiniz?',

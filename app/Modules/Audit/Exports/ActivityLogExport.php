@@ -14,7 +14,7 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 class ActivityLogExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMapping
 {
     /**
-     * @param  array{search?:string,log_name?:string,event?:string,date_from?:string,date_to?:string}  $filters
+     * @param  array{search?:string,log_name?:string,event?:string,date_from?:string,date_to?:string,users_only?:string}  $filters
      */
     public function __construct(private readonly array $filters = []) {}
 
@@ -35,6 +35,7 @@ class ActivityLogExport implements FromQuery, ShouldAutoSize, WithHeadings, With
             ])
             ->when($this->filter('log_name') !== '', fn (Builder $query) => $query->where('log_name', $this->filter('log_name')))
             ->when($this->filter('event') !== '', fn (Builder $query) => $query->where('event', $this->filter('event')))
+            ->when($this->filter('users_only') === '1', fn (Builder $query) => $query->whereNotNull('causer_id'))
             ->when($this->filter('date_from') !== '', fn (Builder $query) => $query->whereDate('created_at', '>=', $this->filter('date_from')))
             ->when($this->filter('date_to') !== '', fn (Builder $query) => $query->whereDate('created_at', '<=', $this->filter('date_to')))
             ->when($this->filter('search') !== '', function (Builder $query): void {

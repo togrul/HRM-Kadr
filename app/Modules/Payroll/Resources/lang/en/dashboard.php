@@ -150,6 +150,8 @@ return [
     ],
 
     'confirm' => [
+        'approve' => 'The :period run will be approved — :count employees, net total :total :currency. Continue?',
+        'approve_masked' => 'The :period run will be approved — :count employees. Continue?',
         'lock' => 'The run will be locked and payslips frozen. Continue?',
         'reopen' => 'The run will be reopened. Continue?',
         'delete' => 'Are you sure you want to delete this record?',

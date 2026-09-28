@@ -86,3 +86,18 @@ test('correct password must be provided to delete account', function () {
         'deleted_at' => null,
     ]);
 });
+
+test('profile page renders the restyled sections', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->get('/profile')
+        ->assertOk()
+        ->assertSee(__('ui::profile.titles.account_settings'))
+        ->assertSee('id="profile-information"', false)
+        ->assertSee('id="update-password"', false)
+        ->assertSee('id="delete-account"', false)
+        ->assertSee('name="current_password"', false)
+        ->assertSee('value="'.e($user->email).'"', false)
+        ->assertDontSee('wire:confirm', false);
+});

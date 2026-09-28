@@ -35,6 +35,9 @@ class ActivityLogDashboard extends Component
 
     public int $perPage = 25;
 
+    /** Only entries a user caused (the "users" metric card), not system ones. */
+    public bool $usersOnly = false;
+
     public ?int $selectedActivityId = null;
 
     /**
@@ -54,7 +57,7 @@ class ActivityLogDashboard extends Component
 
     public function updated($property): void
     {
-        if (in_array($property, ['search', 'logName', 'event', 'dateFrom', 'dateTo', 'perPage'], true)) {
+        if (in_array($property, ['search', 'logName', 'event', 'dateFrom', 'dateTo', 'perPage', 'usersOnly'], true)) {
             $this->resetPage();
             $this->selectedActivityId = null;
         }
@@ -68,8 +71,45 @@ class ActivityLogDashboard extends Component
         $this->dateFrom = '';
         $this->dateTo = '';
         $this->perPage = 25;
+        $this->usersOnly = false;
         $this->selectedActivityId = null;
         $this->resetPage();
+    }
+
+    /**
+     * The header metric cards double as filters: a click applies the card's filter, a
+     * second click on the active card clears it. "total" clears every card filter.
+     */
+    public function toggleMetric(string $metric): void
+    {
+        $active = $this->metricActive($metric);
+
+        if ($metric === 'total') {
+            $this->dateFrom = $this->dateTo = $this->event = '';
+            $this->usersOnly = false;
+        } elseif ($metric === 'today') {
+            $this->dateFrom = $this->dateTo = $active ? '' : today()->toDateString();
+        } elseif ($metric === 'profile_opened') {
+            $this->event = $active ? '' : 'profile_opened';
+        } elseif ($metric === 'users') {
+            $this->usersOnly = ! $active;
+        }
+
+        $this->selectedActivityId = null;
+        $this->resetPage();
+    }
+
+    public function metricActive(string $metric): bool
+    {
+        $today = today()->toDateString();
+
+        return match ($metric) {
+            'total' => ! $this->metricActive('today') && ! $this->metricActive('profile_opened') && ! $this->usersOnly,
+            'today' => $this->dateFrom === $today && $this->dateTo === $today,
+            'profile_opened' => $this->event === 'profile_opened',
+            'users' => $this->usersOnly,
+            default => false,
+        };
     }
 
     public function selectActivity(int $activityId): void
@@ -91,6 +131,7 @@ class ActivityLogDashboard extends Component
             'event' => $this->event,
             'date_from' => $this->dateFrom,
             'date_to' => $this->dateTo,
+            'users_only' => $this->usersOnly ? '1' : '',
         ], fn ($value) => $value !== ''));
     }
 
@@ -136,6 +177,7 @@ class ActivityLogDashboard extends Component
         return AuditActivity::query()
             ->when($this->logName !== '', fn (Builder $query) => $query->where('log_name', $this->logName))
             ->when(! $ignoreEvent && $this->event !== '', fn (Builder $query) => $query->where('event', $this->event))
+            ->when($this->usersOnly, fn (Builder $query) => $query->whereNotNull('causer_id'))
             // Plain ranges, not whereDate(): DATE(created_at) cannot use the index.
             ->when($this->dayStart($this->dateFrom), fn (Builder $query, Carbon $from) => $query->where('created_at', '>=', $from))
             ->when($this->dayStart($this->dateTo), fn (Builder $query, Carbon $to) => $query->where('created_at', '<', $to->addDay()))

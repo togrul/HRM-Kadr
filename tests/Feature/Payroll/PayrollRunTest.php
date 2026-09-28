@@ -163,6 +163,31 @@ class PayrollRunTest extends TestCase
         $this->assertSame(1, Payslip::where('payroll_run_id', $runId)->count());
     }
 
+    public function test_approve_button_asks_for_confirmation_with_period_count_and_total(): void
+    {
+        $personnel = $this->makePersonnel('ap@example.test');
+        $regimeId = CompensationRegime::where('code', 'private')->value('id');
+        $this->assignCompensation($personnel->tabel_no, $regimeId, 1000, 10);
+
+        $period = app(PayrollPeriodService::class)->createPeriod(2026, 6);
+        $runService = app(PayrollRunService::class);
+        $run = $runService->calculate($runService->createRun($period, $regimeId));
+
+        $user = \App\Models\User::factory()->create();
+        foreach (['show-payroll', 'approve-payroll', 'view-compensation-amounts'] as $perm) {
+            $user->givePermissionTo(Permission::findOrCreate($perm, 'web'));
+        }
+        $this->actingAs($user);
+
+        $html = Livewire::test(RunsTab::class, ['periodFilter' => $period->id])->html();
+
+        $this->assertStringContainsString("approveRun({$run->id})", $html);
+        $this->assertStringNotContainsString("wire:click=\"approveRun({$run->id})\"", $html);
+        $this->assertStringContainsString('confirm-action', $html);
+        $this->assertStringContainsString('943,50', $html);
+        $this->assertStringContainsString(e(e($period->starts_on->translatedFormat('F Y'))), $html);
+    }
+
     public function test_manager_can_delete_payslip_run_and_period(): void
     {
         $personnel = $this->makePersonnel('del@example.test');

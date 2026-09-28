@@ -118,6 +118,49 @@ class AuditLogDashboardTest extends TestCase
         $this->assertSame(['login' => 2, 'updated' => 3], $counts($component));
     }
 
+    public function test_metric_cards_toggle_their_filter(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo(Permission::findOrCreate('show-audit-logs', 'web'));
+
+        $make = fn (string $event, ?int $causerId, string $createdAt) => AuditActivity::query()->create([
+            'log_name' => 'default',
+            'description' => 'x',
+            'event' => $event,
+            'causer_type' => $causerId ? User::class : null,
+            'causer_id' => $causerId,
+        ])->forceFill(['created_at' => $createdAt])->save();
+
+        $make('profile_opened', $user->id, now()->toDateTimeString());
+        $make('updated', null, now()->toDateTimeString());
+        $make('updated', $user->id, now()->subDays(3)->toDateTimeString());
+
+        $total = fn ($component): int => $component->viewData('activities')->total();
+        $component = Livewire::actingAs($user)->test(ActivityLogDashboard::class)
+            ->assertSeeHtml('aria-pressed="true"');
+
+        $this->assertSame(3, $total($component));
+
+        $component->call('toggleMetric', 'today')->assertSet('dateFrom', today()->toDateString());
+        $this->assertSame(2, $total($component));
+        $this->assertTrue($component->instance()->metricActive('today'));
+        $this->assertFalse($component->instance()->metricActive('total'));
+
+        $component->call('toggleMetric', 'today')->assertSet('dateFrom', '')->assertSet('dateTo', '');
+        $this->assertSame(3, $total($component));
+
+        $component->call('toggleMetric', 'profile_opened')->assertSet('event', 'profile_opened');
+        $this->assertSame(1, $total($component));
+        $component->call('toggleMetric', 'profile_opened')->assertSet('event', '');
+
+        $component->call('toggleMetric', 'users')->assertSet('usersOnly', true);
+        $this->assertSame(2, $total($component));
+        $this->assertStringContainsString('users_only=1', $component->instance()->exportUrl('csv'));
+
+        $component->call('toggleMetric', 'total')->assertSet('usersOnly', false);
+        $this->assertSame(3, $total($component));
+    }
+
     public function test_authorized_user_can_export_audit_logs(): void
     {
         $user = User::factory()->create();

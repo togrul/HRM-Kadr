@@ -2,6 +2,7 @@
 
 return [
     'titles' => [
+        'account_settings' => 'Account settings',
         'profile' => 'Profile',
         'profile_information' => 'Profile information',
         'update_password' => 'Update password',
@@ -17,6 +18,7 @@ return [
         'delete_account_password_confirmation' => 'Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.',
     ],
     'actions' => [
+        'update_password' => 'Update password',
         'save' => 'Save',
         'saved' => 'Saved.',
         'cancel' => 'Cancel',

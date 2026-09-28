@@ -7,6 +7,7 @@ return [
         'subtitle' => 'Sistemdə baş verən giriş, profil baxışı və məlumat dəyişikliklərini audit bazasından oxuyun. Bu ekran yalnız baxış üçündür.',
     ],
     'metrics' => [
+        'filter_hint' => 'Süzgəc kimi tətbiq et və ya təmizlə',
         'total' => 'Ümumi log',
         'today' => 'Bugün',
         'profile_opened' => 'Profil baxışı',

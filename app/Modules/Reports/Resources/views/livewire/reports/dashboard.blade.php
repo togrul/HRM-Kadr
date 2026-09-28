@@ -104,6 +104,30 @@
                 >{{ __('reports::dashboard.tabs.'.$tab) }}</x-filter.item>
             @endforeach
         </x-filter.nav>
+
+        {{-- small-screen fallback for the panel's period filters: visible without opening the panel --}}
+        <div class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:hidden" data-testid="reports-mobile-period">
+            <x-ui.select wire:model.live="year" :aria-label="__('reports::dashboard.fields.year')">
+                @foreach (range(now()->year - 4, now()->year + 1) as $yearOption)
+                    <option value="{{ $yearOption }}">{{ $yearOption }}</option>
+                @endforeach
+            </x-ui.select>
+
+            <x-ui.select wire:model.live="month" :aria-label="__('reports::dashboard.fields.month')">
+                @foreach (range(1, 12) as $monthOption)
+                    <option value="{{ $monthOption }}">{{ \Carbon\Carbon::create()->month($monthOption)->translatedFormat('F') }}</option>
+                @endforeach
+            </x-ui.select>
+
+            <div class="col-span-2 sm:col-span-1">
+                <x-ui.select wire:model.live="structureId" :aria-label="__('reports::dashboard.fields.structure')">
+                    <option value="">{{ __('reports::dashboard.labels.all_structures') }}</option>
+                    @foreach ($structureOptions as $option)
+                        <option value="{{ $option['id'] }}">{{ $option['label'] }}</option>
+                    @endforeach
+                </x-ui.select>
+            </div>
+        </div>
     </x-page-header>
 
     {{-- ===================== body ===================== --}}
