@@ -38,6 +38,7 @@ class AddOpening extends Component
         $this->storeOpening();
 
         $this->dispatch('openingSaved', __('candidates::recruitment.messages.opening_saved'));
+        $this->dispatch('notify', type: 'success', message: __('candidates::recruitment.messages.opening_saved'));
         $this->dispatch('ui:modal-close');
     }
 

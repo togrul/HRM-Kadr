@@ -76,13 +76,17 @@
                 </div>
                 <div class="flex shrink-0 flex-wrap items-center gap-2">
                     @if (! in_array($requisition->approval_status, ['pending', 'approved'], true))
-                        <x-pill-button variant="primary" wire:click="submitForApproval">{{ __('candidates::recruitment.actions.submit_for_approval') }}</x-pill-button>
+                        <x-pill-button wire:click="submitForApproval">{{ __('candidates::recruitment.actions.submit_for_approval') }}</x-pill-button>
                     @endif
                     @if ($requisition->approval_status !== 'approved')
                         <x-pill-button variant="primary" wire:click="approve">{{ __('candidates::recruitment.actions.approve_requisition') }}</x-pill-button>
                     @endif
                     @if ($requisition->approval_status !== 'rejected')
-                        <x-pill-button variant="danger" wire:click="reject">{{ __('candidates::recruitment.actions.reject_requisition') }}</x-pill-button>
+                        <x-pill-button variant="danger"
+                            data-title="{{ __('candidates::recruitment.actions.reject_requisition') }}"
+                            data-message="{{ __('candidates::recruitment.messages.reject_requisition_confirm', ['title' => $requisition->title]) }}"
+                            x-on:click="$dispatch('confirm-action', { title: $el.dataset.title, message: $el.dataset.message, confirmText: $el.dataset.title, tone: 'rose', run: () => $wire.reject() })"
+                        >{{ __('candidates::recruitment.actions.reject_requisition') }}</x-pill-button>
                     @endif
                 </div>
             </div>

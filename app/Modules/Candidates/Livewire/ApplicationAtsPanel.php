@@ -19,6 +19,9 @@ class ApplicationAtsPanel extends Component
 
     public CandidateApplication $application;
 
+    /** Active ATS tab: interviews | scorecard | offers | pool. */
+    public string $tab = 'interviews';
+
     public array $interviewForm = [
         'interviewer_id' => '',
         'scheduled_at' => '',
@@ -56,6 +59,11 @@ class ApplicationAtsPanel extends Component
         $this->loadApplication();
     }
 
+    public function setTab(string $tab): void
+    {
+        $this->tab = in_array($tab, ['interviews', 'scorecard', 'offers', 'pool'], true) ? $tab : 'interviews';
+    }
+
     public function scheduleInterview(CandidateAtsCompletionService $service): void
     {
         $this->authorize('transition', $this->application);
@@ -82,6 +90,7 @@ class ApplicationAtsPanel extends Component
         ];
         $this->loadApplication();
         $this->dispatch('candidate-application-saved', applicationId: $this->application->id);
+        $this->dispatch('notify', type: 'success', message: __('candidates::recruitment.messages.interview_scheduled'));
     }
 
     public function submitScorecard(CandidateAtsCompletionService $service): void
@@ -112,6 +121,7 @@ class ApplicationAtsPanel extends Component
         ];
         $this->loadApplication();
         $this->dispatch('candidate-application-saved', applicationId: $this->application->id);
+        $this->dispatch('notify', type: 'success', message: __('candidates::recruitment.messages.scorecard_saved'));
     }
 
     public function cancelInterview(int $interviewId, CandidateAtsCompletionService $service): void
@@ -127,6 +137,7 @@ class ApplicationAtsPanel extends Component
 
         $this->loadApplication();
         $this->dispatch('candidate-application-saved', applicationId: $this->application->id);
+        $this->dispatch('notify', type: 'success', message: __('candidates::recruitment.messages.interview_cancelled'));
     }
 
     public function createOffer(CandidateAtsCompletionService $service): void
@@ -156,6 +167,7 @@ class ApplicationAtsPanel extends Component
         ];
         $this->loadApplication();
         $this->dispatch('candidate-application-saved', applicationId: $this->application->id);
+        $this->dispatch('notify', type: 'success', message: __('candidates::recruitment.messages.offer_created'));
     }
 
     public function updateOfferStatus(int $offerId, string $status, CandidateAtsCompletionService $service): void
@@ -169,6 +181,7 @@ class ApplicationAtsPanel extends Component
 
         $this->loadApplication();
         $this->dispatch('candidate-application-saved', applicationId: $this->application->id);
+        $this->dispatch('notify', type: 'success', message: __('candidates::recruitment.messages.offer_status_updated'));
     }
 
     public function addToTalentPool(CandidateAtsCompletionService $service): void
@@ -193,6 +206,7 @@ class ApplicationAtsPanel extends Component
         ];
         $this->loadApplication();
         $this->dispatch('candidate-application-saved', applicationId: $this->application->id);
+        $this->dispatch('notify', type: 'success', message: __('candidates::recruitment.messages.talent_pool_added'));
     }
 
     public function users(): Collection

@@ -129,7 +129,7 @@
                     />
                 </div>
                 <p class="hrm-num shrink-0 text-[11.5px] text-ink-faint">
-                    {{ __('compliance::documents.labels.result_count', ['count' => $num($rows->count())]) }}
+                    {{ __('compliance::documents.labels.result_count', ['count' => $num($rows->total())]) }}
                 </p>
             </div>
 
@@ -141,7 +141,7 @@
                 __('compliance::documents.columns.status'),
             ]">
                 @forelse ($rows as $row)
-                    <tr wire:key="compliance-row-{{ $loop->index }}">
+                    <tr wire:key="compliance-row-{{ $row['document_type'] }}-{{ $row['record_id'] ?? 'm' }}-{{ $row['tabel_no'] }}">
                         <x-table.td standart-width>
                             <div class="flex items-center gap-2.5">
                                 <x-avatar :name="(string) $row['personnel_name']" :tone="in_array($row['status'], ['expired', 'missing'], true) ? 'rose' : 'neutral'" />
@@ -179,6 +179,10 @@
                     </tr>
                 @endforelse
             </x-table.tbl>
+
+            @if ($rows->hasPages())
+                <x-pagination :paginator="$rows" />
+            @endif
         </section>
 
         @if ($structureScores->isNotEmpty())

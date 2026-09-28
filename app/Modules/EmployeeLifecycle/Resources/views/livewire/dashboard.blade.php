@@ -249,6 +249,11 @@
                             <p class="mt-1 text-[11px] leading-4 text-ink-faint">
                                 {{ __('employee-lifecycle::dashboard.labels.probation_meta', ['manager' => $review['manager_name'], 'hr_user' => $review['reviewer_name']]) }}
                             </p>
+                            @if ($canManage && ! in_array($review['status'], ['completed', 'cancelled'], true))
+                                <div class="mt-2 flex justify-end">
+                                    <x-pill-button variant="ghost" class="!h-7 !px-3 !text-[12px]" wire:click="completeFromQueue('probation', {{ $review['id'] }})">{{ __('employee-lifecycle::dashboard.actions.complete_row') }}</x-pill-button>
+                                </div>
+                            @endif
                         </div>
                     @empty
                         <p class="px-4 py-6 text-[12.5px] text-ink-faint">{{ __('employee-lifecycle::dashboard.empty') }}</p>
@@ -278,6 +283,11 @@
                             <div class="mt-1.5">
                                 <x-small-badge mode="violet">{{ $movement['movement_type_label'] }}</x-small-badge>
                             </div>
+                            @if ($canManage && ! in_array($movement['status'], ['completed', 'cancelled'], true))
+                                <div class="mt-2 flex justify-end">
+                                    <x-pill-button variant="ghost" class="!h-7 !px-3 !text-[12px]" wire:click="completeFromQueue('movement', {{ $movement['id'] }})">{{ __('employee-lifecycle::dashboard.actions.complete_row') }}</x-pill-button>
+                                </div>
+                            @endif
                         </div>
                     @empty
                         <p class="px-4 py-6 text-[12.5px] text-ink-faint">{{ __('employee-lifecycle::dashboard.empty') }}</p>
@@ -309,6 +319,11 @@
                                     {{ $case['exit_interview_done'] ? __('employee-lifecycle::dashboard.labels.exit_interview_done') : __('employee-lifecycle::dashboard.labels.exit_interview_pending') }}
                                 </x-small-badge>
                             </div>
+                            @if ($canManage && ! in_array($case['status'], ['completed', 'cancelled'], true))
+                                <div class="mt-2 flex justify-end">
+                                    <x-pill-button variant="ghost" class="!h-7 !px-3 !text-[12px]" wire:click="completeFromQueue('offboarding', {{ $case['id'] }})">{{ __('employee-lifecycle::dashboard.actions.complete_row') }}</x-pill-button>
+                                </div>
+                            @endif
                         </div>
                     @empty
                         <p class="px-4 py-6 text-[12.5px] text-ink-faint">{{ __('employee-lifecycle::dashboard.empty') }}</p>
@@ -575,7 +590,13 @@
                         </form>
                     @endif
                 @else
-                    <form wire:submit="completeProbationReview" class="rounded-xl border border-hairline bg-[#fafafa] px-4 py-3.5">
+                    <form
+                        class="rounded-xl border border-hairline bg-[#fafafa] px-4 py-3.5"
+                        data-names="{{ json_encode(collect($this->probationReviewOptions)->mapWithKeys(fn ($option) => [$option['id'] => \Illuminate\Support\Str::before($option['label'], ' · ')])) }}"
+                        x-on:submit.prevent="$wire.completionForm.probation_decision === 'terminate'
+                            ? $dispatch('confirm-action', { title: @js(__('employee-lifecycle::dashboard.messages.probation_terminate_title')), message: @js(__('employee-lifecycle::dashboard.messages.probation_terminate_confirm', ['name' => '__NAME__'])).replace('__NAME__', JSON.parse($el.dataset.names)[$wire.completionForm.probation_review_id] ?? '—'), confirmText: @js(__('employee-lifecycle::dashboard.probation_decisions.terminate')), tone: 'rose', run: () => $wire.completeProbationReview() })
+                            : $wire.completeProbationReview()"
+                    >
                         <p class="hrm-eyebrow">{{ __('employee-lifecycle::dashboard.forms.probation') }}</p>
                         <div class="mt-3 grid gap-3 sm:grid-cols-2">
                             <x-ui.input-shell class="sm:col-span-2" :error="$errors->first('completionForm.probation_review_id')">

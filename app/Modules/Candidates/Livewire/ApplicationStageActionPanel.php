@@ -102,6 +102,7 @@ class ApplicationStageActionPanel extends Component
         $this->syncActionForm();
         $this->dispatch('candidate-application-saved', applicationId: $this->application->id);
         $this->dispatch('applicationSaved', __('candidates::recruitment.messages.application_stage_saved'));
+        $this->dispatch('notify', type: 'success', message: __('candidates::recruitment.messages.application_stage_saved'));
     }
 
     protected function rules(): array

@@ -133,6 +133,7 @@ class AddApplication extends Component
         ]);
 
         $this->dispatch('applicationSaved', __('candidates::recruitment.messages.application_saved'));
+        $this->dispatch('notify', type: 'success', message: __('candidates::recruitment.messages.application_saved'));
         $this->dispatch('ui:modal-close');
     }
 

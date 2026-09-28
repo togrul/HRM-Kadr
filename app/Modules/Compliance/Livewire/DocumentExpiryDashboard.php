@@ -4,11 +4,17 @@ namespace App\Modules\Compliance\Livewire;
 
 use App\Modules\Compliance\Application\Services\DocumentExpiryReadService;
 use Illuminate\Contracts\View\View;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Component;
+use Livewire\WithPagination;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DocumentExpiryDashboard extends Component
 {
+    use WithPagination;
+
+    public const PER_PAGE = 25;
+
     public string $search = '';
 
     public string $status = '';
@@ -25,6 +31,14 @@ class DocumentExpiryDashboard extends Component
         $this->search = '';
         $this->status = '';
         $this->type = '';
+        $this->resetPage();
+    }
+
+    public function updated(string $property): void
+    {
+        if (in_array($property, ['search', 'status', 'type'], true)) {
+            $this->resetPage();
+        }
     }
 
     public function exportCsv(DocumentExpiryReadService $service): StreamedResponse
@@ -77,6 +91,18 @@ class DocumentExpiryDashboard extends Component
             'status' => $this->status,
             'type' => $this->type,
         ]);
+
+        // ponytail: rows are merged in memory (three document tables + synthesized "missing"
+        // rows), so this pages the built collection — the query count stays flat, only the
+        // rendered rows shrink. Move to a SQL UNION if the personnel count outgrows memory.
+        $rows = $payload['rows'];
+        $page = min($this->getPage(), max(1, (int) ceil($rows->count() / self::PER_PAGE)));
+        $payload['rows'] = new LengthAwarePaginator(
+            $rows->forPage($page, self::PER_PAGE)->values(),
+            $rows->count(),
+            self::PER_PAGE,
+            $page,
+        );
 
         return view('compliance::livewire.document-expiry-dashboard', $payload);
     }
