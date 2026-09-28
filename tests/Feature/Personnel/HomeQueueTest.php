@@ -89,7 +89,7 @@ class HomeQueueTest extends TestCase
             ->assertDispatched('notify', type: 'success');
 
         $this->assertSame('rejected', $entry->fresh()->approval_status);
-        $this->assertStringContainsString('Sənəd təqdim olunmayıb', (string) $entry->fresh()->reason);
+        $this->assertStringContainsString('Sənəd təqdim olunmayıb', (string) $entry->fresh()->rejection_reason);
     }
 
     public function test_a_viewer_without_the_approve_right_sees_no_buttons_and_cannot_decide(): void

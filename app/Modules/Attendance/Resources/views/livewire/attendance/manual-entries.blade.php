@@ -65,10 +65,10 @@
                     ]">
                         @forelse($this->recentEntries as $entry)
                             @php
-                                $statusClass = match($entry->approval_status) {
-                                    'approved' => 'bg-emerald-100 text-emerald-700',
-                                    'rejected' => 'bg-rose-100 text-rose-700',
-                                    default => 'bg-amber-100 text-amber-700',
+                                $statusTone = match($entry->approval_status) {
+                                    'approved' => 'green',
+                                    'rejected' => 'red',
+                                    default => 'amber',
                                 };
                             @endphp
                         <tr>
@@ -94,9 +94,14 @@
                                 <x-table.td>{{ $entry->late_minutes }}</x-table.td>
                                 <x-table.td>{{ $entry->early_leave_minutes }}</x-table.td>
                                 <x-table.td>
-                                    <span class="inline-flex rounded-full px-2 py-1 text-xs uppercase font-medium {{ $statusClass }}">
-                                        {{ $this->approvalStatusLabel((string) $entry->approval_status) }}
-                                    </span>
+                                    <div class="flex max-w-[16rem] flex-col items-start gap-1">
+                                        <x-small-badge :mode="$statusTone" dot>{{ $this->approvalStatusLabel((string) $entry->approval_status) }}</x-small-badge>
+                                        @if ($entry->approval_status === 'rejected' && filled($entry->rejection_reason))
+                                            <p class="line-clamp-2 whitespace-normal text-[12px] leading-snug text-ink-muted" title="{{ $entry->rejection_reason }}">
+                                                <span class="sr-only">{{ __('attendance::manual_entries.labels.reject_note') }}:</span>{{ $entry->rejection_reason }}
+                                            </p>
+                                        @endif
+                                    </div>
                                 </x-table.td>
                                 <x-table.td extraClasses="text-zinc-600">{{ $entry->enteredBy?->name ?? '-' }}</x-table.td>
                                 <x-table.td extraClasses="text-zinc-600">{{ $entry->approvedBy?->name ?? '-' }}</x-table.td>

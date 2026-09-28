@@ -52,5 +52,18 @@ it('stores the rejection reason on the entry', function (): void {
 
     expect($entry->fresh())
         ->approval_status->toBe('rejected')
-        ->reason->toContain('No supporting document');
+        ->rejection_reason->toBe('No supporting document');
+});
+
+it('shows the rejection reason under the status in the queue', function (): void {
+    $this->actingAs($user = manualApprover());
+    $entry = pendingManualEntry($user);
+
+    Livewire::test(ManualEntries::class, ['embedded' => true])
+        ->set('rejectNotes.'.$entry->id, 'Şahid sənədi yoxdur')
+        ->call('reject', $entry->id);
+
+    // The queue lives in an island, so a fresh render shows the rejected list.
+    Livewire::test(ManualEntries::class, ['embedded' => true, 'queueStatus' => 'rejected'])
+        ->assertSee('Şahid sənədi yoxdur');
 });
