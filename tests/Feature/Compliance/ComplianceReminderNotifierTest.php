@@ -3,12 +3,12 @@
 namespace Tests\Feature\Compliance;
 
 use App\Models\Personnel;
-use App\Models\Position;
 use App\Models\Structure;
 use App\Models\User;
 use App\Modules\Compliance\Application\Services\ComplianceReminderNotifier;
 use App\Notifications\PlatformNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -71,7 +71,9 @@ class ComplianceReminderNotifierTest extends TestCase
 
     private function makePersonnel(string $surname, string $email, int $structureId, ?int $parentId): Personnel
     {
-        $position = Position::query()->create(['name' => 'Vəzifə '.Str::random(4)]);
+        // positions.id is not auto-increment on MySQL (SQLite hides it via rowid).
+        $positionId = (int) DB::table('positions')->max('id') + 1;
+        DB::table('positions')->insert(['id' => $positionId, 'name' => 'Vəzifə '.Str::random(4)]);
 
         return Personnel::withoutEvents(fn () => Personnel::query()->create([
             'tabel_no' => 'TB'.Str::upper(Str::random(6)),
@@ -80,8 +82,8 @@ class ComplianceReminderNotifierTest extends TestCase
             'email' => $email, 'mobile' => '994500000000', 'nationality_id' => 1,
             'pin' => 'P'.str_pad((string) random_int(1, 9999999), 7, '0', STR_PAD_LEFT),
             'residental_address' => 'X', 'education_degree_id' => 1, 'work_norm_id' => 1,
-            'structure_id' => $structureId, 'position_id' => $position->id, 'parent_id' => $parentId,
-            'join_work_date' => '2020-01-01', 'added_by' => 1, 'is_pending' => false,
+            'structure_id' => $structureId, 'position_id' => $positionId, 'parent_id' => $parentId,
+            'join_work_date' => '2020-01-01', 'added_by' => DocumentExpiryFixture::seedPersonnelReferences(), 'is_pending' => false,
         ]));
     }
 }

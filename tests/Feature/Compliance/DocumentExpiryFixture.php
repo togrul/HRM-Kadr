@@ -14,14 +14,8 @@ class DocumentExpiryFixture
 {
     public static function seedMixed(int $personnel = 30, string $prefix = 'P'): void
     {
+        $userId = self::seedPersonnelReferences();
         self::seedReferenceData();
-
-        $userId = DB::table('users')->insertGetId([
-            'name' => 'Fixture Owner',
-            'email' => 'compliance-fixture-'.uniqid().'@example.test',
-            'password' => 'x',
-            'is_active' => true,
-        ]);
 
         $rows = [];
         for ($i = 1; $i <= $personnel; $i++) {
@@ -89,12 +83,27 @@ class DocumentExpiryFixture
         ]);
     }
 
-    private static function seedReferenceData(): void
+    /**
+     * The rows every personnel insert points at (nationality 1, education degree 1,
+     * work norm 1, an `added_by` user), so fixtures hold on MySQL with foreign keys on.
+     * Returns the user id to use as `added_by`.
+     */
+    public static function seedPersonnelReferences(): int
     {
         DB::table('countries')->insertOrIgnore(['id' => 1, 'code' => 'AZ']);
         DB::table('education_degrees')->insertOrIgnore(['id' => 1, 'title_az' => 'Bakalavr', 'title_en' => 'Bachelor', 'title_ru' => 'Bachelor']);
         DB::table('work_norms')->insertOrIgnore(['id' => 1, 'name_az' => 'Tam', 'name_en' => 'Full', 'name_ru' => 'Full']);
 
+        return DB::table('users')->insertGetId([
+            'name' => 'Fixture Owner',
+            'email' => 'compliance-fixture-'.uniqid().'@example.test',
+            'password' => 'x',
+            'is_active' => true,
+        ]);
+    }
+
+    private static function seedReferenceData(): void
+    {
         foreach ([1 => 'Alpha HQ', 2 => 'Beta Unit', 3 => ''] as $id => $name) {
             DB::table('structures')->insertOrIgnore(['id' => $id, 'name' => $name, 'shortname' => 'S'.$id, 'parent_id' => null, 'coefficient' => 1.10, 'code' => 40 + $id, 'level' => 1]);
         }

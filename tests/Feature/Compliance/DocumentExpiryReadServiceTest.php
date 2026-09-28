@@ -157,7 +157,7 @@ class DocumentExpiryReadServiceTest extends TestCase
             'position_id' => 1,
             'work_norm_id' => 1,
             'join_work_date' => '2026-03-01',
-            'added_by' => 1,
+            'added_by' => DocumentExpiryFixture::seedPersonnelReferences(),
             'is_pending' => false,
         ]));
     }

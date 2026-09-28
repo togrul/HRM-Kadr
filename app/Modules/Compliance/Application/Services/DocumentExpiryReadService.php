@@ -31,9 +31,19 @@ class DocumentExpiryReadService
 
     private const STATUSES = ['expired', 'expiring_30', 'expiring_60', 'valid', 'missing'];
 
+    /**
+     * Day windows used when a document type has no requirement row or a null column.
+     * `expiring_30` is the critical window, `expiring_60` the warning one — the keys stay
+     * fixed for filters, counts and exports while the day bounds come per type.
+     */
+    private const DEFAULT_CRITICAL_DAYS = 30;
+
+    private const DEFAULT_WARNING_DAYS = 60;
+
     public function dashboard(array $filters = [], int $page = 1, int $perPage = self::PER_PAGE): array
     {
-        $base = $this->unionQuery();
+        $requirements = $this->requirements();
+        $base = $this->unionQuery($requirements);
         $status = (string) ($filters['status'] ?? '');
         $type = (string) ($filters['type'] ?? '');
 
@@ -68,12 +78,15 @@ class DocumentExpiryReadService
                 ->all(),
             'rows' => $this->paginate($base === null ? null : $this->filtered(clone $base, $filters), $page, $perPage),
             'structureScores' => $this->scoresFromCounts($structureStatus),
+            'typeWindows' => collect(array_keys(self::DOCUMENT_SOURCES))
+                ->mapWithKeys(fn (string $key): array => [$key => $this->window($requirements, $key)])
+                ->all(),
         ];
     }
 
     public function rows(array $filters = []): Collection
     {
-        $base = $this->unionQuery();
+        $base = $this->unionQuery($this->requirements());
 
         if ($base === null) {
             return collect();
@@ -99,16 +112,33 @@ class DocumentExpiryReadService
 
     public function reminderRows(int $daysAhead = 30): Collection
     {
-        return $this->rows()
-            ->filter(fn (array $row): bool => in_array($row['status'], ['expired', 'expiring_30', 'missing'], true)
-                || (is_int($row['days_left'] ?? null) && $row['days_left'] <= $daysAhead))
+        $base = $this->unionQuery($this->requirements());
+
+        if ($base === null) {
+            return collect();
+        }
+
+        // Only the rows a reminder is about come back from the database: expired, critical or
+        // missing, or anything expiring within the look-ahead (Y-m-d strings compare as dates).
+        return $base
+            ->where(fn (Builder $query) => $query
+                ->whereIn('status', ['expired', 'expiring_30', 'missing'])
+                ->orWhere(fn (Builder $query) => $query
+                    ->whereNotNull('expires_on')
+                    ->where('expires_on', '<=', today()->addDays($daysAhead)->toDateString())))
+            ->select([
+                'record_id', 'document_type', 'document_label', 'document_number', 'expires_on',
+                'status', 'tabel_no', 'personnel_name', 'structure_name', 'position_name',
+            ])
+            ->get()
+            ->map(fn (object $row): array => $this->shape($row))
             ->sortBy(fn (array $row): string => ($row['expires_at_sort'] ?? '9999-12-31').'|'.$row['personnel_name'])
             ->values();
     }
 
     public function structureScores(): Collection
     {
-        return $this->scoresFromCounts($this->structureStatusCounts($this->unionQuery()));
+        return $this->scoresFromCounts($this->structureStatusCounts($this->unionQuery($this->requirements())));
     }
 
     private function paginate(?Builder $query, int $page, int $perPage): LengthAwarePaginator
@@ -202,7 +232,7 @@ class DocumentExpiryReadService
      * The union of every document branch and every missing-document branch, wrapped so
      * the caller can filter, aggregate and page it. Null when there is nothing to read.
      */
-    private function unionQuery(): ?Builder
+    private function unionQuery(Collection $requirements): ?Builder
     {
         if (! InstalledTables::has('personnels')) {
             return null;
@@ -213,12 +243,12 @@ class DocumentExpiryReadService
 
         foreach (self::DOCUMENT_SOURCES as $type => $source) {
             if (InstalledTables::has($source['table'])) {
-                $branches[] = $this->documentBranch($branch, $type, $source['table'], $source['expires']);
+                $branches[] = $this->documentBranch($branch, $type, $source['table'], $source['expires'], $this->window($requirements, $type));
             }
             $branch++;
         }
 
-        foreach ($this->requirements()->where('is_required', true) as $requirement) {
+        foreach ($requirements->where('is_required', true) as $requirement) {
             $branches[] = $this->missingBranch($branch++, $requirement);
         }
 
@@ -235,14 +265,18 @@ class DocumentExpiryReadService
         return DB::query()->fromSub($union, 'compliance_rows');
     }
 
-    private function documentBranch(int $branch, string $type, string $table, string $expiresColumn): Builder
+    /**
+     * @param  array{critical: int, warning: int}  $window
+     */
+    private function documentBranch(int $branch, string $type, string $table, string $expiresColumn, array $window): Builder
     {
         $label = __('compliance::documents.types.'.$type);
         $expires = "NULLIF(SUBSTR({$table}.{$expiresColumn}, 1, 10), '')";
         [$number, $numberBindings] = $this->documentNumberSql($type, $table);
 
-        // Same thresholds as the old PHP match on days left: < 0 expired, <= 30, <= 60, else
-        // valid; no expiry date is valid. Compared as Y-m-d strings against PHP's today().
+        // < 0 days expired, <= critical days expiring_30, <= warning days expiring_60, else
+        // valid; no expiry date is valid. The type's day windows are baked in as literal
+        // bound dates, compared as Y-m-d strings against PHP's today().
         $status = "CASE WHEN {$expires} IS NULL THEN 'valid'"
             ." WHEN {$expires} < ? THEN 'expired'"
             ." WHEN {$expires} <= ? THEN 'expiring_30'"
@@ -250,8 +284,8 @@ class DocumentExpiryReadService
             ." ELSE 'valid' END";
         $statusBindings = [
             today()->toDateString(),
-            today()->addDays(30)->toDateString(),
-            today()->addDays(60)->toDateString(),
+            today()->addDays($window['critical'])->toDateString(),
+            today()->addDays($window['warning'])->toDateString(),
         ];
 
         $query = DB::table($table)
@@ -421,20 +455,41 @@ class DocumentExpiryReadService
                 'key' => $key,
                 'label' => __('compliance::documents.types.'.$key),
                 'is_required' => true,
+                'critical_days' => null,
+                'warning_days' => null,
             ]);
         }
 
         $localeColumn = app()->getLocale() === 'en' ? 'label_en' : 'label_az';
 
         return DB::table('compliance_document_requirements')
-            ->select(['key', 'label_az', 'label_en', 'is_required'])
+            ->select(['key', 'label_az', 'label_en', 'is_required', 'critical_days', 'warning_days'])
             ->orderBy('id')
             ->get()
             ->map(fn ($row): array => [
                 'key' => (string) $row->key,
                 'label' => (string) ($row->{$localeColumn} ?: $row->label_az),
                 'is_required' => (bool) $row->is_required,
+                'critical_days' => $row->critical_days !== null ? (int) $row->critical_days : null,
+                'warning_days' => $row->warning_days !== null ? (int) $row->warning_days : null,
             ]);
+    }
+
+    /**
+     * The type's critical / warning day windows, falling back to 30 / 60.
+     *
+     * @return array{critical: int, warning: int}
+     */
+    private function window(Collection $requirements, string $type): array
+    {
+        $requirement = $requirements->firstWhere('key', $type);
+        $critical = $requirement['critical_days'] ?? self::DEFAULT_CRITICAL_DAYS;
+
+        // A warning window shorter than the critical one would be empty anyway; show it as such.
+        return [
+            'critical' => $critical,
+            'warning' => max($critical, $requirement['warning_days'] ?? self::DEFAULT_WARNING_DAYS),
+        ];
     }
 
     private function shape(object $row): array

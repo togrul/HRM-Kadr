@@ -64,6 +64,7 @@
                         wire:click.prevent="$set('type', '{{ $option }}')"
                         :active="$type === $option"
                         :count="$num($count)"
+                        :note="__('compliance::documents.labels.type_window', $typeWindows[$option])"
                     >{{ __('compliance::documents.types.'.$option) }}</x-context-panel.item>
                 @endforeach
             </x-context-panel.section>
