@@ -1,13 +1,22 @@
-<section class="rounded-2xl border border-hairline bg-white shadow-card">
-    <div class="border-b border-hairline-subtle px-4 py-2.5">
-        <p class="hrm-eyebrow">{{ __('personnel::profile.sections.personal') }}</p>
+<section class="overflow-hidden rounded-2xl border border-hairline bg-white shadow-card">
+    <div class="flex items-center justify-between gap-3 border-b border-hairline-subtle px-5 py-3.5">
+        <h2 class="text-[15px] font-semibold tracking-[-0.02em] text-ink">{{ __('personnel::profile.sections.personal') }}</h2>
+        @if ($this->canEdit)
+            <button type="button" wire:click="setSection('personal')" class="text-[13px] font-medium text-ink-muted transition hover:text-ink">{{ __('personnel::common.actions.edit') }}</button>
+        @endif
     </div>
 
-    <dl class="grid gap-x-8 sm:grid-cols-2">
+    {{-- A ruled grid: every cell carries its bottom rule and the left column its right rule;
+         -mb-px tucks the last row's rule under the card edge. --}}
+    <dl class="-mb-px grid sm:grid-cols-2">
         @foreach ($reader->personalRows($personnel) as $row)
-            <div class="flex items-baseline justify-between gap-4 border-b border-hairline-subtle px-4 py-2.5 last:border-b-0 sm:[&:nth-last-child(-n+2)]:border-b-0">
-                <dt class="shrink-0 text-[12.5px] text-ink-muted">{{ $row['label'] }}</dt>
-                <dd @class(['min-w-0 truncate text-right text-[12.5px] font-medium text-ink', 'hrm-num' => $row['mono']]) title="{{ $row['value'] }}">{{ $row['value'] }}</dd>
+            <div class="grid grid-cols-2 gap-4 border-b border-hairline-subtle px-5 py-3 sm:odd:border-r">
+                <dt class="truncate text-[13px] text-ink-muted">{{ $row['label'] }}</dt>
+                @if ($row['empty'])
+                    <dd class="truncate text-[13px] italic text-ink-faint">{{ __('personnel::profile.labels.not_set') }}</dd>
+                @else
+                    <dd @class(['truncate text-[13px] font-medium text-ink', 'hrm-num' => $row['mono']]) title="{{ $row['value'] }}">{{ $row['value'] }}</dd>
+                @endif
             </div>
         @endforeach
     </dl>

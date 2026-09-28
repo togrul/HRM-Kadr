@@ -14,6 +14,23 @@ use Illuminate\Support\Str;
 class Personnel360TimelineService
 {
     /**
+     * Event types a timeline can be filtered by, in menu order.
+     */
+    public const TYPES = [
+        'audit',
+        'order',
+        'leave',
+        'vacation',
+        'business_trip',
+        'training_need',
+        'training_delivery',
+        'performance',
+        'event',
+        'media',
+        'project',
+    ];
+
+    /**
      * Small per-build lookup cache so repeated audit rows do not re-query the
      * same reference values such as structures, countries and positions.
      */
@@ -26,17 +43,24 @@ class Personnel360TimelineService
         $dateFrom = filled($filters['date_from'] ?? null) ? Carbon::parse($filters['date_from'])->startOfDay() : null;
         $dateTo = filled($filters['date_to'] ?? null) ? Carbon::parse($filters['date_to'])->endOfDay() : null;
 
-        return collect()
-            ->concat($this->orders($personnel))
-            ->concat($this->leaves($personnel))
-            ->concat($this->vacations($personnel))
-            ->concat($this->businessTrips($personnel))
-            ->concat($this->trainingNeeds($personnel))
-            ->concat($this->trainingDeliveries($personnel))
-            ->concat($this->performanceForms($personnel))
-            ->concat($this->lifecycleEvents($personnel))
-            ->concat($this->auditChanges($personnel))
-            ->concat(app(ProfessionalPortfolioTimelineService::class)->build($personnel))
+        // A type filter reads only the source that produces that type.
+        $sources = [
+            'order' => fn (): Collection => $this->orders($personnel),
+            'leave' => fn (): Collection => $this->leaves($personnel),
+            'vacation' => fn (): Collection => $this->vacations($personnel),
+            'business_trip' => fn (): Collection => $this->businessTrips($personnel),
+            'training_need' => fn (): Collection => $this->trainingNeeds($personnel),
+            'training_delivery' => fn (): Collection => $this->trainingDeliveries($personnel),
+            'performance' => fn (): Collection => $this->performanceForms($personnel),
+            'lifecycle' => fn (): Collection => $this->lifecycleEvents($personnel),
+            'audit' => fn (): Collection => $this->auditChanges($personnel),
+            'portfolio' => fn (): Collection => app(ProfessionalPortfolioTimelineService::class)->build($personnel),
+        ];
+        $source = in_array($type, ['event', 'media', 'project'], true) ? 'portfolio' : $type;
+
+        return collect($sources)
+            ->when($source !== null && isset($sources[$source]), fn (Collection $all) => $all->only($source))
+            ->flatMap(fn (callable $read): Collection => $read())
             ->when($search, fn (Collection $items) => $items->filter(fn (array $item): bool => $this->matchesSearch($item, $search)))
             ->when($type, fn (Collection $items) => $items->filter(fn (array $item): bool => ($item['type'] ?? null) === $type))
             ->when($dateFrom, fn (Collection $items) => $items->filter(fn (array $item): bool => $this->itemDate($item)?->gte($dateFrom) ?? false))
@@ -306,21 +330,37 @@ class Personnel360TimelineService
             ->whereIn('id', $activities->pluck('causer_id')->filter()->unique())
             ->pluck('name', 'id');
 
-        return $activities->map(fn (AuditActivity $activity): array => $this->item(
-            type: 'audit',
-            occurredAt: $activity->created_at,
-            title: __('personnel::portfolio.timeline_titles.audit_change', [
-                'event' => $this->auditEventLabel((string) $activity->event),
-            ]),
-            summary: $this->changedFieldSummary($activity) ?: $this->stringify($activity->description),
-            status: (string) $activity->event,
-            recordId: (int) $activity->id,
-            role: $activity->causer_id
-                ? __('personnel::portfolio.timeline_titles.changed_by', [
-                    'actor' => $causerLabels->get($activity->causer_id) ?: __('personnel::portfolio.timeline_titles.unknown_actor'),
-                ])
-                : __('personnel::portfolio.timeline_titles.system_actor'),
-        ));
+        return $activities->map(function (AuditActivity $activity) use ($causerLabels): array {
+            $changes = $this->changedFields($activity);
+
+            return [...$this->item(
+                type: 'audit',
+                occurredAt: $activity->created_at,
+                title: $this->auditTitle($activity, $changes),
+                summary: $this->changedFieldSummary($changes) ?: $this->stringify($activity->description),
+                status: (string) $activity->event,
+                recordId: (int) $activity->id,
+                role: $activity->causer_id
+                    ? __('personnel::portfolio.timeline_titles.changed_by', [
+                        'actor' => $causerLabels->get($activity->causer_id) ?: __('personnel::portfolio.timeline_titles.unknown_actor'),
+                    ])
+                    : __('personnel::portfolio.timeline_titles.system_actor'),
+            ), 'changes' => $changes->all()];
+        });
+    }
+
+    /**
+     * A one-field edit is named after the field; anything wider keeps the generic title.
+     */
+    private function auditTitle(AuditActivity $activity, Collection $changes): string
+    {
+        if ((string) $activity->event === 'updated' && $changes->count() === 1) {
+            return $changes->first()['field'];
+        }
+
+        return __('personnel::portfolio.timeline_titles.audit_change', [
+            'event' => $this->auditEventLabel((string) $activity->event),
+        ]);
     }
 
     private function item(string $type, mixed $occurredAt, string $title, ?string $summary, ?string $status, int $recordId, ?string $role = null): array
@@ -390,36 +430,10 @@ class Personnel360TimelineService
         return filled($value) ? (string) $value : null;
     }
 
-    private function changedFieldSummary(AuditActivity $activity): ?string
+    private function changedFieldSummary(Collection $changes): ?string
     {
-        $properties = $activity->properties;
-        if ($properties instanceof Collection) {
-            $properties = $properties->toArray();
-        }
-
-        if (! is_array($properties)) {
-            return null;
-        }
-
-        $attributes = (array) data_get($properties, 'attributes', []);
-        $old = (array) data_get($properties, 'old', []);
-
-        $changes = collect(array_unique(array_merge(
-            array_keys($attributes),
-            array_keys($old),
-        )))
-            ->reject(fn (string $field): bool => in_array($field, ['created_at', 'updated_at', 'deleted_at'], true))
-            ->map(function (string $field) use ($attributes, $old): string {
-                $oldValue = $this->fieldValueLabel($field, $old[$field] ?? null);
-                $newValue = $this->fieldValueLabel($field, $attributes[$field] ?? null);
-
-                return __('personnel::portfolio.timeline_titles.changed_field_pair', [
-                    'field' => $this->fieldLabel($field),
-                    'old' => $oldValue,
-                    'new' => $newValue,
-                ]);
-            })
-            ->values();
+        $changes = $changes
+            ->map(fn (array $change): string => __('personnel::portfolio.timeline_titles.changed_field_pair', $change));
 
         if ($changes->isEmpty()) {
             return null;
@@ -428,6 +442,37 @@ class Personnel360TimelineService
         return __('personnel::portfolio.timeline_titles.changed_fields', [
             'fields' => $changes->take(8)->implode('; '),
         ]);
+    }
+
+    /**
+     * @return Collection<int, array{field:string,old:string,new:string}>
+     */
+    private function changedFields(AuditActivity $activity): Collection
+    {
+        $properties = $activity->properties;
+        if ($properties instanceof Collection) {
+            $properties = $properties->toArray();
+        }
+
+        if (! is_array($properties)) {
+            return collect();
+        }
+
+        $attributes = (array) data_get($properties, 'attributes', []);
+        $old = (array) data_get($properties, 'old', []);
+
+        return collect(array_unique(array_merge(
+            array_keys($attributes),
+            array_keys($old),
+        )))
+            ->reject(fn (string $field): bool => in_array($field, ['created_at', 'updated_at', 'deleted_at'], true))
+            ->map(fn (string $field): array => [
+                'field' => $this->fieldLabel($field),
+                'old' => $this->fieldValueLabel($field, $old[$field] ?? null),
+                'new' => $this->fieldValueLabel($field, $attributes[$field] ?? null),
+            ])
+            ->take(8)
+            ->values();
     }
 
     private function fieldLabel(string $field): string

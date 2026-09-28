@@ -44,6 +44,7 @@ return [
         'present' => 'hazırda',
         'years' => ':count il',
         'months' => ':count ay',
+        'not_set' => 'Qeyd edilməyib',
     ],
 
     'actions' => [

@@ -2,16 +2,15 @@
     'valid' => false
 ])
 
-<div @class([
-    'px-3 py-1 text-xs rounded-lg font-medium w-max max-w-[120px] flex justify-center items-center space-x-2',
-    'bg-emerald-100 text-emerald-500' => $valid,
-    'bg-rose-100 text-rose-500' => ! $valid
+<span @class([
+    'hrm-badge',
+    'bg-[#ecfdf5] text-[#047857]' => $valid,
+    'bg-[#fff1f2] text-[#e11d48]' => ! $valid,
 ])>
-     <span @class([
-           'w-2 h-2 rounded-full shadow-sm flex',
-           'bg-emerald-400' => $valid ,
-           'bg-rose-400' => ! $valid ,
-    ])>
-     </span>
-    <span class="uppercase">{{ $valid ? __('ui::common.status.active') : __('ui::common.status.inactive') }}</span>
-</div>
+    <span @class([
+        'h-1.5 w-1.5 shrink-0 rounded-full',
+        'bg-[#10b981]' => $valid,
+        'bg-[#f43f5e]' => ! $valid,
+    ])></span>
+    <span>{{ $valid ? __('ui::common.status.active') : __('ui::common.status.inactive') }}</span>
+</span>

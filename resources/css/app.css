@@ -476,3 +476,10 @@ html {
 body.side-modal-open .sidebar-collapse-toggle {
   display: none !important;
 }
+
+/* Status chip: tiny uppercase pill on a soft tint. Uppercase is for status values only —
+   labels and headings stay sentence case (HRM-19). `lang` on <html> makes CSS uppercase
+   Azerbaijani-correct (i → İ). */
+.hrm-badge {
+  @apply inline-flex h-5 w-max shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-2 text-[10px] font-semibold uppercase leading-none tracking-[0.06em];
+}

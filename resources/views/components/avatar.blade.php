@@ -2,7 +2,7 @@
     'name' => null,       // full name — initials are derived from its first two words
     'initials' => null,   // or pass them explicitly
     'tone' => 'neutral',  // neutral | green | blue | amber | rose | violet
-    'size' => 'md',       // sm (28px) | md (34px) | lg (48px)
+    'size' => 'md',       // sm (28px) | md (34px) | lg (48px) | xl (56px)
 ])
 
 @php
@@ -31,6 +31,7 @@
     $sizeClasses = match ($size) {
         'sm' => 'h-7 w-7 rounded-[9px] text-[10.5px]',
         'lg' => 'h-12 w-12 rounded-2xl text-[15px]',
+        'xl' => 'h-14 w-14 rounded-2xl border border-hairline text-[17px]',
         default => 'h-[34px] w-[34px] rounded-[11px] text-[12px]',
     };
 @endphp

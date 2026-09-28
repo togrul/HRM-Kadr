@@ -29,7 +29,7 @@
 
     <x-dropdown align="right">
         <x-slot name="trigger">
-            <button class="inline-flex h-10 items-center rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[14px] font-medium text-ink-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400">
+            <button class="inline-flex h-9 items-center rounded-full border border-hairline bg-[#f4f4f5] px-3 text-[13px] font-medium text-ink-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400">
                 <span class="max-w-[9rem] truncate">{{ Auth::user()?->name }}</span>
                 <x-icons.arrow-icon size="w-4 h-4" />
             </button>

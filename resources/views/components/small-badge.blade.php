@@ -11,17 +11,23 @@
 
     $variant = strtolower((string) $mode);
 
-    $baseClasses = 'h-5 gap-1 rounded-4xl border border-transparent px-2 py-0.5 text-xs font-medium transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit max-w-full whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge';
+    $baseClasses = 'h-5 gap-1 rounded-full border border-transparent px-2 py-0.5 text-[11px] font-medium transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit max-w-full whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge';
+
+    // A dotted badge is a status value: it takes the uppercase status chip (.hrm-badge);
+    // a plain one labels free text (scopes, descriptions) and keeps its case.
+    if ($dot) {
+        $baseClasses = 'hrm-badge max-w-full overflow-hidden [&>svg]:size-3! [&>svg]:pointer-events-none';
+    }
 
     // Design-system chip palette (see the Colors token table).
     $modeClasses = match ($variant) {
         'secondary' => 'bg-[#f4f4f5] text-[#3f3f46] [a]:hover:bg-hairline',
 
-        'blue', 'sky', 'info' => 'bg-[#e0f2fe] text-[#0369a1] [a]:hover:bg-sky-200',
-        'green', 'emerald', 'success' => 'bg-[#d1fae5] text-[#047857] [a]:hover:bg-emerald-200',
-        'purple', 'violet' => 'bg-[#ede9fe] text-[#6d28d9] [a]:hover:bg-violet-200',
-        'red', 'rose', 'danger' => 'bg-[#ffe4e6] text-[#be123c] [a]:hover:bg-rose-200',
-        'amber', 'warning' => 'bg-[#fef3c7] text-[#b45309] [a]:hover:bg-amber-200',
+        'blue', 'sky', 'info' => 'bg-[#f0f9ff] text-[#0369a1] [a]:hover:bg-sky-100',
+        'green', 'emerald', 'success' => 'bg-[#ecfdf5] text-[#047857] [a]:hover:bg-emerald-100',
+        'purple', 'violet' => 'bg-[#f5f3ff] text-[#6d28d9] [a]:hover:bg-violet-100',
+        'red', 'rose', 'danger' => 'bg-[#fff1f2] text-[#e11d48] [a]:hover:bg-rose-100',
+        'amber', 'warning' => 'bg-[#fff7ed] text-[#c2410c] [a]:hover:bg-orange-100',
 
         default => 'bg-[#f4f4f5] text-[#3f3f46] [a]:hover:bg-hairline',
     };
@@ -30,7 +36,7 @@
         'green', 'emerald', 'success' => 'bg-[#059669]',
         'purple', 'violet' => 'bg-[#7c3aed]',
         'red', 'rose', 'danger' => 'bg-[#e11d48]',
-        'amber', 'warning' => 'bg-[#d97706]',
+        'amber', 'warning' => 'bg-[#f97316]',
         default => 'bg-[#a1a1aa]',
     };
 @endphp

@@ -24,7 +24,7 @@
                 <input type="text" wire:model="code" @disabled(! $isNew) placeholder="{{ __('orders::order_composer.designer.code') }}" aria-label="{{ __('orders::order_composer.designer.code') }}"
                     class="h-10 w-32 rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base text-ink placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-zinc-200 disabled:opacity-50 sm:text-sm">
                 <button type="button" wire:click="save" wire:loading.attr="disabled" wire:target="save"
-                    class="inline-flex h-10 items-center gap-1.5 rounded-[10px] bg-ink px-4 text-[14px] font-semibold text-white transition hover:bg-ink-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 disabled:opacity-50">
+                    class="inline-flex h-9 items-center gap-1.5 rounded-full bg-ink px-4 text-[13px] font-semibold text-white transition hover:bg-ink-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 disabled:opacity-50">
                     <svg wire:loading.remove wire:target="save" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                     <svg wire:loading wire:target="save" class="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle class="opacity-25" cx="12" cy="12" r="10"/><path class="opacity-75" d="M4 12a8 8 0 018-8"/></svg>
                     {{ __('orders::order_composer.designer.save') }}
@@ -245,13 +245,13 @@
                 <h3 class="text-sm font-semibold text-zinc-900">{{ __('orders::order_composer.designer.template_view_title') }}</h3>
                 <div class="ml-auto flex flex-wrap items-center gap-2">
                     <button type="button" wire:click="previewTemplate" wire:loading.attr="disabled" wire:target="previewTemplate"
-                        class="inline-flex h-10 items-center gap-1.5 rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[14px] font-medium text-ink-soft transition hover:bg-[#e4e4e7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 disabled:opacity-50">
+                        class="inline-flex h-9 items-center gap-1.5 rounded-full border border-hairline bg-[#f4f4f5] px-3 text-[13px] font-medium text-ink-soft transition hover:bg-[#e4e4e7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 disabled:opacity-50">
                         <svg wire:loading.remove wire:target="previewTemplate" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                         <svg wire:loading wire:target="previewTemplate" class="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle class="opacity-25" cx="12" cy="12" r="10"/><path class="opacity-75" d="M4 12a8 8 0 018-8"/></svg>
                         {{ __('orders::order_composer.designer.view_template') }}
                     </button>
                     <button type="button" wire:click="downloadTemplate"
-                        class="inline-flex h-10 items-center gap-1.5 rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-[14px] font-medium text-ink-soft transition hover:bg-[#e4e4e7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400">
+                        class="inline-flex h-9 items-center gap-1.5 rounded-full border border-hairline bg-[#f4f4f5] px-3 text-[13px] font-medium text-ink-soft transition hover:bg-[#e4e4e7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400">
                         <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                         {{ __('orders::order_composer.designer.edit_in_word') }}
                     </button>

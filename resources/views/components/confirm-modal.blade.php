@@ -104,12 +104,12 @@
                     {{-- Footer --}}
                     <div class="flex items-center justify-end gap-2.5 border-t border-zinc-100 bg-zinc-50/60 px-6 py-4">
                         <button type="button" x-on:click="closeModal()"
-                                class="inline-flex h-10 items-center justify-center rounded-[10px] border border-hairline bg-white px-4 text-[14px] font-medium text-ink-soft transition hover:bg-[#f4f4f5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300">
+                                class="inline-flex h-9 items-center justify-center rounded-full border border-hairline bg-white px-4 text-[13px] font-medium text-ink-soft transition hover:bg-[#f4f4f5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300">
                             <span x-text="cancelText"></span>
                         </button>
                         <button type="button" x-ref="confirmBtn" x-on:click="accept()"
                                 :class="tone3().btn"
-                                class="inline-flex h-10 items-center justify-center rounded-[10px] px-4 text-[14px] font-semibold text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
+                                class="inline-flex h-9 items-center justify-center rounded-full px-4 text-[13px] font-semibold text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
                             <span x-text="confirmText"></span>
                         </button>
                     </div>

@@ -45,6 +45,9 @@ class PersonnelProfile extends Component
     #[Url(as: 'section')]
     public string $section = 'overview';
 
+    /** Type filter of the overview's recent-events list; empty = every type. */
+    public string $recentType = '';
+
     public function mount(Personnel $personnel): void
     {
         $this->authorize('view', $personnel);
@@ -166,7 +169,9 @@ class PersonnelProfile extends Component
     public function recentEvents(): array
     {
         return app(Personnel360TimelineService::class)
-            ->build(Personnel::withTrashed()->findOrFail($this->personnelId), null, 10)
+            ->build(Personnel::withTrashed()->findOrFail($this->personnelId), null, 10, [
+                'type' => in_array($this->recentType, Personnel360TimelineService::TYPES, true) ? $this->recentType : null,
+            ])
             ->take(6)
             ->values()
             ->all();

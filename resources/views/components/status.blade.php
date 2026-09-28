@@ -3,17 +3,17 @@
 @php
     // Design-system status palette: bg / text / dot, one row per status id.
     $map = [
-        10 => 'bg-[#f4f4f5] border-transparent text-[#52525b]',
-        20 => 'bg-[#fef3c7] border-transparent text-[#b45309]',
-        30 => 'bg-[#e0f2fe] border-transparent text-[#0369a1]',
-        40 => 'bg-[#ede9fe] border-transparent text-[#6d28d9]',
-        70 => 'bg-[#d1fae5] border-transparent text-[#047857]',
-        90 => 'bg-[#ffe4e6] border-transparent text-[#be123c]',
+        10 => 'bg-[#f4f4f5] text-[#52525b]',
+        20 => 'bg-[#fff7ed] text-[#c2410c]',
+        30 => 'bg-[#f0f9ff] text-[#0369a1]',
+        40 => 'bg-[#f5f3ff] text-[#6d28d9]',
+        70 => 'bg-[#ecfdf5] text-[#047857]',
+        90 => 'bg-[#fff1f2] text-[#e11d48]',
     ];
 
     $dotMap = [
         10 => 'bg-[#a1a1aa]',
-        20 => 'bg-[#f59e0b]',
+        20 => 'bg-[#f97316]',
         30 => 'bg-[#0ea5e9]',
         40 => 'bg-[#8b5cf6]',
         70 => 'bg-[#10b981]',
@@ -29,18 +29,11 @@
         };
     }
 
-    $color = $map[$statusId] ?? 'bg-[#f4f4f5] border-transparent text-[#52525b]';
-    $dot = $dotMap[$statusId] ?? 'bg-[#a1a1aa]';
+    $color = $map[$statusId] ?? $map[10];
+    $dot = $dotMap[$statusId] ?? $dotMap[10];
 @endphp
 
-@if($design == 'default')
-<span class="inline-flex w-max items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11.5px] font-medium tracking-[-0.01em] {{ $color }}">
-    <span class="h-1.5 w-1.5 rounded-full {{ $dot }}"></span>
-    {{ $label }}
+<span class="hrm-badge {{ $color }}">
+    <span class="h-1.5 w-1.5 shrink-0 rounded-full {{ $dot }}"></span>
+    <span>{{ $label }}</span>
 </span>
-@else
-<span class="inline-flex w-max items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11.5px] font-semibold tracking-[-0.01em] {{ $color }}">
-        <span class="h-1.5 w-1.5 shrink-0 rounded-full {{ $dot }}"></span>
-        <span>{{ $label }}</span>
-</span>
-@endif

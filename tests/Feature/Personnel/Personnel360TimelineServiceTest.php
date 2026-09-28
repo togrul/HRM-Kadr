@@ -109,6 +109,10 @@ class Personnel360TimelineServiceTest extends TestCase
         $this->assertStringContainsString('Inactive', $auditSummary);
         $this->assertStringNotContainsString('Position Id', $auditSummary);
         $this->assertStringNotContainsString('Structure Id', $auditSummary);
+        $this->assertContains(
+            ['old' => 'old@example.test', 'new' => 'new@example.test'],
+            collect($items->firstWhere('type', 'audit')['changes'])->map(fn (array $change): array => ['old' => $change['old'], 'new' => $change['new']])->all()
+        );
 
         $filteredItems = app(Personnel360TimelineService::class)->build($personnel, null, 80, [
             'type' => 'audit',
@@ -117,6 +121,28 @@ class Personnel360TimelineServiceTest extends TestCase
         ]);
 
         $this->assertSame(['audit'], $filteredItems->pluck('type')->unique()->values()->all());
+    }
+
+    public function test_a_single_field_edit_is_titled_after_the_field(): void
+    {
+        $personnel = $this->makePersonnel();
+
+        AuditActivity::query()->create([
+            'log_name' => 'personnel',
+            'description' => 'You have updated personnel',
+            'event' => 'updated',
+            'subject_type' => Personnel::class,
+            'subject_id' => $personnel->id,
+            'properties' => [
+                'old' => ['email' => 'old@example.test'],
+                'attributes' => ['email' => 'new@example.test'],
+            ],
+        ]);
+
+        $audit = app(Personnel360TimelineService::class)->build($personnel, null, 80, ['type' => 'audit'])->first();
+
+        $this->assertSame($audit['changes'][0]['field'], $audit['title']);
+        $this->assertCount(1, $audit['changes']);
     }
 
     private function makePersonnel(): Personnel

@@ -1,7 +1,10 @@
 <div class="flex flex-col space-y-2 sidemenu-title">
+    {{-- Inside the personnel file the page header already says what is being edited. --}}
+    @unless ($chromeless ?? false)
     <h2 class="text-[18px] font-semibold tracking-[-0.02em] text-ink" id="slide-over-title">
       {{ $title ?? ''}}
     </h2>
+    @endunless
     @if(auth()->user()->can('confirmation-general') && isset($personnelModel) && ($personnelIsPending ?? false))
     <div class="overflow-hidden rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 via-white to-rose-50/60 shadow-card">
         <div class="flex flex-col gap-4 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
