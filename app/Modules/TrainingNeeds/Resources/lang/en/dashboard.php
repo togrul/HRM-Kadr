@@ -8,11 +8,16 @@ return [
     ],
     'panel' => [
         'title' => 'Training',
-        'sections' => 'Training sections',
         'annual_plan' => 'Annual plan',
         'plan_items_unit' => 'plan lines',
         'needs_title' => 'Training needs',
         'needs_description' => 'Needs coming from performance results and the role requirement matrix',
+    ],
+    'nav_groups' => [
+        'foundation' => 'Catalogs and requirements',
+        'needs' => 'Needs and planning',
+        'delivery' => 'Delivery',
+        'insight' => 'Analytics and reports',
     ],
     'tabs' => [
         'overview' => 'Overview',

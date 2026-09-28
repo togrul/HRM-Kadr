@@ -8,11 +8,16 @@ return [
     ],
     'panel' => [
         'title' => 'Təlim',
-        'sections' => 'Təlim bölmələri',
         'annual_plan' => 'İllik plan',
         'plan_items_unit' => 'plan sətri',
         'needs_title' => 'Təlim ehtiyacları',
         'needs_description' => 'Performans nəticələrindən və rol tələbi matrisindən gələn ehtiyaclar',
+    ],
+    'nav_groups' => [
+        'foundation' => 'Kataloq və tələblər',
+        'needs' => 'Ehtiyac və plan',
+        'delivery' => 'Təlimlərin icrası',
+        'insight' => 'Analitika və hesabatlar',
     ],
     'tabs' => [
         'overview' => 'Xülasə',

@@ -151,7 +151,21 @@ return [
         'approve' => 'Təsdiqlə',
     ],
 
+    'a11y' => [
+        'cycle' => 'Dövr',
+        'status_filter' => 'Status üzrə süzgəc',
+        'goal' => '":kpi" üçün bağlı məqsəd',
+        'transition_reason' => 'Səbəb',
+        'decision_note' => 'HR qeydi',
+        'checkin_date' => 'Tarix',
+        'checkin_progress' => 'Gedişat',
+        'checkin_risks' => 'Risklər',
+        'calibration_delta' => 'Düzəliş, bal',
+    ],
+
     'confirm_transition' => [
+        'reject' => 'Hədəflərə etiraz edəcəksiniz: kart yazdığınız səbəblə qaralamaya qaytarılacaq. Davam edilsin?',
+        'return' => 'Kart yazdığınız səbəblə rəhbər qiymətləndirməsinə geri qaytarılacaq. Davam edilsin?',
         'activate' => 'Razılaşdırma mərhələsi keçiləcək və kart dərhal aktivləşəcək. Davam edilsin?',
         'close' => 'Kart bağlanacaq və yalnız oxunacaq. Davam edilsin?',
         'send_for_agreement' => 'Kart əməkdaşa razılaşdırma üçün göndəriləcək. 3 iş günü ərzində cavab verilməsə, avtomatik qəbul olunacaq. Davam edilsin?',
@@ -623,6 +637,7 @@ return [
     ],
     'manager_changed_note' => 'Rəhbər dəyişdi: :from → :to. Qiymətləndirmə hüququ yeni rəhbərə keçdi.',
     'change_requests' => [
+        'confirm_reject' => 'Hədəf dəyişikliyi sorğusu rədd ediləcək. Davam edilsin?',
         'errors' => [
             'already_decided' => 'Bu sorğuya artıq cavab verilib.',
             'same_target' => 'Yeni hədəf hazırkı ilə eynidir.',

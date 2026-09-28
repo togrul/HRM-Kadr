@@ -421,7 +421,11 @@ class KpiScorecardTest extends TestCase
             ->set('calibrationReason', 'Bölmə ortası')
             ->call('saveCalibration')
             ->assertHasNoErrors()
-            ->assertSee('Bölmə ortası');
+            ->assertSee('Bölmə ortası')
+            // calibration inputs carry visible labels; returning the card goes through confirm-action
+            ->assertSee(__('performance_evaluation::kpi.a11y.calibration_delta'))
+            ->assertSeeHtml("run: () => \$wire.moveCard('return')")
+            ->assertDontSeeHtml('$wire.moveCard(asking)');
 
         $this->assertSame('calibration', $card->fresh()->status);
         $this->assertSame('110.0000', $card->fresh()->competency_score);
