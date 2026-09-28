@@ -37,22 +37,22 @@ it('leads the overview with linked work queues and reads durations as hours', fu
         ->toBeLessThan(strpos($html, __('attendance::dashboard.cards.attendance_statistics')));
 });
 
-it('groups the sections into work, review and settings', function (): void {
+it('groups the sections into work, review and settings in the header, leaving the panel to the tree', function (): void {
     $this->actingAs(attendanceAdmin());
 
     $html = Livewire::test(Dashboard::class)->html();
-    $work = strpos($html, __('attendance::dashboard.tabs.work_group'));
-    $review = strpos($html, __('attendance::dashboard.tabs.review_group'));
-    $settings = strpos($html, __('attendance::dashboard.tabs.settings_group'));
+    $panel = fn (string $group): string => preg_match('#<ul[^>]*data-group="'.$group.'"[^>]*>(.*?)</ul>#s', $html, $m) ? $m[1] : '';
 
     // Every chip <li> must sit inside a <ul>, or the browser draws a bullet beside it.
     expect(substr_count($html, '<li '))->toBeGreaterThan(0)
         ->and(preg_match('#</ul>\s*(?:(?!<ul).)*<li #s', $html))->toBe(0)
-        ->and($html)->toContain('#attendance-section-nav')
-        ->and($work)->not->toBeFalse()
-        ->and(strpos($html, __('attendance::dashboard.tabs.puantaj')))->toBeGreaterThan($work)->toBeLessThan($review)
-        ->and(strpos($html, __('attendance::dashboard.tabs.exceptions')))->toBeGreaterThan($review)->toBeLessThan($settings)
-        ->and(strpos($html, __('attendance::dashboard.tabs.shifts')))->toBeGreaterThan($settings);
+        ->and($html)->not->toContain('attendance-section-nav')
+        ->and($html)->toContain(__('attendance::dashboard.tabs.work_group'))
+        ->and($panel('work_group'))->toContain(__('attendance::dashboard.tabs.puantaj'))
+        ->and($panel('review_group'))->toContain(__('attendance::dashboard.tabs.exceptions'))
+        ->and($panel('settings_group'))->toContain(__('attendance::dashboard.tabs.shifts'))
+        // only the active section's group is shown on load
+        ->and($html)->toMatch('#<ul[^>]*data-group="review_group"[^>]*style="display: none"#s');
 });
 
 it('makes every attention card an obvious link, quieter when its queue is empty', function (): void {

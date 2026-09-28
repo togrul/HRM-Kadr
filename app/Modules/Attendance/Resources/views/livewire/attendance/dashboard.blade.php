@@ -35,7 +35,7 @@
             $tabGroups
         ));
 
-        // Work waiting in a section, shown as the panel row's count (real overview figures only).
+        // Work waiting in a section, shown as the tab's count (real overview figures only).
         $tabCounts = array_filter([
             'manual' => (int) ($overview['manual_pending_count'] ?? 0),
             'daily-monitor' => (int) ($overview['raw_pending_count'] ?? 0),
@@ -52,32 +52,13 @@
         };
     @endphp
 
-    {{-- The panel is one card: the grouped section nav on top, the structure tree below it.
-         The nav is teleported in from inside the component root so its links follow the
-         period/structure state; the tree stays a slot child (a nested component cannot teleport). --}}
+    {{-- The panel carries ONE thing, the structure tree; the section nav lives in the page
+         header, so the two never compete in the same column. --}}
     <x-slot name="sidebar">
         <x-context-panel>
-            <div id="attendance-section-nav"></div>
             <livewire:structure.sidebar :selected="$selectedStructureId" wire:key="attendance-structure-sidebar" />
         </x-context-panel>
     </x-slot>
-
-    @teleport('#attendance-section-nav')
-        <nav aria-label="{{ __('attendance::dashboard.title') }}">
-            @foreach ($tabGroups as $groupKey => $groupTabs)
-                <x-context-panel.section :title="__('attendance::dashboard.tabs.'.$groupKey)">
-                    @foreach ($groupTabs as $tab)
-                        <x-context-panel.item
-                            wire:navigate
-                            :href="$attendanceTabRoute($tab)"
-                            :active="$activeTab === $tab"
-                            :count="$tabCounts[$tab] ?? null"
-                        >{{ __('attendance::dashboard.tabs.'.$attendanceTabs[$tab]) }}</x-context-panel.item>
-                    @endforeach
-                </x-context-panel.section>
-            @endforeach
-        </nav>
-    @endteleport
 
     @php
         $activeLabelKey = $attendanceTabs[$activeTab] ?? 'overview';
@@ -111,22 +92,70 @@
             </x-pill-button>
         </x-slot:actions>
 
-        {{-- small screens: the panel is off-canvas, so the same three groups show as chip rows --}}
-        <div class="space-y-2 lg:hidden">
+        {{-- Two-level section nav: a segmented control picks the group (İş / Yoxlama / Ayarlar),
+             the underline tabs beside it are that group's sections. Switching a group only
+             reveals its sections (no request); every permitted section stays in the markup.
+             Counts are real pending figures from the overview. --}}
+        @php
+            $activeGroup = collect($tabGroups)->search(fn (array $tabs) => in_array($activeTab, $tabs, true)) ?: array_key_first($tabGroups);
+        @endphp
+        <nav x-data="{ group: @js($activeGroup) }" class="flex flex-col gap-3 md:flex-row md:items-center md:gap-4" aria-label="{{ __('attendance::dashboard.title') }}">
+            <div class="inline-flex shrink-0 self-start rounded-full bg-[#f4f4f5] p-1" role="tablist">
+                @foreach ($tabGroups as $groupKey => $groupTabs)
+                    @php $groupHasWork = collect($groupTabs)->contains(fn (string $tab) => isset($tabCounts[$tab])); @endphp
+                    <button
+                        type="button"
+                        role="tab"
+                        id="attendance-group-{{ $groupKey }}"
+                        aria-controls="attendance-group-panel-{{ $groupKey }}"
+                        x-on:click="group = '{{ $groupKey }}'"
+                        x-bind:aria-selected="(group === '{{ $groupKey }}').toString()"
+                        aria-selected="{{ $groupKey === $activeGroup ? 'true' : 'false' }}"
+                        class="relative inline-flex h-8 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-medium text-ink-muted transition hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 aria-selected:bg-white aria-selected:font-semibold aria-selected:text-ink aria-selected:shadow-[0_1px_2px_rgba(0,0,0,0.08)]"
+                    >
+                        {{ __('attendance::dashboard.tabs.'.$groupKey) }}
+                        @if ($groupHasWork)
+                            <span class="h-1.5 w-1.5 rounded-full bg-[#f97316]" aria-hidden="true"></span>
+                        @endif
+                    </button>
+                @endforeach
+            </div>
+
+            <span class="hidden h-5 w-px shrink-0 bg-hairline md:block" aria-hidden="true"></span>
+
             @foreach ($tabGroups as $groupKey => $groupTabs)
-                <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-                    <span class="w-16 shrink-0 text-[11.5px] font-medium text-ink-faint">{{ __('attendance::dashboard.tabs.'.$groupKey) }}</span>
-                    {{-- x-filter.item renders an <li>; outside its <ul> every item grows a list bullet --}}
-                    <x-filter.nav wrap class="min-w-0">
-                        @foreach ($groupTabs as $tab)
-                            <x-filter.item wire:navigate href="{{ $attendanceTabRoute($tab) }}" :active="$activeTab === $tab">
+                <ul
+                    id="attendance-group-panel-{{ $groupKey }}"
+                    role="tabpanel"
+                    aria-labelledby="attendance-group-{{ $groupKey }}"
+                    data-group="{{ $groupKey }}"
+                    x-show="group === '{{ $groupKey }}'"
+                    @if ($groupKey !== $activeGroup) style="display: none" @endif
+                    class="hrm-scroll-hidden -mb-3.5 flex min-w-0 items-stretch gap-5 overflow-x-auto"
+                >
+                    @foreach ($groupTabs as $tab)
+                        @php $isActive = $activeTab === $tab; @endphp
+                        <li class="shrink-0">
+                            <a
+                                href="{{ $attendanceTabRoute($tab) }}"
+                                wire:navigate
+                                @if ($isActive) aria-current="page" @endif
+                                @class([
+                                    'inline-flex h-10 items-center gap-1.5 border-b-2 text-[13px] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400',
+                                    'border-ink font-semibold text-ink' => $isActive,
+                                    'border-transparent font-medium text-ink-muted hover:border-hairline hover:text-ink' => ! $isActive,
+                                ])
+                            >
                                 {{ __('attendance::dashboard.tabs.'.$attendanceTabs[$tab]) }}
-                            </x-filter.item>
-                        @endforeach
-                    </x-filter.nav>
-                </div>
+                                @if (isset($tabCounts[$tab]))
+                                    <span class="hrm-num rounded-full bg-[#fff7ed] px-1.5 text-[11px] font-semibold leading-[18px] text-[#c2410c]">{{ $tabCounts[$tab] }}</span>
+                                @endif
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
             @endforeach
-        </div>
+        </nav>
     </x-page-header>
 
     <div class="space-y-4 px-4 py-4 sm:px-5">
