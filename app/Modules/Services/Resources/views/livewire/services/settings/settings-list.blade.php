@@ -142,10 +142,16 @@
                                 @elseif ($settingValue->type === 'string')
                                     <div class="w-[220px]">
                                         <x-ui.input wire:model.blur="setting.{{ $key }}.value" />
+                                        @error("setting.{$key}.value")
+                                            <p class="mt-1 text-[11.5px] text-rose-600">{{ $message }}</p>
+                                        @enderror
                                     </div>
                                 @else
                                     <div class="w-[110px]">
                                         <x-ui.input type="number" step="0.01" class="text-right" wire:model.blur="setting.{{ $key }}.value" />
+                                        @error("setting.{$key}.value")
+                                            <p class="mt-1 text-[11.5px] text-rose-600">{{ $message }}</p>
+                                        @enderror
                                     </div>
                                 @endif
 
@@ -178,6 +184,9 @@
                                 @if ($coefficientIndex !== null)
                                     <div class="w-[110px]">
                                         <x-ui.input type="number" step="0.01" class="text-right" wire:model.blur="setting.{{ $coefficientIndex }}.value" />
+                                        @error("setting.{$coefficientIndex}.value")
+                                            <p class="mt-1 text-[11.5px] text-rose-600">{{ $message }}</p>
+                                        @enderror
                                     </div>
                                 @endif
 

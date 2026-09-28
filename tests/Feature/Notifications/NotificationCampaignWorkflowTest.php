@@ -15,6 +15,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Livewire;
+use RuntimeException;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
@@ -156,7 +157,7 @@ class NotificationCampaignWorkflowTest extends TestCase
         {
             public function send(object $mailable): void
             {
-                throw new \RuntimeException('SMTP provider rejected recipient');
+                throw new RuntimeException('SMTP provider rejected recipient');
             }
         };
 
@@ -322,6 +323,30 @@ class NotificationCampaignWorkflowTest extends TestCase
         $this->assertSame('sent', $campaign->status);
         $this->assertDatabaseCount('notification_dispatches', 1);
         $this->assertDatabaseCount('notifications', 1);
+    }
+
+    public function test_approval_queue_names_the_creator_instead_of_a_date(): void
+    {
+        $approver = User::factory()->create(['is_active' => true]);
+        $creator = User::factory()->create(['name' => 'Kamran Əliyev']);
+        $this->grantNotificationWorkflowPermissions($approver);
+        $this->actingAs($approver);
+
+        NotificationCampaign::query()->create([
+            'category' => 'announcement',
+            'trigger' => 'manual_announcement',
+            'title' => 'Elan',
+            'channel' => 'database',
+            'audience_config' => ['targets' => ['admins']],
+            'payload' => ['action' => 'announcement', 'name' => 'Elan', 'message' => 'Mətn'],
+            'format' => 'text',
+            'status' => 'draft',
+            'approval_status' => 'pending',
+            'created_by' => $creator->id,
+        ]);
+
+        Livewire::test(\App\Modules\Notifications\Livewire\ApprovalQueue::class)
+            ->assertSee(__('notifications::common.fields.creator').': Kamran Əliyev');
     }
 
     public function test_campaign_board_can_duplicate_resend_and_retry_campaigns(): void

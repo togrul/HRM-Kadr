@@ -6,11 +6,6 @@
         'older' => 'bg-zinc-400',
     ];
 
-    $unreadCount = $groupedNotifications
-        ->flatMap(fn (array $group) => $group['items'])
-        ->filter(fn ($notification): bool => empty($notification->read_at))
-        ->count();
-
     $confirmClear = "\$dispatch('confirm-action', { tone: 'rose', message: "
         .\Illuminate\Support\Js::from(__('notifications::common.labels.clear_all_confirm')).", confirmText: "
         .\Illuminate\Support\Js::from(__('notifications::common.labels.clear_all_notifications'))
@@ -70,8 +65,14 @@
         </x-slot>
 
         <x-slot name="actions">
+            @if ($unreadCount > 0)
+                <x-pill-button variant="primary" wire:click="markAllAsRead" wire:loading.attr="disabled" wire:target="markAllAsRead">
+                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                    {{ __('notifications::common.labels.mark_all_as_read') }}
+                </x-pill-button>
+            @endif
             @if ($notifications->total() > 0)
-                <x-pill-button variant="danger" @click="{{ $confirmClear }}">
+                <x-pill-button variant="secondary" @click="{{ $confirmClear }}">
                     <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
                     {{ __('notifications::common.labels.clear_all_notifications') }}
                 </x-pill-button>

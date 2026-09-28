@@ -52,8 +52,9 @@ class ApprovalQueue extends Component
         return NotificationCampaign::query()
             ->where('approval_status', 'pending')
             ->latest('id')
+            ->with('creator:id,name')
             ->limit(8)
-            ->get(['id', 'title', 'category', 'channel', 'scheduled_at', 'created_at']);
+            ->get(['id', 'title', 'category', 'channel', 'scheduled_at', 'created_by', 'created_at']);
     }
 
     public function placeholder(): View

@@ -202,3 +202,22 @@ it('paginates notification list route with threshold 20', function () {
     $secondPage->assertOk();
     $secondPage->assertSee('Notif-01');
 });
+
+it('counts unread across every page and marks all read only on request', function () {
+    $user = User::factory()->create();
+    foreach (range(1, 25) as $index) {
+        seedUserNotification($user, ['name' => 'N'.$index]);
+    }
+
+    $this->actingAs($user);
+
+    $component = Livewire::test(NotificationList::class)
+        ->assertViewHas('unreadCount', 25);
+
+    expect($user->unreadNotifications()->count())->toBe(25);
+
+    $component->call('markAllAsRead')->assertViewHas('unreadCount', 0);
+
+    expect($user->unreadNotifications()->count())->toBe(0)
+        ->and($user->notifications()->count())->toBe(25);
+});

@@ -45,7 +45,7 @@ return [
 
     'attention' => [
         'title' => 'Diqqət tələb edir',
-        'all_clear' => 'Gözləyən iş yoxdur.',
+        'all_clear' => 'Hər şey qaydasındadır',
         'open' => 'Aç',
         'waiting' => 'ən köhnəsi :days gündür',
         'waiting_today' => 'bugün daxil olub',
@@ -127,6 +127,9 @@ return [
         'open' => 'Aç',
         'empty' => 'Burada sizin qərarınızı gözləyən element yoxdur.',
         'reject_confirm' => ':name — bu sorğu rədd edilsin?',
+        'reason' => 'Rədd səbəbi',
+        'reason_placeholder' => 'Rədd səbəbi (məcburi)',
+        'approve_confirm' => ':name — bu sorğu təsdiqlənsin?',
         'approved' => 'Təsdiqləndi',
         'rejected' => 'Rədd edildi',
     ],

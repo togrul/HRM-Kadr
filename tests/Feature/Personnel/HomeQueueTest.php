@@ -6,6 +6,7 @@ use App\Models\AttendanceManualEntry;
 use App\Models\OrderLog;
 use App\Models\PersonnelVacation;
 use App\Models\User;
+use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Contracts\ManualEntryApprover;
 use App\Modules\Orders\Infrastructure\Document\OrderIssueService;
 use App\Modules\Personnel\Livewire\Home;
@@ -63,6 +64,32 @@ class HomeQueueTest extends TestCase
             ->assertSee(__('personnel::home.queue.approve'))
             ->call('decide', $entry->id, true)
             ->assertDispatched('notify');
+    }
+
+    public function test_rejecting_a_manual_entry_needs_a_reason_and_stores_it(): void
+    {
+        $this->actingAsViewer(['show-attendance-manual']);
+        $this->seedPersonnel();
+        $entry = $this->manualEntry(today()->toDateString());
+
+        $this->mock(AttendanceAuthorizationService::class, function ($mock): void {
+            $mock->shouldReceive('can')->andReturn(true);
+        });
+
+        Livewire::test(Home::class)
+            ->call('toggleQueue', 'attendance_pending')
+            ->call('decide', $entry->id, false, ' x ')
+            ->assertDispatched('notify', type: 'error');
+
+        $this->assertNotSame('rejected', $entry->fresh()->approval_status);
+
+        Livewire::test(Home::class)
+            ->call('toggleQueue', 'attendance_pending')
+            ->call('decide', $entry->id, false, 'Sənəd təqdim olunmayıb')
+            ->assertDispatched('notify', type: 'success');
+
+        $this->assertSame('rejected', $entry->fresh()->approval_status);
+        $this->assertStringContainsString('Sənəd təqdim olunmayıb', (string) $entry->fresh()->reason);
     }
 
     public function test_a_viewer_without_the_approve_right_sees_no_buttons_and_cannot_decide(): void
