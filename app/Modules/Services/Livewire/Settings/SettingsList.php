@@ -128,7 +128,7 @@ class SettingsList extends Component
 
     public function saveCandidateStatusWhitelist(): void
     {
-        foreach ($this->candidateWhitelistSettingKeys() as $mode => $key) {
+        foreach (self::candidateWhitelistSettingKeys() as $mode => $key) {
             $normalized = $this->parseWhitelistInput($this->candidateStatusWhitelist[$mode] ?? '');
 
             Setting::updateOrCreate(
@@ -140,7 +140,7 @@ class SettingsList extends Component
             );
         }
 
-        foreach ($this->candidatePresetSettingKeys() as $mode => $keys) {
+        foreach (self::candidatePresetSettingKeys() as $mode => $keys) {
             $defaultStatus = $this->normalizeDefaultStatus($this->candidatePresetSettings[$mode]['default_status'] ?? 'all');
             $showDeleted = (bool) ($this->candidatePresetSettings[$mode]['show_deleted_tab'] ?? true);
 
@@ -176,7 +176,7 @@ class SettingsList extends Component
 
     public function selectAllCandidateStatuses(string $mode): void
     {
-        if (! array_key_exists($mode, $this->candidateWhitelistSettingKeys())) {
+        if (! array_key_exists($mode, self::candidateWhitelistSettingKeys())) {
             return;
         }
 
@@ -189,7 +189,7 @@ class SettingsList extends Component
 
     public function clearAllCandidateStatuses(string $mode): void
     {
-        if (! array_key_exists($mode, $this->candidateWhitelistSettingKeys())) {
+        if (! array_key_exists($mode, self::candidateWhitelistSettingKeys())) {
             return;
         }
 
@@ -327,17 +327,17 @@ class SettingsList extends Component
 
         if ($this->section === 'general') {
             $settings = Setting::query()
-                ->whereNotIn('name', $this->candidateManagedSettingKeys())
-                ->whereNotIn('name', $this->chiefManagedSettingKeys())
-                ->whereNotIn('name', $this->coefficientSettingKeys())
+                ->whereNotIn('name', self::candidateManagedSettingKeys())
+                ->whereNotIn('name', self::chiefManagedSettingKeys())
+                ->whereNotIn('name', self::coefficientSettingKeys())
                 ->get();
         }
 
         $coefficientSettings = $this->section === 'general'
             ? Setting::query()
-                ->whereIn('name', $this->coefficientSettingKeys())
+                ->whereIn('name', self::coefficientSettingKeys())
                 ->get()
-                ->sortBy(fn (Setting $setting) => array_search($setting->name, $this->coefficientSettingKeys(), true))
+                ->sortBy(fn (Setting $setting) => array_search($setting->name, self::coefficientSettingKeys(), true))
                 ->values()
             : collect();
 
@@ -348,7 +348,7 @@ class SettingsList extends Component
 
         $coefficientSettingIndexes = collect($this->setting)
             ->mapWithKeys(fn (array $setting, int $index) => [(string) $setting['name'] => $index])
-            ->only($this->coefficientSettingKeys())
+            ->only(self::coefficientSettingKeys())
             ->all();
 
         $chiefDelegations = $this->activeChiefDelegations();
@@ -361,7 +361,17 @@ class SettingsList extends Component
         ));
     }
 
-    private function candidateWhitelistSettingKeys(): array
+    /**
+     * Every setting name the application reads; these rows must not be deleted.
+     *
+     * @return list<string>
+     */
+    public static function keysReadByCode(): array
+    {
+        return array_merge(self::candidateManagedSettingKeys(), self::chiefManagedSettingKeys(), self::coefficientSettingKeys());
+    }
+
+    private static function candidateWhitelistSettingKeys(): array
     {
         return [
             'military' => 'candidates.list_presets.military.status_whitelist',
@@ -369,7 +379,7 @@ class SettingsList extends Component
         ];
     }
 
-    private function candidatePresetSettingKeys(): array
+    private static function candidatePresetSettingKeys(): array
     {
         return [
             'military' => [
@@ -385,10 +395,10 @@ class SettingsList extends Component
         ];
     }
 
-    private function candidateManagedSettingKeys(): array
+    private static function candidateManagedSettingKeys(): array
     {
-        $whitelistKeys = array_values($this->candidateWhitelistSettingKeys());
-        $presetKeys = collect($this->candidatePresetSettingKeys())
+        $whitelistKeys = array_values(self::candidateWhitelistSettingKeys());
+        $presetKeys = collect(self::candidatePresetSettingKeys())
             ->flatMap(fn (array $keys) => array_values($keys))
             ->values()
             ->all();
@@ -396,12 +406,12 @@ class SettingsList extends Component
         return array_values(array_unique(array_merge($whitelistKeys, $presetKeys)));
     }
 
-    private function chiefManagedSettingKeys(): array
+    private static function chiefManagedSettingKeys(): array
     {
         return ['Chief', 'Chief rank', 'Chief personnel id', 'Chief personnel_id', 'chief_personnel_id'];
     }
 
-    private function coefficientSettingKeys(): array
+    private static function coefficientSettingKeys(): array
     {
         return ['Work coefficient', 'Education coefficient'];
     }
@@ -409,16 +419,16 @@ class SettingsList extends Component
     private function loadCandidateStatusWhitelist(): void
     {
         $settings = Setting::query()
-            ->whereIn('name', $this->candidateManagedSettingKeys())
+            ->whereIn('name', self::candidateManagedSettingKeys())
             ->pluck('value', 'name')
             ->toArray();
 
-        foreach ($this->candidateWhitelistSettingKeys() as $mode => $key) {
+        foreach (self::candidateWhitelistSettingKeys() as $mode => $key) {
             $parsed = $this->parseWhitelistInput($settings[$key] ?? '');
             $this->candidateStatusWhitelist[$mode] = array_map(static fn (int $id) => (string) $id, $parsed);
         }
 
-        foreach ($this->candidatePresetSettingKeys() as $mode => $keys) {
+        foreach (self::candidatePresetSettingKeys() as $mode => $keys) {
             $default = $settings[$keys['default_status']] ?? config("candidates.list_presets.{$mode}.default_status", 'all');
             $showDeletedRaw = $settings[$keys['show_deleted_tab']] ?? config("candidates.list_presets.{$mode}.show_deleted_tab", true);
             $enabledFiltersRaw = $settings[$keys['enabled_filters']] ?? config("candidates.list_presets.{$mode}.enabled_filters", []);

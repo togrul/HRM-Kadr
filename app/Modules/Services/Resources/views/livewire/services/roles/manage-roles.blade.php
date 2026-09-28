@@ -63,6 +63,7 @@
                             <x-icons.edit-icon size="h-[17px] w-[17px]" color="text-current" hover="text-current" />
                         </button>
 
+                        @if (! \App\Modules\Services\Livewire\Roles\DeleteRole::isAdminRole($role->name) && $role->users_count === 0)
                         <button
                             type="button"
                             wire:click.stop.prevent="setDeleteRole({{ $role->id }})"
@@ -72,6 +73,7 @@
                         >
                             <x-icons.delete-icon size="h-[17px] w-[17px]" color="text-current" hover="text-current" />
                         </button>
+                        @endif
                     </div>
                 </div>
 

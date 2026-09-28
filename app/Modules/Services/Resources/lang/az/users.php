@@ -17,8 +17,10 @@ return [
         'created' => 'İstifadəçi uğurla əlavə olundu!',
         'updated' => 'İstifadəçi uğurla yeniləndi!',
         'deleted' => 'İstifadəçi silindi!',
-        'delete_description' => 'Bu istifadəçini silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarılmır.',
+        'delete_description' => 'Bu istifadəçini silmək istədiyinizə əminsiniz? Silinmiş istifadəçini sonradan «Silinmiş» bölməsindən bərpa etmək olar.',
         'force_delete_confirm' => 'Bu istifadəçini tam silmək istədiyinizə əminsiniz?',
-        'old_password_mismatch' => 'Köhnə şifrə uyğun gəlmədi',
+        'old_password_mismatch' => 'Cari şifrə düzgün deyil',
+        'restored' => 'İstifadəçi bərpa olundu!',
+        'restore_confirm' => 'Bu istifadəçini bərpa etmək istədiyinizə əminsiniz? Hesab yenidən aktiv olacaq.',
     ],
 ];

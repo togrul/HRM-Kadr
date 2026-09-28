@@ -72,7 +72,9 @@
                     <x-table.td :isButton="true">
                         <div class="flex items-center justify-end gap-1">
                             @if ($status == 2)
-                                <button type="button" wire:click="restoreData({{ $user->id }})" title="{{ __('services::common.actions.restore') }}" class="{{ $restoreBtn }}">
+                                <button type="button"
+                                    x-on:click="$dispatch('confirm-action', { tone: 'emerald', message: {{ \Illuminate\Support\Js::from(__('services::users.messages.restore_confirm')) }}, confirmText: {{ \Illuminate\Support\Js::from(__('services::common.actions.restore')) }}, run: () => $wire.restoreData({{ $user->id }}) })"
+                                    title="{{ __('services::common.actions.restore') }}" class="{{ $restoreBtn }}">
                                     <x-icons.recover color="text-current" hover="text-current" size="w-[17px] h-[17px]"></x-icons.recover>
                                 </button>
 

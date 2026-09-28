@@ -190,7 +190,6 @@
                                     </div>
                                 @endif
 
-                                <button type="button" wire:click.prevent="setDeleteSettings({{ $coefficientSetting->id }})" title="{{ __('services::common.actions.delete') }}" class="{{ $delBtn }}">{!! $delIcon !!}</button>
                             </div>
                         </div>
                     @empty
@@ -233,7 +232,7 @@
                         </x-ui.input-shell>
 
                         <div class="flex justify-end">
-                            <x-pill-button variant="primary" wire:click="saveChiefPersonnel">{{ __('services::common.actions.save') }}</x-pill-button>
+                            <x-pill-button variant="secondary" wire:click="saveChiefPersonnel">{{ __('services::common.actions.save') }}</x-pill-button>
                         </div>
                     </div>
                 </section>
@@ -279,7 +278,7 @@
 
                     <div class="mt-auto flex items-center justify-end gap-2 border-t border-hairline-subtle bg-[#fafafa] px-4 py-3">
                         <x-pill-button variant="secondary" wire:click="resetChiefDelegationForm">{{ __('services::common.actions.cancel') }}</x-pill-button>
-                        <x-pill-button variant="primary" wire:click="createChiefDelegation">{{ __('services::settings.actions.create_delegation') }}</x-pill-button>
+                        <x-pill-button variant="secondary" wire:click="createChiefDelegation">{{ __('services::settings.actions.create_delegation') }}</x-pill-button>
                     </div>
                 </section>
             </div>
@@ -304,7 +303,10 @@
                                     </p>
                                 </div>
 
-                                <x-pill-button variant="secondary" wire:click="revokeChiefDelegation({{ $delegation->id }})">{{ __('services::settings.actions.stop_delegation') }}</x-pill-button>
+                                <x-pill-button variant="secondary"
+                                    data-message="{{ __('services::settings.messages.stop_delegation_confirm') }}"
+                                    data-confirm="{{ __('services::settings.actions.stop_delegation') }}"
+                                    x-on:click="$dispatch('confirm-action', { message: $el.dataset.message, confirmText: $el.dataset.confirm, tone: 'rose', run: () => $wire.revokeChiefDelegation({{ $delegation->id }}) })">{{ __('services::settings.actions.stop_delegation') }}</x-pill-button>
                             </div>
                         @endforeach
                     </div>

@@ -19,6 +19,7 @@ return [
         'email' => 'E-poçt',
         'password' => 'Şifrə',
         'confirm_password' => 'Şifrəni təsdiqlə',
+        'current_password' => 'Cari şifrə',
         'role' => 'Rol',
         'permission' => 'İcazə',
         'permissions' => 'İcazələr',

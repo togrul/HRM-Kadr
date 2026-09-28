@@ -19,6 +19,7 @@ return [
         'email' => 'Email',
         'password' => 'Password',
         'confirm_password' => 'Confirm password',
+        'current_password' => 'Current password',
         'role' => 'Role',
         'permission' => 'Permission',
         'permissions' => 'Permissions',
