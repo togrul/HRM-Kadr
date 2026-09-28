@@ -22,6 +22,10 @@ RUN printf '%s\n' \
     "opcache.enable=1" \
     "opcache.jit=tracing" \
     "opcache.jit_buffer_size=256M" \
+    "opcache.memory_consumption=256" \
+    "opcache.interned_strings_buffer=32" \
+    "opcache.max_accelerated_files=20000" \
+    "opcache.validate_timestamps=0" \
     "memory_limit=512M" \
     "upload_max_filesize=64M" \
     "post_max_size=64M" \
@@ -52,7 +56,7 @@ RUN mkdir -p /var/www/html/storage/framework/cache/data \
  && chown -R unit:unit /var/www/html/storage /var/www/html/bootstrap/cache \
  && chmod -R ug+rwX /var/www/html/storage /var/www/html/bootstrap/cache
 
-RUN composer install --prefer-dist --optimize-autoloader --no-interaction
+RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
 
 COPY unit.json /docker-entrypoint.d/unit.json
 
