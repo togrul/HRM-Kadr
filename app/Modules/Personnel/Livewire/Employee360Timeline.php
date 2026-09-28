@@ -56,19 +56,7 @@ class Employee360Timeline extends Component
 
     public function typeOptions(): array
     {
-        return [
-            'audit',
-            'order',
-            'leave',
-            'vacation',
-            'business_trip',
-            'training_need',
-            'training_delivery',
-            'performance',
-            'event',
-            'media',
-            'project',
-        ];
+        return Personnel360TimelineService::TYPES;
     }
 
     public function render(): View

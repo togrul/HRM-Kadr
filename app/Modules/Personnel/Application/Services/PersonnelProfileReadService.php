@@ -111,7 +111,7 @@ class PersonnelProfileReadService
     /**
      * The strip under the identity card.
      *
-     * @return list<array{label:string,value:string,mono:bool}>
+     * @return list<array{label:string,value:string,mono:bool,empty:bool}>
      */
     public function identityMeta(Personnel $personnel): array
     {
@@ -119,7 +119,7 @@ class PersonnelProfileReadService
             $this->meta(__('personnel::common.labels.tabel'), $personnel->tabel_no, true),
             $this->meta(__('personnel::common.labels.pin'), $personnel->pin, true),
             $this->meta(__('personnel::common.labels.birthdate'), $this->date($personnel->birthdate), true),
-            $this->meta(__('personnel::common.labels.mobile'), $personnel->mobile, true),
+            $this->meta(__('personnel::common.labels.mobile'), $this->phone($personnel->mobile), true),
             $this->meta(__('personnel::common.labels.join_date'), $this->date($personnel->join_work_date), true),
             $this->meta(__('personnel::profile.labels.tenure'), $this->tenure($personnel), false),
         ];
@@ -128,7 +128,7 @@ class PersonnelProfileReadService
     /**
      * The "Şəxsi məlumatlar" card rows.
      *
-     * @return list<array{label:string,value:string,mono:bool}>
+     * @return list<array{label:string,value:string,mono:bool,empty:bool}>
      */
     public function personalRows(Personnel $personnel): array
     {
@@ -137,7 +137,7 @@ class PersonnelProfileReadService
             $this->meta(__('personnel::common.labels.nationality'), $personnel->nationality?->getAttribute('title'), false),
             $this->meta(__('personnel::common.labels.education_degree'), $personnel->educationDegree?->getAttribute('title_az'), false),
             $this->meta(__('personnel::common.labels.email'), $personnel->email, true),
-            $this->meta(__('personnel::common.labels.phone'), $personnel->phone, true),
+            $this->meta(__('personnel::common.labels.phone'), $this->phone($personnel->phone), true),
             $this->meta(__('personnel::common.labels.residental_address'), $personnel->getAttribute('residental_address'), false),
             $this->meta(__('personnel::common.labels.registered_address'), $personnel->getAttribute('registered_address'), false),
             $this->meta(__('personnel::common.labels.computer_knowledge'), $personnel->getAttribute('computer_knowledge'), false),
@@ -201,6 +201,22 @@ class PersonnelProfileReadService
     /**
      * @return array{label:string,value:string,mono:bool}
      */
+    /**
+     * Groups a local mobile number the way it is read aloud: 0501234567 → 050 123 45 67,
+     * 994501234567 → +994 50 123 45 67. Anything else is shown as stored.
+     */
+    public function phone(mixed $value): ?string
+    {
+        $raw = trim((string) ($value ?? ''));
+        $digits = preg_replace('/\D/', '', $raw);
+
+        return match (true) {
+            (bool) preg_match('/^0(\d{2})(\d{3})(\d{2})(\d{2})$/', $digits, $m) => "0{$m[1]} {$m[2]} {$m[3]} {$m[4]}",
+            (bool) preg_match('/^994(\d{2})(\d{3})(\d{2})(\d{2})$/', $digits, $m) => "+994 {$m[1]} {$m[2]} {$m[3]} {$m[4]}",
+            default => $raw === '' ? null : $raw,
+        };
+    }
+
     private function meta(string $label, mixed $value, bool $mono): array
     {
         $value = trim((string) ($value ?? ''));
@@ -209,6 +225,7 @@ class PersonnelProfileReadService
             'label' => $label,
             'value' => $value !== '' ? $value : '—',
             'mono' => $mono,
+            'empty' => $value === '',
         ];
     }
 

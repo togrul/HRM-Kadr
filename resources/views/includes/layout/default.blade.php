@@ -61,7 +61,7 @@
                     @click="$store.hrmShell.mobilePanelOpen = ! $store.hrmShell.mobilePanelOpen"
                     :aria-expanded="$store.hrmShell.mobilePanelOpen.toString()"
                     aria-controls="sidebar"
-                    class="sticky top-[52px] z-20 inline-flex h-10 w-fit items-center gap-2 self-start rounded-[10px] border border-hairline bg-white px-3.5 text-[13.5px] font-semibold text-ink-soft shadow-card lg:hidden"
+                    class="sticky top-[52px] z-20 inline-flex h-9 w-fit items-center gap-2 self-start rounded-full border border-hairline bg-white px-3.5 text-[13px] font-semibold text-ink-soft shadow-card lg:hidden"
                 >
                     <svg class="h-4 w-4 text-ink-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg>
                     <span>{{ __('ui::common.labels.sections_and_filters') }}</span>
@@ -92,7 +92,7 @@
                 </aside>
             @endif
 
-            <section class="relative min-w-0 flex-1 overflow-hidden rounded-2xl border border-hairline bg-white shadow-card" aria-live="polite">
+            <section class="relative min-w-0 flex-1 overflow-clip rounded-2xl border border-hairline bg-white shadow-card" aria-live="polite">
                 @if ($hasSidebar)
                     <div
                         x-cloak
@@ -103,7 +103,7 @@
                         <button
                             type="button"
                             @click="$store.hrmShell.togglePanel()"
-                            class="inline-flex h-10 items-center gap-2 rounded-[10px] px-3 text-[14px] font-medium text-ink-muted transition hover:bg-[#f4f4f5] hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
+                            class="inline-flex h-9 items-center gap-2 rounded-full px-3 text-[13px] font-medium text-ink-muted transition hover:bg-[#f4f4f5] hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
                             aria-controls="sidebar"
                             :aria-expanded="(! $store.hrmShell.panelCollapsed).toString()"
                         >
