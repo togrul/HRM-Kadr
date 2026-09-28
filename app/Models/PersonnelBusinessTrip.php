@@ -135,9 +135,8 @@ class PersonnelBusinessTrip extends Model
                     break;
                 case 'order_type_id':
                     if (! empty($value)) {
-                        $query->whereHas('order.orderType', function ($qq) use ($value) {
-                            $qq->where('order_type_id', $value);
-                        });
+                        // order_type_id lives on the order itself, not on its type row.
+                        $query->whereHas('order', fn ($qq) => $qq->where('order_type_id', (int) (is_array($value) ? ($value['id'] ?? 0) : $value)));
                     }
                     break;
                 case 'date':
@@ -149,11 +148,13 @@ class PersonnelBusinessTrip extends Model
                     break;
                 case 'business_trip_status':
                     switch ($value) {
+                        // "Ezamiyyətdə" = running today (same rule as the row chip);
+                        // finished or not yet started trips are "İşdə".
                         case 'at_work':
-                            $query->where('end_date', '<', $currentDate);
+                            $query->where(fn ($q) => $q->where('start_date', '>', $currentDate)->orWhere('end_date', '<', $currentDate));
                             break;
                         case 'in_business_trip':
-                            $query->where('end_date', '>=', $currentDate);
+                            $query->where('start_date', '<=', $currentDate)->where('end_date', '>=', $currentDate);
                             break;
                         case 'deleted':
                             $query->onlyTrashed();

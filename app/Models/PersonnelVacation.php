@@ -142,10 +142,13 @@ class PersonnelVacation extends Model
                     }
                     break;
                 case 'vacation_status':
+                    // "Məzuniyyətdə" = running right now (same rule as the row chip);
+                    // everything else — finished or not yet started — is "İşdə".
+                    $now = Carbon::now();
                     if ($value === 'at_work') {
-                        $query->where('return_work_date', '<', Carbon::now());
+                        $query->where(fn ($q) => $q->where('start_date', '>', $now)->orWhere('return_work_date', '<=', $now));
                     } elseif ($value === 'in_vacation') {
-                        $query->where('return_work_date', '>', Carbon::now());
+                        $query->where('start_date', '<=', $now)->where('return_work_date', '>', $now);
                     }
                     break;
                 case 'fullname':

@@ -70,6 +70,7 @@ class LeaveForm extends Form
             'starts_time' => [Rule::requiredIf($this->duration_unit === 'hour'), 'nullable', 'date_format:H:i'],
             'ends_time' => [Rule::requiredIf($this->duration_unit === 'hour'), 'nullable', 'date_format:H:i', 'after:starts_time'],
             'assigned_to.id' => ['nullable', 'integer', Rule::exists('personnels', 'id')],
+            'reason' => ['required', 'string', 'min:3', 'max:1000'],
             'document_path' => [
                 Rule::requiredIf($requiresDocument),
                 function (string $attribute, mixed $value, Closure $fail): void {
@@ -124,6 +125,7 @@ class LeaveForm extends Form
             'ends_time' => __('leaves::common.labels.end_time'),
             'status_id' => __('leaves::common.labels.status'),
             'document_path' => __('leaves::common.labels.file'),
+            'reason' => __('leaves::common.labels.reason'),
         ];
     }
 
