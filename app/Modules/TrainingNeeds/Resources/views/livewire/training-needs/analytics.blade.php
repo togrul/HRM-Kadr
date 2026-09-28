@@ -54,7 +54,7 @@
                 @forelse ($this->analyticsPriorityMix as $priority => $count)
                     <div class="flex items-center justify-between gap-3 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
                         <span class="text-sm font-semibold text-zinc-900">{{ __('training_needs::dashboard.priorities.'.$priority) }}</span>
-                        <x-small-badge :mode="$priority === 'high' ? 'red' : ($priority === 'medium' ? 'green' : 'secondary')">{{ $count }}</x-small-badge>
+                        <x-small-badge :mode="$priority === 'high' ? 'red' : ($priority === 'medium' ? 'amber' : 'secondary')">{{ $count }}</x-small-badge>
                     </div>
                 @empty
                     <p class="text-sm text-zinc-500">{{ __('training_needs::dashboard.empty.analytics') }}</p>

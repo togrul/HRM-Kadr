@@ -279,13 +279,13 @@
                                 @endcan
                             </x-ui.row-menu>
                         @else
-                            @role('Admin')
+                            @can('restore', $_candidate)
                                 <button type="button" wire:click="restoreData('{{ $_candidate->id }}')"
                                     title="{{ __('candidates::common.actions.restore_candidate') }}"
                                     class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink">
                                     <x-icons.recover color="text-current" hover="text-current" />
                                 </button>
-                            @endrole
+                            @endcan
                             @can('delete', $_candidate)
                                 <x-ui.row-menu>
                                     <x-ui.row-menu.item danger

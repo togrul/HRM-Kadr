@@ -204,6 +204,87 @@ class AuditLogDashboardTest extends TestCase
             ->assertDontSee('Attendance overtime request approved.');
     }
 
+    public function test_export_shows_names_and_labels_instead_of_codes(): void
+    {
+        $user = User::factory()->create(['name' => 'Audit Reviewer']);
+        $user->givePermissionTo(Permission::findOrCreate('show-audit-logs', 'web'));
+
+        AuditActivity::query()->create([
+            'log_name' => 'auth',
+            'description' => 'User logged in',
+            'event' => 'login',
+            'causer_type' => User::class,
+            'causer_id' => $user->id,
+        ]);
+
+        $response = $this->actingAs($user)
+            ->get(route('audit.logs.export', ['format' => 'csv']))
+            ->assertOk();
+
+        $csv = $response->getFile()->getContent();
+
+        $this->assertStringContainsString('Audit Reviewer', $csv);
+        $this->assertStringContainsString('Giriş', $csv);
+        $this->assertStringNotContainsString('User #'.$user->id, $csv);
+    }
+
+    public function test_search_matches_user_and_employee_names(): void
+    {
+        $user = User::factory()->create(['name' => 'Zeynəb Qasımova']);
+        $user->givePermissionTo(Permission::findOrCreate('show-audit-logs', 'web'));
+        $this->seedPersonnelReferenceData();
+
+        $personnel = Personnel::withoutEvents(fn () => Personnel::query()->create([
+            'tabel_no' => 'AUD-777', 'surname' => 'Hüseynli', 'name' => 'Rauf', 'patronymic' => 'Elman',
+            'birthdate' => '1990-01-01', 'gender' => 1, 'email' => 'audit-search@example.test', 'mobile' => '994501112299',
+            'nationality_id' => 1, 'pin' => 'AUD0777', 'residental_address' => 'Main st', 'education_degree_id' => 1,
+            'structure_id' => 1, 'position_id' => 1, 'work_norm_id' => 1, 'join_work_date' => '2026-03-01',
+            'added_by' => 1, 'is_pending' => false,
+        ]));
+
+        AuditActivity::query()->create(['log_name' => 'default', 'description' => 'a', 'event' => 'login', 'causer_type' => User::class, 'causer_id' => $user->id]);
+        AuditActivity::query()->create(['log_name' => 'default', 'description' => 'b', 'event' => 'updated', 'subject_type' => Personnel::class, 'subject_id' => $personnel->id]);
+        AuditActivity::query()->create(['log_name' => 'default', 'description' => 'c', 'event' => 'updated']);
+
+        $total = fn ($component): int => $component->viewData('activities')->total();
+        $component = Livewire::actingAs($user)->test(ActivityLogDashboard::class);
+
+        $component->set('search', 'Qasımova');
+        $this->assertSame(1, $total($component));
+
+        $component->set('search', 'Rauf Hüseynli');
+        $this->assertSame(1, $total($component));
+    }
+
+    public function test_event_rows_add_up_to_all_and_cards_follow_filters(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo(Permission::findOrCreate('show-audit-logs', 'web'));
+
+        AuditActivity::query()->create(['log_name' => 'auth', 'description' => 'x', 'event' => 'login', 'causer_type' => User::class, 'causer_id' => $user->id]);
+        AuditActivity::query()->create(['log_name' => 'auth', 'description' => 'x', 'event' => 'login', 'causer_type' => User::class, 'causer_id' => $user->id]);
+        AuditActivity::query()->create(['log_name' => 'other', 'description' => 'x', 'event' => null]);
+
+        $component = Livewire::actingAs($user)->test(ActivityLogDashboard::class);
+        $counts = $component->viewData('eventCounts');
+
+        // Every row, including entries without an event, adds up to "Hamısı" and to the list.
+        $this->assertSame(3, $counts->sum());
+        $this->assertSame(1, $counts->get('__none__'));
+
+        $component->set('event', '__none__');
+        $this->assertSame(1, $component->viewData('activities')->total());
+
+        // Cards count inside the current filter; "users" counts the entries its click lists.
+        $component->set('event', '')->set('logName', 'auth');
+        $summary = $component->viewData('summary');
+        $this->assertSame(2, $summary['total']);
+        $this->assertSame(2, $summary['users']);
+
+        $component->call('toggleMetric', 'users');
+        $this->assertSame($summary['users'], $component->viewData('activities')->total());
+    }
+
     private function seedPersonnelReferenceData(): void
     {
         DB::table('countries')->insertOrIgnore(['id' => 1, 'code' => 'AZ']);

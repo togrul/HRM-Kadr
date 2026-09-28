@@ -6,6 +6,7 @@ return [
         'new_staff' => 'New staff',
         'edit_staff' => 'Edit staff',
         'delete_staff' => 'Delete staff',
+        'vacancies' => 'Vacancies',
     ],
     'fields' => [
         'structure' => 'Structure',
@@ -50,6 +51,7 @@ return [
         'edit_mode_on' => 'You are in edit mode',
         'no_match' => 'No matching unit or position found',
         'structure_exists' => 'This structure has already been added!',
+        'at_least_one_row' => 'Add at least one row.',
         'staff_added' => 'Staff was added successfully!',
         'staff_updated' => 'Staff was updated successfully!',
         'staff_deleted' => 'Staff was deleted!',

@@ -4,7 +4,7 @@ return [
     'title' => 'Davamiyyət izləmə',
     'workspace' => [
         'title' => 'İş sahəsi',
-        'description' => 'Bu ekran davamiyyət, növbələr və manual girişləri idarə edir.',
+        'description' => 'Bu ekran davamiyyət, növbələr və əl ilə girişləri idarə edir.',
     ],
     'filters' => [
         'previous_month' => 'Əvvəlki ay',

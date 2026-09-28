@@ -55,7 +55,7 @@ class AttendanceOvertimeApprovalService
         return $request->refresh();
     }
 
-    public function reject(AttendanceOvertimeRequest $request, int $approvedBy): AttendanceOvertimeRequest
+    public function reject(AttendanceOvertimeRequest $request, int $approvedBy, string $reason): AttendanceOvertimeRequest
     {
         if (app(AttendanceMonthLockService::class)->isPeriodLocked($request->date)) {
             throw ValidationException::withMessages([
@@ -63,10 +63,18 @@ class AttendanceOvertimeApprovalService
             ]);
         }
 
-        $before = $request->only(['status', 'approved_minutes', 'approved_by', 'approved_at']);
+        $reason = trim($reason);
+        if (mb_strlen($reason) < 3) {
+            throw ValidationException::withMessages([
+                'rejection_reason' => __('validation.min.string', ['attribute' => __('attendance::overtime.labels.reject_reason'), 'min' => 3]),
+            ]);
+        }
+
+        $before = $request->only(['status', 'approved_minutes', 'approved_by', 'approved_at', 'rejection_reason']);
 
         $request->update([
             'status' => 'rejected',
+            'rejection_reason' => $reason,
             'approved_minutes' => 0,
             'approved_by' => $approvedBy,
             'approved_at' => now(),
@@ -80,7 +88,7 @@ class AttendanceOvertimeApprovalService
                 'tabel_no' => $request->tabel_no,
                 'date' => $request->date?->toDateString(),
                 'before' => $before,
-                'after' => $request->only(['status', 'approved_minutes', 'approved_by', 'approved_at']),
+                'after' => $request->only(['status', 'approved_minutes', 'approved_by', 'approved_at', 'rejection_reason']),
             ],
             causerId: $approvedBy
         );

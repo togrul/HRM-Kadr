@@ -35,7 +35,7 @@ class AddSettings extends Component
 
         Setting::create($this->settings);
 
-        $this->dispatch('settingsUpdated', __('services::settings.messages.saved'));
+        $this->dispatch('settingsUpdated', __('services::settings.messages.created'));
 
         $this->settings = [];
     }

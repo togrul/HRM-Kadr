@@ -80,10 +80,13 @@ class RequisitionList extends Component
             ->orderByRaw("
                 CASE status
                     WHEN 'open' THEN 1
-                    WHEN 'draft' THEN 2
-                    WHEN 'closed' THEN 3
-                    WHEN 'cancelled' THEN 4
-                    ELSE 5
+                    WHEN 'pending_approval' THEN 2
+                    WHEN 'approved' THEN 3
+                    WHEN 'draft' THEN 4
+                    WHEN 'rejected' THEN 5
+                    WHEN 'closed' THEN 6
+                    WHEN 'cancelled' THEN 7
+                    ELSE 8
                 END
             ")
             ->orderByDesc('id');

@@ -5,7 +5,6 @@ namespace App\Modules\Reports\Livewire;
 use App\Livewire\Concerns\WithRuntimeMemo;
 use App\Modules\Reports\Application\Services\ComparativeReportService;
 use App\Modules\Reports\Application\Services\ReportsAccessService;
-use App\Modules\Reports\Application\Services\ReportsStructureScopeService;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Isolate;
 use Livewire\Component;
@@ -21,16 +20,16 @@ class Comparisons extends Component
 
     public ?int $structureId = null;
 
-    public array $structureOptions = [];
-
-    public function mount(ReportsAccessService $access, ReportsStructureScopeService $structures): void
+    /**
+     * The period comes from the dashboard's panel, the one period control every tab shares.
+     */
+    public function mount(ReportsAccessService $access, ?int $year = null, ?int $month = null, ?int $structureId = null): void
     {
         $access->authorizeView();
 
-        $this->year = (int) request()->integer('year', now()->year);
-        $this->month = max(1, min(12, (int) request()->integer('month', now()->month)));
-        $this->structureId = request()->integer('structure_id') ?: null;
-        $this->structureOptions = $structures->filterOptions()->all();
+        $this->year = $year ?: (int) request()->integer('year', now()->year);
+        $this->month = max(1, min(12, $month ?: (int) request()->integer('month', now()->month)));
+        $this->structureId = $structureId ?: request()->integer('structure_id') ?: null;
     }
 
     public function updatedYear(): void

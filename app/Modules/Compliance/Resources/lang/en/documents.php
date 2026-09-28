@@ -10,7 +10,7 @@ return [
         'expiring_30' => 'Critical',
         'expiring_60' => 'Approaching',
         'valid' => 'Valid',
-        'missing' => 'Missing',
+        'missing' => 'Missing document',
         'compliance_score' => 'Compliance score',
     ],
     'fields' => [
@@ -32,7 +32,7 @@ return [
     ],
     'status' => [
         'expired' => 'Expired',
-        'expiring_30' => 'Needs urgent renewal',
+        'expiring_30' => 'Critical',
         'expiring_60' => 'Approaching',
         'valid' => 'Valid',
         'missing' => 'Missing document',
@@ -57,6 +57,7 @@ return [
     ],
     'columns' => [
         'employee' => 'Employee',
+        'tabel_no' => 'Personnel number',
         'document' => 'Document',
         'expires_at' => 'Expiry date',
         'days_left' => 'Days left',

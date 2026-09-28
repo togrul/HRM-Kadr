@@ -23,7 +23,7 @@ trait InteractsWithRecruitmentPresentation
     {
         return match ($status) {
             'open', 'active', 'approved' => 'green',
-            'draft', 'pending' => 'amber',
+            'draft', 'pending', 'pending_approval' => 'amber',
             'cancelled', 'rejected', 'withdrawn' => 'rose',
             'closed' => 'secondary',
             default => 'secondary',

@@ -187,7 +187,7 @@ return [
     'actions' => [
         'add_kpi' => 'New KPI',
         'edit_kpi' => 'Edit KPI',
-        'add_template' => 'New template',
+        'add_template' => 'New KPI template',
         'edit_template' => 'Edit template',
         'add_item' => 'Add item',
         'add_actual' => 'Actual value',
@@ -596,7 +596,7 @@ return [
             'out_of_range' => 'Must be a number between :min and :max.',
             'not_a_number' => 'Must be a positive number.',
             'wrong_mode' => 'This action does not apply to the current service area.',
-            'order_template_missing' => 'The "Monetary award" order template is missing. An administrator must add it (php artisan orders:seed-word-templates --only=pul_mukafati).',
+            'order_template_missing' => 'The "Monetary award" order template is missing. Ask your system administrator to add it to the order templates.',
         ],
     ],
 

@@ -4,8 +4,9 @@ return [
     'titles' => [
         'staff_schedule' => 'Ştat cədvəli',
         'new_staff' => 'Yeni ştat',
-        'edit_staff' => 'Ştatı düzəliş et',
+        'edit_staff' => 'Ştatı redaktə et',
         'delete_staff' => 'Ştatı sil',
+        'vacancies' => 'Vakansiyalar',
     ],
     'fields' => [
         'structure' => 'Struktur',
@@ -50,6 +51,7 @@ return [
         'edit_mode_on' => 'Redaktə rejimindəsiniz',
         'no_match' => 'Uyğun bölmə və ya vəzifə tapılmadı',
         'structure_exists' => 'Bu struktur artıq əlavə edilib!',
+        'at_least_one_row' => 'Ən azı bir sətir əlavə edin.',
         'staff_added' => 'Ştat uğurla əlavə edildi!',
         'staff_updated' => 'Ştat uğurla yeniləndi!',
         'staff_deleted' => 'Ştat silindi!',

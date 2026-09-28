@@ -21,6 +21,8 @@ return [
     'messages' => [
         'role_saved' => 'Rol uğurla yeniləndi!',
         'role_deleted' => 'Rol silindi!',
+        'admin_role_protected' => 'Admin rolunu silmək olmaz.',
+        'role_has_users' => 'Bu rol istifadəçilərə təyin olunub. Silməzdən əvvəl istifadəçilərə başqa rol təyin edin.',
         'permission_saved' => 'İcazə uğurla əlavə olundu!',
         'permission_deleted' => 'İcazə silindi!',
         'permission_assigned' => 'İcazə rola uğurla təyin olundu!',

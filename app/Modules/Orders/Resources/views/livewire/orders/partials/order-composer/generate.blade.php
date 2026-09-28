@@ -5,7 +5,7 @@
         <span class="flex items-center justify-center w-6 h-6 text-xs text-white rounded-full bg-zinc-900">3</span>
         {{ __('orders::order_composer.labels.step_preview') }}
     </div>
-    <p class="text-xs leading-5 text-zinc-500">{{ __('orders::order_composer.labels.docx_generate_hint') }}</p>
+    <p class="text-xs leading-5 text-zinc-500">{{ __('orders::order_composer.labels.docx_generate_hint', ['action' => $isEditing ? __('orders::order_composer.actions.save') : __('orders::order_composer.actions.publish')]) }}</p>
 
     {{-- one black primary (Nəşr et) on the right; preview secondary; download as an icon --}}
     <div class="flex flex-wrap items-center justify-end gap-2 pt-1">

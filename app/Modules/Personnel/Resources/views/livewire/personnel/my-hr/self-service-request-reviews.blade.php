@@ -135,12 +135,16 @@
                     <x-ui.input-shell :label="__('personnel::my_hr.review.labels.review_note')" labelClass="tracking-tight text-zinc-500">
                         <x-ui.filter-textarea wire:model.live="notes.{{ $row['request_type'] }}_{{ $row['record_id'] }}" rows="3" />
                     </x-ui.input-shell>
+                    <p class="mt-1 text-[11.5px] text-ink-faint">{{ __('personnel::my_hr.review.messages.note_required_for_reject') }}</p>
+                    @error('notes.'.$row['request_type'].'_'.$row['record_id'])
+                        <x-validation> {{ $message }} </x-validation>
+                    @enderror
 
                     <div class="mt-4 flex flex-wrap gap-2">
-                        <button type="button" wire:click="approve('{{ $row['request_type'] }}', {{ $row['record_id'] }})" class="inline-flex h-9 items-center justify-center rounded-full bg-ink px-4 text-[13px] font-semibold text-white transition hover:bg-ink-hover">
+                        <button type="button" x-on:click="$dispatch('confirm-action', { title: @js(__('personnel::my_hr.review.confirm.approve_title')), message: @js(__('personnel::my_hr.review.confirm.approve_message', ['name' => $row['request_type_label']])), confirmText: @js(__('personnel::my_hr.review.actions.approve')), tone: 'emerald', run: () => $wire.approve(@js($row['request_type']), {{ (int) $row['record_id'] }}) })" wire:loading.attr="disabled" wire:target="approve,reject" class="inline-flex h-9 items-center justify-center rounded-full bg-ink px-4 text-[13px] font-semibold text-white transition hover:bg-ink-hover">
                             {{ __('personnel::my_hr.review.actions.approve') }}
                         </button>
-                        <button type="button" wire:click="reject('{{ $row['request_type'] }}', {{ $row['record_id'] }})" class="inline-flex h-9 items-center justify-center rounded-full px-4 text-[13px] font-semibold text-ink-muted transition hover:bg-[#ffe4e6] hover:text-[#be123c]">
+                        <button type="button" x-on:click="$dispatch('confirm-action', { title: @js(__('personnel::my_hr.review.confirm.reject_title')), message: @js(__('personnel::my_hr.review.confirm.reject_message', ['name' => $row['request_type_label']])), confirmText: @js(__('personnel::my_hr.review.actions.reject')), tone: 'rose', run: () => $wire.reject(@js($row['request_type']), {{ (int) $row['record_id'] }}) })" wire:loading.attr="disabled" wire:target="approve,reject" class="inline-flex h-9 items-center justify-center rounded-full px-4 text-[13px] font-semibold text-ink-muted transition hover:bg-[#ffe4e6] hover:text-[#be123c]">
                             {{ __('personnel::my_hr.review.actions.reject') }}
                         </button>
                     </div>

@@ -11,11 +11,11 @@ return [
         'total' => 'Ümumi log',
         'today' => 'Bugün',
         'profile_opened' => 'Profil baxışı',
-        'users' => 'İstifadəçi',
+        'users' => 'İstifadəçi əməliyyatları',
     ],
     'filters' => [
         'search' => 'Axtarış',
-        'search_placeholder' => 'Mətn, event, model və ya log adı...',
+        'search_placeholder' => 'Mətn, hadisə, istifadəçi və ya əməkdaş adı...',
         'log_name' => 'Log tipi',
         'event' => 'Hadisə',
         'from' => 'Başlanğıc',

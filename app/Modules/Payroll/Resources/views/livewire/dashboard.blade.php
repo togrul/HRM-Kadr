@@ -18,12 +18,11 @@
         default => '',
     };
 
-    $exports = [
-        ['bank', 'exportBankFile'],
-        ['bank_csv', 'exportBankCsv'],
-        ['gl', 'exportGl'],
-        ['state', 'exportStateReport'],
-    ];
+    // Bank file, GL and state report are meaningless without amounts — the export methods refuse them too.
+    $canExportAmounts = $this->canExportAmounts();
+    $exports = $canExportAmounts
+        ? [['bank', 'exportBankFile'], ['bank_csv', 'exportBankCsv'], ['gl', 'exportGl'], ['state', 'exportStateReport']]
+        : [['bank_csv', 'exportBankCsv']];
 @endphp
 
 <div class="flex flex-col">
@@ -106,7 +105,7 @@
                 <x-pill-button variant="secondary" wire:click="openPanel('period')">{{ __('payroll::dashboard.actions.create_period') }}</x-pill-button>
             @endif
 
-            @if ($this->canExport() && $exportRunId)
+            @if ($canExportAmounts && $exportRunId)
                 <x-pill-button variant="secondary" :icon="true" wire:click="exportBankFile({{ $exportRunId }})" title="{{ __('payroll::dashboard.export.actions.bank') }}">
                     <svg class="h-4 w-4 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="m9 13 6 5M15 13l-6 5"/></svg>
                 </x-pill-button>

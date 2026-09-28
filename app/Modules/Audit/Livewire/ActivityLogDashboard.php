@@ -2,18 +2,9 @@
 
 namespace App\Modules\Audit\Livewire;
 
-use App\Models\AttendanceOvertimeRequest;
 use App\Models\AuditActivity;
-use App\Models\Candidate;
-use App\Models\OrderLog;
-use App\Models\Personnel;
-use App\Models\StaffSchedule;
-use App\Models\User;
+use App\Modules\Audit\Application\Services\ActivityLogReader;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Livewire\Component;
@@ -137,7 +128,7 @@ class ActivityLogDashboard extends Component
 
     public function render(): View
     {
-        $activities = $this->filteredQuery()
+        $activities = $this->reader()->query($this->filters())
             ->select([
                 'id',
                 'log_name',
@@ -166,38 +157,30 @@ class ActivityLogDashboard extends Component
         return view('audit::livewire.activity-log-dashboard', [
             'activities' => $activities,
             'selectedActivity' => $selectedActivity,
-            'summary' => $this->summary(),
+            'summary' => $this->reader()->summary($this->filters()),
             'logNameOptions' => $this->logNameOptions(),
-            'eventCounts' => $this->eventCounts(),
+            'eventCounts' => $this->reader()->eventCounts($this->filters()),
         ]);
     }
 
-    private function filteredQuery(bool $ignoreEvent = false): Builder
+    /**
+     * @return array<string,mixed>
+     */
+    private function filters(): array
     {
-        return AuditActivity::query()
-            ->when($this->logName !== '', fn (Builder $query) => $query->where('log_name', $this->logName))
-            ->when(! $ignoreEvent && $this->event !== '', fn (Builder $query) => $query->where('event', $this->event))
-            ->when($this->usersOnly, fn (Builder $query) => $query->whereNotNull('causer_id'))
-            // Plain ranges, not whereDate(): DATE(created_at) cannot use the index.
-            ->when($this->dayStart($this->dateFrom), fn (Builder $query, Carbon $from) => $query->where('created_at', '>=', $from))
-            ->when($this->dayStart($this->dateTo), fn (Builder $query, Carbon $to) => $query->where('created_at', '<', $to->addDay()))
-            ->when($this->search !== '', function (Builder $query) {
-                $term = '%'.str_replace(['%', '_'], ['\\%', '\\_'], trim($this->search)).'%';
-
-                $query->where(function (Builder $nested) use ($term) {
-                    $nested
-                        ->where('description', 'like', $term)
-                        ->orWhere('event', 'like', $term)
-                        ->orWhere('log_name', 'like', $term)
-                        ->orWhere('subject_type', 'like', $term)
-                        ->orWhere('causer_type', 'like', $term);
-                });
-            });
+        return [
+            'search' => $this->search,
+            'log_name' => $this->logName,
+            'event' => $this->event,
+            'date_from' => $this->dateFrom,
+            'date_to' => $this->dateTo,
+            'users_only' => $this->usersOnly,
+        ];
     }
 
-    private function dayStart(string $date): ?Carbon
+    private function reader(): ActivityLogReader
     {
-        return $date === '' ? null : rescue(fn (): Carbon => Carbon::parse($date)->startOfDay(), null, false);
+        return app(ActivityLogReader::class);
     }
 
     private function selectedActivity(): ?AuditActivity
@@ -207,35 +190,6 @@ class ActivityLogDashboard extends Component
         }
 
         return AuditActivity::query()->find($this->selectedActivityId);
-    }
-
-    /**
-     * The header strip's four figures, gathered as conditional aggregates so the whole
-     * strip costs one scan instead of four counts.
-     *
-     * @return array<string,int>
-     */
-    private function summary(): array
-    {
-        $startOfDay = today();
-
-        $row = AuditActivity::query()
-            ->selectRaw('count(*) as total_count')
-            ->selectRaw('sum(case when created_at >= ? and created_at < ? then 1 else 0 end) as today_count', [
-                $startOfDay->toDateTimeString(),
-                $startOfDay->copy()->addDay()->toDateTimeString(),
-            ])
-            ->selectRaw('sum(case when event = ? then 1 else 0 end) as profile_opened_count', ['profile_opened'])
-            ->selectRaw('count(distinct causer_id) as user_count')
-            ->toBase()
-            ->first();
-
-        return [
-            'total' => (int) ($row->total_count ?? 0),
-            'today' => (int) ($row->today_count ?? 0),
-            'profile_opened' => (int) ($row->profile_opened_count ?? 0),
-            'users' => (int) ($row->user_count ?? 0),
-        ];
     }
 
     private function logNameOptions(): Collection
@@ -250,104 +204,24 @@ class ActivityLogDashboard extends Component
             ->values();
     }
 
-    /**
-     * Rows for the panel's HADİSƏ facet: the event and how many entries carry it inside the
-     * rest of the current filter. The event filter itself is dropped from the scope —
-     * otherwise the selected event is the only one left with a number and the list can
-     * never be clicked back out of.
-     *
-     * @return Collection<string,int>
-     */
-    private function eventCounts(): Collection
-    {
-        // The empty key holds the rows that carry no event at all. It stays in the map so
-        // "Hamısı" adds up to what clicking it actually lists; the panel skips it as a row,
-        // because $event = '' already means "every event".
-        return $this->filteredQuery(ignoreEvent: true)
-            ->select('event')
-            ->selectRaw('count(*) as event_count')
-            ->groupBy('event')
-            ->orderBy('event')
-            ->toBase()
-            ->get()
-            ->mapWithKeys(fn (object $row): array => [(string) $row->event => (int) $row->event_count]);
-    }
-
     public function actorLabel(AuditActivity $activity): string
     {
-        if ($activity->causer_id === null) {
-            return __('audit::activity.labels.system_actor');
-        }
-
-        return $this->actorLabels[$this->entityKey($activity->causer_type, $activity->causer_id)]
-            ?? class_basename((string) $activity->causer_type).' #'.$activity->causer_id;
+        return $this->reader()->actorLabel($activity, $this->actorLabels);
     }
 
     public function subjectLabel(AuditActivity $activity): string
     {
-        $fullname = data_get($activity->properties, 'viewed_personnel_fullname')
-            ?: data_get($activity->properties, 'personnel_fullname')
-            ?: data_get($activity->properties, 'fullname');
-
-        if (is_string($fullname) && trim($fullname) !== '') {
-            return trim($fullname);
-        }
-
-        if ($activity->subject_id === null) {
-            return __('audit::activity.labels.no_subject');
-        }
-
-        return $this->subjectLabels[$this->entityKey($activity->subject_type, $activity->subject_id)]
-            ?? class_basename((string) $activity->subject_type).' #'.$activity->subject_id;
+        return $this->reader()->subjectLabel($activity, $this->subjectLabels);
     }
 
     public function eventLabel(?string $event): string
     {
-        if (! $event) {
-            return __('audit::activity.labels.no_event');
-        }
-
-        return $this->translateOr("audit::activity.events.{$this->translationKey($event)}", Str::headline($event));
+        return $this->reader()->eventLabel($event);
     }
 
     public function descriptionLabel(?string $description): string
     {
-        if (! $description) {
-            return '-';
-        }
-
-        $key = match (true) {
-            str_starts_with($description, 'You have ') && str_ends_with($description, ' personnel') => 'personnel_'.$this->translationKey(
-                Str::between($description, 'You have ', ' personnel')
-            ),
-            default => match ($description) {
-                'User logged in' => 'user_logged_in',
-                'User logged out' => 'user_logged_out',
-                'Personnel profile opened' => 'personnel_profile_opened',
-                'Manual attendance entry created.' => 'manual_entry_created',
-                'Manual attendance entry approved.' => 'manual_entry_approved',
-                'Manual attendance entry rejected.' => 'manual_entry_rejected',
-                'Manual attendance entry updated.' => 'manual_entry_updated',
-                'Attendance overtime request created automatically.' => 'attendance_overtime_request_created_automatically',
-                'Attendance overtime request created manually.' => 'attendance_overtime_request_created_manually',
-                'Attendance overtime request approved.' => 'attendance_overtime_request_approved',
-                'Attendance overtime request rejected.' => 'attendance_overtime_request_rejected',
-                'Attendance overtime request removed after recalculation.' => 'attendance_overtime_request_removed_after_recalculation',
-                'Attendance overtime request recalculated.' => 'attendance_overtime_request_recalculated',
-                'Attendance overtime request generation skipped due to missing actor.' => 'attendance_overtime_request_generation_skipped',
-                'Duplicate attendance overtime request deleted.' => 'duplicate_attendance_overtime_request_deleted',
-                'Attendance calendar created.' => 'attendance_calendar_created',
-                'Attendance calendar updated.' => 'attendance_calendar_updated',
-                'Attendance calendar deleted.' => 'attendance_calendar_deleted',
-                'Attendance settings updated.' => 'attendance_settings_updated',
-                'Attendance month closed and locked.' => 'attendance_month_closed_and_locked',
-                'Attendance month unlocked.' => 'attendance_month_unlocked',
-                'Attendance weekend calendar auto-created.' => 'attendance_weekend_calendar_auto_created',
-                default => null,
-            },
-        };
-
-        return $key ? $this->translateOr("audit::activity.descriptions.{$key}", $description) : $description;
+        return $this->reader()->descriptionLabel($description);
     }
 
     public function eventTone(?string $event): string
@@ -400,8 +274,8 @@ class ActivityLogDashboard extends Component
                 fn (Collection $rows) => $this->normalizeProfileOpenProperties($rows)
             )
             ->map(fn ($value, $key) => [
-                'key' => $this->translateOr(
-                    "audit::activity.properties.{$this->translationKey((string) $key)}",
+                'key' => $this->reader()->translateOr(
+                    "audit::activity.properties.{$this->reader()->translationKey((string) $key)}",
                     Str::headline((string) $key)
                 ),
                 'value' => is_scalar($value) || $value === null
@@ -431,187 +305,14 @@ class ActivityLogDashboard extends Component
 
     private function primeEntityLabels(Collection $activities): void
     {
-        $actorKeys = $this->entityKeysFor($activities, 'causer_type', 'causer_id')->flip();
-        $subjectKeys = $this->entityKeysFor($activities, 'subject_type', 'subject_id')->flip();
-        $labels = $this->labelsFor($activities, [
-            ['causer_type', 'causer_id'],
-            ['subject_type', 'subject_id'],
-        ]);
-
-        $this->actorLabels = array_intersect_key($labels, $actorKeys->all());
-        $this->subjectLabels = array_intersect_key($labels, $subjectKeys->all());
-    }
-
-    private function entityKeysFor(Collection $activities, string $typeColumn, string $idColumn): Collection
-    {
-        return $activities
-            ->filter(fn (AuditActivity $activity) => filled($activity->{$typeColumn}) && filled($activity->{$idColumn}))
-            ->map(fn (AuditActivity $activity) => $this->entityKey($activity->{$typeColumn}, $activity->{$idColumn}))
-            ->unique()
-            ->values();
-    }
-
-    /**
-     * @param  array<int,array{0:string,1:string}>  $columnPairs
-     * @return array<string,string>
-     */
-    private function labelsFor(Collection $activities, array $columnPairs): array
-    {
-        $references = collect($columnPairs)
-            ->flatMap(fn (array $columns) => $activities->map(function (AuditActivity $activity) use ($columns): ?array {
-                [$typeColumn, $idColumn] = $columns;
-
-                if (! filled($activity->{$typeColumn}) || ! filled($activity->{$idColumn})) {
-                    return null;
-                }
-
-                return [
-                    'type' => (string) $activity->{$typeColumn},
-                    'id' => (int) $activity->{$idColumn},
-                ];
-            }))
-            ->filter()
-            ->unique(fn (array $reference) => $this->entityKey($reference['type'], $reference['id']))
-            ->values();
-
-        return $references
-            ->groupBy('type')
-            ->flatMap(function (Collection $items, string $modelClass): array {
-                if (! is_a($modelClass, Model::class, true)) {
-                    return [];
-                }
-
-                $ids = $items->pluck('id')->unique()->values();
-                if ($ids->isEmpty()) {
-                    return [];
-                }
-
-                // Only the id to read means the label is the "Class #id" fallback anyway.
-                if ($this->labelColumnsFor($modelClass) === ['id'] && $modelClass !== StaffSchedule::class) {
-                    return $ids->mapWithKeys(fn (int $id): array => [$this->entityKey($modelClass, $id) => class_basename($modelClass).' #'.$id])->all();
-                }
-
-                $models = $modelClass::query()
-                    ->select($this->labelColumnsFor($modelClass))
-                    ->when($this->usesSoftDeletes($modelClass), fn (Builder $query) => $query->withTrashed())
-                    ->whereIn('id', $ids)
-                    ->get()
-                    ->keyBy('id');
-
-                return $ids
-                    ->mapWithKeys(function (int $id) use ($modelClass, $models): array {
-                        $model = $models->get($id);
-
-                        return [
-                            $this->entityKey($modelClass, $id) => $model
-                                ? $this->modelLabel($model)
-                                : class_basename($modelClass).' #'.$id,
-                        ];
-                    })
-                    ->all();
-            })
+        $reader = $this->reader();
+        $labels = $reader->labelsFor($activities);
+        $keys = fn (string $type, string $id): array => $activities
+            ->filter(fn (AuditActivity $activity) => filled($activity->{$type}) && filled($activity->{$id}))
+            ->mapWithKeys(fn (AuditActivity $activity) => [$reader->entityKey($activity->{$type}, $activity->{$id}) => true])
             ->all();
-    }
 
-    private function modelLabel(Model $model): string
-    {
-        if ($model instanceof User) {
-            return trim($model->name) !== ''
-                ? $model->name
-                : (string) $model->email;
-        }
-
-        if ($model instanceof Personnel) {
-            return trim($model->fullname) !== ''
-                ? $model->fullname
-                : (string) $model->tabel_no;
-        }
-
-        if ($model instanceof Candidate) {
-            return trim($model->fullname) !== ''
-                ? $model->fullname
-                : class_basename($model).' #'.$model->getKey();
-        }
-
-        if ($model instanceof StaffSchedule) {
-            return __('audit::activity.labels.staff_schedule', ['id' => $model->getKey()]);
-        }
-
-        if ($model instanceof OrderLog) {
-            return filled($model->order_no)
-                ? __('audit::activity.labels.order_log_with_number', ['number' => $model->order_no])
-                : __('audit::activity.labels.order_log', ['id' => $model->getKey()]);
-        }
-
-        if ($model instanceof AttendanceOvertimeRequest) {
-            return $model->date
-                ? __('audit::activity.labels.attendance_overtime_request_with_date', ['date' => $model->date->format('d.m.Y')])
-                : __('audit::activity.labels.attendance_overtime_request', ['id' => $model->getKey()]);
-        }
-
-        foreach (['name', 'title', 'label'] as $attribute) {
-            if (filled($model->{$attribute} ?? null)) {
-                return (string) $model->{$attribute};
-            }
-        }
-
-        return class_basename($model).' #'.$model->getKey();
-    }
-
-    /**
-     * @return array<int,string>
-     */
-    private function labelColumnsFor(string $modelClass): array
-    {
-        if ($modelClass === User::class) {
-            return ['id', 'name', 'email'];
-        }
-
-        if ($modelClass === Personnel::class) {
-            return ['id', 'surname', 'name', 'patronymic', 'tabel_no'];
-        }
-
-        if ($modelClass === Candidate::class) {
-            return ['id', 'surname', 'name', 'patronymic'];
-        }
-
-        if ($modelClass === StaffSchedule::class) {
-            return ['id'];
-        }
-
-        if ($modelClass === OrderLog::class) {
-            return ['id', 'order_no'];
-        }
-
-        if ($modelClass === AttendanceOvertimeRequest::class) {
-            return ['id', 'date', 'tabel_no', 'status'];
-        }
-
-        return ['id'];
-    }
-
-    private function entityKey(?string $type, mixed $id): string
-    {
-        return ((string) $type).'#'.((string) $id);
-    }
-
-    private function translationKey(string $value): string
-    {
-        return Str::of($value)
-            ->replace(['.', '-'], '_')
-            ->snake()
-            ->toString();
-    }
-
-    private function usesSoftDeletes(string $modelClass): bool
-    {
-        return in_array(SoftDeletes::class, class_uses_recursive($modelClass), true);
-    }
-
-    private function translateOr(string $key, string $fallback): string
-    {
-        $translation = __($key);
-
-        return $translation === $key ? $fallback : $translation;
+        $this->actorLabels = array_intersect_key($labels, $keys('causer_type', 'causer_id'));
+        $this->subjectLabels = array_intersect_key($labels, $keys('subject_type', 'subject_id'));
     }
 }

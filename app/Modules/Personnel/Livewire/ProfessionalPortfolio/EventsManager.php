@@ -408,6 +408,9 @@ class EventsManager extends Component
 
     public function render(): View
     {
-        return view('personnel::livewire.personnel.professional-portfolio.events-manager');
+        return view('personnel::livewire.personnel.professional-portfolio.events-manager', [
+            // Only the status moves the workflow allows are offered as buttons.
+            'transitions' => app(ProfessionalPortfolioWorkflowPolicyService::class)->eventTransitions(),
+        ]);
     }
 }

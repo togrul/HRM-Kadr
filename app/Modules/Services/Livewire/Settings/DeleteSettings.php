@@ -22,7 +22,7 @@ class DeleteSettings extends Component
     public function setDeleteSettings($settingId): void
     {
         $setting = Setting::query()
-            ->select('id')
+            ->select('id', 'name')
             ->find($settingId);
 
         if (! $setting) {
@@ -31,7 +31,9 @@ class DeleteSettings extends Component
             return;
         }
 
-        // $this->authorize('delete', $setting);
+        if ($this->refuseInUse($setting)) {
+            return;
+        }
 
         $this->settingId = (int) $setting->id;
 
@@ -45,7 +47,7 @@ class DeleteSettings extends Component
         }
 
         $setting = Setting::query()
-            ->select('id')
+            ->select('id', 'name')
             ->find($this->settingId);
 
         if (! $setting) {
@@ -54,13 +56,31 @@ class DeleteSettings extends Component
             return;
         }
 
-        // $this->authorize('delete', $setting);
+        if ($this->refuseInUse($setting)) {
+            $this->settingId = null;
+
+            return;
+        }
 
         $setting->delete();
 
         $this->settingId = null;
 
         $this->dispatch('settingsWasDeleted', __('services::settings.messages.deleted'));
+    }
+
+    /**
+     * Settings the application reads by name (coefficients, chief, candidate presets) cannot be deleted.
+     */
+    private function refuseInUse(Setting $setting): bool
+    {
+        $inUse = in_array($setting->name, SettingsList::keysReadByCode(), true);
+
+        if ($inUse) {
+            $this->dispatch('notify', type: 'error', message: __('services::settings.messages.in_use'));
+        }
+
+        return $inUse;
     }
 
     public function render(): View

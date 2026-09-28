@@ -160,6 +160,9 @@
     <div class="grid grid-cols-1">
         <x-label for="leave.reason">{{ __('leaves::common.labels.reason') }}</x-label>
         <x-textarea name="leave.reason" :placeholder="__('leaves::common.labels.reason_placeholder')" mode="gray" wire:model="leave.reason"></x-textarea>
+        @error('leave.reason')
+            <x-validation> {{ $message }} </x-validation>
+        @enderror
     </div>
 
     @if($this->leaveDurationNotice)

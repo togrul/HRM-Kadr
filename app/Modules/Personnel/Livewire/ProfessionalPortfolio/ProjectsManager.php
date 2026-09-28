@@ -363,6 +363,9 @@ class ProjectsManager extends Component
 
     public function render(): View
     {
-        return view('personnel::livewire.personnel.professional-portfolio.projects-manager');
+        return view('personnel::livewire.personnel.professional-portfolio.projects-manager', [
+            // Only the status moves the workflow allows are offered as buttons.
+            'transitions' => app(ProfessionalPortfolioWorkflowPolicyService::class)->projectTransitions(),
+        ]);
     }
 }

@@ -140,7 +140,7 @@
                                 </x-table.td>
                             </tr>
                         @empty
-                            <x-table.empty :rows="9" />
+                            <x-table.empty :rows="13" />
                         @endforelse
                     </x-table.tbl>
                 </div>

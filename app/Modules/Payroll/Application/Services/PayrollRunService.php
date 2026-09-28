@@ -51,6 +51,40 @@ class PayrollRunService
         );
     }
 
+    /**
+     * Run lifecycle: draft → calculated → approved → locked; reopen sends an approved or
+     * locked run back to calculated.
+     * Only draft / calculated runs may be recalculated or deleted.
+     *
+     * @throws ValidationException
+     */
+    private function guardStatus(bool $allowed, string $messageKey): void
+    {
+        if (! $allowed) {
+            throw ValidationException::withMessages(['run' => __('payroll::dashboard.messages.'.$messageKey)]);
+        }
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    public function deleteRun(PayrollRun $run): void
+    {
+        $this->guardStatus($run->isEditable(), 'not_editable');
+
+        $run->delete();
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    public function deletePayslip(Payslip $payslip): void
+    {
+        $this->guardStatus((bool) $payslip->run?->isEditable(), 'not_editable');
+
+        $payslip->delete();
+    }
+
     public function createRun(PayrollPeriod $period, ?int $regimeId = null, ?int $userId = null, string $runType = 'regular'): PayrollRun
     {
         return PayrollRun::create([
@@ -69,9 +103,7 @@ class PayrollRunService
     {
         $this->guardOwnership('calculation');
 
-        if ($run->isLocked()) {
-            throw new RuntimeException('A locked payroll run cannot be recalculated.');
-        }
+        $this->guardStatus($run->isEditable(), 'not_editable');
 
         $onDate = $run->period->ends_on->toDateString();
         $year = (int) $run->period->year;
@@ -153,9 +185,7 @@ class PayrollRunService
     {
         $this->guardOwnership('approval');
 
-        if ($run->status !== 'calculated') {
-            throw new RuntimeException('Only a calculated run can be approved.');
-        }
+        $this->guardStatus($run->status === 'calculated', 'approve_requires_calculated');
 
         $run->update(['status' => 'approved', 'approved_at' => now()]);
 
@@ -195,9 +225,7 @@ class PayrollRunService
     {
         $this->guardOwnership('locking');
 
-        if (! in_array($run->status, ['calculated', 'approved'], true)) {
-            throw new RuntimeException('Only a calculated or approved run can be locked.');
-        }
+        $this->guardStatus($run->status === 'approved', 'lock_requires_approval');
 
         $this->guardOneOffsUnchangedSinceCalculation($run);
 
@@ -241,6 +269,8 @@ class PayrollRunService
 
     public function reopen(PayrollRun $run): PayrollRun
     {
+        $this->guardStatus(in_array($run->status, ['approved', 'locked'], true), 'reopen_not_allowed');
+
         $this->loans->reverseRepaymentsForRun($run);
         $this->retro->reverseRetroPayments($run);
 

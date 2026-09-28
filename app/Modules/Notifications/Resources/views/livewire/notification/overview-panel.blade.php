@@ -31,13 +31,15 @@
                                 {{ $flowTitle }}
                             </h3>
                         </div>
+                        @if ($canSeedStarters)
                             <x-ui.async-button
                                 type="button"
-                            wire:click="{{ $flowKey === 'birthday' ? 'seedBirthdayStarter' : ($flowKey === 'position_change' ? 'seedPositionChangeStarter' : ($flowKey === 'employment_started' ? 'seedEmploymentStartedStarter' : 'seedHolidayStarter')) }}"
-                            class="shrink-0"
-                        >
-                            {{ __('notifications::common.buttons.seed') }}
-                        </x-ui.async-button>
+                                wire:click="{{ $flowKey === 'birthday' ? 'seedBirthdayStarter' : ($flowKey === 'position_change' ? 'seedPositionChangeStarter' : ($flowKey === 'employment_started' ? 'seedEmploymentStartedStarter' : 'seedHolidayStarter')) }}"
+                                class="shrink-0"
+                            >
+                                {{ __('notifications::common.buttons.seed') }}
+                            </x-ui.async-button>
+                        @endif
                     </div>
 
                     <p class="mt-2 w-full text-sm leading-8 text-zinc-500">

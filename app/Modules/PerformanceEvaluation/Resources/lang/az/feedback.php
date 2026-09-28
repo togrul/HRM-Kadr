@@ -79,7 +79,7 @@ return [
 
     'confirm' => [
         'delete' => 'Bu rəy sorğusunu silmək istədiyinizə əminsiniz?',
-        'remove_rater' => 'Bu qiymətvereni çıxarmaq istədiyinizə əminsiniz?',
+        'remove_rater' => 'Bu qiymətverəni çıxarmaq istədiyinizə əminsiniz?',
     ],
 
     'empty' => [

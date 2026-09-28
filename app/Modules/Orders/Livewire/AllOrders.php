@@ -188,7 +188,7 @@ class AllOrders extends Component
 
         // Only Word-engine orders are printable: they carry their filled .docx.
         abort_unless((string) $order->template_render_mode === OrderIssueService::RENDER_MODE_DOCX, 404);
-        abort_unless((bool) auth()->user()?->can('add-orders'), 403);
+        abort_unless((bool) auth()->user()?->can('export-orders'), 403);
 
         // Order numbers may contain "/" (e.g. 2026/ƏM-145), which is illegal in a
         // download filename — fold path separators to a dash.

@@ -63,6 +63,7 @@ class EditUser extends Component
             'user.email' => __('services::common.labels.email'),
             'user.password' => __('services::common.labels.password'),
             'user.confirm-password' => __('services::common.labels.confirm_password'),
+            'user.old_password' => __('services::common.labels.current_password'),
             'roleId' => __('services::common.labels.role'),
         ];
     }

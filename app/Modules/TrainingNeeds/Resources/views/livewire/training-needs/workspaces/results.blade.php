@@ -1,4 +1,5 @@
     @if ($activeTab === 'results')
+        @if ($this->canManageTrainingNeeds)
         <div class="grid gap-4 xl:grid-cols-2">
             <x-surface-card :title="__('training_needs::dashboard.cards.feedback_forms')" icon="icons.folder-plus-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
                 @if ($editingFeedbackFormId)
@@ -110,6 +111,7 @@
                 </div>
             </x-surface-card>
         </div>
+        @endif
 
         <div class="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
             <x-surface-card :title="__('training_needs::dashboard.cards.delivered_trainings')" icon="icons.clock-icon">
@@ -122,11 +124,15 @@
                                     <p class="text-sm text-zinc-600">{{ $record->program?->title ?? __('training_needs::dashboard.labels.no_program') }}</p>
                                 </div>
                                 <div class="flex items-center gap-2">
+                                    @if ($this->canManageTrainingNeeds)
                                     <x-ui.action-pill wire:click="selectDeliveryRecord({{ $record->id }})" icon="icons.edit-icon">{{ __('training_needs::dashboard.actions.replace_certificate') }}</x-ui.action-pill>
+                                    @endif
                                     @if ($record->certificate_path)
                                         <x-ui.action-pill mode="secondary" wire:click="previewDeliveryCertificate({{ $record->id }})">{{ __('training_needs::dashboard.actions.preview_certificate') }}</x-ui.action-pill>
                                         <x-ui.action-pill mode="secondary" wire:click="downloadDeliveryCertificate({{ $record->id }})">{{ __('training_needs::dashboard.actions.download_certificate') }}</x-ui.action-pill>
+                                        @if ($this->canManageTrainingNeeds)
                                         <x-ui.action-pill mode="delete" wire:click="confirmDeleteDeliveryCertificate({{ $record->id }})" icon="icons.delete-icon">{{ __('training_needs::dashboard.actions.delete_certificate') }}</x-ui.action-pill>
+                                        @endif
                                     @endif
                                     <x-small-badge mode="green">{{ __('training_needs::dashboard.delivery_result_statuses.'.$record->result_status) }}</x-small-badge>
                                 </div>
@@ -142,6 +148,7 @@
             <div class="space-y-4">
                 <livewire:training-needs.results-summary :key="'training-needs-results-summary-'.$resultsSummaryVersion" lazy />
 
+                @if ($this->canManageTrainingNeeds)
                 <x-surface-card :title="__('training_needs::dashboard.cards.delivery_documents')" icon="icons.profile-outline-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
                     <div class="grid gap-3">
                         <x-ui.select-dropdown
@@ -203,6 +210,7 @@
                         <x-button mode="black" wire:click="storeDeliveryDocument">{{ __('training_needs::dashboard.actions.save_certificate') }}</x-button>
                     </div>
                 </x-surface-card>
+                @endif
             </div>
         </div>
     @endif

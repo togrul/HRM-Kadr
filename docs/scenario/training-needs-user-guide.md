@@ -1,238 +1,190 @@
 # Təlim ehtiyacı istifadəçi bələdçisi
 
 ## Bu modul nə üçündür?
-Bu modul əməkdaşların hansı sahədə inkişaf etməli olduğunu müəyyənləşdirmək, həmin ehtiyacı plana salmaq, təlim keçirmək və nəticəni izləmək üçündür.
+`Təlim ehtiyacı` əməkdaşların hansı biliyə və bacarığa ehtiyacı olduğunu müəyyən etmək, bunu illik plana çevirmək, təlimləri keçirmək və nəticəsini izləmək üçündür.
 
-Sadə dildə bu modul sizə bu suallara cavab verir:
-- kim hansı mövzuda inkişaf etməlidir?
-- həmin inkişaf üçün hansı təlim uyğundur?
-- təlim nə vaxt keçiriləcək?
-- təlim keçirildikdən sonra nəticə nə oldu?
+Qısaca iş axını belədir:
 
-Bu modulda iş bir dəfəlik deyil. Ehtiyac burada yaranır, planlaşdırılır, sessiyaya çevrilir və sonda nəticə ilə bağlanır.
+1. Kompetensiyalar və təlim proqramları kataloqa yazılır.
+2. Hər vəzifə üçün tələb olunan səviyyə göstərilir.
+3. Əməkdaşın mövcud səviyyəsi qeyd olunur və təlim ehtiyacı yaradılır.
+4. Ehtiyaclar illik plana düşür, HR planı yoxlayıb təsdiqləyir.
+5. Təsdiqlənmiş plan sətirlərindən təlim sessiyaları yaradılır.
+6. Sessiya keçirilir, davamiyyət qeyd olunur, sertifikat və rəylər toplanır.
+7. Rəhbər hesabatlarında il və rüb üzrə nəticəyə baxılır.
+
+Performans qiymətləndirməsində zəif çıxan sahələr də buraya avtomatik təlim ehtiyacı kimi düşə bilər (mənbəsi `Performans boşluğu` və ya `Bacarıq ölçümü` olur).
 
 ## Harada açılır?
-Sol menyudan `Təlim ehtiyacı` bölməsini açın.
+Sol dar menyuda (rail) `Təlim` bölməsini seçin. Səhifənin başlığı `Təlim ehtiyacı`-dır.
+
+Solda açılan panelin başlığı `Təlim`-dir. Panelin ən altındakı `İstifadə təlimatı` linki bu bələdçini açır.
 
 ## Bu modul kimlər üçündür?
+- **HR / təlim məsulu** — kataloqu, planı, sessiyaları və sertifikatları idarə edir.
+- **Plan yoxlayan şəxs** — plan sətirlərini yoxlayır və təsdiqləyir.
+- **Rəhbər** — hesabatlara və nəticələrə baxır.
 
-### HR və təlimə cavabdeh əməkdaş
-Ən çox bu işləri görür:
-- ehtiyacları daxil edir
-- illik və ya dövri plan yaradır
-- sessiya təşkil edir
-- yekun nəticəni bağlayır
+Modulu açmaq üçün baxış, idarəetmə, yoxlama və ya eksport icazələrindən biri lazımdır. Yadda saxlama, silmə, sessiya yaratma kimi dəyişikliklər yalnız idarəetmə icazəsi olanlara işləyir. Plan sətirini təsdiqləmək üçün ayrıca yoxlama icazəsi, hesabat eksportu üçün isə eksport icazəsi lazımdır.
 
-### Rəhbər və məsul şəxs
-Əsasən bunlara baxır:
-- əməkdaş üçün hansı təlim lazımdır
-- plan necə gedir
-- nəticə nə olub
+## Ekranın quruluşu
 
-### Məlumatı izləyən istifadəçi
-Əsasən bunları görür:
-- plan vəziyyəti
-- sessiya tarixləri
-- nəticə və ümumi hesabat
+### Başlıq
+Başlıqda üç rəqəm görünür: `Təlim ehtiyacları`, `Plan sətirləri`, `Sessiyalar`.
 
-## Bu modulda iş məntiqi necədir?
-Bu modulda iş adətən bu sıra ilə gedir:
+Sağdakı düymələr:
+- `İstifadəçi bələdçisi` — bu bələdçini açır.
+- `Təlim təqvimi` — birbaşa sessiyalar bölməsinə keçir.
+- Printer ikonu (`Çap görünüşü`) — yekun hesabatın çap görünüşünü yeni pəncərədə açır. Oradan brauzer vasitəsilə PDF kimi saxlaya bilərsiniz.
+- `Profil və plan` — əməkdaş profili və təlim ehtiyacı formasına keçir. Yeni ehtiyac yazmağın ən qısa yolu budur.
 
-1. Əvvəl əsas seçim siyahıları hazırlanır.
-2. Sonra ehtiyac müəyyən edilir.
-3. Ehtiyac planlaşdırılır.
-4. Plan sessiyaya çevrilir.
-5. Sessiya keçirilir.
-6. Sonda nəticə və rəy qeyd olunur.
+### Sol panel — 4 qrup
+Panelin yuxarısında `Xülasə` durur, altında bölmələr işə görə 4 qrupa ayrılıb:
 
-Qısa yadda saxlama formulu:
+| Qrup | Bölmələr |
+|---|---|
+| `Kataloq və tələblər` | `Kataloqlar`, `Rol tələbi matrisi` |
+| `Ehtiyac və plan` | `Profil və plan`, `İllik planlama` |
+| `Təlimlərin icrası` | `Təlim təqvimi`, `Nəticələr` |
+| `Analitika və hesabatlar` | `Analitika və hesabat`, `Rəhbər hesabatları`, `Tam siyahılar` |
 
-`Ehtiyac -> plan -> sessiya -> nəticə`
+`İllik planlama`, `Təlim təqvimi` və `Nəticələr` yanında say görünür (yalnız qeyd olduqda).
 
-Əgər bu ardıcıllıq pozularsa, sonrakı hissələrdə məlumat natamam görünə bilər.
+Aktiv illik plan varsa, panelin altında `İllik plan` kartı çıxır: planın adı, statusu, sətir sayı və icra faizini göstərən zolaq.
 
-## Əsas bölmələr nə üçündür?
+Kiçik ekranda sol panel əvəzinə eyni bölmələr başlığın altında düymələr kimi düzülür.
+
+### Status nişanları
+Kiçik rəngli nişanlar qeydin vəziyyətini göstərir:
+- Ehtiyac və plan sətiri: `Qaralama`, `Baxışda`, `Təsdiqlənib`, `Planlanıb`, `Tamamlanıb`.
+- İllik plan: `Qaralama`, `Baxışda`, `Təsdiqlənib`, `Dərc olunub`.
+- Sessiya: `Qaralama`, `Planlanıb`, `İcradadır`, `Tamamlanıb`, `Ləğv olunub`.
+- İştirakçı: `Planlanıb`, `Təsdiqlənib`, `İştirak edib`, `Qatılmayıb`, `Ləğv edilib`.
+- Prioritet: `Aşağı`, `Orta`, `Yüksək` (yüksək qırmızı çalarlı görünür).
+
+## Bölmələr
 
 ### Xülasə
-Bu hissə ümumi vəziyyəti tez görmək üçündür.
-
-Burada adətən:
-- neçə aktiv ehtiyac olduğu
-- neçə planın açıq qaldığı
-- neçə sessiyanın keçirildiyi
-- neçə nəticənin tamamlandığı
-görünür.
-
-Bu bölmə gündəlik əməliyyat yeri deyil. Daha çox ümumi nəzarət üçündür.
+Altı göstərici kartı (`Kompetensiyalar`, `Təlim proqramları`, `Rol tələbləri`, `Təlim ehtiyacları`, `Plan sətirləri`, `Sessiyalar`), son təlim ehtiyacları cədvəli, `Son kompetensiyalar` və `Son təlim proqramları`. Burada heç nə dəyişdirilmir, yalnız baxılır.
 
 ### Kataloqlar
-Bu bölmə əsas seçim siyahıları üçündür.
+Dörd kataloq: `Kompetensiya qrupları`, `Kompetensiya səviyyələri`, `Kompetensiyalar`, `Təlim proqramları`. Hər birinin öz forması və siyahısı var. Siyahıda qələm ikonu redaktə, zibil qutusu ikonu silmədir. Aşağıda `Təlim proqramı -> kompetensiya xəritəsi` ilə proqramı kompetensiyaya bağlayırsınız.
 
-Burada hazırlanan məlumatlar sonradan bütün formalar üçün istifadə olunur. Məsələn:
-- kompetensiya qrupları
-- səviyyələr
-- kompetensiyalar
-- proqramlar
-
-Bu hissə natamam olarsa:
-- seçim siyahıları boş görünə bilər
-- proqram seçmək çətinləşə bilər
-- sonrakı formalar tam işləməyə bilər
-
-### Rol tələbləri
-Bu hissədə vəzifə üçün hansı bilik və bacarığın vacib olduğu yazılır.
-
-Bu niyə vacibdir?
-- ehtiyac daha düzgün görünür
-- rəhbər hansı sahəyə baxmalı olduğunu anlayır
-- planlama daha əsaslı aparılır
-
-Sadə desək, bu bölmə “bu vəzifə üçün nə gözlənilir?” sualına cavab verir.
+### Rol tələbi matrisi
+Vəzifə, kompetensiya, `Tələb olunan səviyyə`, `Prioritet` seçilir, lazım olsa `Məcburidir` işarələnir və `Rol tələbini yadda saxla` basılır.
 
 ### Profil və plan
-Bu hissədə əməkdaşın inkişaf ehtiyacı daxil edilir.
+İki forma:
+- `Əməkdaş kompetensiya profili` — əməkdaşın kompetensiya üzrə mövcud səviyyəsi.
+- `Fərdi inkişaf planı shell-i` — konkret təlim ehtiyacı.
 
-Burada siz:
-- əməkdaşı seçirsiniz
-- mövzunu seçirsiniz və ya yazırsınız
-- uyğun proqramı qeyd edirsiniz
-- plan qeydi əlavə edirsiniz
-
-Bu hissədə yaradılan ehtiyac sonrakı mərhələdə planlaşdırma üçün istifadə olunur.
+Aşağıda `Son profil sətirləri` və `Təlim ehtiyacı sırası` görünür.
 
 ### İllik planlama
-Bu bölmədə ehtiyac konkret plana çevrilir.
-
-Burada qərar verilir:
-- hansı təlim əvvəl keçiriləcək
-- hansı təlim sonrakı dövrə qalacaq
-- hansı əməkdaş və ya qrup üçün plan qurulacaq
-
-Sadə dildə ehtiyac burada “qeyd” olmaqdan çıxıb “real iş planı”na çevrilir.
+İllik plan forması, `Son planlar`, `Sistem tövsiyəli planlar`, `Plan sətirləri lövhəsi` və seçilmiş sətir üçün `HR baxış paneli`.
 
 ### Təlim təqvimi
-Bu hissə sessiyaların keçirilməsi üçündür.
-
-Burada:
-- tarix seçilir
-- proqram seçilir
-- iştirakçılar əlavə olunur
-- sessiyanın vəziyyəti izlənir
-
-Bu hissə olmadan plan real təlimə çevrilmiş sayılmır.
+`Sessiya təklifləri`, sessiya forması (`Təlim təqvimi`), `İştirakçı və davamiyyət`, `Yaxın sessiyalar`, `İcra xülasəsi` və seçilmiş sessiya üçün `Sessiya detalları`.
 
 ### Nəticələr
-Sessiya başa çatdıqdan sonra ən vacib hissə budur.
+`Rəy formaları`, `Rəy cavabları`, `Keçirilmiş təlimlər`, `Sertifikat və sənəd yükləmə`, həmçinin eksport düymələri.
 
-Burada:
-- nəticə yazılır
-- qısa rəy əlavə olunur
-- lazım olarsa sənəd və ya sertifikat qeyd olunur
+### Analitika və hesabat, Rəhbər hesabatları, Tam siyahılar
+- `Analitika və hesabat` — əhatə nisbəti, mənbə və prioritet bölgüsü, ən çox boşluq olan vəzifələr.
+- `Rəhbər hesabatları` — `Hesabat ili` və `Hesabat rübü` seçib illik/rüblük icra, büdcə, davamiyyət, ehtiyac vs icra göstəricilərinə baxırsınız.
+- `Tam siyahılar` — ehtiyaclar, plan sətirləri, sessiyalar və keçirilmiş təlimlərin tam siyahısı; axtarış, status filtri var, sətri seçəndə sağda `Detallı baxış` açılır.
 
-Bu məlumatlar sonradan ümumi hesabatlara da təsir edir.
+## Əsas əməliyyatlar
 
-### Analitika
-Bu hissə rəhbərlik və ümumi nəzarət üçündür.
+### Təlim ehtiyacı yaratmaq
+1. Başlıqda `Profil və plan` düyməsini basın.
+2. `Fərdi inkişaf planı shell-i` formasında `Əməkdaş` və `Kompetensiya` seçin.
+3. `Tövsiyə olunan proqram`, `Hədəf səviyyə`, `Prioritet`, `Status`, `Mənbə`, `Hədəf tamamlanma tarixi` doldurun.
+4. Lazım olsa `Səbəb` və `Plan qeydi` yazın.
+5. `Təlim ehtiyacını yadda saxla` basın. Yeni qeyd `Təlim ehtiyacı sırası`-nda görünəcək.
 
-Burada:
-- neçə təlim keçirildiyi
-- neçə ehtiyacın bağlandığı
-- hansı mövzuların daha çox təkrarlandığı
-- hansı planların açıq qaldığı
-görünə bilər.
+Əməkdaşın mövcud səviyyəsini yazmaq üçün eyni səhifədə `Əməkdaş kompetensiya profili` formasını doldurub `Profili yadda saxla` basın.
 
-## Yeni istifadəçi üçün ən rahat iş sırası
-Modulu ilk dəfə istifadə edirsinizsə, bu sıranı izləyin:
-
-1. `Kataloqlar` hissəsində əsas siyahıların hazır olduğuna baxın.
-2. `Rol tələbləri` hissəsini yoxlayın.
-3. `Profil və plan` bölməsində ehtiyacı daxil edin.
-4. `İllik planlama` hissəsində plan yaradın.
-5. `Təlim təqvimi`ndə sessiya qurun.
-6. Sessiya bitəndən sonra `Nəticələr` hissəsini doldurun.
-7. `Analitika` və hesabatlarda nəticəni yoxlayın.
-
-## Ən çox görülən işlər necə edilir?
-
-### 1. Yeni təlim ehtiyacı yaratmaq
-1. `Profil və plan` bölməsinə keçin.
-2. Əməkdaşı seçin.
-3. Ehtiyac mövzusunu yazın və ya seçin.
-4. Uyğun proqramı qeyd edin.
-5. Lazımdırsa qısa qeyd yazın.
-6. `Yadda saxla` düyməsini basın.
-
-#### Yadda saxladıqdan sonra nə olur?
-- ehtiyac siyahıda görünür
-- sonradan planlama hissəsində seçilə bilir
-- həmin əməkdaş üçün inkişaf işi artıq izlənə bilir
-
-### 2. Ehtiyacı plana salmaq
+### İllik plan qurmaq
 1. `İllik planlama` bölməsinə keçin.
-2. Hazır ehtiyacı seçin.
-3. Plan sətrinə əlavə edin.
-4. Tarix və lazım olan məlumatları yazın.
-5. Yadda saxlayın.
+2. `Plan adı`, `Plan ili`, `Plan rübü` (bütün il üçün `Bütün il`), status və qeyd yazın.
+3. Təsdiqlənmiş ehtiyaclardan sətirlərin avtomatik yaranmasını istəyirsinizsə, `Təsdiqlənmiş ehtiyaclardan plan sətirlərini avtomatik yarat` qutusunu işarələyin.
+4. `Planı yadda saxla` basın. Sətir yaranarsa plan `Baxışda` statusuna keçir, yaranmazsa `Qaralama` qalır.
 
-#### Sonra nə olur?
-- həmin ehtiyac planlaşdırılmış kimi görünür
-- sonrakı mərhələdə sessiya yaratmaq mümkün olur
-- plan ümumi siyahılarda görünür
+Mövcud planı `Son planlar` siyahısında `Düzəliş et` ilə dəyişə, `Sil` ilə silə bilərsiniz. Silmədən əvvəl sistem təsdiq soruşacaq.
 
-### 3. Sessiya yaratmaq
-1. `Təlim təqvimi`nə keçin.
-2. Proqramı seçin.
-3. Tarixi seçin.
-4. İştirakçıları əlavə edin.
-5. Sessiyanı yaradın.
+### Plan sətirini yoxlamaq və təsdiqləmək
+1. `Plan sətirləri lövhəsi`-ndə sətirin yanında `Yoxla` və ya `Paneldə aç` basın.
+2. `HR baxış paneli`-ndə iştirakçı sayını, plan büdcəsini, prioriteti düzəldin, `HR review qeydi` yazın.
+3. `HR düzəlişi kimi işarələ` — dəyişikliyi saxlayır, amma hələ təsdiqləmir.
+4. `Təsdiqlə` — sətiri təsdiqləyir. `Ləğv et` paneli bağlayır.
 
-#### Sonra nə olur?
-- sessiya təqvimdə görünür
-- iştirakçı statusları izlənə bilir
-- sessiya bitəndən sonra nəticə hissəsinə düşür
+Bu addımlar yalnız plan yoxlama icazəsi olanlarda işləyir.
 
-### 4. Sessiyadan sonra nəticəni bağlamaq
-1. `Nəticələr` bölməsinə keçin.
-2. Sessiyanı seçin.
-3. Qısa nəticəni yazın.
-4. Rəyi əlavə edin.
-5. Lazımdırsa sənəd və ya sertifikat əlavə edin.
-6. Yadda saxlayın.
+### Sessiya yaratmaq
+Təklifdən:
+1. `Təlim təqvimi`-ndə `Sessiya təklifləri` siyahısına baxın (təsdiqlənmiş plan sətirlərindən yaranır).
+2. `Formaya yerləşdir` — təklifi formaya doldurur, siz yoxlayıb saxlayırsınız.
+3. `Sessiya yarat` — dərhal sessiya yaradır.
+4. Bir neçə təklif üçün qutuları işarələyin (və ya `Görünən təklifləri seç`) və `Seçilən təkliflərdən sessiya yarat` basın.
 
-#### Sonra nə olur?
-- ümumi hesabatlar yenilənir
-- həmin sessiyanın tamamlandığı görünür
-- inkişaf işinin nəticəsi görünən olur
+Əl ilə: formada plan, proqram, `Sessiya adı`, başlama/bitmə tarixi, məkan, təlimçi, tutum və büdcələri doldurun. İştirakçıların avtomatik əlavə olunmasını istəyirsinizsə `Təsdiqlənmiş ehtiyaclardan iştirakçıları avtomatik əlavə et` qutusunu işarələyin və `Sessiyanı yadda saxla` basın.
 
-## Bu məlumatlar harada görünür?
-- daxil etdiyiniz ehtiyac `Profil və plan` hissəsində görünür
-- plan `İllik planlama` siyahısında görünür
-- sessiya `Təlim təqvimi`ndə görünür
-- nəticə `Nəticələr` və `Analitika` hissəsinə təsir edir
+### İştirakçı və davamiyyət
+1. `İştirakçı və davamiyyət` kartında sessiyanı, əməkdaşı və davamiyyət statusunu seçib `İştirakçı əlavə et` basın.
+2. `Yaxın sessiyalar`-da sessiyanın üzərinə basın — aşağıda `Sessiya detalları` açılır.
+3. Orada iştirakçını axtarıb filtrləyə, sətirdəki düymələrlə statusunu dərhal dəyişə bilərsiniz.
+4. Toplu iş üçün iştirakçıları seçin (`Görünənləri seç`), `Toplu davamiyyət statusu` seçib `Seçilənlərə tətbiq et` basın.
+5. `Seçilənləri sil` iştirakçıları sessiyadan çıxarır — sistem təsdiq soruşacaq.
 
-## Problem olanda əvvəl haraya baxmaq lazımdır?
+### Sessiyanı tamamlamaq
+Təlim bitdikdən sonra `Sessiyanı tamamla` basın. İştirak edənlər üçün avtomatik keçirilmiş təlim qeydi yaranır və onlar `Nəticələr` bölməsində görünür.
 
-### Seçimlər boş çıxırsa
-Əvvəl bunları yoxlayın:
-- kataloqlar hazırdırmı?
-- proqram əlavə olunubmu?
-- rol tələbi hissəsi boş deyil ki?
+### Sertifikat yükləmək
+1. `Nəticələr` bölməsində `Keçirilmiş təlimlər` siyahısından qeydi seçin (`Əvəz et`).
+2. `Sertifikat və sənəd yükləmə` kartında faylı seçin — yadda saxlamadan əvvəl önizləmə görünür.
+3. `Sertifikatı yadda saxla` basın.
 
-### Sessiya yarada bilmirsinizsə
-Yoxlayın:
-- ehtiyac plana düşübmü?
-- plan düzgün yaradılıbmı?
+Sertifikatı olan qeyddə `Bax`, `Yüklə` və `Sil` düymələri görünür. Silmə təsdiq tələb edir.
 
-### Hesabatda nəticə görünmürsə
-Yoxlayın:
-- sessiya nəticəsi yazılıbmı?
-- rəy və nəticə hissəsi boş qalmayıb ki?
+### Rəy toplamaq
+1. `Rəy formaları` kartında sessiyanı seçin, forma adı, status, sual tipi və sualları yazıb `Rəy formasını yadda saxla` basın.
+2. Cavabı daxil etmək üçün `Rəy cavabları` kartında formanı, əməkdaşı, `Ümumi bal`, şərh və cavabları doldurub `Rəyi yadda saxla` basın.
 
-## Nəyə diqqət etmək lazımdır?
-- Əvvəl əsas siyahılar hazır olmalıdır.
-- Proqram seçmədən planlama aparmaq qarışıqlıq yarada bilər.
-- Sessiya bitəndən sonra nəticə hissəsini boş qoymayın.
-- Analitikaya baxmadan planın təsirini qiymətləndirmək çətin olur.
+### Eksport və çap
+`Nəticələr` bölməsinin `Eksport hesabatları` kartında:
+- `Keçirilmiş təlimləri eksport et`
+- `Rəy hesabatını eksport et`
+- `İcra xülasəsini eksport et`
+- `Pivot icra hesabatını eksport et`
+- `Audit hesabatını eksport et`
+- `Çap görünüşü`
 
-## Qısa nəticə
-Bu modul sadəcə təlim siyahısı deyil. Burada ehtiyac yaranır, plan qurulur, təlim keçirilir və nəticə izlənir. Moduldan düzgün istifadə etmək üçün işi addım-addım aparmaq vacibdir.
+Eksport düymələri yalnız eksport icazəsi olanlara işləyir.
+
+## Tez-tez verilən suallar
+
+**Yadda saxla basıram, amma heç nə olmur, niyə?**
+Dəyişiklik etmək üçün idarəetmə icazəsi lazımdır. Sizdə yalnız baxış icazəsi varsa, formalar görünsə də yadda saxlanmır. HR administratoruna müraciət edin.
+
+**`Sessiya təklifləri` boşdur. Niyə?**
+Təkliflər yalnız təsdiqlənmiş plan sətirlərindən yaranır. Əvvəl `İllik planlama` bölməsində sətirləri `Təsdiqlə` ilə təsdiqləyin.
+
+**Plan yaratdım, amma sətir yoxdur.**
+Avtomatik sətir üçün qutu işarələnməli və təsdiqlənmiş ehtiyac olmalıdır. Ehtiyacların statusunu `Təsdiqlənib` edin, sonra planı yenidən yadda saxlayın.
+
+**Kompetensiyanı silsəm nə olur?**
+Ona bağlı rol tələbləri, profillər və təlim ehtiyacları da silinir. Sistem bunu təsdiq pəncərəsində xəbərdar edir.
+
+**Performansdan gələn ehtiyacı necə tanıyım?**
+`Təlim ehtiyacı sırası`-nda mənbəsi `Performans boşluğu` olur və əlavə `Zəif nəticə` və ya `Orta nəticə` nişanı görünür.
+
+**Sol paneldə bəzi bölmələr görünmür.**
+Təşkilatın ayarlarında bəzi bölmələr söndürülə bilər. Bu halda panel yalnız aktiv bölmələri göstərir.
+
+## Yadda saxlayın
+- Ən qısa yol: `Profil və plan` → `İllik planlama` → `Təlim təqvimi` → `Nəticələr`.
+- Sessiya təklifləri yalnız təsdiqlənmiş plan sətirlərindən gəlir.
+- Təlim bitəndə `Sessiyanı tamamla` basmağı unutmayın — nəticə qeydi yalnız bundan sonra yaranır.
+- Silmə və toplu çıxarma həmişə təsdiq pəncərəsi ilə gəlir; mesajı oxuyub təsdiqləyin.
+- Rəhbər üçün hesabat lazımdırsa `Rəhbər hesabatları` və ya `Çap görünüşü` istifadə edin.

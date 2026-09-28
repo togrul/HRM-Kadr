@@ -15,10 +15,10 @@ return [
     ],
     'badges' => [
         'title' => 'Sorğu nişanları',
-        'manual' => 'Manual',
+        'manual' => 'Əl ilə',
         'auto_generated' => 'Avtomatik yaradılıb',
-        'manual_request' => 'Manual sorğu',
-        'from_manual_entry' => 'Manual girişdən',
+        'manual_request' => 'Əl ilə sorğu',
+        'from_manual_entry' => 'Əl ilə girişdən',
         'from_ledger' => 'Gündəlik qeyddən',
         'stale_pending' => 'Köhnəlmiş gözləmə',
     ],
@@ -57,16 +57,22 @@ return [
         'approve' => 'Təsdiq et',
         'reject' => 'Rədd et',
     ],
+    'labels' => [
+        'reject_reason' => 'Rədd səbəbi',
+    ],
+    'placeholders' => [
+        'reject_reason' => 'Rədd səbəbini yazın',
+    ],
     'empty' => [
         'title' => 'Əlavə iş sorğusu tapılmadı.',
-        'description_filtered' => 'Cari filtrlərə uyğun əlavə iş sorğusu yoxdur. Filtrləri dəyişin və ya manual sorğu yaradın.',
+        'description_filtered' => 'Cari filtrlərə uyğun əlavə iş sorğusu yoxdur. Filtrləri dəyişin və ya əl ilə sorğu yaradın.',
         'description_default' => 'Seçilmiş dövrdə hələ əlavə iş sorğusu yoxdur. Təsdiqlənmiş, rədd edilmiş və ya hələ yaradılmamış sorğular burada görünməyəcək.',
     ],
     'messages' => [
         'validation_failed' => 'Validasiya uğursuz oldu.',
         'approved' => 'Əlavə iş sorğusu təsdiqləndi.',
         'rejected' => 'Əlavə iş sorğusu rədd edildi.',
-        'created' => 'Manual əlavə iş sorğusu yaradıldı.',
+        'created' => 'Əl ilə əlavə iş sorğusu yaradıldı.',
     ],
     'errors' => [
         'requested_minutes_positive' => 'Tələb olunan dəqiqələr sıfırdan böyük olmalıdır.',

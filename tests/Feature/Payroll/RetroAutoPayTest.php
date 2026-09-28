@@ -33,7 +33,7 @@ class RetroAutoPayTest extends TestCase
         // January paid & locked at base 1000 (net 859 after statutory).
         $compensation->assignCompensation($personnel->tabel_no, ['regime_id' => $regimeId, 'base_amount' => 1000, 'effective_from' => '2026-01-01']);
         $jan = app(PayrollPeriodService::class)->createPeriod(2026, 1);
-        $runService->lock($runService->calculate($runService->createRun($jan, $regimeId)));
+        $runService->lock($runService->approve($runService->calculate($runService->createRun($jan, $regimeId))));
 
         // Back-dated raise to 1000 → 1500 effective from January.
         $compensation->assignCompensation($personnel->tabel_no, ['regime_id' => $regimeId, 'base_amount' => 1500, 'effective_from' => '2026-01-01']);
@@ -47,7 +47,7 @@ class RetroAutoPayTest extends TestCase
         $this->assertSame('422.50', $retroLine->amount);
 
         // Lock February → retro ledger records the pay-out once.
-        $runService->lock($febRun);
+        $runService->lock($runService->approve($febRun));
         $this->assertSame(1, RetroPayment::where('tabel_no', $personnel->tabel_no)->count());
 
         // March must NOT pay the same retro again.

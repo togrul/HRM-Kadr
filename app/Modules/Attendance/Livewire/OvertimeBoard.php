@@ -33,6 +33,11 @@ class OvertimeBoard extends Component
 
     public array $approvedMinutes = [];
 
+    /**
+     * @var array<int,string>
+     */
+    public array $rejectReasons = [];
+
     public int $perPage = 20;
 
     public bool $canApprove = false;
@@ -140,19 +145,26 @@ class OvertimeBoard extends Component
             abort(403);
         }
 
+        $this->validate(
+            ['rejectReasons.'.$requestId => ['required', 'string', 'min:3', 'max:1000']],
+            [],
+            ['rejectReasons.'.$requestId => __('attendance::overtime.labels.reject_reason')]
+        );
+
         $request = AttendanceOvertimeRequest::query()->find($requestId);
         if (! $request) {
             return;
         }
 
         try {
-            $service->reject($request, (int) Auth::id());
+            $service->reject($request, (int) Auth::id(), (string) $this->rejectReasons[$requestId]);
         } catch (ValidationException $exception) {
             $this->dispatch('notify', type: 'error', message: collect($exception->errors())->flatten()->first() ?: __('attendance::overtime.messages.validation_failed'));
 
             return;
         }
 
+        unset($this->rejectReasons[$requestId]);
         $this->dispatch('notify', type: 'success', message: __('attendance::overtime.messages.rejected'));
     }
 

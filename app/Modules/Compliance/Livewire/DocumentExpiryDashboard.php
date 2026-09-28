@@ -53,7 +53,7 @@ class DocumentExpiryDashboard extends Component
 
             fputcsv($handle, [
                 __('compliance::documents.columns.employee'),
-                'Tabel',
+                __('compliance::documents.columns.tabel_no'),
                 __('compliance::documents.columns.structure'),
                 __('compliance::documents.columns.position'),
                 __('compliance::documents.columns.document'),

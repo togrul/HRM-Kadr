@@ -175,7 +175,7 @@ class PersonnelProfileReadService
         return match (true) {
             filled($personnel->leave_work_date) => 'rose',
             (bool) $personnel->getAttribute('is_pending') => 'amber',
-            (bool) $personnel->active_vacation => 'green',
+            (bool) $personnel->active_vacation => 'violet',
             (bool) $personnel->active_business_trip => 'blue',
             default => 'neutral',
         };

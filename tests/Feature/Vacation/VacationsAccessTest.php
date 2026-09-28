@@ -97,8 +97,9 @@ class VacationsAccessTest extends TestCase
             'added_by' => $user->id,
         ]));
 
-        // One already back at work, one still to come — the two buckets the panel offers.
-        foreach ([[5, -30], [3, 30]] as [$duration, $offsetDays]) {
+        // One already back at work, one still to come, one running now. Only the running
+        // one is "Məzuniyyətdə" — the same rule as the row chip; upcoming counts as "İşdə".
+        foreach ([[5, -30], [3, 30], [4, -1]] as [$duration, $offsetDays]) {
             $start = now()->addDays($offsetDays);
 
             PersonnelVacation::query()->create([
@@ -115,11 +116,38 @@ class VacationsAccessTest extends TestCase
             ]);
         }
 
-        $summary = Livewire::test(Vacations::class)->instance()->summary();
+        $component = Livewire::test(Vacations::class);
+        $summary = $component->instance()->summary();
 
-        $this->assertSame(2, $summary['all']);
-        $this->assertSame(8, $summary['days']);
-        $this->assertSame(1, $summary['at_work']);
+        $this->assertSame(3, $summary['all']);
+        $this->assertSame(12, $summary['days']);
+        $this->assertSame(2, $summary['at_work']);
         $this->assertSame(1, $summary['in_vacation']);
+
+        // The status bucket narrows the list the same way it counts.
+        $component->call('setStatus', 'in_vacation');
+        $this->assertSame([4], $component->instance()->vacations()->pluck('duration')->all());
+        $component->call('setStatus', 'at_work');
+        $this->assertEqualsCanonicalizing([5, 3], $component->instance()->vacations()->pluck('duration')->all());
+    }
+
+    public function test_export_needs_export_permission_and_follows_the_status_bucket(): void
+    {
+        $this->actingAs($this->userWith('show-vacations'));
+        Livewire::test(Vacations::class)->call('exportExcel')->assertForbidden();
+
+        \Maatwebsite\Excel\Facades\Excel::fake();
+        $this->actingAs($this->userWith('show-vacations', 'export-vacations'));
+        Livewire::test(Vacations::class)->call('setStatus', 'in_vacation')->call('exportExcel');
+
+        \Maatwebsite\Excel\Facades\Excel::matchByRegex();
+        \Maatwebsite\Excel\Facades\Excel::assertDownloaded('/vacation-.*\\.xlsx/');
+    }
+
+    public function test_bind_order_button_is_hidden_without_permission(): void
+    {
+        $this->actingAs($this->userWith('show-vacations'));
+
+        $this->assertFalse(Livewire::test(Vacations::class)->instance()->canBindOrder());
     }
 }

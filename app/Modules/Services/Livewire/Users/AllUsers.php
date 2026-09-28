@@ -87,7 +87,7 @@ class AllUsers extends Component
             ->withProperties(['user_id' => $user->id, 'email' => $user->email])
             ->log('user.restored');
 
-        $this->dispatch('userAdded', __('services::users.messages.updated'));
+        $this->dispatch('userAdded', __('services::users.messages.restored'));
     }
 
     public function mount(): void

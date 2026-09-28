@@ -27,7 +27,7 @@
         <x-slot:stats>
             <x-page-header.stat :value="$num($this->totalOpenings)" :label="__('candidates::recruitment.titles.openings')" />
             <x-page-header.stat :value="$num($this->activeApplications)" :label="__('candidates::recruitment.labels.applications')" tone="blue" />
-            <x-page-header.stat :value="$num($this->totalPublished)" :label="__('candidates::recruitment.labels.published_at')" tone="green" />
+            <x-page-header.stat :value="$num($this->totalPublished)" :label="__('candidates::recruitment.labels.published_count')" tone="green" />
         </x-slot:stats>
 
         <x-slot:actions>

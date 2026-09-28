@@ -92,7 +92,7 @@
                                             </a>
                                             <x-button mode="slate" class="!h-8 !px-3 !text-xs" wire:click="editShift({{ $shift->id }})">{{ __('attendance::shift_management.actions.edit') }}</x-button>
                                             @if($shift->is_active)
-                                                <x-button mode="reject" class="!h-8 !px-3 !text-xs" wire:click="deactivateShift({{ $shift->id }})">{{ __('attendance::shift_management.actions.deactivate') }}</x-button>
+                                                <x-button mode="reject" class="!h-8 !px-3 !text-xs" data-title="{{ __('attendance::shift_management.actions.deactivate') }}" data-message="{{ __('attendance::shift_management.confirm.deactivate_shift') }}" x-on:click="$dispatch('confirm-action', { title: $el.dataset.title, message: $el.dataset.message, confirmText: $el.dataset.title, tone: 'rose', run: () => $wire.deactivateShift({{ $shift->id }}) })">{{ __('attendance::shift_management.actions.deactivate') }}</x-button>
                                             @endif
                                         </div>
                                     </x-table.td>
@@ -322,7 +322,7 @@
                                             </a>
                                             <x-button mode="slate" class="!h-8 !px-3 !text-xs" wire:click="editAssignment({{ $assignment->id }})">{{ __('attendance::shift_management.actions.edit') }}</x-button>
                                             @if($assignment->is_active)
-                                                <x-button mode="reject" class="!h-8 !px-3 !text-xs" wire:click="deactivateAssignment({{ $assignment->id }})">{{ __('attendance::shift_management.actions.deactivate') }}</x-button>
+                                                <x-button mode="reject" class="!h-8 !px-3 !text-xs" data-title="{{ __('attendance::shift_management.actions.deactivate') }}" data-message="{{ __('attendance::shift_management.confirm.deactivate_assignment') }}" x-on:click="$dispatch('confirm-action', { title: $el.dataset.title, message: $el.dataset.message, confirmText: $el.dataset.title, tone: 'rose', run: () => $wire.deactivateAssignment({{ $assignment->id }}) })">{{ __('attendance::shift_management.actions.deactivate') }}</x-button>
                                             @endif
                                         </div>
                                     </x-table.td>

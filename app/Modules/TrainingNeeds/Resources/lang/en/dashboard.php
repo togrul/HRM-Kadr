@@ -196,7 +196,6 @@ return [
         'mark_hr_adjusted' => 'Mark HR adjusted',
         'approve_plan_item' => 'Approve',
         'review_plan_item' => 'Review',
-        'open_review' => 'Open in panel',
         'edit' => 'Edit',
         'delete' => 'Delete',
         'apply_session_proposal' => 'Apply to form',

@@ -1,157 +1,194 @@
 # Şəxsi kabinet istifadəçi bələdçisi
 
-## Bu bölmə nə üçündür?
-Şəxsi kabinet əməkdaşın öz işi ilə bağlı əsas bölmələri bir yerdə görməsi üçündür.
+## Bu modul nə üçündür?
+Şəxsi kabinet əməkdaşın özünə aid HR məlumatlarını bir yerdə görməsi və sadə müraciətləri özü göndərməsi üçündür.
 
 Burada siz:
-- öz müraciətlərinizi yarada bilərsiniz
-- müraciətlərinizin vəziyyətini izləyə bilərsiniz
-- sizə gələn bildirişləri görə bilərsiniz
-- sizə göndərilən sənədləri aça bilərsiniz
-- öyrənmə materiallarını izləyə bilərsiniz
-- rəhbər və struktur xəttinizi görə bilərsiniz
+- icazə, məzuniyyət və ezamiyyət müraciəti göndərə bilərsiniz
+- müraciətlərinizin vəziyyətini izləyə və lazım olsa düzəliş istəyə bilərsiniz
+- sizə təyin olunan uyğunlaşma sənədləri və öyrənmə materialları ilə tanış ola bilərsiniz
+- maaş vərəqələrinizə və sənədlərinizə baxa bilərsiniz
+- rəhbərinizi və müraciətlərinizin kimdən keçəcəyini görə bilərsiniz
+
+HR tərəfində isə əməkdaşların göndərdiyi müraciətlər ayrıca `Şəxsi kabinet müraciətləri` səhifəsində təsdiqlənir (bax aşağıda).
 
 ## Harada açılır?
-Sistemə daxil olduqdan sonra sol menyudan `Şəxsi kabinet` bölməsini açın.
+Sol dar menyuda `Kabinet` ikonunu seçin. Açılan səhifənin adı `Şəxsi kabinet`-dir.
+
+Səhifənin solunda panel var. Panelin yuxarısında adınız, altında isə bölmələr görünür:
+`Xülasə`, `Ərizələrim`, `Bildirişlər`, `Uyğunlaşma sənədləri`, `Fərdi inkişaf planım`, `Öyrənmə materialları`, `Sənədlərim`, `Maaş vərəqələrim`, `Mənim strukturum`.
+
+Bölmənin yanında rəqəm görünürsə, orada diqqət tələb edən qeyd var. Panelin aşağısında `Məzuniyyət balansı` kartı qalan və istifadə olunmuş günlərinizi göstərir.
+
+Kiçik ekranda (telefonda) sol panel əvəzinə bölmələr başlığın altında düymələr kimi görünür.
 
 ## Sistemə ilk dəfə daxil olarkən
-1. Sizə göndərilən linki açın.
-2. İlk parolunuzu təyin edin.
-3. Sonrakı girişlərdə e-poçt və yeni parolunuzla daxil olun.
+1. HR sizə parol təyin etmək üçün keçid göndərir.
+2. Keçidi açın və ilk parolunuzu təyin edin.
+3. Sonrakı girişlərdə e-poçtunuz və bu parolla daxil olun.
 
-Əgər daxil ola bilmirsinizsə, HR və ya sistem inzibatçısına müraciət edin.
+Əgər kabinet açılır, amma `Kabinetiniz hələ əməkdaş kartınıza bağlanmayıb` yazısı görünürsə, hesabınız hələ əməkdaş kartınızla əlaqələndirilməyib. Kadrlar şöbəsinə müraciət edin — əlaqələndirildikdən sonra kabinet özü açılacaq.
 
-## Xülasə
-Xülasə bölməsi kabinetin əsas başlanğıc səhifəsidir.
+HR üçün qeyd: hesab əməkdaşın kartında `Daha çox → Şəxsi kabinet hesabı` bölməsindən yaradılır və ya bağlanır. Hesab yaratmaq üçün kartda e-poçt olmalıdır.
 
-Burada adətən bunlar görünür:
-- əsas qısa keçidlər
-- gözləyən işlər
-- vacib bildirişlər
-- yaxın tarixli tapşırıqlar
+## Bu modul kimlər üçündür?
 
-Bu hissə sizə “hazırda nəyə baxmalıyam?” sualının cavabını verir.
+### Əməkdaş
+Öz kabinetini açır, müraciət göndərir, sənədlərlə tanış olur, maaş vərəqəsinə baxır.
 
-## Ərizələrim
-Bu bölmə icazə, məzuniyyət və ezamiyyət müraciətləri üçündür.
+### Rəhbər və HR əməkdaşı
+Əməkdaşların göndərdiyi müraciətləri `Şəxsi kabinet müraciətləri` səhifəsində təsdiqləyir və ya rədd edir.
 
-### Burada nə edə bilərsiniz?
-- yeni müraciət yarada bilərsiniz
-- əvvəlki müraciətlərinizə baxa bilərsiniz
-- hansı müraciətin cavab gözlədiyini görə bilərsiniz
-- lazım olarsa düzəliş istəyi göndərə bilərsiniz
+## Ekranın quruluşu
 
-### Yeni müraciət necə yaradılır?
-1. `Ərizələrim` bölməsinə keçin.
-2. Yuxarıdakı uyğun düyməni seçin:
-   - `İcazə müraciəti`
-   - `Məzuniyyət müraciəti`
-   - `Ezamiyyət müraciəti`
-3. Formu doldurun.
-4. `Göndər` düyməsini basın.
+### Başlıq düymələri
+- `Bələdçini aç` — bu bələdçini açır.
+- `Yeni ərizə` — qara əsas düymədir. Basanda kiçik siyahı açılır: `İcazə müraciəti`, `Məzuniyyət müraciəti`, `Ezamiyyət müraciəti`. Siyahıda yalnız sizə icazə verilən müraciət növləri görünür.
 
-### Göndərdikdən sonra nə olur?
-- müraciət siyahıda görünür
-- vəziyyəti `Gözləyir` kimi görünə bilər
-- cavab gəldikcə vəziyyət yenilənir
-- ayrıca bildiriş də gələ bilər
+### Xülasə
+Kabinetin başlanğıc səhifəsidir. Burada:
+- profiliniz: `Tabel nömrəsi`, `Vəzifə`, `Struktur`, `Email`, `Mobil nömrə`, `İşə başlama tarixi`
+- son müraciətləriniz və onların statusu
+- `Qısa keçidlər` — müraciət formalarını və `Maaş vərəqələrim` bölməsini bir kliklə açan düymələr
+
+### Ərizələrim
+Bütün icazə, məzuniyyət və ezamiyyət müraciətləriniz bir siyahıda görünür. Yuxarıda qısa say var: `Ümumi müraciət`, `Gözləyən`, `Aktiv və yaxın`, `Bağlanan`.
+
+Filtrlər: `Axtarış`, `Növ`, `Status`, `Tarixdən`, `Tarixədək`.
+
+Hər sətirə klikləyəndə detallar açılır: müddət, aralıq, hazırkı təsdiqləyən, göndərilmə vaxtı, əmr nömrəsi və s.
 
 ### Statuslar nə deməkdir?
-- `Gözləyir` – cavab hələ verilməyib
-- `Təsdiqlənib` – müraciət qəbul olunub
-- `Rədd edilib` – müraciət qəbul olunmayıb
+- `GÖZLƏYİR` (sarı) — müraciət hələ təsdiq gözləyir
+- `TƏSDİQLƏNİB` — təsdiq olunub, amma tarixi hələ gəlməyib
+- `PLANLAŞDIRILIB` (mavi) — məzuniyyət və ya ezamiyyət təsdiqlənib, tarixi qarşıdadır
+- `AKTİVDİR` (yaşıl) — hazırda davam edir
+- `BAŞA ÇATIB` — tarixi keçib
+- `LƏĞV EDİLİB` — rədd edilib və ya ləğv olunub
+- `SİLİNİB` — qeyd silinib
 
-## Bildirişlər
-Bu bölmədə sizə aid sistem bildirişləri görünür.
+## Əsas əməliyyatlar
 
-### Burada nə görə bilərsiniz?
-- müraciət cavabları
-- sizə göndərilən uyğunlaşma sənədləri
-- sizə təyin olunan öyrənmə materialları
-- düzəliş istəyi ilə bağlı qərarlar
+### 1. İcazə müraciəti göndərmək
+1. `Yeni ərizə` → `İcazə müraciəti` seçin.
+2. `İcazə növü`nü seçin.
+3. `Müddət tipi`ni seçin: `Tam gün`, `Yarım gün` və ya `Saatlıq`.
+4. Tarixləri doldurun. Tam gündə `Başlama tarixi` və `Bitmə tarixi`, yarım gündə `Günün hissəsi`, saatlıqda `Başlama saatı` və `Bitmə saatı` soruşulur.
+5. `Səbəb` yazın (məcburi deyil, amma yazmaq tövsiyə olunur).
+6. Bəzi icazə növləri üçün `Təsdiqedici sənəd` yükləmək məcburidir.
+7. `İcazə müraciətini göndər` düyməsini basın.
 
-Bildirişləri açaraq nə baş verdiyini daha dəqiq görə bilərsiniz.
+### 2. Məzuniyyət müraciəti göndərmək
+1. `Yeni ərizə` → `Məzuniyyət müraciəti`.
+2. `Gediləcək yer`, `Başlama tarixi`, `Bitmə tarixi` xanalarını doldurun.
+3. `Məzuniyyət müraciətini göndər` basın.
 
-## Uyğunlaşma
-Bu bölmədə sizə təyin olunmuş sənədlər görünür.
+### 3. Ezamiyyət müraciəti göndərmək
+1. `Yeni ərizə` → `Ezamiyyət müraciəti`.
+2. `Məkan`, `Başlama tarixi`, `Bitmə tarixi` doldurun, lazımdırsa `Təsvir` yazın.
+3. `Ezamiyyət müraciətini göndər` basın.
 
-Məsələn:
-- daxili qaydalar
-- vəzifə təlimatı
-- təhlükəsizlik sənədləri
-- xoş gəldin paketi
+Formu göndərmədən bağlamaq üçün `Formu bağla` düyməsi var.
 
-### Bu bölmə nə üçündür?
-Sizə oxumaq və tanış olmaq üçün göndərilən sənədləri bir yerdə göstərir.
+#### Göndərdikdən sonra nə olur?
+- müraciət `Ərizələrim` siyahısında `GÖZLƏYİR` statusu ilə görünür
+- müraciət təsdiq edən şəxsə gedir (kimə gedəcəyini `Mənim strukturum` bölməsində görə bilərsiniz)
+- qərar veriləndə `Bildirişlər` bölməsinə xəbər gəlir və status yenilənir
 
-### Necə istifadə olunur?
-1. Sənədi açın.
-2. Məzmunla tanış olun.
-3. Lazımdırsa `Tanış oldum` düyməsini basın.
+### 4. Düzəliş istəmək
+Göndərdiyiniz və hələ bağlanmamış müraciətdə tarixi və ya məlumatı dəyişmək lazımdırsa:
+1. `Ərizələrim` siyahısında sətirə klikləyin.
+2. Açılan hissədə `Düzəliş istə` düyməsini basın.
+3. Yeni tarixləri (və müraciət növünə görə yer, məkan və ya təsvir) yazın.
+4. `Səbəb` xanasını mütləq doldurun.
+5. `Düzəliş müraciətini göndər` basın.
 
-### Bu nəyi dəyişir?
-Sistem ayrıca qeyd edir:
-- sənədi nə vaxt açdığınızı
-- nə vaxt təsdiq etdiyinizi
+`Düzəliş istə` düyməsi yalnız statusu `GÖZLƏYİR`, `TƏSDİQLƏNİB`, `PLANLAŞDIRILIB` və ya `AKTİVDİR` olan müraciətlərdə görünür. Eyni müraciət üçün artıq cavab gözləyən düzəliş varsa, yenisini göndərmək olmur.
 
-Bu tarixlər HR tərəfində də görünə bilər.
+### 5. Uyğunlaşma sənədi ilə tanış olmaq
+`Uyğunlaşma sənədləri` bölməsində sizə təyin olunmuş daxili qaydalar, vəzifə təlimatı, təhlükəsizlik qaydaları və s. görünür.
+1. `Sənədi aç` düyməsini basın — sistem açılma tarixini yazır.
+2. Sənədi oxuyun.
+3. Sənəddə `Təsdiq tələb edir` nişanı varsa, `Tanış oldum` düyməsini basın.
 
-## Fərdi inkişaf planım
-Bu bölmədə sizin inkişaf ehtiyaclarınız və tövsiyə olunan istiqamətlər görünür.
+Hər sənəddə `Təyin edilib`, `Son tarix`, `Açılıb`, `Təsdiqlənib` tarixləri görünür. Son tarix keçibsə sənəd `Gecikir` kimi göstərilir. `Məcburi` nişanlı sənədləri gecikdirməyin.
 
-### Burada nə görə bilərsiniz?
-- inkişaf mövzularını
-- plan qeydlərini
-- sizə uyğun təlim və ya materialları
-- hədəf tarixləri
+### 6. Öyrənmə materiallarını keçmək
+`Öyrənmə materialları` bölməsində video, təqdimat, PDF və linklər görünür.
+1. `Materialı aç` basın.
+2. Materialı oxuyun və ya izləyin.
+3. Bitirdikdən sonra `Tamamlandı kimi işarələ` basın.
 
-Bu bölmə sizə hansı sahədə inkişaf etməli olduğunuzu göstərir.
+Tamamlanan materialda bu düymə artıq görünmür.
 
-## Öyrənmə materialları
-Bu bölmədə sizə təyin olunmuş materiallar görünür.
+### 7. Maaş vərəqəsinə baxmaq
+1. `Maaş vərəqələrim` bölməsini açın.
+2. Siyahıdan ayı seçin.
+3. Sağda `Brüt`, `Net` məbləğlər və hesablama sətirləri görünür.
+4. Çap etmək və ya saxlamaq üçün `PDF` düyməsini basın. Bağlamaq üçün `Bağla`.
 
-Məsələn:
-- video
-- PDF
-- təqdimat
-- digər fayllar
+Burada yalnız rəsmiləşdirilmiş (bağlanmış) hesablamalar görünür. Cari ayın hesablaması hələ bağlanmayıbsa, siyahıda olmayacaq.
 
-### Necə istifadə olunur?
-1. Materialı açın.
-2. Oxuyun və ya izləyin.
-3. Lazım olduqda materialı tamamlanmış kimi qeyd edin.
+### 8. Sənədlərimə baxmaq
+`Sənədlərim` bölməsində əməkdaş kartınıza əlavə olunmuş və sizə görünməsinə icazə verilən sənədlər var. `Faylı aç` düyməsi sənədi açır. Bəzi sənədlər yalnız müəyyən tarix aralığında görünür.
 
-### Bundan sonra nə olur?
-Sistem tamamlanma tarixini yadda saxlaya bilər.
-Bu məlumat daha sonra ümumi görünüşdə və HR tərəfində görünə bilər.
+### 9. Bildirişləri idarə etmək
+`Bildirişlər` bölməsi açılan kimi yeni bildirişlər oxunmuş sayılır. `Hamısını təmizlə` düyməsi bütün bildirişlərinizi birdəfəlik silir — sistem təsdiq soruşmur, ona görə diqqətli olun.
 
-## Sənədlərim
-Bu bölmədə sizə görünməsinə icazə verilən sənədlər görünür.
+### 10. Strukturuma baxmaq
+`Mənim strukturum` bölməsində:
+- birbaşa rəhbəriniz və struktur yolunuz
+- `Tabe olduğu şəxslər` və `Tabeliyində olan şəxslər`
+- `Müraciət təsdiq xətti` — hər müraciət növü üçün `1-ci addım` (birbaşa rəhbər), `2-ci addım` (rəhbərin rəhbəri) və `HR xətti`
 
-### Niyə bütün sənədlər görünmür?
-Çünki burada yalnız sizə açıq olan sənədlər göstərilir. Bəzi sənədlər yalnız müəyyən istifadəçilər üçün görünən ola bilər.
+Rəhbər tapılmayanda müraciət birbaşa HR-a düşür (`Yalnız HR xətti`).
 
-## Mənim strukturum
-Bu bölmədə sizin iş xəttiniz görünür.
+## Müraciətlərin təsdiqi (HR və rəhbər üçün)
+Əməkdaşların kabinetdən göndərdiyi müraciətlər ayrıca səhifədə toplanır. Sol dar menyuda `Müraciətlər` ikonunu seçin (tam adı `Şəxsi kabinet müraciətləri`). Eyni səhifəyə `Məzuniyyətlər` və `Ezamiyyətlər` səhifələrinin başlığındakı `Şəxsi kabinet müraciətləri` düyməsi ilə də keçmək olar. Səhifənin başlığı `Şəxsi kabinet müraciətlərinə baxış`-dır.
 
-### Burada nə görə bilərsiniz?
-- hansı strukturda çalışdığınızı
-- birbaşa rəhbərinizi
-- yuxarı rəhbər xəttini
-- sizə bağlı əməkdaşlar varsa onları
+Bu səhifə yalnız müraciətlərə baxmaq icazəsi olanlara görünür.
 
-Bu hissə sizə “kimə tabeyəm?” və “mənim xəttim necədir?” sualına cavab verir.
+### Ekranda nə var?
+- başlıqda saylar: `Ümumi baxış`, `İcazə`, `Məzuniyyət`, `Ezamiyyət`, `Düzəliş müraciəti`
+- sol paneldə `Növ` üzrə süzgəc
+- `Növbə görünüşü`: `Mənə gələnlər` və ya `Bütün növbə` — ikinci seçim yalnız bütün müraciətlərə baxmaq icazəsi olanlara görünür
+- `Axtarış` — əməkdaş adı, müraciət növü və ya səbəb ilə
+
+Hər kartda əməkdaş, dövr, qısa xülasə, detallar və `Təsdiq auditi` (marşrut mənbəyi, əsas təsdiqləyən, yuxarı xətt, HR xətti) görünür. Düzəliş müraciətində `Təklif olunan dəyişiklik` göstərilir.
+
+### Müraciəti təsdiqləmək və ya rədd etmək
+1. Kartı nəzərdən keçirin.
+2. Lazımdırsa `Baxış qeydi` yazın — bu qeyd əməkdaşa bildirişlə gedir.
+3. `Təsdiqlə` və ya `Rədd et` düyməsini basın.
+
+Qərar dərhal tətbiq olunur və kart siyahıdan çıxır. Sistem təsdiq soruşmur. Rədd edilən müraciət əməkdaşda `LƏĞV EDİLİB` kimi görünür. Təsdiqlənən düzəliş müraciəti əsas müraciətdəki məlumatı avtomatik dəyişir.
 
 ## Tez-tez verilən suallar
 
-### Müraciət yaratdım, sonra harada görünəcək?
-`Ərizələrim` bölməsində görünəcək və vəziyyəti oradan izlənəcək.
+### `Yeni ərizə` düyməsi niyə görünmür?
+Ya hesabınız hələ əməkdaş kartınıza bağlanmayıb, ya da sizə müraciət göndərmək icazəsi verilməyib. HR-a müraciət edin.
 
-### Mənə yeni sənəd təyin olunubsa harada görəcəyəm?
-`Uyğunlaşma` və ya `Öyrənmə materialları` bölməsində görünəcək. Adətən bu barədə ayrıca bildiriş də gəlir.
+### Müraciətim kimə getdi?
+`Ərizələrim` siyahısında sətri açın — `Hazırkı təsdiqləyən` orada yazılıb. Ümumi qayda `Mənim strukturum` bölməsindədir.
 
-### Mənə bütün sənədlər niyə görünmür?
-Çünki `Sənədlərim` bölməsi yalnız sizə görünməsinə icazə verilən sənədləri göstərir.
+### `Düzəliş istə` düyməsi niyə yoxdur?
+Müraciət artıq başa çatıb, ləğv edilib və ya onun üçün cavab gözləyən başqa düzəliş var.
 
-### Daxil ola bilmirəmsə nə etməliyəm?
-HR və ya sistem inzibatçısı ilə əlaqə saxlayın. Hesabınızın əməkdaş kartı ilə bağlı olması vacibdir.
+### Maaş vərəqəm niyə görünmür?
+Yalnız bağlanmış (rəsmiləşmiş) hesablamalar göstərilir. Ayın hesablaması hələ bağlanmayıbsa gözləyin.
+
+### `Tanış oldum` düyməsi niyə yoxdur?
+Sənəd tanışlıq təsdiqi tələb etmir və ya siz artıq təsdiqləmisiniz.
+
+### Bütün sənədlərim niyə görünmür?
+`Sənədlərim` yalnız sizə görünməsinə icazə verilən sənədləri göstərir.
+
+### HR olaraq müraciət siyahıda görünmür.
+`Növbə görünüşü`nün `Mənə gələnlər` olduğunu yoxlayın — orada yalnız sizə təyin edilən müraciətlər olur. Artıq qərar verilmiş müraciətlər bu səhifədə görünmür.
+
+## Yadda saxlayın
+- Müraciəti göndərməzdən əvvəl tarixləri yoxlayın; sonradan dəyişmək üçün düzəliş müraciəti lazım olacaq.
+- `Məcburi` nişanlı sənəd və materialları son tarixdən əvvəl tamamlayın.
+- `Hamısını təmizlə` bildirişləri geri qaytarılmadan silir.
+- Rədd edərkən `Baxış qeydi`ndə səbəbi yazın ki, əməkdaş nəyi düzəltməli olduğunu bilsin.
+- Kabinet açılmırsa və ya məlumat səhvdirsə, Kadrlar şöbəsinə yazın.

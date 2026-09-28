@@ -11,7 +11,17 @@ class ProfessionalPortfolioWorkflowPolicyService
 {
     public function assertEventTransition(PersonnelEventRecord $record, string $target): void
     {
-        $this->assertTransition($record->verification_status, $target, [
+        $this->assertTransition($record->verification_status, $target, $this->eventTransitions());
+    }
+
+    /**
+     * Allowed status moves per current status — the views show only these actions.
+     *
+     * @return array<string, list<string>>
+     */
+    public function eventTransitions(): array
+    {
+        return [
             PersonnelEventRecord::STATUS_PENDING => [
                 PersonnelEventRecord::STATUS_VERIFIED,
                 PersonnelEventRecord::STATUS_REJECTED,
@@ -19,14 +29,57 @@ class ProfessionalPortfolioWorkflowPolicyService
             PersonnelEventRecord::STATUS_REJECTED => [
                 PersonnelEventRecord::STATUS_VERIFIED,
             ],
-        ]);
+        ];
     }
 
     public function assertMediaTransition(PersonnelMediaMention $record, string $target): void
     {
         $record->loadMissing('archiveAttachment');
 
-        $this->assertTransition($record->verification_status, $target, [
+        $this->assertTransition($record->verification_status, $target, $this->mediaTransitions());
+
+        if ($target === PersonnelMediaMention::STATUS_VERIFIED) {
+            $this->assertMediaCanBeVerified($record);
+        }
+
+        if ($target === PersonnelMediaMention::STATUS_ARCHIVED_ONLY) {
+            $this->assertArchiveExists($record);
+        }
+
+        if ($target === PersonnelMediaMention::STATUS_BROKEN_LINK
+            && ! filled($record->url)
+            && ! (bool) config('personnel.portfolio.policy.allow_manual_broken_without_url', false)) {
+            throw new HttpException(422, __('personnel::portfolio.messages.media_url_required_for_broken_status'));
+        }
+    }
+
+    public function assertProjectTransition(PersonnelProjectRecord $record, string $target): void
+    {
+        $this->assertTransition($record->verification_status, $target, $this->projectTransitions());
+    }
+
+    /**
+     * @return array<string, list<string>>
+     */
+    public function projectTransitions(): array
+    {
+        return [
+            PersonnelProjectRecord::STATUS_PENDING => [
+                PersonnelProjectRecord::STATUS_VERIFIED,
+                PersonnelProjectRecord::STATUS_REJECTED,
+            ],
+            PersonnelProjectRecord::STATUS_REJECTED => [
+                PersonnelProjectRecord::STATUS_VERIFIED,
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string, list<string>>
+     */
+    public function mediaTransitions(): array
+    {
+        return [
             PersonnelMediaMention::STATUS_PENDING => [
                 PersonnelMediaMention::STATUS_VERIFIED,
                 PersonnelMediaMention::STATUS_REJECTED,
@@ -52,34 +105,7 @@ class ProfessionalPortfolioWorkflowPolicyService
                 PersonnelMediaMention::STATUS_VERIFIED,
                 PersonnelMediaMention::STATUS_ARCHIVED_ONLY,
             ],
-        ]);
-
-        if ($target === PersonnelMediaMention::STATUS_VERIFIED) {
-            $this->assertMediaCanBeVerified($record);
-        }
-
-        if ($target === PersonnelMediaMention::STATUS_ARCHIVED_ONLY) {
-            $this->assertArchiveExists($record);
-        }
-
-        if ($target === PersonnelMediaMention::STATUS_BROKEN_LINK
-            && ! filled($record->url)
-            && ! (bool) config('personnel.portfolio.policy.allow_manual_broken_without_url', false)) {
-            throw new HttpException(422, __('personnel::portfolio.messages.media_url_required_for_broken_status'));
-        }
-    }
-
-    public function assertProjectTransition(PersonnelProjectRecord $record, string $target): void
-    {
-        $this->assertTransition($record->verification_status, $target, [
-            PersonnelProjectRecord::STATUS_PENDING => [
-                PersonnelProjectRecord::STATUS_VERIFIED,
-                PersonnelProjectRecord::STATUS_REJECTED,
-            ],
-            PersonnelProjectRecord::STATUS_REJECTED => [
-                PersonnelProjectRecord::STATUS_VERIFIED,
-            ],
-        ]);
+        ];
     }
 
     public function recommendedMediaStatus(PersonnelMediaMention $record): ?string

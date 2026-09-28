@@ -105,6 +105,7 @@
         </div>
 
         <div class="flex flex-col">
+            <x-label for="form.headcount">{{ __('candidates::recruitment.labels.headcount') }}</x-label>
             <x-livewire-input mode="gray" type="number" name="form.headcount" wire:model="form.headcount"></x-livewire-input>
             @error('form.headcount') <x-validation>{{ $message }}</x-validation> @enderror
         </div>

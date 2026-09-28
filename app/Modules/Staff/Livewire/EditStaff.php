@@ -42,7 +42,7 @@ class EditStaff extends Component
         }
 
         $this->staff = $group->toArray();
-        $this->title = __('staff::common.titles.edit_staff').'( '.$this->staff[0]['structure']['name'].' )';
+        $this->title = __('staff::common.titles.edit_staff').' ('.$this->staff[0]['structure']['name'].')';
         $this->syncComputedStaffRows();
     }
 

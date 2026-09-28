@@ -225,6 +225,54 @@ class CompensationDashboardTest extends TestCase
         $this->assertSame('A1–A5', $band['range']);
     }
 
+    public function test_grade_editor_never_sends_a_masked_amount_and_keeps_it_on_save(): void
+    {
+        $scale = \App\Models\PayScale::create([
+            'name' => 'Gizli şkala',
+            'regime_id' => CompensationRegime::where('code', 'private')->value('id'),
+            'currency' => 'AZN',
+            'effective_from' => '2026-01-01',
+            'is_active' => true,
+        ]);
+        $grade = \App\Models\PayGrade::create(['pay_scale_id' => $scale->id, 'code' => 'B7', 'name' => 'B7 pilləsi', 'base_amount' => 4321.5, 'sort' => 0]);
+
+        // Manager without the amounts permission.
+        $user = \App\Models\User::factory()->create();
+        $user->givePermissionTo(Permission::findOrCreate('show-compensation', 'web'));
+        $user->givePermissionTo(Permission::findOrCreate('manage-compensation', 'web'));
+        $this->actingAs($user);
+
+        $component = Livewire::test(ScalesTab::class)
+            ->call('selectScale', $scale->id)
+            ->assertDontSee(__('compensation::dashboard.actions.add_grade'))
+            ->call('editGrade', $grade->id)
+            ->assertSet('gradeForm.base_amount', '')
+            ->assertDontSeeHtml('4321')
+            ->assertDontSeeHtml('gradeForm.base_amount');
+
+        $this->assertStringNotContainsString('4321', json_encode($component->snapshot));
+
+        // Tampering the amount over the wire changes nothing; the other fields still save.
+        $component->set('gradeForm.name', 'Yeni ad')
+            ->set('gradeForm.base_amount', '1')
+            ->call('saveGrade')
+            ->assertHasNoErrors();
+
+        $this->assertSame('Yeni ad', $grade->fresh()->name);
+        $this->assertSame(4321.5, (float) $grade->fresh()->base_amount);
+
+        // Creating a grade means setting its amount — refused.
+        Livewire::test(ScalesTab::class)
+            ->call('selectScale', $scale->id)
+            ->call('openPanel', 'grade')
+            ->set('gradeForm.code', 'B8')
+            ->set('gradeForm.name', 'B8')
+            ->set('gradeForm.base_amount', '100')
+            ->call('saveGrade')
+            ->assertForbidden();
+        $this->assertSame(1, \App\Models\PayGrade::count());
+    }
+
     public function test_editor_panel_opens_for_each_catalog_form(): void
     {
         $this->actingAsManager();

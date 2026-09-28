@@ -693,6 +693,37 @@ class TrainingNeedsDashboardTest extends TestCase
         $this->assertDatabaseHas('training_competency_groups', ['id' => $group->id]);
     }
 
+    public function test_view_only_users_get_no_forms_they_cannot_save(): void
+    {
+        $user = \App\Models\User::factory()->create();
+        $user->givePermissionTo(Permission::findOrCreate('show-training-needs', 'web'));
+        $this->actingAs($user);
+
+        Livewire::test(TrainingNeedsFoundationWorkspace::class, ['tab' => 'catalogs'])
+            ->assertDontSee('wire:click="storeGroup"', false)
+            ->assertDontSee('wire:click="storeProgramMap"', false)
+            ->call('storeGroup')
+            ->assertForbidden();
+
+        Livewire::test(TrainingNeedsFoundationWorkspace::class, ['tab' => 'profiles'])
+            ->assertDontSee('wire:click="storeNeed"', false);
+
+        Livewire::test(TrainingNeedsOperationsWorkspace::class, ['tab' => 'planning'])
+            ->assertDontSee('wire:click="storePlan"', false);
+
+        Livewire::test(TrainingNeedsOperationsWorkspace::class, ['tab' => 'calendar'])
+            ->assertDontSee('wire:click="storeSession"', false);
+
+        Livewire::test(TrainingNeedsResultsWorkspace::class, ['tab' => 'results'])
+            ->assertDontSee('wire:click="storeFeedbackForm"', false)
+            ->assertDontSee('wire:click="storeDeliveryDocument"', false);
+
+        $user->givePermissionTo(Permission::findOrCreate('manage-training-needs', 'web'));
+
+        Livewire::test(TrainingNeedsFoundationWorkspace::class, ['tab' => 'catalogs'])
+            ->assertSee('wire:click="storeGroup"', false);
+    }
+
     private function createPersonnel(int $userId, int $positionId): Personnel
     {
         DB::table('countries')->insert([

@@ -25,6 +25,7 @@ class EnsurePasswordResetIsCompleted
         $allowedRoutes = [
             'profile.edit',
             'profile.update',
+            'password.update',
             'logout',
         ];
 

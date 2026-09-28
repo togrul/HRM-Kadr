@@ -8,6 +8,7 @@ use App\Modules\Reports\Application\Services\ReportsStructureScopeService;
 use App\Modules\Reports\Application\Services\StandardReportService;
 use App\Modules\Reports\Exports\ReportsTableExport;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -62,6 +63,19 @@ class Dashboard extends Component
     public function updatedStructureId(): void
     {
         $this->structureId = $this->structureId ?: null;
+    }
+
+    /**
+     * The standard and dynamic tabs report their own selection here, so the header's Excel
+     * and print act on what the tab shows now rather than on the page's initial settings.
+     */
+    #[On('reports-selection')]
+    public function syncSelection(?string $report = null, ?string $source = null, ?string $groupBy = null, ?string $metric = null): void
+    {
+        $this->report = $report ?? $this->report;
+        $this->source = $source ?? $this->source;
+        $this->groupBy = $groupBy ?? $this->groupBy;
+        $this->metric = $metric ?? $this->metric;
     }
 
     /**

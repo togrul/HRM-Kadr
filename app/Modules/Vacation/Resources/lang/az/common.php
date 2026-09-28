@@ -3,7 +3,6 @@
 return [
     'titles' => [
         'vacations' => 'Məzuniyyətlər',
-        'requests' => 'Məzuniyyət müraciətləri',
     ],
     'labels' => [
         'year' => 'İl',

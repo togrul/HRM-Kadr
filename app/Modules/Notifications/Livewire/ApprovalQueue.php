@@ -16,7 +16,12 @@ class ApprovalQueue extends Component
 {
     use InteractsWithNotificationAuthorization;
 
+    public const PREVIEW_LIMIT = 8;
+
     public array $notes = [];
+
+    /** The queue shows the newest few; "show all" lists every pending campaign. */
+    public bool $showAll = false;
 
     public function mount(): void
     {
@@ -39,6 +44,12 @@ class ApprovalQueue extends Component
     public function reject(int $campaignId): void
     {
         $this->authorizeCampaignApprovals();
+        // A rejection goes back to the author, so it has to say why.
+        $this->validate(
+            ["notes.{$campaignId}" => ['required', 'string', 'min:3']],
+            [],
+            ["notes.{$campaignId}" => __('notifications::common.fields.note')]
+        );
         $campaign = NotificationCampaign::query()->findOrFail($campaignId);
         app(NotificationCampaignDispatcher::class)->rejectCampaign($campaign, $this->notes[$campaignId] ?? null);
         unset($this->notes[$campaignId]);
@@ -53,7 +64,7 @@ class ApprovalQueue extends Component
             ->where('approval_status', 'pending')
             ->latest('id')
             ->with('creator:id,name')
-            ->limit(8)
+            ->when(! $this->showAll, fn ($query) => $query->limit(self::PREVIEW_LIMIT))
             ->get(['id', 'title', 'category', 'channel', 'scheduled_at', 'created_by', 'created_at']);
     }
 
@@ -66,6 +77,10 @@ class ApprovalQueue extends Component
     {
         return view('notification::livewire.notification.approval-queue', [
             'campaigns' => $this->campaigns,
+            // A short page already is the whole queue; only a full one needs counting.
+            'pendingTotal' => $this->showAll || $this->campaigns->count() < self::PREVIEW_LIMIT
+                ? $this->campaigns->count()
+                : NotificationCampaign::query()->where('approval_status', 'pending')->count(),
             'canApproveCampaigns' => $this->canApproveCampaigns(),
             'categoryLabels' => NotificationTriggerRegistry::campaignCategoryLabels(),
         ]);

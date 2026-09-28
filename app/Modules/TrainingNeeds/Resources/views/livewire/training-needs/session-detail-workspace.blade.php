@@ -36,8 +36,10 @@
                             <p class="text-xs text-zinc-500">{{ __('training_needs::dashboard.empty.filtered_session_participants') }}</p>
                         </div>
                         <div class="flex flex-wrap gap-2">
+                            @if ($this->canManageTrainingNeeds)
                             <x-ui.action-pill mode="secondary" wire:click="selectVisibleParticipants" icon="icons.profile-icon">{{ __('training_needs::dashboard.actions.select_visible_participants') }}</x-ui.action-pill>
                             <x-ui.action-pill mode="secondary" wire:click="clearSelectedParticipants">{{ __('training_needs::dashboard.actions.clear_selected_participants') }}</x-ui.action-pill>
+                            @endif
                         </div>
                     </div>
                     <div class="flex flex-wrap items-end gap-3">
@@ -67,6 +69,7 @@
                                 <option value="employee_request">{{ __('training_needs::dashboard.sources.employee_request') }}</option>
                             </x-ui.select>
                         </div>
+                        @if ($this->canManageTrainingNeeds)
                         <div class="min-w-56 flex-1">
                             <x-label for="bulk-attendance-status">{{ __('training_needs::dashboard.fields.bulk_attendance_status') }}</x-label>
                             <x-ui.select id="bulk-attendance-status" wire:model="bulkAttendanceStatus">
@@ -79,13 +82,16 @@
                         </div>
                         <x-ui.action-pill wire:click="applyBulkParticipantStatus">{{ __('training_needs::dashboard.actions.apply_bulk_status') }}</x-ui.action-pill>
                         <x-ui.action-pill mode="delete" wire:click="confirmRemoveSelectedParticipants" icon="icons.delete-icon">{{ __('training_needs::dashboard.actions.remove_selected_participants') }}</x-ui.action-pill>
+                        @endif
                     </div>
+                    @if ($this->canManageTrainingNeeds)
                     <div class="mt-3 flex flex-wrap gap-2">
                         <x-ui.action-pill mode="secondary" wire:click="applyBulkParticipantStatusShortcut('confirmed')">{{ __('training_needs::dashboard.attendance_statuses.confirmed') }}</x-ui.action-pill>
                         <x-ui.action-pill mode="secondary" wire:click="applyBulkParticipantStatusShortcut('attended')">{{ __('training_needs::dashboard.attendance_statuses.attended') }}</x-ui.action-pill>
                         <x-ui.action-pill mode="secondary" wire:click="applyBulkParticipantStatusShortcut('absent')">{{ __('training_needs::dashboard.attendance_statuses.absent') }}</x-ui.action-pill>
                         <x-ui.action-pill mode="secondary" wire:click="applyBulkParticipantStatusShortcut('cancelled')">{{ __('training_needs::dashboard.attendance_statuses.cancelled') }}</x-ui.action-pill>
                     </div>
+                    @endif
                 </div>
             </div>
 
@@ -104,12 +110,14 @@
                                 {{ __('training_needs::dashboard.attendance_statuses.'.$participant->attendance_status) }}
                             </x-small-badge>
                         </div>
+                        @if ($this->canManageTrainingNeeds)
                         <div class="mt-3 flex flex-wrap gap-2">
                             <button type="button" wire:click="quickSetParticipantStatus({{ $participant->id }}, 'confirmed')" class="h-10 rounded-full border border-zinc-200 bg-white px-3 text-sm font-medium text-zinc-700 transition hover:border-blue-300 hover:text-blue-700">{{ __('training_needs::dashboard.attendance_statuses.confirmed') }}</button>
                             <button type="button" wire:click="quickSetParticipantStatus({{ $participant->id }}, 'attended')" class="h-10 rounded-full border border-zinc-200 bg-white px-3 text-sm font-medium text-zinc-700 transition hover:border-green-300 hover:text-green-700">{{ __('training_needs::dashboard.attendance_statuses.attended') }}</button>
                             <button type="button" wire:click="quickSetParticipantStatus({{ $participant->id }}, 'absent')" class="h-10 rounded-full border border-zinc-200 bg-white px-3 text-sm font-medium text-zinc-700 transition hover:border-rose-300 hover:text-rose-700">{{ __('training_needs::dashboard.attendance_statuses.absent') }}</button>
                             <button type="button" wire:click="quickSetParticipantStatus({{ $participant->id }}, 'cancelled')" class="h-10 rounded-full border border-zinc-200 bg-white px-3 text-sm font-medium text-zinc-700 transition hover:border-zinc-400 hover:text-zinc-900">{{ __('training_needs::dashboard.attendance_statuses.cancelled') }}</button>
                         </div>
+                        @endif
                     </x-ui.list-card>
                 @empty
                     <x-ui.empty-state icon="icons.users-icon" :message="__('training_needs::dashboard.empty.filtered_session_participants')" />
@@ -117,9 +125,11 @@
             </div>
         </div>
 
+        @if ($this->canManageTrainingNeeds)
         <div class="mt-4 flex justify-end">
             <x-button mode="success" wire:click="completeSession">{{ __('training_needs::dashboard.actions.complete_session') }}</x-button>
         </div>
+        @endif
     @else
         <x-ui.empty-state icon="icons.calendar-icon" :message="__('training_needs::dashboard.empty.sessions')" />
     @endif

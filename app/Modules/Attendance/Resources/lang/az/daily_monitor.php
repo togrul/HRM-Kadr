@@ -39,10 +39,10 @@ return [
         'late' => 'gecikib',
         'absent' => 'yoxdur',
         'missing' => 'gündəlik qeyd çatışmır',
-        'manual_present' => 'manual işdə',
+        'manual_present' => 'işdə (əl ilə qeyd)',
         'holiday_worked' => 'bayramda işləyib',
         'weekend_worked' => 'həftəsonu işləyib',
-        'manual_absence' => 'manual yoxluq',
+        'manual_absence' => 'yoxluq (əl ilə qeyd)',
         'unknown' => 'naməlum',
     ],
 ];

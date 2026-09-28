@@ -5,13 +5,18 @@ namespace Tests\Feature\Payroll;
 use App\Models\CompensationRegime;
 use App\Models\EmployeeBankAccount;
 use App\Models\Personnel;
+use App\Models\User;
 use App\Modules\Compensation\Application\Services\CompensationService;
 use App\Modules\Payroll\Application\Services\PayrollExportService;
 use App\Modules\Payroll\Application\Services\PayrollPeriodService;
 use App\Modules\Payroll\Application\Services\PayrollRunService;
+use App\Modules\Payroll\Livewire\Dashboard;
+use App\Modules\Payroll\Livewire\Tabs\PayslipsTab;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 class PayrollExportTest extends TestCase
@@ -64,6 +69,66 @@ class PayrollExportTest extends TestCase
         $this->assertSame('125.00', $row['income_tax']);
         $this->assertSame('286.00', $row['dsmf_ee']);
         $this->assertSame('52.50', $row['medical_er']);
+    }
+
+    public function test_amount_bearing_exports_need_the_amounts_permission(): void
+    {
+        $personnel = $this->makePersonnel('mask@example.test');
+        $regimeId = CompensationRegime::where('code', 'private')->value('id');
+        app(CompensationService::class)->assignCompensation(
+            $personnel->tabel_no,
+            ['regime_id' => $regimeId, 'base_amount' => 3000, 'effective_from' => '2026-06-01'],
+        );
+        EmployeeBankAccount::create([
+            'tabel_no' => $personnel->tabel_no,
+            'iban' => 'AZ21NABZ00000000137010001944',
+            'bank_name' => 'Test Bank',
+            'is_primary' => true,
+            'is_active' => true,
+        ]);
+        $period = app(PayrollPeriodService::class)->createPeriod(2026, 6);
+        $runService = app(PayrollRunService::class);
+        $run = $runService->calculate($runService->createRun($period, $regimeId));
+
+        // Exporter who sees "•••" on screen.
+        $user = User::factory()->create();
+        foreach (['show-payroll', 'export-payroll'] as $perm) {
+            $user->givePermissionTo(Permission::findOrCreate($perm, 'web'));
+        }
+        $this->actingAs($user);
+
+        foreach (['exportBankFile', 'exportGl', 'exportStateReport'] as $method) {
+            Livewire::test(Dashboard::class)->call($method, $run->id)->assertForbidden();
+        }
+
+        $csv = $this->csvOf(Livewire::test(Dashboard::class)->call('exportBankCsv', $run->id));
+        $this->assertStringContainsString('•••', $csv);
+        $this->assertStringNotContainsString('2521.50', $csv);
+
+        // Only the masked CSV is offered, in the shell and on the payslips tab.
+        $shell = Livewire::test(Dashboard::class)->set('periodFilter', $period->id);
+        $shell->assertSeeHtml("exportBankCsv({$run->id})");
+        foreach (['exportBankFile', 'exportGl', 'exportStateReport'] as $method) {
+            $shell->assertDontSeeHtml("{$method}({$run->id})");
+            Livewire::test(PayslipsTab::class, ['runId' => $run->id])->assertDontSeeHtml("\$parent.{$method}({$run->id})");
+        }
+
+        // With the amounts permission every export carries the real figures.
+        $user->givePermissionTo(Permission::findOrCreate('view-compensation-amounts', 'web'));
+        $user->forgetCachedPermissions();
+
+        Livewire::test(Dashboard::class)->call('exportBankFile', $run->id)->assertFileDownloaded('payroll-bank-file.xlsx');
+        Livewire::test(Dashboard::class)->call('exportGl', $run->id)->assertFileDownloaded('payroll-gl.xlsx');
+        Livewire::test(Dashboard::class)->call('exportStateReport', $run->id)->assertFileDownloaded('payroll-state-report.xlsx');
+        $this->assertStringContainsString('2521.50', $this->csvOf(Livewire::test(Dashboard::class)->call('exportBankCsv', $run->id)));
+    }
+
+    private function csvOf($component): string
+    {
+        $download = data_get($component->effects, 'download');
+        $this->assertSame('payroll-bank-file.csv', $download['name'] ?? null);
+
+        return base64_decode($download['content']);
     }
 
     private function makePersonnel(string $email): Personnel

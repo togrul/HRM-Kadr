@@ -11,11 +11,11 @@ return [
         'total' => 'Total logs',
         'today' => 'Today',
         'profile_opened' => 'Profile views',
-        'users' => 'Users',
+        'users' => 'User actions',
     ],
     'filters' => [
         'search' => 'Search',
-        'search_placeholder' => 'Text, event, model, or log name...',
+        'search_placeholder' => 'Text, event, user or employee name...',
         'log_name' => 'Log type',
         'event' => 'Event',
         'from' => 'From',

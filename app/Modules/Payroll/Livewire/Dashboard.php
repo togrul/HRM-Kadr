@@ -118,6 +118,17 @@ class Dashboard extends Component
         return auth()->user()?->can('export-payroll') ?? false;
     }
 
+    public function canViewAmounts(): bool
+    {
+        return auth()->user()?->can('view-compensation-amounts') ?? false;
+    }
+
+    /** Bank file, GL and state report carry nothing but amounts, so they need both permissions. */
+    public function canExportAmounts(): bool
+    {
+        return $this->canExport() && $this->canViewAmounts();
+    }
+
     protected function fieldLabelPrefix(): string
     {
         return 'payroll::dashboard.fields.';
@@ -129,7 +140,7 @@ class Dashboard extends Component
 
     public function exportBankFile(int $runId, PayrollExportService $service): BinaryFileResponse
     {
-        abort_unless($this->canExport(), 403);
+        abort_unless($this->canExportAmounts(), 403);
 
         return $this->downloadReportTable(
             $service->bankRows(PayrollRun::findOrFail($runId)),
@@ -150,13 +161,14 @@ class Dashboard extends Component
         abort_unless($this->canExport(), 403);
 
         $rows = $service->bankRows(PayrollRun::findOrFail($runId));
+        $masked = ! $this->canViewAmounts();
         $headers = ['tabel_no', 'full_name', 'iban', 'bank_name', 'amount', 'currency'];
 
-        return response()->streamDownload(function () use ($rows, $headers): void {
+        return response()->streamDownload(function () use ($rows, $headers, $masked): void {
             $out = fopen('php://output', 'w');
             fputcsv($out, $headers);
             foreach ($rows as $row) {
-                fputcsv($out, [$row['tabel_no'], $row['full_name'], $row['iban'], $row['bank_name'], $row['amount'], $row['currency']]);
+                fputcsv($out, [$row['tabel_no'], $row['full_name'], $row['iban'], $row['bank_name'], $masked ? '•••' : $row['amount'], $row['currency']]);
             }
             fclose($out);
         }, 'payroll-bank-file.csv', ['Content-Type' => 'text/csv']);
@@ -164,7 +176,7 @@ class Dashboard extends Component
 
     public function exportGl(int $runId, PayrollExportService $service): BinaryFileResponse
     {
-        abort_unless($this->canExport(), 403);
+        abort_unless($this->canExportAmounts(), 403);
 
         return $this->downloadReportTable(
             $service->glRows(PayrollRun::findOrFail($runId)),
@@ -181,7 +193,7 @@ class Dashboard extends Component
 
     public function exportStateReport(int $runId, PayrollExportService $service): BinaryFileResponse
     {
-        abort_unless($this->canExport(), 403);
+        abort_unless($this->canExportAmounts(), 403);
 
         return $this->downloadReportTable(
             $service->stateRows(PayrollRun::findOrFail($runId)),

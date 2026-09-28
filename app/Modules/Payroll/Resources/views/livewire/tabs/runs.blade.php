@@ -58,15 +58,15 @@
                                     'period' => $this->periodLabel($run->period),
                                     'count' => $num($run->employee_count),
                                     'total' => $money($run->net_total),
-                                    'currency' => $periodCurrency ?? 'AZN',
+                                    'currency' => $run->period?->currency ?? 'AZN',
                                 ]) }}">{{ __('payroll::dashboard.actions.approve') }}</x-pill-button>
                             @endif
 
-                            @if ($this->canLock() && in_array($run->status, ['calculated', 'approved'], true))
+                            @if ($this->canLock() && $run->status === 'approved')
                                 <x-pill-button variant="primary" x-on:click="{{ $confirm('emerald', 'lock', 'lock', 'lockRun('.$run->id.')') }}">{{ __('payroll::dashboard.actions.lock') }}</x-pill-button>
                             @endif
 
-                            @if ($this->canLock() && $run->status === 'locked')
+                            @if ($this->canLock() && in_array($run->status, ['approved', 'locked'], true))
                                 <x-pill-button variant="secondary" x-on:click="{{ $confirm('amber', 'reopen', 'reopen', 'reopenRun('.$run->id.')') }}">{{ __('payroll::dashboard.actions.reopen') }}</x-pill-button>
                             @endif
 

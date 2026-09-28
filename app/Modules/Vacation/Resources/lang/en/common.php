@@ -3,7 +3,6 @@
 return [
     'titles' => [
         'vacations' => 'Vacations',
-        'requests' => 'Vacation requests',
     ],
     'labels' => [
         'year' => 'Year',

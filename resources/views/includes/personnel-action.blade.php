@@ -169,7 +169,7 @@
 
     {{-- Sticky: the actions stay in reach however long the step is. --}}
     <div class="sticky bottom-0 z-20 -mb-4 flex w-full items-center justify-between gap-3 border-t border-hairline bg-white/95 py-3 backdrop-blur supports-[backdrop-filter]:bg-white/80">
-        @if(! auth()->user()->can('update-personnels') && isset($personnelModel))
+        @if(! auth()->user()->can('edit-personnels') && isset($personnelModel))
             <div class="flex items-center space-x-2">
                 <x-icons.lock-icon color="text-rose-500" hover="text-rose-600" size="w-7 h-7"></x-icons.lock-icon>
                 <span class="text-sm text-zinc-500">{{ __('personnel::common.messages.no_permission_to_edit') }}</span>

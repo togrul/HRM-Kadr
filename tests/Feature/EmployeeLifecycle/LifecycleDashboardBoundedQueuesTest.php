@@ -154,6 +154,22 @@ class LifecycleDashboardBoundedQueuesTest extends TestCase
             ->assertSeeHtml('Surname');
     }
 
+    public function test_movement_completion_is_confirmed_with_the_employee_name_and_pickers_are_labelled(): void
+    {
+        self::seedLargeFixture(3);
+        $this->actingAs($this->manager());
+        $movementId = (int) DB::table('employee_lifecycle_movements')->whereNotIn('status', ['completed', 'cancelled'])->value('id');
+
+        Livewire::test(Dashboard::class)
+            ->call('completeFromQueue', 'movement', $movementId)
+            ->assertSeeHtml('run: () => $wire.completeMovement()')
+            ->assertSee(__('employee-lifecycle::dashboard.fields.movement'))
+            ->assertSee(__('employee-lifecycle::dashboard.fields.probation_review'))
+            ->assertSee(__('employee-lifecycle::dashboard.fields.probation_decision'))
+            ->assertSee(__('employee-lifecycle::dashboard.fields.offboarding_case'))
+            ->assertDontSeeHtml('wire:submit="completeMovement"');
+    }
+
     private function manager(): User
     {
         foreach (['show-employee-lifecycle', 'manage-employee-lifecycle'] as $permission) {

@@ -1,5 +1,6 @@
     @if ($activeTab === 'matrix')
         <div class="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
+            @if ($this->canManageTrainingNeeds)
             <x-surface-card :title="__('training_needs::dashboard.cards.requirement_matrix')" icon="icons.profile-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
                 <div class="grid gap-3 md:grid-cols-2">
                     <div class="md:col-span-2">
@@ -59,6 +60,7 @@
                     </div>
                 </div>
             </x-surface-card>
+            @endif
 
             <x-surface-card :title="__('training_needs::dashboard.cards.recent_requirements')" icon="icons.folder-plus-icon">
                 <div class="space-y-3">
@@ -71,7 +73,7 @@
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <x-small-badge mode="blue">{{ $requirement->requiredLevel?->name ?? '---' }}</x-small-badge>
-                                    <x-small-badge mode="{{ $requirement->priority === 'high' ? 'red' : ($requirement->priority === 'medium' ? 'green' : 'secondary') }}">
+                                    <x-small-badge mode="{{ $requirement->priority === 'high' ? 'red' : ($requirement->priority === 'medium' ? 'amber' : 'secondary') }}">
                                         {{ __('training_needs::dashboard.priorities.'.$requirement->priority) }}
                                     </x-small-badge>
                                 </div>

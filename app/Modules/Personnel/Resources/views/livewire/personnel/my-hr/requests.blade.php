@@ -80,7 +80,7 @@
                 <span class="{{ $labelClass }}">{{ __('personnel::my_hr.requests.fields.status') }}</span>
                 <x-ui.select wire:model.live="statusFilter">
                     <option value="all">{{ __('personnel::my_hr.requests.filters.all') }}</option>
-                    @foreach (['pending', 'approved', 'upcoming', 'active', 'completed', 'cancelled', 'deleted'] as $status)
+                    @foreach (['pending', 'approved', 'upcoming', 'active', 'completed', 'rejected', 'cancelled', 'deleted'] as $status)
                         <option value="{{ $status }}">{{ __('personnel::my_hr.requests.status.'.$status) }}</option>
                     @endforeach
                 </x-ui.select>

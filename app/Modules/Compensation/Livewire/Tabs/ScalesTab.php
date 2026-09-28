@@ -171,6 +171,7 @@ class ScalesTab extends CompensationTab
 
     public function editScale(int $id): void
     {
+        $this->guardManage();
         $scale = PayScale::findOrFail($id);
         $this->editingScaleId = $scale->id;
         $this->panel = 'scale';
@@ -273,6 +274,7 @@ class ScalesTab extends CompensationTab
 
     public function editGrade(int $id): void
     {
+        $this->guardManage();
         $grade = PayGrade::findOrFail($id);
         $this->selectedScaleId = $grade->pay_scale_id;
         $this->editingGradeId = $grade->id;
@@ -280,7 +282,8 @@ class ScalesTab extends CompensationTab
         $this->gradeForm = [
             'code' => $grade->code,
             'name' => $grade->name,
-            'base_amount' => (string) $grade->base_amount,
+            // Never ship a masked amount to the browser; such users cannot change it either.
+            'base_amount' => $this->canViewAmounts() ? (string) $grade->base_amount : '',
             'rank_category_id' => $grade->rank_category_id,
             'position_id' => $grade->position_id,
             'sort' => $grade->sort,
@@ -293,14 +296,18 @@ class ScalesTab extends CompensationTab
         $this->guardManage();
         abort_unless($this->selectedScaleId !== null, 422);
 
-        $data = $this->validate([
+        // A grade is its amount: without the amounts permission one can only edit the other fields.
+        $amounts = $this->canViewAmounts();
+        abort_unless($amounts || $this->editingGradeId !== null, 403);
+
+        $data = $this->validate(array_filter([
             'gradeForm.code' => 'required|string|max:64',
             'gradeForm.name' => 'required|string|max:255',
-            'gradeForm.base_amount' => 'required|numeric|min:0',
+            'gradeForm.base_amount' => $amounts ? 'required|numeric|min:0' : null,
             'gradeForm.rank_category_id' => 'nullable|exists:rank_categories,id',
             'gradeForm.position_id' => 'nullable|exists:positions,id',
             'gradeForm.sort' => 'nullable|integer|min:0',
-        ], attributes: $this->fieldLabels([
+        ]), attributes: $this->fieldLabels([
             'gradeForm.code' => 'code',
             'gradeForm.name' => 'name',
             'gradeForm.base_amount' => 'base_amount',

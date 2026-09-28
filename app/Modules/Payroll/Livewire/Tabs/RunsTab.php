@@ -9,7 +9,6 @@ use App\Models\PayslipLine;
 use App\Modules\Payroll\Application\Services\PayrollRunService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Reactive;
 
@@ -112,49 +111,46 @@ class RunsTab extends PayrollTab
     {
         abort_unless($this->canManage(), 403);
 
-        $service->calculate(PayrollRun::findOrFail($runId));
-        $this->dispatch('payroll-run-focused', runId: $runId);
-        $this->announce('calculated');
+        if ($this->attempt(fn () => $service->calculate(PayrollRun::findOrFail($runId)))) {
+            $this->dispatch('payroll-run-focused', runId: $runId);
+            $this->announce('calculated');
+        }
     }
 
     public function approveRun(int $runId, PayrollRunService $service): void
     {
         abort_unless($this->canApprove(), 403);
 
-        $service->approve(PayrollRun::findOrFail($runId));
-        $this->announce('approved');
+        if ($this->attempt(fn () => $service->approve(PayrollRun::findOrFail($runId)))) {
+            $this->announce('approved');
+        }
     }
 
     public function lockRun(int $runId, PayrollRunService $service): void
     {
         abort_unless($this->canLock(), 403);
 
-        try {
-            $service->lock(PayrollRun::findOrFail($runId));
-        } catch (ValidationException $exception) {
-            $this->dispatch('notify', type: 'error', message: collect($exception->errors())->flatten()->first());
-
-            return;
+        if ($this->attempt(fn () => $service->lock(PayrollRun::findOrFail($runId)))) {
+            $this->announce('locked');
         }
-
-        $this->announce('locked');
     }
 
     public function reopenRun(int $runId, PayrollRunService $service): void
     {
         abort_unless($this->canLock(), 403);
 
-        $service->reopen(PayrollRun::findOrFail($runId));
-        $this->announce('reopened');
+        if ($this->attempt(fn () => $service->reopen(PayrollRun::findOrFail($runId)))) {
+            $this->announce('reopened');
+        }
     }
 
-    public function deleteRun(int $runId): void
+    public function deleteRun(int $runId, PayrollRunService $service): void
     {
         abort_unless($this->canManage(), 403);
 
-        PayrollRun::whereKey($runId)->delete();
-
-        $this->dispatch('payroll-run-deleted', runId: $runId);
-        $this->announce('deleted');
+        if ($this->attempt(fn () => $service->deleteRun(PayrollRun::findOrFail($runId)))) {
+            $this->dispatch('payroll-run-deleted', runId: $runId);
+            $this->announce('deleted');
+        }
     }
 }

@@ -6,6 +6,7 @@ use App\Models\PayrollPeriod;
 use App\Support\Livewire\LabelsValidationFields;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Js;
+use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 
 /**
@@ -62,6 +63,22 @@ abstract class PayrollTab extends Component
     protected function fieldLabelPrefix(): string
     {
         return 'payroll::dashboard.fields.';
+    }
+
+    /**
+     * Run a lifecycle step; a refused transition becomes an error toast instead of a 500.
+     */
+    protected function attempt(callable $step): bool
+    {
+        try {
+            $step();
+        } catch (ValidationException $exception) {
+            $this->dispatch('notify', type: 'error', message: collect($exception->errors())->flatten()->first());
+
+            return false;
+        }
+
+        return true;
     }
 
     /**

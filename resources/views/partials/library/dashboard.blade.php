@@ -237,7 +237,7 @@
 
     <x-side-modal>
         @if ($showSideMenu === 'library-create' && $library['can_manage'])
-            <h2 class="text-[17px] font-semibold tracking-[-0.02em] text-ink">{{ __($ns.'.catalog.create_title') }}</h2>
+            <h2 class="text-[17px] font-semibold tracking-[-0.02em] text-ink">{{ __($ns.'.catalog.'.(($library['is_new_version'] ?? false) ? 'version_title' : 'create_title')) }}</h2>
 
             <div class="mt-5 grid gap-4 md:grid-cols-2">
                 @foreach ($library['fields'] as $field)

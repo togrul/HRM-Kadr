@@ -2,34 +2,6 @@
     <x-surface-card :title="__('reports::dashboard.comparisons.title')" icon="icons.pending-icon" class="rounded-2xl border-zinc-200/90 bg-white shadow-card" bodyClass="rounded-b-2xl border-zinc-200/90 bg-[linear-gradient(180deg,#ffffff_0%,#fcfcfd_100%)]" contentClass="p-5 lg:p-6">
         <div class="space-y-4">
             <p class="text-sm leading-7 text-zinc-500">{{ __('reports::dashboard.comparisons.description') }}</p>
-
-            <div class="grid gap-4 md:grid-cols-3">
-                <div>
-                    <label class="mb-1 block text-xs font-medium text-zinc-500">{{ __('reports::dashboard.fields.year') }}</label>
-                    <x-ui.select wire:model.live="year">
-                        @foreach (range(now()->year - 4, now()->year + 1) as $yearOption)
-                            <option value="{{ $yearOption }}">{{ $yearOption }}</option>
-                        @endforeach
-                    </x-ui.select>
-                </div>
-                <div>
-                    <label class="mb-1 block text-xs font-medium text-zinc-500">{{ __('reports::dashboard.fields.month') }}</label>
-                    <x-ui.select wire:model.live="month">
-                        @foreach (range(1, 12) as $monthOption)
-                            <option value="{{ $monthOption }}">{{ \Carbon\Carbon::create()->month($monthOption)->translatedFormat('F') }}</option>
-                        @endforeach
-                    </x-ui.select>
-                </div>
-                <div>
-                    <label class="mb-1 block text-xs font-medium text-zinc-500">{{ __('reports::dashboard.fields.structure') }}</label>
-                    <x-ui.select wire:model.live="structureId">
-                        <option value="">{{ __('reports::dashboard.labels.all_structures') }}</option>
-                        @foreach ($structureOptions as $option)
-                            <option value="{{ $option['id'] }}">{{ $option['label'] }}</option>
-                        @endforeach
-                    </x-ui.select>
-                </div>
-            </div>
         </div>
     </x-surface-card>
 

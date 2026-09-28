@@ -17,6 +17,7 @@ return [
         'empty' => 'No loans',
         'active' => ':count active',
         'select_personnel' => 'Select an employee to manage loans.',
+        'search_personnel' => 'Find an employee for a loan or advance',
         'types' => [
             'loan' => 'Loan',
             'advance' => 'Advance',
@@ -91,6 +92,8 @@ return [
         'lock' => 'Lock',
         'reopen' => 'Reopen',
         'close' => 'Close',
+        'clear' => 'Clear',
+        'print' => 'Print',
         'save' => 'Save',
         'delete' => 'Delete',
     ],
@@ -166,6 +169,10 @@ return [
         'reopened' => 'Reopened',
         'deleted' => 'Deleted',
         'saved' => 'Saved',
-        'recalculate_first' => 'One-off earnings changed after this run was calculated — recalculate before locking',
+        'not_editable' => 'An approved or locked run cannot be recalculated or deleted',
+        'approve_requires_calculated' => 'Only a calculated run can be approved',
+        'lock_requires_approval' => 'The run must be approved before it can be locked',
+        'reopen_not_allowed' => 'Only an approved or locked run can be reopened',
+        'recalculate_first' => 'One-off earnings changed after this run was calculated — reopen and recalculate it',
     ],
 ];

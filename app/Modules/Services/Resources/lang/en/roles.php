@@ -21,6 +21,8 @@ return [
     'messages' => [
         'role_saved' => 'Role was updated successfully!',
         'role_deleted' => 'Role was deleted!',
+        'admin_role_protected' => 'The admin role cannot be deleted.',
+        'role_has_users' => 'This role is assigned to users. Assign them another role before deleting it.',
         'permission_saved' => 'Permission was added successfully!',
         'permission_deleted' => 'Permission was deleted!',
         'permission_assigned' => 'Permission was added to role successfully!',

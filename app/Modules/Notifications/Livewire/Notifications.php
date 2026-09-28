@@ -3,6 +3,7 @@
 namespace App\Modules\Notifications\Livewire;
 
 use App\Modules\Notifications\Support\NotificationCountCache;
+use App\Modules\Notifications\Support\NotificationTarget;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Http\Response;
@@ -92,13 +93,7 @@ class Notifications extends Component
 
         $user = auth()->user();
         $notification = $user->notifications()->whereKey($notificationId)->firstOrFail();
-        $type = $notification->data['type'] ?? 'default';
-
-        $route = match ($type) {
-            'Personnel', 'Birthday' => 'home',
-            'Leave', 'leave' => 'leaves',
-            default => 'notifications',
-        };
+        $route = NotificationTarget::route((array) $notification->data);
 
         $notification->markAsRead();
         app(NotificationCountCache::class)->forgetUser((int) $user->id);

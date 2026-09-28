@@ -1,4 +1,5 @@
     @if ($activeTab === 'profiles')
+        @if ($this->canManageTrainingNeeds)
         <div class="grid gap-4 xl:grid-cols-2">
             <x-surface-card :title="__('training_needs::dashboard.cards.employee_profiles')" icon="icons.profile-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
                 <div class="grid gap-3 md:grid-cols-2">
@@ -160,6 +161,7 @@
                 </div>
             </x-surface-card>
         </div>
+        @endif
 
         <div class="grid gap-4 xl:grid-cols-2">
             <x-surface-card :title="__('training_needs::dashboard.cards.recent_profiles')" icon="icons.profile-outline-icon">
@@ -189,7 +191,7 @@
             <x-surface-card :title="__('training_needs::dashboard.cards.need_queue')" icon="icons.pending-icon">
                 <div class="space-y-3">
                     @forelse ($this->recentNeeds as $need)
-                        <x-ui.list-card :tone="$need->priority === 'high' ? 'rose' : ($need->priority === 'medium' ? 'sky' : 'neutral')">
+                        <x-ui.list-card :tone="$need->priority === 'high' ? 'rose' : ($need->priority === 'medium' ? 'amber' : 'neutral')">
                             <div class="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
                                 <div>
                                     <p class="text-sm font-semibold text-zinc-900">{{ $need->personnel?->fullname ?? '---' }}</p>
@@ -199,7 +201,7 @@
                                     @endif
                                 </div>
                                 <div class="flex flex-wrap items-center gap-2">
-                                    <x-small-badge mode="{{ $need->priority === 'high' ? 'red' : ($need->priority === 'medium' ? 'green' : 'secondary') }}">
+                                    <x-small-badge mode="{{ $need->priority === 'high' ? 'red' : ($need->priority === 'medium' ? 'amber' : 'secondary') }}">
                                         {{ __('training_needs::dashboard.priorities.'.$need->priority) }}
                                     </x-small-badge>
                                     @if ($need->source === 'performance_gap')

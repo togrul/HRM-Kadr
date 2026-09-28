@@ -67,6 +67,29 @@ class MyHrNotificationsTest extends TestCase
         $this->assertSame(0, $user->fresh()->notifications()->count());
     }
 
+    public function test_clearing_the_cabinet_keeps_hr_operator_notifications(): void
+    {
+        $this->seedReferenceData();
+
+        $user = User::factory()->create(['is_active' => true, 'email' => 'employee@example.test']);
+        $user->givePermissionTo(Permission::findOrCreate('show-my-hr', 'web'));
+        $personnel = $this->makePersonnel($user->email);
+
+        $this->seedUserNotification($user, ['name' => 'Kabinet bildirişi'], null, 10);
+        $operator = $this->seedUserNotification($user, ['name' => 'Yeni əməkdaş əlavə edildi'], null, 20);
+        $operator->forceFill(['type' => \App\Notifications\NewPersonnelAdded::class])->save();
+
+        $this->actingAs($user);
+
+        Livewire::test(MyHrNotifications::class, ['personnelId' => $personnel->id])
+            ->assertSee('Kabinet bildirişi')
+            ->assertDontSee('Yeni əməkdaş əlavə edildi')
+            ->call('clearNotifications');
+
+        $this->assertSame([$operator->id], $user->fresh()->notifications()->pluck('id')->all());
+        $this->assertNull($operator->fresh()->read_at);
+    }
+
     private function seedUserNotification(User $user, array $data = [], ?string $readAt = null, ?int $minutesAgo = null): DatabaseNotification
     {
         $createdAt = now();

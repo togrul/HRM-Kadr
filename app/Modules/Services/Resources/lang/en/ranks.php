@@ -19,6 +19,7 @@ return [
         'created' => 'Rank was added successfully!',
         'updated' => 'Rank was updated successfully!',
         'deleted' => 'Rank was deleted!',
+        'in_use' => 'This rank is used in personnel records and cannot be deleted.',
         'delete_description' => 'Are you sure you want to delete this data? This action cannot be undone.',
     ],
 ];

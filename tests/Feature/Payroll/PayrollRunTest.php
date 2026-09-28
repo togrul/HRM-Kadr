@@ -17,8 +17,8 @@ use App\Modules\Payroll\Livewire\Tabs\RunsTab;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
-use RuntimeException;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
@@ -71,7 +71,7 @@ class PayrollRunTest extends TestCase
         $period = app(PayrollPeriodService::class)->createPeriod(2026, 5);
         $runService = app(PayrollRunService::class);
         $run = $runService->calculate($runService->createRun($period, $regimeId));
-        $run = $runService->lock($run);
+        $run = $runService->lock($runService->approve($run));
 
         $this->assertSame('locked', $run->status);
         $payslip = $run->payslips()->first();
@@ -80,7 +80,7 @@ class PayrollRunTest extends TestCase
         $this->assertSame('800.00', (string) $payslip->snapshot['gross']);
         $this->assertNotEmpty($payslip->snapshot['lines']);
 
-        $this->expectException(RuntimeException::class);
+        $this->expectException(ValidationException::class);
         $runService->calculate($run);
     }
 
@@ -157,6 +157,13 @@ class PayrollRunTest extends TestCase
             ->call('calculateRun', $runId)
             ->assertDispatched('payroll-run-focused', runId: $runId)
             ->assertDispatched('payroll-updated')
+            ->call('lockRun', $runId)
+            ->assertDispatched('notify', type: 'error', message: __('payroll::dashboard.messages.lock_requires_approval'));
+
+        $this->assertSame('calculated', PayrollRun::find($runId)->status);
+
+        Livewire::test(RunsTab::class, ['periodFilter' => $periodId])
+            ->call('approveRun', $runId)
             ->call('lockRun', $runId);
 
         $this->assertSame('locked', PayrollRun::find($runId)->status);
@@ -186,6 +193,101 @@ class PayrollRunTest extends TestCase
         $this->assertStringContainsString('confirm-action', $html);
         $this->assertStringContainsString('943,50', $html);
         $this->assertStringContainsString(e(e($period->starts_on->translatedFormat('F Y'))), $html);
+    }
+
+    public function test_approved_run_is_frozen_until_reopened(): void
+    {
+        $personnel = $this->makePersonnel('sm@example.test');
+        $regimeId = CompensationRegime::where('code', 'private')->value('id');
+        $this->assignCompensation($personnel->tabel_no, $regimeId, 1000, 0);
+
+        $period = app(PayrollPeriodService::class)->createPeriod(2026, 4);
+        $runService = app(PayrollRunService::class);
+        $run = $runService->approve($runService->calculate($runService->createRun($period, $regimeId)));
+        $payslipId = $run->payslips()->value('id');
+
+        $user = \App\Models\User::factory()->create();
+        foreach (['show-payroll', 'manage-payroll', 'approve-payroll', 'lock-payroll'] as $perm) {
+            $user->givePermissionTo(Permission::findOrCreate($perm, 'web'));
+        }
+        $this->actingAs($user);
+
+        $tab = Livewire::test(RunsTab::class, ['periodFilter' => $period->id]);
+        $html = $tab->html();
+        $this->assertStringNotContainsString("calculateRun({$run->id})", $html);
+        $this->assertStringNotContainsString("deleteRun({$run->id})", $html);
+        $this->assertStringContainsString("lockRun({$run->id})", $html);
+
+        $tab->call('calculateRun', $run->id)
+            ->assertDispatched('notify', type: 'error', message: __('payroll::dashboard.messages.not_editable'))
+            ->call('deleteRun', $run->id)
+            ->assertNotDispatched('payroll-run-deleted');
+        Livewire::test(PayslipsTab::class, ['runId' => $run->id])
+            ->assertDontSeeHtml("deletePayslip({$payslipId})")
+            ->call('deletePayslip', $payslipId);
+
+        $this->assertSame('approved', $run->fresh()->status);
+        $this->assertDatabaseHas('payslips', ['id' => $payslipId]);
+
+        // Reopen sends it back to calculated; a calculated run cannot be locked directly.
+        $tab->call('reopenRun', $run->id);
+        $this->assertSame('calculated', $run->fresh()->status);
+        $this->assertStringNotContainsString("lockRun({$run->id})", Livewire::test(RunsTab::class, ['periodFilter' => $period->id])->html());
+
+        $this->expectException(ValidationException::class);
+        $runService->lock($run->fresh());
+    }
+
+    public function test_approve_dialog_uses_the_runs_own_period_currency(): void
+    {
+        $personnel = $this->makePersonnel('cur@example.test');
+        $regimeId = CompensationRegime::where('code', 'private')->value('id');
+        $this->assignCompensation($personnel->tabel_no, $regimeId, 1000, 0);
+
+        $period = app(PayrollPeriodService::class)->createPeriod(2026, 3);
+        $period->update(['currency' => 'USD']);
+        $runService = app(PayrollRunService::class);
+        $runService->calculate($runService->createRun($period, $regimeId));
+
+        $user = \App\Models\User::factory()->create();
+        foreach (['show-payroll', 'approve-payroll', 'view-compensation-amounts'] as $perm) {
+            $user->givePermissionTo(Permission::findOrCreate($perm, 'web'));
+        }
+        $this->actingAs($user);
+
+        // The shell's selected period (and its currency) differs from the run's.
+        $html = Livewire::test(RunsTab::class, ['periodCurrency' => 'EUR'])->html();
+
+        // The confirmation text ends with ":total :currency. …".
+        $this->assertStringContainsString('USD. ', $html);
+        $this->assertStringNotContainsString('EUR. ', $html);
+    }
+
+    public function test_payslip_and_loan_controls_use_their_own_wording(): void
+    {
+        $personnel = $this->makePersonnel('lbl@example.test');
+        $regimeId = CompensationRegime::where('code', 'private')->value('id');
+        $this->assignCompensation($personnel->tabel_no, $regimeId, 1000, 0);
+
+        $period = app(PayrollPeriodService::class)->createPeriod(2026, 8);
+        $runService = app(PayrollRunService::class);
+        $run = $runService->lock($runService->approve($runService->calculate($runService->createRun($period, $regimeId))));
+
+        $user = \App\Models\User::factory()->create();
+        foreach (['show-payroll', 'manage-payroll'] as $perm) {
+            $user->givePermissionTo(Permission::findOrCreate($perm, 'web'));
+        }
+        $this->actingAs($user);
+
+        Livewire::test(PayslipsTab::class, ['runId' => $run->id])
+            ->call('viewPayslip', $run->payslips()->value('id'))
+            ->assertSee(__('payroll::dashboard.actions.print'))
+            ->assertDontSee('(PDF)');
+
+        Livewire::test(LoansTab::class)
+            ->assertSeeHtml(e(__('payroll::dashboard.loans.search_personnel')))
+            ->call('selectPersonnel', $personnel->tabel_no, 'Jane Doe')
+            ->assertSee(__('payroll::dashboard.actions.clear'));
     }
 
     public function test_manager_can_delete_payslip_run_and_period(): void

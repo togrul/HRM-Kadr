@@ -31,7 +31,7 @@
             </x-pill-button>
             @if ($opening->requisition)
                 <x-pill-button :href="route('candidates.requisitions.show', $opening->requisition)" wire:navigate>
-                    {{ __('candidates::recruitment.actions.open_requisitions') }}
+                    {{ __('candidates::recruitment.actions.open_requisition') }}
                 </x-pill-button>
             @endif
             @can('create', App\Models\CandidateApplication::class)

@@ -23,6 +23,8 @@ class AddStaff extends Component
         $this->authorize('create', StaffSchedule::class);
 
         if (empty($this->staff)) {
+            $this->addError('staff', __('staff::common.messages.at_least_one_row'));
+
             return;
         }
 

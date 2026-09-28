@@ -42,6 +42,8 @@ return [
         'expand_panel' => 'Paneli aç',
         'open_menu' => 'Menyunu aç',
         'breadcrumb_root' => 'Kadr İdarəetməsi',
+        'user_guide' => 'İstifadə təlimatı',
+        'opens_in_new_tab' => 'yeni tabda açılır',
         'more_actions' => 'Digər əməliyyatlar',
         'status' => 'Status',
         'saved_views' => 'Saxlanmış görünüşlər',

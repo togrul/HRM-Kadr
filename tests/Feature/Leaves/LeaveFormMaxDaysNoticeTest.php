@@ -68,6 +68,21 @@ class LeaveFormMaxDaysNoticeTest extends TestCase
             ->assertHasErrors(['leave.document_path']);
     }
 
+    public function test_reason_is_required_and_shown_under_the_field(): void
+    {
+        $this->actingAs($this->userWithCreatePermission());
+
+        Livewire::test(AddLeave::class)
+            ->call('store')
+            ->assertHasErrors(['leave.reason' => 'required'])
+            ->set('leave.reason', 'ab')
+            ->call('store')
+            ->assertHasErrors(['leave.reason' => 'min'])
+            ->set('leave.reason', 'Ailə vəziyyəti')
+            ->call('store')
+            ->assertHasNoErrors(['leave.reason']);
+    }
+
     public function test_disallowed_document_type_is_rejected(): void
     {
         $this->actingAs($this->userWithCreatePermission());

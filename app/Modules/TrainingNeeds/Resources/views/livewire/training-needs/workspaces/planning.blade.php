@@ -1,5 +1,6 @@
     @if ($activeTab === 'planning')
         <div class="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
+            @if ($this->canManageTrainingNeeds)
             <x-surface-card :title="__('training_needs::dashboard.cards.annual_planning_board')" icon="icons.training-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
                 @if ($editingPlanId)
                     <div class="mb-4 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800">
@@ -60,6 +61,7 @@
                     </div>
                 </div>
             </x-surface-card>
+            @endif
 
             <x-surface-card :title="__('training_needs::dashboard.cards.recent_plans')" icon="icons.pending-icon">
                 <div class="space-y-3">
@@ -74,8 +76,10 @@
                             </div>
                             <p class="mt-2 text-xs text-zinc-500">{{ __('training_needs::dashboard.labels.plan_summary', ['count' => $plan->items_count, 'participants' => $plan->planned_participants, 'budget' => number_format((float) $plan->estimated_budget, 2)]) }}</p>
                             <div class="mt-3 flex flex-wrap gap-2">
+                                @if ($this->canManageTrainingNeeds)
                                 <x-ui.action-pill mode="secondary" wire:click="editPlan({{ $plan->id }})" icon="icons.edit-icon">{{ __('training_needs::dashboard.actions.edit') }}</x-ui.action-pill>
                                 <x-ui.action-pill mode="delete" wire:click="confirmDeletePlan({{ $plan->id }})" icon="icons.delete-icon">{{ __('training_needs::dashboard.actions.delete') }}</x-ui.action-pill>
+                                @endif
                             </div>
                         </x-ui.list-card>
                     @empty
@@ -127,6 +131,7 @@
         </x-surface-card>
 
         @if ($this->selectedPlanItem)
+            @if ($this->canReviewTrainingNeeds)
             <x-surface-card :title="__('training_needs::dashboard.cards.plan_item_review')" icon="icons.profile-outline-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
                 <div class="grid gap-3 md:grid-cols-2">
                     <div class="md:col-span-2">
@@ -172,6 +177,7 @@
                     </div>
                 </div>
             </x-surface-card>
+            @endif
         @endif
 
         <x-surface-card :title="__('training_needs::dashboard.cards.plan_items_board')" icon="icons.profile-outline-icon">
@@ -188,7 +194,7 @@
                                 <x-small-badge :mode="$item->review_status === 'approved' ? 'green' : ($item->review_status === 'hr_adjusted' ? 'sky' : 'secondary')">{{ __('training_needs::dashboard.review_statuses.'.$item->review_status) }}</x-small-badge>
                                 <x-small-badge mode="green">{{ __('training_needs::dashboard.labels.participant_count', ['count' => $item->participant_count]) }}</x-small-badge>
                                 <x-small-badge mode="blue">{{ __('training_needs::dashboard.labels.need_count', ['count' => $item->need_count]) }}</x-small-badge>
-                                <x-small-badge :mode="$item->priority === 'high' ? 'red' : ($item->priority === 'medium' ? 'green' : 'secondary')">{{ __('training_needs::dashboard.priorities.'.$item->priority) }}</x-small-badge>
+                                <x-small-badge :mode="$item->priority === 'high' ? 'red' : ($item->priority === 'medium' ? 'amber' : 'secondary')">{{ __('training_needs::dashboard.priorities.'.$item->priority) }}</x-small-badge>
                                 <x-small-badge mode="sky">{{ __('training_needs::dashboard.labels.suggested_score', ['score' => number_format((float) $item->suggested_score, 1)]) }}</x-small-badge>
                             </div>
                         </div>
@@ -197,9 +203,8 @@
                             <p class="mt-2 text-xs text-zinc-500">{{ __('training_needs::dashboard.labels.review_note_meta', ['note' => $item->review_note]) }}</p>
                         @endif
                         <div class="mt-3 flex flex-wrap gap-2">
-                            <x-button mode="black" wire:click="selectPlanItemForReview({{ $item->id }})">{{ __('training_needs::dashboard.actions.review_plan_item') }}</x-button>
-                            @if ($item->review_status !== 'approved')
-                                <x-button mode="black" wire:click="selectPlanItemForReview({{ $item->id }})">{{ __('training_needs::dashboard.actions.open_review') }}</x-button>
+                            @if ($this->canReviewTrainingNeeds)
+                            <x-button mode="primary" wire:click="selectPlanItemForReview({{ $item->id }})">{{ __('training_needs::dashboard.actions.review_plan_item') }}</x-button>
                             @endif
                         </div>
                     </x-ui.list-card>

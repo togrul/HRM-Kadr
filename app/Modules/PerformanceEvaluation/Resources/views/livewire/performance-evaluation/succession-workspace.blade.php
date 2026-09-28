@@ -134,8 +134,9 @@
                             </p>
                         </div>
                         @can('manage-performance-evaluation')
-                            <button type="button"
-                                x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('performance_evaluation::succession.confirm_delete_plan')), run: () => $wire.deletePlan({{ $plan->id }}) })"
+                            @php $deleteLabel = __('performance_evaluation::succession.remove.plan', ['plan' => $plan->role_title]); @endphp
+                            <button type="button" aria-label="{{ $deleteLabel }}" title="{{ $deleteLabel }}"
+                                x-on:click="$dispatch('confirm-action', { title: @js($deleteLabel), message: @js(__('performance_evaluation::succession.confirm_delete_plan')), confirmText: @js(__('performance_evaluation::succession.remove.delete_action')), tone: 'rose', run: () => $wire.deletePlan({{ $plan->id }}) })"
                                 class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-rose-400 transition hover:bg-rose-50 hover:text-rose-500">
                                 <svg class="h-[17px] w-[17px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
                             </button>
@@ -218,8 +219,9 @@
                             @if ($pool->description)<p class="mt-1 text-[12px] text-zinc-400">{{ $pool->description }}</p>@endif
                         </div>
                         @can('manage-performance-evaluation')
-                            <button type="button"
-                                x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('performance_evaluation::succession.confirm_delete_pool')), run: () => $wire.deletePool({{ $pool->id }}) })"
+                            @php $deleteLabel = __('performance_evaluation::succession.remove.pool', ['pool' => $pool->name]); @endphp
+                            <button type="button" aria-label="{{ $deleteLabel }}" title="{{ $deleteLabel }}"
+                                x-on:click="$dispatch('confirm-action', { title: @js($deleteLabel), message: @js(__('performance_evaluation::succession.confirm_delete_pool')), confirmText: @js(__('performance_evaluation::succession.remove.delete_action')), tone: 'rose', run: () => $wire.deletePool({{ $pool->id }}) })"
                                 class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-rose-400 transition hover:bg-rose-50 hover:text-rose-500">
                                 <svg class="h-[17px] w-[17px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
                             </button>
@@ -319,8 +321,8 @@
                         </div>
                     </div>
                     <div class="mt-8 flex items-center justify-end gap-2.5 border-t border-zinc-100 pt-5">
-                        <button type="button" wire:click="closeSideMenu" class="h-11 rounded-xl border border-zinc-200 px-5 text-sm font-medium text-zinc-600 hover:bg-zinc-50">{{ __('performance_evaluation::succession.actions.cancel') }}</button>
-                        <button type="button" wire:click="saveAssessment" class="h-11 rounded-xl bg-emerald-600 px-6 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 active:scale-[0.98]">{{ __('performance_evaluation::succession.actions.save') }}</button>
+                        <x-pill-button wire:click="closeSideMenu">{{ __('performance_evaluation::succession.actions.cancel') }}</x-pill-button>
+                        <x-pill-button variant="primary" wire:click="saveAssessment">{{ __('performance_evaluation::succession.actions.save') }}</x-pill-button>
                     </div>
                 </div>
             @endif
@@ -385,8 +387,8 @@
                         </div>
                     </div>
                     <div class="mt-8 flex items-center justify-end gap-2.5 border-t border-zinc-100 pt-5">
-                        <button type="button" wire:click="closeSideMenu" class="h-11 rounded-xl border border-zinc-200 px-5 text-sm font-medium text-zinc-600 hover:bg-zinc-50">{{ __('performance_evaluation::succession.actions.cancel') }}</button>
-                        <button type="button" wire:click="savePlan" class="h-11 rounded-xl bg-emerald-600 px-6 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 active:scale-[0.98]">{{ __('performance_evaluation::succession.actions.save') }}</button>
+                        <x-pill-button wire:click="closeSideMenu">{{ __('performance_evaluation::succession.actions.cancel') }}</x-pill-button>
+                        <x-pill-button variant="primary" wire:click="savePlan">{{ __('performance_evaluation::succession.actions.save') }}</x-pill-button>
                     </div>
                 </div>
             @endif
@@ -419,8 +421,8 @@
                         </div>
                     </div>
                     <div class="mt-8 flex items-center justify-end gap-2.5 border-t border-zinc-100 pt-5">
-                        <button type="button" wire:click="closeSideMenu" class="h-11 rounded-xl border border-zinc-200 px-5 text-sm font-medium text-zinc-600 hover:bg-zinc-50">{{ __('performance_evaluation::succession.actions.cancel') }}</button>
-                        <button type="button" wire:click="savePool" class="h-11 rounded-xl bg-emerald-600 px-6 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 active:scale-[0.98]">{{ __('performance_evaluation::succession.actions.save') }}</button>
+                        <x-pill-button wire:click="closeSideMenu">{{ __('performance_evaluation::succession.actions.cancel') }}</x-pill-button>
+                        <x-pill-button variant="primary" wire:click="savePool">{{ __('performance_evaluation::succession.actions.save') }}</x-pill-button>
                     </div>
                 </div>
             @endif

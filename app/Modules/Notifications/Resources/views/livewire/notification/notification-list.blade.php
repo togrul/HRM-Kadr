@@ -91,7 +91,15 @@
 
                 <div class="divide-y divide-hairline-subtle">
                     @foreach ($group['items'] as $notification)
-                        <x-notification.list-item :$notification wire:key="notification-{{ $notification->id }}" />
+                        <x-notification.list-item
+                            :$notification
+                            wire:key="notification-{{ $notification->id }}"
+                            wire:click="open('{{ $notification->id }}')"
+                            x-on:keydown.enter="$wire.open('{{ $notification->id }}')"
+                            role="button"
+                            tabindex="0"
+                            class="cursor-pointer"
+                        />
                     @endforeach
                 </div>
             </section>
