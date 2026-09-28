@@ -13,6 +13,7 @@ use App\Modules\Orders\Infrastructure\Document\OrderIssueService;
 use App\Modules\Orders\Infrastructure\Document\OrderLookupFieldRegistry;
 use App\Modules\Orders\Infrastructure\Document\OrderSubjectResolver;
 use App\Modules\Orders\Livewire\Concerns\InteractsWithOrderSubjectPicker;
+use App\Support\Language\AzerbaijaniDateFormatter;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Storage;
@@ -40,6 +41,7 @@ class OrderComposer extends Component
 
     public string $orderNumber = '';
 
+    /** The order date as the native date input sends it (Y-m-d). */
     public string $orderDate = '';
 
     public string $organizationCity = OrderDraftService::ORGANIZATION_CITY;
@@ -72,6 +74,7 @@ class OrderComposer extends Component
         }
 
         $this->presetCode = $presetCode ?? '';
+        $this->orderDate = now()->format('Y-m-d');
         $this->pickPersonnel($personnelId);
     }
 
@@ -94,7 +97,7 @@ class OrderComposer extends Component
         $this->presetCode = (string) ($snapshot['template_code'] ?? '');
         $this->fields = (array) ($snapshot['fields'] ?? []);
         $this->orderNumber = (string) $order->order_no;
-        $this->orderDate = (string) ($snapshot['order_date_text'] ?? '');
+        $this->orderDate = app(AzerbaijaniDateFormatter::class)->parse((string) ($snapshot['order_date_text'] ?? ''))?->format('Y-m-d') ?? '';
         $this->hasUploadedDocx = ! empty($snapshot['docx_path']);
 
         $this->pickPersonnel(empty($snapshot['personnel_id']) ? null : (int) $snapshot['personnel_id']);
@@ -249,6 +252,12 @@ class OrderComposer extends Component
     {
         $this->authorize('add-orders');
 
+        $this->validate(
+            ['orderDate' => ['required', 'date_format:Y-m-d']],
+            [],
+            ['orderDate' => __('orders::order_composer.labels.date')],
+        );
+
         $template = $this->templateOrError();
         if (! $template) {
             return null;
@@ -354,6 +363,18 @@ class OrderComposer extends Component
         return $errors !== [];
     }
 
+    /**
+     * The date as printed on the order ("14.05.2026-cı il"); the input's raw value when
+     * it cannot be read as a date.
+     */
+    private function documentDate(): string
+    {
+        $dates = app(AzerbaijaniDateFormatter::class);
+        $date = $dates->parse($this->orderDate);
+
+        return $date ? $dates->longDate($date) : $this->orderDate;
+    }
+
     private function composition(): OrderComposition
     {
         return new OrderComposition(
@@ -364,7 +385,7 @@ class OrderComposer extends Component
             hirePositionId: $this->hirePositionId,
             fields: $this->fields,
             orderNumber: $this->orderNumber,
-            orderDate: $this->orderDate,
+            orderDate: $this->documentDate(),
             organizationCity: $this->organizationCity,
             editOrderId: $this->editOrderId,
         );

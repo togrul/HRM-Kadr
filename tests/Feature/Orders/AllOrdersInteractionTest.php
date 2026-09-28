@@ -7,7 +7,9 @@ use App\Models\OrderCategory;
 use App\Models\OrderLog;
 use App\Models\OrderStatus;
 use App\Models\User;
+use App\Modules\Orders\Infrastructure\Document\OrderIssueService;
 use App\Modules\Orders\Livewire\AllOrders;
+use App\Modules\Orders\Livewire\OrderPreview;
 use App\Services\StructureService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -123,5 +125,134 @@ class AllOrdersInteractionTest extends TestCase
         Livewire::test(AllOrders::class)->call('exportExcel');
 
         Excel::assertDownloaded('orders-'.now()->format('d.m.Y H:i').'.xlsx');
+    }
+
+    public function test_each_row_offers_one_status_driven_primary_action(): void
+    {
+        $user = $this->actAsOrderManager();
+
+        $this->docxOrder('DRAFT-1', 10, null, $user);
+        $this->docxOrder('READY-1', 10, 'order-documents/1.docx', $user);
+        $this->docxOrder('DONE-1', 20, 'order-documents/2.docx', $user);
+
+        Livewire::test(AllOrders::class)
+            ->assertSee(__('orders::order_list.status.draft'))
+            ->assertSee(__('orders::order_list.actions.continue'))
+            ->assertSee("\$wire.approveOrder('READY-1')")
+            ->assertSee("printOrder('DONE-1')", false)
+            ->assertSee(__('orders::order_list.actions.duplicate'))
+            ->assertSee("\$wire.deleteOrder('DONE-1')")
+            ->assertSee("openSideMenu('order-preview'", false)
+            ->assertDontSee('wire:confirm', false);
+    }
+
+    public function test_a_draft_cannot_be_approved_from_the_list(): void
+    {
+        $user = $this->actAsOrderManager();
+        $draft = $this->docxOrder('DRAFT-2', 10, null, $user);
+
+        Livewire::test(AllOrders::class)
+            ->call('approveOrder', 'DRAFT-2')
+            ->assertDispatched('orderError');
+
+        $this->assertSame(10, (int) $draft->fresh()->status_id);
+    }
+
+    public function test_duplicate_copies_an_order_as_a_new_draft(): void
+    {
+        $user = $this->actAsOrderManager();
+        $source = $this->docxOrder('214-M', 20, 'order-documents/9.docx', $user, ['var_2' => '19.05.2026-cı il']);
+
+        Livewire::test(AllOrders::class)
+            ->call('duplicateOrder', '214-M')
+            ->assertDispatched('orderAdded')
+            ->call('duplicateOrder', '214-M');
+
+        $copy = OrderLog::where('order_no', '214-M-kopya')->firstOrFail();
+        $this->assertSame(OrderIssueService::STATUS_PENDING, (int) $copy->status_id);
+        $this->assertTrue(OrderIssueService::isDraft($copy));
+        $this->assertSame('ise_qebul', data_get($copy->template_snapshot, 'template_code'));
+        $this->assertSame(['var_2' => '19.05.2026-cı il'], data_get($copy->template_snapshot, 'fields'));
+        $this->assertSame(7, data_get($copy->template_snapshot, 'hire_structure_id'));
+        $this->assertTrue(OrderLog::where('order_no', '214-M-kopya-2')->exists());
+        $this->assertSame(20, (int) $source->fresh()->status_id);
+    }
+
+    public function test_delete_soft_deletes_the_order(): void
+    {
+        $user = $this->actAsOrderManager();
+        $order = $this->docxOrder('DEL-1', 10, null, $user);
+
+        Livewire::test(AllOrders::class)
+            ->call('deleteOrder', 'DEL-1')
+            ->assertDispatched('orderWasDeleted');
+
+        $this->assertSoftDeleted($order);
+    }
+
+    public function test_the_row_preview_opens_in_the_side_panel(): void
+    {
+        $user = $this->actAsOrderManager();
+        $order = $this->docxOrder('PRV-1', 10, null, $user);
+
+        Livewire::test(AllOrders::class)
+            ->call('openSideMenu', 'order-preview', $order->id)
+            ->assertSeeLivewire(OrderPreview::class);
+
+        Livewire::test(OrderPreview::class, ['orderId' => $order->id])
+            ->assertSee('PRV-1')
+            ->assertSee(__('orders::order_list.preview.no_document'));
+    }
+
+    private function actAsOrderManager(): User
+    {
+        foreach ([[10, 'Təsdiq gözləyən'], [20, 'Təsdiqlənmiş'], [30, 'Ləğv edilmiş']] as [$id, $name]) {
+            OrderStatus::query()->firstOrCreate(['id' => $id], ['locale' => 'az', 'name' => $name]);
+        }
+
+        $this->app->instance(StructureService::class, new class extends StructureService
+        {
+            public function __construct() {}
+
+            public function getAccessibleStructures(?User $user = null): array
+            {
+                return [7];
+            }
+        });
+
+        $user = User::factory()->create();
+        foreach (['show-orders', 'add-orders', 'export-orders', 'delete-orders'] as $permission) {
+            $user->givePermissionTo(Permission::findOrCreate($permission, 'web'));
+        }
+        $this->actingAs($user);
+
+        return $user;
+    }
+
+    /**
+     * @param  array<string,string>  $fields
+     */
+    private function docxOrder(string $no, int $status, ?string $docxPath, User $user, array $fields = []): OrderLog
+    {
+        return OrderLog::query()->create([
+            'order_id' => null,
+            'order_no' => $no,
+            'given_date' => now(),
+            'given_by' => 'Test',
+            'given_by_rank' => '',
+            'status_id' => $status,
+            'creator_id' => $user->id,
+            'template_render_mode' => OrderIssueService::RENDER_MODE_DOCX,
+            'template_snapshot' => [
+                'template_code' => 'ise_qebul',
+                'label' => 'İşə qəbul',
+                'fields' => $fields,
+                'candidate_id' => 1,
+                'hire_structure_id' => 7,
+                'hire_position_id' => 2,
+                'order_date_text' => '14.05.2026-cı il',
+                'docx_path' => $docxPath,
+            ],
+        ]);
     }
 }

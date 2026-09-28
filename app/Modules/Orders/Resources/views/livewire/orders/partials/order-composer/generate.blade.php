@@ -7,26 +7,28 @@
     </div>
     <p class="text-xs leading-5 text-zinc-500">{{ __('orders::order_composer.labels.docx_generate_hint') }}</p>
 
-    <div class="flex flex-wrap items-center justify-end gap-3 pt-1">
-        <x-button mode="secondary" wire:click="preview" wire:loading.attr="disabled" wire:target="preview">
+    {{-- one black primary (Nəşr et) on the right; preview secondary; download as an icon --}}
+    <div class="flex flex-wrap items-center justify-end gap-2 pt-1">
+        <x-pill-button :icon="true" wire:click="downloadWord" wire:loading.attr="disabled" wire:target="downloadWord"
+            title="{{ __('orders::order_composer.actions.download_word') }}" aria-label="{{ __('orders::order_composer.actions.download_word') }}">
+            <svg wire:loading.remove wire:target="downloadWord" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span wire:loading.flex wire:target="downloadWord"><svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10"/><path class="opacity-75" d="M4 12a8 8 0 018-8"/></svg></span>
+        </x-pill-button>
+        <x-pill-button wire:click="preview" wire:loading.attr="disabled" wire:target="preview">
             <span wire:loading.remove wire:target="preview">{{ __('orders::order_composer.actions.preview_word') }}</span>
-            <span wire:loading wire:target="preview">…</span>
-        </x-button>
-        <x-button mode="default" wire:click="downloadWord" wire:loading.attr="disabled" wire:target="downloadWord">
-            <span wire:loading.remove wire:target="downloadWord">{{ __('orders::order_composer.actions.download_word') }}</span>
-            <span wire:loading wire:target="downloadWord">…</span>
-        </x-button>
-        <x-button mode="black" wire:click="issue" wire:loading.attr="disabled" wire:target="issue">
-            <span wire:loading.remove wire:target="issue">{{ $isEditing ? __('orders::order_composer.actions.save') : __('orders::order_composer.actions.issue') }}</span>
-            <span wire:loading wire:target="issue">…</span>
-        </x-button>
+            <span wire:loading.flex wire:target="preview" class="items-center gap-1.5"><svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10"/><path class="opacity-75" d="M4 12a8 8 0 018-8"/></svg>{{ __('orders::order_composer.actions.preparing') }}</span>
+        </x-pill-button>
+        <x-pill-button variant="primary" wire:click="issue" wire:loading.attr="disabled" wire:target="issue">
+            <span wire:loading.remove wire:target="issue">{{ $isEditing ? __('orders::order_composer.actions.save') : __('orders::order_composer.actions.publish') }}</span>
+            <span wire:loading.flex wire:target="issue" class="items-center gap-1.5"><svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10"/><path class="opacity-75" d="M4 12a8 8 0 018-8"/></svg>{{ __('orders::order_composer.actions.preparing') }}</span>
+        </x-pill-button>
     </div>
     @error('previewPdf') <x-validation>{{ $message }}</x-validation> @enderror
 
     {{-- Faithful inline PDF preview of the generated document --}}
     <div wire:loading.flex wire:target="preview" class="items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 py-10 text-sm text-zinc-400">
         <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle class="opacity-25" cx="12" cy="12" r="10"/><path class="opacity-75" d="M4 12a8 8 0 018-8"/></svg>
-        {{ __('orders::order_composer.actions.preview_word') }}…
+        {{ __('orders::order_composer.actions.preparing') }}
     </div>
     @if ($previewPdf !== '')
         <div wire:loading.remove wire:target="preview" class="overflow-hidden rounded-xl border border-zinc-200 shadow-inner">

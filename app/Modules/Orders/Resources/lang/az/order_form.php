@@ -4,7 +4,6 @@ return [
     'titles' => [
         'add' => 'Əmr əlavə et',
         'edit' => 'Əmri düzəliş et',
-        'delete' => 'Əmri sil',
     ],
     'fields' => [
         'template' => 'Şablon',
@@ -48,7 +47,6 @@ return [
     'actions' => [
         'add' => 'Əlavə et',
         'save' => 'Yadda saxla',
-        'delete' => 'Sil',
     ],
     'messages' => [
         'order_added' => 'Əmr uğurla əlavə edildi!',

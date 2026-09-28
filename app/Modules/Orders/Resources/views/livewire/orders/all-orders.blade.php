@@ -7,6 +7,12 @@
         default => 'bg-[#a1a1aa]',
     };
     $isAdmin = auth()->user()?->hasRole('Admin');
+    // Confirm-modal payload for component tags: the js directive inside an x-tag attribute breaks the
+    // compiler, so the dispatch expression is built here with Js::from() and echoed.
+    $confirm = fn (string $title, string $message, string $confirmText, string $tone, string $method, string $orderNo): string => sprintf(
+        "\$dispatch('confirm-action', { title: %s, message: %s, confirmText: %s, tone: '%s', run: () => \$wire.%s(%s) })",
+        \Illuminate\Support\Js::from($title), \Illuminate\Support\Js::from($message), \Illuminate\Support\Js::from($confirmText), $tone, $method, \Illuminate\Support\Js::from($orderNo),
+    );
 @endphp
 
 <div class="flex flex-col">
@@ -110,18 +116,17 @@
         </x-slot:stats>
 
         <x-slot:actions>
-            @can('edit-orders')
-                <x-pill-button :href="route('orders.designer')" wire:navigate>
-                    <svg class="h-4 w-4 text-ink-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-                    {{ __('orders::order_composer.designer.title') }}
-                </x-pill-button>
-            @endcan
             @can('export-orders')
-                <x-pill-button variant="emerald" :icon="true" wire:click.prevent="exportExcel"
+                <x-pill-button :icon="true" wire:click.prevent="exportExcel"
                     wire:loading.attr="disabled" wire:target="exportExcel"
-                    title="{{ __('orders::order_list.actions.export_excel') }}">
+                    title="{{ __('orders::order_list.actions.export_excel') }}" aria-label="{{ __('orders::order_list.actions.export_excel') }}">
                     <x-icons.excel-icon />
                 </x-pill-button>
+            @endcan
+            @can('edit-orders')
+                <x-ui.row-menu :label="__('orders::order_list.actions.more')">
+                    <x-ui.row-menu.item :href="route('orders.designer')" wire:navigate>{{ __('orders::order_composer.designer.title') }}</x-ui.row-menu.item>
+                </x-ui.row-menu>
             @endcan
             @can('add-orders')
                 <x-pill-button variant="primary" wire:click="openSideMenu('order-composer')">
@@ -178,10 +183,17 @@
         @forelse ($this->orders as $_order)
             @php
                 $isDocx = $_order->template_render_mode === \App\Modules\Orders\Infrastructure\Document\OrderIssueService::RENDER_MODE_DOCX;
+                $inTrash = $status == 'deleted';
+                $isDraft = $isDocx && \App\Modules\Orders\Infrastructure\Document\OrderIssueService::isDraft($_order);
+                $statusId = (int) $_order->status_id;
+                $isPending = $isDocx && ! $inTrash && $statusId === 10;
+                $isApproved = $isDocx && ! $inTrash && $statusId === 20;
+                $isCancelled = $isDocx && ! $inTrash && $statusId === 30;
             @endphp
-            <tr wire:key="order-row-{{ $_order->id }}" @class([
-                'bg-[#fffbeb]/60' => (int) $_order->status_id === 10,
-                'bg-[#fff1f2]/60' => (int) $_order->status_id === 30,
+            <tr wire:key="order-row-{{ $_order->id }}" wire:click="openSideMenu('order-preview', {{ $_order->id }})" @class([
+                'cursor-pointer transition hover:bg-[#fafafa]',
+                'bg-[#fffbeb]/60' => $statusId === 10 && ! $isDraft,
+                'bg-[#fff1f2]/60' => $statusId === 30,
             ])>
                 <x-table.td>
                     <span class="hrm-num text-[13px] font-semibold text-ink">{{ $_order->order_no }}</span>
@@ -202,7 +214,7 @@
                 <x-table.td>
                     <div class="flex flex-col leading-tight">
                         <span class="hrm-num text-[13px] font-medium text-ink-soft">{{ \Carbon\Carbon::parse($_order->given_date)->format('d.m.Y') }}</span>
-                        @if ($isAdmin && $status == 'deleted')
+                        @if ($isAdmin && $inTrash)
                             <span class="text-[11px] text-ink-faint">{{ __('orders::order_list.table.deleted_date') }}: {{ \Carbon\Carbon::parse($_order->deleted_at)->format('d.m.Y H:i') }}</span>
                             <span class="text-[11px] text-ink-faint">{{ __('orders::order_list.table.deleted_by') }}: {{ $_order->personDidDelete?->name ?? '—' }}</span>
                         @endif
@@ -222,84 +234,67 @@
                 </x-table.td>
 
                 <x-table.td>
-                    <x-status design="modern" :status-id="$_order->status_color_id" :label="$_order->status->name" />
+                    <x-status design="modern" :status-id="$_order->status_color_id" :label="$_order->status_label" />
                 </x-table.td>
 
                 <x-table.td :isButton="true">
-                    <div class="flex items-center justify-end gap-1">
-                        {{-- a soft-deleted order must be restored before it can be printed or transitioned --}}
-                        @if ($isDocx && $status != 'deleted')
-                            @can('export-orders')
-                                <button wire:click="printOrder('{{ $_order->order_no }}')"
-                                    title="{{ __('orders::order_list.actions.download_now') }}" aria-label="{{ __('orders::order_list.actions.download_now') }}"
-                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink">
-                                    <x-icons.print-file color="text-current" hover="text-current" />
-                                </button>
-                            @endcan
+                    {{-- clicks here must not bubble to the row (which opens the preview) --}}
+                    <div class="flex items-center justify-end gap-1" x-on:click.stop>
+                        {{-- one status-driven primary action; everything else lives in the menu --}}
+                        @if ($isPending && $isDraft)
                             @can('add-orders')
-                                @if ($_order->status_id == 10)
-                                    <button type="button"
-                                        x-on:click="$dispatch('confirm-action', { title: @js(__('orders::order_composer.actions.approve')), message: @js(__('orders::order_composer.confirm.approve')), confirmText: @js(__('orders::order_composer.actions.approve')), tone: 'emerald', run: () => $wire.approveOrder('{{ $_order->order_no }}') })"
-                                        class="inline-flex h-8 items-center gap-1 rounded-lg bg-emerald-600 px-2.5 text-[12px] font-semibold text-white transition hover:bg-emerald-500">
-                                        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                                        {{ __('orders::order_composer.actions.approve') }}
-                                    </button>
-                                    <button type="button"
-                                        x-on:click="$dispatch('confirm-action', { title: @js(__('orders::order_composer.actions.cancel')), message: @js(__('orders::order_composer.confirm.cancel_pending')), confirmText: @js(__('orders::order_composer.actions.cancel')), tone: 'rose', run: () => $wire.cancelOrder('{{ $_order->order_no }}') })"
-                                        title="{{ __('orders::order_composer.actions.cancel') }}" aria-label="{{ __('orders::order_composer.actions.cancel') }}"
-                                        class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-rose-50 hover:text-rose-600">
-                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-                                    </button>
-                                @elseif ($_order->status_id == 20)
-                                    <button type="button"
-                                        x-on:click="$dispatch('confirm-action', { title: @js(__('orders::order_composer.actions.revert')), message: @js(__('orders::order_composer.confirm.revert')), confirmText: @js(__('orders::order_composer.actions.revert')), tone: 'amber', run: () => $wire.revertOrder('{{ $_order->order_no }}') })"
-                                        class="inline-flex h-8 items-center gap-1 rounded-lg border border-hairline px-2.5 text-[12px] font-medium text-ink-muted transition hover:border-amber-200 hover:bg-amber-50 hover:text-amber-700">
-                                        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
-                                        {{ __('orders::order_composer.actions.revert') }}
-                                    </button>
-                                @elseif ($_order->status_id == 30)
-                                    <button type="button"
-                                        x-on:click="$dispatch('confirm-action', { title: @js(__('orders::order_composer.actions.reopen')), message: @js(__('orders::order_composer.confirm.reopen')), confirmText: @js(__('orders::order_composer.actions.reopen')), tone: 'teal', run: () => $wire.reopenOrder('{{ $_order->order_no }}') })"
-                                        class="inline-flex h-8 items-center gap-1 rounded-lg border border-hairline px-2.5 text-[12px] font-medium text-ink-muted transition hover:border-teal-200 hover:bg-teal-50 hover:text-teal-700">
-                                        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><polyline points="3 3 3 8 8 8"/></svg>
-                                        {{ __('orders::order_composer.actions.reopen') }}
-                                    </button>
-                                @endif
+                                <x-pill-button wire:click="openSideMenu('order-composer', {{ $_order->id }})">{{ __('orders::order_list.actions.continue') }}</x-pill-button>
+                            @endcan
+                        @elseif ($isPending)
+                            @can('add-orders')
+                                <x-pill-button x-on:click="{{ $confirm(__('orders::order_composer.actions.approve'), __('orders::order_composer.confirm.approve'), __('orders::order_composer.actions.approve'), 'emerald', 'approveOrder', $_order->order_no) }}">{{ __('orders::order_composer.actions.approve') }}</x-pill-button>
+                            @endcan
+                        @elseif ($isApproved)
+                            @can('export-orders')
+                                <x-pill-button wire:click="printOrder('{{ $_order->order_no }}')"><x-icons.print-file color="text-current" hover="text-current" size="h-4 w-4" />{{ __('orders::order_list.actions.download') }}</x-pill-button>
                             @endcan
                         @endif
 
-                        @if ($status == 'deleted')
-                            @can('edit-orders')
-                                <button wire:click="restoreData('{{ $_order->order_no }}')" title="{{ __('orders::order_list.actions.restore') }}"
-                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink">
-                                    <x-icons.recover color="text-current" hover="text-current" />
-                                </button>
-                            @endcan
-                            @can('delete-orders')
-                                <button type="button"
-                                    x-on:click="$dispatch('confirm-action', { title: @js(__('orders::order_list.actions.force_delete')), message: @js(__('orders::order_list.messages.force_delete_confirm')), confirmText: @js(__('orders::order_list.actions.force_delete')), tone: 'rose', run: () => $wire.forceDeleteData('{{ $_order->order_no }}') })"
-                                    title="{{ __('orders::order_list.actions.force_delete') }}"
-                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-rose-50 hover:text-rose-600">
-                                    <x-icons.force-delete />
-                                </button>
-                            @endcan
-                        @else
-                            @if ($isDocx && $_order->status_id == 10)
+                        <x-ui.row-menu>
+                            <x-ui.row-menu.item wire:click="openSideMenu('order-preview', {{ $_order->id }})">{{ __('orders::order_list.actions.preview') }}</x-ui.row-menu.item>
+
+                            @if ($inTrash)
+                                @can('edit-orders')
+                                    <x-ui.row-menu.item wire:click="restoreData('{{ $_order->order_no }}')"><x-icons.recover color="text-current" hover="text-current" size="h-4 w-4" />{{ __('orders::order_list.actions.restore') }}</x-ui.row-menu.item>
+                                @endcan
+                                @can('delete-orders')
+                                    <x-ui.row-menu.separator />
+                                    <x-ui.row-menu.item danger x-on:click="{{ $confirm(__('orders::order_list.actions.force_delete'), __('orders::order_list.messages.force_delete_confirm'), __('orders::order_list.actions.force_delete'), 'rose', 'forceDeleteData', $_order->order_no) }}"><x-icons.force-delete color="text-current" hover="text-current" size="h-4 w-4" />{{ __('orders::order_list.actions.force_delete') }}</x-ui.row-menu.item>
+                                @endcan
+                            @else
+                                @if ($isDocx && ! $isApproved && ! $isDraft)
+                                    @can('export-orders')
+                                        <x-ui.row-menu.item wire:click="printOrder('{{ $_order->order_no }}')"><x-icons.print-file color="text-current" hover="text-current" size="h-4 w-4" />{{ __('orders::order_list.actions.download') }}</x-ui.row-menu.item>
+                                    @endcan
+                                @endif
                                 @can('add-orders')
-                                    <button type="button" wire:click="openSideMenu('order-composer', {{ $_order->id }})"
-                                        title="{{ __('orders::order_composer.actions.edit') }}" aria-label="{{ __('orders::order_composer.actions.edit') }}"
-                                        class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-ink">
-                                        <x-icons.document-icon />
-                                    </button>
+                                    @if ($isPending)
+                                        <x-ui.row-menu.item wire:click="openSideMenu('order-composer', {{ $_order->id }})">{{ __('orders::order_list.actions.edit') }}</x-ui.row-menu.item>
+                                    @endif
+                                    @if ($isDocx)
+                                        <x-ui.row-menu.item wire:click="duplicateOrder('{{ $_order->order_no }}')">{{ __('orders::order_list.actions.duplicate') }}</x-ui.row-menu.item>
+                                    @endif
+                                    @if ($isApproved)
+                                        <x-ui.row-menu.item x-on:click="{{ $confirm(__('orders::order_composer.actions.revert'), __('orders::order_composer.confirm.revert'), __('orders::order_composer.actions.revert'), 'amber', 'revertOrder', $_order->order_no) }}">{{ __('orders::order_composer.actions.revert') }}</x-ui.row-menu.item>
+                                    @endif
+                                    @if ($isCancelled)
+                                        <x-ui.row-menu.item x-on:click="{{ $confirm(__('orders::order_composer.actions.reopen'), __('orders::order_composer.confirm.reopen'), __('orders::order_composer.actions.reopen'), 'teal', 'reopenOrder', $_order->order_no) }}">{{ __('orders::order_composer.actions.reopen') }}</x-ui.row-menu.item>
+                                    @endif
+                                    @if ($isPending || $isApproved)
+                                        <x-ui.row-menu.item x-on:click="{{ $confirm(__('orders::order_composer.actions.cancel'), $isApproved ? __('orders::order_composer.confirm.cancel_approved') : __('orders::order_composer.confirm.cancel_pending'), __('orders::order_composer.actions.cancel'), 'rose', 'cancelOrder', $_order->order_no) }}">{{ __('orders::order_composer.actions.cancel') }}</x-ui.row-menu.item>
+                                    @endif
+                                @endcan
+                                @can('delete-orders')
+                                    <x-ui.row-menu.separator />
+                                    <x-ui.row-menu.item danger x-on:click="{{ $confirm(__('orders::order_list.actions.delete'), __('orders::order_list.messages.delete_order_confirm'), __('orders::order_list.actions.delete'), 'rose', 'deleteOrder', $_order->order_no) }}"><x-icons.delete-icon color="text-current" hover="text-current" size="h-4 w-4" />{{ __('orders::order_list.actions.delete') }}</x-ui.row-menu.item>
                                 @endcan
                             @endif
-                            @can('delete-orders')
-                                <button wire:click="setDeleteOrder('{{ $_order->order_no }}')" title="{{ __('orders::order_list.actions.delete') }}"
-                                    class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-rose-50 hover:text-rose-600">
-                                    <x-icons.delete-icon />
-                                </button>
-                            @endcan
-                        @endif
+                        </x-ui.row-menu>
                     </div>
                 </x-table.td>
             </tr>
@@ -316,18 +311,14 @@
 
     <x-pagination :paginator="$this->orders" :unit="__('orders::order_list.table.unit')" />
 
-    @can('add-orders')
-        <x-side-modal size="xx-large">
-            @if ($showSideMenu === 'order-composer')
+    <x-side-modal size="xx-large">
+        @if ($showSideMenu === 'order-composer')
+            @can('add-orders')
                 <livewire:orders.order-composer :orderId="$modelName ? (int) $modelName : null" :presetCode="$secondModel ?? ''"
                     :key="'order-composer-' . ($modelName ?? 'new') . '-' . ($secondModel ?? 'any')" />
-            @endif
-        </x-side-modal>
-    @endcan
-
-    @can('delete-orders')
-        <div>
-            <livewire:orders.delete-order wire:key="order-delete-modal" />
-        </div>
-    @endcan
+            @endcan
+        @elseif ($showSideMenu === 'order-preview' && $modelName)
+            <livewire:orders.order-preview :orderId="(int) $modelName" :key="'order-preview-' . $modelName" />
+        @endif
+    </x-side-modal>
 </div>

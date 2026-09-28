@@ -29,7 +29,6 @@ return [
     'actions' => [
         'generate' => 'Generate preview',
         'download' => 'Download Word document',
-        'issue' => 'Create order & download',
         'preview_word' => 'Preview',
         'download_word' => 'Download Word',
         'approve' => 'Approve',
@@ -38,6 +37,8 @@ return [
         'revert' => 'Revoke approval',
         'edit' => 'Edit order',
         'save' => 'Save changes',
+        'publish' => 'Publish',
+        'preparing' => 'Preparing',
         'create' => 'New order',
         'upload_replace' => 'Replace Word file',
     ],

@@ -94,7 +94,8 @@
                 </div>
                 <div>
                     <x-label for="orderDate">{{ __('orders::order_composer.labels.date') }}</x-label>
-                    <x-livewire-input mode="gray" name="orderDate" wire:model="orderDate" />
+                    <x-ui.input type="date" id="orderDate" class="mt-1" wire:model="orderDate" />
+                    @error('orderDate') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
             </div>
         </section>

@@ -29,14 +29,29 @@ return [
     'messages' => [
         'force_delete_confirm' => 'Are you sure you want to remove this data?',
         'delete_order_confirm' => 'Are you sure you want to delete this order?',
+        'order_duplicated' => 'A copy of the order was created as a draft.',
+        'draft_not_ready' => 'A draft order cannot be approved — finish and save it first.',
     ],
     'actions' => [
         'open_user_guide' => 'User guide',
-        'download_now' => 'Download DOCX now',
         'force_delete' => 'Delete permanently',
         'restore' => 'Restore',
         'delete' => 'Delete',
         'export_excel' => 'Export to Excel',
+        'more' => 'More actions',
+        'continue' => 'Continue',
+        'preview' => 'Preview',
+        'edit' => 'Edit',
+        'duplicate' => 'Duplicate',
+        'download' => 'Download',
+    ],
+    'status' => [
+        'draft' => 'Draft',
+    ],
+    'preview' => [
+        'loading' => 'Preparing preview…',
+        'unavailable' => 'The preview could not be generated. Use “Download” to open the document.',
+        'no_document' => 'This order has no document yet.',
     ],
     'hints' => [
         'docx_only' => 'Only DOCX orders can be edited',

@@ -4,7 +4,6 @@ return [
     'titles' => [
         'add' => 'Add order',
         'edit' => 'Edit order',
-        'delete' => 'Delete order',
     ],
     'fields' => [
         'template' => 'Template',
@@ -48,7 +47,6 @@ return [
     'actions' => [
         'add' => 'Add',
         'save' => 'Save',
-        'delete' => 'Delete',
     ],
     'messages' => [
         'order_added' => 'Order was added successfully!',
