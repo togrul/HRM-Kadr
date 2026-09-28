@@ -62,7 +62,11 @@ return [
         'yes' => 'var',
         'no' => 'yoxdur',
     ],
+    'hints' => [
+        'from_orders' => 'Ezamiyyətlər ezamiyyət əmrlərindən yaranır — yeni ezamiyyət üçün Əmrlər modulunda əmr hazırlayın.',
+    ],
     'actions' => [
+        'go_to_orders' => 'Əmrlərə keç',
         'export_excel' => 'Excel-ə çıxar',
     ],
     'messages' => [

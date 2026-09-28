@@ -92,15 +92,16 @@
             @endcan
             @can('add-orders')
                 @php
+                    // The composer opens in a side panel on this page, so the user stays in Vacation.
                     // One vacation template: the button opens it. Several: it lists them. None: the plain composer.
                     $vacationTemplates = $this->vacationOrderTemplates;
                     $pickTemplate = count($vacationTemplates) > 1;
+                    $openComposer = "openSideMenu('order-composer', ".\Illuminate\Support\Js::from((string) array_key_first($vacationTemplates)).')';
                 @endphp
                 <div class="relative" x-data="{ open: false }" @keydown.escape.window="open = false">
                     <x-pill-button
                         variant="primary"
-                        :href="$pickTemplate ? null : route('orders', array_filter(['create' => 1, 'preset' => array_key_first($vacationTemplates)]))"
-                        :wire:navigate="! $pickTemplate"
+                        :wire:click="$pickTemplate ? null : $openComposer"
                         x-on:click="{{ $pickTemplate ? 'open = ! open' : '' }}"
                     >
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
@@ -109,7 +110,7 @@
                     @if ($pickTemplate)
                         <div x-cloak x-show="open" x-transition.opacity.duration.100ms @click.outside="open = false" class="absolute right-0 z-40 mt-1.5 w-64 overflow-hidden rounded-xl border border-hairline bg-white py-1 shadow-overlay">
                             @foreach ($vacationTemplates as $code => $label)
-                                <a href="{{ route('orders', ['create' => 1, 'preset' => $code]) }}" wire:navigate class="flex w-full items-center px-3.5 py-2 text-left text-[12.5px] text-ink-soft transition hover:bg-[#fafafa] hover:text-ink">{{ $label }}</a>
+                                <button type="button" @click="open = false" wire:click="openSideMenu('order-composer', @js((string) $code))" class="flex w-full items-center px-3.5 py-2 text-left text-[12.5px] text-ink-soft transition hover:bg-[#fafafa] hover:text-ink">{{ $label }}</button>
                             @endforeach
                         </div>
                     @endif
@@ -305,4 +306,12 @@
     </x-table.tbl>
 
     <x-pagination :paginator="$this->vacations" :unit="__('vacation::common.labels.unit')" />
+
+    @can('add-orders')
+        <x-side-modal size="xx-large">
+            @if ($showSideMenu === 'order-composer')
+                <livewire:orders.order-composer :presetCode="$modelName ?: null" :key="'vacation-order-'.($modelName ?: 'any')" />
+            @endif
+        </x-side-modal>
+    @endcan
 </div>

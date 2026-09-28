@@ -52,6 +52,22 @@ class BusinessTripsAccessTest extends TestCase
             ->assertSet('filter.structure_id', null);
     }
 
+    public function test_empty_list_explains_trips_come_from_orders(): void
+    {
+        $this->actingAs($this->userWith('show-business_trips', 'show-orders'));
+
+        Livewire::test(BusinessTrips::class)
+            ->assertSee(__('business_trips::common.hints.from_orders'))
+            ->assertSee(__('business_trips::common.actions.go_to_orders'))
+            ->assertSee(route('orders'));
+
+        $this->actingAs($this->userWith('show-business_trips'));
+
+        Livewire::test(BusinessTrips::class)
+            ->assertSee(__('business_trips::common.hints.from_orders'))
+            ->assertDontSee(__('business_trips::common.actions.go_to_orders'));
+    }
+
     private function userWith(string ...$permissions): User
     {
         $user = User::factory()->create();
