@@ -87,9 +87,6 @@
                 </button>
             </div>
 
-            <x-pill-button variant="secondary" :href="route('docs.guide', ['focus' => 'attendance']).'#attendance-module'">
-                {{ __('attendance::dashboard.actions.open_user_guide') }}
-            </x-pill-button>
         </x-slot:actions>
 
         {{-- Two-level section nav: a segmented control picks the group (İş / Yoxlama / Ayarlar),

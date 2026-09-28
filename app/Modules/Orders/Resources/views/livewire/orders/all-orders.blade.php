@@ -78,14 +78,6 @@
                 @endforeach
             </x-context-panel.section>
 
-            <x-slot name="footer">
-                <p class="text-[12px] font-semibold text-ink">{{ __('orders::order_list.guide.title') }}</p>
-                <p class="mt-1 text-[11.5px] leading-snug text-ink-faint">{{ __('orders::order_list.guide.description') }}</p>
-                <a href="{{ route('docs.guide', ['focus' => 'orders']) }}#orders-module"
-                    class="mt-2 inline-flex items-center gap-1 text-[11.5px] font-semibold text-ink transition hover:underline">
-                    {{ __('orders::order_list.actions.open_user_guide') }} &rarr;
-                </a>
-            </x-slot>
         </x-context-panel>
     @endteleport
 

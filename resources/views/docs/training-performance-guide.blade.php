@@ -1,156 +1,10 @@
 @php
-    $sidebarGroups = [
-        [
-            'label' => 'Başlanğıc',
-            'tone' => 'zinc',
-            'icon' => 'rocket_launch',
-            'items' => [
-                ['id' => 'overview', 'label' => 'Ümumi baxış'],
-                ['id' => 'overview-workflow', 'label' => 'Modulların iş axını'],
-            ],
-        ],
-        [
-            'label' => 'Təlim ehtiyacı',
-            'tone' => 'sky',
-            'icon' => 'school',
-            'items' => [
-                ['id' => 'training-module', 'label' => 'Modulun məqsədi'],
-                ['id' => 'training-outline', 'label' => 'Bölmələr və sıra'],
-                ['id' => 'training-workflow', 'label' => 'Ekran xəritəsi'],
-                ['id' => 'training-scenarios', 'label' => 'Ssenarilər'],
-                ['id' => 'training-doc', 'label' => 'Tam bələdçi'],
-            ],
-        ],
-        [
-            'label' => 'Performans qiymətləndirməsi',
-            'tone' => 'emerald',
-            'icon' => 'analytics',
-            'items' => [
-                ['id' => 'performance-module', 'label' => 'Modulun məqsədi'],
-                ['id' => 'performance-outline', 'label' => 'Bölmələr və sıra'],
-                ['id' => 'performance-workflow', 'label' => 'Ekran xəritəsi'],
-                ['id' => 'performance-scenarios', 'label' => 'Ssenarilər'],
-                ['id' => 'performance-doc', 'label' => 'Tam bələdçi'],
-            ],
-        ],
-        [
-            'label' => 'Davamiyyət',
-            'tone' => 'indigo',
-            'icon' => 'schedule',
-            'items' => [
-                ['id' => 'attendance-module', 'label' => 'Modulun məqsədi'],
-                ['id' => 'attendance-outline', 'label' => 'Bölmələr və sıra'],
-                ['id' => 'attendance-workflow', 'label' => 'Ekran xəritəsi'],
-                ['id' => 'attendance-scenarios', 'label' => 'Ssenarilər'],
-                ['id' => 'attendance-doc', 'label' => 'Tam bələdçi'],
-            ],
-        ],
-        [
-            'label' => 'Əmrlər',
-            'tone' => 'amber',
-            'icon' => 'gavel',
-            'items' => [
-                ['id' => 'orders-module', 'label' => 'Modulun məqsədi'],
-                ['id' => 'orders-outline', 'label' => 'Bölmələr və sıra'],
-                ['id' => 'orders-workflow', 'label' => 'Ekran xəritəsi'],
-                ['id' => 'orders-scenarios', 'label' => 'Ssenarilər'],
-                ['id' => 'orders-doc', 'label' => 'Tam bələdçi'],
-            ],
-        ],
-        [
-            'label' => 'Bildirişlər',
-            'tone' => 'rose',
-            'icon' => 'notifications',
-            'items' => [
-                ['id' => 'notifications-module', 'label' => 'Modulun məqsədi'],
-                ['id' => 'notifications-outline', 'label' => 'Bölmələr və sıra'],
-                ['id' => 'notifications-workflow', 'label' => 'Ekran xəritəsi'],
-                ['id' => 'notifications-scenarios', 'label' => 'Ssenarilər'],
-                ['id' => 'notifications-doc', 'label' => 'Tam bələdçi'],
-            ],
-        ],
-        [
-            'label' => 'Peşəkar portfel',
-            'tone' => 'violet',
-            'icon' => 'work_history',
-            'items' => [
-                ['id' => 'professional-portfolio-module', 'label' => 'Modulun məqsədi'],
-                ['id' => 'professional-portfolio-outline', 'label' => 'Bölmələr və sıra'],
-                ['id' => 'professional-portfolio-workflow', 'label' => 'İş axını'],
-                ['id' => 'professional-portfolio-scenarios', 'label' => 'Ssenarilər'],
-                ['id' => 'professional-portfolio-doc', 'label' => 'Tam bələdçi'],
-            ],
-        ],
-        [
-            'label' => 'Şəxsi kabinet',
-            'tone' => 'cyan',
-            'icon' => 'account_circle',
-            'items' => [
-                ['id' => 'my-hr-module', 'label' => 'Modulun məqsədi'],
-                ['id' => 'my-hr-outline', 'label' => 'Bölmələr və sıra'],
-                ['id' => 'my-hr-workflow', 'label' => 'İş axını'],
-                ['id' => 'my-hr-scenarios', 'label' => 'Ssenarilər'],
-                ['id' => 'my-hr-doc', 'label' => 'Tam bələdçi'],
-            ],
-        ],
-        [
-            'label' => 'Adaptasiya kitabxanası',
-            'tone' => 'amber',
-            'icon' => 'menu_book',
-            'items' => [
-                ['id' => 'onboarding-library-module', 'label' => 'Modulun məqsədi'],
-                ['id' => 'onboarding-library-outline', 'label' => 'Bölmələr və sıra'],
-                ['id' => 'onboarding-library-workflow', 'label' => 'İş axını'],
-                ['id' => 'onboarding-library-scenarios', 'label' => 'Ssenarilər'],
-                ['id' => 'onboarding-library-doc', 'label' => 'Tam bələdçi'],
-            ],
-        ],
-        [
-            'label' => 'Tədris kitabxanası',
-            'tone' => 'emerald',
-            'icon' => 'library_books',
-            'items' => [
-                ['id' => 'learning-library-module', 'label' => 'Modulun məqsədi'],
-                ['id' => 'learning-library-outline', 'label' => 'Bölmələr və sıra'],
-                ['id' => 'learning-library-workflow', 'label' => 'İş axını'],
-                ['id' => 'learning-library-scenarios', 'label' => 'Ssenarilər'],
-                ['id' => 'learning-library-doc', 'label' => 'Tam bələdçi'],
-            ],
-        ],
-    ];
-
+    // Everything module-specific comes from App\Support\Docs\GuideRegistry via the controller.
     $allSectionIds = collect($sidebarGroups)->flatMap(fn ($group) => array_column($group['items'], 'id'))->values()->all();
     $moduleSectionMap = collect($sidebarGroups)
-        ->flatMap(function (array $group) {
-            $module = match ($group['label']) {
-                'Təlim ehtiyacı' => 'training',
-                'Performans qiymətləndirməsi' => 'performance',
-                'Davamiyyət' => 'attendance',
-                'Əmrlər' => 'orders',
-                'Bildirişlər' => 'notifications',
-                'Peşəkar portfel' => 'professional-portfolio',
-                'Şəxsi kabinet' => 'my-hr',
-                'Adaptasiya kitabxanası' => 'onboarding-library',
-                'Tədris kitabxanası' => 'learning-library',
-                default => 'overview',
-            };
-
-            return collect($group['items'])->mapWithKeys(fn (array $item) => [$item['id'] => $module]);
-        })
+        ->flatMap(fn (array $group) => collect($group['items'])->mapWithKeys(fn (array $item) => [$item['id'] => $group['key']]))
         ->all();
-
-    $initialSection = match ($focus) {
-        'training' => 'training-module',
-        'performance' => 'performance-module',
-        'attendance' => 'attendance-module',
-        'orders' => 'orders-module',
-        'notifications' => 'notifications-module',
-        'professional-portfolio' => 'professional-portfolio-module',
-        'my-hr' => 'my-hr-module',
-        'onboarding-library' => 'onboarding-library-module',
-        'learning-library' => 'learning-library-module',
-        default => 'overview',
-    };
+    $initialSection = $focus === 'overview' ? 'overview' : $focus.'-module';
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
@@ -886,34 +740,12 @@
                 <div class="docs-breadcrumbs">
                     <span>Docs</span>
                     <span class="material-symbols-outlined">chevron_right</span>
-                    <span>{{ match ($focus) {
-                        'training' => 'Təlim ehtiyacı',
-                        'performance' => 'Performans qiymətləndirməsi',
-                        'attendance' => 'Davamiyyət',
-                        'orders' => 'Əmrlər',
-                        'notifications' => 'Bildirişlər',
-                        'professional-portfolio' => 'Peşəkar portfel',
-                        'my-hr' => 'Şəxsi kabinet',
-                        'onboarding-library' => 'Adaptasiya kitabxanası',
-                        'learning-library' => 'Tədris kitabxanası',
-                        default => 'Ümumi baxış',
-                    } }}</span>
+                    <span>{{ $focusLabel }}</span>
                 </div>
 
                 <header class="docs-hero">
                     <p class="docs-header-kicker">{{ $focus === 'overview' ? 'Başlanğıc' : 'İstifadə bələdçisi' }}</p>
-                    <h1 class="docs-page-title">{{ $focus === 'overview' ? 'HR modullarının ortaq istifadə bələdçisi' : match ($focus) {
-                        'training' => 'Təlim ehtiyacı',
-                        'performance' => 'Performans qiymətləndirməsi',
-                        'attendance' => 'Davamiyyət',
-                        'orders' => 'Əmrlər',
-                        'notifications' => 'Bildirişlər',
-                        'professional-portfolio' => 'Peşəkar portfel',
-                        'my-hr' => 'Şəxsi kabinet',
-                        'onboarding-library' => 'Adaptasiya kitabxanası',
-                        'learning-library' => 'Tədris kitabxanası',
-                        default => 'HR bələdçisi',
-                    } }}</h1>
+                    <h1 class="docs-page-title">{{ $focus === 'overview' ? 'HR modullarının ortaq istifadə bələdçisi' : $focusLabel }}</h1>
                     <p class="docs-lead">
                         Bu səhifədə modulların nə işə yaradığı, hansı bölmənin nə üçün istifadə olunduğu və gündəlik işi hansı ardıcıllıqla görməyin daha rahat olduğu sadə dildə izah olunur.
                     </p>
@@ -921,27 +753,16 @@
 
                 @include('docs.partials.guide-overview', $initialModulePayloads['overview'] ?? [])
 
-                @foreach (['training', 'performance', 'attendance', 'orders', 'notifications', 'professional-portfolio', 'my-hr', 'onboarding-library', 'learning-library'] as $module)
+                @foreach ($modules as $module => $entry)
                     <div
                         data-docs-module-host="{{ $module }}"
                         data-loaded="{{ in_array($module, $initialModules, true) ? 'true' : 'false' }}"
                     >
                         @if (in_array($module, $initialModules, true))
-                            @include("docs.partials.guide-{$module}", $initialModulePayloads[$module] ?? [])
+                            @include('docs.partials.guide-module', $initialModulePayloads[$module] ?? [])
                         @else
                             <section class="docs-lazy-placeholder" aria-live="polite">
-                                <p class="docs-lazy-placeholder-title">{{ match ($module) {
-                                    'training' => 'Təlim ehtiyacı',
-                                    'performance' => 'Performans qiymətləndirməsi',
-                                    'attendance' => 'Davamiyyət',
-                                    'orders' => 'Əmrlər',
-                                    'notifications' => 'Bildirişlər',
-                                    'professional-portfolio' => 'Peşəkar portfel',
-                                    'my-hr' => 'Şəxsi kabinet',
-                                    'onboarding-library' => 'Adaptasiya kitabxanası',
-                                    'learning-library' => 'Tədris kitabxanası',
-                                    default => 'Modul',
-                                } }}</p>
+                                <p class="docs-lazy-placeholder-title">{{ $entry['label'] }}</p>
                                 <p class="docs-lazy-placeholder-text">
                                     Bu modul hissəsi yalnız siz ona keçəndə və ya səhifədə həmin hissəyə yaxınlaşanda yüklənəcək.
                                 </p>

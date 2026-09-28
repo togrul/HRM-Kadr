@@ -42,6 +42,8 @@ return [
         'expand_panel' => 'Expand panel',
         'open_menu' => 'Open menu',
         'breadcrumb_root' => 'HR Management',
+        'user_guide' => 'User guide',
+        'opens_in_new_tab' => 'opens in a new tab',
         'more_actions' => 'More actions',
         'status' => 'Status',
         'saved_views' => 'Saved views',

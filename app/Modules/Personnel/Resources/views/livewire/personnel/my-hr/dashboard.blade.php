@@ -57,9 +57,6 @@
         </x-slot:icon>
 
         <x-slot:actions>
-            <x-pill-button :href="route('docs.guide', ['focus' => 'my-hr']).'#my-hr-module'">
-                {{ __('personnel::my_hr.actions.open_docs') }}
-            </x-pill-button>
 
             @if ($this->hasPersonnelLink && $this->createForms !== [])
                 {{-- "Yeni ərizə" has to pick a type: the tab holds three different forms. --}}

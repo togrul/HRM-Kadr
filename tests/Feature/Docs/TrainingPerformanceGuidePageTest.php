@@ -60,8 +60,7 @@ class TrainingPerformanceGuidePageTest extends TestCase
             ->get(route('docs.guide', ['focus' => 'professional-portfolio']))
             ->assertOk()
             ->assertSee('Peşəkar portfel modulu')
-            ->assertSee('Tədbirlər')
-            ->assertSee('Zaman xətti')
+            ->assertSee('Peşəkar portfel istifadəçi bələdçisi')
             ->assertDontSee('Təlim ehtiyacı istifadəçi bələdçisi');
     }
 
