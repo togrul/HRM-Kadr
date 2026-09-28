@@ -57,4 +57,21 @@ class DocumentExpiryDashboardTest extends TestCase
             $this->assertStringContainsString('Surname1', $row['personnel_name']);
         }
     }
+
+    public function test_csv_export_uses_translated_status_labels_not_codes(): void
+    {
+        LifecycleDashboardBoundedQueuesTest::seedLargeFixture(2);
+        $user = User::factory()->create();
+        $user->givePermissionTo(Permission::findOrCreate('show-document-compliance', 'web'));
+
+        $csv = Livewire::actingAs($user)
+            ->test(DocumentExpiryDashboard::class)
+            ->call('exportCsv')
+            ->effects['download']['content'] ?? '';
+
+        $csv = base64_decode($csv);
+        $this->assertStringContainsString(__('compliance::documents.status.missing'), $csv);
+        $this->assertStringContainsString(__('compliance::documents.columns.tabel_no'), $csv);
+        $this->assertStringNotContainsString(',missing', $csv);
+    }
 }

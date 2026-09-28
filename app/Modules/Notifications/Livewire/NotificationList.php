@@ -4,6 +4,7 @@ namespace App\Modules\Notifications\Livewire;
 
 use App\Modules\Notifications\Support\DispatchesNotificationRefresh;
 use App\Modules\Notifications\Support\NotificationCountCache;
+use App\Modules\Notifications\Support\NotificationTarget;
 use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -28,6 +29,27 @@ class NotificationList extends Component
         $user->unreadNotifications()->update(['read_at' => now()]);
         app(NotificationCountCache::class)->forgetUser((int) $user->id);
         $this->dispatchNotificationRefresh();
+    }
+
+    /**
+     * Opening a row does what the bell does: marks it read and follows it to its page.
+     * A notification without a page of its own just turns read in place.
+     */
+    public function open(string $notificationId): void
+    {
+        $user = auth()->user();
+        abort_unless($user, 403);
+
+        $notification = $user->notifications()->whereKey($notificationId)->firstOrFail();
+        $notification->markAsRead();
+        app(NotificationCountCache::class)->forgetUser((int) $user->id);
+        $this->dispatchNotificationRefresh();
+
+        $route = NotificationTarget::route((array) $notification->data);
+
+        if ($route !== 'notifications') {
+            $this->redirectRoute($route, navigate: true);
+        }
     }
 
     public function clearNotifications(): void

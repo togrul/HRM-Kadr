@@ -69,19 +69,18 @@
             <div class="flex flex-col gap-3 p-4 lg:flex-row lg:items-end lg:justify-between">
                 <div class="min-w-0 flex-1">
                     <x-label for="approvalNote">{{ __('candidates::recruitment.labels.approval_note') }}</x-label>
-                    <textarea wire:model="approvalNote" rows="2"
+                    <textarea id="approvalNote" wire:model="approvalNote" rows="2"
                         class="mt-1 w-full rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 py-2 text-base text-ink placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-0 sm:text-sm"
                         placeholder="{{ __('candidates::recruitment.labels.approval_note') }}"></textarea>
                     @error('approvalNote') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
+                @can('update', App\Models\Candidate::class)
                 <div class="flex shrink-0 flex-wrap items-center gap-2">
                     @if (! in_array($requisition->approval_status, ['pending', 'approved'], true))
                         <x-pill-button wire:click="submitForApproval">{{ __('candidates::recruitment.actions.submit_for_approval') }}</x-pill-button>
                     @endif
-                    @if ($requisition->approval_status !== 'approved')
+                    @if ($requisition->approval_status === 'pending')
                         <x-pill-button variant="primary" wire:click="approve">{{ __('candidates::recruitment.actions.approve_requisition') }}</x-pill-button>
-                    @endif
-                    @if ($requisition->approval_status !== 'rejected')
                         <x-pill-button variant="danger"
                             data-title="{{ __('candidates::recruitment.actions.reject_requisition') }}"
                             data-message="{{ __('candidates::recruitment.messages.reject_requisition_confirm', ['title' => $requisition->title]) }}"
@@ -89,6 +88,7 @@
                         >{{ __('candidates::recruitment.actions.reject_requisition') }}</x-pill-button>
                     @endif
                 </div>
+                @endcan
             </div>
             @if ($requisition->approval_note)
                 <p class="border-t border-hairline-subtle bg-[#fafafa] px-4 py-3 text-[12.5px] leading-relaxed text-ink-muted">{{ $requisition->approval_note }}</p>

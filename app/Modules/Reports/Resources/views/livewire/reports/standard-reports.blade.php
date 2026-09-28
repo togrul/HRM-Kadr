@@ -4,37 +4,12 @@
     @endphp
 
     <x-surface-card :title="__('reports::dashboard.standard.title')" icon="icons.report-chart-icon" class="rounded-2xl border-zinc-200/90 bg-white shadow-card" bodyClass="rounded-b-2xl border-zinc-200/90 bg-[linear-gradient(180deg,#ffffff_0%,#fcfcfd_100%)]" contentClass="p-5 lg:p-6">
-        <div class="grid gap-3 xl:grid-cols-[repeat(4,minmax(0,1fr))] xl:items-end">
+        <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3 xl:items-end">
             <div class="min-w-0">
                 <label class="mb-1 block text-xs font-medium text-zinc-500">{{ __('reports::dashboard.fields.report_type') }}</label>
                 <x-ui.select wire:model.live="report">
                     @foreach ($reportOptions as $option)
                         <option value="{{ $option['key'] }}">{{ $option['label'] }}</option>
-                    @endforeach
-                </x-ui.select>
-            </div>
-            <div class="min-w-0">
-                <label class="mb-1 block text-xs font-medium text-zinc-500">{{ __('reports::dashboard.fields.year') }}</label>
-                <x-ui.select wire:model.live="year">
-                    @foreach (range(now()->year - 4, now()->year + 1) as $yearOption)
-                        <option value="{{ $yearOption }}">{{ $yearOption }}</option>
-                    @endforeach
-                </x-ui.select>
-            </div>
-            <div class="min-w-0">
-                <label class="mb-1 block text-xs font-medium text-zinc-500">{{ __('reports::dashboard.fields.month') }}</label>
-                <x-ui.select wire:model.live="month">
-                    @foreach (range(1, 12) as $monthOption)
-                        <option value="{{ $monthOption }}">{{ \Carbon\Carbon::create()->month($monthOption)->translatedFormat('F') }}</option>
-                    @endforeach
-                </x-ui.select>
-            </div>
-            <div class="min-w-0">
-                <label class="mb-1 block text-xs font-medium text-zinc-500">{{ __('reports::dashboard.fields.structure') }}</label>
-                <x-ui.select wire:model.live="structureId">
-                    <option value="">{{ __('reports::dashboard.labels.all_structures') }}</option>
-                    @foreach ($structureOptions as $option)
-                        <option value="{{ $option['id'] }}">{{ $option['label'] }}</option>
                     @endforeach
                 </x-ui.select>
             </div>

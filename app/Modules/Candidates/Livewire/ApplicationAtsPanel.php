@@ -98,14 +98,14 @@ class ApplicationAtsPanel extends Component
         $this->authorize('transition', $this->application);
 
         $data = $this->validate([
-            'scoreForm.interview_id' => ['required', 'integer', Rule::exists('candidate_interviews', 'id')->where('candidate_application_id', $this->application->id)],
+            'scoreForm.interview_id' => ['required', 'integer', Rule::exists('candidate_interviews', 'id')->where('candidate_application_id', $this->application->id)->whereNot('status', 'cancelled')],
             'scoreForm.technical' => ['required', 'integer', 'min:0', 'max:100'],
             'scoreForm.communication' => ['required', 'integer', 'min:0', 'max:100'],
             'scoreForm.culture' => ['required', 'integer', 'min:0', 'max:100'],
             'scoreForm.note' => ['nullable', 'string', 'max:2000'],
         ])['scoreForm'];
 
-        $interview = CandidateInterview::query()->where('candidate_application_id', $this->application->id)->findOrFail($data['interview_id']);
+        $interview = CandidateInterview::query()->where('candidate_application_id', $this->application->id)->where('status', '!=', 'cancelled')->findOrFail($data['interview_id']);
         $service->submitScorecard($interview, [
             ['criterion' => 'technical', 'score' => $data['technical']],
             ['criterion' => 'communication', 'score' => $data['communication']],

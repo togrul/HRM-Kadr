@@ -4,7 +4,6 @@ namespace App\Modules\Reports\Livewire;
 
 use App\Livewire\Concerns\WithRuntimeMemo;
 use App\Modules\Reports\Application\Services\ReportsAccessService;
-use App\Modules\Reports\Application\Services\ReportsStructureScopeService;
 use App\Modules\Reports\Application\Services\StandardReportCatalogService;
 use App\Modules\Reports\Application\Services\StandardReportService;
 use App\Modules\Reports\Exports\ReportsTableExport;
@@ -32,12 +31,9 @@ class StandardReports extends Component
 
     public array $reportOptions = [];
 
-    public array $structureOptions = [];
-
     public function mount(
         ReportsAccessService $access,
         StandardReportCatalogService $catalog,
-        ReportsStructureScopeService $structures,
         ?string $report = null,
         ?int $year = null,
         ?int $month = null,
@@ -51,12 +47,12 @@ class StandardReports extends Component
         $this->month = max(1, min(12, $month ?: (int) request()->integer('month', now()->month)));
         $this->structureId = $structureId ?: request()->integer('structure_id') ?: null;
         $this->reportOptions = $catalog->all();
-        $this->structureOptions = $structures->filterOptions()->all();
     }
 
     public function updatedReport(): void
     {
         $this->resetRuntimeMemo();
+        $this->dispatch('reports-selection', report: $this->report)->to(Dashboard::class);
     }
 
     public function updatedYear(): void

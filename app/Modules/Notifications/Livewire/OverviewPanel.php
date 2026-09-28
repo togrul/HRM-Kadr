@@ -38,7 +38,7 @@ class OverviewPanel extends Component
 
     public function seedBirthdayStarter(): void
     {
-        $this->authorizeTemplateManagement();
+        $this->authorizeStarterSeeding();
         $template = NotificationTemplate::query()->updateOrCreate(
             ['key' => 'birthday.default'],
             [
@@ -76,7 +76,7 @@ class OverviewPanel extends Component
 
     public function seedPositionChangeStarter(): void
     {
-        $this->authorizeTemplateManagement();
+        $this->authorizeStarterSeeding();
         $template = NotificationTemplate::query()->updateOrCreate(
             ['key' => 'position-change.default'],
             [
@@ -114,7 +114,7 @@ class OverviewPanel extends Component
 
     public function seedEmploymentStartedStarter(): void
     {
-        $this->authorizeTemplateManagement();
+        $this->authorizeStarterSeeding();
         $template = NotificationTemplate::query()->updateOrCreate(
             ['key' => 'employment-started.default'],
             [
@@ -152,7 +152,7 @@ class OverviewPanel extends Component
 
     public function seedHolidayStarter(): void
     {
-        $this->authorizeTemplateManagement();
+        $this->authorizeStarterSeeding();
         $template = NotificationTemplate::query()->updateOrCreate(
             ['key' => 'holiday.default'],
             [
@@ -188,9 +188,19 @@ class OverviewPanel extends Component
         $this->dispatch('notification-rule-changed');
     }
 
+    /**
+     * A starter writes both a template and a rule, so it needs both permissions.
+     */
+    private function authorizeStarterSeeding(): void
+    {
+        $this->authorizeTemplateManagement();
+        $this->authorizeRuleManagement();
+    }
+
     public function render(): View
     {
         return view('notification::livewire.notification.overview-panel', [
+            'canSeedStarters' => $this->canManageTemplates() && $this->canManageRules(),
             'managementTablesReady' => $this->managementTablesReady(),
             'stats' => $this->stats(),
             'previews' => $this->previews(),

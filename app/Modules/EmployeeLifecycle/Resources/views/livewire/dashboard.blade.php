@@ -599,7 +599,7 @@
                     >
                         <p class="hrm-eyebrow">{{ __('employee-lifecycle::dashboard.forms.probation') }}</p>
                         <div class="mt-3 grid gap-3 sm:grid-cols-2">
-                            <x-ui.input-shell class="sm:col-span-2" :error="$errors->first('completionForm.probation_review_id')">
+                            <x-ui.input-shell class="sm:col-span-2" :label="__('employee-lifecycle::dashboard.fields.probation_review')" :error="$errors->first('completionForm.probation_review_id')">
                                 <x-ui.select-dropdown
                                     wire:model="completionForm.probation_review_id"
                                     :model="$this->probationReviewOptions"
@@ -607,7 +607,7 @@
                                     placeholder="---"
                                 />
                             </x-ui.input-shell>
-                            <x-ui.input-shell :error="$errors->first('completionForm.probation_decision')">
+                            <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.probation_decision')" :error="$errors->first('completionForm.probation_decision')">
                                 <x-ui.select wire:model="completionForm.probation_decision">
                                     @foreach (['confirm', 'extend', 'terminate'] as $decision)
                                         <option value="{{ $decision }}">{{ __('employee-lifecycle::dashboard.probation_decisions.'.$decision) }}</option>
@@ -626,10 +626,16 @@
                         </div>
                     </form>
 
-                    <form wire:submit="completeMovement" class="rounded-xl border border-hairline bg-[#fafafa] px-4 py-3.5">
+                    <form
+                        class="rounded-xl border border-hairline bg-[#fafafa] px-4 py-3.5"
+                        data-names="{{ json_encode(collect($this->movementOptions)->mapWithKeys(fn ($option) => [$option['id'] => \Illuminate\Support\Str::before($option['label'], ' · ')])) }}"
+                        x-on:submit.prevent="$wire.completionForm.movement_id
+                            ? $dispatch('confirm-action', { title: @js(__('employee-lifecycle::dashboard.messages.movement_complete_title')), message: @js(__('employee-lifecycle::dashboard.messages.movement_complete_confirm', ['name' => '__NAME__'])).replace('__NAME__', JSON.parse($el.dataset.names)[$wire.completionForm.movement_id] ?? '—'), confirmText: @js(__('employee-lifecycle::dashboard.actions.complete_movement')), tone: 'rose', run: () => $wire.completeMovement() })
+                            : $wire.completeMovement()"
+                    >
                         <p class="hrm-eyebrow">{{ __('employee-lifecycle::dashboard.forms.movement') }}</p>
                         <div class="mt-3">
-                            <x-ui.input-shell :error="$errors->first('completionForm.movement_id')">
+                            <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.movement')" :error="$errors->first('completionForm.movement_id')">
                                 <x-ui.select-dropdown
                                     wire:model="completionForm.movement_id"
                                     :model="$this->movementOptions"
@@ -646,7 +652,7 @@
                     <form wire:submit="completeOffboarding" class="rounded-xl border border-hairline bg-[#fafafa] px-4 py-3.5">
                         <p class="hrm-eyebrow">{{ __('employee-lifecycle::dashboard.forms.offboarding') }}</p>
                         <div class="mt-3 space-y-3">
-                            <x-ui.input-shell :error="$errors->first('completionForm.offboarding_case_id')">
+                            <x-ui.input-shell :label="__('employee-lifecycle::dashboard.fields.offboarding_case')" :error="$errors->first('completionForm.offboarding_case_id')">
                                 <x-ui.select-dropdown
                                     wire:model="completionForm.offboarding_case_id"
                                     :model="$this->offboardingCaseOptions"
@@ -761,7 +767,13 @@
                 <x-pill-button wire:click="toggleTemplateActive">
                     {{ ($editingTemplateForm['is_active'] ?? false) ? __('employee-lifecycle::dashboard.actions.deactivate_template') : __('employee-lifecycle::dashboard.actions.activate_template') }}
                 </x-pill-button>
-                <x-pill-button variant="danger" wire:click="deleteOrArchiveTemplate">
+                <x-pill-button
+                    variant="danger"
+                    data-title="{{ ($editingTemplateForm['usage_count'] ?? 0) > 0 ? __('employee-lifecycle::dashboard.messages.template_archive_title') : __('employee-lifecycle::dashboard.messages.template_delete_title') }}"
+                    data-message="{{ ($editingTemplateForm['usage_count'] ?? 0) > 0 ? __('employee-lifecycle::dashboard.messages.template_archive_confirm', ['name' => $editingTemplateForm['name'] ?? '']) : __('employee-lifecycle::dashboard.messages.template_delete_confirm', ['name' => $editingTemplateForm['name'] ?? '']) }}"
+                    data-confirm="{{ ($editingTemplateForm['usage_count'] ?? 0) > 0 ? __('employee-lifecycle::dashboard.actions.archive_template') : __('employee-lifecycle::dashboard.actions.delete_template') }}"
+                    x-on:click="$dispatch('confirm-action', { title: $el.dataset.title, message: $el.dataset.message, confirmText: $el.dataset.confirm, tone: 'rose', run: () => $wire.deleteOrArchiveTemplate() })"
+                >
                     {{ ($editingTemplateForm['usage_count'] ?? 0) > 0
                         ? __('employee-lifecycle::dashboard.actions.archive_template')
                         : __('employee-lifecycle::dashboard.actions.delete_template') }}

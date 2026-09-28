@@ -119,7 +119,7 @@
                     <span class="block text-[12px] font-medium text-ink-muted">{{ __('candidates::recruitment.labels.interview') }}</span>
                     <x-ui.select wire:model="scoreForm.interview_id">
                         <option value="">---</option>
-                        @foreach ($application->interviews as $interview)
+                        @foreach ($application->interviews->where('status', '!=', 'cancelled') as $interview)
                             <option value="{{ $interview->id }}">{{ $interview->interviewer?->name ?? __('candidates::recruitment.labels.unassigned') }} · {{ optional($interview->scheduled_at)->format('d.m.Y H:i') ?? '—' }}</option>
                         @endforeach
                     </x-ui.select>
@@ -194,7 +194,11 @@
                         @if ($offer->status === 'sent')
                             <div class="mt-4 flex flex-wrap gap-2">
                                 @foreach (['accepted', 'declined', 'withdrawn'] as $status)
-                                    <x-pill-button wire:click="updateOfferStatus({{ $offer->id }}, '{{ $status }}')">{{ __('candidates::recruitment.actions.offer_'.$status) }}</x-pill-button>
+                                    <x-pill-button
+                                        data-title="{{ __('candidates::recruitment.actions.offer_'.$status) }}"
+                                        data-message="{{ __('candidates::recruitment.messages.offer_status_confirm', ['status' => __('candidates::recruitment.ats_statuses.'.$status)]) }}"
+                                        x-on:click="$dispatch('confirm-action', { title: $el.dataset.title, message: $el.dataset.message, confirmText: $el.dataset.title, tone: '{{ $status === 'accepted' ? 'emerald' : 'rose' }}', run: () => $wire.updateOfferStatus({{ $offer->id }}, '{{ $status }}') })"
+                                    >{{ __('candidates::recruitment.actions.offer_'.$status) }}</x-pill-button>
                                 @endforeach
                             </div>
                         @endif

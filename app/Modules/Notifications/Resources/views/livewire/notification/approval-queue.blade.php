@@ -57,12 +57,17 @@
                 </div>
 
                 <div class="mt-4 rounded-2xl border border-zinc-200/80 bg-white/80 p-3.5">
-                    <label class="hrm-eyebrow">{{ __('notifications::common.fields.note') }}</label>
+                    <label for="approval-note-{{ $campaign->id }}" class="hrm-eyebrow">{{ __('notifications::common.fields.note') }}</label>
                     <textarea
+                        id="approval-note-{{ $campaign->id }}"
                         wire:model="notes.{{ $campaign->id }}"
                         rows="3"
                         class="mt-2 w-full rounded-2xl border border-zinc-200 bg-zinc-50/70 px-4 py-3 text-sm leading-6 text-zinc-800"
                     ></textarea>
+                    <p class="mt-1 text-xs text-zinc-500">{{ __('notifications::common.helpers.reject_note_required') }}</p>
+                    @error('notes.'.$campaign->id)
+                        <p class="mt-1 text-xs font-medium text-rose-600">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
         @empty
@@ -71,5 +76,14 @@
                 <p class="mt-2 text-sm leading-6 text-zinc-500">{{ __('notifications::common.helpers.approval_queue_empty') }}</p>
             </div>
         @endforelse
+
+        @if ($pendingTotal > \App\Modules\Notifications\Livewire\ApprovalQueue::PREVIEW_LIMIT)
+            <div class="flex items-center justify-between gap-3 pt-1 text-sm text-zinc-500">
+                <span>{{ __('notifications::common.helpers.approval_queue_shown', ['shown' => $campaigns->count(), 'total' => $pendingTotal]) }}</span>
+                <button type="button" wire:click="$toggle('showAll')" class="font-semibold text-zinc-900 underline-offset-2 hover:underline">
+                    {{ $showAll ? __('notifications::common.buttons.show_less') : __('notifications::common.buttons.show_all') }}
+                </button>
+            </div>
+        @endif
     </div>
 </x-surface-card>

@@ -221,3 +221,35 @@ it('counts unread across every page and marks all read only on request', functio
     expect($user->unreadNotifications()->count())->toBe(0)
         ->and($user->notifications()->count())->toBe(25);
 });
+
+it('opens an inbox row like the bell: marks it read and follows it', function () {
+    $user = User::factory()->create();
+    $leave = seedUserNotification($user, ['type' => 'Leave', 'action' => 'leave']);
+    $plain = seedUserNotification($user, ['type' => 'Other', 'action' => 'announcement']);
+
+    $this->actingAs($user);
+
+    Livewire::test(NotificationList::class)
+        ->assertSeeHtml("wire:click=\"open('{$leave->id}')\"")
+        ->call('open', $leave->id)
+        ->assertRedirect(route('leaves'));
+
+    Livewire::test(NotificationList::class)
+        ->call('open', $plain->id)
+        ->assertNoRedirect();
+
+    expect($leave->refresh()->read_at)->not->toBeNull()
+        ->and($plain->refresh()->read_at)->not->toBeNull();
+});
+
+it('does not open another user\'s notification from the inbox', function () {
+    $owner = User::factory()->create();
+    $notification = seedUserNotification($owner);
+
+    $this->actingAs(User::factory()->create());
+
+    expect(fn () => Livewire::test(NotificationList::class)->call('open', $notification->id))
+        ->toThrow(Illuminate\Database\Eloquent\ModelNotFoundException::class);
+
+    expect($notification->refresh()->read_at)->toBeNull();
+});

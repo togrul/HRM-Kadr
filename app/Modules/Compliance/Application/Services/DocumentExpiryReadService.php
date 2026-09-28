@@ -106,7 +106,7 @@ class DocumentExpiryReadService
             'document_number' => $row['document_number'],
             'expires_at' => $row['expires_at'],
             'days_left' => $row['days_left'] ?? '',
-            'status' => $row['status'],
+            'status' => __('compliance::documents.status.'.$row['status']),
         ]);
     }
 

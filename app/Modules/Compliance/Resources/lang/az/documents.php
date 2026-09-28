@@ -10,7 +10,7 @@ return [
         'expiring_30' => 'Kritik',
         'expiring_60' => 'Yaxınlaşır',
         'valid' => 'Qüvvədədir',
-        'missing' => 'Çatışmayan',
+        'missing' => 'Sənəd yoxdur',
         'compliance_score' => 'Uyğunluq balı',
     ],
     'fields' => [
@@ -32,7 +32,7 @@ return [
     ],
     'status' => [
         'expired' => 'Vaxtı bitib',
-        'expiring_30' => 'Təcili yenilənməlidir',
+        'expiring_30' => 'Kritik',
         'expiring_60' => 'Yaxınlaşır',
         'valid' => 'Qüvvədədir',
         'missing' => 'Sənəd yoxdur',
@@ -57,6 +57,7 @@ return [
     ],
     'columns' => [
         'employee' => 'Əməkdaş',
+        'tabel_no' => 'Tabel nömrəsi',
         'document' => 'Sənəd',
         'expires_at' => 'Bitmə tarixi',
         'days_left' => 'Qalan gün',

@@ -102,6 +102,28 @@ class CandidateListInteractionTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_restore_button_follows_the_delete_permission_not_the_admin_role(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo([
+            Permission::findOrCreate('show-candidates', 'web'),
+            Permission::findOrCreate('delete-candidates', 'web'),
+        ]);
+
+        $candidate = $this->makeCandidate();
+        $candidate->delete();
+
+        $this->actingAs($user);
+
+        Livewire::test(CandidateList::class)
+            ->call('setStatus', 'deleted')
+            ->assertSeeHtml("wire:click=\"restoreData('{$candidate->id}')\"")
+            ->call('restoreData', $candidate->id)
+            ->assertHasNoErrors();
+
+        $this->assertNotSoftDeleted('candidates', ['id' => $candidate->id]);
+    }
+
     public function test_force_delete_action_is_forbidden_without_delete_permission(): void
     {
         $user = User::factory()->create();

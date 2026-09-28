@@ -3,6 +3,7 @@
 namespace App\Modules\Audit\Exports;
 
 use App\Models\AuditActivity;
+use App\Modules\Audit\Application\Services\ActivityLogReader;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -13,14 +14,33 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 
 class ActivityLogExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMapping
 {
+    /** @var array<string,string> Names of the causers and subjects in the current chunk. */
+    private array $labels = [];
+
+    private readonly ActivityLogReader $reader;
+
     /**
      * @param  array{search?:string,log_name?:string,event?:string,date_from?:string,date_to?:string,users_only?:string}  $filters
      */
-    public function __construct(private readonly array $filters = []) {}
+    public function __construct(private readonly array $filters = [])
+    {
+        $this->reader = app(ActivityLogReader::class);
+    }
+
+    /**
+     * Resolves the names of a whole chunk at once, so mapping a row costs no query.
+     */
+    public function prepareRows(iterable $rows): iterable
+    {
+        $rows = collect($rows);
+        $this->labels = $this->reader->labelsFor($rows);
+
+        return $rows;
+    }
 
     public function query(): Builder
     {
-        return AuditActivity::query()
+        return $this->reader->query($this->filters)
             ->select([
                 'id',
                 'log_name',
@@ -33,23 +53,6 @@ class ActivityLogExport implements FromQuery, ShouldAutoSize, WithHeadings, With
                 'properties',
                 'created_at',
             ])
-            ->when($this->filter('log_name') !== '', fn (Builder $query) => $query->where('log_name', $this->filter('log_name')))
-            ->when($this->filter('event') !== '', fn (Builder $query) => $query->where('event', $this->filter('event')))
-            ->when($this->filter('users_only') === '1', fn (Builder $query) => $query->whereNotNull('causer_id'))
-            ->when($this->filter('date_from') !== '', fn (Builder $query) => $query->whereDate('created_at', '>=', $this->filter('date_from')))
-            ->when($this->filter('date_to') !== '', fn (Builder $query) => $query->whereDate('created_at', '<=', $this->filter('date_to')))
-            ->when($this->filter('search') !== '', function (Builder $query): void {
-                $term = '%'.str_replace(['%', '_'], ['\\%', '\\_'], $this->filter('search')).'%';
-
-                $query->where(function (Builder $nested) use ($term): void {
-                    $nested
-                        ->where('description', 'like', $term)
-                        ->orWhere('event', 'like', $term)
-                        ->orWhere('log_name', 'like', $term)
-                        ->orWhere('subject_type', 'like', $term)
-                        ->orWhere('causer_type', 'like', $term);
-                });
-            })
             ->orderByDesc('created_at')
             ->orderByDesc('id');
     }
@@ -82,20 +85,15 @@ class ActivityLogExport implements FromQuery, ShouldAutoSize, WithHeadings, With
             $row->id,
             $row->created_at instanceof Carbon ? $row->created_at->format('Y-m-d H:i:s') : (string) $row->created_at,
             (string) $row->log_name,
-            (string) $row->event,
-            (string) $row->description,
-            $this->entityLabel($row->causer_type, $row->causer_id),
-            $this->entityLabel($row->subject_type, $row->subject_id),
+            $this->reader->eventLabel($row->event),
+            $this->reader->descriptionLabel($row->description),
+            $this->reader->actorLabel($row, $this->labels),
+            $row->subject_id === null ? '' : $this->reader->subjectLabel($row, $this->labels),
             $this->viewedPersonnelLabel($properties),
             (string) data_get($properties, 'ip', ''),
             (string) data_get($properties, 'user_agent', ''),
             json_encode($properties, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
         ];
-    }
-
-    private function filter(string $key): string
-    {
-        return trim((string) data_get($this->filters, $key, ''));
     }
 
     private function properties(AuditActivity $activity): array
@@ -107,15 +105,6 @@ class ActivityLogExport implements FromQuery, ShouldAutoSize, WithHeadings, With
         }
 
         return is_array($properties) ? $properties : [];
-    }
-
-    private function entityLabel(?string $type, mixed $id): string
-    {
-        if (! $type || ! $id) {
-            return '';
-        }
-
-        return class_basename($type).' #'.$id;
     }
 
     private function viewedPersonnelLabel(array $properties): string

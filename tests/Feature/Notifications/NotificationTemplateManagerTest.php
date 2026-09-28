@@ -105,4 +105,27 @@ class NotificationTemplateManagerTest extends TestCase
             ->call('save')
             ->assertForbidden();
     }
+
+    public function test_starter_seeding_needs_both_template_and_rule_permissions(): void
+    {
+        $user = User::factory()->create();
+        $this->grantTemplatePermissions($user);
+        $this->actingAs($user);
+
+        Livewire::test(\App\Modules\Notifications\Livewire\OverviewPanel::class)
+            ->assertDontSee(__('notifications::common.buttons.seed'))
+            ->call('seedBirthdayStarter')
+            ->assertForbidden();
+
+        $this->assertDatabaseCount('notification_rules', 0);
+
+        Permission::findOrCreate('manage-notification-rules', 'web');
+        $user->givePermissionTo('manage-notification-rules');
+
+        Livewire::test(\App\Modules\Notifications\Livewire\OverviewPanel::class)
+            ->assertSee(__('notifications::common.buttons.seed'))
+            ->call('seedBirthdayStarter');
+
+        $this->assertDatabaseCount('notification_rules', 1);
+    }
 }

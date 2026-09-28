@@ -40,7 +40,7 @@
         </x-slot:actions>
 
         @include('candidates::livewire.candidates.partials.recruitment-toolbar', [
-            'statusOptions' => ['draft', 'open', 'closed', 'cancelled'],
+            'statusOptions' => ['draft', 'pending_approval', 'approved', 'rejected', 'open', 'closed', 'cancelled'],
         ])
     </x-page-header>
 

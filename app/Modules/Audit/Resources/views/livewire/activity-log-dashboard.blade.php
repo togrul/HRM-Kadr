@@ -19,7 +19,7 @@
                     :count="$num($eventTotal)"
                 >{{ __('audit::activity.filters.all') }}</x-context-panel.item>
 
-                @foreach ($eventCounts->except('') as $option => $count)
+                @foreach ($eventCounts as $option => $count)
                     <x-context-panel.item
                         wire:key="audit-panel-event-{{ $option }}"
                         wire:click.prevent="$set('event', '{{ $option }}')"
@@ -138,7 +138,7 @@
                         @endforeach
                     </x-ui.select>
 
-                    <x-filter.reset :active="$search !== '' || $logName !== '' || $event !== '' || $dateFrom !== '' || $dateTo !== ''" action="resetFilters" />
+                    <x-filter.reset :active="$search !== '' || $logName !== '' || $event !== '' || $dateFrom !== '' || $dateTo !== '' || $usersOnly" action="resetFilters" />
                 </div>
             </div>
 

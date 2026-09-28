@@ -109,7 +109,9 @@ class ApplicationStageActionPanel extends Component
         $rules = [
             'form.to_stage' => ['required', Rule::in(collect($this->stageOptions())->pluck('id')->all())],
             'form.occurred_at' => ['required', 'date'],
-            'form.note' => ['nullable', 'string'],
+            'form.note' => ($this->form['to_stage'] ?? null) === 'rejected'
+                ? ['required', 'string', 'min:3']
+                : ['nullable', 'string'],
             'form.decision' => ['nullable', 'string', 'max:255'],
             'form.score' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'form.rejection_reason_id' => ['nullable', 'exists:candidate_rejection_reasons,id'],
@@ -134,6 +136,14 @@ class ApplicationStageActionPanel extends Component
         }
 
         return $rules;
+    }
+
+    protected function messages(): array
+    {
+        return [
+            'form.note.required' => __('candidates::recruitment.messages.rejection_note_required'),
+            'form.note.min' => __('candidates::recruitment.messages.rejection_note_required'),
+        ];
     }
 
     protected function validationAttributes(): array

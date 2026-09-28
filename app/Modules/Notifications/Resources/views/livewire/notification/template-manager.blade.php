@@ -142,7 +142,7 @@
                         @if ($canManageTemplates)
                             <div class="mt-4 flex items-center justify-end gap-2">
                                 <x-ui.async-button type="button" variant="secondary" size="sm" wire:click="edit({{ $template->id }})" wire:loading.attr="disabled" wire:target="edit">{{ __('notifications::common.buttons.edit') }}</x-ui.async-button>
-                                <x-ui.async-button type="button" variant="danger" size="sm" wire:click="delete({{ $template->id }})" wire:loading.attr="disabled" wire:target="delete">{{ __('notifications::common.buttons.delete') }}</x-ui.async-button>
+                                <x-ui.async-button type="button" variant="danger" size="sm" data-title="{{ __('notifications::common.confirm.delete_template_title') }}" data-message="{{ __('notifications::common.confirm.delete_template_message') }}" data-confirm="{{ __('notifications::common.buttons.delete') }}" x-on:click="$dispatch('confirm-action', { title: $el.dataset.title, message: $el.dataset.message, confirmText: $el.dataset.confirm, tone: 'rose', run: () => $wire.delete({{ $template->id }}) })" wire:loading.attr="disabled" wire:target="delete">{{ __('notifications::common.buttons.delete') }}</x-ui.async-button>
                             </div>
                         @endif
                     </div>

@@ -428,6 +428,8 @@ class LifecycleDashboardReadServiceTest extends TestCase
         Livewire::test(\App\Modules\EmployeeLifecycle\Livewire\Dashboard::class)
             ->call('selectTemplate', $templateId)
             ->assertSet('selectedTemplateId', $templateId)
+            ->assertSeeHtml('run: () => $wire.deleteOrArchiveTemplate()')
+            ->assertSee(__('employee-lifecycle::dashboard.messages.template_delete_title'))
             ->set('editingTemplateForm.name', 'Editable probation plan')
             ->set('editingTemplateForm.type', 'probation')
             ->set('editingTemplateForm.default_duration_days', 30)
