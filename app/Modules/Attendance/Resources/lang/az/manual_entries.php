@@ -50,7 +50,7 @@ return [
         'entered_by' => 'Daxil edən',
         'approved_by' => 'Təsdiq edən',
         'actions' => 'Əməliyyatlar',
-        'reject_note' => 'İmtina qeydi',
+        'reject_note' => 'Rədd səbəbi',
         'break' => 'Fasilə',
         'status' => 'Status',
         'min' => 'dəq',
@@ -116,7 +116,7 @@ return [
     ],
     'placeholders' => [
         'search_personnel' => 'Manual giriş yaratmaq üçün əməkdaş axtarın',
-        'reject_note' => 'İmtina qeydi',
+        'reject_note' => 'Rədd səbəbi (məcburi)',
     ],
     'messages' => [
         'validation_failed' => 'Validasiya uğursuz oldu.',

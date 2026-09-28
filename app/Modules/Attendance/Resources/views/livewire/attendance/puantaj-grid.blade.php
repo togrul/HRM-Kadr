@@ -37,16 +37,18 @@
         </svg>
     @endif
 
-    <div class="relative min-h-[300px] overflow-x-auto" x-on:click="openCell($event)">
-        <div class="inline-block min-w-full py-2 align-middle">
-            <div class="overflow-visible">
-                <x-table.tbl :headers="$headers" :title="__('attendance::puantaj.title')" bordered>
+    {{-- The table's own scroller is the only scroll container (both axes), so the day header
+         sticks to its top and the name column to its left while 31 days scroll past. --}}
+    <div class="relative min-h-[300px]" x-on:click="openCell($event)">
+        <div class="py-2">
+            <div>
+                <x-table.tbl :headers="$headers" :title="__('attendance::puantaj.title')" bordered sticky>
                     @forelse($rows as $row)
                         @php
                             $personnel = $row['personnel'];
                         @endphp
                         <tr data-name="{{ $row['label'] }}">
-                            <x-table.td extraClasses="w-max">
+                            <x-table.td extraClasses="w-max sticky left-0 z-[1] bg-white">
                                 <div class="font-medium text-zinc-800">
                                     {{ $personnel->surname }} {{ $personnel->name }} {{ $personnel->patronymic }}
                                 </div>

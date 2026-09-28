@@ -43,6 +43,15 @@ return [
         'snapshot_queued' => 'Aylıq xülasə növbəyə əlavə edildi.',
         'export_requires_snapshot' => 'İxrac üçün əvvəlcə bu ay üzrə aylıq xülasə yaradılmalıdır.',
         'export_requires_fresh_snapshot' => 'İxrac dayandırıldı: son xülasədən sonra davamiyyət qeydləri dəyişib — aylıq xülasəni yenidən yaradın.',
+        'already_closed' => 'Bu ay artıq bağlıdır.',
+        'already_open' => 'Bu ay artıq açıqdır — açılacaq bir şey yoxdur.',
+        'unlock_refused_handed_over' => 'Bu ay artıq maliyyə sisteminə ötürülüb və ya orada bağlanıb. Açmazdan əvvəl əmək haqqı bölməsi ilə razılaşdırın.',
+    ],
+    'confirm' => [
+        'close_title' => 'Ayı bağla',
+        'close_message' => ':month bağlanacaq: aylıq xülasə yenidən yaradılacaq və bu ayın bütün gündəlik qeydləri kilidlənəcək. Bağlı ayda düzəliş etmək olmur.',
+        'unlock_title' => 'Ayı aç',
+        'unlock_message' => ':month yenidən açılacaq və kilidlər götürüləcək. Əmək haqqı bu aydan artıq hesablanıbsa, iki sistem arasında uyğunsuzluq yarana bilər.',
     ],
     'payroll_headers' => [
         'tabel_no' => 'Tabel nömrəsi',

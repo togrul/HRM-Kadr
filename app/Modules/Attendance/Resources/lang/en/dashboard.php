@@ -20,6 +20,8 @@ return [
         'open_user_guide' => 'User guide',
     ],
     'tabs' => [
+        'work_group' => 'Work',
+        'review_group' => 'Review',
         'settings_group' => 'Settings',
         'overview' => 'Summary',
         'daily_monitor' => 'Daily monitor',
@@ -38,6 +40,8 @@ return [
         'needs_attention' => 'Needs attention',
         'attendance_statistics' => 'Attendance statistics',
         'process_statistics' => 'Process statistics',
+        'open_queue' => 'View',
+        'queue_empty' => 'Nothing waiting',
     ],
     'metrics' => [
         'workdays' => 'Workdays',

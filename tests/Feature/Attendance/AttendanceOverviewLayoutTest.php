@@ -37,16 +37,32 @@ it('leads the overview with linked work queues and reads durations as hours', fu
         ->toBeLessThan(strpos($html, __('attendance::dashboard.cards.attendance_statistics')));
 });
 
-it('groups configuration tabs apart from the daily work tabs', function (): void {
+it('groups the sections into work, review and settings', function (): void {
     $this->actingAs(attendanceAdmin());
 
     $html = Livewire::test(Dashboard::class)->html();
-    $group = strpos($html, __('attendance::dashboard.tabs.settings_group'));
+    $work = strpos($html, __('attendance::dashboard.tabs.work_group'));
+    $review = strpos($html, __('attendance::dashboard.tabs.review_group'));
+    $settings = strpos($html, __('attendance::dashboard.tabs.settings_group'));
 
-    // Every tab <li> must sit inside a <ul>, or the browser draws a bullet beside it.
+    // Every chip <li> must sit inside a <ul>, or the browser draws a bullet beside it.
     expect(substr_count($html, '<li '))->toBeGreaterThan(0)
         ->and(preg_match('#</ul>\s*(?:(?!<ul).)*<li #s', $html))->toBe(0)
-        ->and($group)->not->toBeFalse()
-        ->and(strpos($html, __('attendance::dashboard.tabs.shifts')))->toBeGreaterThan($group)
-        ->and(strpos($html, __('attendance::dashboard.tabs.daily_monitor')))->toBeLessThan($group);
+        ->and($html)->toContain('#attendance-section-nav')
+        ->and($work)->not->toBeFalse()
+        ->and(strpos($html, __('attendance::dashboard.tabs.puantaj')))->toBeGreaterThan($work)->toBeLessThan($review)
+        ->and(strpos($html, __('attendance::dashboard.tabs.exceptions')))->toBeGreaterThan($review)->toBeLessThan($settings)
+        ->and(strpos($html, __('attendance::dashboard.tabs.shifts')))->toBeGreaterThan($settings);
+});
+
+it('makes every attention card an obvious link, quieter when its queue is empty', function (): void {
+    $this->actingAs(attendanceAdmin());
+
+    $html = Livewire::withQueryParams(['year' => 2026, 'month' => 9])->test(Dashboard::class)->html();
+
+    expect($html)
+        ->toContain(__('attendance::dashboard.cards.open_queue'))
+        ->toContain(__('attendance::dashboard.cards.queue_empty'))
+        ->toContain('focus-visible:ring-2')
+        ->toContain('group-hover:translate-x-0.5');
 });

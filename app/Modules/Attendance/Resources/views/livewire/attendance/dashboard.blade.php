@@ -24,8 +24,24 @@
             'calendar-regimes' => 'calendar_regimes',
         ];
 
-        // Configuration, not daily work: rendered as a separate group after the work tabs.
-        $settingsTabs = ['settings', 'shifts', 'calendar-regimes'];
+        // Three groups, by what the user comes to do: daily work, review/approval, configuration.
+        $tabGroups = [
+            'work_group' => ['overview', 'daily-monitor', 'manager-summary', 'puantaj', 'manual'],
+            'review_group' => ['exceptions', 'overtime', 'month-close', 'history'],
+            'settings_group' => ['settings', 'shifts', 'calendar-regimes'],
+        ];
+        $tabGroups = array_filter(array_map(
+            fn (array $tabs) => array_values(array_intersect($tabs, $availableTabs)),
+            $tabGroups
+        ));
+
+        // Work waiting in a section, shown as the panel row's count (real overview figures only).
+        $tabCounts = array_filter([
+            'manual' => (int) ($overview['manual_pending_count'] ?? 0),
+            'daily-monitor' => (int) ($overview['raw_pending_count'] ?? 0),
+            'exceptions' => (int) ($overview['open_exception_count'] ?? 0),
+            'overtime' => (int) ($overview['pending_overtime_count'] ?? 0),
+        ]);
 
         // Durations read as hours ("198", "7:30"); the unit sits beside the number as a suffix.
         $asHours = function (int|float|null $minutes): string {
@@ -36,12 +52,32 @@
         };
     @endphp
 
-    {{-- The panel carries the structure tree; the section nav is a horizontal strip in the page. --}}
+    {{-- The panel is one card: the grouped section nav on top, the structure tree below it.
+         The nav is teleported in from inside the component root so its links follow the
+         period/structure state; the tree stays a slot child (a nested component cannot teleport). --}}
     <x-slot name="sidebar">
         <x-context-panel>
+            <div id="attendance-section-nav"></div>
             <livewire:structure.sidebar :selected="$selectedStructureId" wire:key="attendance-structure-sidebar" />
         </x-context-panel>
     </x-slot>
+
+    @teleport('#attendance-section-nav')
+        <nav aria-label="{{ __('attendance::dashboard.title') }}">
+            @foreach ($tabGroups as $groupKey => $groupTabs)
+                <x-context-panel.section :title="__('attendance::dashboard.tabs.'.$groupKey)">
+                    @foreach ($groupTabs as $tab)
+                        <x-context-panel.item
+                            wire:navigate
+                            :href="$attendanceTabRoute($tab)"
+                            :active="$activeTab === $tab"
+                            :count="$tabCounts[$tab] ?? null"
+                        >{{ __('attendance::dashboard.tabs.'.$attendanceTabs[$tab]) }}</x-context-panel.item>
+                    @endforeach
+                </x-context-panel.section>
+            @endforeach
+        </nav>
+    @endteleport
 
     @php
         $activeLabelKey = $attendanceTabs[$activeTab] ?? 'overview';
@@ -75,36 +111,21 @@
             </x-pill-button>
         </x-slot:actions>
 
-        {{-- section nav: stays on the page so the panel can give the structure tree its
-             full height, and wraps instead of scrolling so every section is reachable --}}
-        {{-- day-to-day sections first; configuration sits apart as a quieter second group --}}
-        <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <x-filter.nav wrap class="min-w-0">
-                @foreach ($attendanceTabs as $tab => $labelKey)
-                    @continue(! in_array($tab, $availableTabs, true) || in_array($tab, $settingsTabs, true))
-                    <x-filter.item wire:navigate href="{{ $attendanceTabRoute($tab) }}" :active="$activeTab === $tab">
-                        {{ __('attendance::dashboard.tabs.'.$labelKey) }}
-                    </x-filter.item>
-                @endforeach
-            </x-filter.nav>
-
-            @if (array_intersect($settingsTabs, $availableTabs) !== [])
-                <div class="flex flex-wrap items-center gap-2 border-l border-hairline pl-3">
-                    <span class="flex items-center gap-1 text-[11.5px] font-medium text-ink-faint">
-                        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                        {{ __('attendance::dashboard.tabs.settings_group') }}
-                    </span>
+        {{-- small screens: the panel is off-canvas, so the same three groups show as chip rows --}}
+        <div class="space-y-2 lg:hidden">
+            @foreach ($tabGroups as $groupKey => $groupTabs)
+                <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                    <span class="w-16 shrink-0 text-[11.5px] font-medium text-ink-faint">{{ __('attendance::dashboard.tabs.'.$groupKey) }}</span>
                     {{-- x-filter.item renders an <li>; outside its <ul> every item grows a list bullet --}}
                     <x-filter.nav wrap class="min-w-0">
-                        @foreach ($settingsTabs as $tab)
-                            @continue(! in_array($tab, $availableTabs, true))
-                            <x-filter.item wire:navigate href="{{ $attendanceTabRoute($tab) }}" :active="$activeTab === $tab" class="text-ink-muted">
+                        @foreach ($groupTabs as $tab)
+                            <x-filter.item wire:navigate href="{{ $attendanceTabRoute($tab) }}" :active="$activeTab === $tab">
                                 {{ __('attendance::dashboard.tabs.'.$attendanceTabs[$tab]) }}
                             </x-filter.item>
                         @endforeach
                     </x-filter.nav>
                 </div>
-            @endif
+            @endforeach
         </div>
     </x-page-header>
 
@@ -135,12 +156,38 @@
             <p class="hrm-eyebrow">{{ __('attendance::dashboard.cards.needs_attention') }}</p>
             <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 @foreach ($queueTiles as $tile)
-                    <x-ui.metric-tile
-                        :label="__('attendance::dashboard.metrics.'.$tile['metric'])"
-                        :value="$tile['value']"
-                        :tone="$tile['value'] > 0 ? $tile['tone'] : 'ink'"
-                        :href="in_array($tile['tab'], $availableTabs, true) ? $attendanceTabRoute($tile['tab']) : null"
-                    />
+                    @php
+                        $tileHref = in_array($tile['tab'], $availableTabs, true) ? $attendanceTabRoute($tile['tab']) : null;
+                        $tileEmpty = $tile['value'] === 0;
+                        $tileDot = $tileEmpty ? 'bg-zinc-300' : ($tile['tone'] === 'rose' ? 'bg-[#e11d48]' : 'bg-[#d97706]');
+                        $tileNumber = $tileEmpty ? 'text-ink-faint' : ($tile['tone'] === 'rose' ? 'text-[#be123c]' : 'text-[#b45309]');
+                    @endphp
+                    {{-- the whole card is the link to the queue behind the number; an empty queue
+                         reads quieter but still opens its section --}}
+                    <{{ $tileHref ? 'a' : 'div' }}
+                        @if ($tileHref) href="{{ $tileHref }}" wire:navigate @endif
+                        @class([
+                            'group flex flex-col rounded-2xl border px-4 py-3.5 transition',
+                            'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-2' => $tileHref,
+                            'border-hairline bg-white shadow-card hover:border-zinc-300 hover:shadow-md' => ! $tileEmpty,
+                            'border-hairline bg-[#fafafa] hover:border-zinc-300 hover:bg-white' => $tileEmpty,
+                        ])
+                    >
+                        <div class="flex items-center gap-1.5">
+                            <span class="h-1.5 w-1.5 shrink-0 rounded-full {{ $tileDot }}" aria-hidden="true"></span>
+                            <x-ui.field-label as="div" class="tracking-tight">{{ __('attendance::dashboard.metrics.'.$tile['metric']) }}</x-ui.field-label>
+                        </div>
+                        <p class="hrm-num mt-auto pt-2 text-[21px] font-semibold tracking-[-0.03em] {{ $tileNumber }}">{{ $tile['value'] }}</p>
+                        @if ($tileHref)
+                            <div class="mt-2 flex items-center justify-between gap-2 border-t border-hairline-subtle pt-2 text-[12px]">
+                                <span class="text-ink-faint">{{ $tileEmpty ? __('attendance::dashboard.cards.queue_empty') : '' }}</span>
+                                <span class="inline-flex items-center gap-0.5 font-medium text-ink-muted transition group-hover:text-ink">
+                                    {{ __('attendance::dashboard.cards.open_queue') }}
+                                    <svg class="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                                </span>
+                            </div>
+                        @endif
+                    </{{ $tileHref ? 'a' : 'div' }}>
                 @endforeach
             </div>
         </section>

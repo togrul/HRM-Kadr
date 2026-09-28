@@ -9,6 +9,7 @@ use App\Modules\Attendance\Application\Services\AttendancePayrollExportService;
 use App\Modules\Attendance\Exports\AttendancePayrollCsvExport;
 use App\Modules\Attendance\Exports\AttendancePayrollExport;
 use App\Modules\Attendance\Jobs\GenerateAttendanceMonthlySnapshotJob;
+use DomainException;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 use Maatwebsite\Excel\Excel as ExcelWriter;
@@ -62,7 +63,15 @@ class MonthClose extends Component
             abort(403);
         }
 
-        $stats = $lockService->closeMonth($this->year, $this->month);
+        try {
+            $stats = $lockService->closeMonth($this->year, $this->month);
+        } catch (DomainException) {
+            $this->refreshState($lockService);
+            $this->dispatch('notify', type: 'error', message: __('attendance::month_close.messages.already_closed'));
+
+            return;
+        }
+
         $this->refreshState($lockService);
 
         $this->dispatch(
@@ -81,7 +90,17 @@ class MonthClose extends Component
             abort(403);
         }
 
-        $stats = $lockService->unlockMonth($this->year, $this->month);
+        try {
+            $stats = $lockService->unlockMonth($this->year, $this->month);
+        } catch (DomainException) {
+            $this->refreshState($lockService);
+            $this->dispatch('notify', type: 'error', message: ($this->status['is_locked'] ?? false)
+                ? __('attendance::month_close.messages.unlock_refused_handed_over')
+                : __('attendance::month_close.messages.already_open'));
+
+            return;
+        }
+
         $this->refreshState($lockService);
 
         $this->dispatch(
