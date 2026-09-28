@@ -22,5 +22,10 @@
         <span class="text-[10px] font-medium uppercase tracking-wide text-zinc-400">{{ $label }}</span>
     @endif
     {{-- an empty vacancy reads as a dash, not a zero, so a real opening stands out --}}
-    <span class="hrm-metric-value {{ $valueClass }}">{{ $tone === 'vacant' && $v === 0 ? '—' : $v }}</span>
+    <span class="hrm-metric-value hrm-num inline-flex items-center gap-1 {{ $valueClass }}">
+        @if ($tone === 'vacant' && $v > 0)
+            <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-orange-500" aria-hidden="true"></span>
+        @endif
+        {{ $tone === 'vacant' && $v === 0 ? '—' : $v }}
+    </span>
 </div>

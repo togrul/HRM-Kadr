@@ -51,6 +51,12 @@ class Staffs extends Component
      */
     public ?array $openNodes = null;
 
+    /** Unit / position name filter for the tree; a match opens every branch that leads to it. */
+    public string $search = '';
+
+    /** "Yalnız vakant olanlar": keep only branches that still have an open slot. */
+    public bool $onlyVacant = false;
+
     /** Nodes this deep (and shallower) come with the page; anything below opens on demand. */
     private const TREE_EAGER_DEPTH = 2;
 
@@ -74,7 +80,9 @@ class Staffs extends Component
         $report = $this->returnData(type: 'excel');
         $name = Carbon::now()->format('d.m.Y H:i');
 
-        return Excel::download(new VacancyExport($report), "vakansiyalar-{$name}.xlsx");
+        $prefix = $this->selectedPage === 'vacancies' ? 'vakansiyalar' : 'stat-cedveli';
+
+        return Excel::download(new VacancyExport($report), "{$prefix}-{$name}.xlsx");
     }
 
     public function showPage($page): void
@@ -508,9 +516,16 @@ class Staffs extends Component
 
             $this->openNodes ??= $this->defaultOpenNodes($staffTree);
 
+            $search = trim($this->search);
+            $visibleTree = $this->filterTree($staffTree, $search, $this->onlyVacant);
+
             return view('staff::livewire.staff-schedule.staffs', [
                 'staffs' => collect(),
                 'staffTree' => $staffTree,
+                'visibleTree' => $visibleTree,
+                // A search result is useless folded away, so every surviving branch opens.
+                'treeOpenIds' => $search !== '' ? $this->collectTreeIds($visibleTree) : $this->openNodes,
+                'treeSearch' => $search,
                 'staffTreeIds' => $staffTreeIds,
                 'staffAllOpen' => count($this->openNodes) >= count($staffTreeIds),
                 'staffSummary' => $this->summarizeTree($staffTree),
@@ -520,10 +535,72 @@ class Staffs extends Component
         return view('staff::livewire.staff-schedule.staffs', [
             'staffs' => $this->returnData(),
             'staffTree' => [],
+            'visibleTree' => [],
+            'treeOpenIds' => [],
+            'treeSearch' => '',
             'staffTreeIds' => [],
             'staffAllOpen' => false,
             'staffSummary' => $this->summarizeTree([]),
         ]);
+    }
+
+    /**
+     * Narrow the (cached) tree in memory — no query. A node survives when its name matches
+     * (then its whole subtree stays), when one of its positions matches (only those
+     * positions stay), or when a descendant survives. `onlyVacant` drops every branch
+     * and position without an open slot. Aggregates keep describing the whole unit.
+     *
+     * @param  array<int, array<string, mixed>>  $tree
+     * @return array<int, array<string, mixed>>
+     */
+    public function filterTree(array $tree, string $search, bool $onlyVacant): array
+    {
+        if ($search === '' && ! $onlyVacant) {
+            return $tree;
+        }
+
+        $matches = fn (string $text): bool => $search === '' || mb_stripos($text, $search) !== false;
+        $kept = [];
+
+        foreach ($tree as $node) {
+            if ($onlyVacant && (int) $node['agg']['vacant'] <= 0) {
+                continue;
+            }
+
+            $positions = $onlyVacant
+                ? array_values(array_filter($node['positions'], fn (array $p): bool => (int) $p['vacant'] > 0))
+                : $node['positions'];
+
+            if ($search !== '' && $matches($node['name'])) {
+                $kept[] = [...$node, 'positions' => $positions, 'children' => $this->filterTree($node['children'], '', $onlyVacant)];
+
+                continue;
+            }
+
+            $positions = array_values(array_filter($positions, fn (array $p): bool => $matches($p['title'])));
+            $children = $this->filterTree($node['children'], $search, $onlyVacant);
+
+            if ($positions !== [] || $children !== []) {
+                $kept[] = [...$node, 'positions' => $positions, 'children' => $children];
+            }
+        }
+
+        return $kept;
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $tree
+     * @return list<int>
+     */
+    protected function collectTreeIds(array $tree): array
+    {
+        $ids = [];
+
+        foreach ($tree as $node) {
+            $ids = [...$ids, (int) $node['id'], ...$this->collectTreeIds($node['children'])];
+        }
+
+        return $ids;
     }
 
     /**

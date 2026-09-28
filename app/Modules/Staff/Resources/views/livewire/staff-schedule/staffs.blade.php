@@ -1,4 +1,5 @@
 @php
+    $canAddStaff = auth()->user()?->can('add-staff') ?? false;
     $canEditStaff = auth()->user()?->can('edit-staff') ?? false;
     $canDeleteStaff = auth()->user()?->can('delete-staff') ?? false;
     $num = fn ($value): string => number_format((int) $value, 0, ',', ' ');
@@ -10,6 +11,24 @@
     class="flex flex-col"
     x-data="{ editMode: false }"
 >
+    {{-- edit-mode strip: while it is up the tree's mutating controls are visible, otherwise nothing can change --}}
+    <div x-show="editMode" x-cloak role="status"
+        class="sticky top-0 z-20 flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-amber-200 bg-amber-50 px-4 py-2 text-[13px] text-ink sm:px-5">
+        <span class="h-2 w-2 shrink-0 rounded-full bg-orange-500" aria-hidden="true"></span>
+        <span class="font-semibold">{{ __('staff::common.messages.edit_mode_on') }}</span>
+        <span class="ml-auto flex items-center gap-2">
+            @if ($canAddStaff)
+                <x-pill-button wire:click="openSideMenu('add-staff')">
+                    <x-icons.add-icon size="w-4 h-4" />
+                    {{ __('staff::common.actions.add_staff') }}
+                </x-pill-button>
+            @endif
+            <x-pill-button variant="primary" x-on:click="editMode = false">
+                {{ __('staff::common.actions.done') }}
+            </x-pill-button>
+        </span>
+    </div>
+
     {{-- ===================== contextual panel ===================== --}}
     <x-slot name="sidebar"><div id="hrm-context-panel"></div></x-slot>
 
@@ -109,44 +128,61 @@
 
         <x-slot:actions>
             @if ($selectedPage == 'all')
-                <x-pill-button wire:click="{{ $staffAllOpen ? 'collapseAllNodes' : 'expandAllNodes' }}">
-                    {{ $staffAllOpen ? __('staff::common.actions.collapse_all') : __('staff::common.actions.expand_all') }}
-                </x-pill-button>
-                <x-pill-button wire:click.prevent="showPage('vacancies')">
-                    {{ __('staff::common.actions.get_all_vacancies') }}
-                </x-pill-button>
-                @if ($canEditStaff || $canDeleteStaff)
-                    <x-pill-button
-                        x-on:click="editMode = ! editMode"
-                        x-bind:class="editMode ? 'border-ink bg-ink text-white' : ''"
-                    >
-                        <span class="relative inline-flex h-4 w-7 items-center rounded-full transition-colors"
-                            x-bind:class="editMode ? 'bg-white/30' : 'bg-hairline'">
-                            <span class="inline-block h-3 w-3 transform rounded-full bg-white shadow transition-transform"
-                                x-bind:class="editMode ? 'translate-x-3.5' : 'translate-x-0.5'"></span>
-                        </span>
-                        {{ __('staff::common.actions.edit_mode') }}
+                <label class="relative block w-full sm:w-56">
+                    <span class="sr-only">{{ __('staff::common.actions.search_tree') }}</span>
+                    <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                    <input
+                        type="search"
+                        wire:model.live.debounce.300ms="search"
+                        placeholder="{{ __('staff::common.actions.search_tree') }}"
+                        class="h-9 w-full rounded-full border border-hairline bg-[#f4f4f5] pl-9 pr-3 text-base text-ink placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-0 sm:text-sm"
+                    />
+                </label>
+                @if ($canAddStaff || $canEditStaff || $canDeleteStaff)
+                    {{-- Apple Edit → Done: the tree is read-only until this is pressed --}}
+                    <x-pill-button x-show="! editMode" x-on:click="editMode = true">
+                        {{ __('staff::common.actions.edit') }}
                     </x-pill-button>
                 @endif
             @else
                 <x-pill-button wire:click.prevent="showPage('all')">
                     {{ __('staff::common.actions.all_data') }}
                 </x-pill-button>
-                @can('export-staff')
-                    <x-pill-button variant="emerald" :icon="true" wire:click.prevent="exportExcel"
-                        wire:loading.attr="disabled" wire:target="exportExcel"
-                        title="{{ __('staff::common.actions.export_excel') }}">
-                        <x-icons.excel-icon />
-                    </x-pill-button>
-                @endcan
             @endif
-            @can('add-staff')
-                <x-pill-button variant="primary" wire:click="openSideMenu('add-staff')">
-                    <x-icons.add-icon color="text-white" hover="text-white" size="w-4 h-4" />
-                    {{ __('staff::common.actions.add_staff') }}
-                </x-pill-button>
-            @endcan
+
+            <x-ui.row-menu>
+                @if ($selectedPage == 'all')
+                    <x-ui.row-menu.item wire:click="showPage('vacancies')">
+                        {{ __('staff::common.actions.get_all_vacancies') }}
+                    </x-ui.row-menu.item>
+                    <x-ui.row-menu.item wire:click="{{ $staffAllOpen ? 'collapseAllNodes' : 'expandAllNodes' }}">
+                        {{ $staffAllOpen ? __('staff::common.actions.collapse_all') : __('staff::common.actions.expand_all') }}
+                    </x-ui.row-menu.item>
+                @endif
+                @can('export-staff')
+                    @if ($selectedPage == 'all')
+                        <x-ui.row-menu.separator />
+                    @endif
+                    <x-ui.row-menu.item wire:click="exportExcel">
+                        <x-icons.excel-icon />
+                        {{ __('staff::common.actions.export_excel') }}
+                    </x-ui.row-menu.item>
+                @endcan
+            </x-ui.row-menu>
         </x-slot:actions>
+
+        @if ($selectedPage == 'all')
+            <div class="px-4 pb-3 sm:px-5">
+                <x-filter.nav>
+                    <x-filter.item href="#" wire:click.prevent="$set('onlyVacant', false)" :active="! $onlyVacant">
+                        {{ __('staff::common.filters.all') }}
+                    </x-filter.item>
+                    <x-filter.item href="#" wire:click.prevent="$set('onlyVacant', true)" :active="$onlyVacant">
+                        {{ __('staff::common.filters.only_vacant') }}
+                    </x-filter.item>
+                </x-filter.nav>
+            </div>
+        @endif
     </x-page-header>
 
     @if ($selectedPage == 'all')
@@ -161,9 +197,11 @@
             </div>
 
             <div class="bg-white">
-                @foreach ($staffTree as $node)
-                    <x-staff.tree-node wire:key="staff-node-{{ $node['id'] }}" :node="$node" :depth="0" :open-ids="$openNodes ?? []" />
-                @endforeach
+                @forelse ($visibleTree as $node)
+                    <x-staff.tree-node wire:key="staff-node-{{ $node['id'] }}" :node="$node" :depth="0" :open-ids="$treeOpenIds" :search="$treeSearch" />
+                @empty
+                    <p class="px-4 py-10 text-center text-[13px] text-ink-muted">{{ __('staff::common.messages.no_match') }}</p>
+                @endforelse
             </div>
         @else
             <x-table.empty :rows="4" />
