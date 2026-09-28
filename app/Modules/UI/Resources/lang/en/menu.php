@@ -14,7 +14,7 @@ return [
         'my_hr' => 'My HR',
         'self_service_reviews' => 'Self-service review',
         'onboarding_library' => 'Onboarding library',
-        'learning_library' => 'Learning library',
+        'learning_library' => 'Training library',
         'attendance' => 'Attendance',
         'training' => 'Training',
         'performance' => 'Performance',

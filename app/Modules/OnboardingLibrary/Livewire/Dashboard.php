@@ -7,7 +7,6 @@ use App\Modules\OnboardingLibrary\Application\Services\OnboardingLibraryReadServ
 use App\Modules\Personnel\Contracts\OnboardingAssignmentManager;
 use App\Support\Library\LibraryExportAction;
 use App\Support\Livewire\AbstractLibraryDashboard;
-use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Computed;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -78,19 +77,9 @@ class Dashboard extends AbstractLibraryDashboard
         );
 
         $this->assignmentForm['template_id'] = $template->id;
-        $this->templateUpload = null;
-        $this->templateForm = [
-            'title' => '',
-            'document_type' => 'policy',
-            'version' => '1.0',
-            'effective_from' => null,
-            'effective_to' => null,
-            'is_required' => true,
-            'requires_acknowledgement' => true,
-            'is_active' => true,
-            'auto_assign_new_hires' => false,
-        ];
-        $this->versionSourceTemplateId = null;
+        $this->resetLibraryForm();
+        $this->closeSideMenu();
+        unset($this->catalogPayload);
 
         $this->dispatch('notify', type: 'success', message: __('onboarding-library::dashboard.messages.template_saved'));
     }
@@ -142,6 +131,7 @@ class Dashboard extends AbstractLibraryDashboard
             auth()->user()
         );
 
+        $this->closeSideMenu();
         $this->dispatch('notify', type: 'success', message: __('onboarding-library::dashboard.messages.assignment_saved', ['count' => $count]));
     }
 
@@ -152,7 +142,7 @@ class Dashboard extends AbstractLibraryDashboard
         $template = OnboardingDocumentTemplate::query()->findOrFail($templateId);
         app(OnboardingAssignmentManager::class)->toggleTemplateActive($template);
 
-        unset($this->payload);
+        unset($this->catalogPayload);
         $this->dispatch('notify', type: 'success', message: __('onboarding-library::dashboard.messages.template_state_updated'));
     }
 
@@ -163,7 +153,7 @@ class Dashboard extends AbstractLibraryDashboard
         $template = OnboardingDocumentTemplate::query()->findOrFail($templateId);
         app(OnboardingAssignmentManager::class)->setTemplateArchived($template, $template->archived_at === null, auth()->user());
 
-        unset($this->payload);
+        unset($this->catalogPayload);
         $this->dispatch('notify', type: 'success', message: __('onboarding-library::dashboard.messages.template_archive_updated'));
     }
 
@@ -185,6 +175,8 @@ class Dashboard extends AbstractLibraryDashboard
             'auto_assign_new_hires' => (bool) $template->auto_assign_new_hires,
         ];
 
+        $this->resetValidation();
+        $this->openSideMenu('library-create');
         $this->dispatch('notify', type: 'info', message: __('onboarding-library::dashboard.messages.version_prefilled'));
     }
 
@@ -293,12 +285,6 @@ class Dashboard extends AbstractLibraryDashboard
     }
 
     #[Computed]
-    public function summaryPayload(): array
-    {
-        return app(OnboardingLibraryReadService::class)->buildSummary();
-    }
-
-    #[Computed]
     public function generalPayload(): array
     {
         return app(OnboardingLibraryReadService::class)->buildGeneral(
@@ -310,21 +296,9 @@ class Dashboard extends AbstractLibraryDashboard
     }
 
     #[Computed]
-    public function libraryPayload(): array
-    {
-        return app(OnboardingLibraryReadService::class)->buildLibrary($this->searchTemplate);
-    }
-
-    #[Computed]
     public function reportsPayload(): array
     {
         return app(OnboardingLibraryReadService::class)->buildReports();
-    }
-
-    #[Computed]
-    public function payload(): array
-    {
-        return app(OnboardingLibraryReadService::class)->build($this->searchTemplate, $this->searchPersonnel, $this->searchStructure, $this->searchPosition);
     }
 
     public function canView(): bool
@@ -342,8 +316,60 @@ class Dashboard extends AbstractLibraryDashboard
         return auth()->user()?->can('assign-onboarding-documents') ?? false;
     }
 
-    public function render(): View
+    protected function readService(): OnboardingLibraryReadService
     {
-        return view('onboarding-library::livewire.onboarding-library.dashboard');
+        return app(OnboardingLibraryReadService::class);
+    }
+
+    protected function resetLibraryForm(): void
+    {
+        $this->templateUpload = null;
+        $this->versionSourceTemplateId = null;
+        $this->templateForm = [
+            'title' => '',
+            'document_type' => 'policy',
+            'version' => '1.0',
+            'effective_from' => null,
+            'effective_to' => null,
+            'is_required' => true,
+            'requires_acknowledgement' => true,
+            'is_active' => true,
+            'auto_assign_new_hires' => false,
+        ];
+    }
+
+    protected function libraryConfig(): array
+    {
+        $types = ['policy', 'internal_regulation', 'job_instruction', 'security_rule', 'welcome_pack', 'other'];
+        $typeOptions = array_combine($types, array_map(fn (string $type): string => __('personnel::my_hr.onboarding.document_types.'.$type), $types));
+
+        return [
+            'ns' => 'onboarding-library::dashboard',
+            'icon' => 'onboarding',
+            'breadcrumb' => __('ui::menu.items.onboarding_library'),
+            'search' => 'searchTemplate',
+            'form' => 'templateForm',
+            'upload' => 'templateUpload',
+            'save' => 'saveTemplate',
+            'toggle_active' => 'toggleTemplateActive',
+            'toggle_archived' => 'toggleTemplateArchived',
+            'new_version' => 'prepareNextTemplateVersion',
+            'assign_key' => 'template_id',
+            'assign_items' => 'assignment_templates',
+            'can_manage' => $this->canManageTemplates(),
+            'can_assign' => $this->canAssignDocuments(),
+            'type_options' => $typeOptions,
+            'fields' => [
+                ['key' => 'title', 'label' => 'template_title', 'type' => 'text', 'wide' => true],
+                ['key' => 'document_type', 'label' => 'document_type', 'type' => 'select', 'options' => $typeOptions],
+                ['key' => 'version', 'label' => 'version', 'type' => 'text'],
+                ['key' => 'effective_from', 'label' => 'effective_from', 'type' => 'date'],
+                ['key' => 'effective_to', 'label' => 'effective_to', 'type' => 'date'],
+                ['key' => 'is_required', 'label' => 'is_required', 'type' => 'checkbox'],
+                ['key' => 'requires_acknowledgement', 'label' => 'requires_acknowledgement', 'type' => 'checkbox'],
+                ['key' => 'is_active', 'label' => 'is_active', 'type' => 'checkbox'],
+                ['key' => 'auto_assign_new_hires', 'label' => 'auto_assign_new_hires', 'type' => 'checkbox'],
+            ],
+        ];
     }
 }
