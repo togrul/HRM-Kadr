@@ -553,13 +553,23 @@ class Staffs extends Component
      * @param  array<int, array<string, mixed>>  $tree
      * @return array<int, array<string, mixed>>
      */
+    /**
+     * Azerbaijani-aware lower case: İ→i and I→ı, one character each, so offsets in the
+     * folded string still point at the same characters of the original.
+     */
+    public static function foldCase(string $text): string
+    {
+        return mb_strtolower(strtr($text, ['İ' => 'i', 'I' => 'ı']));
+    }
+
     public function filterTree(array $tree, string $search, bool $onlyVacant): array
     {
         if ($search === '' && ! $onlyVacant) {
             return $tree;
         }
 
-        $matches = fn (string $text): bool => $search === '' || mb_stripos($text, $search) !== false;
+        $needle = self::foldCase($search);
+        $matches = fn (string $text): bool => $needle === '' || mb_strpos(self::foldCase($text), $needle) !== false;
         $kept = [];
 
         foreach ($tree as $node) {

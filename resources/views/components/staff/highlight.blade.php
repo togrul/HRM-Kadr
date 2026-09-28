@@ -4,17 +4,24 @@
 ])
 
 @php
-    // Every case-insensitive hit of the tree search goes into <mark>; each piece is escaped first.
-    $html = e((string) $text);
+    // Every hit of the tree search goes into <mark>; each piece is escaped first. Matching uses
+    // the same Azerbaijani-aware folding as the search itself (İ/i, I/ı).
+    $text = (string) $text;
+    $needle = \App\Modules\Staff\Livewire\Staffs::foldCase((string) $query);
+    $html = '';
 
-    if ($query !== '') {
-        $pieces = preg_split('/('.preg_quote($query, '/').')/iu', (string) $text, -1, PREG_SPLIT_DELIM_CAPTURE) ?: [(string) $text];
-        $html = '';
-        foreach ($pieces as $i => $piece) {
-            $html .= $i % 2 === 1
-                ? '<mark class="rounded bg-amber-100 px-0.5 text-ink">'.e($piece).'</mark>'
-                : e($piece);
+    if ($needle === '') {
+        $html = e($text);
+    } else {
+        $haystack = \App\Modules\Staff\Livewire\Staffs::foldCase($text);
+        $length = mb_strlen($needle);
+        $offset = 0;
+        while (($hit = mb_strpos($haystack, $needle, $offset)) !== false) {
+            $html .= e(mb_substr($text, $offset, $hit - $offset))
+                .'<mark class="rounded bg-amber-100 px-0.5 text-ink">'.e(mb_substr($text, $hit, $length)).'</mark>';
+            $offset = $hit + $length;
         }
+        $html .= e(mb_substr($text, $offset));
     }
 @endphp
 {!! $html !!}

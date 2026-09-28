@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Modules\Staff\Livewire\AddStaff;
 use App\Modules\Staff\Livewire\Staffs;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
@@ -163,6 +164,17 @@ class StaffCrudRegressionTest extends TestCase
         $this->assertSame(['Kassir'], array_column($vacant[0]['children'][0]['positions'], 'title'));
 
         $this->assertSame([], $filter('hüquq', true));
+    }
+
+    public function test_search_folds_azerbaijani_dotted_and_dotless_i(): void
+    {
+        $this->assertSame('iqtisadiyyat', Staffs::foldCase('İQTİSADİYYAT'));
+        $this->assertSame('ıslahat', Staffs::foldCase('ISLAHAT'));
+        $this->assertStringContainsString(Staffs::foldCase('iqtisad'), Staffs::foldCase('İqtisadiyyat şöbəsi'));
+        $this->assertStringContainsString(Staffs::foldCase('ıslahat'), Staffs::foldCase('Islahat'));
+
+        $html = Blade::render('<x-staff.highlight :text="$text" :query="$query" />', ['text' => 'İqtisadiyyat şöbəsi', 'query' => 'iqtisad']);
+        $this->assertStringContainsString('<mark class="rounded bg-amber-100 px-0.5 text-ink">İqtisad</mark>iyyat', $html);
     }
 
     public function test_only_vacant_chip_hides_fully_staffed_branches(): void
