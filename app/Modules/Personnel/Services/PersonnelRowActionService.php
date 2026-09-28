@@ -51,7 +51,7 @@ class PersonnelRowActionService
                             'type' => 'delete',
                             'value' => $personnel->tabel_no,
                         ],
-                        confirmMessage: __('personnel::common.messages.delete_data_confirm'),
+                        // The delete modal is the confirmation; a second prompt here asked twice.
                         wireTarget: 'setDeletePersonnel'
                     );
                 }

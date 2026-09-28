@@ -91,6 +91,9 @@
             {{ __('staff::common.actions.add_row') }}
         </x-pill-button>
     </div>
+    @error('staff')
+    <x-validation> {{ $message }} </x-validation>
+    @enderror
 
     <div class="flex justify-between items-end w-full">
         <x-modal-button>{{ __('staff::common.actions.save') }}</x-modal-button>

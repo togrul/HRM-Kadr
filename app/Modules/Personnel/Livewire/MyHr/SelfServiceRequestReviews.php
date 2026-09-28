@@ -68,6 +68,14 @@ class SelfServiceRequestReviews extends Component
 
     public function reject(string $type, int $recordId): void
     {
+        // The employee sees this note as the reason their request was turned down.
+        $noteKey = 'notes.'.$this->noteKey($type, $recordId);
+        $this->validate(
+            [$noteKey => ['required', 'string', 'min:3', 'max:2000']],
+            [],
+            [$noteKey => __('personnel::my_hr.review.labels.review_note')]
+        );
+
         $service = app(MyHrRequestReviewService::class);
         $reviewer = auth()->user();
         $note = trim((string) ($this->notes[$this->noteKey($type, $recordId)] ?? ''));

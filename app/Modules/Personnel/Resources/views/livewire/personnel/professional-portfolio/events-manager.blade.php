@@ -65,11 +65,11 @@
                                     <x-ui.async-button variant="primary" size="sm" fullWidth="true" wire:click="edit({{ $record->id }})" wire:target="edit({{ $record->id }})" wire:loading.attr="disabled">{{ __('personnel::portfolio.actions.edit') }}</x-ui.async-button>
                                 @endcan
                                 @canany(['verify-professional-portfolio-records', 'verify-personnel-event-records'])
-                                    @if ($record->verification_status !== 'verified')
-                                        <x-ui.async-button variant="success" size="sm" fullWidth="true" wire:click="verify({{ $record->id }})" wire:target="verify({{ $record->id }})" wire:loading.attr="disabled">{{ __('personnel::portfolio.actions.verify') }}</x-ui.async-button>
+                                    @if (in_array('verified', $transitions[$record->verification_status] ?? [], true))
+                                        <x-ui.async-button variant="success" size="sm" fullWidth="true" data-title="{{ __('personnel::portfolio.confirm.title') }}" data-message="{{ __('personnel::portfolio.confirm.verify') }}" data-confirm="{{ __('personnel::portfolio.actions.verify') }}" x-on:click="$dispatch('confirm-action', { title: $el.dataset.title, message: $el.dataset.message, confirmText: $el.dataset.confirm, tone: 'emerald', run: () => $wire.verify({{ (int) $record->id }}) })" wire:target="verify({{ $record->id }})" wire:loading.attr="disabled">{{ __('personnel::portfolio.actions.verify') }}</x-ui.async-button>
                                     @endif
-                                    @if ($record->verification_status !== 'rejected')
-                                        <x-ui.async-button variant="danger" size="sm" fullWidth="true" wire:click="reject({{ $record->id }})" wire:target="reject({{ $record->id }})" wire:loading.attr="disabled">{{ __('personnel::portfolio.actions.reject') }}</x-ui.async-button>
+                                    @if (in_array('rejected', $transitions[$record->verification_status] ?? [], true))
+                                        <x-ui.async-button variant="danger" size="sm" fullWidth="true" data-title="{{ __('personnel::portfolio.confirm.title') }}" data-message="{{ __('personnel::portfolio.confirm.reject') }}" data-confirm="{{ __('personnel::portfolio.actions.reject') }}" x-on:click="$dispatch('confirm-action', { title: $el.dataset.title, message: $el.dataset.message, confirmText: $el.dataset.confirm, tone: 'rose', run: () => $wire.reject({{ (int) $record->id }}) })" wire:target="reject({{ $record->id }})" wire:loading.attr="disabled">{{ __('personnel::portfolio.actions.reject') }}</x-ui.async-button>
                                     @endif
                                 @endcanany
                             </div>

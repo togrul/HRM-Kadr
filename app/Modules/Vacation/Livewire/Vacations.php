@@ -122,6 +122,8 @@ class Vacations extends Component
 
     public function printVacationDocument(PersonnelVacation $model): ?BinaryFileResponse
     {
+        $this->authorize('export', PersonnelVacation::class);
+
         $model->load([
             'personnel',
             'personnel.latestRank.rank',
@@ -192,12 +194,16 @@ class Vacations extends Component
         return response()->download($filename.'.docx')->deleteFileAfterSend();
     }
 
+    /** Who may bind an approved self-service vacation to an order — the button uses the same rule. */
+    #[Computed]
+    public function canBindOrder(): bool
+    {
+        return auth()->user()?->can('review-self-service-requests') || auth()->user()?->can('edit-vacations');
+    }
+
     public function bindOperationalOrder(PersonnelVacation $model): void
     {
-        abort_unless(
-            auth()->user()?->can('review-self-service-requests') || auth()->user()?->can('edit-vacations'),
-            403
-        );
+        abort_unless($this->canBindOrder(), 403);
 
         abort_unless(
             (string) $model->submission_source === 'employee_self_service'
@@ -336,8 +342,7 @@ class Vacations extends Component
             ->toBase()
             ->selectRaw(
                 'count(*) as total,'
-                .' sum(case when return_work_date < ? then 1 else 0 end) as at_work,'
-                .' sum(case when return_work_date > ? then 1 else 0 end) as in_vacation,'
+                .' sum(case when start_date <= ? and return_work_date > ? then 1 else 0 end) as in_vacation,'
                 .' coalesce(sum(duration), 0) as days',
                 [$now, $now]
             )
@@ -345,7 +350,7 @@ class Vacations extends Component
 
         return [
             'all' => (int) ($row->total ?? 0),
-            'at_work' => (int) ($row->at_work ?? 0),
+            'at_work' => (int) ($row->total ?? 0) - (int) ($row->in_vacation ?? 0),
             'in_vacation' => (int) ($row->in_vacation ?? 0),
             'days' => (int) ($row->days ?? 0),
         ];

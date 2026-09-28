@@ -44,6 +44,6 @@ class BusinessTripPolicy
 
     public function export(User $user): bool
     {
-        return $user->can('show-business_trips');
+        return $user->can('export-business_trips');
     }
 }

@@ -58,6 +58,13 @@ return [
         'export_excel' => 'Export Excel',
         'export_csv' => 'Export CSV',
     ],
+    'confirm' => [
+        'title' => "Change the record's status?",
+        'verify' => 'The record will be verified and shown in the portfolio.',
+        'reject' => 'The record will be rejected and removed from the portfolio.',
+        'broken' => 'The record will be marked as "Link broken".',
+        'archived' => 'The record will be marked as "Archive only".',
+    ],
     'status' => [
         'pending' => 'Pending',
         'verified' => 'Verified',

@@ -108,6 +108,18 @@ class HomeQueueTest extends TestCase
         $this->assertSame('pending', $entry->fresh()->approval_status);
     }
 
+    public function test_a_viewer_without_the_approve_right_gets_an_open_link_instead(): void
+    {
+        $this->actingAsViewer(['show-attendance-manual']);
+        $this->seedPersonnel();
+        $this->manualEntry(today()->toDateString());
+
+        $home = Livewire::test(Home::class)->call('toggleQueue', 'attendance_pending');
+
+        $this->assertSame(route('attendance.manual-entries'), $home->instance()->queueItems[0]['url']);
+        $home->assertSee(__('personnel::home.queue.open'));
+    }
+
     public function test_unsigned_orders_open_read_only_with_a_link_to_the_order(): void
     {
         $this->actingAsViewer(['show-orders']);

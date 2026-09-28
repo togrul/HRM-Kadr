@@ -54,7 +54,7 @@ return [
         'more' => 'More',
         'back_to_list' => 'Back to list',
         'print_cv' => 'Print CV',
-        'export_word' => 'Export to Word',
+        'export_word' => 'Download CV as Word',
         'open_profile' => 'Open personnel file',
     ],
     'recent' => [

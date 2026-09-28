@@ -117,6 +117,8 @@ class BusinessTrips extends Component
 
     public function printBusinessTripDocument(PersonnelBusinessTrip $model, $multi = false): ?BinaryFileResponse
     {
+        $this->authorize('export', PersonnelBusinessTrip::class);
+
         $model->load(['personnel', 'order.orderType', 'order.attributes', 'personnel.idDocuments']);
 
         if (! $model->order || ! $model->order->orderType) {
@@ -244,17 +246,18 @@ class BusinessTrips extends Component
 
     protected function decoratePagination(LengthAwarePaginator $paginated): LengthAwarePaginator
     {
-        $now = Carbon::now();
+        $today = Carbon::today();
 
         $paginated->setCollection(
-            $paginated->getCollection()->values()->map(function (PersonnelBusinessTrip $trip) use ($now) {
+            $paginated->getCollection()->values()->map(function (PersonnelBusinessTrip $trip) use ($today) {
                 $businessTripsCount = (int) ($trip->order?->businessTrips?->count() ?? 0);
                 $isForeign = (int) ($trip->order?->order_type_id ?? 0) === PersonnelBusinessTrip::FOREIGN_BUSINESS_TRIP;
                 $trip->is_multi_order_trip = $businessTripsCount > 1 && ! $isForeign;
 
                 $startDate = Carbon::parse($trip->start_date);
                 $endDate = Carbon::parse($trip->end_date);
-                $trip->is_active_trip = $startDate <= $now && $endDate > $now;
+                // Same rule as the "Ezamiyyətdə" count: the trip runs today, both ends inclusive.
+                $trip->is_active_trip = $startDate->startOfDay()->lte($today) && $endDate->copy()->startOfDay()->gte($today);
                 $trip->start_date_label = $startDate->format('d.m.Y');
                 $trip->end_date_label = $endDate->format('d.m.Y');
                 $trip->order_date_label = Carbon::parse($trip->order_date)->format('d.m.Y');
@@ -290,15 +293,14 @@ class BusinessTrips extends Component
             ->toBase()
             ->selectRaw(
                 'count(*) as total,'
-                .' sum(case when end_date < ? then 1 else 0 end) as at_work,'
-                .' sum(case when end_date >= ? then 1 else 0 end) as in_business_trip',
+                .' sum(case when start_date <= ? and end_date >= ? then 1 else 0 end) as in_business_trip',
                 [$today, $today]
             )
             ->first();
 
         return [
             'all' => (int) ($row->total ?? 0),
-            'at_work' => (int) ($row->at_work ?? 0),
+            'at_work' => (int) ($row->total ?? 0) - (int) ($row->in_business_trip ?? 0),
             'in_business_trip' => (int) ($row->in_business_trip ?? 0),
             'deleted' => $this->baseQuery()->onlyTrashed()->count(),
         ];

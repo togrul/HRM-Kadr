@@ -54,6 +54,51 @@ class SelfServiceRequestReviewTest extends TestCase
         $this->assertSame(OrderStatusEnum::APPROVED->value, (int) $leave->fresh()->status_id);
     }
 
+    public function test_rejecting_needs_a_note_and_shows_as_rejected_to_the_employee(): void
+    {
+        $this->seedReferenceData();
+
+        $reviewer = User::factory()->create(['is_active' => true]);
+        $reviewer->givePermissionTo(Permission::findOrCreate('review-self-service-requests', 'web'));
+
+        $requester = User::factory()->create(['is_active' => true, 'email' => 'employee@example.test']);
+        $personnel = $this->makePersonnel($requester->email);
+
+        $leave = Leave::query()->create([
+            'tabel_no' => $personnel->tabel_no,
+            'leave_type_id' => 1,
+            'starts_at' => '2026-04-01',
+            'ends_at' => '2026-04-01',
+            'duration_unit' => 'day',
+            'total_days' => 1,
+            'reason' => 'Şəxsi səbəb',
+            'status_id' => OrderStatusEnum::PENDING->value,
+            'submission_source' => 'employee_self_service',
+            'submitted_by_user_id' => $requester->id,
+        ]);
+
+        $this->actingAs($reviewer);
+
+        $component = Livewire::test(SelfServiceRequestReviews::class)
+            ->call('reject', 'leave', $leave->id)
+            ->assertHasErrors(['notes.leave_'.$leave->id => 'required']);
+
+        $this->assertSame(OrderStatusEnum::PENDING->value, (int) $leave->fresh()->status_id);
+
+        $component->set('notes.leave_'.$leave->id, 'Tarix uyğun deyil')
+            ->call('reject', 'leave', $leave->id)
+            ->assertHasNoErrors();
+
+        $this->assertSame(OrderStatusEnum::CANCELLED->value, (int) $leave->fresh()->status_id);
+
+        $row = collect(app(\App\Modules\Personnel\Application\Services\MyHr\MyHrRequestsReadService::class)
+            ->build($personnel, [])['rows'] ?? [])->firstWhere('record_id', $leave->id);
+
+        $this->assertNotNull($row);
+        $this->assertSame('rejected', $row['status_key']);
+        $this->assertSame(__('personnel::my_hr.requests.status.rejected'), $row['status_label']);
+    }
+
     public function test_reviewer_with_global_permission_can_switch_to_all_scope_and_see_audit_fields(): void
     {
         $this->seedReferenceData();

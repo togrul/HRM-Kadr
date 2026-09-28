@@ -304,6 +304,7 @@ return [
         'no_permission_to_edit' => 'You have no permission to edit.',
         'personnel_created' => 'Personnel was added successfully!',
         'personnel_updated' => 'Personnel was updated successfully!',
+        'personnel_approved' => 'Employee approved.',
         'personnel_deleted' => 'Personnel was deleted!',
         'delete_data_confirm' => 'Are you sure you want to delete this data?',
         'remove_data_confirm' => 'Are you sure you want to remove this data?',

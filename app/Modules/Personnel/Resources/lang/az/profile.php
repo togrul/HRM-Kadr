@@ -54,7 +54,7 @@ return [
         'more' => 'Daha çox',
         'back_to_list' => 'Siyahıya qayıt',
         'print_cv' => 'CV çap et',
-        'export_word' => 'Word-ə ixrac',
+        'export_word' => 'CV-ni Word-ə yüklə',
         'open_profile' => 'Şəxsi işi aç',
     ],
     'recent' => [

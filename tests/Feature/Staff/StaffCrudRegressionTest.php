@@ -197,6 +197,51 @@ class StaffCrudRegressionTest extends TestCase
             ->assertSee($row(2), escape: false);
     }
 
+    public function test_add_form_refuses_to_save_without_rows(): void
+    {
+        $this->actingAs($this->authorizedUser());
+        $this->seedStructuresAndPositions();
+
+        Livewire::test(AddStaff::class)
+            ->set('structureId', 2)
+            ->call('store')
+            ->assertHasErrors(['staff'])
+            ->assertSee(__('staff::common.messages.at_least_one_row'))
+            ->assertNotDispatched('staffAdded');
+    }
+
+    public function test_excel_export_needs_the_export_permission(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo(Permission::findOrCreate('show-staff', 'web'));
+        $this->actingAs($user);
+
+        Livewire::test(Staffs::class)->call('exportExcel')->assertForbidden();
+
+        \Maatwebsite\Excel\Facades\Excel::fake();
+        $user->givePermissionTo(Permission::findOrCreate('export-staff', 'web'));
+        app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+        $this->actingAs($user->fresh());
+
+        Livewire::test(Staffs::class)->call('exportExcel')->assertOk();
+    }
+
+    public function test_vacancy_list_includes_top_level_units(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo(Permission::findOrCreate('show-staff', 'web'));
+        $this->actingAs($user);
+        $this->seedStructuresAndPositions();
+        $this->grantStructureScope($user, [1, 2]);
+
+        DB::table('positions')->insert(['id' => 2, 'name' => 'Top Level Chief']);
+        DB::table('staff_schedules')->insert(['structure_id' => 1, 'position_id' => 2, 'total' => 1, 'filled' => 0, 'vacant' => 1]);
+
+        Livewire::test(Staffs::class)
+            ->call('showPage', 'vacancies')
+            ->assertSee('Top Level Chief');
+    }
+
     private function seedDeepStructureTree(): void
     {
         DB::table('structures')->insert([

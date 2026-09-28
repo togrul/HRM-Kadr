@@ -16,7 +16,15 @@
             </div>
 
             @if ($summary['total'] > 0)
-                <x-pill-button variant="danger" wire:click="clearNotifications" wire:loading.attr="disabled" wire:target="clearNotifications">
+                <x-pill-button
+                    variant="danger"
+                    data-title="{{ __('personnel::my_hr.notifications.clear_confirm.title') }}"
+                    data-message="{{ __('personnel::my_hr.notifications.clear_confirm.message') }}"
+                    data-confirm="{{ __('personnel::my_hr.notifications.actions.clear_all') }}"
+                    x-on:click="$dispatch('confirm-action', { title: $el.dataset.title, message: $el.dataset.message, confirmText: $el.dataset.confirm, tone: 'rose', run: () => $wire.clearNotifications() })"
+                    wire:loading.attr="disabled"
+                    wire:target="clearNotifications"
+                >
                     {{ __('personnel::my_hr.notifications.actions.clear_all') }}
                 </x-pill-button>
             @endif

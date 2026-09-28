@@ -148,13 +148,18 @@ class HomeOverviewService
     }
 
     /**
-     * @return list<array{id:int,title:string,meta:string}>
+     * Each row links to the manual-entries tab, so a viewer who may see but not approve
+     * the entries still has somewhere to go (approvers get approve / reject instead).
+     *
+     * @return list<array{id:int,title:string,meta:string,url:string}>
      */
     private function manualEntryItems(int $limit): array
     {
         if (! InstalledTables::has('attendance_manual_entries')) {
             return [];
         }
+
+        $url = route('attendance.manual-entries');
 
         return AttendanceManualEntry::query()
             ->with('personnel:tabel_no,surname,name,patronymic')
@@ -173,6 +178,7 @@ class HomeOverviewService
                         : $entry->absence_code,
                     $entry->reason ? Str::limit((string) $entry->reason, 40) : null,
                 ])->filter()->implode(' · '),
+                'url' => $url,
             ])
             ->all();
     }

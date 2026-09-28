@@ -304,6 +304,7 @@ return [
         'no_permission_to_edit' => 'Redaktə etmək üçün icazəniz yoxdur.',
         'personnel_created' => 'Əməkdaş uğurla əlavə olundu!',
         'personnel_updated' => 'Əməkdaş uğurla yeniləndi!',
+        'personnel_approved' => 'Əməkdaş təsdiqləndi.',
         'personnel_deleted' => 'Əməkdaş silindi!',
         'delete_data_confirm' => 'Bu məlumatı silmək istədiyinizə əminsiniz?',
         'remove_data_confirm' => 'Bu məlumatı tam silmək istədiyinizə əminsiniz?',

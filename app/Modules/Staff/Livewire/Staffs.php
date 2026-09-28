@@ -183,7 +183,7 @@ class Staffs extends Component
 
         if ($this->selectedPage === 'vacancies') {
             $result = $result
-                ->filter(fn ($row) => (int) ($row->vacant ?? 0) > 0 && ! empty($row->structure?->parent_id))
+                ->filter(fn ($row) => (int) ($row->vacant ?? 0) > 0)
                 ->values();
         }
 
@@ -257,9 +257,9 @@ class Staffs extends Component
         $rows->each(function ($row) use ($activeByStructure, $activeByStructurePosition, $nestedIdsByStructure) {
             $structureId = (int) ($row->structure_id ?? 0);
             $positionId = (int) ($row->position_id ?? 0);
-            $hasParent = ! empty($row->structure?->parent_id);
-
-            if ($positionId > 0 && $hasParent) {
+            // A position row counts the people holding that position in its own unit —
+            // top-level units included, so their vacancies are listed like any other.
+            if ($positionId > 0) {
                 $filled = (int) ($activeByStructurePosition[$structureId][$positionId] ?? 0);
             } else {
                 $filled = 0;

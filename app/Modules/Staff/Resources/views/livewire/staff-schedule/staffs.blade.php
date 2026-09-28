@@ -58,7 +58,7 @@
             @endif
 
             @if ($selectedPage != 'all')
-                <x-context-panel.section :title="__('staff::common.actions.get_all_vacancies')">
+                <x-context-panel.section :title="__('staff::common.titles.vacancies')">
                     <div class="px-2 pb-1.5 pt-1.5">
                         <x-context-panel.meta :columns="2" :items="[
                             ['label' => __('staff::common.fields.count'), 'value' => $num($staffs->count())],

@@ -1,5 +1,6 @@
 @php
     $summary = $this->summary;
+    $canBindOrder = $this->canBindOrder;
     $activeStatus = data_get($filter, 'vacation_status', 'all');
     $statusFilters = [
         'all' => ['label' => __('vacation::common.labels.all'), 'dot' => 'bg-[#a1a1aa]', 'count' => $summary['all']],
@@ -73,7 +74,7 @@
     <x-page-header
         collapsible-filters
         :filters-active="$this->hasActiveFilters"
-        :title="__('vacation::common.titles.requests')"
+        :title="__('vacation::common.titles.vacations')"
         :breadcrumb="__('vacation::common.titles.vacations')"
     >
         <x-slot:icon>
@@ -260,7 +261,7 @@
                         @if (filled($_vacation->order_no))
                             <a href="{{ route('orders', ['search' => ['order_no' => $_vacation->order_no]]) }}"
                                 class="hrm-num text-[13px] font-medium text-[#0369a1] transition hover:underline">{{ $_vacation->order_no }}</a>
-                        @elseif ($_vacation->submission_source === 'employee_self_service' && $_vacation->approval_status === 'approved')
+                        @elseif ($canBindOrder && $_vacation->submission_source === 'employee_self_service' && $_vacation->approval_status === 'approved')
                             <button type="button" wire:click="bindOperationalOrder('{{ $_vacation->id }}')"
                                 class="inline-flex h-[26px] w-max items-center rounded-lg border border-hairline bg-[#fafafa] px-2 text-[11.5px] font-semibold text-ink-soft transition hover:border-zinc-300 hover:bg-white">
                                 {{ __('vacation::common.actions.bind_order') }}
@@ -290,7 +291,7 @@
                                     <x-icons.document-icon color="text-current" hover="text-current" />
                                 </button>
                             @endcan
-                        @elseif ($_vacation->submission_source === 'employee_self_service' && $_vacation->approval_status === 'approved')
+                        @elseif ($canBindOrder && $_vacation->submission_source === 'employee_self_service' && $_vacation->approval_status === 'approved')
                             <button type="button" wire:click="bindOperationalOrder('{{ $_vacation->id }}')"
                                 title="{{ __('vacation::common.actions.bind_order') }}"
                                 class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-amber-50 hover:text-amber-600">

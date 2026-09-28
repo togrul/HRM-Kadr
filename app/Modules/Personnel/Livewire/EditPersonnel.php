@@ -80,8 +80,10 @@ class EditPersonnel extends Component
 
     public function confirmPersonnel(): void
     {
+        $this->authorize('confirmation-general');
+
         app(PersonnelPendingApprovalService::class)->approve($this->personnelModelDataInstance());
-        $this->dispatch('addError', __('personnel::common.messages.personnel_updated'));
+        $this->dispatch('personnelAdded', __('personnel::common.messages.personnel_approved'));
     }
 
     public function store(): void

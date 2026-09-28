@@ -13,7 +13,7 @@
         }
 
         if ($personnel->active_vacation) {
-            return ['key' => 'vacation', 'tone' => 'green', 'label' => __('personnel::common.states.in_vacation')];
+            return ['key' => 'vacation', 'tone' => 'violet', 'label' => __('personnel::common.states.in_vacation')];
         }
 
         if ($personnel->active_business_trip) {

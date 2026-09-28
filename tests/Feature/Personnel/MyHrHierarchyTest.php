@@ -65,7 +65,7 @@ class MyHrHierarchyTest extends TestCase
             ->assertSee($report->fullname)
             ->assertSee('İcazə')
             ->assertSee('İerarxik təsdiq siyasəti')
-            ->assertSee('Bu müraciət əvvəl birbaşa rəhbərinizə, sonra isə rəhbərinizin rəhbərinə keçir.');
+            ->assertSee(__('personnel::my_hr.hierarchy.messages.upper_policy_help'));
     }
 
     public function test_my_hr_hierarchy_tab_stays_within_query_budget(): void
