@@ -44,7 +44,6 @@ class EditRequisition extends Component
         $this->requisition = $this->storeRequisition($this->requisition);
 
         $this->dispatch('requisitionSaved', __('candidates::recruitment.messages.requisition_saved'));
-        $this->dispatch('notify', type: 'success', message: __('candidates::recruitment.messages.requisition_saved'));
         $this->dispatch('ui:modal-close');
     }
 

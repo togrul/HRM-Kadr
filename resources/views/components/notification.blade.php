@@ -76,6 +76,7 @@
                 'fileAdded',
                 'settingsUpdated', 'settingsWasDeleted',
                 'candidateAdded', 'candidateWasDeleted',
+                'requisitionSaved', 'openingSaved', 'applicationSaved',
                 'templateAdded', 'templateWasDeleted',
                 'componentAdded',
                 'componentWasDeleted',

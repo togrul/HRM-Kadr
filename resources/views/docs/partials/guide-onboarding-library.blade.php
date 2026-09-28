@@ -1,13 +1,13 @@
 <section id="onboarding-library-module" class="docs-section">
     <div class="docs-module-head">
         <div>
-            <p class="docs-header-kicker text-amber-700">Uyğunlaşma kitabxanası</p>
-            <h2 class="docs-section-title">Uyğunlaşma kitabxanası</h2>
+            <p class="docs-header-kicker text-amber-700">Adaptasiya kitabxanası</p>
+            <h2 class="docs-section-title">Adaptasiya kitabxanası</h2>
             <p class="docs-lead !mt-3 !max-w-none">
                 Daxili qayda və tanışlıq sənədlərini hazırlayın, seçilmiş əməkdaşlara göndərin və nəticəni bir yerdən izləyin.
             </p>
         </div>
-        <a href="{{ route('onboarding-library') }}" class="docs-module-link">Uyğunlaşma kitabxanasını aç</a>
+        <a href="{{ route('onboarding-library') }}" class="docs-module-link">Adaptasiya kitabxanasını aç</a>
     </div>
 
     <div id="onboarding-library-outline" class="docs-grid docs-grid-3">
@@ -78,7 +78,7 @@
         <div class="docs-visual-frame">
             <img
                 src="{{ asset('docs/screenshots/onboarding-library-dashboard.png') }}"
-                alt="Uyğunlaşma kitabxanası əsas görünüşü"
+                alt="Adaptasiya kitabxanası əsas görünüşü"
                 class="docs-visual-image"
                 loading="lazy"
             >

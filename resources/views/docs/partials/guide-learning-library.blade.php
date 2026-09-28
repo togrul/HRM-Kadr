@@ -1,13 +1,13 @@
 <section id="learning-library-module" class="docs-section">
     <div class="docs-module-head">
         <div>
-            <p class="docs-header-kicker text-emerald-700">Öyrənmə kitabxanası</p>
-            <h2 class="docs-section-title">Öyrənmə kitabxanası</h2>
+            <p class="docs-header-kicker text-emerald-700">Tədris kitabxanası</p>
+            <h2 class="docs-section-title">Tədris kitabxanası</h2>
             <p class="docs-lead !mt-3 !max-w-none">
                 Təlim materiallarını hazırlayın, seçilmiş əməkdaşlara göndərin və tamamlanma vəziyyətini rahat izləyin.
             </p>
         </div>
-        <a href="{{ route('learning-library') }}" class="docs-module-link">Öyrənmə kitabxanasını aç</a>
+        <a href="{{ route('learning-library') }}" class="docs-module-link">Tədris kitabxanasını aç</a>
     </div>
 
     <div id="learning-library-outline" class="docs-grid docs-grid-3">
@@ -78,7 +78,7 @@
         <div class="docs-visual-frame">
             <img
                 src="{{ asset('docs/screenshots/learning-library-dashboard.png') }}"
-                alt="Öyrənmə kitabxanası əsas görünüşü"
+                alt="Tədris kitabxanası əsas görünüşü"
                 class="docs-visual-image"
                 loading="lazy"
             >
