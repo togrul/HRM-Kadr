@@ -141,7 +141,7 @@
         @endphp
         <div class="relative w-full" x-data="{showStructures: false, openNodes: $store.structureTree ?? ($store.structureTree = {})}">
             <button @click="showStructures = !showStructures"
-                    class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium bg-gray-100 rounded-lg appearance-none"
+                    class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium bg-zinc-100 rounded-lg appearance-none"
             >
                 {{ $fieldLabel }}
             </button>
@@ -153,7 +153,7 @@
                  x-transition:leave="transition ease-in-out duration-300"
                  x-transition:leave-start="opacity-100 transform scale-y-100 translate-y-0"
                  x-transition:leave-end="opacity-0 transform scale-y-0 -translate-y-1/2"
-                 class="z-40 flex px-4 py-3 bg-neutral-50 border border-gray-200 shadow-xl rounded absolute top-9 {{ ($row % 3) === 0 ? 'left-0' : 'right-0' }} w-full sm:max-w-xl md:max-w-screen-sm lg:max-w-screen-md min-w-full sm:w-screen "
+                 class="z-40 flex px-4 py-3 bg-neutral-50 border border-zinc-200 shadow-xl rounded absolute top-9 {{ ($row % 3) === 0 ? 'left-0' : 'right-0' }} w-full sm:max-w-xl md:max-w-screen-sm lg:max-w-screen-md min-w-full sm:w-screen "
             >
                 <x-radio-tree.list>
                     @php

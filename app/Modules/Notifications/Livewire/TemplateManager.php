@@ -6,6 +6,9 @@ use App\Mail\NotificationTemplatePreviewMail;
 use App\Models\NotificationTemplate;
 use App\Modules\Notifications\Livewire\Concerns\InteractsWithNotificationAuthorization;
 use App\Modules\Notifications\Support\NotificationTemplateRenderer;
+use App\Modules\Notifications\Support\NotificationTriggerRegistry;
+use App\Modules\Notifications\Support\SamplePayloads;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Component;
 
@@ -180,7 +183,7 @@ class TemplateManager extends Component
         ];
     }
 
-    public function render()
+    public function render(): View
     {
         $templates = NotificationTemplate::query()
             ->when($this->search !== '', function ($query) {
@@ -202,7 +205,7 @@ class TemplateManager extends Component
         return view('notification::livewire.notification.template-manager', [
             'templates' => $templates,
             'canManageTemplates' => $this->canManageTemplates(),
-            'categories' => ['birthday', 'position_change', 'holiday', 'announcement', 'training_result', 'leave_status'],
+            'categories' => array_keys($this->categoryLabels()),
             'categoryLabels' => $this->categoryLabels(),
             'previewSubject' => $previewSubject,
             'previewBody' => $previewBody,
@@ -211,59 +214,19 @@ class TemplateManager extends Component
         ]);
     }
 
-    public function placeholder()
+    public function placeholder(): View
     {
         return view('notification::livewire.notification.placeholders.settings-panel');
     }
 
     protected function samplePayload(): array
     {
-        return match ($this->form['category']) {
-            'birthday' => [
-                'name' => 'Murad Əliyev',
-                'position' => 'Baş məsləhətçi',
-                'structure' => 'İnsan resursları şöbəsi',
-                'birthday_label' => '16.03.2026',
-            ],
-            'position_change' => [
-                'name' => 'Leyla Məmmədova',
-                'old_position' => 'Məsləhətçi',
-                'new_position' => 'Aparıcı məsləhətçi',
-                'old_structure' => 'Maliyyə şöbəsi',
-                'new_structure' => 'İnsan resursları şöbəsi',
-                'change_reason' => 'Daxili rotasiya',
-                'effective_date' => now()->format('d.m.Y'),
-            ],
-            'holiday' => [
-                'holiday_name' => 'Novruz bayramı',
-                'holiday_date' => '20.03.2026',
-                'duration' => '3 gün',
-                'scope' => 'Bütün əməkdaşlar',
-                'holiday_rules' => 'Rəsmi qeyri-iş günləri',
-            ],
-            'announcement' => [
-                'title' => 'Daxili elan',
-                'name' => 'Daxili elan',
-                'body' => 'Bu gün saat 18:00-da sistem yenilənməsi olacaq.',
-                'message' => 'elan yayımlandı',
-            ],
-            default => [
-                'name' => 'Nümunə istifadəçi',
-                'message' => 'Nümunə bildiriş mətni',
-            ],
-        };
+        return SamplePayloads::for($this->form['category']);
     }
 
     protected function categoryLabels(): array
     {
-        return [
-            'birthday' => __('notifications::common.categories.birthday'),
-            'position_change' => __('notifications::common.categories.position_change'),
-            'holiday' => __('notifications::common.categories.holiday'),
-            'announcement' => __('notifications::common.categories.announcement'),
-            'training_result' => __('notifications::common.categories.training_result'),
-            'leave_status' => __('notifications::common.categories.leave_status'),
-        ];
+        return NotificationTriggerRegistry::campaignCategoryLabels();
     }
 
     protected function availableVariables(): array

@@ -3,11 +3,14 @@
         'other' => __('personnel::wizard.options.injury_types.other'),
         'contusion' => __('personnel::wizard.options.injury_types.contusion'),
     ];
+    $features = app(\App\Services\Features\FeatureState::class);
+    $hasMilitaryDomains = $features->enabled('military_service') || $features->enabled('captivity');
 @endphp
 
 <div class="flex flex-col space-y-4">
+    @feature('military_service')
     <x-form-card title="{{ __('personnel::wizard.sections.military') }}">
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
             <div class="flex flex-col">
                 <x-ui.select-dropdown
                     label="{{ __('personnel::common.labels.ranks') }}"
@@ -36,7 +39,7 @@
                 <x-livewire-input mode="gray" name="historyForm.military.location" wire:model="historyForm.military.location"></x-livewire-input>
             </div>
         </div>
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
             <div class="flex flex-col">
                 <x-label for="historyForm.military.given_date">{{ __('personnel::common.labels.given_date') }}</x-label>
                 <x-pikaday-input mode="gray" name="historyForm.military.given_date" format="Y-MM-DD" wire:model.live="historyForm.military.given_date">
@@ -83,39 +86,39 @@
                         @forelse ($historyForm->militaryList as $key => $msModel)
                             <tr>
                                 <x-table.td>
-                                    <span class="text-sm font-medium text-gray-700">
+                                    <span class="text-sm font-medium text-zinc-700">
                                         {{ $msModel['attitude_to_military_service'] }}
                                    </span>
                                 </x-table.td>
                                  <x-table.td>
-                                    <span class="text-sm font-medium text-gray-900">
+                                    <span class="text-sm font-medium text-zinc-900">
                                         {{ $msModel['location'] }}
                                     </span>
                                  </x-table.td>
                                 <x-table.td>
-                                   <span class="text-sm font-medium text-teal-600">
+                                   <span class="text-sm font-medium text-ink">
                                         {{ $this->rankLabel(data_get($msModel, 'rank_id')) ?? '---' }}
                                     </span>
                                 </x-table.td>
                                 <x-table.td>
                                     <div class="flex items-center space-x-6">
                                         <div class="flex flex-col items-start space-y-1">
-                                            <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">{{ __('personnel::common.labels.given_date') }}:</span>
-                                            <span class="text-sm font-medium text-teal-600">
+                                            <span class="text-sm font-medium text-zinc-500 border-b border-dashed border-zinc-400">{{ __('personnel::common.labels.given_date') }}:</span>
+                                            <span class="text-sm font-medium text-ink">
                                                 {{ $msModel['given_date'] }}
                                             </span>
                                         </div>
                                         @if(array_key_exists('start_date',$msModel))
                                             <div class="flex flex-col items-start space-y-1">
-                                                <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">{{ __('personnel::common.labels.start_date') }}:</span>
-                                                <span class="text-sm font-medium text-gray-600">
+                                                <span class="text-sm font-medium text-zinc-500 border-b border-dashed border-zinc-400">{{ __('personnel::common.labels.start_date') }}:</span>
+                                                <span class="text-sm font-medium text-zinc-600">
                                                     {{ $msModel['start_date'] }}
                                                 </span>
                                             </div>
                                         @endif
                                         @if(array_key_exists('end_date',$msModel))
                                             <div class="flex flex-col items-start space-y-1">
-                                                <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">{{ __('personnel::common.labels.end_date') }}:</span>
+                                                <span class="text-sm font-medium text-zinc-500 border-b border-dashed border-zinc-400">{{ __('personnel::common.labels.end_date') }}:</span>
                                                 <span class="text-sm font-medium text-rose-500">
                                                     {{ $msModel['end_date'] }}
                                                 </span>
@@ -125,9 +128,8 @@
                                 </x-table.td>
                                 <x-table.td :isButton="true">
                                     <button
-                                        onclick="confirm('{{ __('personnel::common.messages.remove_data_confirm') }}') || event.stopImmediatePropagation()"
-                                        wire:click="forceDeleteMilitary({{ $key }})"
-                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
+                                        x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::common.messages.remove_data_confirm')), confirmText: @js(__('ui::common.actions.delete')), run: () => $wire.forceDeleteMilitary({{ $key }}) })"
+                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium text-zinc-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-zinc-700"
                                     >
                                         <x-icons.force-delete></x-icons.force-delete>
                                     </button>
@@ -149,15 +151,15 @@
     </x-form-card>
 
     <x-form-card title="{{ __('personnel::wizard.sections.injuries') }}">
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
             <div class="flex flex-col">
                 <x-label for="historyForm.injury.injury_type">{{ __('personnel::common.labels.injury_type') }}</x-label>
                 <div class="flex flex-row">
-                    <label class="inline-flex items-center w-full px-2 py-2 bg-gray-100 rounded shadow-sm">
+                    <label class="inline-flex items-center w-full px-2 py-2 bg-zinc-100 rounded shadow-sm">
                         <input type="radio" class="form-radio" name="historyForm.injury.injury_type" wire:model="historyForm.injury.injury_type" value="other">
                         <span class="ml-2 text-sm font-normal">{{ __('personnel::wizard.options.injury_types.other') }}</span>
                     </label>
-                    <label class="inline-flex items-center w-full px-2 py-2 ml-4 bg-gray-100 rounded shadow-sm">
+                    <label class="inline-flex items-center w-full px-2 py-2 ml-4 bg-zinc-100 rounded shadow-sm">
                         <input type="radio" class="form-radio" name="historyForm.injury.injury_type" wire:model="historyForm.injury.injury_type" value="contusion">
                         <span class="ml-2 text-sm font-normal">{{ __('personnel::wizard.options.injury_types.contusion') }}</span>
                     </label>
@@ -208,17 +210,17 @@
                             <tr>
                                 <x-table.td>
                                     @if(!empty($injuryModel['injury_type']))
-                                        <span class="text-sm font-medium text-gray-700">
+                                        <span class="text-sm font-medium text-zinc-700">
                                             {{ $injuryTypeLabels[$injuryModel['injury_type']] ?? ($injuryModel['injury_type'] ?? '---') }}
                                        </span>
                                     @endif
                                 </x-table.td>
                                 <x-table.td>
                                     <div class="flex flex-col space-y-1 w-max">
-                                         <span class="text-sm font-medium text-gray-600 border-b border-dashed border-slate-400">
+                                         <span class="text-sm font-medium text-zinc-600 border-b border-dashed border-zinc-400">
                                             {{ $injuryModel['location'] }}
                                         </span>
-                                        <span class="text-sm font-medium text-gray-900">
+                                        <span class="text-sm font-medium text-zinc-900">
                                             @if(! empty($injuryModel['date_time']))
                                                 {{ \Carbon\Carbon::parse($injuryModel['date_time'])->format('d.m.Y') }}
                                             @endif
@@ -232,7 +234,7 @@
                                         @click="showFull = (showFull === '' ? '{{ $key }}' : '')"
                                     >
                                         <span
-                                            class="text-sm font-medium text-gray-700 truncate whitespace-normal"
+                                            class="text-sm font-medium text-zinc-700 truncate whitespace-normal"
                                             :class="{ 'line-clamp-2': showFull === '' }"
                                         >
                                             {{ $injuryModel['description']}}
@@ -241,9 +243,8 @@
                                 </x-table.td>
                                 <x-table.td :isButton="true">
                                     <button
-                                        onclick="confirm('{{ __('personnel::common.messages.remove_data_confirm') }}') || event.stopImmediatePropagation()"
-                                        wire:click="forceDeleteInjury({{ $key }})"
-                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
+                                        x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::common.messages.remove_data_confirm')), confirmText: @js(__('ui::common.actions.delete')), run: () => $wire.forceDeleteInjury({{ $key }}) })"
+                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium text-zinc-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-zinc-700"
                                     >
                                         <x-icons.force-delete></x-icons.force-delete>
                                     </button>
@@ -278,9 +279,11 @@
             @enderror
         </div>
     </x-form-card>
+    @endfeature
 
+    @feature('captivity')
     <x-form-card title="{{ __('personnel::wizard.sections.captivity') }}">
-        <div class="grid grid-cols-4 gap-2">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
             <div class="flex flex-col">
                 <x-label for="historyForm.captivity.location">{{ __('personnel::common.labels.location') }}</x-label>
                 <x-livewire-input mode="gray" name="historyForm.captivity.location" wire:model="historyForm.captivity.location"></x-livewire-input>
@@ -331,20 +334,20 @@
                         @forelse ($historyForm->captivityList as $key => $captivityModel)
                             <tr>
                                 <x-table.td>
-                                    <span class="text-sm font-medium text-gray-600">
+                                    <span class="text-sm font-medium text-zinc-600">
                                         {{ $captivityModel['location'] }}
                                     </span>
                                 </x-table.td>
                                 <x-table.td>
-                                    <span class="text-sm font-medium text-gray-900">
+                                    <span class="text-sm font-medium text-zinc-900">
                                         {{ $captivityModel['condition'] }}
                                     </span>
                                 </x-table.td>
                                 <x-table.td>
                                     <div class="flex items-center space-x-6">
                                         <div class="flex flex-col items-start space-y-1">
-                                            <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">{{ __('personnel::common.labels.taken_date')  }}:</span>
-                                            <span class="text-sm font-medium text-gray-900">
+                                            <span class="text-sm font-medium text-zinc-500 border-b border-dashed border-zinc-400">{{ __('personnel::common.labels.taken_date')  }}:</span>
+                                            <span class="text-sm font-medium text-zinc-900">
                                                 @if(! empty($captivityModel['taken_captive_date']))
                                                     {{ \Carbon\Carbon::parse($captivityModel['taken_captive_date'])->format('d.m.Y') }}
                                                 @endif
@@ -352,7 +355,7 @@
                                         </div>
                                         @if(! empty($captivityModel['release_date']))
                                             <div class="flex flex-col items-start space-y-1">
-                                                <span class="text-sm font-medium text-gray-500 border-b border-dashed border-slate-400">{{ __('personnel::common.labels.release_date')  }}:</span>
+                                                <span class="text-sm font-medium text-zinc-500 border-b border-dashed border-zinc-400">{{ __('personnel::common.labels.release_date')  }}:</span>
                                                 <span class="text-sm font-medium text-emerald-500">
                                                     {{ \Carbon\Carbon::parse($captivityModel['release_date'])->format('d.m.Y') }}
                                                 </span>
@@ -362,9 +365,8 @@
                                 </x-table.td>
                                 <x-table.td :isButton="true">
                                     <button
-                                        onclick="confirm('{{ __('personnel::common.messages.remove_data_confirm') }}') || event.stopImmediatePropagation()"
-                                        wire:click="forceDeleteCaptivity({{ $key }})"
-                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium text-gray-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-gray-700"
+                                        x-on:click="$dispatch('confirm-action', { tone: 'rose', message: @js(__('personnel::common.messages.remove_data_confirm')), confirmText: @js(__('ui::common.actions.delete')), run: () => $wire.forceDeleteCaptivity({{ $key }}) })"
+                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium text-zinc-500 uppercase transition duration-300 rounded-lg hover:bg-red-50 hover:text-zinc-700"
                                     >
                                         <x-icons.force-delete></x-icons.force-delete>
                                     </button>
@@ -384,4 +386,13 @@
             </div>
         </div>
     </x-form-card>
+    @endfeature
+
+    @unless($hasMilitaryDomains)
+        <x-form-card title="{{ __('personnel::wizard.sections.military') }}">
+            <div class="flex items-center justify-center py-6">
+                <span class="font-medium text-zinc-500">{{ __('personnel::common.labels.no_information_added') }}</span>
+            </div>
+        </x-form-card>
+    @endunless
 </div>

@@ -2,11 +2,18 @@
 
 namespace App\Services;
 
+use App\Models\RoleStructure;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 
 class StructureService
 {
+    /**
+     * Structures the user may see: the union of the structures granted to each of the
+     * user's roles (role_structures is keyed by role, and is edited per role).
+     *
+     * @return list<int>
+     */
     public function getAccessibleStructures(?User $user = null): array
     {
         $user ??= auth()->user();
@@ -15,32 +22,18 @@ class StructureService
             return [];
         }
 
-        // return $user->structures()
-        //         ->pluck('structures.id')
-        //         ->all();
+        // ponytail: cached per user for 5 minutes; RoleStructureObserver clears it when a
+        // role's structures change, a changed role assignment waits out the TTL.
         return Cache::remember(
             "structure-accessible-{$user->id}",
             now()->addMinutes(5),
-            fn () => $user->structures()
-                ->pluck('structures.id')
+            fn (): array => RoleStructure::query()
+                ->whereIn('role_id', $user->roles()->select('roles.id'))
+                ->distinct()
+                ->pluck('structure_id')
+                ->map(fn ($id): int => (int) $id)
+                ->values()
                 ->all()
         );
     }
-
-//     public function getAccessibleStructures(): array
-//     {
-//         return auth()->user()
-//             ->structures
-//             ->pluck('id')
-//             ->unique()
-//             ->toArray();
-
-// //        return auth()->user()
-// //            ->roles()
-// //            ->with('structures:id')
-// //            ->get()
-// //            ->flatMap(fn ($role) => $role->structures->pluck('id'))
-// //            ->unique()
-// //            ->toArray();
-//     }
 }

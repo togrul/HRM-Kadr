@@ -11,7 +11,6 @@ class OrdersNoDebugStopsTest extends TestCase
     {
         $paths = [
             app_path('Models'),
-            app_path('Services/Orders'),
             app_path('Modules/Orders'),
         ];
 
@@ -43,4 +42,3 @@ class OrdersNoDebugStopsTest extends TestCase
         $this->assertSame([], $violations, implode(PHP_EOL, $violations));
     }
 }
-

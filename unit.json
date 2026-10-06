@@ -1,10 +1,26 @@
 {
+    "settings": {
+        "http": {
+            "idle_timeout": 305
+        }
+    },
     "listeners": {
         "*:8000": {
             "pass": "routes"
         }
     },
     "routes": [
+        {
+            "match": {
+                "uri": "/build/*"
+            },
+            "action": {
+                "share": "/var/www/html/public$uri",
+                "response_headers": {
+                    "Cache-Control": "public, max-age=31536000, immutable"
+                }
+            }
+        },
         {
             "match": {
                 "uri": "!/index.php"
@@ -21,7 +37,12 @@
         "laravel": {
             "type": "php",
             "root": "/var/www/html/public/",
-            "script": "index.php"
+            "script": "index.php",
+            "processes": {
+                "max": 8,
+                "spare": 2,
+                "idle_timeout": 60
+            }
         }
     }
 }

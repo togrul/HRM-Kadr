@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 use Throwable;
 
 class AuditQueryBudgetCommand extends Command
@@ -48,6 +49,10 @@ class AuditQueryBudgetCommand extends Command
 
             $user->givePermissionTo(Permission::findOrCreate('show-audit-logs', 'web'));
 
+            // givePermissionTo() forgets the permission cache; reload it here so the
+            // probe below is not charged for the cache miss.
+            app(PermissionRegistrar::class)->getPermissions();
+
             if (! AuditActivity::query()->exists()) {
                 if (! $this->option('allow-empty')) {
                     $this->error('Audit log is empty. Re-run with --allow-empty for a temporary benchmark row.');
@@ -72,9 +77,9 @@ class AuditQueryBudgetCommand extends Command
                 $seededFixture = true;
             }
 
+            // No Auth::login(): its login event writes a real audit row that the probe would
+            // both count and leave behind on a non-empty log.
             $result = $this->probe('dashboard_render', (int) $this->option('render-budget'), function () use ($user): void {
-                Auth::login($user);
-
                 Livewire::actingAs($user)
                     ->test(ActivityLogDashboard::class)
                     ->assertOk();

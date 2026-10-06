@@ -7,10 +7,11 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CandidateDocumentDownloadController extends Controller
 {
-    public function __invoke(Request $request, CandidateDocument $document)
+    public function __invoke(Request $request, CandidateDocument $document): StreamedResponse
     {
         Gate::authorize('view', $document->candidate);
 

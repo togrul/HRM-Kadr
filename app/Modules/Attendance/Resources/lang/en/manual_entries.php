@@ -50,7 +50,7 @@ return [
         'entered_by' => 'Entered by',
         'approved_by' => 'Approved by',
         'actions' => 'Actions',
-        'reject_note' => 'Reject note',
+        'reject_note' => 'Rejection reason',
         'break' => 'Break',
         'status' => 'Status',
         'min' => 'min',
@@ -116,7 +116,7 @@ return [
     ],
     'placeholders' => [
         'search_personnel' => 'Search personnel to create a manual entry',
-        'reject_note' => 'Reject note',
+        'reject_note' => 'Rejection reason (required)',
     ],
     'messages' => [
         'validation_failed' => 'Validation failed.',

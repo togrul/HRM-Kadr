@@ -2,7 +2,7 @@
      x-data="{}"
 >
     <div class="sidemenu-title">
-        <h2 class="text-xl font-title font-semibold text-gray-500" id="slide-over-title">
+        <h2 class="text-xl font-title font-semibold text-zinc-500" id="slide-over-title">
             {!!  $title ?? '' !!}
         </h2>
     </div>
@@ -20,7 +20,7 @@
             />
         </div>
         <button wire:click="setMonth"
-                class="appearance-none bg-slate-900 text-slate-100 px-4 py-2 mt-1 rounded-md shadow-sm text-sm font-medium flex items-center space-x-2 justify-end transition-all duration-300 hover:bg-slate-700 hover:text-slate-100 hover:shadow-none"
+                class="appearance-none bg-zinc-900 text-zinc-100 px-4 py-2 mt-1 rounded-md shadow-sm text-sm font-medium flex items-center space-x-2 justify-end transition-all duration-300 hover:bg-zinc-700 hover:text-zinc-100 hover:shadow-none"
         >
             <span> {{ __('personnel::common.actions.save') }}</span>
         </button>
@@ -43,14 +43,14 @@
                         <tr @class([
                             'rounded-sm',
                             'border-none' => ! $currentYear,
-                            'border-l-4 border-teal-500' => $currentYear
+                            'border-l-4 border-ink' => $currentYear
                         ])>
                             <x-table.td>
-                                <span class="text-sm bg-slate-100 rounded-md shadow-sm px-3 py-1 font-medium flex justify-center items-center text-slate-600">{{ $vacation->year }}</span>
+                                <span class="text-sm bg-zinc-100 rounded-md shadow-sm px-3 py-1 font-medium flex justify-center items-center text-zinc-600">{{ $vacation->year }}</span>
                             </x-table.td>
                             <x-table.td>
                                 <div class="flex items-center justify-center space-x-2">
-                                     <span class="text-sm font-medium flex items-center text-slate-900">
+                                     <span class="text-sm font-medium flex items-center text-zinc-900">
                                          {{ array_search($vacation->reserved_date_month, $months) }}
                                     </span>
                                     <button wire:click="updateMonth({{ $vacation }})">
@@ -59,7 +59,7 @@
                                 </div>
                             </x-table.td>
                             <x-table.td>
-                                <span class="text-sm font-medium flex items-center text-slate-900">{{ $vacation->vacation_days_total }}</span>
+                                <span class="text-sm font-medium flex items-center text-zinc-900">{{ $vacation->vacation_days_total }}</span>
                             </x-table.td>
                             <x-table.td>
                                 <span class="text-sm font-medium flex items-center text-green-500">{{ $vacation->remaining_days }}</span>
@@ -70,7 +70,7 @@
                             <x-table.td :isButton="true">
                                 <div class="flex items-center space-x-2">
                                     <button wire:click="goToVacations('{{ $vacation->year }}')"
-                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                                        class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-zinc-500 hover:bg-zinc-50 hover:text-zinc-700"
                                     >
                                         <x-icons.document-icon></x-icons.document-icon>
                                     </button>

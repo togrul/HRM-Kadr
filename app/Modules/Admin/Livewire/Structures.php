@@ -2,12 +2,14 @@
 
 namespace App\Modules\Admin\Livewire;
 
-use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait;
-use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
 use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\Structure;
+use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait;
+use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -81,17 +83,42 @@ class Structures extends Component
 
     public function deleteModel(?int $id = null): void
     {
-        if ($id) {
-            $this->model = Structure::findOrFail($id);
-
-            if ($this->model) {
-                $this->callDeletePromptSwal();
-            }
+        if (! $id) {
+            return;
         }
+
+        $this->model = Structure::findOrFail($id);
+
+        // Warn (via the app's confirm modal) — a plain "delete?" when the structure is
+        // unused, or an "it is in use, everything linked to it will be deleted" warning
+        // when it is referenced anywhere.
+        $used = app(\App\Services\Structures\StructureDeletionService::class)->isUsed((int) $id);
+
+        $this->dispatch('confirm-structure-delete', message: $used
+            ? __('admin::references.structure_delete.in_use')
+            : __('admin::references.structure_delete.confirm'));
+    }
+
+    public function performDelete(): void
+    {
+        Gate::authorize('access-admin');
+
+        if (! $this->model) {
+            return;
+        }
+
+        // Cascade is fully handled (+ audited + caches flushed via StructureObserver) by
+        // the service; we just reset the form and confirm.
+        app(\App\Services\Structures\StructureDeletionService::class)->cascadeDelete((int) $this->model->id);
+
+        $this->resetForm();
+        $this->callSuccessSwal();
     }
 
     public function store(): void
     {
+        Gate::authorize('access-admin');
+
         $this->form['code'] = blank($this->form['code'] ?? null) ? 1 : (int) $this->form['code'];
         $this->form['level'] = blank($this->form['level'] ?? null) ? 1 : (int) $this->form['level'];
         $this->form['coefficient'] = blank($this->form['coefficient'] ?? null) ? 1 : (int) $this->form['coefficient'];
@@ -114,9 +141,9 @@ class Structures extends Component
         $this->closeCrud();
     }
 
-    public function render()
+    public function render(): View
     {
-        $structureList = Cache::rememberForever('structures', function () {
+        $structureList = Cache::rememberForever(\App\Support\OrderLookupCache::key('structures', 'admin-tree'), function () {
             return Structure::withRecursive('subs', false)
                 ->whereNull('parent_id')
                 ->orderBy('code')

@@ -1,25 +1,22 @@
-<x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
-        {{ __('ui::auth.messages.forgot_password_help') }}
-    </div>
-
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
-
-    <form method="POST" action="{{ route('password.email') }}">
+<x-auth-shell
+    :title="__('ui::auth.titles.forgot_password')"
+    :subtitle="__('ui::auth.messages.forgot_password_help')"
+    :back-to-login="true"
+>
+    <form method="POST" action="{{ route('password.email') }}" class="mt-6 space-y-4">
         @csrf
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('ui::auth.fields.email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
+        <x-auth-input
+            id="email"
+            name="email"
+            type="email"
+            :label="__('ui::auth.fields.email')"
+            value="{{ old('email') }}"
+            required
+            autofocus
+            placeholder="{{ __('ui::auth.fields.email_placeholder') }}"
+        />
 
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('ui::auth.actions.email_password_reset_link') }}
-            </x-primary-button>
-        </div>
+        <x-auth-submit>{{ __('ui::auth.actions.email_password_reset_link') }}</x-auth-submit>
     </form>
-</x-guest-layout>
+</x-auth-shell>

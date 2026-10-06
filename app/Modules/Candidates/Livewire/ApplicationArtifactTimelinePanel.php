@@ -7,6 +7,7 @@ use App\Models\CandidateDocument;
 use App\Modules\Candidates\Application\Services\CandidateApplicationReadService;
 use App\Modules\Candidates\Application\Services\CandidateApplicationStageService;
 use App\Modules\Candidates\Support\Traits\InteractsWithRecruitmentPresentation;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
@@ -82,7 +83,7 @@ class ApplicationArtifactTimelinePanel extends Component
             ->all();
     }
 
-    public function render()
+    public function render(): View
     {
         return view('candidates::livewire.candidates.application-artifact-timeline-panel');
     }

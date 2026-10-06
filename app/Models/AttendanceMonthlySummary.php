@@ -6,6 +6,18 @@ use App\Traits\PersonnelTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property string $tabel_no
+ * @property int $year
+ * @property int $month
+ * @property int $total_scheduled_minutes
+ * @property int $total_worked_minutes
+ * @property int $total_overtime_minutes
+ * @property int $total_workdays
+ * @property int $total_present_days
+ * @property int $total_absence_days
+ * @property bool $is_locked
+ */
 class AttendanceMonthlySummary extends Model
 {
     use HasFactory;
@@ -40,4 +52,3 @@ class AttendanceMonthlySummary extends Model
         'calculated_at' => 'datetime',
     ];
 }
-

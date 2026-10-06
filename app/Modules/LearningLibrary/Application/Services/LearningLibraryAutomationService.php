@@ -2,11 +2,11 @@
 
 namespace App\Modules\LearningLibrary\Application\Services;
 
-use App\Models\EmployeeContentAssignment;
 use App\Models\EmployeeContentAsset;
+use App\Models\EmployeeContentAssignment;
 use App\Models\Personnel;
 use App\Models\User;
-use App\Modules\Personnel\Application\Services\MyHr\LearningAssignmentManagerService;
+use App\Modules\Personnel\Contracts\LearningAssignmentManager;
 use App\Notifications\PlatformNotification;
 
 class LearningLibraryAutomationService
@@ -33,7 +33,7 @@ class LearningLibraryAutomationService
             return 0;
         }
 
-        $service = app(LearningAssignmentManagerService::class);
+        $service = app(LearningAssignmentManager::class);
         $count = 0;
         $dueAt = now()->addDays($dueDays)->toDateString();
 

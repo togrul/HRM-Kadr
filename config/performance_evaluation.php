@@ -1,6 +1,11 @@
 <?php
 
 return [
+    'kpi' => [
+        // Leave (sick, maternity, unpaid…) above this many days inside a card's period
+        // scales its additive targets and bonus pro-rata to the days worked (spec §5.1).
+        'long_leave_days' => (int) env('PERFORMANCE_KPI_LONG_LEAVE_DAYS', 30),
+    ],
     'performance' => [
         'query_budget' => [
             'overview_build' => env('PERFORMANCE_QUERY_BUDGET_OVERVIEW', 18),

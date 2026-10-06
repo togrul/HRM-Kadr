@@ -1,148 +1,160 @@
-<div class="flex flex-col gap-6 px-6 py-4">
-    @include('candidates::livewire.candidates.partials.recruitment-nav')
+@php
+    $panelCard = 'overflow-hidden rounded-2xl border border-hairline bg-white shadow-card';
+    $sectionHead = 'flex items-center justify-between gap-3 border-b border-hairline-subtle px-4 py-3';
+    $emptyBox = 'rounded-xl border border-dashed border-hairline bg-[#fafafa] px-4 py-6 text-center text-[12.5px] text-ink-faint';
+    $tile = 'rounded-xl border border-hairline bg-[#fafafa] px-3 py-2.5';
+@endphp
 
-    <section class="rounded-[32px] border border-slate-200 bg-white p-6 shadow-[0_28px_60px_-45px_rgba(15,23,42,0.35)]">
-        <div class="flex flex-col gap-5 border-b border-slate-200 pb-6 lg:flex-row lg:items-start lg:justify-between">
-            <div class="space-y-3">
-                <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">
-                    {{ __('candidates::recruitment.titles.analytics') }}
-                </div>
-                <h1 class="text-3xl font-semibold tracking-tight text-slate-900">
-                    {{ __('candidates::recruitment.titles.analytics') }}
-                </h1>
-                <div class="flex flex-wrap gap-2">
-                    <span class="inline-flex rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">{{ $this->recruitmentPackLabel($this->currentPack) }}</span>
-                </div>
-            </div>
-        </div>
+<div class="flex flex-col">
+    {{-- ===================== contextual panel ===================== --}}
+    <x-slot name="sidebar"><div id="hrm-context-panel"></div></x-slot>
 
-        <div class="mt-6 grid gap-4 lg:grid-cols-3 xl:grid-cols-6">
+    @teleport('#hrm-context-panel')
+        @include('candidates::livewire.candidates.partials.recruitment-panel', [
+            'panelTitle' => __('candidates::recruitment.titles.analytics'),
+            'panelSubtitle' => $this->recruitmentPackLabel($this->currentPack),
+        ])
+    @endteleport
+
+    <div class="lg:hidden">@include('candidates::livewire.candidates.partials.recruitment-nav')</div>
+
+    {{-- ===================== header ===================== --}}
+    <x-page-header
+        :title="__('candidates::recruitment.titles.analytics')"
+        :breadcrumb="__('candidates::common.titles.candidates')"
+    >
+        <x-slot:icon>
+            <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 3-4 3 3 5-7"/></svg>
+        </x-slot:icon>
+
+        <x-slot:actions>
+            <x-small-badge mode="secondary">{{ $this->recruitmentPackLabel($this->currentPack) }}</x-small-badge>
+        </x-slot:actions>
+    </x-page-header>
+
+    <div class="flex flex-col gap-4 px-4 py-4 sm:px-5">
+        {{-- summary tiles --}}
+        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             @foreach ($this->summaryCards as $card)
-                <div class="{{ $card['card'] }} rounded-[24px] border p-4">
-                    <div class="{{ $card['labelColor'] }} text-[11px] font-semibold uppercase tracking-tight">{{ $card['label'] }}</div>
-                    <div class="{{ $card['valueColor'] }} mt-3 text-3xl font-semibold tracking-tight">{{ $card['value'] }}</div>
+                <div class="rounded-2xl border border-hairline bg-white px-4 py-3 shadow-card">
+                    <p class="hrm-eyebrow">{{ $card['label'] }}</p>
+                    <p class="hrm-num mt-1.5 text-[21px] font-semibold tracking-[-0.03em] text-ink">{{ $card['value'] }}</p>
                 </div>
             @endforeach
         </div>
-    </section>
 
-    <div class="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-        <div class="space-y-6">
-            <section class="rounded-[32px] border border-slate-200 bg-white p-6 shadow-[0_28px_60px_-45px_rgba(15,23,42,0.35)]">
-                <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.titles.pipeline_summary') }}</div>
-                <h2 class="mt-2 text-2xl font-semibold tracking-tight text-slate-900">{{ __('candidates::recruitment.titles.pipeline_summary') }}</h2>
-
-                <div class="mt-6 grid gap-4 md:grid-cols-2">
+        <div class="grid gap-4 xl:grid-cols-2">
+            {{-- pipeline by stage --}}
+            <section class="{{ $panelCard }}">
+                <div class="{{ $sectionHead }}">
+                    <h2 class="text-[14px] font-semibold tracking-[-0.02em] text-ink">{{ __('candidates::recruitment.titles.pipeline_summary') }}</h2>
+                </div>
+                <div class="grid gap-2 p-3 sm:grid-cols-2">
                     @foreach ($this->stageSummary as $stage)
-                        <article class="rounded-[24px] border border-slate-200 bg-slate-50 p-4">
-                            <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.labels.pipeline_stage') }}</div>
-                            <div class="mt-3 text-xl font-semibold text-slate-900">{{ $stage['label'] }}</div>
-                            <div class="mt-4 text-4xl font-semibold tracking-tight text-slate-900">{{ $stage['count'] }}</div>
-                        </article>
+                        <div class="{{ $tile }}">
+                            <p class="truncate text-[12px] font-medium text-ink-soft">{{ $stage['label'] }}</p>
+                            <p class="hrm-num mt-1 text-[19px] font-semibold tracking-[-0.03em] text-ink">{{ $stage['count'] }}</p>
+                        </div>
                     @endforeach
                 </div>
             </section>
 
-            <section class="rounded-[32px] border border-slate-200 bg-white p-6 shadow-[0_28px_60px_-45px_rgba(15,23,42,0.35)]">
-                <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.titles.time_to_stage') }}</div>
-                <h2 class="mt-2 text-2xl font-semibold tracking-tight text-slate-900">{{ __('candidates::recruitment.titles.time_to_stage') }}</h2>
-
-                <div class="mt-6 space-y-3">
+            {{-- time to stage --}}
+            <section class="{{ $panelCard }}">
+                <div class="{{ $sectionHead }}">
+                    <h2 class="text-[14px] font-semibold tracking-[-0.02em] text-ink">{{ __('candidates::recruitment.titles.time_to_stage') }}</h2>
+                </div>
+                <div class="space-y-2 p-3">
                     @forelse ($this->timeToStageSummary as $row)
-                        <div class="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                            <div>
-                                <div class="text-sm font-semibold text-slate-800">{{ $row['label'] }}</div>
-                                <div class="text-xs text-slate-500">{{ $row['total'] }} {{ __('candidates::recruitment.labels.applications') }}</div>
+                        <div class="flex items-center justify-between gap-3 {{ $tile }}">
+                            <div class="min-w-0">
+                                <p class="truncate text-[12.5px] font-medium text-ink">{{ $row['label'] }}</p>
+                                <p class="hrm-num text-[11px] text-ink-faint">{{ $row['total'] }} {{ __('candidates::recruitment.labels.applications') }}</p>
                             </div>
-                            <div class="text-right">
-                                <div class="text-lg font-semibold tracking-tight text-slate-900">{{ $row['avg_days'] }}</div>
-                                <div class="text-xs text-slate-500">{{ __('candidates::recruitment.labels.days_avg') }}</div>
+                            <div class="shrink-0 text-right">
+                                <p class="hrm-num text-[16px] font-semibold text-ink">{{ $row['avg_days'] }}</p>
+                                <p class="text-[10.5px] text-ink-faint">{{ __('candidates::recruitment.labels.days_avg') }}</p>
                             </div>
                         </div>
                     @empty
-                        <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">
-                            {{ __('candidates::recruitment.empty.analytics_stage_velocity') }}
-                        </div>
+                        <p class="{{ $emptyBox }}">{{ __('candidates::recruitment.empty.analytics_stage_velocity') }}</p>
                     @endforelse
                 </div>
             </section>
-        </div>
 
-        <div class="space-y-6">
-            <section class="rounded-[32px] border border-slate-200 bg-white p-6 shadow-[0_28px_60px_-45px_rgba(15,23,42,0.35)]">
-                <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.titles.source_effectiveness') }}</div>
-                <h2 class="mt-2 text-2xl font-semibold tracking-tight text-slate-900">{{ __('candidates::recruitment.titles.source_effectiveness') }}</h2>
-
-                <div class="mt-6 space-y-3">
+            {{-- source effectiveness --}}
+            <section class="{{ $panelCard }}">
+                <div class="{{ $sectionHead }}">
+                    <h2 class="text-[14px] font-semibold tracking-[-0.02em] text-ink">{{ __('candidates::recruitment.titles.source_effectiveness') }}</h2>
+                </div>
+                <div class="space-y-2 p-3">
                     @forelse ($this->sourceEffectivenessSummary as $row)
-                        <div class="rounded-[24px] border border-slate-200 bg-slate-50 px-4 py-4">
+                        <div class="{{ $tile }}">
                             <div class="flex items-start justify-between gap-3">
-                                <div class="text-sm font-semibold text-slate-800">{{ $row['label'] }}</div>
-                                <div class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-600">{{ $row['success_rate'] }}%</div>
+                                <p class="min-w-0 truncate text-[12.5px] font-medium text-ink">{{ $row['label'] }}</p>
+                                <x-small-badge :mode="$row['success_rate'] >= 50 ? 'green' : 'secondary'">{{ $row['success_rate'] }}%</x-small-badge>
                             </div>
-                            <div class="mt-3 grid gap-2 sm:grid-cols-3">
-                                <div class="rounded-2xl border border-slate-200 bg-white px-3 py-2">
-                                    <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.labels.total') }}</div>
-                                    <div class="mt-1 text-lg font-semibold tracking-tight text-slate-900">{{ $row['total'] }}</div>
+                            <div class="mt-2 grid grid-cols-3 gap-2">
+                                <div class="rounded-lg border border-hairline bg-white px-2 py-1.5">
+                                    <p class="hrm-eyebrow">{{ __('candidates::recruitment.labels.total') }}</p>
+                                    <p class="hrm-num mt-0.5 text-[14px] font-semibold text-ink">{{ $row['total'] }}</p>
                                 </div>
-                                <div class="rounded-2xl border border-slate-200 bg-white px-3 py-2">
-                                    <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.labels.successful') }}</div>
-                                    <div class="mt-1 text-lg font-semibold tracking-tight text-emerald-700">{{ $row['successful'] }}</div>
+                                <div class="rounded-lg border border-hairline bg-white px-2 py-1.5">
+                                    <p class="hrm-eyebrow">{{ __('candidates::recruitment.labels.successful') }}</p>
+                                    <p class="hrm-num mt-0.5 text-[14px] font-semibold text-[#047857]">{{ $row['successful'] }}</p>
                                 </div>
-                                <div class="rounded-2xl border border-slate-200 bg-white px-3 py-2">
-                                    <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.labels.rejected') }}</div>
-                                    <div class="mt-1 text-lg font-semibold tracking-tight text-rose-700">{{ $row['rejected'] }}</div>
+                                <div class="rounded-lg border border-hairline bg-white px-2 py-1.5">
+                                    <p class="hrm-eyebrow">{{ __('candidates::recruitment.labels.rejected') }}</p>
+                                    <p class="hrm-num mt-0.5 text-[14px] font-semibold text-[#be123c]">{{ $row['rejected'] }}</p>
                                 </div>
                             </div>
                         </div>
                     @empty
-                        <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">
-                            {{ __('candidates::recruitment.empty.analytics_sources') }}
-                        </div>
+                        <p class="{{ $emptyBox }}">{{ __('candidates::recruitment.empty.analytics_sources') }}</p>
                     @endforelse
                 </div>
             </section>
 
-            <section class="rounded-[32px] border border-slate-200 bg-white p-6 shadow-[0_28px_60px_-45px_rgba(15,23,42,0.35)]">
-                <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.titles.rejection_reasons') }}</div>
-                <h2 class="mt-2 text-2xl font-semibold tracking-tight text-slate-900">{{ __('candidates::recruitment.titles.rejection_reasons') }}</h2>
-
-                <div class="mt-6 space-y-3">
+            {{-- rejection reasons --}}
+            <section class="{{ $panelCard }}">
+                <div class="{{ $sectionHead }}">
+                    <h2 class="text-[14px] font-semibold tracking-[-0.02em] text-ink">{{ __('candidates::recruitment.titles.rejection_reasons') }}</h2>
+                </div>
+                <div class="space-y-2 p-3">
                     @forelse ($this->rejectionReasonSummary as $row)
-                        <div class="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                            <div class="text-sm font-semibold text-slate-700">{{ $row['label'] }}</div>
-                            <div class="text-lg font-semibold tracking-tight text-rose-700">{{ $row['count'] }}</div>
+                        <div class="flex items-center justify-between gap-3 {{ $tile }}">
+                            <p class="min-w-0 truncate text-[12.5px] font-medium text-ink-soft">{{ $row['label'] }}</p>
+                            <p class="hrm-num shrink-0 text-[16px] font-semibold text-[#be123c]">{{ $row['count'] }}</p>
                         </div>
                     @empty
-                        <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">
-                            {{ __('candidates::recruitment.empty.analytics_rejection_reasons') }}
-                        </div>
-                    @endforelse
-                </div>
-            </section>
-
-            <section class="rounded-[32px] border border-slate-200 bg-white p-6 shadow-[0_28px_60px_-45px_rgba(15,23,42,0.35)]">
-                <div class="text-[11px] font-semibold uppercase tracking-tight text-slate-400">{{ __('candidates::recruitment.titles.recent_activity') }}</div>
-                <h2 class="mt-2 text-2xl font-semibold tracking-tight text-slate-900">{{ __('candidates::recruitment.titles.recent_activity') }}</h2>
-
-                <div class="mt-6 space-y-3">
-                    @forelse ($this->recentMoves as $event)
-                        <article class="rounded-[24px] border border-slate-200 bg-slate-50 p-4">
-                            <div class="flex flex-wrap items-center gap-2">
-                                <span class="inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-700">{{ __('candidates::recruitment.stages.'.$event->stage_key) }}</span>
-                                <span class="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">{{ $event->action }}</span>
-                            </div>
-                            <div class="mt-3 text-sm font-semibold text-slate-900">{{ $event->application?->candidate?->fullname ?? '—' }}</div>
-                            <div class="mt-1 text-sm text-slate-500">{{ $event->application?->opening?->title ?? '—' }}</div>
-                            <div class="mt-2 text-xs text-slate-400">{{ $event->actor?->name ?? '—' }} · {{ optional($event->occurred_at)->format('d.m.Y H:i') ?? '—' }}</div>
-                        </article>
-                    @empty
-                        <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">
-                            {{ __('candidates::recruitment.empty.analytics_activity') }}
-                        </div>
+                        <p class="{{ $emptyBox }}">{{ __('candidates::recruitment.empty.analytics_rejection_reasons') }}</p>
                     @endforelse
                 </div>
             </section>
         </div>
+
+        {{-- recent activity --}}
+        <section class="{{ $panelCard }}">
+            <div class="{{ $sectionHead }}">
+                <h2 class="text-[14px] font-semibold tracking-[-0.02em] text-ink">{{ __('candidates::recruitment.titles.recent_activity') }}</h2>
+            </div>
+            <div class="grid gap-2 p-3 md:grid-cols-2 xl:grid-cols-3">
+                @forelse ($this->recentMoves as $event)
+                    <article class="{{ $tile }}">
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <x-small-badge mode="secondary">{{ __('candidates::recruitment.stages.'.$event->stage_key) }}</x-small-badge>
+                            <span class="text-[10.5px] text-ink-faint">{{ $event->action }}</span>
+                        </div>
+                        <p class="mt-2 truncate text-[12.5px] font-semibold text-ink">{{ $event->application?->candidate?->fullname ?? '—' }}</p>
+                        <p class="truncate text-[11.5px] text-ink-muted">{{ $event->application?->opening?->title ?? '—' }}</p>
+                        <p class="mt-1 truncate text-[10.5px] text-ink-faint">
+                            {{ $event->actor?->name ?? '—' }} · <span class="hrm-num">{{ optional($event->occurred_at)->format('d.m.Y H:i') ?? '—' }}</span>
+                        </p>
+                    </article>
+                @empty
+                    <p class="{{ $emptyBox }} md:col-span-2 xl:col-span-3">{{ __('candidates::recruitment.empty.analytics_activity') }}</p>
+                @endforelse
+            </div>
+        </section>
     </div>
 </div>

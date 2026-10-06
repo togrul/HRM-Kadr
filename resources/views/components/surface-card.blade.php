@@ -11,9 +11,9 @@
     $overflowClass = $clip ? 'overflow-hidden' : 'overflow-visible';
 @endphp
 
-<div {{ $attributes->merge(['class' => $overflowClass.' rounded-xl flex flex-col border border-zinc-200 bg-zinc-100/80 shadow-[0_1px_2px_rgba(16,24,40,0.04)]']) }}>
-    <div class="flex items-center justify-between px-[5px] py-2.5 flex-none">
-        <div class="text-xs uppercase font-semibold text-slate-600 tracking-tight w-full">
+<div {{ $attributes->merge(['class' => $overflowClass.' rounded-2xl flex flex-col border border-hairline bg-white shadow-card']) }}>
+    <div class="flex items-center justify-between px-4 py-2.5 flex-none">
+        <div class="hrm-eyebrow w-full">
             {{ $title }} 
         </div>
           
@@ -27,11 +27,11 @@
         @endif
     </div>
 
-    <div class="px-1 pb-1 flex-1">
-        <div class="h-full rounded-lg border border-zinc-200 bg-white {{ $bodyClass }}">
-            <div class="{{ $contentClass }}">
-                {{ $slot }}
-            </div>
+    {{-- one card: the body sits flush under a hairline instead of as a second bordered card
+         inset in the first (the nested frames read as a card hanging inside a card) --}}
+    <div class="h-full flex-1 border-t border-hairline-subtle {{ $bodyClass }}">
+        <div class="{{ $contentClass }}">
+            {{ $slot }}
         </div>
     </div>
 </div>

@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Orders;
 
-use App\Services\Orders\Document\DocxPlaceholderParser;
+use App\Modules\Orders\Application\Document\DocxPlaceholderParser;
 use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\TemplateProcessor;

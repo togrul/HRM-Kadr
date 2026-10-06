@@ -3,17 +3,20 @@
 namespace App\Modules\Services\Livewire\Roles;
 
 use App\Livewire\Traits\SideModalAction;
+use App\Models\Role;
+use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
 use App\Support\Permissions\RoleTranslation;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\On;
 use Livewire\Component;
-use App\Models\Role;
 
 #[On(['permissionSet', 'roleWasDeleted'])]
 class ManageRoles extends Component
 {
     use AuthorizesRequests, SideModalAction;
+    use AuthorizesSettingsAccess;
 
     public $role_name;
 
@@ -33,7 +36,7 @@ class ManageRoles extends Component
         ];
     }
 
-    public function editRole($id)
+    public function editRole($id): void
     {
         $this->isUpdate = true;
         $this->isCreating = false;
@@ -49,12 +52,12 @@ class ManageRoles extends Component
         $this->resetErrorBag();
     }
 
-    public function setDeleteRole($roleId)
+    public function setDeleteRole($roleId): void
     {
         $this->dispatch('setDeleteRole', $roleId);
     }
 
-    public function store()
+    public function store(): void
     {
         $this->validate();
 
@@ -70,7 +73,7 @@ class ManageRoles extends Component
         $this->cancel();
     }
 
-    public function sendRole($id)
+    public function sendRole($id): void
     {
         $this->getRoleByID($id);
         $this->openSidebar();
@@ -78,14 +81,14 @@ class ManageRoles extends Component
         $this->resetErrorBag();
     }
 
-    private function getRoleByID($id)
+    private function getRoleByID($id): void
     {
         $role = Role::findOrFail($id);
         $this->role_id = $id;
         $this->role_name = $role->name;
     }
 
-    public function cancel()
+    public function cancel(): void
     {
         $this->isUpdate = false;
         $this->isCreating = false;
@@ -93,7 +96,7 @@ class ManageRoles extends Component
         $this->resetErrorBag();
     }
 
-    private function resetInputFields()
+    private function resetInputFields(): void
     {
         $this->role_name = '';
         $this->role_id = null;
@@ -104,7 +107,7 @@ class ManageRoles extends Component
         return RoleTranslation::label((string) $role->name);
     }
 
-    public function render()
+    public function render(): View
     {
         $roles = Role::query()
             ->select('id', 'name', 'guard_name')

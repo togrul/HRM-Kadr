@@ -9,7 +9,7 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-     public function up(): void
+    public function up(): void
     {
         Schema::table('personnel_punishments', function (Blueprint $table) {
             $table->string('order_given_by')->nullable();
@@ -17,9 +17,9 @@ return new class extends Migration
             $table->dateTime('order_date')->nullable();
         });
 
-         Schema::table('personnel_military_services', function (Blueprint $table) {
+        Schema::table('personnel_military_services', function (Blueprint $table) {
             $table->string('location')->nullable();
-         });
+        });
     }
 
     /**
@@ -33,6 +33,6 @@ return new class extends Migration
 
         Schema::table('personnel_military_services', function (Blueprint $table) {
             $table->dropColumn('location');
-         });
+        });
     }
 };

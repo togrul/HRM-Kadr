@@ -4,20 +4,21 @@ namespace App\Modules\Candidates\Support\Traits;
 
 use App\Concerns\LoadsAppealStatuses;
 use App\Enums\AttitudeMilitaryEnum;
+use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\Candidate;
 use App\Models\Structure;
-use App\Livewire\Traits\DropdownConstructTrait;
 use App\Modules\Candidates\Application\Services\CandidateProfileFieldSchemaService;
 use App\Modules\Candidates\Support\CandidateModeResolver;
 use App\Modules\Candidates\Support\CandidateWorkflowPackResolver;
 use App\Traits\NormalizesDropdownPayloads;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 
 trait CandidateCrud
 {
-    use LoadsAppealStatuses;
     use DropdownConstructTrait;
+    use LoadsAppealStatuses;
     use NormalizesDropdownPayloads;
 
     public $candidate = [];
@@ -32,7 +33,7 @@ trait CandidateCrud
 
     public string $candidateMode = CandidateModeResolver::MILITARY;
 
-    public function rules()
+    public function rules(): array
     {
         return array_merge(
             app(CandidateProfileFieldSchemaService::class)->coreRules(),
@@ -40,18 +41,18 @@ trait CandidateCrud
         );
     }
 
-    protected function validationAttributes()
+    protected function validationAttributes(): array
     {
         return app(CandidateProfileFieldSchemaService::class)->validationAttributeLabels($this->candidateWorkflowPack());
     }
 
-    public function mount()
+    public function mount(): void
     {
         $this->candidateMode = app(CandidateModeResolver::class)->resolve();
 
         if (! empty($this->candidateModel)) {
             $this->fillCandidate();
-            $this->title = __('candidates::common.titles.edit_candidate') . ' - ' . "<span class='text-teal-500'>{$this->candidateModelData->fullname}</span>";
+            $this->title = __('candidates::common.titles.edit_candidate').' - '."<span class='text-teal-500'>{$this->candidateModelData->fullname}</span>";
         } else {
             $this->authorize('create', Candidate::class);
             $this->title = __('candidates::common.titles.add_candidate');
@@ -99,7 +100,7 @@ trait CandidateCrud
         );
     }
 
-    public function render()
+    public function render(): View
     {
         $statuses = $this->appealStatuses();
 

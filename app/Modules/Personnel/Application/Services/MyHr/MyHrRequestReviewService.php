@@ -12,10 +12,11 @@ use App\Modules\Personnel\Application\Services\MyHr\Review\SelfServiceRequestPat
 use App\Modules\Personnel\Application\Services\MyHr\Review\SelfServiceReviewAuthorizationService;
 use App\Modules\Personnel\Application\Services\MyHr\Review\SelfServiceReviewNotificationService;
 use App\Modules\Personnel\Application\Services\MyHr\Review\SelfServiceVacationOrderBinderService;
+use App\Modules\Personnel\Contracts\MyHrRequestReview;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
-class MyHrRequestReviewService
+class MyHrRequestReviewService implements MyHrRequestReview
 {
     public function __construct(
         private readonly SelfServiceReviewAuthorizationService $authorization,

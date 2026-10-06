@@ -7,10 +7,15 @@ use Livewire\Wireable;
 final class LeaveFilterData implements Wireable
 {
     public ?int $leave_type_id;
+
     public string $fullname;
+
     public ?string $gender;
+
     public string $reason;
+
     public ?string $starts_at;
+
     public ?string $ends_at;
 
     public function __construct(
@@ -31,12 +36,12 @@ final class LeaveFilterData implements Wireable
 
     public static function make(): self
     {
-        return new self();
+        return new self;
     }
 
     public static function fromArray(array $payload): self
     {
-        return (new self())->fillFromArray($payload);
+        return (new self)->fillFromArray($payload);
     }
 
     public function fillFromArray(array $payload): self
@@ -69,8 +74,8 @@ final class LeaveFilterData implements Wireable
 
         return match ($key) {
             'leave_type_id' => (int) $value,
-            'gender'        => (string) $value,
-            default         => is_string($value) ? $value : $value,
+            'gender' => (string) $value,
+            default => is_string($value) ? $value : $value,
         };
     }
 
@@ -85,11 +90,11 @@ final class LeaveFilterData implements Wireable
     {
         return [
             'leave_type_id' => $this->leave_type_id,
-            'fullname'      => $this->fullname,
-            'gender'        => $this->gender,
-            'reason'        => $this->reason,
-            'starts_at'     => $this->starts_at,
-            'ends_at'       => $this->ends_at,
+            'fullname' => $this->fullname,
+            'gender' => $this->gender,
+            'reason' => $this->reason,
+            'starts_at' => $this->starts_at,
+            'ends_at' => $this->ends_at,
         ];
     }
 

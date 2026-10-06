@@ -6,11 +6,11 @@ use App\Models\Award;
 use App\Models\City;
 use App\Models\CountryTranslation;
 use App\Models\Disability;
+use App\Models\EducationalInstitution;
 use App\Models\EducationDegree;
 use App\Models\EducationDocumentType;
 use App\Models\EducationForm;
 use App\Models\EducationType;
-use App\Models\EducationalInstitution;
 use App\Models\Kinship;
 use App\Models\Language;
 use App\Models\Position;
@@ -23,11 +23,11 @@ use App\Observers\AwardObserver;
 use App\Observers\CityObserver;
 use App\Observers\CountryTranslationObserver;
 use App\Observers\DisabilityObserver;
+use App\Observers\EducationalInstitutionObserver;
 use App\Observers\EducationDegreeObserver;
 use App\Observers\EducationDocumentTypeObserver;
 use App\Observers\EducationFormObserver;
 use App\Observers\EducationTypeObserver;
-use App\Observers\EducationalInstitutionObserver;
 use App\Observers\KinshipObserver;
 use App\Observers\LanguageObserver;
 use App\Observers\PositionObserver;
@@ -92,6 +92,7 @@ class AdminServiceProvider extends ServiceProvider
         return [
             'appeal-statuses' => \App\Modules\Admin\Livewire\AppealStatus::class,
             'award-types' => \App\Modules\Admin\Livewire\AwardTypes::class,
+            'punishment-types' => \App\Modules\Admin\Livewire\PunishmentTypes::class,
             'awards' => \App\Modules\Admin\Livewire\Awards::class,
             'cities' => \App\Modules\Admin\Livewire\Cities::class,
             'countries' => \App\Modules\Admin\Livewire\Countries::class,

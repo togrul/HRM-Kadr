@@ -22,7 +22,7 @@
 
 <x-ui.input-shell :label="$label" :error="$error" :hint="$hint" labelClass="tracking-tight text-zinc-500">
     <label for="{{ $inputId }}" class="group block cursor-pointer">
-        <div class="rounded-[24px] bg-[#f0f0f3] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_10px_22px_rgba(0,0,0,0.04)] transition group-hover:bg-[#f5f5f7]">
+        <div class="rounded-2xl bg-[#f0f0f3] p-4 shadow-card transition group-hover:bg-[#f5f5f7]">
             <div class="flex items-start gap-4">
                 <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl {{ $isSelected ? 'bg-emerald-50 text-emerald-600' : 'bg-white text-zinc-500 shadow-sm' }}">
                     <x-icons.document-icon class="h-5 w-5" />

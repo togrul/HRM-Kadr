@@ -3,12 +3,8 @@
 namespace App\Modules\Attendance\Application\Services;
 
 use App\Models\AttendanceCalendar;
-use App\Models\AttendanceDailyStructureSummary;
 use App\Models\AttendanceDailyLedger;
-use App\Models\AttendanceException;
-use App\Models\AttendanceManualEntry;
-use App\Models\AttendanceOvertimeRequest;
-use App\Models\AttendanceRawPunch;
+use App\Models\AttendanceDailyStructureSummary;
 use Carbon\Carbon;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
@@ -27,8 +23,7 @@ class AttendanceOverviewService
         ?int $structureId = null,
         bool $useCache = true,
         ?array $structureIds = null
-    ): array
-    {
+    ): array {
         $cache = app(AttendanceCacheService::class);
 
         $normalizedStructureIds = $this->normalizeStructureIds($structureId, $structureIds);
@@ -282,6 +277,7 @@ class AttendanceOverviewService
 
             if ($row->scope_type === 'structure' && $row->scope_id !== null) {
                 $structureMap[$dateKey] = (string) $row->day_type;
+
                 continue;
             }
 

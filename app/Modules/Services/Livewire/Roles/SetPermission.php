@@ -2,21 +2,25 @@
 
 namespace App\Modules\Services\Livewire\Roles;
 
+use App\Models\Role;
 use App\Models\Structure;
+use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
 use App\Support\Permissions\PermissionDescriptionCatalog;
 use App\Support\Permissions\PermissionTranslationKey;
 use App\Support\Permissions\RoleTranslation;
 use App\Support\Translations\ModuleTranslation;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
-use App\Models\Role;
 
 class SetPermission extends Component
 {
+    use AuthorizesSettingsAccess;
+
     public $title;
 
     public $roleModel;
@@ -43,7 +47,7 @@ class SetPermission extends Component
 
     public string $permissionSearch = '';
 
-    public function mount()
+    public function mount(): void
     {
         $this->initializeProperties();
         $this->loadRoleData();
@@ -66,7 +70,7 @@ class SetPermission extends Component
         ]);
     }
 
-    public function store()
+    public function store(): void
     {
         DB::transaction(function () {
             $this->updateRoleData();
@@ -92,7 +96,7 @@ class SetPermission extends Component
     private function clearCacheAndSelections(): void
     {
         Cache::forget('structures');
-        Cache::forget("structure-accessible-".auth()->user()->id);
+        Cache::forget('structure-accessible-'.auth()->user()->id);
         app(PermissionRegistrar::class)->forgetCachedPermissions();
         $this->initializeProperties();
     }
@@ -131,7 +135,7 @@ class SetPermission extends Component
         $this->permissionStructureList = $this->normalizeIdList($this->permissionStructureList, $this->structureIdPool);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('services::livewire.services.roles.set-permission', [
             'permissions' => $this->filteredPermissionGroups(),
@@ -234,7 +238,7 @@ class SetPermission extends Component
                 'name' => $permission->name,
                 'translation_key' => 'services::permissions.methods.'.$methodKey,
                 'fallback_label' => ModuleTranslation::humanize($methodKey),
-                'description' => PermissionDescriptionCatalog::describe((string) $permission->name),
+                'description' => PermissionDescriptionCatalog::label((string) $permission->name),
             ];
 
             return $carry;

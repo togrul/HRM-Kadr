@@ -1,7 +1,5 @@
 <?php
 
-use App\Models\Order;
-use App\Models\OrderCategory;
 use App\Models\Structure;
 use App\Models\User;
 use Livewire\Livewire;
@@ -17,26 +15,6 @@ dataset('sidebar-structure-components', [
                 'shortname' => 'Smoke Root',
                 'code' => 990001,
                 'level' => 0,
-            ]);
-        },
-    ],
-    'structure.orders' => [
-        'structure.orders',
-        function (): void {
-            OrderCategory::query()->create([
-                'id' => 990001,
-                'name_az' => 'Smoke Category',
-                'name_en' => 'Smoke Category',
-                'name_ru' => 'Smoke Category',
-            ]);
-
-            Order::query()->insert([
-                'id' => 990001,
-                'order_category_id' => 990001,
-                'name' => 'Smoke Order',
-                'content' => 'Smoke content',
-                'order_model' => '\\App\\Models\\Personnel',
-                'blade' => Order::BLADE_DEFAULT,
             ]);
         },
     ],

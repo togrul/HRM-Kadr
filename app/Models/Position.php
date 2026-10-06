@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $approval_rank
+ * @property bool $is_approval_target
+ */
 class Position extends Model
 {
     use HasFactory;

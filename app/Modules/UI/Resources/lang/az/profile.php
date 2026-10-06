@@ -2,6 +2,7 @@
 
 return [
     'titles' => [
+        'account_settings' => 'Hesab ayarları',
         'profile' => 'Profil',
         'profile_information' => 'Profil məlumatları',
         'update_password' => 'Şifrəni yenilə',
@@ -17,6 +18,7 @@ return [
         'delete_account_password_confirmation' => 'Hesabınız silindikdən sonra bütün məlumatlar həmişəlik silinəcək. Davam etmək üçün şifrənizi daxil edin.',
     ],
     'actions' => [
+        'update_password' => 'Şifrəni yenilə',
         'save' => 'Yadda saxla',
         'saved' => 'Yadda saxlanıldı.',
         'cancel' => 'Ləğv et',

@@ -65,7 +65,7 @@ class MyHrHierarchyTest extends TestCase
             ->assertSee($report->fullname)
             ->assertSee('İcazə')
             ->assertSee('İerarxik təsdiq siyasəti')
-            ->assertSee('Bu müraciət əvvəl birbaşa rəhbərinizə, sonra isə rəhbərinizin rəhbərinə keçir.');
+            ->assertSee(__('personnel::my_hr.hierarchy.messages.upper_policy_help'));
     }
 
     public function test_my_hr_hierarchy_tab_stays_within_query_budget(): void
@@ -114,7 +114,8 @@ class MyHrHierarchyTest extends TestCase
             ->get(route('my-hr', ['tab' => 'hierarchy']))
             ->assertOk();
 
-        $this->assertLessThanOrEqual(43, count(DB::getQueryLog()));
+        // Was 39 before the ancestor walks went to the flat chart map.
+        $this->assertLessThanOrEqual(32, count(DB::getQueryLog()));
     }
 
     private function makePersonnel(string $email, string $surname, string $name, string $patronymic, int $structureId, int $positionId): Personnel

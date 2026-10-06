@@ -2,74 +2,19 @@
 
 namespace App\Modules\Admin\Livewire;
 
-use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait;
-use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
 use App\Models\EducationDocumentType;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Modules\Admin\Support\ReferenceCrudComponent;
 use Livewire\Attributes\On;
-use Livewire\Component;
 
 #[On(['documentTypesUpdated', 'deleted'])]
-class DocumentTypes extends Component
+class DocumentTypes extends ReferenceCrudComponent
 {
-    use AuthorizesRequests;
-    use AdminCrudTrait;
-    use CallSwalTrait;
+    protected string $modelClass = EducationDocumentType::class;
 
-    public function rules(): array
+    protected string $savedEvent = 'documentTypesUpdated';
+
+    protected function addLabel(): string
     {
-        return [
-            'form.id' => 'required|integer|min:1|unique:education_document_types,id'.($this->model ? ','.$this->form['id'] : ''),
-            'form.name' => 'required|string|min:2',
-        ];
-    }
-
-    protected function validationAttributes(): array
-    {
-        return [
-            'form.id' => __('admin::references.fields.id'),
-            'form.name' => __('admin::references.fields.name'),
-        ];
-    }
-
-    public function openCrud(?int $id = null): void
-    {
-        $this->model = $id
-            ? EducationDocumentType::find($id)
-            : null;
-
-        $this->form = $this->model ? $this->model->toArray() : [];
-        $this->isAdded = true;
-    }
-
-    public function deleteModel(?int $id = null): void
-    {
-        if ($id) {
-            $this->model = EducationDocumentType::find($id);
-
-            if ($this->model) {
-                $this->callDeletePromptSwal();
-            }
-        }
-    }
-
-    public function store(): void
-    {
-        $this->validate();
-
-        $this->model
-            ? $this->model->update($this->form)
-            : EducationDocumentType::create($this->form);
-
-        $this->callSuccessSwal();
-
-        $this->dispatch('documentTypesUpdated');
-        $this->closeCrud();
-    }
-
-    public function render()
-    {
-        $documentTypes = EducationDocumentType::all();
-        return view('admin::livewire.admin.document-types', compact('documentTypes'));
+        return __('admin::references.buttons.add_document_type');
     }
 }

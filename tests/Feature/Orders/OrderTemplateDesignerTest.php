@@ -102,7 +102,7 @@ class OrderTemplateDesignerTest extends TestCase
 
     public function test_it_previews_the_stored_template_as_a_pdf(): void
     {
-        if (! app(\App\Services\Orders\Document\DocxToPdfConverter::class)->isAvailable()) {
+        if (! app(\App\Modules\Orders\Application\Document\DocxToPdfConverter::class)->isAvailable()) {
             $this->markTestSkipped('LibreOffice not available for PDF conversion.');
         }
 

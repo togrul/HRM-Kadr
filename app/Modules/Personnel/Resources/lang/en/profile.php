@@ -1,0 +1,65 @@
+<?php
+
+return [
+    'title' => 'Personnel file',
+
+    'sections' => [
+        'overview' => 'Overview',
+        'personal' => 'Personal details',
+        'documents' => 'Documents',
+        'education' => 'Education',
+        'career' => 'Work history',
+        'military' => 'Military',
+        'awards' => 'Awards and penalties',
+        'kinship' => 'Family',
+        'other' => 'Other',
+    ],
+
+    'groups' => [
+        'file' => 'Personnel file',
+        'id_document' => 'Identity document',
+        'service_card' => 'Service card',
+        'passport' => 'Passport',
+        'education' => 'Primary education',
+        'extra_education' => 'Additional education',
+        'language' => 'Foreign language',
+        'scientific_degree' => 'Scientific degree and title',
+        'labor_activity' => 'Work history',
+        'rank' => 'Ranks',
+        'military_service' => 'Military service',
+        'participation' => 'Events attended',
+        'injury' => 'Injuries',
+        'weapon' => 'Weapons',
+        'award' => 'Awards',
+        'punishment' => 'Penalties',
+        'kinship' => 'Relatives',
+        'election' => 'Elected bodies',
+        'event' => 'Professional events',
+        'project' => 'Projects',
+        'media' => 'Media',
+    ],
+
+    'labels' => [
+        'tenure' => 'Total tenure',
+        'present' => 'present',
+        'years' => ':count y',
+        'months' => ':count m',
+    ],
+
+    'actions' => [
+        'new_action' => 'Action',
+        'add_leave' => 'Add leave',
+        'issue_order' => 'Issue order',
+        'back_to_overview' => 'Back to overview',
+        'more' => 'More',
+        'back_to_list' => 'Back to list',
+        'print_cv' => 'Print CV',
+        'export_word' => 'Download CV as Word',
+        'open_profile' => 'Open personnel file',
+    ],
+    'recent' => [
+        'title' => 'Recent events',
+        'view_all' => 'Full timeline',
+        'empty' => 'No events recorded yet.',
+    ],
+];

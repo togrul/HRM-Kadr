@@ -5,15 +5,25 @@ namespace App\Models;
 use App\Traits\CreateDeleteTrait;
 use App\Traits\DateCastTrait;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * @property int $id
+ * @property string|null $surname
+ * @property string|null $name
+ * @property string|null $patronymic
+ * @property int|null $gender
+ * @property int|null $structure_id
+ * @property int|null $status_id
+ */
 class Candidate extends Model
 {
     use CreateDeleteTrait,
@@ -120,7 +130,7 @@ class Candidate extends Model
         return $this->hasOne(CandidateApplication::class)->latestOfMany('id');
     }
 
-    public function scopeFilter($query, array $filters)
+    public function scopeFilter($query, array $filters): Builder
     {
         foreach ($filters as $field => $value) {
             switch ($field) {

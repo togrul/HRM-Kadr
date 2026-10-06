@@ -4,8 +4,10 @@ namespace App\Modules\Personnel\Support\Traits\Information;
 
 use App\Models\PersonnelMasterDegree;
 
-trait MasterDegreeTrait {
+trait MasterDegreeTrait
+{
     public array $masterDegrees = [];
+
     public int $selectedDegree;
 
     protected function getMasterDegreesRules(): array
@@ -23,7 +25,7 @@ trait MasterDegreeTrait {
 
         $modelInstance = new PersonnelMasterDegree;
         $masterDegreeData = $this->modifyArray($this->masterDegrees, $modelInstance->dateList());
-        $this->personnelModelData->masterDegrees()->updateOrCreate(
+        $this->personnel->masterDegrees()->updateOrCreate(
             ['given_date' => $masterDegreeData['given_date']],
             $masterDegreeData,
         );
@@ -35,6 +37,7 @@ trait MasterDegreeTrait {
 
     public function updateMasterDegree(PersonnelMasterDegree $masterDegree): void
     {
+        $this->ensureOwnRecord($masterDegree);
         $this->selectedDegree = $masterDegree->id;
         $this->masterDegrees = $masterDegree->only(['degree', 'given_date', 'approved_date', 'redemption_date']);
 
@@ -47,6 +50,7 @@ trait MasterDegreeTrait {
 
     public function forceDeleteMasterDegree(PersonnelMasterDegree $masterDegree): void
     {
+        $this->ensureOwnRecord($masterDegree);
         $masterDegree->delete();
         $this->dispatch('contractAdded', __('personnel::information.messages.master_degree_deleted'));
         $this->dispatchModalCloseEvent();

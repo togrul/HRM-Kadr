@@ -13,7 +13,6 @@ use App\Models\TrainingLevel;
 use App\Models\TrainingNeedItem;
 use App\Models\TrainingProgram;
 use App\Models\TrainingSession;
-use App\Modules\TrainingNeeds\Livewire\Dashboard;
 use App\Modules\TrainingNeeds\Livewire\Analytics as TrainingNeedsAnalytics;
 use App\Modules\TrainingNeeds\Livewire\CertificateViewer as TrainingNeedsCertificateViewer;
 use App\Modules\TrainingNeeds\Livewire\FoundationWorkspace as TrainingNeedsFoundationWorkspace;
@@ -21,10 +20,10 @@ use App\Modules\TrainingNeeds\Livewire\Lists as TrainingNeedsLists;
 use App\Modules\TrainingNeeds\Livewire\OperationsWorkspace as TrainingNeedsOperationsWorkspace;
 use App\Modules\TrainingNeeds\Livewire\Overview as TrainingNeedsOverview;
 use App\Modules\TrainingNeeds\Livewire\Reports as TrainingNeedsReports;
-use App\Modules\TrainingNeeds\Livewire\ResultsWorkspace as TrainingNeedsResultsWorkspace;
 use App\Modules\TrainingNeeds\Livewire\ResultsSummary as TrainingNeedsResultsSummary;
-use Illuminate\Support\Facades\DB;
+use App\Modules\TrainingNeeds\Livewire\ResultsWorkspace as TrainingNeedsResultsWorkspace;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
@@ -54,9 +53,9 @@ class TrainingNeedsDashboardTest extends TestCase
         $this->actingAs($user);
 
         Livewire::test(TrainingNeedsOverview::class)
-            ->assertSee(__('training_needs::dashboard.cards.foundation_scope'))
-            ->assertSee(__('training_needs::dashboard.cards.recent_competencies'))
-            ->assertSee(__('training_needs::dashboard.cards.coverage_snapshot'));
+            ->assertSee(__('training_needs::dashboard.panel.needs_title'))
+            ->assertSee(__('training_needs::dashboard.stats.competencies'))
+            ->assertSee(__('training_needs::dashboard.cards.recent_competencies'));
     }
 
     public function test_analytics_component_renders_reporting_cards(): void
@@ -605,6 +604,124 @@ class TrainingNeedsDashboardTest extends TestCase
         $this->assertDatabaseMissing('training_annual_plans', [
             'id' => $plan->id,
         ]);
+    }
+
+    public function test_catalog_entries_can_be_listed_and_deleted(): void
+    {
+        $user = \App\Models\User::factory()->create();
+        $this->grantTrainingNeedsPermissions($user);
+        $this->actingAs($user);
+
+        $group = TrainingCompetencyGroup::query()->create(['name' => 'Leadership', 'slug' => 'leadership']);
+        $competency = TrainingCompetency::query()->create(['name' => 'Decision Making', 'slug' => 'decision-making', 'training_competency_group_id' => $group->id]);
+        $level = TrainingLevel::query()->create(['name' => 'Catalog Test Level', 'score' => 99]);
+        $program = TrainingProgram::query()->create(['title' => 'Leadership Basics', 'slug' => 'leadership-basics', 'delivery_type' => 'internal']);
+
+        $component = Livewire::test(TrainingNeedsFoundationWorkspace::class, ['tab' => 'catalogs']);
+
+        // lists expose the records
+        $this->assertTrue($component->instance()->catalogGroups->contains('id', $group->id));
+        $this->assertTrue($component->instance()->catalogCompetencies->contains('id', $competency->id));
+        $this->assertTrue($component->instance()->catalogLevels->contains('id', $level->id));
+        $this->assertTrue($component->instance()->catalogPrograms->contains('id', $program->id));
+
+        // each entity can be deleted
+        $component->call('deleteCompetency', $competency->id)->assertHasNoErrors();
+        $component->call('deleteGroup', $group->id)->assertHasNoErrors();
+        $component->call('deleteLevel', $level->id)->assertHasNoErrors();
+        $component->call('deleteProgram', $program->id)->assertHasNoErrors();
+
+        $this->assertDatabaseMissing('training_competencies', ['id' => $competency->id]);
+        $this->assertDatabaseMissing('training_competency_groups', ['id' => $group->id]);
+        $this->assertDatabaseMissing('training_levels', ['id' => $level->id]);
+        $this->assertDatabaseMissing('training_programs', ['id' => $program->id]);
+    }
+
+    public function test_catalog_entries_can_be_edited_in_place(): void
+    {
+        $user = \App\Models\User::factory()->create();
+        $this->grantTrainingNeedsPermissions($user);
+        $this->actingAs($user);
+
+        $group = TrainingCompetencyGroup::query()->create(['name' => 'Ops', 'slug' => 'ops']);
+        $competency = TrainingCompetency::query()->create(['name' => 'Routing', 'slug' => 'routing', 'training_competency_group_id' => $group->id]);
+        TrainingLevel::query()->delete(); // clear seeded levels to avoid score collisions
+        $level = TrainingLevel::query()->create(['name' => 'Tier', 'score' => 5]);
+
+        $component = Livewire::test(TrainingNeedsFoundationWorkspace::class, ['tab' => 'catalogs']);
+
+        // edit a group: load -> change -> save updates the same row (no new record)
+        $component->call('editGroup', $group->id)
+            ->assertSet('editingGroupId', $group->id)
+            ->assertSet('groupForm.name', 'Ops')
+            ->set('groupForm.name', 'Operations')
+            ->call('storeGroup')
+            ->assertHasNoErrors()
+            ->assertSet('editingGroupId', null);
+
+        $this->assertSame(1, TrainingCompetencyGroup::query()->count());
+        $this->assertSame('Operations', $group->fresh()->name);
+
+        // edit a competency name in place
+        $component->call('editCompetency', $competency->id)
+            ->set('competencyForm.name', 'Smart Routing')
+            ->call('storeCompetency')
+            ->assertHasNoErrors();
+        $this->assertSame('Smart Routing', $competency->fresh()->name);
+
+        // editing a level and keeping its own score must pass the unique-ignore-self rule
+        $component->call('editLevel', $level->id)
+            ->set('levelForm.name', 'Senior Tier')
+            ->call('storeLevel')
+            ->assertHasNoErrors();
+        $this->assertSame('Senior Tier', $level->fresh()->name);
+        $this->assertSame(5, (int) $level->fresh()->score);
+    }
+
+    public function test_catalog_delete_requires_manage_permission(): void
+    {
+        $user = \App\Models\User::factory()->create();
+        $user->givePermissionTo(Permission::findOrCreate('show-training-needs', 'web'));
+        $this->actingAs($user);
+
+        $group = TrainingCompetencyGroup::query()->create(['name' => 'Ops', 'slug' => 'ops']);
+
+        Livewire::test(TrainingNeedsFoundationWorkspace::class, ['tab' => 'catalogs'])
+            ->call('deleteGroup', $group->id)
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('training_competency_groups', ['id' => $group->id]);
+    }
+
+    public function test_view_only_users_get_no_forms_they_cannot_save(): void
+    {
+        $user = \App\Models\User::factory()->create();
+        $user->givePermissionTo(Permission::findOrCreate('show-training-needs', 'web'));
+        $this->actingAs($user);
+
+        Livewire::test(TrainingNeedsFoundationWorkspace::class, ['tab' => 'catalogs'])
+            ->assertDontSee('wire:click="storeGroup"', false)
+            ->assertDontSee('wire:click="storeProgramMap"', false)
+            ->call('storeGroup')
+            ->assertForbidden();
+
+        Livewire::test(TrainingNeedsFoundationWorkspace::class, ['tab' => 'profiles'])
+            ->assertDontSee('wire:click="storeNeed"', false);
+
+        Livewire::test(TrainingNeedsOperationsWorkspace::class, ['tab' => 'planning'])
+            ->assertDontSee('wire:click="storePlan"', false);
+
+        Livewire::test(TrainingNeedsOperationsWorkspace::class, ['tab' => 'calendar'])
+            ->assertDontSee('wire:click="storeSession"', false);
+
+        Livewire::test(TrainingNeedsResultsWorkspace::class, ['tab' => 'results'])
+            ->assertDontSee('wire:click="storeFeedbackForm"', false)
+            ->assertDontSee('wire:click="storeDeliveryDocument"', false);
+
+        $user->givePermissionTo(Permission::findOrCreate('manage-training-needs', 'web'));
+
+        Livewire::test(TrainingNeedsFoundationWorkspace::class, ['tab' => 'catalogs'])
+            ->assertSee('wire:click="storeGroup"', false);
     }
 
     private function createPersonnel(int $userId, int $positionId): Personnel

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Modules\Compliance\Application\Services\ComplianceReminderNotifier;
 use App\Modules\Compliance\Application\Services\DocumentExpiryReadService;
 use App\Modules\Notifications\Support\NotificationCampaignDispatcher;
 use Illuminate\Console\Command;
@@ -15,13 +16,18 @@ class ComplianceDocumentReminderCommand extends Command
 
     protected $description = 'Report expired, missing and soon-expiring personnel compliance documents.';
 
-    public function handle(DocumentExpiryReadService $service, NotificationCampaignDispatcher $dispatcher): int
-    {
+    public function handle(
+        DocumentExpiryReadService $service,
+        NotificationCampaignDispatcher $dispatcher,
+        ComplianceReminderNotifier $notifier,
+    ): int {
         $days = (int) ($this->option('days') ?: config('compliance.document_expiry.reminders.days_ahead', 30));
         $rows = $service->reminderRows($days);
         $notification = null;
+        $perRecipient = ['employees' => 0, 'managers' => 0];
 
         if ($this->option('notify') && $rows->isNotEmpty()) {
+            // HR/admin digest campaign — the org-wide view.
             $notification = $dispatcher->createManualCampaign([
                 'category' => 'announcement',
                 'title' => __('compliance::documents.reminders.notification_title', ['count' => $rows->count()]),
@@ -30,6 +36,9 @@ class ComplianceDocumentReminderCommand extends Command
                 'audience_targets' => ['hr', 'admins'],
                 'send_now' => true,
             ]);
+
+            // Per-recipient: the affected employee + manager escalation.
+            $perRecipient = $notifier->notify($rows);
         }
 
         if ($this->option('json')) {
@@ -37,6 +46,8 @@ class ComplianceDocumentReminderCommand extends Command
                 'days_ahead' => $days,
                 'count' => $rows->count(),
                 'notification_campaign_id' => $notification?->id,
+                'employees_notified' => $perRecipient['employees'],
+                'managers_escalated' => $perRecipient['managers'],
                 'rows' => $rows->values()->all(),
             ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 
@@ -58,6 +69,10 @@ class ComplianceDocumentReminderCommand extends Command
 
         if ($notification) {
             $this->info(__('compliance::documents.reminders.notification_created', ['id' => $notification->id]));
+        }
+
+        if ($perRecipient['employees'] || $perRecipient['managers']) {
+            $this->info(__('compliance::documents.reminders.per_recipient', $perRecipient));
         }
 
         return self::SUCCESS;

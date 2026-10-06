@@ -29,7 +29,6 @@ class OnboardingLibraryServiceProvider extends ServiceProvider
         }
 
         $this->loadRoutesFrom(__DIR__.'/../Routes/web.php');
-        $this->loadViewsFrom(__DIR__.'/../Resources/views', 'onboarding-library');
         $this->loadTranslationsFrom(__DIR__.'/../Resources/lang', 'onboarding-library');
         $this->loadMigrations();
         $this->registerAliases($this->componentMap(), 'onboarding-library');

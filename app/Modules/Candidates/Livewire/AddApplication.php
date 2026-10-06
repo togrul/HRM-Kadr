@@ -8,6 +8,7 @@ use App\Models\JobOpening;
 use App\Modules\Candidates\Application\Services\CandidateApplicationStageService;
 use App\Modules\Candidates\Support\Traits\BuildsRecruitmentOptions;
 use App\Modules\Candidates\Support\Traits\InteractsWithRecruitmentPresentation;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
@@ -135,7 +136,7 @@ class AddApplication extends Component
         $this->dispatch('ui:modal-close');
     }
 
-    public function render()
+    public function render(): View
     {
         return view('candidates::livewire.candidates.add-application');
     }

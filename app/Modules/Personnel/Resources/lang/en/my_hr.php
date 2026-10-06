@@ -5,6 +5,12 @@ return [
     'description' => 'A unified employee self-service entry point for personal HR summary, requests, onboarding documents, individual development plan, and hierarchy context.',
     'actions' => [
         'open_docs' => 'Open guide',
+        'new_request' => 'New request',
+    ],
+    'balance' => [
+        'title' => 'Vacation balance',
+        'remaining_note' => 'days left / :total days entitled',
+        'used' => ':count days used',
     ],
     'tabs' => [
         'overview' => 'Overview',
@@ -14,7 +20,20 @@ return [
         'development_plan' => 'My development plan',
         'learning' => 'Learning materials',
         'documents' => 'My documents',
+        'payslips' => 'My payslips',
         'hierarchy' => 'My structure',
+    ],
+
+    'payslips' => [
+        'kicker' => 'Self-service',
+        'title' => 'My payslips',
+        'description' => 'Your locked (finalised) payroll calculations are shown here.',
+        'list' => 'Payslips',
+        'empty' => 'No payslips yet',
+        'detail' => 'Payslip detail',
+        'close' => 'Close',
+        'gross' => 'Gross',
+        'net' => 'Net',
     ],
     'summary' => [
         'profile_kicker' => 'Employee profile',
@@ -28,28 +47,16 @@ return [
         'quick_actions_kicker' => 'Quick actions',
         'quick_actions_title' => 'Start work from here',
         'quick_actions_body' => 'In the next sprint these buttons will open employee self-service forms and assignment inboxes.',
-        'foundation_kicker' => 'Sprint 1 foundation',
-        'foundation_title' => 'The My HR shell is ready',
-        'foundation_body' => 'This stage establishes the route, employee-safe access, personnel bootstrap, and the primary tab skeleton. The next sprints will fill each tab with functional workflows.',
-        'foundation_states' => [
-            'requests' => 'Leave, vacation, and business trip self-service façades will connect in the next sprint.',
-            'notifications' => 'An employee inbox will be added on top of the existing notification flow.',
-            'onboarding' => 'Assigned documents and acknowledgement tracking will appear here.',
-            'development_plan' => 'Training Needs will expose an employee-facing individual development plan here.',
-            'learning' => 'Welcome videos and targeted learning content will use a dedicated storage-backed library.',
-            'documents' => 'Employee-safe document visibility will be grouped here.',
-            'hierarchy' => 'Manager, structure, and approval lines will use the same hierarchy source of truth.',
-        ],
     ],
     'empty_state' => [
-        'kicker' => 'Personnel link not found',
-        'title' => 'This self-service account is not linked to a personnel record yet',
-        'body' => 'An active personnel record could not be resolved for this user, so the My HR workspace cannot be fully loaded. The system first tries direct user-personnel links, then email and name matching.',
-        'hint' => 'Once HR links this user to an active personnel card, the workspace will start working automatically.',
+        'kicker' => 'Account not linked',
+        'title' => 'Your workspace is not linked to your employee record yet',
+        'body' => 'Your sign-in account has not been linked to your employee record, so your details, requests and documents cannot be shown here yet.',
+        'hint' => 'Contact HR. Once your account is linked to your record, the workspace opens automatically.',
+        'admin_hint' => 'Open the employee\'s record and link this account under «More → Self-service account».',
+        'admin_action' => 'Employee list',
     ],
     'messages' => [
-        'foundation_title' => 'This section is in the foundation phase',
-        'foundation_body' => 'The route and shell for :tab are ready. The next sprint will add the employee-facing data contract and the workflow layer.',
         'contact_not_available' => 'No contact information available',
     ],
     'requests' => [
@@ -119,6 +126,7 @@ return [
             'upcoming' => 'Upcoming',
             'active' => 'Active',
             'completed' => 'Completed',
+            'rejected' => 'Rejected',
             'cancelled' => 'Cancelled',
             'deleted' => 'Deleted',
         ],
@@ -156,6 +164,10 @@ return [
         'description' => 'Request status updates, HR announcements, and self-service activity are grouped here. Opening this tab marks new notifications as read.',
         'actions' => [
             'clear_all' => 'Clear all',
+        ],
+        'clear_confirm' => [
+            'title' => 'Delete the notifications?',
+            'message' => 'Every notification in your personal cabinet will be deleted. This cannot be undone.',
         ],
         'summary' => [
             'total' => 'Total notifications',
@@ -327,7 +339,7 @@ return [
     'learning' => [
         'kicker' => 'Targeted content',
         'title' => 'Learning materials',
-        'description' => 'Assigned welcome videos, presentations, PDFs, and other learning content appear here. Opening records `opened_at`, while completion records `completed_at`.',
+        'description' => 'Assigned welcome videos, presentations, PDFs, and other learning content appear here. The dates you open and complete each item are recorded automatically.',
         'actions' => [
             'open_content' => 'Open material',
             'mark_completed' => 'Mark as completed',
@@ -470,6 +482,13 @@ return [
             'search_placeholder' => 'Search by employee, request type, or reason',
             'approved' => 'The request was approved.',
             'rejected' => 'The request was rejected.',
+            'note_required_for_reject' => 'A note is required to reject — the employee sees it as the reason.',
+        ],
+        'confirm' => [
+            'approve_title' => 'Approve the request?',
+            'approve_message' => 'The :name request will be approved and the employee notified.',
+            'reject_title' => 'Reject the request?',
+            'reject_message' => 'The :name request will be rejected; your note is sent to the employee as the reason.',
         ],
         'patch_fields' => [
             'starts_at' => 'Start date',
@@ -547,8 +566,8 @@ return [
             'primary_approver' => 'Primary approver',
             'fallback_approver' => 'Fallback approver',
             'upper_approver' => 'Upper manager',
-            'primary_step' => 'Step 1',
-            'upper_step' => 'Step 2',
+            'primary_step' => 'Approver',
+            'upper_step' => 'Backup approver',
             'hr_step' => 'HR line',
             'hr_active' => 'HR enabled',
             'hr_inactive' => 'HR disabled',
@@ -564,8 +583,8 @@ return [
             'hr_only_policy' => 'HR only policy',
         ],
         'messages' => [
-            'primary_policy_help' => 'This request first goes to the direct manager. After the decision, the process continues.',
-            'upper_policy_help' => 'This request first goes to the direct manager, then moves to the next manager in the line.',
+            'primary_policy_help' => 'This request goes to your direct manager. Their decision completes it.',
+            'upper_policy_help' => 'Either your direct manager or their manager can decide on this request. One decision completes it.',
             'hr_policy_help' => 'HR remains active as watcher and final operational line for this request type.',
             'hr_policy_inactive_help' => 'A separate HR follow-up line is not active for this request type.',
             'policy_active_help' => 'The hierarchy policy remains active for this request type.',

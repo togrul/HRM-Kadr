@@ -1,31 +1,22 @@
-<x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
-        {{ __('ui::auth.messages.verification_pending') }}
-    </div>
-
+<x-auth-shell
+    :title="__('ui::auth.titles.verify_email')"
+    :subtitle="__('ui::auth.messages.verification_pending')"
+>
     @if (session('status') == 'verification-link-sent')
-        <div class="mb-4 font-medium text-sm text-green-600 dark:text-green-400">
+        <div class="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-3 text-[12.5px] text-emerald-700">
             {{ __('ui::auth.messages.verification_link_sent') }}
         </div>
     @endif
 
-    <div class="mt-4 flex items-center justify-between">
-        <form method="POST" action="{{ route('verification.send') }}">
-            @csrf
+    <form method="POST" action="{{ route('verification.send') }}" class="mt-6">
+        @csrf
+        <x-auth-submit>{{ __('ui::auth.actions.resend_verification_email') }}</x-auth-submit>
+    </form>
 
-            <div>
-                <x-primary-button>
-                    {{ __('ui::auth.actions.resend_verification_email') }}
-                </x-primary-button>
-            </div>
-        </form>
-
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-
-            <button type="submit" class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
-                {{ __('ui::auth.actions.log_out') }}
-            </button>
-        </form>
-    </div>
-</x-guest-layout>
+    <form method="POST" action="{{ route('logout') }}" class="mt-3">
+        @csrf
+        <button type="submit" class="h-11 w-full rounded-xl border border-hairline bg-[#f4f4f5] text-[13.5px] font-semibold text-ink-soft transition hover:bg-[#e4e4e7] hover:text-ink">
+            {{ __('ui::auth.actions.log_out') }}
+        </button>
+    </form>
+</x-auth-shell>

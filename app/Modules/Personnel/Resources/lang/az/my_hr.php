@@ -5,6 +5,12 @@ return [
     'description' => 'Əməkdaş üçün vahid şəxsi kabinet giriş nöqtəsi: öz HR xülasəsi, müraciətlər, uyğunlaşma sənədləri, fərdi inkişaf planı və struktur konteksti buradan idarə olunur.',
     'actions' => [
         'open_docs' => 'Bələdçini aç',
+        'new_request' => 'Yeni ərizə',
+    ],
+    'balance' => [
+        'title' => 'Məzuniyyət balansı',
+        'remaining_note' => 'gün qalıb / :total gün haqq',
+        'used' => ':count gün istifadə olunub',
     ],
     'tabs' => [
         'overview' => 'Xülasə',
@@ -14,7 +20,20 @@ return [
         'development_plan' => 'Fərdi inkişaf planım',
         'learning' => 'Öyrənmə materialları',
         'documents' => 'Sənədlərim',
+        'payslips' => 'Maaş vərəqələrim',
         'hierarchy' => 'Mənim strukturum',
+    ],
+
+    'payslips' => [
+        'kicker' => 'Şəxsi kabinet',
+        'title' => 'Maaş vərəqələrim',
+        'description' => 'Kilidlənmiş (rəsmiləşmiş) maaş hesablamalarınız burada göstərilir.',
+        'list' => 'Vərəqələr',
+        'empty' => 'Hələ maaş vərəqəsi yoxdur',
+        'detail' => 'Vərəqə detalı',
+        'close' => 'Bağla',
+        'gross' => 'Brüt',
+        'net' => 'Net',
     ],
     'summary' => [
         'profile_kicker' => 'Əməkdaş profili',
@@ -28,28 +47,16 @@ return [
         'quick_actions_kicker' => 'Qısa keçidlər',
         'quick_actions_title' => 'İşlərinizi buradan başlayın',
         'quick_actions_body' => 'Bu düymələr şəxsi kabinet form-larını və təyin edilmiş iş axınlarını açır.',
-        'foundation_kicker' => 'Başlanğıc mərhələsi',
-        'foundation_title' => 'Şəxsi kabinet əsas xətti hazırdır',
-        'foundation_body' => 'Bu mərhələdə route, əməkdaş üçün təhlükəsiz giriş, personnel bootstrap və əsas tab skeleti qurulur. Sonrakı sprint-lər hər tabı ayrıca funksional hissə ilə dolduracaq.',
-        'foundation_states' => [
-            'requests' => 'İcazə, məzuniyyət və ezamiyyət müraciətləri burada idarə olunacaq.',
-            'notifications' => 'Şəxsi kabinet bildiriş qutusu mövcud bildiriş axını üzərindən ayrıca görünüş kimi işləyəcək.',
-            'onboarding' => 'Oxunmalı sənədlər üçün təyinat və tanışlıq paneli burada görünəcək.',
-            'development_plan' => 'Təlim ehtiyacları üzərindən fərdi inkişaf planı əməkdaş görünüşü ilə açılacaq.',
-            'learning' => 'Xoş gəldin videoları və hədəfli material kitabxanası ayrıca storage disk ilə idarə olunacaq.',
-            'documents' => 'Öz sənədlərim və self-service visibility qaydaları burada toplanacaq.',
-            'hierarchy' => 'Rəhbər, struktur və təsdiq xətti eyni ierarxik mənbədən göstəriləcək.',
-        ],
     ],
     'empty_state' => [
-        'kicker' => 'Personnel link tapılmadı',
-        'title' => 'Şəxsi kabinet hələ əməkdaş kartı ilə bağlanmayıb',
-        'body' => 'Bu istifadəçi üçün aktiv kadr qeydi tapılmadığına görə şəxsi kabineti tam yükləmək mümkün olmadı. Sistem əvvəlcə user-personnel əlaqəsini email və ad uyğunluğu ilə tapmağa çalışır.',
-        'hint' => 'HR administratoru user hesabını aktiv əməkdaş kartı ilə bağladıqdan sonra bu kabinet avtomatik işləyəcək.',
+        'kicker' => 'Hesab əlaqələndirilməyib',
+        'title' => 'Kabinetiniz hələ əməkdaş kartınıza bağlanmayıb',
+        'body' => 'Giriş hesabınız sistemdəki əməkdaş kartınızla hələ əlaqələndirilməyib, ona görə şəxsi məlumatlarınız, müraciətləriniz və sənədləriniz burada görünmür.',
+        'hint' => 'Kadrlar şöbəsinə müraciət edin. Hesabınız kartınızla əlaqələndirildikdən sonra kabinet avtomatik açılacaq.',
+        'admin_hint' => 'Əməkdaşın kartını açın və «Daha çox → Şəxsi kabinet hesabı» ilə bu hesabı əlaqələndirin.',
+        'admin_action' => 'Əməkdaşlar siyahısı',
     ],
     'messages' => [
-        'foundation_title' => 'Bu bölmə başlanğıc mərhələsindədir',
-        'foundation_body' => ':tab tabı üçün route və əsas qabıq hazırdır. Növbəti sprint-də əməkdaş görünüşü, data contract və form/workflow hissəsi qoşulacaq.',
         'contact_not_available' => 'Əlaqə məlumatı göstərilməyib',
     ],
     'requests' => [
@@ -119,6 +126,7 @@ return [
             'upcoming' => 'Planlaşdırılıb',
             'active' => 'Aktivdir',
             'completed' => 'Başa çatıb',
+            'rejected' => 'Rədd edilib',
             'cancelled' => 'Ləğv edilib',
             'deleted' => 'Silinib',
         ],
@@ -153,9 +161,13 @@ return [
     'notifications' => [
         'kicker' => 'Şəxsi kabinet bildiriş qutusu',
         'title' => 'Bildirişlər',
-        'description' => 'Müraciət statusları, HR elanları və self-service axınına aid yeniliklər burada toplanır. Bu tab açılan kimi yeni bildirişlər oxunmuş hesab edilir.',
+        'description' => 'Müraciət statusları, HR elanları və şəxsi kabinetə aid yeniliklər burada toplanır. Bu tab açılan kimi yeni bildirişlər oxunmuş hesab edilir.',
         'actions' => [
             'clear_all' => 'Hamısını təmizlə',
+        ],
+        'clear_confirm' => [
+            'title' => 'Bildirişlər silinsin?',
+            'message' => 'Şəxsi kabinetdəki bütün bildirişlər silinəcək. Bu əməliyyatı geri qaytarmaq olmur.',
         ],
         'summary' => [
             'total' => 'Ümumi bildiriş',
@@ -165,7 +177,7 @@ return [
         ],
         'empty' => [
             'title' => 'Bildiriş yoxdur',
-            'body' => 'Hələ sizin üçün göstəriləcək self-service bildirişi yaradılmayıb.',
+            'body' => 'Hələ sizin üçün bildiriş yoxdur.',
         ],
     ],
     'onboarding' => [
@@ -311,7 +323,7 @@ return [
             'assignment_intro' => 'Bu panel seçilmiş əməkdaş üzrə uyğunlaşma təyinatlarının vəziyyətini və cari sənəd axınını göstərir.',
             'template_help' => 'İş yeri qaydaları, vəzifə təlimatı və digər uyğunlaşma sənədlərini burada bir dəfə yaradıb sonradan fərqli əməkdaşlara təyin edin.',
             'assignment_help' => 'Hazır şablonu seçib əməkdaşın şəxsi kabinetinə əlavə edin. Son tarix versəniz əməkdaş kabinetində gecikmə statusu avtomatik görünəcək.',
-            'library_source' => 'Yeni şablon yaratmaq, versiya idarə etmək və ümumi hesabatları izləmək üçün ayrıca uyğunlaşma kitabxanasından istifadə edin. Bu side panel yalnız seçilmiş əməkdaş üçün təyinat və override idarəsi üçündür.',
+            'library_source' => 'Yeni şablon yaratmaq, versiya idarə etmək və ümumi hesabatları izləmək üçün ayrıca adaptasiya kitabxanasından istifadə edin. Bu panel yalnız seçilmiş əməkdaş üçün təyinatları və fərdi dəyişiklikləri idarə etmək üçündür.',
             'report_help' => 'Şablon kitabxanasının ümumi vəziyyətini və seçilmiş əməkdaş üzrə təyinat yükünü burada izləyin.',
             'latest_templates_hint' => 'Yeni şablon yaradıldıqdan sonra həmin sənəd yuxarıdakı hesabat panelində təyinat statistikası ilə görünür.',
             'template_saved' => 'Uyğunlaşma sənədi şablonu yaradıldı.',
@@ -321,13 +333,13 @@ return [
         ],
         'empty' => [
             'title' => 'Hələ uyğunlaşma təyinatı yoxdur',
-            'body' => 'Bu əməkdaş üçün hələ heç bir onboarding sənədi təyin edilməyib.',
+            'body' => 'Bu əməkdaş üçün hələ heç bir uyğunlaşma sənədi təyin edilməyib.',
         ],
     ],
     'learning' => [
         'kicker' => 'Hədəfli materiallar',
         'title' => 'Öyrənmə materialları',
-        'description' => 'Sizə təyin olunmuş xoş gəldin videoları, təqdimatlar, PDF-lər və digər öyrənmə materialları burada görünür. Açmaq `opened_at`, tamamlandı kimi işarələmək isə `completed_at` yazır.',
+        'description' => 'Sizə təyin olunmuş xoş gəldin videoları, təqdimatlar, PDF-lər və digər öyrənmə materialları burada görünür. Materialı açdığınız və tamamladığınız tarix avtomatik qeyd olunur.',
         'actions' => [
             'open_content' => 'Materialı aç',
             'mark_completed' => 'Tamamlandı kimi işarələ',
@@ -418,7 +430,7 @@ return [
             'assignment_intro' => 'Bu panel seçilmiş əməkdaş üzrə material təyinatlarının vəziyyətini və cari material axınını göstərir.',
             'library_help' => 'Materialı bir dəfə yaradın, sonra seçilmiş əməkdaşa və gələcəkdə digər əməkdaşlara təyin edin.',
             'assignment_help' => 'Hazır materialı seçib əməkdaşın öyrənmə tabına əlavə edin. Son tarix versəniz gecikmə statusu avtomatik görünəcək.',
-            'library_source' => 'Yeni material yaratmaq, kitabxananı idarə etmək və bulk targeting etmək üçün ayrıca öyrənmə kitabxanasından istifadə edin. Bu side panel yalnız seçilmiş əməkdaş üçün təyinat və override əməliyyatlarını saxlayır.',
+            'library_source' => 'Yeni material yaratmaq, kitabxananı idarə etmək və toplu təyinat etmək üçün ayrıca tədris kitabxanasından istifadə edin. Bu panel yalnız seçilmiş əməkdaş üçün təyinatları və fərdi dəyişiklikləri idarə etmək üçündür.',
             'asset_saved' => 'Öyrənmə materialı yaradıldı.',
             'assignment_saved' => 'Öyrənmə materialı əməkdaşa təyin edildi.',
             'assignment_waived' => 'Material təyinatı üçün istisna verildi.',
@@ -470,6 +482,13 @@ return [
             'search_placeholder' => 'Əməkdaş, müraciət növü və ya səbəb ilə axtarın',
             'approved' => 'Müraciət təsdiqləndi.',
             'rejected' => 'Müraciət rədd edildi.',
+            'note_required_for_reject' => 'Rədd etmək üçün qeyd mütləqdir — əməkdaş onu səbəb kimi görəcək.',
+        ],
+        'confirm' => [
+            'approve_title' => 'Müraciət təsdiqlənsin?',
+            'approve_message' => ':name müraciəti təsdiqlənəcək və əməkdaşa bildiriş gedəcək.',
+            'reject_title' => 'Müraciət rədd edilsin?',
+            'reject_message' => ':name müraciəti rədd ediləcək; yazdığınız qeyd əməkdaşa səbəb kimi göndəriləcək.',
         ],
         'patch_fields' => [
             'starts_at' => 'Başlama tarixi',
@@ -547,8 +566,8 @@ return [
             'primary_approver' => 'Əsas təsdiqləyən',
             'fallback_approver' => 'Ehtiyat təsdiqləyən',
             'upper_approver' => 'Rəhbərin rəhbəri',
-            'primary_step' => '1-ci addım',
-            'upper_step' => '2-ci addım',
+            'primary_step' => 'Təsdiqləyən',
+            'upper_step' => 'Əvəzedici təsdiqləyən',
             'hr_step' => 'HR xətti',
             'hr_active' => 'HR aktivdir',
             'hr_inactive' => 'HR deaktivdir',
@@ -564,8 +583,8 @@ return [
             'hr_only_policy' => 'Yalnız HR xətti',
         ],
         'messages' => [
-            'primary_policy_help' => 'Bu müraciət əvvəl birbaşa rəhbərinizə gedir. Rəhbər qərar verdikdən sonra proses davam edir.',
-            'upper_policy_help' => 'Bu müraciət əvvəl birbaşa rəhbərinizə, sonra isə rəhbərinizin rəhbərinə keçir.',
+            'primary_policy_help' => 'Bu müraciət birbaşa rəhbərinizə gedir. Rəhbərin qərarı ilə müraciət tamamlanır.',
+            'upper_policy_help' => 'Bu müraciəti birbaşa rəhbəriniz və ya onun rəhbəri təsdiqləyə bilər. Onlardan birinin qərarı ilə müraciət tamamlanır.',
             'hr_policy_help' => 'HR bu müraciət növündə həmişə izləyici və final əməliyyat xəttində qalacaq.',
             'hr_policy_inactive_help' => 'Bu müraciət növündə ayrıca HR izləmə xətti aktiv deyil.',
             'policy_active_help' => 'Bu müraciət növü üçün ierarxik siyasət aktiv qalır.',

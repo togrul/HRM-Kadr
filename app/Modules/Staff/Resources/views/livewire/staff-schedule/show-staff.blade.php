@@ -1,6 +1,6 @@
 <div class="flex flex-col space-y-2">
     <div class="sidemenu-title">
-        <h2 class="text-xl font-title font-semibold text-gray-500" id="slide-over-title">
+        <h2 class="text-xl font-title font-semibold text-zinc-500" id="slide-over-title">
           {{ $title ?? ''}}
         </h2>
     </div>
@@ -26,12 +26,12 @@
                         <x-table.td>
                            <div class="flex items-center space-x-2">
                                 @if(!empty($staff->photo))
-                                <img src="{{ \Illuminate\Support\Facades\Storage::url($staff->photo) }}" alt="" class="flex-none rounded-xl object-cover w-14 h-14 border-4 border-gray-200">
+                                <img src="{{ \Illuminate\Support\Facades\Storage::url($staff->photo) }}" alt="" class="flex-none rounded-xl object-cover w-14 h-14 border-4 border-zinc-200">
                                @else
-                                <img src="{{ asset('assets/images/no-image.png') }}" alt="" class="flex-none rounded-xl object-cover w-14 h-14 border-4 border-gray-200">
+                                <img src="{{ asset('assets/images/no-image.png') }}" alt="" class="flex-none rounded-xl object-cover w-14 h-14 border-4 border-zinc-200">
                                 @endif
                                <div class="flex flex-col space-y-1">
-                                <span class="text-sm font-medium text-gray-600">
+                                <span class="text-sm font-medium text-zinc-600">
                                     {{ $staff->fullname }}
                                </span>
                                </div>
@@ -39,7 +39,7 @@
                         </x-table.td>
 
                        <x-table.td>
-                            <span class="text-sm font-medium text-gray-500 rounded-xl px-3 py-1 shadow-sm bg-gray-100">
+                            <span class="text-sm font-medium text-zinc-500 rounded-xl px-3 py-1 shadow-sm bg-zinc-100">
                                 {{ $staff->gender ? __('staff::common.fields.man') : __('staff::common.fields.woman') }}
                            </span>
                         </x-table.td>

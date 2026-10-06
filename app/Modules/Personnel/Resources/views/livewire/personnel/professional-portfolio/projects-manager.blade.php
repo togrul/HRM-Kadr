@@ -8,12 +8,12 @@
             <div class="grid gap-1 lg:grid-cols-2 2xl:grid-cols-4">
                 <x-ui.input-shell :label="__('personnel::portfolio.fields.search')" labelClass="tracking-tight text-zinc-500"><input wire:model.live.debounce.300ms="search" type="text" placeholder="{{ __('personnel::portfolio.messages.search_placeholder') }}" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-2 text-sm text-zinc-800 placeholder:text-zinc-400 focus:border-zinc-300 focus:outline-none" /></x-ui.input-shell>
                 <x-ui.input-shell :label="__('personnel::portfolio.fields.status')" labelClass="tracking-tight text-zinc-500">
-                    <select wire:model.live="statusFilter" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-2 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none">
-                        <option value="all">Hamısı</option>
+                    <x-ui.select wire:model.live="statusFilter">
+                        <option value="all">{{ __('personnel::common.labels.all') }}</option>
                         @foreach (\App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioOptions::verificationStatuses() as $status)
                             <option value="{{ $status }}">{{ __('personnel::portfolio.status.'.$status) }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                 </x-ui.input-shell>
                 <x-ui.input-shell :label="__('personnel::portfolio.fields.date_from')" labelClass="tracking-tight text-zinc-500"><input wire:model.live="dateFrom" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-1.5 text-[13px] text-zinc-800 focus:border-zinc-300 focus:outline-none" /></x-ui.input-shell>
                 <x-ui.input-shell :label="__('personnel::portfolio.fields.date_to')" labelClass="tracking-tight text-zinc-500"><input wire:model.live="dateTo" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-1.5 text-[13px] text-zinc-800 focus:border-zinc-300 focus:outline-none" /></x-ui.input-shell>
@@ -32,9 +32,9 @@
 
             <div class="space-y-3">
                 @forelse ($this->records as $record)
-                    <div class="rounded-[24px] border {{ $record->verification_status === 'pending' ? 'border-amber-200 bg-amber-50/40 shadow-sm shadow-amber-100/40' : 'border-zinc-200 bg-white' }} p-4">
+                    <div class="rounded-2xl border {{ $record->verification_status === 'pending' ? 'border-amber-200 bg-amber-50/40 shadow-sm shadow-amber-100/40' : 'border-zinc-200 bg-white' }} p-4">
                         <div class="space-y-3">
-                            <div class="rounded-[22px] border border-zinc-200 bg-zinc-50/80 px-4 py-3.5">
+                            <div class="rounded-2xl border border-zinc-200 bg-zinc-50/80 px-4 py-3.5">
                                 <h3 class="max-w-[38rem] text-lg font-semibold tracking-tight text-zinc-950">{{ $record->project_name }}</h3>
                             </div>
 
@@ -61,11 +61,11 @@
 
                             @canany(['verify-professional-portfolio-records', 'verify-personnel-project-records'])
                                 <div class="grid gap-2 sm:grid-cols-2 xl:grid-cols-2">
-                                    @if ($record->verification_status !== 'verified')
-                                        <x-ui.async-button variant="success" size="sm" fullWidth="true" wire:click="verify({{ $record->id }})" wire:target="verify({{ $record->id }})" wire:loading.attr="disabled">{{ __('personnel::portfolio.actions.verify') }}</x-ui.async-button>
+                                    @if (in_array('verified', $transitions[$record->verification_status] ?? [], true))
+                                        <x-ui.async-button variant="success" size="sm" fullWidth="true" data-title="{{ __('personnel::portfolio.confirm.title') }}" data-message="{{ __('personnel::portfolio.confirm.verify') }}" data-confirm="{{ __('personnel::portfolio.actions.verify') }}" x-on:click="$dispatch('confirm-action', { title: $el.dataset.title, message: $el.dataset.message, confirmText: $el.dataset.confirm, tone: 'emerald', run: () => $wire.verify({{ (int) $record->id }}) })" wire:target="verify({{ $record->id }})" wire:loading.attr="disabled">{{ __('personnel::portfolio.actions.verify') }}</x-ui.async-button>
                                     @endif
-                                    @if ($record->verification_status !== 'rejected')
-                                        <x-ui.async-button variant="danger" size="sm" fullWidth="true" wire:click="reject({{ $record->id }})" wire:target="reject({{ $record->id }})" wire:loading.attr="disabled">{{ __('personnel::portfolio.actions.reject') }}</x-ui.async-button>
+                                    @if (in_array('rejected', $transitions[$record->verification_status] ?? [], true))
+                                        <x-ui.async-button variant="danger" size="sm" fullWidth="true" data-title="{{ __('personnel::portfolio.confirm.title') }}" data-message="{{ __('personnel::portfolio.confirm.reject') }}" data-confirm="{{ __('personnel::portfolio.actions.reject') }}" x-on:click="$dispatch('confirm-action', { title: $el.dataset.title, message: $el.dataset.message, confirmText: $el.dataset.confirm, tone: 'rose', run: () => $wire.reject({{ (int) $record->id }}) })" wire:target="reject({{ $record->id }})" wire:loading.attr="disabled">{{ __('personnel::portfolio.actions.reject') }}</x-ui.async-button>
                                     @endif
                                 </div>
                             @endcanany
@@ -75,7 +75,7 @@
                             <div class="mt-4 space-y-4 border-t border-zinc-100 pt-4">
                                 <x-professional-portfolio.verification-panel :status="$this->selectedRecord->verification_status" :verifier="$this->selectedRecord->verifier?->name" :verified-at="optional($this->selectedRecord->verified_at)?->format('d.m.Y H:i')" />
                                 <div class="space-y-4">
-                                    <div class="rounded-[24px] border border-zinc-200 bg-zinc-50/70 p-4">
+                                    <div class="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4">
                                         <div class="space-y-4">
                                             <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-3">
                                                 <p class="text-[11px] font-semibold uppercase tracking-tight text-zinc-400">{{ __('personnel::portfolio.fields.responsibility_summary') }}</p>
@@ -131,54 +131,54 @@
         </div>
 
         @if ($showForm)
-            <div class="rounded-[24px] border border-zinc-200 bg-zinc-50 p-4">
+            <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
                 <div class="flex items-center justify-between">
                     <h3 class="text-lg font-semibold tracking-tight text-zinc-950">{{ $editingId ? __('personnel::portfolio.actions.edit') : __('personnel::portfolio.actions.add_project') }}</h3>
                     <x-ui.async-button variant="secondary" size="sm" wire:click="cancelForm" wire:target="cancelForm" wire:loading.attr="disabled">{{ __('personnel::portfolio.actions.cancel') }}</x-ui.async-button>
                 </div>
                 <div class="mt-4 space-y-3">
                     <div class="grid gap-3 md:grid-cols-2">
-                        <x-ui.input-shell :label="__('personnel::portfolio.fields.project_name')" :error="$errors->first('form.project_name')"><input wire:model.defer="form.project_name" type="text" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
-                        <x-ui.input-shell :label="__('personnel::portfolio.fields.project_code')" :error="$errors->first('form.project_code')"><input wire:model.defer="form.project_code" type="text" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
+                        <x-ui.input-shell :label="__('personnel::portfolio.fields.project_name')" :error="$errors->first('form.project_name')"><input wire:model="form.project_name" type="text" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
+                        <x-ui.input-shell :label="__('personnel::portfolio.fields.project_code')" :error="$errors->first('form.project_code')"><input wire:model="form.project_code" type="text" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
                     </div>
                     <div class="grid gap-3 md:grid-cols-2">
                         <x-ui.input-shell :label="__('personnel::portfolio.fields.project_type')">
-                            <select wire:model.defer="form.project_type" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm">
+                            <x-ui.select wire:model="form.project_type">
                                 @foreach ($options::projectTypes() as $option)
                                     <option value="{{ $option }}">{{ __('personnel::portfolio.options.project_type.'.$option) }}</option>
                                 @endforeach
-                            </select>
+                            </x-ui.select>
                         </x-ui.input-shell>
-                        <x-ui.input-shell :label="__('personnel::portfolio.fields.role_title')" :error="$errors->first('form.role_title')"><input wire:model.defer="form.role_title" type="text" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
+                        <x-ui.input-shell :label="__('personnel::portfolio.fields.role_title')" :error="$errors->first('form.role_title')"><input wire:model="form.role_title" type="text" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
                     </div>
-                    <x-ui.input-shell :label="__('personnel::portfolio.fields.responsibility_summary')" :error="$errors->first('form.responsibility_summary')"><textarea wire:model.defer="form.responsibility_summary" rows="3" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm"></textarea></x-ui.input-shell>
+                    <x-ui.input-shell :label="__('personnel::portfolio.fields.responsibility_summary')" :error="$errors->first('form.responsibility_summary')"><textarea wire:model="form.responsibility_summary" rows="3" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm"></textarea></x-ui.input-shell>
                     <div class="grid gap-3 md:grid-cols-2">
-                        <x-ui.input-shell :label="__('personnel::portfolio.fields.team_name')"><input wire:model.defer="form.team_name" type="text" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
+                        <x-ui.input-shell :label="__('personnel::portfolio.fields.team_name')"><input wire:model="form.team_name" type="text" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
                         <x-ui.input-shell :label="__('personnel::portfolio.fields.sponsor_unit')" :error="$errors->first('form.sponsor_unit_id')">
-                            <select wire:model.defer="form.sponsor_unit_id" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm">
+                            <x-ui.select wire:model="form.sponsor_unit_id">
                                 <option value="">—</option>
                                 @foreach ($this->sponsorUnitOptions as $unit)
                                     <option value="{{ $unit->id }}">{{ $unit->name }}</option>
                                 @endforeach
-                            </select>
+                            </x-ui.select>
                         </x-ui.input-shell>
                     </div>
                     <div class="grid gap-3 md:grid-cols-2">
-                        <x-ui.input-shell :label="__('personnel::portfolio.fields.start_date')" :error="$errors->first('form.start_date')"><input wire:model.defer="form.start_date" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
-                        <x-ui.input-shell :label="__('personnel::portfolio.fields.end_date')" :error="$errors->first('form.end_date')"><input wire:model.defer="form.end_date" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
+                        <x-ui.input-shell :label="__('personnel::portfolio.fields.start_date')" :error="$errors->first('form.start_date')"><input wire:model="form.start_date" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
+                        <x-ui.input-shell :label="__('personnel::portfolio.fields.end_date')" :error="$errors->first('form.end_date')"><input wire:model="form.end_date" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
                     </div>
                     <label class="flex items-center gap-3 rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-700">
                         <input wire:model.live="form.is_ongoing" type="checkbox" class="rounded border-zinc-300 text-zinc-950" />
                         <span>{{ __('personnel::portfolio.fields.is_ongoing') }}</span>
                     </label>
-                    <x-ui.input-shell :label="__('personnel::portfolio.fields.partner_organizations')"><textarea wire:model.defer="form.partner_organizations" rows="2" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm"></textarea></x-ui.input-shell>
-                    <x-ui.input-shell :label="__('personnel::portfolio.fields.outcome_summary')"><textarea wire:model.defer="form.outcome_summary" rows="3" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm"></textarea></x-ui.input-shell>
-                    <x-ui.input-shell :label="__('personnel::portfolio.fields.impact_summary')"><textarea wire:model.defer="form.impact_summary" rows="3" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm"></textarea></x-ui.input-shell>
+                    <x-ui.input-shell :label="__('personnel::portfolio.fields.partner_organizations')"><textarea wire:model="form.partner_organizations" rows="2" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm"></textarea></x-ui.input-shell>
+                    <x-ui.input-shell :label="__('personnel::portfolio.fields.outcome_summary')"><textarea wire:model="form.outcome_summary" rows="3" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm"></textarea></x-ui.input-shell>
+                    <x-ui.input-shell :label="__('personnel::portfolio.fields.impact_summary')"><textarea wire:model="form.impact_summary" rows="3" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm"></textarea></x-ui.input-shell>
                     <div class="grid gap-3 md:grid-cols-2">
-                        <x-ui.input-shell :label="__('personnel::portfolio.fields.reference_url')" :error="$errors->first('form.reference_url')"><input wire:model.defer="form.reference_url" type="url" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
+                        <x-ui.input-shell :label="__('personnel::portfolio.fields.reference_url')" :error="$errors->first('form.reference_url')"><input wire:model="form.reference_url" type="url" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
                         <x-ui.file-upload-shell wire:model="evidenceUpload" :label="__('personnel::portfolio.fields.evidence')" :error="$errors->first('evidenceUpload')" :upload="$evidenceUpload" :existing-name="$editingId && $this->selectedRecord?->evidenceAttachment ? $this->selectedRecord->evidenceAttachment->original_name : null" />
                     </div>
-                    <x-ui.input-shell :label="__('personnel::portfolio.fields.notes')"><textarea wire:model.defer="form.notes" rows="2" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm"></textarea></x-ui.input-shell>
+                    <x-ui.input-shell :label="__('personnel::portfolio.fields.notes')"><textarea wire:model="form.notes" rows="2" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm"></textarea></x-ui.input-shell>
                 </div>
                 <div class="mt-4">
                     <x-ui.async-button variant="primary" fullWidth="true" wire:click="save" wire:target="save" wire:loading.attr="disabled">{{ __('personnel::portfolio.actions.save_record') }}</x-ui.async-button>

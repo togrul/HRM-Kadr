@@ -4,7 +4,7 @@ namespace App\Support;
 
 class ViewNumberFormatter
 {
-    public static function decimal($value, int $precision = 2)
+    public static function decimal($value, int $precision = 2): mixed
     {
         if ($value === null || $value === '') {
             return 0;
@@ -19,4 +19,3 @@ class ViewNumberFormatter
         return rtrim(rtrim($formatted, '0'), '.');
     }
 }
-

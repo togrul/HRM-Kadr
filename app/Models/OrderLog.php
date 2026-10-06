@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\NormalizesFilterRanges;
 use App\Traits\CreateDeleteTrait;
 use App\Traits\DateCastTrait;
 use Carbon\Carbon;
@@ -16,12 +17,22 @@ use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * @property string|null $order_no
+ * @property int|null $order_type_id
+ * @property mixed $given_date
+ * @property string|null $given_by
+ * @property int|null $status_id
+ * @property array<string, mixed>|null $template_snapshot
+ * @property string|null $template_render_mode
+ */
 class OrderLog extends Model
 {
     use CreateDeleteTrait;
     use DateCastTrait;
     use HasFactory;
     use LogsActivity;
+    use NormalizesFilterRanges;
     use SoftDeletes;
 
     public function getActivitylogOptions(): LogOptions
@@ -219,53 +230,6 @@ class OrderLog extends Model
     protected function isEmrOrder(): bool
     {
         return (int) $this->order_id === Order::IG_EMR;
-    }
-
-    protected function filterValueIsEmpty(mixed $value): bool
-    {
-        if (is_array($value)) {
-            foreach ($value as $item) {
-                if (! $this->filterValueIsEmpty($item)) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        if (is_bool($value)) {
-            return false;
-        }
-
-        if (is_string($value)) {
-            return trim($value) === '';
-        }
-
-        return $value === null;
-    }
-
-    protected function normalizeDateRange(array $value, ?string $defaultMin = null, ?string $defaultMax = null): array
-    {
-        $defaultMin ??= '1990-01-01';
-        $defaultMax ??= Carbon::now()->format('Y-m-d');
-
-        $min = $this->normalizeDateValue($value['min'] ?? null, $defaultMin);
-        $max = $this->normalizeDateValue($value['max'] ?? null, $defaultMax);
-
-        if ($min > $max) {
-            [$min, $max] = [$max, $min];
-        }
-
-        return [$min, $max];
-    }
-
-    protected function normalizeDateValue(?string $value, string $fallback): string
-    {
-        if ($value === null || trim($value) === '') {
-            return $fallback;
-        }
-
-        return Carbon::parse($value)->format('Y-m-d');
     }
 
     protected function rollbackBusinessTripOrder(): void

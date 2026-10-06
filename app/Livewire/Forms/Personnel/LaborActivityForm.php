@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Forms\Personnel;
 
-use App\Models\Structure;
 use App\Models\Personnel;
 use Illuminate\Support\Arr;
 use Livewire\Form;
@@ -68,7 +67,7 @@ class LaborActivityForm extends Form
             'laborActivities',
             'latestDisposal',
             'currentWork',
-            'structure' => fn ($query) => $query->withRecursive('parent', false),
+            'structure',
             'ranks.rank',
             'ranks.rankReason',
         ]);
@@ -161,6 +160,7 @@ class LaborActivityForm extends Form
                         $item['leave_date'] = $entry['join_date'] ?? $item['leave_date'] ?? null;
                     }
                     $item['is_current'] = false;
+
                     return $item;
                 })
                 ->all();
@@ -250,5 +250,4 @@ class LaborActivityForm extends Form
     {
         return $this->rankList ?? [];
     }
-
 }

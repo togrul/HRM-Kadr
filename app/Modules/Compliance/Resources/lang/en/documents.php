@@ -7,10 +7,10 @@ return [
     'summary' => [
         'total' => 'Total documents',
         'expired' => 'Expired',
-        'expiring_30' => 'Expires in 30 days',
-        'expiring_60' => 'Expires in 60 days',
+        'expiring_30' => 'Critical',
+        'expiring_60' => 'Approaching',
         'valid' => 'Valid',
-        'missing' => 'Missing',
+        'missing' => 'Missing document',
         'compliance_score' => 'Compliance score',
     ],
     'fields' => [
@@ -32,7 +32,7 @@ return [
     ],
     'status' => [
         'expired' => 'Expired',
-        'expiring_30' => 'Needs urgent renewal',
+        'expiring_30' => 'Critical',
         'expiring_60' => 'Approaching',
         'valid' => 'Valid',
         'missing' => 'Missing document',
@@ -43,8 +43,10 @@ return [
         'export_csv' => 'Export CSV',
     ],
     'labels' => [
+        'type_window' => 'Critical ≤ :critical · Approaching ≤ :warning days',
         'unassigned' => 'Unassigned',
         'result_count' => ':count results',
+        'document_count' => ':count documents',
         'required_document' => 'Required document has not been added',
         'not_available' => 'Not available',
         'indefinite' => 'Indefinite',
@@ -55,6 +57,7 @@ return [
     ],
     'columns' => [
         'employee' => 'Employee',
+        'tabel_no' => 'Personnel number',
         'document' => 'Document',
         'expires_at' => 'Expiry date',
         'days_left' => 'Days left',
@@ -73,6 +76,9 @@ return [
         'notification_title' => 'Document compliance risk: :count records',
         'notification_created' => 'Notification campaign created: #:id',
         'more_items' => ':count more risk records exist.',
+        'employee_subject' => 'Your documents need attention: :count records',
+        'manager_subject' => 'Document risk in your team: :count records (expired/missing)',
+        'per_recipient' => 'Per-recipient: :employees employees, :managers managers (escalation).',
     ],
     'empty' => 'No matching documents found.',
 ];

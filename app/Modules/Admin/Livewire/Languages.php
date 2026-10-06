@@ -2,75 +2,37 @@
 
 namespace App\Modules\Admin\Livewire;
 
-use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait;
-use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
 use App\Models\Language;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Modules\Admin\Support\ReferenceCrudComponent;
 use Livewire\Attributes\On;
-use Livewire\Component;
 
 #[On(['languageUpdated', 'deleted'])]
-class Languages extends Component
+class Languages extends ReferenceCrudComponent
 {
-    use AdminCrudTrait;
-    use AuthorizesRequests;
-    use CallSwalTrait;
+    protected string $modelClass = Language::class;
 
-    public function rules(): array
+    protected string $savedEvent = 'languageUpdated';
+
+    protected function addLabel(): string
+    {
+        return __('admin::languages.actions.add');
+    }
+
+    protected function saveLabel(): string
+    {
+        return __('admin::languages.actions.save');
+    }
+
+    protected function actionsLabel(): string
+    {
+        return __('admin::languages.table.actions');
+    }
+
+    protected function fields(): array
     {
         return [
-            'form.id' => 'required|integer|min:1|unique:languages,id'.($this->model ? ','.$this->form['id'] : ''),
-            'form.name' => 'required|string|min:2',
+            'id' => $this->idField(__('admin::languages.fields.id')),
+            'name' => ['label' => __('admin::languages.fields.name'), 'rules' => 'required|string|min:2'],
         ];
-    }
-
-    protected function validationAttributes(): array
-    {
-        return [
-            'form.id' => __('admin::languages.fields.id'),
-            'form.name' => __('admin::languages.fields.name'),
-        ];
-    }
-
-    public function openCrud(?int $id = null): void
-    {
-        $this->model = $id
-            ? Language::find($id)
-            : null;
-
-        $this->form = $this->model ? $this->model->toArray() : [];
-        $this->isAdded = true;
-    }
-
-    public function deleteModel(?int $id = null): void
-    {
-        if ($id) {
-            $this->model = Language::find($id);
-
-            if ($this->model) {
-                $this->callDeletePromptSwal();
-            }
-        }
-    }
-
-    public function store(): void
-    {
-        $this->validate();
-
-        $this->model
-            ? $this->model->update($this->form)
-            : Language::create($this->form);
-
-        $this->callSuccessSwal();
-
-        $this->dispatch('languageUpdated');
-        $this->closeCrud();
-    }
-
-    public function render()
-    {
-        $languages = Language::all();
-
-        return view('admin::livewire.admin.languages', compact('languages'));
     }
 }

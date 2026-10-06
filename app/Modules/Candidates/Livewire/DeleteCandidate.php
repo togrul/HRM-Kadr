@@ -3,6 +3,7 @@
 namespace App\Modules\Candidates\Livewire;
 
 use App\Models\Candidate;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
@@ -16,7 +17,7 @@ class DeleteCandidate extends Component
     public ?int $candidateId = null;
 
     #[On('setDeleteCandidate')]
-    public function setDeleteCandidate($candidateId)
+    public function setDeleteCandidate($candidateId): void
     {
         $candidate = Candidate::query()
             ->select('id')
@@ -35,7 +36,7 @@ class DeleteCandidate extends Component
         $this->dispatch('deleteCandidateWasSet');
     }
 
-    public function deleteCandidate()
+    public function deleteCandidate(): void
     {
         if (! $this->candidateId) {
             return;
@@ -60,7 +61,7 @@ class DeleteCandidate extends Component
         $this->dispatch('candidateWasDeleted', __('candidates::common.messages.candidate_deleted'));
     }
 
-    public function render()
+    public function render(): View
     {
         return view('candidates::livewire.candidates.delete-candidate');
     }

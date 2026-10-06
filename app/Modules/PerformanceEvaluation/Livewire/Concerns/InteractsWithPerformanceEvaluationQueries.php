@@ -17,6 +17,7 @@ use App\Models\PerformanceTrainingNeedLink;
 use App\Models\Personnel;
 use App\Models\TrainingCompetency;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 trait InteractsWithPerformanceEvaluationQueries
@@ -41,7 +42,7 @@ trait InteractsWithPerformanceEvaluationQueries
     public function templateOptions(): array
     {
         $base = PerformanceFormTemplate::query()
-            ->select('id', DB::raw("COALESCE(code, name) as label"))
+            ->select('id', DB::raw('COALESCE(code, name) as label'))
             ->orderBy('name');
 
         return $this->optionsWithSelected(
@@ -166,7 +167,7 @@ trait InteractsWithPerformanceEvaluationQueries
     public function testBankOptions(): array
     {
         $base = PerformanceTestBank::query()
-            ->select('id', DB::raw("COALESCE(code, name) as label"))
+            ->select('id', DB::raw('COALESCE(code, name) as label'))
             ->orderBy('name');
 
         return $this->optionsWithSelected(
@@ -185,7 +186,7 @@ trait InteractsWithPerformanceEvaluationQueries
         $bankId = $sessionId ? PerformanceTestSession::query()->whereKey($sessionId)->value('performance_test_bank_id') : null;
 
         $base = PerformanceTestQuestion::query()
-            ->select('id', DB::raw("SUBSTR(prompt, 1, 120) as label"))
+            ->select('id', DB::raw('SUBSTR(prompt, 1, 120) as label'))
             ->when($bankId, fn ($query) => $query->where('performance_test_bank_id', $bankId))
             ->orderBy('sort_order')
             ->orderBy('id');
@@ -296,7 +297,48 @@ trait InteractsWithPerformanceEvaluationQueries
         );
     }
 
-    public function getRecentCyclesProperty()
+    /**
+     * Final-score spread over every scored form, using the same thresholds the scoring
+     * service writes (>=85 high, >=60 medium, else weak) so the chart cannot drift from
+     * the categories stored on the rows.
+     *
+     * @return array{total:int, average:float, buckets:array<int, array{key:string, count:int, percent:int}>}
+     */
+    public function getScoreDistributionProperty(): array
+    {
+        $row = DB::selectOne(
+            'select
+                count(final_score) as scored,
+                avg(final_score) as average,
+                sum(final_category = ?) as high,
+                sum(final_category = ?) as medium,
+                sum(final_category = ?) as weak
+             from performance_forms',
+            ['high', 'medium', 'weak']
+        );
+
+        $scored = (int) ($row->scored ?? 0);
+
+        $buckets = collect(['high', 'medium', 'weak'])
+            ->map(function (string $key) use ($row, $scored): array {
+                $count = (int) ($row->{$key} ?? 0);
+
+                return [
+                    'key' => $key,
+                    'count' => $count,
+                    'percent' => $scored > 0 ? (int) round($count / $scored * 100) : 0,
+                ];
+            })
+            ->all();
+
+        return [
+            'total' => $scored,
+            'average' => round((float) ($row->average ?? 0), 1),
+            'buckets' => $buckets,
+        ];
+    }
+
+    public function getRecentCyclesProperty(): Collection
     {
         return PerformanceCycle::query()
             ->latest('id')
@@ -304,7 +346,7 @@ trait InteractsWithPerformanceEvaluationQueries
             ->get();
     }
 
-    public function getRecentTemplatesProperty()
+    public function getRecentTemplatesProperty(): Collection
     {
         return PerformanceFormTemplate::query()
             ->withCount('sections')
@@ -313,7 +355,7 @@ trait InteractsWithPerformanceEvaluationQueries
             ->get();
     }
 
-    public function getRecentTemplateSectionsProperty()
+    public function getRecentTemplateSectionsProperty(): Collection
     {
         return PerformanceFormTemplateSection::query()
             ->leftJoin('performance_form_templates', 'performance_form_templates.id', '=', 'performance_form_template_sections.performance_form_template_id')
@@ -327,7 +369,7 @@ trait InteractsWithPerformanceEvaluationQueries
             ->get();
     }
 
-    public function getRecentTemplateItemsProperty()
+    public function getRecentTemplateItemsProperty(): Collection
     {
         return PerformanceFormTemplateItem::query()
             ->leftJoin('performance_form_template_sections', 'performance_form_template_sections.id', '=', 'performance_form_template_items.performance_form_template_section_id')
@@ -344,8 +386,10 @@ trait InteractsWithPerformanceEvaluationQueries
             ->get();
     }
 
-    public function getRecentFormsProperty()
+    public function getRecentFormsProperty(): Collection
     {
+        $formSearch = property_exists($this, 'formSearch') ? trim($this->formSearch) : '';
+
         return PerformanceForm::query()
             ->leftJoin('performance_cycles', 'performance_cycles.id', '=', 'performance_forms.performance_cycle_id')
             ->leftJoin('performance_form_templates', 'performance_form_templates.id', '=', 'performance_forms.performance_form_template_id')
@@ -360,12 +404,18 @@ trait InteractsWithPerformanceEvaluationQueries
                 DB::raw('manager_users.name as manager_name'),
                 DB::raw('hr_users.name as hr_reviewer_name'),
             ])
-            ->latest('id')
-            ->limit(6)
+            ->when(
+                $formSearch !== '',
+                fn ($query) => $query->where(fn ($inner) => $inner
+                    ->where('personnels.surname', 'like', '%'.$formSearch.'%')
+                    ->orWhere('personnels.name', 'like', '%'.$formSearch.'%'))
+            )
+            ->latest('performance_forms.id')
+            ->limit(50)
             ->get();
     }
 
-    public function getRecentWeakLinksProperty()
+    public function getRecentWeakLinksProperty(): Collection
     {
         return PerformanceTrainingNeedLink::query()
             ->with([
@@ -378,7 +428,7 @@ trait InteractsWithPerformanceEvaluationQueries
             ->get();
     }
 
-    public function getRecentTestBanksProperty()
+    public function getRecentTestBanksProperty(): Collection
     {
         return PerformanceTestBank::query()
             ->withCount('questions')
@@ -387,7 +437,7 @@ trait InteractsWithPerformanceEvaluationQueries
             ->get();
     }
 
-    public function getRecentTestAttemptsProperty()
+    public function getRecentTestAttemptsProperty(): Collection
     {
         return PerformanceTestAttempt::query()
             ->with([
@@ -399,7 +449,7 @@ trait InteractsWithPerformanceEvaluationQueries
             ->get();
     }
 
-    public function getPendingReviewAnswersProperty()
+    public function getPendingReviewAnswersProperty(): Collection
     {
         return PerformanceTestAttemptAnswer::query()
             ->leftJoin('performance_test_questions', 'performance_test_questions.id', '=', 'performance_test_attempt_answers.performance_test_question_id')

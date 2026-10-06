@@ -5,12 +5,13 @@ namespace App\Modules\Reports\Livewire;
 use App\Livewire\Concerns\WithRuntimeMemo;
 use App\Modules\Reports\Application\Services\DynamicReportBuilderService;
 use App\Modules\Reports\Application\Services\ReportsAccessService;
-use App\Modules\Reports\Application\Services\ReportsStructureScopeService;
 use App\Modules\Reports\Exports\ReportsTableExport;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Isolate;
 use Livewire\Component;
-use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Excel as ExcelWriter;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 #[Isolate]
 class DynamicBuilder extends Component
@@ -37,12 +38,9 @@ class DynamicBuilder extends Component
 
     public array $metricOptions = [];
 
-    public array $structureOptions = [];
-
     public function mount(
         ReportsAccessService $access,
         DynamicReportBuilderService $builder,
-        ReportsStructureScopeService $structures,
         ?string $source = null,
         ?string $groupBy = null,
         ?string $metric = null,
@@ -60,7 +58,6 @@ class DynamicBuilder extends Component
         $this->month = max(1, min(12, $month ?: (int) request()->integer('month', now()->month)));
         $this->structureId = $structureId ?: request()->integer('structure_id') ?: null;
         $this->sourceOptions = $builder->sourceOptions();
-        $this->structureOptions = $structures->filterOptions()->all();
         $this->syncDependentOptions($builder);
     }
 
@@ -68,16 +65,27 @@ class DynamicBuilder extends Component
     {
         $this->syncDependentOptions(app(DynamicReportBuilderService::class));
         $this->resetRuntimeMemo();
+        $this->syncSelection();
     }
 
     public function updatedGroupBy(): void
     {
         $this->resetRuntimeMemo();
+        $this->syncSelection();
     }
 
     public function updatedMetric(): void
     {
         $this->resetRuntimeMemo();
+        $this->syncSelection();
+    }
+
+    /**
+     * Tells the dashboard what this tab shows, so its header Excel/print act on it.
+     */
+    protected function syncSelection(): void
+    {
+        $this->dispatch('reports-selection', source: $this->source, groupBy: $this->groupBy, metric: $this->metric)->to(Dashboard::class);
     }
 
     public function updatedYear(): void
@@ -105,7 +113,7 @@ class DynamicBuilder extends Component
         );
     }
 
-    public function exportExcel()
+    public function exportExcel(): BinaryFileResponse
     {
         app(ReportsAccessService::class)->authorizeExport();
 
@@ -115,7 +123,7 @@ class DynamicBuilder extends Component
         );
     }
 
-    public function exportCsv()
+    public function exportCsv(): BinaryFileResponse
     {
         app(ReportsAccessService::class)->authorizeExport();
 
@@ -138,12 +146,12 @@ class DynamicBuilder extends Component
         ]);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('reports::livewire.reports.dynamic-builder');
     }
 
-    public function placeholder()
+    public function placeholder(): View
     {
         return view('reports::livewire.reports.placeholder');
     }

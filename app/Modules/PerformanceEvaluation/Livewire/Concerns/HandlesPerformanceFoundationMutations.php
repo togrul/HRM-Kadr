@@ -6,6 +6,7 @@ use App\Models\PerformanceCycle;
 use App\Models\PerformanceFormTemplate;
 use App\Models\PerformanceFormTemplateItem;
 use App\Models\PerformanceFormTemplateSection;
+use Illuminate\Validation\ValidationException;
 
 trait HandlesPerformanceFoundationMutations
 {
@@ -188,7 +189,14 @@ trait HandlesPerformanceFoundationMutations
     public function deleteCycle(int $id): void
     {
         $this->authorizePerformanceEvaluationManage();
-        PerformanceCycle::query()->findOrFail($id)->delete();
+        $cycle = PerformanceCycle::query()->findOrFail($id);
+        if ($cycle->status === 'closed') {
+            throw ValidationException::withMessages([
+                'cycleForm.status' => __('performance_evaluation::dashboard.messages.cycle_closed'),
+            ]);
+        }
+
+        $cycle->delete();
         if ($this->editingCycleId === $id) {
             $this->cancelCycleEdit();
         }

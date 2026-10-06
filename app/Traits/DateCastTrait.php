@@ -8,7 +8,7 @@ trait DateCastTrait
 
     const FORMAT_CAST = 'date:d.m.Y';
 
-    public function dateList()
+    public function dateList(): mixed
     {
         return $this->dates;
     }

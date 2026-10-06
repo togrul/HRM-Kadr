@@ -7,15 +7,15 @@ use App\Services\Profiles\ProfileState;
 class CandidateModeResolver
 {
     public const MILITARY = 'military';
+
     public const CIVILIAN = 'civilian';
+
     public const AUTO = 'auto';
 
     public function __construct(
         private readonly ProfileState $profileState,
         private readonly CandidateWorkflowPackResolver $workflowPackResolver,
-    )
-    {
-    }
+    ) {}
 
     public function resolve(): string
     {

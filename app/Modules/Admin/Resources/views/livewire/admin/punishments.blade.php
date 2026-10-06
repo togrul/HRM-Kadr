@@ -1,23 +1,4 @@
-<div
-    class="flex flex-col"
-    x-data
-    x-init="
-        const root = $el;
-        const paintPaginator = () => {
-            const paginator = root.querySelector('span[aria-current=page]>span');
-            if (paginator) {
-                paginator.classList.add('bg-blue-50', 'text-blue-600');
-            }
-        };
-        paintPaginator();
-        if (typeof Livewire !== 'undefined') {
-            Livewire.hook('commit', ({ component, succeed }) => {
-                if (component.id !== $wire.__instance.id) return;
-                succeed(() => queueMicrotask(paintPaginator));
-            });
-        }
-    "
->
+<div class="flex flex-col">
     <div class="flex flex-col items-center justify-between sm:flex-row filter bg-white py-2 px-2 rounded-xl">
         <x-filter.nav>
             <x-filter.item  wire:click.prevent="setPunishmentType('-1')" :active="$selectedType === '-1'">
@@ -50,7 +31,7 @@
 
         <div class="flex items-center justify-center space-x-2 action-section">
             <x-button class="space-x-2" mode="primary" wire:click.prevent="openCrud()">
-                <x-icons.add-icon color="text-white" hover="text-gray-50"></x-icons.add-icon>
+                <x-icons.add-icon color="text-white" hover="text-zinc-50"></x-icons.add-icon>
                 <span>{{ __('admin::references.buttons.add_punishment') }}</span>
             </x-button>
         </div>
@@ -61,8 +42,8 @@
     @endif
 
     @if($isAdded)
-        <div wire:transition class="flex border border-gray-300 rounded-md bg-slate-50 relative px-3 py-2 my-3">
-            <button class="appearance-none absolute top-2 right-2" wire:click="closeCrud()">
+        <div wire:transition class="flex border border-zinc-300 rounded-md bg-zinc-50 relative px-3 py-2 my-3">
+            <button type="button" class="appearance-none absolute top-2 right-2 flex h-10 w-10 items-center justify-center rounded-lg text-ink-muted hover:bg-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400" aria-label="{{ __('admin::references.actions.close') }}" title="{{ __('admin::references.actions.close') }}" wire:click="closeCrud()">
                 <x-icons.close-icon></x-icons.close-icon>
             </button>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 mt-4 w-full">
@@ -110,12 +91,12 @@
                         @forelse ($punishments as $punishment)
                             <tr wire:key="punishment-row-{{ $punishment->id }}">
                                 <x-table.td>
-                                      <span class="text-sm text-gray-500 font-medium">
+                                      <span class="text-sm text-zinc-500 font-medium">
                                           {{ $punishment->id }}
                                       </span>
                                 </x-table.td>
                                 <x-table.td>
-                                    <span class="text-xs font-medium flex justify-center items-center px-1 py-1 rounded-md border border-gray-300 bg-gray-50 text-gray-600">
+                                    <span class="text-xs font-medium flex justify-center items-center px-1 py-1 rounded-md border border-zinc-300 bg-zinc-50 text-zinc-600">
                                         {{ $punishment->type_label }}
                                     </span>
                                 </x-table.td>
@@ -126,16 +107,19 @@
                                 </x-table.td>
                                 <x-table.td :isButton="true" width="100">
                                     <div class="flex items-center space-x-2">
-                                        <button
+                                        <button type="button"
+                                            aria-label="{{ __('admin::references.actions.edit') }}"
+                                            title="{{ __('admin::references.actions.edit') }}"
                                             wire:click.prevent="openCrud({{ $punishment->id }})"
-                                            class="appearance-none flex items-center justify-center w-8 h-8 text-xs font-medium uppercase rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                                            class="appearance-none flex items-center justify-center w-10 h-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 text-xs font-medium uppercase rounded-lg text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700"
                                         >
-                                            <x-icons.edit-icon color="text-slate-400" hover="text-slate-500"></x-icons.edit-icon>
+                                            <x-icons.edit-icon color="text-zinc-400" hover="text-zinc-500"></x-icons.edit-icon>
                                         </button>
-                                        <button
+                                        <button type="button"
+                                            aria-label="{{ __('admin::references.actions.delete') }}"
+                                            title="{{ __('admin::references.actions.delete') }}"
                                             wire:click.prevent = "deleteModel({{ $punishment->id }})"
-                                            {{--                                            wire:click="$dispatch('delete-prompt')"--}}
-                                            class="flex items-center justify-center w-8 h-8 text-xs font-medium uppercase transition duration-300 rounded-lg text-gray-500 hover:bg-red-100 hover:text-gray-700"
+                                            class="flex items-center justify-center w-10 h-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 text-xs font-medium uppercase transition duration-300 rounded-lg text-zinc-500 hover:bg-red-100 hover:text-zinc-700"
                                         >
                                             <x-icons.delete-icon color="text-rose-500" hover="text-rose-600"></x-icons.delete-icon>
                                         </button>
@@ -156,4 +140,3 @@
         </div>
     </div>
 </div>
-@include('includes.sweetalert-push')

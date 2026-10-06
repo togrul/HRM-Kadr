@@ -22,6 +22,16 @@ return [
             'enabled' => true,
             'migrations' => app_path('Modules/Orders/Database/Migrations'),
         ],
+        'compensation' => [
+            'provider' => \App\Modules\Compensation\Providers\CompensationServiceProvider::class,
+            'enabled' => true,
+            'migrations' => app_path('Modules/Compensation/Database/Migrations'),
+        ],
+        'payroll' => [
+            'provider' => \App\Modules\Payroll\Providers\PayrollServiceProvider::class,
+            'enabled' => true,
+            'migrations' => app_path('Modules/Payroll/Database/Migrations'),
+        ],
         'staff' => [
             'provider' => \App\Modules\Staff\Providers\StaffServiceProvider::class,
             'enabled' => true,
@@ -47,6 +57,15 @@ return [
             'enabled' => true,
             'migrations' => app_path('Modules/Vacation/Database/Migrations'),
         ],
+        // API-only: it exposes what this system owns so a finance system can
+        // read it. Disabling it removes the routes, which is how a standalone
+        // installation runs.
+        'integration' => [
+            'provider' => \App\Modules\Integration\Providers\IntegrationServiceProvider::class,
+            'enabled' => true,
+            'migrations' => app_path('Modules/Integration/Database/Migrations'),
+        ],
+
         'admin' => [
             'provider' => \App\Modules\Admin\Providers\AdminServiceProvider::class,
             'enabled' => true,

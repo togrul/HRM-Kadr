@@ -1,190 +1,172 @@
 # Performans qiymətləndirmə istifadəçi bələdçisi
 
 ## Bu modul nə üçündür?
-Bu modul əməkdaşların iş nəticəsini qiymətləndirmək, test aparmaq və ümumi nəticəni görmək üçündür.
+Bu modul əməkdaşların işini ölçmək və inkişafını planlamaq üçündür. Burada:
+- KPI kartları ilə hər əməkdaşın ölçülə bilən nəticəsini izləyirsiniz
+- qiymətləndirmə formaları (davranış və kompetensiya) təyin edib bal verirsiniz
+- testlər keçirirsiniz
+- məqsədlər (OKR), varislik planları və 360° rəy aparırsınız
+- hesabat və bonus hesablayırsınız
 
-Sadə dildə bu modul sizə bu suallara cavab verir:
-- qiymətləndirmə nə vaxt aparılır?
-- kim hansı formanı doldurur?
-- test nəticəsi necə görünür?
-- zəif qalan sahə hansıdır?
-
-Bu modulun məqsədi sadəcə bal yazmaq deyil. Burada qiymətləndirmə planlanır, əməkdaşa verilir, nəticə toplanır və gələcək inkişaf üçün əsas yaranır.
+Zəif bal alınan meyar kompetensiyaya bağlıdırsa, sistem əməkdaş üçün avtomatik `Təlim ehtiyacı` yaradır.
 
 ## Harada açılır?
-Sol menyudan `Performans qiymətləndirməsi` bölməsini açın.
+Sol dar menyuda (rail) `Performans` ikonunu basın. Solda açılan paneldə modulun bütün bölmələri qruplar üzrə görünür. Panelin ən altındakı `İstifadə təlimatı` linki bu bələdçini açır.
 
 ## Bu modul kimlər üçündür?
+- **HR** — dövr, forma, KPI kitabxanası və şablonları qurur, kartları yaradır, kalibrasiya edir, nəticəni təsdiqləyir və bonus hesablayır.
+- **Rəhbər** — komandasının KPI hədəflərini yoxlayır, faktiki dəyərləri təsdiqləyir, aralıq qeyd yazır və kompetensiyaları qiymətləndirir.
+- **Əməkdaş** — KPI kartını qəbul edir və ya etiraz edir, öz-qiymətləndirmə aparır, ona təyin olunan testləri həll edir.
 
-### HR və məsul əməkdaş
-Ən çox bu işləri görür:
-- dövr yaradır
-- forma hazırlayır
-- qiymətləndirmə verir
-- nəticəni izləyir
+Yaratma, silmə və təyinat düymələri yalnız performansı idarə etmək icazəsi olanlara görünür. İcazəniz yoxdursa, səhifəni görürsünüz, amma bu düymələr görünmür.
 
-### Rəhbər və yoxlayan şəxs
-Əsasən bunları edir:
-- qiymətləndirməyə baxır
-- bal və cavabları yoxlayır
-- nəticəni təsdiqləyir və ya bağlayır
+## Ekranın quruluşu
 
-### Əməkdaş
-Əgər ona qiymətləndirmə və ya test verilibsə:
-- formanı doldurur
-- testə cavab verir
-- nəticəni sonradan görə bilir
+### Sol panel — qruplaşdırılmış naviqasiya
+Bölmələr işə görə qruplaşdırılıb:
+- `Xülasə` — modulun ümumi mənzərəsi
+- **KPI**: `KPI kartları`, `KPI analitikası`, `Bonus`, `KPI kitabxanası`
+- **Qiymətləndirmə**: `Dövrlər`, `Şablonlar`, `Qiymətləndirmələr`, `Testlər`
+- **İnkişaf və istedad**: `Məqsədlər`, `Varislik`, `360° rəy`
+- **Hesabat və siyahılar**: `Hesabatlar`, `Tam siyahılar`
 
-## Bu modulun əsas iş məntiqi necədir?
-Adətən iş belə gedir:
+Bəzi bölmələrin yanında say görünür (məsələn, neçə dövr və ya forma var). Aktiv dövr varsa, panelin aşağısında `AKTİV DÖVR` bloku onun adını, tarixlərini və neçə formanın qiymətləndirildiyini zolaqla göstərir. Kiçik ekranda eyni bölmələr başlığın altında düymə-çiplər kimi görünür.
 
-1. Əvvəl qiymətləndirmə dövrü yaradılır.
-2. Sonra forma və ya test hazırlanır.
-3. Qiymətləndirmə əməkdaşa verilir.
-4. Cavab və nəticə toplanır.
-5. Sonda ümumi nəticə görünür.
+### Başlıq
+- sağda üç göstərici: `Forma`, `Bal` (orta bal) və `İnkişaf linki` (zəif baldan yaranan təlim ehtiyacları)
+- `İstifadəçi bələdçisi` — bu bələdçini açır
+- `Yeni şablon` — `Şablonlar` bölməsinə keçir
+- printer ikonu — `Çap görünüşü` (brauzerdən PDF kimi saxlaya bilərsiniz)
+- qara `+ Form təyinatı` düyməsi — səhifənin əsas əməliyyatı; `Qiymətləndirmələr` bölməsini açıb təyinat panelini göstərir (yalnız icazəsi olanlara görünür)
 
-Qısa yadda saxlama formulu:
+### Status çipləri
+Kiçik rəngli yazılar kartın və ya formanın hansı mərhələdə olduğunu göstərir: `Qaralama`, `Aktiv`, `Bağlı`, `Təqdim edilib`, `Gedişdə`. KPI kartlarının öz mərhələləri aşağıda izah olunub.
 
-`Dövr -> forma/test -> təyinat -> cavab -> nəticə`
+## Qiymətləndirmə axını (forma ilə)
 
-## Əsas bölmələr nə üçündür?
+### 1. Dövr yaratmaq
+1. Paneldə `Dövrlər` bölməsini açın və `Yeni dövr` düyməsini basın.
+2. `Dövr adı`, `Dövr növü` (`İllik`, `Tədris ili`, `Rüblük`), `Başlanğıc tarixi` və `Bitiş tarixi` yazın.
+3. `Dövrü yadda saxla` basın.
 
-### Xülasə
-Bu hissə ümumi vəziyyəti göstərir.
+Dövr bağlananda onun nəticələri dəyişməz olur. Dəyişiklik lazımdırsa, əvvəlcə dövrü yenidən açmaq lazımdır.
 
-Burada:
-- neçə aktiv dövr olduğu
-- neçə qiymətləndirmənin açıq qaldığı
-- neçə testin göndərildiyi
-- ümumi nəticə görünüşü
-kimi məlumatlar görünə bilər.
+### 2. Forma (şablon) hazırlamaq
+1. `Şablonlar` bölməsində `Yeni forma` basın, ad və kod yazıb `Şablonu yadda saxla` edin.
+2. `Bölmə əlavə et` ilə böyük blok yaradın (məs. «Davranış»). Bölmə çəkisi onun yekun bala təsiridir; bütün bölmələrin cəmi 100% olmalıdır. Çəki verməsəniz, meyarlar bərabər sayılır.
+3. Bölmənin içində `Meyar əlavə et` ilə konkret meyarları yazın. `Aşağı bal həddi` və `Kompetensiya` seçsəniz, bal həddən aşağı olanda avtomatik təlim ehtiyacı yaranır.
 
-Bu bölmə daha çox ümumi nəzarət üçündür.
+### 3. Formanı əməkdaşa təyin etmək
+1. Başlıqdakı `+ Form təyinatı` düyməsini basın.
+2. Sağda açılan paneldə `Dövr`, `Şablon`, `Əməkdaş`, lazım olsa `Rəhbər` və `İR yoxlayan` seçin.
+3. `Formanı təyin et` basın.
 
-### Dövrlər
-Qiymətləndirmənin hansı tarix aralığında aparılacağını burada qurursunuz.
+Bundan sonra özünüqiymətləndirmə, rəhbər və İR statusları ayrıca izlənir.
 
-Məsələn:
-- illik qiymətləndirmə
-- rüblük qiymətləndirmə
-- xüsusi daxili qiymətləndirmə dövrü
+### 4. Bal daxil etmək
+1. `Qiymətləndirmələr` bölməsində `Bal daxil et` basın.
+2. `Qiymətləndirmə forması`, `Meyar`, `Qiymətləndirən` (`Özünüqiymətləndirmə`, `Rəhbər`, `İR`) seçin, `Bal` (0–100) və `Şərh` yazın.
+3. `Balı yadda saxla` basın.
 
-Əgər dövr düzgün qurulmasa, sonrakı hissələrdə qarışıqlıq yarana bilər.
+Meyar kompetensiyaya bağlı deyilsə, sistem xəbərdarlıq edir: bu halda aşağı bal təlim ehtiyacı yaratmayacaq.
 
-### Şablonlar
-Forma və test üçün əsas quruluş burada hazırlanır.
+## KPI kartları
 
-Bu hissə nə üçündür?
-- hansı meyarların ölçüləcəyini müəyyən etmək
-- sualları və qiymətləndirmə formalarını əvvəlcədən hazırlamaq
+### Hazırlıq: KPI kitabxanası
+`KPI kitabxanası` bölməsində üç hissə var: `KPI kitabxanası`, `Vəzifə şablonları` və (icazəsi olanlara) `Bildiriş şablonları`.
+- `Yeni KPI` ilə göstərici əlavə edin: tip, istiqamət (`Çox olması yaxşıdır`, `Az olması yaxşıdır`, `Diapazon`), ölçü vahidi, tezlik və məlumat mənbəyi. Mənbə əl ilə, sistemdən (davamiyyət, təlim), formula ilə və ya xarici sistemdən ola bilər.
+- `Yeni şablon` ilə vəzifə şablonu qurun: KPI-ları seçin, çəki verin (cəmi 100% olmalıdır), hədəf və vəzifələri bağlayın. Hər vəzifə yalnız bir şablona bağlana bilər.
+- İstifadədə olan KPI silinmir — onu arxivləşdirin.
 
-Sadə desək, bu hissə sonradan istifadə ediləcək formanın “əsas çərçivəsi”dir.
+### Kartları yaratmaq
+1. `KPI kartları` bölməsində yuxarıdan dövrü seçin.
+2. `Kartları yarat` basın — şablonu olan vəzifələr üçün kartlar qaralama kimi açılır.
+3. Əməkdaş ikinci vəzifədə və ya yarım ştatda işləyirsə, `Əlavə vəzifə` ilə ayrıca kart açın.
 
-### Qiymətləndirmələr
-Hazırlanmış qiymətləndirmə burada əməkdaşa verilir.
+Başlıqdakı digər düymələr: `Sistemdən yenilə` (avtomatik KPI-ları indi yeniləyir) və `Excel ilə yüklə` (faktiki dəyərləri toplu yükləmək). Bu düymələr yalnız icazəsi olanlara görünür. Zəng ikonu ilə bildirişləri e-poçtla da almağı seçə bilərsiniz.
 
-Bu hissədə görə bilərsiniz:
-- kimə qiymətləndirmə verilib
-- nəticə daxil olub-olmayıb
-- qiymətləndirmə hansı mərhələdədir
+### Kart siyahısı
+Cədvəldə `Əməkdaş`, `Vəzifə`, `Rəhbər`, `Status`, `KPI balı`, `Yekun bal` görünür. Status süzgəci ilə siyahını daraldın. Sətri basanda kart açılır; `← Siyahıya qayıt` ilə geri dönürsünüz. Kartın `Çap / PDF` düyməsi çap görünüşünü açır.
 
-### Testlər
-Bu bölmədə testlər hazırlanır və izlənir.
+### Kartın mərhələləri
+Kartın yuxarısında mərhələ zolağı və `Növbəti addım` bloku var. Orada `Sizin növbənizdir` və ya `Gözlənilir: rəhbər` kimi yazı kimin hərəkət etməli olduğunu göstərir.
 
-Burada:
-- test yaratmaq
-- sual əlavə etmək
-- testi əməkdaşa vermək
-- cavabları izləmək
-mümkündür.
+| Mərhələ | Kim nə edir |
+|---|---|
+| `Qaralama` | Rəhbər və ya HR hədəfləri yoxlayır, `Razılaşdırmaya göndər` basır. HR `Birbaşa aktivləşdir` də edə bilər. |
+| `Razılaşdırmada` | Əməkdaş `Qəbul edirəm` və ya `Etiraz et` seçir. 3 iş günü cavab verilməsə, kart avtomatik qəbul olunur. |
+| `Aktiv` | Faktiki dəyərlər yazılır, aralıq qeydlər aparılır. Dövr bitəndə `Öz-qiymətləndirməni başlat`. |
+| `Öz-qiymətləndirmə` | Əməkdaş kompetensiyaları 1–5 ilə qiymətləndirir, `Öz-qiymətləndirməni təqdim et`. |
+| `Rəhbər qiymətləndirməsi` | Rəhbər qiymət verir, `Qiymətləndirməni təqdim et`. |
+| `Kalibrasiya` | HR balları uyğunlaşdırır (±15 bal), `Təsdiqlə` və ya `Geri qaytar`. |
+| `Təsdiqlənib` | Nəticə əməkdaşa açılır. HR `Bağla` və ya `Geri qaytar` edə bilər. |
+| `Bağlanıb` | Nəticə dondurulub, yalnız baxmaq olar. |
 
-### Hesabatlar
-Yekun nəticələrə baxmaq üçündür.
+Hər keçiddə sistem təsdiq pəncərəsi açır və nə olacağını izah edir.
 
-Burada:
-- fərdi nəticə
-- komanda üzrə görünüş
-- zəif və güclü tərəflər
-görünə bilər.
+**`Etiraz et` və `Geri qaytar`** səbəb tələb edir:
+1. Düyməni basın — altında səbəb sahəsi açılır.
+2. `Səbəbi yazın…` sahəsini doldurun.
+3. `Təsdiqlə` basın və açılan pəncərədə yenidən təsdiq edin.
 
-### Tam siyahılar
-Bu hissə daha geniş axtarış və tam görünüş üçündür.
+Səbəb yazılmasa, sistem `Səbəb yazmaq məcburidir.` xətası verir.
 
-Əgər sizə qısa xülasə yox, bütün qeydlər lazımdırsa, bu hissə daha uyğundur.
+### Faktiki dəyər və hədəf dəyişikliyi
+- Aktiv kartda KPI sətrində `Faktiki dəyər` basın, rəqəmi və lazım olsa `Qeyd` və `Sübut faylı` əlavə edin. Rəhbər təsdiqləyənə qədər dəyər `təsdiq gözləyir` kimi görünür.
+- Aktiv kartda hədəf birbaşa dəyişmir: `Dəyişiklik istə` ilə `Yeni hədəf` və `Səbəb` yazıb `Sorğunu göndər` basın. HR `Hədəf dəyişikliyi sorğuları` blokunda `Təsdiqlə` və ya `Rədd et` seçir. Rədd üçün qeyd məcburidir və sistem təsdiq soruşur.
+- `Aralıq qeyd əlavə et` ilə ayda bir dəfə gedişat və riskləri yazın.
 
-## Yeni istifadəçi üçün ən rahat iş sırası
-1. `Dövrlər` bölməsində dövr yaradın.
-2. `Şablonlar` bölməsində forma və ya test hazırlayın.
-3. `Qiymətləndirmələr` bölməsində bunu əməkdaşa təyin edin.
-4. Cavabları və nəticəni izləyin.
-5. `Hesabatlar` bölməsində ümumi nəticəyə baxın.
+## Bonus və analitika
+- `Bonus` bölməsində bonus qaydasını qurun, `Qaydanı saxla`, sonra `Hesabla` basın. Bonus yalnız təsdiqlənmiş və bağlanmış kartlar üçün hesablanır. Nəticəni `Əmək haqqına ötür (Excel)` ilə çıxarın və ya (hərbi rejimdə) `Əmrləri hazırla` ilə hər əməkdaş üçün «Pul mükafatı» əmri layihəsi yaradın — sistem əvvəlcə təsdiq soruşur.
+- `KPI analitikası` bölməsində `Mənim KPI-larım`, `Komanda paneli`, gecikmələr, rəhbər sərtliyi indeksi və risk siyahıları görünür.
 
-## Ən çox görülən işlər necə edilir?
+## İnkişaf və istedad
 
-### 1. Yeni qiymətləndirmə yaratmaq
-1. `Dövrlər` bölməsində dövr yaradın.
-2. `Şablonlar` bölməsində forma hazırlayın.
-3. `Qiymətləndirmələr` bölməsində formu seçin.
-4. Əməkdaşı seçin.
-5. Təyin edin.
+### Məqsədlər
+`Məqsəd əlavə et` ilə obyektiv, KPI və ya məqsəd yaradın, üst məqsədə bağlayın. `İrəliləyiş qeydi` ilə cari dəyəri yeniləyin. Silmə sistem təsdiqi ilə olur.
 
-#### Sonra nə olur?
-- qiymətləndirmə siyahıda görünür
-- cavab gözlənilir
-- əməkdaş və ya rəhbər onu açıb doldura bilir
-- nəticə daxil olduqdan sonra hesabatlara təsir edir
+### Varislik
+Üç hissə var: `9-xanalı şəbəkə`, `Varislik planları`, `İstedad hovuzları`. Başlıqdakı əsas düymə hissəyə görə dəyişir: `Qiymətləndir`, `Plan əlavə et` və ya `Hovuz əlavə et`.
+- Şəbəkədə, namizədlər və hovuz üzvləri siyahısında hər adın yanında **✕** düyməsi var. Siçanı üzərinə gətirəndə kimin çıxarılacağı yazılır (məs. «Əli Məmmədov — namizədlikdən çıxar»).
+- ✕ basanda sistem adı çəkərək təsdiq soruşur; `Çıxar` basanda şəxs çıxarılır.
+- Planı və ya hovuzu zibil qutusu ikonu ilə silirsiniz — bu da təsdiq tələb edir.
 
-### 2. Test təyin etmək
-1. `Testlər` bölməsinə keçin.
-2. Testi və ya sualları hazırlayın.
-3. Testi əməkdaşa verin.
-4. Cavabları izləyin.
+### 360° rəy
+`Yeni sorğu` ilə əməkdaş üçün rəy sorğusu açın, `Qiymətverən əlavə et` ilə menecer, həmkar, tabeçi və ya özünü əlavə edin. Qiymətlər toplandıqdan sonra `Kalibrasiyaya keç`, balları razılaşdırıb `Təsdiqlə` basın.
 
-#### Sonra nə olur?
-- testin vəziyyəti görünür
-- cavablar toplandıqca nəticə formalaşır
-- sonradan hesabatlara düşür
+## Testlər
+`Testlər` bölməsinin alt bölmələri: `Banklar`, `Suallar`, `Import`, `Təyinatlar`, `Yoxlama`.
+1. Bankda keçid balı, müddət və cəhd sayını qurun.
+2. Sualları əl ilə yazın və ya `Import şablonunu yüklə` ilə Excel-dən yükləyin.
+3. `Təyinatlar`da testi əməkdaşa verin.
+4. Açıq cavabları `Yoxlama` hissəsində yoxlayan qiymətləndirir.
 
-### 3. Nəticəyə baxmaq
-1. `Qiymətləndirmələr` və ya `Hesabatlar` bölməsinə keçin.
-2. Lazım olan şəxsi, dövrü və ya formanı seçin.
-3. Yekun nəticəyə baxın.
+## Hesabatlar
+`Hesabatlar` bölməsində forma, xülasə, zəif sahə, audit və test hesabatlarını Excel-ə çıxarır, `Çap görünüşü` açırsınız. `Tam siyahılar` bütün qeydləri səhifələrlə göstərir.
 
-#### Bu nəyi dəyişir?
-- zəif qalan sahələr daha aydın görünür
-- gələcək inkişaf işi üçün əsas yaranır
-- rəhbər qərar verməkdə daha rahat olur
+## Tez-tez verilən suallar
 
-## Bu məlumatlar harada görünür?
-- yaradılan dövr `Dövrlər` hissəsində görünür
-- hazırlanan forma `Şablonlar` hissəsində görünür
-- verilən qiymətləndirmə `Qiymətləndirmələr` hissəsində görünür
-- test nəticəsi `Testlər` və `Hesabatlar` hissəsinə təsir edir
+**`+ Form təyinatı` düyməsi niyə görünmür?**
+Bu düymə yalnız performansı idarə etmək icazəsi olanlara görünür.
 
-## Problem olanda əvvəl haraya baxmaq lazımdır?
+**Kartda heç bir keçid düyməsi yoxdur. Niyə?**
+Hazırda sizin növbəniz deyil. `Növbəti addım` blokunda kimin gözlənildiyi yazılıb.
 
-### Qiymətləndirmə görünmürsə
-Yoxlayın:
-- dövr yaradılıbmı?
-- forma hazırdırmı?
-- qiymətləndirmə həqiqətən təyin olunubmu?
+**Faktiki dəyər yaza bilmirəm.**
+Faktiki dəyər yalnız `Aktiv` kartda yazılır. KPI avtomatik və ya formula ilə hesablanırsa, onu heç kim əl ilə yazmır.
 
-### Test nəticəsi görünmürsə
-Yoxlayın:
-- test göndərilibmi?
-- cavab daxil olubmu?
+**Hədəfi niyə dəyişə bilmirəm?**
+Hədəf yalnız `Qaralama` mərhələsində dəyişir. Aktiv kartda `Dəyişiklik istə` ilə HR-a sorğu göndərin.
 
-### Hesabat boş görünürsə
-Yoxlayın:
-- nəticə daxil edilibmi?
-- doğru dövr seçilibmi?
+**Aşağı bal verdim, amma təlim ehtiyacı yaranmadı.**
+Meyar kompetensiyaya bağlı deyil. Şablonda meyara kompetensiya seçin.
 
-## Nəyə diqqət etmək lazımdır?
-- Əvvəl dövr yaradılmalıdır.
-- Natamam forma ilə qiymətləndirmə başlamayın.
-- Nəticələrə baxmadan qərar verməyin.
-- Zəif sahələr görünəndə onları qeyd edin və inkişaf planı ilə əlaqələndirin.
+**KPI-ı silə bilmirəm.**
+O, şablonda və ya kartda istifadə olunur. Onu arxivləşdirin.
 
-## Qısa nəticə
-Bu modul sadəcə bal yazmaq üçün deyil. Burada qiymətləndirmə verilir, nəticə toplanır və gələcək inkişaf üçün aydın əsas yaranır.
+## Yadda saxlayın
+- Hər şey dövrə bağlıdır — əvvəl dövr yaradın.
+- Kartın növbəti addımını `Növbəti addım` blokundan oxuyun.
+- `Etiraz et`, `Geri qaytar` və hədəf sorğusunun rəddi səbəb tələb edir.
+- Bağlanmış kart və dövr dəyişmir.
+- Silmə və çıxarma həmişə təsdiq pəncərəsi ilə olur — adı diqqətlə oxuyun.

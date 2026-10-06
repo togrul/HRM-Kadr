@@ -233,7 +233,9 @@ class MyHrRequestsReadService
         }
 
         if ((int) $leave->status_id === OrderStatusEnum::CANCELLED->value) {
-            return 'cancelled';
+            // A reviewer turning down the employee's own request cancels the leave — to
+            // the employee that is a rejection, not a cancellation.
+            return $leave->submission_source === 'employee_self_service' ? 'rejected' : 'cancelled';
         }
 
         if ((int) $leave->status_id === OrderStatusEnum::PENDING->value) {
@@ -285,7 +287,7 @@ class MyHrRequestsReadService
         }
 
         if (in_array($approvalStatus, ['rejected', 'cancelled'], true)) {
-            return 'cancelled';
+            return $approvalStatus;
         }
 
         return $this->normalizeDateBoundStatus(
@@ -304,7 +306,7 @@ class MyHrRequestsReadService
         }
 
         if (in_array($approvalStatus, ['rejected', 'cancelled'], true)) {
-            return 'cancelled';
+            return $approvalStatus;
         }
 
         return $this->normalizeDateBoundStatus(
@@ -321,7 +323,7 @@ class MyHrRequestsReadService
             'approved', 'active' => 'success',
             'upcoming' => 'info',
             'completed' => 'neutral',
-            'deleted', 'cancelled' => 'danger',
+            'deleted', 'cancelled', 'rejected' => 'danger',
             default => 'neutral',
         };
     }

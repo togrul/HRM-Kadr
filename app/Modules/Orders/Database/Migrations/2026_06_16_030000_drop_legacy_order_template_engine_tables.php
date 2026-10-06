@@ -19,13 +19,32 @@ return new class extends Migration
         // The block engine never populates order_logs.order_template_version_id;
         // drop its foreign key + the now-dead column so the parent table can go.
         if (Schema::hasColumn('order_logs', 'order_template_version_id')) {
+            // The foreign key goes first: MySQL refuses to drop an index a key still
+            // depends on (errno 1553), and the composite index is the one backing it.
+            // Names are discovered, never assumed — this cleanup meets databases built
+            // by different paths, and one absent name aborts the whole drop.
+            foreach ($this->foreignKeysOn('order_logs', 'order_template_version_id') as $key) {
+                Schema::table('order_logs', function (Blueprint $table) use ($key) {
+                    // SQLite reports its keys unnamed; there the column form is what
+                    // triggers the table rebuild that actually removes the constraint.
+                    $table->dropForeign($key['name'] ?: $key['columns']);
+                });
+            }
+
+            // The index is composite — (order_type_id, order_template_version_id) — and
+            // MySQL uses its leading column to back the order_type_id foreign key, so
+            // dropping it outright is refused with errno 1553. MySQL does not need the
+            // drop at all: it strips the column from the index itself and leaves a
+            // single-column index behind. Only SQLite, whose drop-column rebuilds the
+            // table, trips over an index that still names the column.
+            if (Schema::getConnection()->getDriverName() === 'sqlite'
+                && Schema::hasIndex('order_logs', 'order_logs_type_template_version_idx')) {
+                Schema::table('order_logs', function (Blueprint $table) {
+                    $table->dropIndex('order_logs_type_template_version_idx');
+                });
+            }
+
             Schema::table('order_logs', function (Blueprint $table) {
-                // Drop the composite index that includes the column first, otherwise
-                // SQLite's drop-column table rebuild fails on the dangling index.
-                $table->dropIndex('order_logs_type_template_version_idx');
-                // Column-array form: derives the conventional FK name on MySQL and
-                // is handled via table rebuild on SQLite (test driver).
-                $table->dropForeign(['order_template_version_id']);
                 $table->dropColumn('order_template_version_id');
             });
         }
@@ -38,6 +57,19 @@ return new class extends Migration
         Schema::dropIfExists('order_template_fields');
         Schema::dropIfExists('order_template_versions');
         Schema::dropIfExists('order_template_sets');
+    }
+
+    /**
+     * The foreign keys actually defined on a column, as the schema reports them.
+     *
+     * @return list<array{name: string|null, columns: list<string>}>
+     */
+    private function foreignKeysOn(string $table, string $column): array
+    {
+        return collect(Schema::getForeignKeys($table))
+            ->filter(fn (array $key): bool => in_array($column, $key['columns'], true))
+            ->values()
+            ->all();
     }
 
     public function down(): void

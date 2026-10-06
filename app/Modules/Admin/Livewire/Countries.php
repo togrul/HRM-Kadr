@@ -2,12 +2,15 @@
 
 namespace App\Modules\Admin\Livewire;
 
+use App\Models\Country;
 use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait;
 use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
-use App\Models\Country;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -47,8 +50,7 @@ class Countries extends Component
         if ($this->model) {
             $this->form = $this->model->toArray();
             $this->form['country_translations'] = $this->form['country_translations'][0];
-        }
-        else {
+        } else {
             $this->form = [];
         }
         $this->isAdded = true;
@@ -67,7 +69,7 @@ class Countries extends Component
         $this->closeCrud();
     }
 
-    private function checkCountryExist($id)
+    private function checkCountryExist($id): Country|Collection|null
     {
         return Country::with(['countryTranslations' => function ($query) {
             $query->where('locale', $this->selectedLocale);
@@ -77,6 +79,8 @@ class Countries extends Component
 
     public function store(): void
     {
+        Gate::authorize('access-admin');
+
         $this->hasError = false;
         $this->validate();
 
@@ -149,7 +153,7 @@ class Countries extends Component
         $this->selectedLocale = config('app.locale');
     }
 
-    public function render()
+    public function render(): View
     {
         $countries = Country::whereHas('countryTranslations', function ($query) {
             $query->where('locale', $this->selectedLocale);

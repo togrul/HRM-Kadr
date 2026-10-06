@@ -77,6 +77,7 @@ class BackfillPersonnelTabelNumbers extends Command
 
                     if ($newTabelNo === $oldTabelNo) {
                         $stats['skipped']++;
+
                         continue;
                     }
 
@@ -115,4 +116,3 @@ class BackfillPersonnelTabelNumbers extends Command
         return $stats['errors'] > 0 ? self::FAILURE : self::SUCCESS;
     }
 }
-

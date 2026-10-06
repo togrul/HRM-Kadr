@@ -7,19 +7,21 @@ return [
         'subtitle' => 'Read sign-ins, profile views, and data changes from the audit database. This screen is read-only.',
     ],
     'metrics' => [
+        'filter_hint' => 'Apply as a filter, or clear it',
         'total' => 'Total logs',
         'today' => 'Today',
         'profile_opened' => 'Profile views',
-        'users' => 'Users',
+        'users' => 'User actions',
     ],
     'filters' => [
         'search' => 'Search',
-        'search_placeholder' => 'Text, event, model, or log name...',
+        'search_placeholder' => 'Text, event, user or employee name...',
         'log_name' => 'Log type',
         'event' => 'Event',
         'from' => 'From',
         'to' => 'To',
         'per_page' => 'Rows',
+        'period' => 'Period',
         'all' => 'All',
     ],
     'list' => [
@@ -36,6 +38,9 @@ return [
     ],
     'labels' => [
         'system_actor' => 'System',
+        'read_only_note' => 'This screen is read-only — entries cannot be modified.',
+        'read_only_short' => 'Read-only',
+        'results_unit' => 'results',
         'no_subject' => 'No subject',
         'no_event' => 'No event',
         'no_log_name' => 'No log name',

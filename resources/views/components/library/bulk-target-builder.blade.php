@@ -9,7 +9,7 @@
 
 <div class="mt-4 space-y-4">
     <div class="grid gap-4 xl:grid-cols-2">
-        <div class="rounded-[24px] bg-[#f5f5f7] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_10px_22px_rgba(0,0,0,0.035)]">
+        <div class="rounded-2xl bg-[#f5f5f7] p-4 shadow-card">
             <div class="flex items-center justify-between gap-3">
                 <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __($translationNs.'.sections.target_structures') }}</x-ui.field-label>
                 <span class="inline-flex min-w-7 items-center justify-center rounded-full bg-white px-2 py-1 text-[11px] font-semibold tracking-tight text-zinc-500">{{ count($selectedStructureIds) }}</span>
@@ -20,7 +20,7 @@
             @if ($payload['structures'] === [])
                 <p class="mt-4 text-sm text-zinc-500">{{ __($translationNs.'.messages.empty_structures') }}</p>
             @else
-                <div class="mt-4 grid max-h-[18rem] gap-3 overflow-y-auto pr-1">
+                <div class="mt-4 grid max-h-[18rem] gap-3 overflow-y-auto pr-1 hrm-scroll hrm-scroll-hover">
                     @foreach ($payload['structures'] as $structure)
                         @php
                             $isSelected = in_array($structure['id'], $selectedStructureIds, true);
@@ -39,7 +39,7 @@
             @endif
         </div>
 
-        <div class="rounded-[24px] bg-[#f5f5f7] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_10px_22px_rgba(0,0,0,0.035)]">
+        <div class="rounded-2xl bg-[#f5f5f7] p-4 shadow-card">
             <div class="flex items-center justify-between gap-3">
                 <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __($translationNs.'.fields.target_positions') }}</x-ui.field-label>
                 <span class="inline-flex min-w-7 items-center justify-center rounded-full bg-white px-2 py-1 text-[11px] font-semibold tracking-tight text-zinc-500">{{ count($selectedPositionIds) }}</span>
@@ -50,7 +50,7 @@
             @if ($payload['positions'] === [])
                 <p class="mt-4 text-sm text-zinc-500">{{ __($translationNs.'.messages.empty_positions') }}</p>
             @else
-                <div class="mt-4 grid max-h-[18rem] gap-3 overflow-y-auto pr-1">
+                <div class="mt-4 grid max-h-[18rem] gap-3 overflow-y-auto pr-1 hrm-scroll hrm-scroll-hover">
                     @foreach ($payload['positions'] as $position)
                         @php
                             $isSelected = in_array($position['id'], $selectedPositionIds, true);
@@ -70,13 +70,13 @@
         </div>
     </div>
 
-    <div class="rounded-[24px] bg-[#f5f5f7] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_10px_22px_rgba(0,0,0,0.035)]">
+    <div class="rounded-2xl bg-[#f5f5f7] p-4 shadow-card">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div class="flex items-center gap-3">
                 <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __($translationNs.'.sections.target_people') }}</x-ui.field-label>
                 <span class="inline-flex min-w-7 items-center justify-center rounded-full bg-white px-2 py-1 text-[11px] font-semibold tracking-tight text-zinc-500">{{ count($selectedPersonnelIds) }}</span>
             </div>
-            <button type="button" wire:click="clearSelection" class="inline-flex items-center justify-center self-start rounded-full bg-white px-3 py-1.5 text-xs font-semibold tracking-tight text-zinc-600 shadow-sm transition hover:text-zinc-950">{{ __($translationNs.'.actions.clear_selection') }}</button>
+            <button type="button" wire:click="clearSelection" class="inline-flex h-10 items-center justify-center self-start rounded-full bg-white px-3 text-sm font-semibold tracking-tight text-zinc-600 shadow-sm transition hover:text-zinc-950">{{ __($translationNs.'.actions.clear_selection') }}</button>
         </div>
         <div class="mt-3">
             <x-ui.filter-input wire:model.live.debounce.300ms="searchPersonnel" type="text" placeholder="{{ __($translationNs.'.messages.search_personnel_placeholder') }}" />
@@ -84,7 +84,7 @@
         @if ($payload['personnels'] === [])
             <p class="mt-4 text-sm text-zinc-500">{{ __($translationNs.'.messages.empty_personnels') }}</p>
         @else
-            <div class="mt-4 grid max-h-[24rem] gap-3 overflow-y-auto pr-1 md:grid-cols-2 xl:grid-cols-3">
+            <div class="mt-4 grid max-h-[24rem] gap-3 overflow-y-auto pr-1 hrm-scroll hrm-scroll-hover md:grid-cols-2 xl:grid-cols-3">
                 @foreach ($payload['personnels'] as $personnel)
                     @php
                         $isSelected = in_array($personnel['id'], $selectedPersonnelIds, true);
@@ -110,7 +110,7 @@
     @endif
 
     <div class="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(20rem,0.9fr)]">
-        <div class="rounded-[24px] bg-[#f5f5f7] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_10px_22px_rgba(0,0,0,0.035)]">
+        <div class="rounded-2xl bg-[#f5f5f7] px-4 py-4 shadow-card">
             <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __($translationNs.'.sections.targeting_rules') }}</x-ui.field-label>
             <div class="mt-3 flex flex-wrap gap-2">
                 <span class="inline-flex items-center rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs font-semibold text-zinc-700">{{ __($translationNs.'.fields.target_structures') }}: {{ count($selectedStructureIds) }}</span>
@@ -122,7 +122,7 @@
             </div>
         </div>
 
-        <div class="rounded-[24px] bg-[#f5f5f7] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_10px_22px_rgba(0,0,0,0.035)]">
+        <div class="rounded-2xl bg-[#f5f5f7] px-4 py-4 shadow-card">
             <div class="space-y-4">
                 <div class="space-y-2">
                     <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __($translationNs.'.fields.include_recent_hires') }}</x-ui.field-label>

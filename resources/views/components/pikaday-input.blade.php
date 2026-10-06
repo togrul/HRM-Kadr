@@ -3,19 +3,19 @@
      'type' => 'text',
      'name',
      'mode' => 'default',
-     'format',
+     'format' => 'Y-MM-DD',
      'script'
 ])
 
 @php
-     $extraClass = match($mode)
-     {
-          'default' => 'bg-white',
-          'gray' => "bg-neutral-100"
-     };
-     $isError = $errors->has($name)?'bg-red-50':'';
+     $wireModel = collect($attributes->getAttributes())
+          ->first(fn ($value, $key) => str_starts_with($key, 'wire:model'));
+     $hasError = $errors->has($name) || (is_string($wireModel) && $errors->has($wireModel));
+     $isError = $hasError ? 'border-rose-300 bg-rose-50' : '';
 
-     $format = "Y-MM-DD" ? 'DD.MM.Y' : $format;
+     // Livewire keeps dates as Y-MM-DD; people read and type them as DD.MM.YYYY. Any other
+     // format a caller passes is used as given.
+     $format = $format === 'Y-MM-DD' ? 'DD.MM.Y' : $format;
      $currentYear = \Carbon\Carbon::now()->format('Y');
 @endphp
 
@@ -23,10 +23,10 @@
     type="{{ $type }}"
     id="{{ $name }}"
     name="{{ $name }}"
-    x-data
+    x-data="{ picker: null, destroy() { if (this.picker) this.picker.destroy(); this.picker = null; } }"
     x-ref="input"
     x-on:change="$dispatch('input', $el.value)"
-    x-init="(function (pikaday, $el) {
+    x-init="picker = (function (pikaday, $el) {
           pikaday.defaultDate = $el.value;
           {{ $script ?? '' }} ;
           return pikaday;
@@ -36,7 +36,8 @@
           yearRange: 100,
           onSelect: function (date) { $el.value = moment(date.toString()).format('{{ $format }}'); }
          }), $el)"
-    {{ $disabled ? 'disabled' : '' }}
-    {!! $attributes->merge(['class' => "block border-none font-normal w-full mt-1 px-3 py-2 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition duration-100 ease-in-out transform {$extraClass} {$isError} "]) !!}
+    @disabled($disabled)
+    @if ($hasError) aria-invalid="true" @endif
+    {!! $attributes->merge(['class' => \App\Support\Ui\FieldStyles::input(trim('mt-1 block '.$isError))]) !!}
 
 >

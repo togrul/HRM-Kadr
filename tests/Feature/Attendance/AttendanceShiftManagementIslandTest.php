@@ -42,6 +42,32 @@ class AttendanceShiftManagementIslandTest extends TestCase
             ->assertDontSeeHtml('FRAGMENT:type=island|name=attendance-shift-assignments');
     }
 
+    public function test_deactivating_a_shift_asks_for_confirmation_first(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo(Permission::findOrCreate('manage-attendance-shifts', 'web'));
+        $this->actingAs($user);
+
+        $shift = AttendanceShift::query()->create([
+            'name' => 'Night shift',
+            'start_time' => '22:00:00',
+            'end_time' => '06:00:00',
+            'break_minutes' => 0,
+            'is_night_shift' => true,
+            'in_flex_before_minutes' => 0,
+            'in_flex_after_minutes' => 0,
+            'out_flex_before_minutes' => 0,
+            'out_flex_after_minutes' => 0,
+            'is_active' => true,
+            'created_by' => $user->id,
+        ]);
+
+        Livewire::test(ShiftManagement::class)
+            ->assertSeeHtml("run: () => \$wire.deactivateShift({$shift->id})")
+            ->assertSeeHtml(e(__('attendance::shift_management.confirm.deactivate_shift')))
+            ->assertDontSeeHtml("wire:click=\"deactivateShift({$shift->id})\"");
+    }
+
     public function test_recent_assignment_edit_populates_form_without_island_regression(): void
     {
         $role = Role::query()->firstOrCreate([

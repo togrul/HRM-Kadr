@@ -1,8 +1,33 @@
 <?php
 
 return [
+    'marketing' => [
+        'eyebrow' => 'Vahid HR platforması',
+        'headline' => 'Şəxsi işdən əmək haqqına qədər bütün kadr prosesi bir yerdə',
+        'description' => 'Vahid struktur ağacı və audit izi. Əmrlər, davamiyyət, məzuniyyət və performans bir-biri ilə bağlı işləyir.',
+        'highlights' => [
+            'personnel' => 'Şəxsi işlər və struktur',
+            'personnel_note' => 'Ştat cədvəli ilə tam sinxron',
+            'orders' => 'Əmr dövriyyəsi',
+            'orders_note' => 'Şablon, təsdiq və DOCX ixracı',
+            'attendance' => 'Davamiyyət və puantaj',
+            'attendance_note' => 'Gündəlik monitor və ay bağlanışı',
+            'payroll' => 'Əmək haqqı və kompensasiya',
+            'payroll_note' => 'Hesablama run-ları və payslip',
+        ],
+    ],
+    'labels' => [
+        'sign_in_subtitle' => 'Davam etmək üçün hesabınıza daxil olun',
+        'show_password' => 'Şifrəni göstər',
+        'hide_password' => 'Şifrəni gizlət',
+        'footer_note' => 'Daxili istifadə üçün nəzərdə tutulub.',
+    ],
     'titles' => [
         'app_name' => 'İnsan Resurslarının İdarəetmə Sistemi',
+        'forgot_password' => 'Şifrənizi unutmusunuz?',
+        'reset_password' => 'Yeni şifrə təyin edin',
+        'confirm_password' => 'Şifrəni təsdiqləyin',
+        'verify_email' => 'E-poçtunuzu təsdiqləyin',
     ],
     'fields' => [
         'name' => 'Ad',
@@ -13,6 +38,7 @@ return [
         'new_password' => 'Yeni şifrə',
         'confirm_password' => 'Şifrəni təsdiq et',
         'remember_me' => 'Məni xatırla',
+        'email_placeholder' => 'ad.soyad@example.com',
     ],
     'actions' => [
         'log_in' => 'Daxil ol',
@@ -25,12 +51,14 @@ return [
     ],
     'links' => [
         'forgot_password' => 'Şifrənizi unutmusunuz?',
+        'back_to_login' => 'Girişə qayıt',
         'already_registered' => 'Artıq qeydiyyatdan keçmisiniz?',
     ],
     'messages' => [
         'verification_pending' => 'Başlamazdan əvvəl göndərdiyimiz keçidə klikləyərək e-poçt ünvanınızı təsdiqləyin. Məktubu almamısınızsa, yenisini göndərə bilərik.',
         'verification_link_sent' => 'Qeydiyyat zamanı göstərdiyiniz e-poçt ünvanına yeni təsdiq keçidi göndərildi.',
         'secure_area_confirmation' => 'Davam etməzdən əvvəl şifrənizi təsdiqləyin.',
+        'reset_password_help' => 'Yeni şifrənizi təyin edin. Şifrə ən azı 8 simvoldan ibarət olmalıdır.',
         'forgot_password_help' => 'Problem deyil. E-poçt ünvanınızı daxil edin, sizə yeni şifrə təyin etməyə imkan verən keçidi göndərək.',
         'email_unverified' => 'E-poçt ünvanınız təsdiqlənməyib.',
         'resend_verification_prompt' => 'Təsdiq e-poçtunu yenidən göndərmək üçün bura klikləyin.',

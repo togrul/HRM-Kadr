@@ -7,6 +7,7 @@ use App\Models\CandidateInterview;
 use App\Models\CandidateOffer;
 use App\Models\User;
 use App\Modules\Candidates\Application\Services\CandidateAtsCompletionService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
@@ -17,6 +18,9 @@ class ApplicationAtsPanel extends Component
     use AuthorizesRequests;
 
     public CandidateApplication $application;
+
+    /** Active ATS tab: interviews | scorecard | offers | pool. */
+    public string $tab = 'interviews';
 
     public array $interviewForm = [
         'interviewer_id' => '',
@@ -55,6 +59,11 @@ class ApplicationAtsPanel extends Component
         $this->loadApplication();
     }
 
+    public function setTab(string $tab): void
+    {
+        $this->tab = in_array($tab, ['interviews', 'scorecard', 'offers', 'pool'], true) ? $tab : 'interviews';
+    }
+
     public function scheduleInterview(CandidateAtsCompletionService $service): void
     {
         $this->authorize('transition', $this->application);
@@ -81,6 +90,7 @@ class ApplicationAtsPanel extends Component
         ];
         $this->loadApplication();
         $this->dispatch('candidate-application-saved', applicationId: $this->application->id);
+        $this->dispatch('notify', type: 'success', message: __('candidates::recruitment.messages.interview_scheduled'));
     }
 
     public function submitScorecard(CandidateAtsCompletionService $service): void
@@ -88,14 +98,14 @@ class ApplicationAtsPanel extends Component
         $this->authorize('transition', $this->application);
 
         $data = $this->validate([
-            'scoreForm.interview_id' => ['required', 'integer', Rule::exists('candidate_interviews', 'id')->where('candidate_application_id', $this->application->id)],
+            'scoreForm.interview_id' => ['required', 'integer', Rule::exists('candidate_interviews', 'id')->where('candidate_application_id', $this->application->id)->whereNot('status', 'cancelled')],
             'scoreForm.technical' => ['required', 'integer', 'min:0', 'max:100'],
             'scoreForm.communication' => ['required', 'integer', 'min:0', 'max:100'],
             'scoreForm.culture' => ['required', 'integer', 'min:0', 'max:100'],
             'scoreForm.note' => ['nullable', 'string', 'max:2000'],
         ])['scoreForm'];
 
-        $interview = CandidateInterview::query()->where('candidate_application_id', $this->application->id)->findOrFail($data['interview_id']);
+        $interview = CandidateInterview::query()->where('candidate_application_id', $this->application->id)->where('status', '!=', 'cancelled')->findOrFail($data['interview_id']);
         $service->submitScorecard($interview, [
             ['criterion' => 'technical', 'score' => $data['technical']],
             ['criterion' => 'communication', 'score' => $data['communication']],
@@ -111,6 +121,7 @@ class ApplicationAtsPanel extends Component
         ];
         $this->loadApplication();
         $this->dispatch('candidate-application-saved', applicationId: $this->application->id);
+        $this->dispatch('notify', type: 'success', message: __('candidates::recruitment.messages.scorecard_saved'));
     }
 
     public function cancelInterview(int $interviewId, CandidateAtsCompletionService $service): void
@@ -126,6 +137,7 @@ class ApplicationAtsPanel extends Component
 
         $this->loadApplication();
         $this->dispatch('candidate-application-saved', applicationId: $this->application->id);
+        $this->dispatch('notify', type: 'success', message: __('candidates::recruitment.messages.interview_cancelled'));
     }
 
     public function createOffer(CandidateAtsCompletionService $service): void
@@ -155,6 +167,7 @@ class ApplicationAtsPanel extends Component
         ];
         $this->loadApplication();
         $this->dispatch('candidate-application-saved', applicationId: $this->application->id);
+        $this->dispatch('notify', type: 'success', message: __('candidates::recruitment.messages.offer_created'));
     }
 
     public function updateOfferStatus(int $offerId, string $status, CandidateAtsCompletionService $service): void
@@ -168,6 +181,7 @@ class ApplicationAtsPanel extends Component
 
         $this->loadApplication();
         $this->dispatch('candidate-application-saved', applicationId: $this->application->id);
+        $this->dispatch('notify', type: 'success', message: __('candidates::recruitment.messages.offer_status_updated'));
     }
 
     public function addToTalentPool(CandidateAtsCompletionService $service): void
@@ -192,6 +206,7 @@ class ApplicationAtsPanel extends Component
         ];
         $this->loadApplication();
         $this->dispatch('candidate-application-saved', applicationId: $this->application->id);
+        $this->dispatch('notify', type: 'success', message: __('candidates::recruitment.messages.talent_pool_added'));
     }
 
     public function users(): Collection
@@ -215,7 +230,7 @@ class ApplicationAtsPanel extends Component
             ->findOrFail($this->application->id);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('candidates::livewire.candidates.application-ats-panel', [
             'users' => $this->users(),

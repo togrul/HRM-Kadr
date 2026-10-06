@@ -3,6 +3,7 @@
 namespace App\Modules\Personnel\Livewire\Steps;
 
 use App\Livewire\Forms\Personnel\KinshipForm;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Isolate;
 
 #[Isolate]
@@ -33,7 +34,7 @@ class KinshipStep extends AbstractPersonnelWizardStep
         return 7;
     }
 
-    public function render()
+    public function render(): View
     {
         return view('personnel::livewire.personnel.steps.kinship-step', [
             'stepSearchModels' => $this->activeStepSearchModels(),

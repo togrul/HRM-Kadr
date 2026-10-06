@@ -8,6 +8,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $cycle_type
+ * @property \Illuminate\Support\Carbon|null $period_start
+ * @property \Illuminate\Support\Carbon|null $period_end
+ * @property string $status
+ * @property bool $auto_generate_forms
+ * @property string|null $description
+ */
 class PerformanceCycle extends Model
 {
     use HasFactory;
@@ -29,9 +39,23 @@ class PerformanceCycle extends Model
         'auto_generate_forms' => 'boolean',
     ];
 
+    /**
+     * A closed cycle is read-only: its forms and scores can no longer change.
+     */
+    public static function isClosed(int|string|null $cycleId): bool
+    {
+        return $cycleId !== null
+            && static::query()->whereKey($cycleId)->where('status', 'closed')->exists();
+    }
+
     public function forms(): HasMany
     {
         return $this->hasMany(PerformanceForm::class);
+    }
+
+    public function scorecards(): HasMany
+    {
+        return $this->hasMany(PerformanceScorecard::class);
     }
 
     public function getActivitylogOptions(): LogOptions

@@ -7,12 +7,25 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property string $event_type
+ * @property string $participation_role
+ * @property string $title
+ * @property \Illuminate\Support\Carbon $start_date
+ * @property \Illuminate\Support\Carbon|null $end_date
+ * @property int|null $country_id
+ * @property string $attendance_format
+ * @property string $strategic_level
+ * @property string $visibility
+ */
 class PersonnelEventRecord extends Model
 {
     use HasFactory;
 
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_VERIFIED = 'verified';
+
     public const STATUS_REJECTED = 'rejected';
 
     protected $fillable = [
@@ -54,11 +67,13 @@ class PersonnelEventRecord extends Model
         return $this->belongsTo(Personnel::class);
     }
 
+    /** @return BelongsTo<ProfessionalRecordAttachment, $this> */
     public function certificateAttachment(): BelongsTo
     {
         return $this->belongsTo(ProfessionalRecordAttachment::class, 'certificate_attachment_id');
     }
 
+    /** @return BelongsTo<ProfessionalRecordAttachment, $this> */
     public function agendaAttachment(): BelongsTo
     {
         return $this->belongsTo(ProfessionalRecordAttachment::class, 'agenda_attachment_id');

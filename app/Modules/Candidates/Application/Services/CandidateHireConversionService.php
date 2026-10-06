@@ -8,9 +8,9 @@ use App\Models\CandidateApplication;
 use App\Models\Personnel;
 use App\Modules\EmployeeLifecycle\Application\Services\LifecyclePlanTemplateService;
 use App\Services\PersonnelTabelNoGeneratorService;
+use App\Support\Database\InstalledTables;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -268,14 +268,14 @@ class CandidateHireConversionService
             return $hasColumns;
         }
 
-        return $hasColumns = Schema::hasColumn('candidate_applications', 'personnel_id')
-            && Schema::hasColumn('candidate_applications', 'converted_at')
-            && Schema::hasColumn('candidate_applications', 'converted_by');
+        return $hasColumns = InstalledTables::hasColumn('candidate_applications', 'personnel_id')
+            && InstalledTables::hasColumn('candidate_applications', 'converted_at')
+            && InstalledTables::hasColumn('candidate_applications', 'converted_by');
     }
 
     private function ensureLifecycleEvent(CandidateApplication $application, Personnel $personnel, array $context): void
     {
-        if (! Schema::hasTable('employee_lifecycle_events')) {
+        if (! InstalledTables::has('employee_lifecycle_events')) {
             return;
         }
 
@@ -293,7 +293,7 @@ class CandidateHireConversionService
         $ownerUserId = $context['owner_user_id'] ?? $application->assigned_recruiter_id ?? $application->opening?->owner_id ?? $actorId;
         $templateId = $this->activeOnboardingTemplateId();
 
-        if ($templateId !== null && Schema::hasTable('employee_lifecycle_task_templates')) {
+        if ($templateId !== null && InstalledTables::has('employee_lifecycle_task_templates')) {
             $eventId = app(LifecyclePlanTemplateService::class)->launchForPersonnel(
                 $templateId,
                 $personnel->id,
@@ -336,7 +336,7 @@ class CandidateHireConversionService
 
     public function ensureOrderLifecycleForCandidate(Candidate $candidate, Personnel $personnel, array $context = []): void
     {
-        if (! Schema::hasTable('employee_lifecycle_events')) {
+        if (! InstalledTables::has('employee_lifecycle_events')) {
             return;
         }
 
@@ -380,7 +380,7 @@ class CandidateHireConversionService
 
     private function activeOnboardingTemplateId(): ?int
     {
-        if (! Schema::hasTable('employee_lifecycle_plan_templates')) {
+        if (! InstalledTables::has('employee_lifecycle_plan_templates')) {
             return null;
         }
 

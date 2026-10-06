@@ -13,8 +13,7 @@ class PerformanceEvaluationReportExport implements FromCollection, WithHeadings,
         protected Collection $rows,
         protected array $headings,
         protected string $type
-    ) {
-    }
+    ) {}
 
     public function collection(): Collection
     {

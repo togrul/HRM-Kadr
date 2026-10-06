@@ -1,0 +1,422 @@
+<?php
+
+namespace Tests\Feature\Compensation;
+
+use App\Models\CompensationComponent;
+use App\Models\CompensationRegime;
+use App\Models\EmployeeBankAccount;
+use App\Models\EmployeeCompensation;
+use App\Models\Personnel;
+use App\Modules\Compensation\Livewire\Dashboard;
+use App\Modules\Compensation\Livewire\Tabs\AssignmentsTab;
+use App\Modules\Compensation\Livewire\Tabs\BankTab;
+use App\Modules\Compensation\Livewire\Tabs\ComponentsTab;
+use App\Modules\Compensation\Livewire\Tabs\ScalesTab;
+use App\Modules\Compensation\Livewire\Tabs\StatutoryTab;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
+use Tests\TestCase;
+
+class CompensationDashboardTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seedReferenceData();
+    }
+
+    public function test_dashboard_requires_view_permission(): void
+    {
+        $user = \App\Models\User::factory()->create();
+        $this->actingAs($user);
+
+        Livewire::test(Dashboard::class)->assertForbidden();
+    }
+
+    public function test_authorized_user_can_open_dashboard(): void
+    {
+        $this->actingAsManager();
+
+        Livewire::test(Dashboard::class)
+            ->assertOk()
+            ->assertSet('activeTab', 'scales');
+    }
+
+    public function test_manager_can_create_pay_scale(): void
+    {
+        $this->actingAsManager();
+        $regimeId = CompensationRegime::where('code', 'private')->value('id');
+
+        Livewire::test(ScalesTab::class)
+            ->set('scaleForm.name', 'Mülki şkala 2026')
+            ->set('scaleForm.regime_id', $regimeId)
+            ->set('scaleForm.currency', 'AZN')
+            ->set('scaleForm.effective_from', '2026-01-01')
+            ->call('saveScale')
+            ->assertHasNoErrors()
+            ->assertDispatched('notify')
+            ->assertDispatched('compensation-updated');
+
+        $this->assertDatabaseHas('pay_scales', ['name' => 'Mülki şkala 2026', 'regime_id' => $regimeId]);
+    }
+
+    public function test_manager_can_create_component(): void
+    {
+        $this->actingAsManager();
+
+        Livewire::test(ComponentsTab::class)
+            ->set('componentForm.code', 'transport')
+            ->set('componentForm.name', 'Nəqliyyat əlavəsi')
+            ->set('componentForm.type', 'earning')
+            ->set('componentForm.calc_type', 'fixed')
+            ->call('saveComponent')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('compensation_components', ['code' => 'transport', 'type' => 'earning']);
+    }
+
+    public function test_assigning_new_compensation_ends_the_previous_active_one(): void
+    {
+        $this->actingAsManager();
+        $personnel = $this->makePersonnel('emp1@example.test');
+        $regimeId = CompensationRegime::where('code', 'private')->value('id');
+
+        $component = Livewire::test(AssignmentsTab::class, ['tabelNo' => $personnel->tabel_no])
+            ->set('assignmentForm.regime_id', $regimeId)
+            ->set('assignmentForm.base_amount', '1000')
+            ->set('assignmentForm.currency', 'AZN')
+            ->set('assignmentForm.effective_from', '2026-01-01')
+            ->call('saveAssignment')
+            ->assertHasNoErrors();
+
+        $component
+            ->set('assignmentForm.regime_id', $regimeId)
+            ->set('assignmentForm.base_amount', '1200')
+            ->set('assignmentForm.currency', 'AZN')
+            ->set('assignmentForm.effective_from', '2026-06-01')
+            ->call('saveAssignment')
+            ->assertHasNoErrors();
+
+        $this->assertSame(1, EmployeeCompensation::where('tabel_no', $personnel->tabel_no)->where('status', 'active')->count());
+        $ended = EmployeeCompensation::where('tabel_no', $personnel->tabel_no)->where('status', 'ended')->first();
+        $this->assertNotNull($ended);
+        $this->assertSame('2026-05-31', $ended->effective_to->toDateString());
+        $this->assertSame('1200.00', EmployeeCompensation::where('status', 'active')->value('base_amount'));
+    }
+
+    public function test_base_amount_is_masked_without_amounts_permission(): void
+    {
+        $personnel = $this->makePersonnel('emp2@example.test');
+        $comp = EmployeeCompensation::create([
+            'tabel_no' => $personnel->tabel_no,
+            'regime_id' => CompensationRegime::where('code', 'private')->value('id'),
+            'base_amount' => 1500,
+            'currency' => 'AZN',
+            'effective_from' => '2026-01-01',
+            'status' => 'active',
+        ]);
+
+        $viewer = \App\Models\User::factory()->create();
+        $viewer->givePermissionTo(Permission::findOrCreate('show-compensation', 'web'));
+        $this->actingAs($viewer);
+        $this->assertSame('•••', $comp->maskedBaseAmount());
+
+        $viewer->givePermissionTo(Permission::findOrCreate('view-compensation-amounts', 'web'));
+        $viewer->forgetCachedPermissions();
+        $this->assertSame('1,500.00', $comp->fresh()->maskedBaseAmount());
+    }
+
+    public function test_only_one_primary_bank_account_remains(): void
+    {
+        $this->actingAsManager();
+        $personnel = $this->makePersonnel('emp3@example.test');
+
+        $component = Livewire::test(BankTab::class, ['tabelNo' => $personnel->tabel_no])
+            ->set('bankForm.iban', 'AZ21NABZ00000000137010001944')
+            ->set('bankForm.is_primary', true)
+            ->call('saveBank')
+            ->assertHasNoErrors();
+
+        $component
+            ->set('bankForm.iban', 'AZ21NABZ00000000137010009999')
+            ->set('bankForm.is_primary', true)
+            ->call('saveBank')
+            ->assertHasNoErrors();
+
+        $this->assertSame(1, EmployeeBankAccount::where('tabel_no', $personnel->tabel_no)->where('is_primary', true)->count());
+        $this->assertSame(2, EmployeeBankAccount::where('tabel_no', $personnel->tabel_no)->count());
+    }
+
+    public function test_manager_can_create_a_statutory_rate(): void
+    {
+        $this->actingAsManager();
+
+        Livewire::test(StatutoryTab::class)
+            ->set('statutoryForm.component_code', 'medical')
+            ->set('statutoryForm.payer', 'ee')
+            ->set('statutoryForm.base', 'social')
+            ->set('statutoryForm.effective_from', '2027-01-01')
+            ->set('statutoryBrackets', [['up_to' => 2500, 'rate' => 2], ['up_to' => null, 'rate' => 0.5]])
+            ->call('saveStatutoryRate')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('statutory_rates', [
+            'component_code' => 'medical', 'payer' => 'ee', 'effective_from' => '2027-01-01 00:00:00', 'regime_id' => null,
+        ]);
+    }
+
+    public function test_validation_messages_use_translated_field_labels(): void
+    {
+        $this->actingAsManager();
+
+        // Raw attribute path "scale form.name" must NOT leak into the message — the translated label is used.
+        Livewire::test(ScalesTab::class)
+            ->call('saveScale')
+            ->assertHasErrors('scaleForm.name')
+            ->assertDontSee('scale form.name');
+    }
+
+    public function test_scale_band_is_derived_from_its_grades_and_obeys_the_amounts_permission(): void
+    {
+        $this->actingAsManager();
+        $scale = \App\Models\PayScale::create([
+            'name' => 'Band şkalası',
+            'regime_id' => CompensationRegime::where('code', 'private')->value('id'),
+            'currency' => 'AZN',
+            'effective_from' => '2026-01-01',
+            'is_active' => true,
+        ]);
+
+        foreach ([['A1', 900], ['A2', 1200], ['A5', 2000]] as $index => [$code, $amount]) {
+            \App\Models\PayGrade::create([
+                'pay_scale_id' => $scale->id,
+                'code' => $code,
+                'name' => $code.' pilləsi',
+                'base_amount' => $amount,
+                'sort' => $index,
+            ]);
+        }
+
+        $component = Livewire::test(ScalesTab::class);
+        $band = $component->instance()->scaleRange($component->instance()->scales->first());
+
+        $this->assertSame(3, $band['grades']);
+        $this->assertSame('A1–A5', $band['range']);
+        $this->assertSame('900', $band['min']);
+        $this->assertSame('1 450', $band['midpoint']);
+        $this->assertSame('2 000', $band['max']);
+
+        // A viewer without the amounts permission sees the mask, never the figures.
+        $viewer = \App\Models\User::factory()->create();
+        $viewer->givePermissionTo(Permission::findOrCreate('show-compensation', 'web'));
+        $this->actingAs($viewer);
+
+        $masked = Livewire::test(ScalesTab::class);
+        $band = $masked->instance()->scaleRange($masked->instance()->scales->first());
+
+        $this->assertSame('•••', $band['min']);
+        $this->assertSame('•••', $band['midpoint']);
+        $this->assertSame('A1–A5', $band['range']);
+    }
+
+    public function test_grade_editor_never_sends_a_masked_amount_and_keeps_it_on_save(): void
+    {
+        $scale = \App\Models\PayScale::create([
+            'name' => 'Gizli şkala',
+            'regime_id' => CompensationRegime::where('code', 'private')->value('id'),
+            'currency' => 'AZN',
+            'effective_from' => '2026-01-01',
+            'is_active' => true,
+        ]);
+        $grade = \App\Models\PayGrade::create(['pay_scale_id' => $scale->id, 'code' => 'B7', 'name' => 'B7 pilləsi', 'base_amount' => 4321.5, 'sort' => 0]);
+
+        // Manager without the amounts permission.
+        $user = \App\Models\User::factory()->create();
+        $user->givePermissionTo(Permission::findOrCreate('show-compensation', 'web'));
+        $user->givePermissionTo(Permission::findOrCreate('manage-compensation', 'web'));
+        $this->actingAs($user);
+
+        $component = Livewire::test(ScalesTab::class)
+            ->call('selectScale', $scale->id)
+            ->assertDontSee(__('compensation::dashboard.actions.add_grade'))
+            ->call('editGrade', $grade->id)
+            ->assertSet('gradeForm.base_amount', '')
+            ->assertDontSeeHtml('4321')
+            ->assertDontSeeHtml('gradeForm.base_amount');
+
+        $this->assertStringNotContainsString('4321', json_encode($component->snapshot));
+
+        // Tampering the amount over the wire changes nothing; the other fields still save.
+        $component->set('gradeForm.name', 'Yeni ad')
+            ->set('gradeForm.base_amount', '1')
+            ->call('saveGrade')
+            ->assertHasNoErrors();
+
+        $this->assertSame('Yeni ad', $grade->fresh()->name);
+        $this->assertSame(4321.5, (float) $grade->fresh()->base_amount);
+
+        // Creating a grade means setting its amount — refused.
+        Livewire::test(ScalesTab::class)
+            ->call('selectScale', $scale->id)
+            ->call('openPanel', 'grade')
+            ->set('gradeForm.code', 'B8')
+            ->set('gradeForm.name', 'B8')
+            ->set('gradeForm.base_amount', '100')
+            ->call('saveGrade')
+            ->assertForbidden();
+        $this->assertSame(1, \App\Models\PayGrade::count());
+    }
+
+    public function test_editor_panel_opens_for_each_catalog_form(): void
+    {
+        $this->actingAsManager();
+
+        Livewire::test(ComponentsTab::class)
+            ->assertSet('panel', '')
+            ->call('openPanel', 'component')
+            ->assertSet('panel', 'component')
+            ->call('closePanel')
+            ->assertSet('panel', '');
+
+        Livewire::test(ScalesTab::class)
+            ->assertSet('panel', '')
+            ->call('openPanel', 'scale')
+            ->assertSet('panel', 'scale')
+            ->call('openPanel', 'grade')
+            ->assertSet('panel', 'grade')
+            ->call('closePanel')
+            ->assertSet('panel', '')
+            // Saving closes the panel through the form's own cancel path.
+            ->call('openPanel', 'scale')
+            ->set('scaleForm.name', 'Panel şkalası')
+            ->set('scaleForm.regime_id', CompensationRegime::where('code', 'private')->value('id'))
+            ->set('scaleForm.currency', 'AZN')
+            ->set('scaleForm.effective_from', '2026-01-01')
+            ->call('saveScale')
+            ->assertHasNoErrors()
+            ->assertSet('panel', '');
+    }
+
+    public function test_shell_renders_only_the_active_tab_and_passes_the_picked_employee(): void
+    {
+        $this->actingAsManager();
+        $personnel = $this->makePersonnel('emp4@example.test');
+
+        Livewire::withQueryParams(['tab' => 'components'])->test(Dashboard::class)
+            ->assertSet('activeTab', 'components')
+            ->assertSeeLivewire(ComponentsTab::class)
+            ->assertDontSeeLivewire(ScalesTab::class)
+            ->call('switchTab', 'bank')
+            ->assertSeeLivewire(BankTab::class)
+            ->call('selectPersonnel', $personnel->tabel_no, 'Jane Doe')
+            ->assertSet('selectedTabelNo', $personnel->tabel_no)
+            ->assertSee('Jane Doe');
+    }
+
+    public function test_every_tab_refuses_a_user_without_view_permission(): void
+    {
+        $this->actingAs(\App\Models\User::factory()->create());
+
+        foreach ([ScalesTab::class, ComponentsTab::class, AssignmentsTab::class, BankTab::class, StatutoryTab::class] as $tab) {
+            Livewire::test($tab)->assertForbidden();
+        }
+    }
+
+    public function test_tab_mutators_require_manage_permission_on_their_own(): void
+    {
+        $viewer = \App\Models\User::factory()->create();
+        $viewer->givePermissionTo(Permission::findOrCreate('show-compensation', 'web'));
+        $this->actingAs($viewer);
+        $personnel = $this->makePersonnel('emp5@example.test');
+
+        Livewire::test(ScalesTab::class)->call('saveScale')->assertForbidden();
+        Livewire::test(ComponentsTab::class)->call('saveComponent')->assertForbidden();
+        Livewire::test(StatutoryTab::class)->call('saveStatutoryRate')->assertForbidden();
+        Livewire::test(AssignmentsTab::class, ['tabelNo' => $personnel->tabel_no])->call('saveAssignment')->assertForbidden();
+        Livewire::test(BankTab::class, ['tabelNo' => $personnel->tabel_no])->call('saveBank')->assertForbidden();
+        Livewire::test(BankTab::class, ['tabelNo' => $personnel->tabel_no])->call('openPanel', 'bank')->assertForbidden();
+
+        $this->assertSame(0, EmployeeBankAccount::count());
+    }
+
+    public function test_bank_editor_only_reaches_the_picked_employees_accounts(): void
+    {
+        $this->actingAsManager();
+        $owner = $this->makePersonnel('emp6@example.test');
+        $other = $this->makePersonnel('emp7@example.test');
+        $account = EmployeeBankAccount::create([
+            'tabel_no' => $owner->tabel_no, 'iban' => 'AZ21NABZ00000000137010001944', 'is_primary' => true, 'is_active' => true,
+        ]);
+
+        $this->expectException(ModelNotFoundException::class);
+
+        Livewire::test(BankTab::class, ['tabelNo' => $other->tabel_no])
+            ->call('editBank', $account->id);
+    }
+
+    public function test_seed_catalog_is_available(): void
+    {
+        $this->assertSame(3, CompensationRegime::count());
+        $this->assertSame(11, CompensationComponent::count());
+        $this->assertDatabaseHas('compensation_components', ['code' => 'unemployment_ee', 'is_statutory' => true]);
+        $this->assertDatabaseHas('compensation_components', ['code' => 'medical_ee', 'is_statutory' => true]);
+    }
+
+    private function actingAsManager(): void
+    {
+        $user = \App\Models\User::factory()->create();
+        $user->givePermissionTo(Permission::findOrCreate('show-compensation', 'web'));
+        $user->givePermissionTo(Permission::findOrCreate('manage-compensation', 'web'));
+        $user->givePermissionTo(Permission::findOrCreate('view-compensation-amounts', 'web'));
+        $this->actingAs($user);
+    }
+
+    private function makePersonnel(string $email): Personnel
+    {
+        return Personnel::withoutEvents(fn () => Personnel::query()->create([
+            'tabel_no' => 'TB'.Str::upper(Str::random(6)),
+            'surname' => 'Doe',
+            'name' => 'Jane',
+            'patronymic' => 'Smith',
+            'birthdate' => '1990-01-01',
+            'gender' => 1,
+            'email' => $email,
+            'mobile' => '994501112233',
+            'nationality_id' => 1,
+            'pin' => 'P'.str_pad((string) random_int(1, 9999999), 7, '0', STR_PAD_LEFT),
+            'residental_address' => 'Main st',
+            'education_degree_id' => 1,
+            'structure_id' => 1,
+            'position_id' => 1,
+            'work_norm_id' => 1,
+            'join_work_date' => '2026-03-01',
+            'added_by' => 1,
+            'is_pending' => false,
+        ]));
+    }
+
+    private function seedReferenceData(): void
+    {
+        if (! DB::table('countries')->where('id', 1)->exists()) {
+            DB::table('countries')->insert(['id' => 1, 'code' => 'AZ']);
+        }
+        if (! DB::table('education_degrees')->where('id', 1)->exists()) {
+            DB::table('education_degrees')->insert(['id' => 1, 'title_az' => 'Bakalavr', 'title_en' => 'Bachelor', 'title_ru' => 'Bachelor']);
+        }
+        if (! DB::table('structures')->where('id', 1)->exists()) {
+            DB::table('structures')->insert(['id' => 1, 'name' => 'HQ', 'shortname' => 'HQ', 'parent_id' => null, 'coefficient' => 1.10, 'code' => 10, 'level' => 1]);
+        }
+        if (! DB::table('positions')->where('id', 1)->exists()) {
+            DB::table('positions')->insert(['id' => 1, 'name' => 'Officer', 'approval_rank' => 10, 'is_approval_target' => false]);
+        }
+        if (! DB::table('work_norms')->where('id', 1)->exists()) {
+            DB::table('work_norms')->insert(['id' => 1, 'name_az' => 'Tam iş günü', 'name_en' => 'Full time', 'name_ru' => 'Full time']);
+        }
+    }
+}

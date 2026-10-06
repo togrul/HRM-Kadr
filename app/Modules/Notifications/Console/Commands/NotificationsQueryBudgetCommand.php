@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 use Throwable;
 
 class NotificationsQueryBudgetCommand extends Command
@@ -156,6 +157,10 @@ class NotificationsQueryBudgetCommand extends Command
         }
 
         $user->givePermissionTo($permissions);
+
+        // givePermissionTo() forgets the permission cache; reload it here so the
+        // probe below is not charged for the cache miss.
+        app(PermissionRegistrar::class)->getPermissions();
     }
 
     private function probe(string $flow, int $budget, callable $callback): array

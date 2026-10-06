@@ -1,10 +1,55 @@
-<div class="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4" x-data>
+@php
+    $sectionTitles = [
+        'general' => __('services::common.labels.general'),
+        'candidate' => __('services::common.labels.candidate_preferences'),
+        'notifications-settings' => __('services::common.labels.notifications'),
+        'menus' => __('services::common.labels.menus'),
+        'roles' => __('services::common.navigation.roles_and_permissions'),
+        'users' => __('services::common.labels.users'),
+        'ranks' => __('services::common.labels.ranks'),
+    ];
+@endphp
 
-    <div class="flex flex-col space-y-2 bg-white border-r border-dashed border-neutral-200">
-        @livewire('structure.services', key('structure'))
+<div x-data class="flex flex-col">
+
+    {{-- ===================== contextual panel ===================== --}}
+    {{--
+        Rendered straight into the slot (no teleport): the panel body is its own Livewire
+        component, so it keeps working outside the page component's root — and a nested
+        Livewire component inside a teleport does not get its DOM patched on update.
+    --}}
+    <x-slot name="sidebar">
+        <x-context-panel
+            :title="__('ui::menu.items.settings')"
+            :subtitle="__('services::settings.labels.system_configuration')"
+        >
+            <x-context-panel.section>
+                @livewire('structure.services', key('structure'))
+            </x-context-panel.section>
+
+            <x-slot:footer>
+                <p class="text-[11.5px] text-ink-faint">{{ __('services::common.messages.customize_settings') }}</p>
+            </x-slot:footer>
+        </x-context-panel>
+    </x-slot>
+
+    {{-- ===================== header ===================== --}}
+    <x-page-header
+        :title="__('ui::menu.items.settings')"
+        :breadcrumb="$sectionTitles[$selectedService] ?? __('ui::menu.items.settings')"
+    >
+        <x-slot:icon>
+            <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </x-slot:icon>
+    </x-page-header>
+
+    {{-- the settings menu stays inline on small screens, where there is no side panel --}}
+    <div class="border-b border-hairline bg-white px-2 py-2 lg:hidden">
+        @livewire('structure.services', key('structure-compact'))
     </div>
 
-    <div class="px-2 py-2 sm:col-span-2 md:col-span-3">
+    {{-- ===================== body ===================== --}}
+    <div class="px-4 py-4 sm:px-5">
         <div wire:loading wire:target="selectService" class='text-input__loading'>
             <div class='text-input__loading--line'></div>
             <div class='text-input__loading--line'></div>
@@ -16,26 +61,11 @@
         </div>
 
         @if (!$selectedService)
-            <div class="flex items-center justify-center w-full px-4 py-6 bg-neutral-100 rounded-xl">
-                <div class="flex flex-col items-center space-y-3">
-                    <svg class="w-20 h-20 text-emerald-500" xmlns="http://www.w3.org/2000/svg"
-                        xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24">
-                        <defs />
-                        <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                            <rect x="0" y="0" width="24" height="24" />
-                            <path
-                                d="M7,3 L17,3 C19.209139,3 21,4.790861 21,7 C21,9.209139 19.209139,11 17,11 L7,11 C4.790861,11 3,9.209139 3,7 C3,4.790861 4.790861,3 7,3 Z M7,9 C8.1045695,9 9,8.1045695 9,7 C9,5.8954305 8.1045695,5 7,5 C5.8954305,5 5,5.8954305 5,7 C5,8.1045695 5.8954305,9 7,9 Z"
-                                fill="currentColor" />
-                            <path
-                                d="M7,13 L17,13 C19.209139,13 21,14.790861 21,17 C21,19.209139 19.209139,21 17,21 L7,21 C4.790861,21 3,19.209139 3,17 C3,14.790861 4.790861,13 7,13 Z M17,19 C18.1045695,19 19,18.1045695 19,17 C19,15.8954305 18.1045695,15 17,15 C15.8954305,15 15,15.8954305 15,17 C15,18.1045695 15.8954305,19 17,19 Z"
-                                fill="currentColor" opacity="0.3" />
-                        </g>
-                    </svg>
-                    <h1 class="text-lg text-slate-600">{{ __('services::common.messages.customize_settings') }}</h1>
-                </div>
-            </div>
+            <section class="rounded-xl border border-hairline bg-white px-4 py-6">
+                <x-ui.empty-state icon="icons.settings2-icon" :title="__('services::common.messages.customize_settings')" />
+            </section>
         @else
-            <section class="" wire:target="selectService" wire:loading.remove>
+            <section wire:target="selectService" wire:loading.remove>
                 @switch($selectedService)
                     @case('general')
                         @livewire('services.settings.settings-list', ['section' => 'general'], key('settings-general'))
@@ -55,21 +85,16 @@
 
                     @case('roles')
                         <div class="space-y-4" x-data="{ activeRoleTab: 'roles' }">
-                            <div class="inline-flex items-center rounded-2xl border border-zinc-200 bg-zinc-50 p-1">
-                                <button
-                                    type="button"
-                                    class="rounded-xl px-4 py-2 text-sm font-medium transition-all"
-                                    :class="activeRoleTab === 'roles' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'"
-                                    @click="activeRoleTab = 'roles'"
-                                >
+                            @php
+                                $roleTab = 'h-[30px] shrink-0 rounded-[9px] border px-2.5 text-[12px] transition';
+                                $roleTabOn = 'border-ink bg-ink font-semibold text-white';
+                                $roleTabOff = 'border-hairline bg-[#f4f4f5] font-medium text-[#3f3f46] hover:bg-[#e4e4e7] hover:text-ink';
+                            @endphp
+                            <div class="flex items-center gap-1.5">
+                                <button type="button" class="{{ $roleTab }}" x-on:click="activeRoleTab = 'roles'" x-bind:class="activeRoleTab === 'roles' ? '{{ $roleTabOn }}' : '{{ $roleTabOff }}'">
                                     {{ __('services::common.labels.roles') }}
                                 </button>
-                                <button
-                                    type="button"
-                                    class="rounded-xl px-4 py-2 text-sm font-medium transition-all"
-                                    :class="activeRoleTab === 'permissions' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'"
-                                    @click="activeRoleTab = 'permissions'"
-                                >
+                                <button type="button" class="{{ $roleTab }}" x-on:click="activeRoleTab = 'permissions'" x-bind:class="activeRoleTab === 'permissions' ? '{{ $roleTabOn }}' : '{{ $roleTabOff }}'">
                                     {{ __('services::common.labels.permissions') }}
                                 </button>
                             </div>
@@ -92,9 +117,7 @@
                         @livewire('services.ranks.all-ranks', key('ranks'))
                     @break
                 @endswitch
-
             </section>
         @endif
     </div>
-
 </div>

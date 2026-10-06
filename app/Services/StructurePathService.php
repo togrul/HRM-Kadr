@@ -4,46 +4,97 @@ namespace App\Services;
 
 use App\Models\Structure;
 
+/**
+ * Ancestor labels for a structure, without a query per org level.
+ *
+ * Walking `->parent` (lazily, or via the `withRecursive('parent')` scope) costs one round
+ * trip per level — seven on the current chart — every time a page renders a unit label.
+ * The org chart is small, so one flat read answers every lookup the request makes.
+ *
+ * Bind this `scoped()`: a fresh instance per caller re-reads the chart, which on a table
+ * means once per row.
+ */
 class StructurePathService
 {
     /**
-     * @var array<int, array{name:string, parent_id:int|null}>
+     * @var array<int, array{name:string, parent_id:int|null}>|null
      */
     protected ?array $structureMap = null;
 
     /**
-     * @var array<int, string>
+     * @var array<string, list<string>>
      */
-    protected array $pathCache = [];
+    protected array $segmentCache = [];
 
-    public function resolve(?int $structureId): string
+    /**
+     * @var array<int, list<int>>|null
+     */
+    protected ?array $childrenIndex = null;
+
+    /**
+     * The unit and its ancestors, outermost first.
+     *
+     * Callers join these themselves: unit names contain spaces, so a joined string cannot
+     * be split back apart.
+     *
+     * @return list<string>
+     */
+    public function segments(?int $structureId, bool $includeRoot = false): array
     {
         if (empty($structureId)) {
-            return '';
+            return [];
         }
 
         $structureId = (int) $structureId;
+        $key = $structureId.($includeRoot ? ':root' : '');
 
-        if (array_key_exists($structureId, $this->pathCache)) {
-            return $this->pathCache[$structureId];
+        if (array_key_exists($key, $this->segmentCache)) {
+            return $this->segmentCache[$key];
         }
 
         $map = $this->structureMap();
-        $segments = [];
+        $names = [];
         $cursor = $structureId;
+        // A malformed parent chain must not spin forever.
+        $guard = count($map) + 1;
 
-        while (isset($map[$cursor])) {
+        while (isset($map[$cursor]) && $guard-- > 0) {
             $node = $map[$cursor];
+
+            // The organizational root is a label most screens already carry in the header.
+            if ($node['parent_id'] === null && ! $includeRoot) {
+                break;
+            }
+
+            $names[] = $node['name'];
 
             if ($node['parent_id'] === null) {
                 break;
             }
 
-            $segments[] = $node['name'];
             $cursor = (int) $node['parent_id'];
         }
 
-        return $this->pathCache[$structureId] = implode(' / ', array_reverse($segments));
+        return $this->segmentCache[$key] = array_values(array_reverse(array_filter($names)));
+    }
+
+    /**
+     * The full chain as one label. Kept for the screens that show the whole path.
+     */
+    public function resolve(?int $structureId): string
+    {
+        return implode(' / ', $this->segments($structureId));
+    }
+
+    /**
+     * Just the unit the person actually sits in — what a table column should print, with
+     * resolve() available for the hover title.
+     */
+    public function current(?int $structureId): string
+    {
+        $segments = $this->segments($structureId);
+
+        return $segments === [] ? '' : (string) end($segments);
     }
 
     public function resolveFromModel(?Structure $structure): string
@@ -51,6 +102,96 @@ class StructurePathService
         return $this->resolve($structure?->id);
     }
 
+    /**
+     * The unit, then each ancestor up to and including the root — nearest first.
+     *
+     * @return list<int>
+     */
+    public function lineIds(?int $structureId): array
+    {
+        $map = $this->structureMap();
+        $ids = [];
+        $cursor = (int) $structureId;
+
+        while (isset($map[$cursor]) && ! isset($ids[$cursor])) {
+            $ids[$cursor] = true;
+            $cursor = (int) $map[$cursor]['parent_id'];
+        }
+
+        return array_keys($ids);
+    }
+
+    /**
+     * The unit and every unit below it, from the same flat read — walking `->subs`
+     * lazily costs a query per node. With `$within`, the walk only descends through
+     * those units (the user's accessible set); the unit itself is always included.
+     *
+     * @param  list<int>|null  $within
+     * @return list<int>
+     */
+    public function descendantIds(int $structureId, ?array $within = null): array
+    {
+        if (! isset($this->structureMap()[$structureId])) {
+            return [];
+        }
+
+        $children = $this->childrenIndex();
+        $allowed = $within === null ? null : array_flip($within);
+        $ids = [];
+        $stack = [$structureId];
+
+        while ($stack !== []) {
+            $id = array_pop($stack);
+
+            if (isset($ids[$id])) {
+                continue;
+            }
+
+            $ids[$id] = true;
+
+            foreach ($children[$id] ?? [] as $child) {
+                if ($allowed === null || isset($allowed[$child])) {
+                    $stack[] = $child;
+                }
+            }
+        }
+
+        return array_keys($ids);
+    }
+
+    /**
+     * Drop the cached chart; the next lookup re-reads it. StructureObserver calls this so
+     * a unit created or removed mid-request is seen by the rest of that request.
+     */
+    public function flush(): void
+    {
+        $this->structureMap = null;
+        $this->childrenIndex = null;
+        $this->segmentCache = [];
+    }
+
+    /**
+     * @return array<int, list<int>>
+     */
+    protected function childrenIndex(): array
+    {
+        if ($this->childrenIndex !== null) {
+            return $this->childrenIndex;
+        }
+
+        $children = [];
+        foreach ($this->structureMap() as $id => $node) {
+            if ($node['parent_id'] !== null) {
+                $children[$node['parent_id']][] = $id;
+            }
+        }
+
+        return $this->childrenIndex = $children;
+    }
+
+    /**
+     * @return array<int, array{name:string, parent_id:int|null}>
+     */
     protected function structureMap(): array
     {
         if ($this->structureMap !== null) {

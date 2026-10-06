@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\Docs\GuideRegistry;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,6 +18,9 @@ class TrainingPerformanceGuideController extends Controller
 
         return view('docs.training-performance-guide', [
             'focus' => $focus,
+            'focusLabel' => $focus === 'overview' ? 'Ümumi baxış' : GuideRegistry::get($focus)['label'],
+            'modules' => GuideRegistry::modules(),
+            'sidebarGroups' => $this->sidebarGroups(),
             'initialModules' => $initialModules,
             'initialModulePayloads' => collect($initialModules)
                 ->mapWithKeys(fn (string $module) => [$module => $this->modulePayload($module)])
@@ -26,64 +30,81 @@ class TrainingPerformanceGuideController extends Controller
 
     public function section(Request $request, string $module): JsonResponse
     {
-        $module = $this->normalizeFocus($module);
-
-        abort_if($module === 'overview', 404);
+        abort_unless(GuideRegistry::has($module), 404);
 
         return response()->json([
             'module' => $module,
-            'html' => view("docs.partials.guide-{$module}", $this->modulePayload($module))->render(),
+            'html' => view('docs.partials.guide-module', $this->modulePayload($module))->render(),
         ]);
     }
 
     private function normalizeFocus(?string $focus): string
     {
-        if (! in_array($focus, ['overview', 'training', 'performance', 'attendance', 'orders', 'notifications', 'professional-portfolio', 'my-hr', 'onboarding-library', 'learning-library'], true)) {
-            return 'overview';
+        return GuideRegistry::has((string) $focus) ? (string) $focus : 'overview';
+    }
+
+    /**
+     * The guide's own sidebar: the overview, then one group per module whose entries are the
+     * module head plus the markdown's H2 headings — so the menu always matches the text.
+     *
+     * @return list<array{key:string,label:string,tone:string,icon:string,items:list<array{id:string,label:string}>}>
+     */
+    private function sidebarGroups(): array
+    {
+        $groups = [[
+            'key' => 'overview',
+            'label' => 'Başlanğıc',
+            'tone' => 'zinc',
+            'icon' => 'rocket_launch',
+            'items' => [
+                ['id' => 'overview', 'label' => 'Ümumi baxış'],
+                ['id' => 'overview-workflow', 'label' => 'Modulların iş axını'],
+            ],
+        ]];
+
+        foreach (GuideRegistry::modules() as $key => $module) {
+            $items = [['id' => $key.'-module', 'label' => 'Modulun məqsədi']];
+            foreach ($this->headings($module['markdown']) as $index => $heading) {
+                $items[] = ['id' => $key.'-h-'.($index + 1), 'label' => $heading];
+            }
+
+            $groups[] = ['key' => $key] + array_intersect_key($module, array_flip(['label', 'tone', 'icon'])) + ['items' => $items];
         }
 
-        return $focus;
+        return $groups;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function headings(string $file): array
+    {
+        $contents = $this->withoutCodeBlocks(file_get_contents(GuideRegistry::markdownPath($file)) ?: '');
+        preg_match_all('/^##[ \t]+(.+?)[ \t#]*$/m', $contents, $matches);
+
+        return array_map(fn (string $heading): string => trim(str_replace(['`', '*'], '', $heading)), $matches[1]);
+    }
+
+    private function withoutCodeBlocks(string $contents): string
+    {
+        return preg_replace('/^```.*?^```/ms', '', $contents) ?? $contents;
     }
 
     private function modulePayload(string $module): array
     {
-        return match ($module) {
-            'overview' => [
-                'overviewHtml' => $this->renderMarkdown('docs/scenario/training-performance-user-guide.md'),
-            ],
-            'training' => [
-                'trainingHtml' => $this->renderMarkdown('docs/scenario/training-needs-user-guide.md'),
-            ],
-            'performance' => [
-                'performanceHtml' => $this->renderMarkdown('docs/scenario/performance-evaluation-user-guide.md'),
-            ],
-            'attendance' => [
-                'attendanceHtml' => $this->renderMarkdown('docs/scenario/attendance-user-guide.md'),
-            ],
-            'orders' => [
-                'ordersModuleHtml' => $this->renderMarkdown('docs/scenario/orders-user-guide.md'),
-                'ordersUserHtml' => $this->renderMarkdown('docs/scenario/orders-user-guide.md'),
-                'ordersAdminHtml' => $this->renderMarkdown('docs/scenario/orders-admin-guide.md'),
-                'ordersApprovalHtml' => $this->renderMarkdown('docs/scenario/orders-approval-guide.md'),
-                'ordersOpsHtml' => $this->renderMarkdown('docs/scenario/orders-ops-commands-guide.md'),
-            ],
-            'notifications' => [
-                'notificationsHtml' => $this->renderMarkdown('docs/scenario/notifications-module-guide.md'),
-            ],
-            'professional-portfolio' => [
-                'professionalPortfolioHtml' => $this->renderMarkdown('docs/scenario/professional-portfolio-user-guide.md'),
-            ],
-            'my-hr' => [
-                'myHrHtml' => $this->renderMarkdown('docs/scenario/my-hr-user-guide.md'),
-            ],
-            'onboarding-library' => [
-                'onboardingLibraryHtml' => $this->renderMarkdown('docs/scenario/onboarding-library-user-guide.md'),
-            ],
-            'learning-library' => [
-                'learningLibraryHtml' => $this->renderMarkdown('docs/scenario/learning-library-user-guide.md'),
-            ],
-            default => [],
-        };
+        if ($module === 'overview') {
+            return ['overviewHtml' => $this->renderMarkdown('docs/scenario/training-performance-user-guide.md')];
+        }
+
+        $entry = GuideRegistry::get($module);
+        $index = 0;
+        $html = preg_replace_callback('/<h2>/', function () use ($module, &$index): string {
+            $index++;
+
+            return '<h2 id="'.$module.'-h-'.$index.'">';
+        }, (string) $this->renderMarkdown('docs/scenario/'.$entry['markdown'])) ?? '';
+
+        return ['key' => $module, 'module' => $entry, 'html' => new HtmlString($html)];
     }
 
     private function renderMarkdown(string $relativePath): HtmlString

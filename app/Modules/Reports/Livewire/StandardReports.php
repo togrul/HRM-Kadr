@@ -4,14 +4,15 @@ namespace App\Modules\Reports\Livewire;
 
 use App\Livewire\Concerns\WithRuntimeMemo;
 use App\Modules\Reports\Application\Services\ReportsAccessService;
-use App\Modules\Reports\Application\Services\ReportsStructureScopeService;
 use App\Modules\Reports\Application\Services\StandardReportCatalogService;
 use App\Modules\Reports\Application\Services\StandardReportService;
 use App\Modules\Reports\Exports\ReportsTableExport;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Isolate;
 use Livewire\Component;
-use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Excel as ExcelWriter;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 #[Isolate]
 class StandardReports extends Component
@@ -30,12 +31,9 @@ class StandardReports extends Component
 
     public array $reportOptions = [];
 
-    public array $structureOptions = [];
-
     public function mount(
         ReportsAccessService $access,
         StandardReportCatalogService $catalog,
-        ReportsStructureScopeService $structures,
         ?string $report = null,
         ?int $year = null,
         ?int $month = null,
@@ -49,12 +47,12 @@ class StandardReports extends Component
         $this->month = max(1, min(12, $month ?: (int) request()->integer('month', now()->month)));
         $this->structureId = $structureId ?: request()->integer('structure_id') ?: null;
         $this->reportOptions = $catalog->all();
-        $this->structureOptions = $structures->filterOptions()->all();
     }
 
     public function updatedReport(): void
     {
         $this->resetRuntimeMemo();
+        $this->dispatch('reports-selection', report: $this->report)->to(Dashboard::class);
     }
 
     public function updatedYear(): void
@@ -82,7 +80,7 @@ class StandardReports extends Component
         );
     }
 
-    public function exportExcel()
+    public function exportExcel(): BinaryFileResponse
     {
         app(ReportsAccessService::class)->authorizeExport();
 
@@ -92,7 +90,7 @@ class StandardReports extends Component
         );
     }
 
-    public function exportCsv()
+    public function exportCsv(): BinaryFileResponse
     {
         app(ReportsAccessService::class)->authorizeExport();
 
@@ -113,12 +111,12 @@ class StandardReports extends Component
         ]);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('reports::livewire.reports.standard-reports');
     }
 
-    public function placeholder()
+    public function placeholder(): View
     {
         return view('reports::livewire.reports.placeholder');
     }

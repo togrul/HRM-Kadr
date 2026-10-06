@@ -9,7 +9,9 @@ class ProfileState
         private string $active = 'default',
         private array $baseModules = [],
     ) {
-        //
+        // Profile keys are lower-case; normalise the active value (e.g. APP_TYPE=PUBLIC) so
+        // its module/feature overrides actually apply regardless of how it's cased in env.
+        $this->active = strtolower(trim($this->active));
     }
 
     public function active(): string

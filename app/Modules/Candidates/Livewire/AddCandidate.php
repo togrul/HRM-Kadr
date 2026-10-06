@@ -2,17 +2,18 @@
 
 namespace App\Modules\Candidates\Livewire;
 
-use App\Modules\Candidates\Support\Traits\CandidateCrud;
 use App\Models\Candidate;
+use App\Modules\Candidates\Support\Traits\CandidateCrud;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;
 
 class AddCandidate extends Component
 {
-    use CandidateCrud;
     use AuthorizesRequests;
+    use CandidateCrud;
 
-    public function placeholder()
+    public function placeholder(): View
     {
         return view('candidates::livewire.candidates.placeholders.add-candidate');
     }

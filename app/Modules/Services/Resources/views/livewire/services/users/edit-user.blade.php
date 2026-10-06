@@ -1,6 +1,6 @@
 <div>
     <div class="sidemenu-title">
-        <h2 class="text-lg font-medium text-gray-600" id="slide-over-title">
+        <h2 class="text-lg font-medium text-zinc-600" id="slide-over-title">
             {{ $title ?? ''}}
           </h2>
     </div>
@@ -42,6 +42,15 @@
     </div>
 
     <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        @if ((int) $userModel->id === (int) auth()->id())
+            <div class="sm:col-span-2 sm:w-1/2 sm:pr-1">
+              <x-label for="user.old_password">{{ __('services::common.labels.current_password') }}</x-label>
+              <x-livewire-input mode="gray" type="password" name="user.old_password" wire:model="user.old_password" autocomplete="current-password"></x-livewire-input>
+              @error('user.old_password')
+                  <x-validation> {{ $message }} </x-validation>
+              @enderror
+            </div>
+        @endif
         <div class="">
           <x-label for="user.password">{{ __('services::common.labels.password') }}</x-label>
           <x-livewire-input mode="gray" type="password" name="user.password" wire:model="user.password" autocomplete="new-password"></x-livewire-input>

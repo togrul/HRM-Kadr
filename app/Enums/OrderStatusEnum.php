@@ -15,9 +15,9 @@ enum OrderStatusEnum: int
 
     public static function label($value): self
     {
-        return match($value) {
-            'PENDING'   => self::PENDING,
-            'APPROVED'  => self::APPROVED,
+        return match ($value) {
+            'PENDING' => self::PENDING,
+            'APPROVED' => self::APPROVED,
             'CANCELLED' => self::CANCELLED,
         };
     }

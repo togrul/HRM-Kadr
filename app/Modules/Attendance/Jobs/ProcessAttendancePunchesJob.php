@@ -21,8 +21,7 @@ class ProcessAttendancePunchesJob implements ShouldQueue
         public string $fromDate,
         public string $toDate,
         public ?string $source = null
-    ) {
-    }
+    ) {}
 
     public function handle(AttendancePunchProcessingPipelineService $pipeline): void
     {
@@ -33,4 +32,3 @@ class ProcessAttendancePunchesJob implements ShouldQueue
         );
     }
 }
-

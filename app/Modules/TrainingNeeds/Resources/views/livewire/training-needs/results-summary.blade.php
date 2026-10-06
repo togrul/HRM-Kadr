@@ -12,8 +12,10 @@
                     </div>
                     <p class="mt-2 text-xs text-zinc-500">{{ __('training_needs::dashboard.labels.feedback_form_meta', ['count' => $form->responses_count, 'questions' => count($form->questions ?? [])]) }}</p>
                     <div class="mt-3 flex flex-wrap gap-2">
+                        @if ($this->canManageTrainingNeeds)
                         <x-ui.action-pill mode="secondary" wire:click="relayEditFeedbackForm({{ $form->id }})" icon="icons.edit-icon">{{ __('training_needs::dashboard.actions.edit') }}</x-ui.action-pill>
                         <x-ui.action-pill mode="delete" wire:click="relayDeleteFeedbackForm({{ $form->id }})" icon="icons.delete-icon">{{ __('training_needs::dashboard.actions.delete') }}</x-ui.action-pill>
+                        @endif
                     </div>
                 </x-ui.list-card>
             @empty
@@ -41,10 +43,11 @@
         </div>
     </x-surface-card>
 
+    @if ($this->canExportTrainingNeeds)
     <x-surface-card :title="__('training_needs::dashboard.cards.export_reports')" icon="icons.pending-icon">
         <div class="grid gap-3">
             <x-button mode="black" wire:click="exportDeliveryReport">{{ __('training_needs::dashboard.actions.export_delivery_report') }}</x-button>
-            <x-button mode="success" wire:click="exportFeedbackReport">{{ __('training_needs::dashboard.actions.export_feedback_report') }}</x-button>
+            <x-button mode="default" wire:click="exportFeedbackReport">{{ __('training_needs::dashboard.actions.export_feedback_report') }}</x-button>
             <x-button mode="default" wire:click="exportDeliverySummaryReport">{{ __('training_needs::dashboard.actions.export_delivery_summary_report') }}</x-button>
             <x-button mode="default" wire:click="exportDeliveryPivotReport">{{ __('training_needs::dashboard.actions.export_delivery_pivot_report') }}</x-button>
             <x-button mode="default" wire:click="exportAuditReport">{{ __('training_needs::dashboard.actions.export_audit_report') }}</x-button>
@@ -55,4 +58,5 @@
             <p class="text-xs text-zinc-500">{{ __('training_needs::dashboard.labels.print_report_hint') }}</p>
         </div>
     </x-surface-card>
+    @endif
 </div>

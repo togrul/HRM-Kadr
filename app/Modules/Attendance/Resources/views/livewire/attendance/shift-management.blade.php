@@ -5,49 +5,49 @@
             <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                 <div>
                     <x-label for="attendance-shift-name">{{ __('attendance::shift_management.fields.shift_name') }}</x-label>
-                    <x-livewire-input id="attendance-shift-name" mode="gray" name="shiftForm.name" wire:model.defer="shiftForm.name" />
+                    <x-livewire-input id="attendance-shift-name" mode="gray" name="shiftForm.name" wire:model="shiftForm.name" />
                     @error('shiftForm.name') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <div>
                     <x-label for="attendance-shift-start">{{ __('attendance::shift_management.fields.start_time') }}</x-label>
-                    <input id="attendance-shift-start" type="time" wire:model.defer="shiftForm.start_time" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                    <input id="attendance-shift-start" type="time" wire:model="shiftForm.start_time" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
                     @error('shiftForm.start_time') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <div>
                     <x-label for="attendance-shift-end">{{ __('attendance::shift_management.fields.end_time') }}</x-label>
-                    <input id="attendance-shift-end" type="time" wire:model.defer="shiftForm.end_time" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                    <input id="attendance-shift-end" type="time" wire:model="shiftForm.end_time" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
                     @error('shiftForm.end_time') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <div>
                     <x-label for="attendance-shift-break">{{ __('attendance::shift_management.fields.break_minutes') }}</x-label>
-                    <x-livewire-input id="attendance-shift-break" mode="gray" type="number" min="0" name="shiftForm.break_minutes" wire:model.defer="shiftForm.break_minutes" />
+                    <x-livewire-input id="attendance-shift-break" mode="gray" type="number" min="0" name="shiftForm.break_minutes" wire:model="shiftForm.break_minutes" />
                     @error('shiftForm.break_minutes') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <div>
                     <x-label for="attendance-shift-in-before">{{ __('attendance::shift_management.fields.check_in_flex_before') }}</x-label>
-                    <x-livewire-input id="attendance-shift-in-before" mode="gray" type="number" min="0" name="shiftForm.in_flex_before_minutes" wire:model.defer="shiftForm.in_flex_before_minutes" />
+                    <x-livewire-input id="attendance-shift-in-before" mode="gray" type="number" min="0" name="shiftForm.in_flex_before_minutes" wire:model="shiftForm.in_flex_before_minutes" />
                 </div>
                 <div>
                     <x-label for="attendance-shift-in-after">{{ __('attendance::shift_management.fields.check_in_flex_after') }}</x-label>
-                    <x-livewire-input id="attendance-shift-in-after" mode="gray" type="number" min="0" name="shiftForm.in_flex_after_minutes" wire:model.defer="shiftForm.in_flex_after_minutes" />
+                    <x-livewire-input id="attendance-shift-in-after" mode="gray" type="number" min="0" name="shiftForm.in_flex_after_minutes" wire:model="shiftForm.in_flex_after_minutes" />
                 </div>
                 <div>
                     <x-label for="attendance-shift-out-before">{{ __('attendance::shift_management.fields.check_out_flex_before') }}</x-label>
-                    <x-livewire-input id="attendance-shift-out-before" mode="gray" type="number" min="0" name="shiftForm.out_flex_before_minutes" wire:model.defer="shiftForm.out_flex_before_minutes" />
+                    <x-livewire-input id="attendance-shift-out-before" mode="gray" type="number" min="0" name="shiftForm.out_flex_before_minutes" wire:model="shiftForm.out_flex_before_minutes" />
                 </div>
                 <div>
                     <x-label for="attendance-shift-out-after">{{ __('attendance::shift_management.fields.check_out_flex_after') }}</x-label>
-                    <x-livewire-input id="attendance-shift-out-after" mode="gray" type="number" min="0" name="shiftForm.out_flex_after_minutes" wire:model.defer="shiftForm.out_flex_after_minutes" />
+                    <x-livewire-input id="attendance-shift-out-after" mode="gray" type="number" min="0" name="shiftForm.out_flex_after_minutes" wire:model="shiftForm.out_flex_after_minutes" />
                 </div>
             </div>
 
             <div class="mt-3 grid gap-3 md:grid-cols-2">
                 <label class="flex h-10 items-center gap-2 rounded-lg bg-neutral-100 px-3 text-sm text-zinc-700 shadow-sm">
-                    <input type="checkbox" wire:model.defer="shiftForm.is_night_shift" class="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500" />
+                    <input type="checkbox" wire:model="shiftForm.is_night_shift" class="h-4 w-4 rounded border-hairline text-ink focus:ring-zinc-400" />
                     <span>{{ __('attendance::shift_management.labels.night_shift') }}</span>
                 </label>
                 <label class="flex h-10 items-center gap-2 rounded-lg bg-neutral-100 px-3 text-sm text-zinc-700 shadow-sm">
-                    <input type="checkbox" wire:model.defer="shiftForm.is_active" class="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500" />
+                    <input type="checkbox" wire:model="shiftForm.is_active" class="h-4 w-4 rounded border-hairline text-ink focus:ring-zinc-400" />
                     <span>{{ __('attendance::shift_management.labels.active_shift') }}</span>
                 </label>
             </div>
@@ -92,7 +92,7 @@
                                             </a>
                                             <x-button mode="slate" class="!h-8 !px-3 !text-xs" wire:click="editShift({{ $shift->id }})">{{ __('attendance::shift_management.actions.edit') }}</x-button>
                                             @if($shift->is_active)
-                                                <x-button mode="reject" class="!h-8 !px-3 !text-xs" wire:click="deactivateShift({{ $shift->id }})">{{ __('attendance::shift_management.actions.deactivate') }}</x-button>
+                                                <x-button mode="reject" class="!h-8 !px-3 !text-xs" data-title="{{ __('attendance::shift_management.actions.deactivate') }}" data-message="{{ __('attendance::shift_management.confirm.deactivate_shift') }}" x-on:click="$dispatch('confirm-action', { title: $el.dataset.title, message: $el.dataset.message, confirmText: $el.dataset.title, tone: 'rose', run: () => $wire.deactivateShift({{ $shift->id }}) })">{{ __('attendance::shift_management.actions.deactivate') }}</x-button>
                                             @endif
                                         </div>
                                     </x-table.td>
@@ -135,19 +135,19 @@
                             <button
                                 type="button"
                                 wire:click="selectPersonnel('{{ $personnel->tabel_no }}', '{{ addslashes($personnel->fullname) }}')"
-                                class="flex w-full flex-col rounded-md px-2 py-1 text-left text-slate-600 transition-all duration-300 hover:bg-white drop-shadow-sm"
+                                class="flex w-full flex-col rounded-md px-2 py-1 text-left text-zinc-600 transition-all duration-300 hover:bg-white drop-shadow-sm"
                             >
                                 <span>{{ $personnel->fullname }}</span>
                                 <span class="text-xs font-mono text-zinc-500">{{ $personnel->tabel_no }}</span>
                                 <span class="max-w-[18rem] truncate text-[11px] text-zinc-400 md:max-w-[24rem]" title="{{ $personnel->structure_path }}">
-                                    {{ $personnel->structure_path ?: '-' }}
+                                    {{ $personnel->structure_name ?: '-' }}
                                     @if($personnel->position?->name)
                                         • {{ $personnel->position->name }}
                                     @endif
                                 </span>
                             </button>
                         @empty
-                            <span class="mx-auto text-sm font-medium text-slate-500">
+                            <span class="mx-auto text-sm font-medium text-zinc-500">
                                 {{ __('attendance::shift_management.labels.search_personnel_empty') }}
                             </span>
                         @endforelse
@@ -156,22 +156,22 @@
                 </div>
                 <div>
                     <x-label for="attendance-assignment-shift">{{ __('attendance::shift_management.fields.shift') }}</x-label>
-                    <select id="attendance-assignment-shift" wire:model.defer="assignmentForm.shift_id" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                    <x-ui.select id="attendance-assignment-shift" wire:model="assignmentForm.shift_id">
                         <option value="">{{ __('attendance::shift_management.options.select_shift') }}</option>
                         @foreach($this->assignmentShifts as $shift)
                             <option value="{{ $shift->id }}">{{ $shift->name }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                     @error('assignmentForm.shift_id') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <div>
                     <x-label for="attendance-assignment-from">{{ __('attendance::shift_management.fields.effective_from') }}</x-label>
-                    <input id="attendance-assignment-from" type="date" wire:model.defer="assignmentForm.effective_from" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                    <input id="attendance-assignment-from" type="date" wire:model="assignmentForm.effective_from" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
                     @error('assignmentForm.effective_from') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <div>
                     <x-label for="attendance-assignment-to">{{ __('attendance::shift_management.fields.effective_to') }}</x-label>
-                    <input id="attendance-assignment-to" type="date" wire:model.defer="assignmentForm.effective_to" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                    <input id="attendance-assignment-to" type="date" wire:model="assignmentForm.effective_to" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
                     @error('assignmentForm.effective_to') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
             </div>
@@ -194,7 +194,7 @@
                             <p class="text-xs font-mono uppercase tracking-wide text-zinc-500">{{ $selectedPersonnel['tabel_no'] }}</p>
                             @if($this->selectedPersonnelRecord?->structure_path)
                                 <p class="mt-1 max-w-[18rem] truncate text-xs text-zinc-500 md:max-w-[24rem]" title="{{ $this->selectedPersonnelRecord->structure_path }}">
-                                    {{ $this->selectedPersonnelRecord->structure_path }}
+                                    {{ $this->selectedPersonnelRecord->structure_name }}
                                     @if($this->selectedPersonnelRecord?->position?->name)
                                         • {{ $this->selectedPersonnelRecord->position->name }}
                                     @endif
@@ -216,7 +216,7 @@
 
             <div class="mt-3">
                 <label class="flex h-10 items-center gap-2 rounded-lg bg-neutral-100 px-3 text-sm text-zinc-700 shadow-sm">
-                    <input type="checkbox" wire:model.defer="assignmentForm.is_active" class="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500" />
+                    <input type="checkbox" wire:model="assignmentForm.is_active" class="h-4 w-4 rounded border-hairline text-ink focus:ring-zinc-400" />
                     <span>{{ __('attendance::shift_management.labels.active_assignment') }}</span>
                 </label>
             </div>
@@ -243,7 +243,7 @@
                                     <x-table.td>
                                         <div class="flex flex-col">
                                             <span class="max-w-[18rem] truncate md:max-w-[24rem]" title="{{ $assignment->personnel?->structure_path ?? '' }}">
-                                                {{ $assignment->personnel?->structure_path ?? '-' }}
+                                                {{ $assignment->personnel?->structure_name ?? '-' }}
                                             </span>
                                             @if($assignment->personnel?->position?->name)
                                                 <span class="text-xs text-zinc-500">{{ $assignment->personnel->position->name }}</span>
@@ -322,7 +322,7 @@
                                             </a>
                                             <x-button mode="slate" class="!h-8 !px-3 !text-xs" wire:click="editAssignment({{ $assignment->id }})">{{ __('attendance::shift_management.actions.edit') }}</x-button>
                                             @if($assignment->is_active)
-                                                <x-button mode="reject" class="!h-8 !px-3 !text-xs" wire:click="deactivateAssignment({{ $assignment->id }})">{{ __('attendance::shift_management.actions.deactivate') }}</x-button>
+                                                <x-button mode="reject" class="!h-8 !px-3 !text-xs" data-title="{{ __('attendance::shift_management.actions.deactivate') }}" data-message="{{ __('attendance::shift_management.confirm.deactivate_assignment') }}" x-on:click="$dispatch('confirm-action', { title: $el.dataset.title, message: $el.dataset.message, confirmText: $el.dataset.title, tone: 'rose', run: () => $wire.deactivateAssignment({{ $assignment->id }}) })">{{ __('attendance::shift_management.actions.deactivate') }}</x-button>
                                             @endif
                                         </div>
                                     </x-table.td>

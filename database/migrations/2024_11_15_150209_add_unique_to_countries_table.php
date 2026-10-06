@@ -16,8 +16,8 @@ return new class extends Migration
         }
 
         Schema::table('countries', function (Blueprint $table) {
-             $table->integer('id')->change();
-             $table->unique(['id', 'code']);
+            $table->integer('id')->change();
+            $table->unique(['id', 'code']);
         });
     }
 

@@ -2,4 +2,6 @@
     @include('training-needs::livewire.training-needs.workspaces.catalogs')
     @include('training-needs::livewire.training-needs.workspaces.matrix')
     @include('training-needs::livewire.training-needs.workspaces.profiles')
+
+    <x-ui.delete-confirmation-modal />
 </div>

@@ -4,6 +4,9 @@ namespace App\Modules\Services\Livewire\Users;
 
 use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\User;
+use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
+use DB;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -14,6 +17,7 @@ use Spatie\Permission\Models\Role;
 class AddUser extends Component
 {
     use AuthorizesRequests;
+    use AuthorizesSettingsAccess;
     use DropdownConstructTrait;
 
     public $title;
@@ -24,7 +28,7 @@ class AddUser extends Component
 
     public string $searchRole = '';
 
-    protected function rules()
+    protected function rules(): array
     {
         return [
             'user.name' => 'required|string|min:1',
@@ -35,7 +39,7 @@ class AddUser extends Component
         ];
     }
 
-    protected function validationAttributes()
+    protected function validationAttributes(): array
     {
         return [
             'user.name' => __('services::common.labels.name'),
@@ -46,9 +50,13 @@ class AddUser extends Component
         ];
     }
 
-    public function store()
+    public function store(): void
     {
-        $this->authorize('manage-settings');
+        $this->authorize('access-settings');
+
+        // Livewire updates skip the HTTP TrimStrings middleware, so trim here.
+        $this->user['name'] = trim((string) ($this->user['name'] ?? ''));
+        $this->user['email'] = trim((string) ($this->user['email'] ?? ''));
 
         $this->validate();
 
@@ -71,14 +79,14 @@ class AddUser extends Component
         $this->dispatch('userAdded', __('services::users.messages.created'));
     }
 
-    public function mount()
+    public function mount(): void
     {
-        $this->authorize('manage-settings');
+        $this->authorize('access-settings');
         $this->title = __('services::users.titles.add');
         $this->roleId = null;
     }
 
-    public function render()
+    public function render(): View
     {
         return view('services::livewire.services.users.add-user');
     }
@@ -90,7 +98,7 @@ class AddUser extends Component
         $search = $this->dropdownSearch('searchRole');
 
         $base = Role::query()
-            ->select('id', \DB::raw('name as label'))
+            ->select('id', DB::raw('name as label'))
             ->orderBy('name');
 
         if ($search === '') {

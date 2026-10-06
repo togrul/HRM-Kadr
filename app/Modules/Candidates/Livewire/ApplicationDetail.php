@@ -5,6 +5,7 @@ namespace App\Modules\Candidates\Livewire;
 use App\Models\CandidateApplication;
 use App\Modules\Candidates\Application\Services\CandidateApplicationReadService;
 use App\Modules\Candidates\Support\Traits\InteractsWithRecruitmentPresentation;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -43,7 +44,7 @@ class ApplicationDetail extends Component
         return (string) ($this->application->opening?->profile_pack ?: $this->workflowPackResolver()->resolve());
     }
 
-    public function render()
+    public function render(): View
     {
         return view('candidates::livewire.candidates.application-detail');
     }

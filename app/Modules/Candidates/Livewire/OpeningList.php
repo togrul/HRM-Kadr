@@ -6,6 +6,7 @@ use App\Livewire\Traits\SideModalAction;
 use App\Models\Candidate;
 use App\Models\JobOpening;
 use App\Modules\Candidates\Support\Traits\InteractsWithRecruitmentPresentation;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -125,7 +126,7 @@ class OpeningList extends Component
             ->count();
     }
 
-    public function render()
+    public function render(): View
     {
         return view('candidates::livewire.candidates.opening-list');
     }

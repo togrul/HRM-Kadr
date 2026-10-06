@@ -8,14 +8,14 @@ use App\Livewire\Forms\Personnel\EducationForm;
 use App\Livewire\Forms\Personnel\KinshipForm;
 use App\Livewire\Forms\Personnel\LaborActivityForm;
 use App\Livewire\Forms\Personnel\MiscellaneousForm;
-use App\Livewire\Forms\Personnel\ServiceHistoryForm;
 use App\Livewire\Forms\Personnel\PersonalInformationForm;
+use App\Livewire\Forms\Personnel\ServiceHistoryForm;
+use App\Models\Personnel;
 use App\Modules\Personnel\Services\PersonnelFormAssembler;
 use App\Modules\Personnel\Support\Traits\PersonnelCrud;
 use App\Modules\Personnel\Support\Traits\RelationCruds\RelationCrudTrait;
-use App\Models\Personnel;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Isolate;
 use Livewire\Component;
 
@@ -27,15 +27,22 @@ class AddPersonnel extends Component
     use RelationCrudTrait;
 
     public PersonalInformationForm $personalForm;
+
     public DocumentForm $documentForm;
+
     public EducationForm $educationForm;
+
     public LaborActivityForm $laborActivityForm;
+
     public ServiceHistoryForm $historyForm;
+
     public AwardsPunishmentsForm $awardsPunishmentsForm;
+
     public KinshipForm $kinshipForm;
+
     public MiscellaneousForm $miscForm;
 
-    public function store()
+    public function store(): void
     {
         $this->validateCurrentStepForSave();
         $this->persistPersonnel();
@@ -83,7 +90,8 @@ class AddPersonnel extends Component
         $this->dispatchPersonnelStored(__('personnel::common.messages.personnel_created'));
         $this->dispatchModalCloseEvent();
     }
-    public function mount()
+
+    public function mount(): void
     {
         $this->authorize('create', Personnel::class);
         $this->title = __('personnel::common.titles.new_personnel');

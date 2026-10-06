@@ -5,16 +5,8 @@ namespace App\Modules\Orders\Providers;
 use App\Models\OrderType;
 use App\Modules\Orders\Console\Commands\OrdersListQueryBudgetCommand;
 use App\Modules\Orders\Console\Commands\OrdersListRenderBenchmarkCommand;
-use App\Modules\Orders\Domain\Contracts\AccessibleStructureScopeReadRepository;
 use App\Modules\Orders\Domain\Contracts\OrderTypeStatusLookupReadRepository;
-use App\Modules\Orders\Domain\Contracts\PersonnelLookupReadRepository;
-use App\Modules\Orders\Domain\Contracts\RankPositionLookupReadRepository;
-use App\Modules\Orders\Domain\Contracts\StructureLookupReadRepository;
 use App\Modules\Orders\Infrastructure\Persistence\Eloquent\EloquentOrderTypeStatusLookupReadRepository;
-use App\Modules\Orders\Infrastructure\Persistence\Eloquent\EloquentPersonnelLookupReadRepository;
-use App\Modules\Orders\Infrastructure\Persistence\Eloquent\EloquentRankPositionLookupReadRepository;
-use App\Modules\Orders\Infrastructure\Persistence\Eloquent\EloquentStructureLookupReadRepository;
-use App\Modules\Orders\Infrastructure\Persistence\Eloquent\StructureServiceAccessibleStructureScopeReadRepository;
 use App\Observers\OrderTypeObserver;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
@@ -34,11 +26,7 @@ class OrdersServiceProvider extends ServiceProvider
             ]);
         }
 
-        $this->app->bind(AccessibleStructureScopeReadRepository::class, StructureServiceAccessibleStructureScopeReadRepository::class);
         $this->app->bind(OrderTypeStatusLookupReadRepository::class, EloquentOrderTypeStatusLookupReadRepository::class);
-        $this->app->bind(PersonnelLookupReadRepository::class, EloquentPersonnelLookupReadRepository::class);
-        $this->app->bind(StructureLookupReadRepository::class, EloquentStructureLookupReadRepository::class);
-        $this->app->bind(RankPositionLookupReadRepository::class, EloquentRankPositionLookupReadRepository::class);
     }
 
     public function boot(): void
@@ -71,7 +59,7 @@ class OrdersServiceProvider extends ServiceProvider
             'all-orders' => \App\Modules\Orders\Livewire\AllOrders::class,
             'order-composer' => \App\Modules\Orders\Livewire\OrderComposer::class,
             'template-designer' => \App\Modules\Orders\Livewire\OrderTemplateDesigner::class,
-            'delete-order' => \App\Modules\Orders\Livewire\DeleteOrder::class,
+            'order-preview' => \App\Modules\Orders\Livewire\OrderPreview::class,
         ];
     }
 

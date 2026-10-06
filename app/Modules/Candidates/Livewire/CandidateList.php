@@ -3,37 +3,41 @@
 namespace App\Modules\Candidates\Livewire;
 
 use App\Concerns\LoadsAppealStatuses;
-use App\Modules\Candidates\Exports\CandidateExport;
-use App\Modules\Candidates\Support\CandidateModeResolver;
-use App\Modules\Candidates\Support\Traits\InteractsWithRecruitmentPresentation;
 use App\Livewire\Traits\SideModalAction;
-use App\Models\Setting;
 use App\Models\Candidate;
 use App\Models\CandidateApplication;
 use App\Models\CandidateDocument;
 use App\Models\JobOpening;
 use App\Models\JobRequisition;
+use App\Models\Setting;
+use App\Modules\Candidates\Exports\CandidateExport;
+use App\Modules\Candidates\Support\CandidateModeResolver;
+use App\Modules\Candidates\Support\Traits\InteractsWithRecruitmentPresentation;
 use App\Services\StructureService;
 use Carbon\Carbon;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\LazyCollection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 #[On(['candidateAdded', 'filterSelected', 'candidateWasDeleted'])]
 class CandidateList extends Component
 {
     use AuthorizesRequests;
-    use LoadsAppealStatuses;
     use InteractsWithRecruitmentPresentation;
+    use LoadsAppealStatuses;
     use SideModalAction;
     use WithPagination;
 
@@ -71,7 +75,7 @@ class CandidateList extends Component
         5 => 'green',
     ];
 
-    public function exportExcel()
+    public function exportExcel(): BinaryFileResponse
     {
         $this->authorize('export', Candidate::class);
 
@@ -97,6 +101,18 @@ class CandidateList extends Component
         $this->applyFilter();
     }
 
+    /** Filters apply as they change; there is no separate "search" step. */
+    public function updatedFilter(): void
+    {
+        $this->applyFilter();
+    }
+
+    #[Computed]
+    public function hasActiveFilters(): bool
+    {
+        return collect(Arr::dot($this->search))->contains(fn ($value): bool => filled($value) && $value !== 'all');
+    }
+
     public function toggleDocumentCategory(string $category): void
     {
         $this->filter['document_category'] = ($this->search['document_category'] ?? null) === $category ? null : $category;
@@ -111,8 +127,6 @@ class CandidateList extends Component
             __('candidates::common.labels.structure'),
             __('candidates::common.labels.dates'),
             __('candidates::common.labels.status'),
-            __('candidates::common.labels.files'),
-            __('personnel::common.labels.action'),
             __('personnel::common.labels.action'),
         ];
 
@@ -166,7 +180,7 @@ class CandidateList extends Component
             ->filter($this->search ?? []);
     }
 
-    protected function returnData($type = 'normal')
+    protected function returnData($type = 'normal'): LengthAwarePaginator|LazyCollection
     {
         $result = $this->filteredCandidateQuery()
             ->with([
@@ -237,7 +251,7 @@ class CandidateList extends Component
         $this->accessibleStructureIds = $structureService->getAccessibleStructures();
     }
 
-    public function render()
+    public function render(): View
     {
         return view('candidates::livewire.candidates.candidate-list');
     }
@@ -534,7 +548,7 @@ class CandidateList extends Component
         return (bool) ($this->listPreset()['show_deleted_tab'] ?? true);
     }
 
-    private function defaultStatus()
+    private function defaultStatus(): int|string
     {
         $visibleStatusIds = $this->visibleStatusIds();
         $default = $this->listPreset()['default_status'] ?? 'all';
@@ -552,7 +566,7 @@ class CandidateList extends Component
         return 'all';
     }
 
-    private function sanitizeStatus($status)
+    private function sanitizeStatus($status): int|string
     {
         $visibleStatusIds = $this->visibleStatusIds();
 

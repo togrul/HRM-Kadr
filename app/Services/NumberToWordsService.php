@@ -13,7 +13,7 @@ class NumberToWordsService
         $this->numberToWords = new NumberToWords;
     }
 
-    public function convert($number, $language = 'az')
+    public function convert($number, $language = 'az'): string
     {
         $converter = match ($language) {
             'az' => $this->numberToWords->getNumberTransformer('az'),

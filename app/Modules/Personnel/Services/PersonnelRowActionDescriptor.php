@@ -83,5 +83,4 @@ final class PersonnelRowActionDescriptor
             iconProps: $iconProps,
         );
     }
-
 }

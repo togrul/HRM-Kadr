@@ -81,7 +81,9 @@ class AttendanceManagerSummaryTabTest extends TestCase
         $this->actingAs($user);
 
         Livewire::test(AttendanceManagerSummary::class, ['year' => 2026, 'month' => 3])
-            ->assertSee(__('attendance::manager_summary.title'))
+            // The dashboard's tab strip already prints manager_summary.title; the body owns
+            // the table heading, so that is what proves this tab rendered.
+            ->assertSee(__('attendance::manager_summary.table.title'))
             ->assertSee('Məmmədov Elvin Rəşad')
             ->assertSee((string) 15)
             ->assertSee((string) 1)

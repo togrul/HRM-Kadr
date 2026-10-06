@@ -10,9 +10,12 @@ use App\Models\PerformanceTrainingNeedLink;
 use App\Modules\PerformanceEvaluation\Application\Services\PerformanceEvaluationReportingService;
 use App\Modules\PerformanceEvaluation\Exports\PerformanceEvaluationReportExport;
 use App\Modules\PerformanceEvaluation\Livewire\Concerns\InteractsWithPerformanceEvaluationAccess;
+use Illuminate\Contracts\View\View;
+use Illuminate\Support\Collection;
 use Livewire\Attributes\Isolate;
 use Livewire\Component;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 #[Isolate]
 class Reports extends Component
@@ -35,37 +38,37 @@ class Reports extends Component
         ];
     }
 
-    public function getRecentTestSessionsProperty()
+    public function getRecentTestSessionsProperty(): \Illuminate\Database\Eloquent\Collection
     {
         return app(PerformanceEvaluationReportingService::class)->testSessionRows(limit: 8);
     }
 
-    public function getRecentTestAttemptsProperty()
+    public function getRecentTestAttemptsProperty(): \Illuminate\Database\Eloquent\Collection
     {
         return app(PerformanceEvaluationReportingService::class)->testAttemptRows(limit: 8);
     }
 
-    public function getRecentTestAnswersProperty()
+    public function getRecentTestAnswersProperty(): \Illuminate\Database\Eloquent\Collection
     {
         return app(PerformanceEvaluationReportingService::class)->testAnswerRows(limit: 8);
     }
 
-    public function getQuestionAnalysisRowsProperty()
+    public function getQuestionAnalysisRowsProperty(): Collection
     {
         return app(PerformanceEvaluationReportingService::class)->testQuestionAnalysisRows(limit: 8);
     }
 
-    public function getReviewerTurnaroundRowsProperty()
+    public function getReviewerTurnaroundRowsProperty(): Collection
     {
         return app(PerformanceEvaluationReportingService::class)->reviewerTurnaroundRows(limit: 8);
     }
 
-    public function getPersonnelOutcomeRowsProperty()
+    public function getPersonnelOutcomeRowsProperty(): Collection
     {
         return app(PerformanceEvaluationReportingService::class)->personnelOutcomeRows(limit: 8);
     }
 
-    public function exportPerformanceFormsReport()
+    public function exportPerformanceFormsReport(): BinaryFileResponse
     {
         $this->authorizePerformanceEvaluationExport();
 
@@ -91,7 +94,7 @@ class Reports extends Component
         );
     }
 
-    public function exportPerformanceSummaryReport()
+    public function exportPerformanceSummaryReport(): BinaryFileResponse
     {
         $this->authorizePerformanceEvaluationExport();
 
@@ -113,7 +116,7 @@ class Reports extends Component
         );
     }
 
-    public function exportPerformanceWeakLinksReport()
+    public function exportPerformanceWeakLinksReport(): BinaryFileResponse
     {
         $this->authorizePerformanceEvaluationExport();
 
@@ -136,7 +139,7 @@ class Reports extends Component
         );
     }
 
-    public function exportPerformanceWeakPivotReport()
+    public function exportPerformanceWeakPivotReport(): BinaryFileResponse
     {
         $this->authorizePerformanceEvaluationExport();
 
@@ -155,7 +158,7 @@ class Reports extends Component
         );
     }
 
-    public function exportPerformanceAuditReport()
+    public function exportPerformanceAuditReport(): BinaryFileResponse
     {
         $this->authorizePerformanceEvaluationExport();
 
@@ -176,7 +179,7 @@ class Reports extends Component
         );
     }
 
-    public function exportPerformanceTestSessionsReport()
+    public function exportPerformanceTestSessionsReport(): BinaryFileResponse
     {
         $this->authorizePerformanceEvaluationExport();
 
@@ -201,7 +204,7 @@ class Reports extends Component
         );
     }
 
-    public function exportPerformanceTestAttemptsReport()
+    public function exportPerformanceTestAttemptsReport(): BinaryFileResponse
     {
         $this->authorizePerformanceEvaluationExport();
 
@@ -226,7 +229,7 @@ class Reports extends Component
         );
     }
 
-    public function exportPerformanceTestAnswersReport()
+    public function exportPerformanceTestAnswersReport(): BinaryFileResponse
     {
         $this->authorizePerformanceEvaluationExport();
 
@@ -256,7 +259,7 @@ class Reports extends Component
         );
     }
 
-    public function exportPerformanceQuestionAnalysisReport()
+    public function exportPerformanceQuestionAnalysisReport(): BinaryFileResponse
     {
         $this->authorizePerformanceEvaluationExport();
 
@@ -280,7 +283,7 @@ class Reports extends Component
         );
     }
 
-    public function exportPerformanceReviewerTurnaroundReport()
+    public function exportPerformanceReviewerTurnaroundReport(): BinaryFileResponse
     {
         $this->authorizePerformanceEvaluationExport();
 
@@ -298,7 +301,7 @@ class Reports extends Component
         );
     }
 
-    public function exportPerformancePersonnelOutcomeReport()
+    public function exportPerformancePersonnelOutcomeReport(): BinaryFileResponse
     {
         $this->authorizePerformanceEvaluationExport();
 
@@ -319,7 +322,7 @@ class Reports extends Component
         );
     }
 
-    public function render()
+    public function render(): View
     {
         return view('performance-evaluation::livewire.performance-evaluation.reports');
     }

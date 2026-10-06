@@ -6,13 +6,16 @@ use App\Livewire\Concerns\WithRuntimeMemo;
 use App\Models\PerformanceForm;
 use App\Models\PerformanceFormTemplate;
 use App\Models\PerformanceFormTemplateItem;
-use App\Models\PerformanceTestAttemptAnswer;
 use App\Models\PerformanceTestAttempt;
+use App\Models\PerformanceTestAttemptAnswer;
 use App\Models\PerformanceTestBank;
 use App\Models\PerformanceTestQuestion;
 use App\Models\PerformanceTestSession;
 use App\Models\PerformanceTrainingNeedLink;
 use App\Modules\PerformanceEvaluation\Livewire\Concerns\InteractsWithPerformanceEvaluationAccess;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Isolate;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -21,12 +24,15 @@ use Livewire\WithPagination;
 class Lists extends Component
 {
     use InteractsWithPerformanceEvaluationAccess;
-    use WithRuntimeMemo;
     use WithPagination;
+    use WithRuntimeMemo;
 
     public string $entity = 'forms';
+
     public string $search = '';
+
     public string $filter = 'all';
+
     public ?int $selectedRowId = null;
 
     /**
@@ -142,7 +148,7 @@ class Lists extends Component
         ];
     }
 
-    public function getSelectedRowProperty()
+    public function getSelectedRowProperty(): ?Model
     {
         if (! $this->selectedRowId) {
             return null;
@@ -228,7 +234,7 @@ class Lists extends Component
         });
     }
 
-    public function getRowsProperty()
+    public function getRowsProperty(): LengthAwarePaginator
     {
         $search = trim($this->search);
         $pageName = $this->pageNameForEntity();
@@ -420,7 +426,7 @@ class Lists extends Component
         };
     }
 
-    public function render()
+    public function render(): View
     {
         return view('performance-evaluation::livewire.performance-evaluation.lists');
     }

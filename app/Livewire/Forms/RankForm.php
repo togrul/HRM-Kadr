@@ -27,14 +27,14 @@ class RankForm extends Form
 
     public $is_active = true;
 
-    protected function validationAttributes()
+    protected function validationAttributes(): array
     {
         return [
             'name_az' => __('services::ranks.fields.name_az'),
         ];
     }
 
-    public function setPost(Rank $rank)
+    public function setPost(Rank $rank): void
     {
         $this->rank = $rank;
 
@@ -47,19 +47,19 @@ class RankForm extends Form
         $this->is_active = (bool) $rank->is_active;
     }
 
-    public function create()
+    public function create(): void
     {
         $this->validate();
 
-        $updateData = Arr::except($this->all(),'rank');
+        $updateData = Arr::except($this->all(), 'rank');
 
         Rank::create($updateData);
     }
 
-    public function update()
+    public function update(): void
     {
         $this->validate();
-        $updateData = Arr::except($this->all(),'rank');
+        $updateData = Arr::except($this->all(), 'rank');
         $this->rank->update(
             $updateData
         );

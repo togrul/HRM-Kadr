@@ -2,18 +2,21 @@
 
 namespace App\Modules\Services\Livewire\Roles;
 
+use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\On;
-use Livewire\WithPagination;
 use Livewire\Component;
 use Livewire\WithoutUrlPagination;
-use Illuminate\Validation\Rule;
+use Livewire\WithPagination;
 use Spatie\Permission\Models\Permission;
 
 #[On('permissionWasDeleted')]
 class Permissions extends Component
 {
-    use WithPagination, WithoutUrlPagination;
+    use AuthorizesSettingsAccess;
+    use WithoutUrlPagination, WithPagination;
 
     public $permission_id;
 
@@ -87,7 +90,7 @@ class Permissions extends Component
         $this->resetErrorBag();
     }
 
-    public function setDeletePermission($permissionId)
+    public function setDeletePermission($permissionId): void
     {
         $this->dispatch('setDeletePermission', $permissionId);
     }
@@ -102,7 +105,7 @@ class Permissions extends Component
         $this->resetPage();
     }
 
-    private function resetInputFields()
+    private function resetInputFields(): void
     {
         $this->permission_name = '';
         $this->permission_description = '';
@@ -136,16 +139,14 @@ class Permissions extends Component
                 || str_contains($normalized, 'publish')
                 || str_contains($normalized, 'close')
                 || str_contains($normalized, 'manage')
-                || str_contains($normalized, 'settings')
-                    => ['label' => __('services::roles.badges.risks.high'), 'mode' => 'red'],
+                || str_contains($normalized, 'settings') => ['label' => __('services::roles.badges.risks.high'), 'mode' => 'red'],
             str_contains($normalized, 'create')
                 || str_contains($normalized, 'add')
                 || str_contains($normalized, 'edit')
                 || str_contains($normalized, 'update')
                 || str_contains($normalized, 'assign')
                 || str_contains($normalized, 'export')
-                || str_contains($normalized, 'import')
-                    => ['label' => __('services::roles.badges.risks.medium'), 'mode' => 'amber'],
+                || str_contains($normalized, 'import') => ['label' => __('services::roles.badges.risks.medium'), 'mode' => 'amber'],
             default => ['label' => __('services::roles.badges.risks.low'), 'mode' => 'green'],
         };
     }
@@ -180,7 +181,7 @@ class Permissions extends Component
             return e($text);
         }
 
-        $pattern = '/(' . preg_quote($needle, '/') . ')/iu';
+        $pattern = '/('.preg_quote($needle, '/').')/iu';
         $parts = preg_split($pattern, $text, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
 
         if ($parts === false) {
@@ -190,7 +191,7 @@ class Permissions extends Component
         return collect($parts)
             ->map(function (string $part) use ($needle): string {
                 if (mb_strtolower($part) === mb_strtolower($needle)) {
-                    return '<mark class="rounded bg-amber-100 px-1 text-zinc-900">' . e($part) . '</mark>';
+                    return '<mark class="rounded bg-amber-100 px-1 text-zinc-900">'.e($part).'</mark>';
                 }
 
                 return e($part);
@@ -198,7 +199,7 @@ class Permissions extends Component
             ->implode('');
     }
 
-    public function render()
+    public function render(): View
     {
         $permissions = Permission::query()
             ->select('id', 'name', 'description')

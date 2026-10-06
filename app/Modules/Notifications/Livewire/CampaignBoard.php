@@ -5,6 +5,10 @@ namespace App\Modules\Notifications\Livewire;
 use App\Models\NotificationCampaign;
 use App\Modules\Notifications\Livewire\Concerns\InteractsWithNotificationAuthorization;
 use App\Modules\Notifications\Support\NotificationCampaignDispatcher;
+use App\Modules\Notifications\Support\NotificationTitle;
+use App\Modules\Notifications\Support\NotificationTriggerRegistry;
+use Illuminate\Contracts\View\View;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -12,8 +16,8 @@ use Livewire\WithPagination;
 
 class CampaignBoard extends Component
 {
-    use WithPagination;
     use InteractsWithNotificationAuthorization;
+    use WithPagination;
 
     private const ALLOWED_STATUSES = [
         'draft',
@@ -119,7 +123,7 @@ class CampaignBoard extends Component
     }
 
     #[Computed]
-    public function campaigns()
+    public function campaigns(): LengthAwarePaginator
     {
         $campaigns = NotificationCampaign::query()
             ->withCount([
@@ -148,8 +152,8 @@ class CampaignBoard extends Component
             ->paginate(8);
 
         $campaigns->getCollection()->transform(function (NotificationCampaign $campaign) {
-            $copyCount = preg_match_all($this->duplicateTitlePattern(), (string) $campaign->title, $matches);
-            $displayTitle = trim((string) preg_replace($this->duplicateTitlePattern(), '', (string) $campaign->title));
+            $copyCount = NotificationTitle::copyCount($campaign->title);
+            $displayTitle = NotificationTitle::normalize($campaign->title);
 
             $campaign->setAttribute('display_title', $displayTitle !== '' ? $displayTitle : $campaign->title);
             $campaign->setAttribute('display_copy_count', $copyCount);
@@ -168,39 +172,17 @@ class CampaignBoard extends Component
         return $campaigns;
     }
 
-    protected function duplicateTitlePattern(): string
-    {
-        $copySuffix = trim((string) __('notifications::common.badges.copy_suffix'));
-        $copyLabel = trim((string) __('notifications::common.badges.copy_label'));
-
-        $parts = array_filter([
-            preg_quote($copySuffix, '/'),
-            '\('.preg_quote($copyLabel, '/').'\)',
-            '\(surət\)',
-            '\(copy\)',
-        ]);
-
-        return '/(?:\s*(?:'.implode('|', $parts).'))/iu';
-    }
-
-    public function placeholder()
+    public function placeholder(): View
     {
         return view('notification::livewire.notification.placeholders.settings-panel');
     }
 
-    public function render()
+    public function render(): View
     {
         return view('notification::livewire.notification.campaign-board', [
             'campaigns' => $this->campaigns,
             'canManageCampaigns' => $this->canManageCampaigns(),
-            'categoryLabels' => [
-                'birthday' => __('notifications::common.categories.birthday'),
-                'position_change' => __('notifications::common.categories.position_change'),
-                'holiday' => __('notifications::common.categories.holiday'),
-                'announcement' => __('notifications::common.categories.announcement'),
-                'training_result' => __('notifications::common.categories.training_result'),
-                'leave_status' => __('notifications::common.categories.leave_status'),
-            ],
+            'categoryLabels' => NotificationTriggerRegistry::campaignCategoryLabels(),
         ]);
     }
 }

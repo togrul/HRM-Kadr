@@ -38,4 +38,3 @@ class AttendanceAuditLogger
         $logger->log($description);
     }
 }
-

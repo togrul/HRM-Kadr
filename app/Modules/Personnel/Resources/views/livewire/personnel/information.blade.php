@@ -1,6 +1,6 @@
 <div class="flex flex-col space-y-8" x-data="{}">
     <div class="sidemenu-title">
-        <h2 class="text-xl font-semibold text-gray-500 font-title" id="slide-over-title">
+        <h2 class="text-xl font-semibold text-zinc-500 font-title" id="slide-over-title">
             {{ $title ?? ''}}
         </h2>
     </div>
@@ -19,12 +19,9 @@
     </div>
 
     <div class="flex w-full px-2 py-3 rounded-md bg-neutral-50">
-        @foreach ($steps as $key => $step)
-            <div x-show="$wire.currentStep === {{ $key }}"
-                 class="flex w-full"
-            >
-                @include('includes.informations.'.($stepViews[$key] ?? 'contracts'))
-            </div>
-        @endforeach
+        {{-- Only the open tab renders: switching tabs is a server round trip anyway. --}}
+        <div class="flex w-full" wire:key="information-step-{{ $currentStep }}">
+            @include('includes.informations.'.($stepViews[$currentStep] ?? 'contracts'))
+        </div>
     </div>
 </div>

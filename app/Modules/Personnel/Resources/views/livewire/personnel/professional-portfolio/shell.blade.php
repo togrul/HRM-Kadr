@@ -1,9 +1,9 @@
 <div class="space-y-6">
-    <div class="rounded-[28px] border border-zinc-200 bg-zinc-50 p-6 shadow-sm">
+    <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-6 shadow-sm">
         <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div class="space-y-2">
                 <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('personnel::common.titles.personnels') }} · {{ __('personnel::portfolio.title') }}</x-ui.field-label>
-                <h2 class="text-3xl font-semibold tracking-tight text-zinc-950">{{ $this->personnel->fullname }}</h2>
+                <h2 class="text-[18px] font-semibold tracking-tight text-zinc-950">{{ $this->personnel->fullname }}</h2>
                 <p class="text-sm text-zinc-500">{{ __('personnel::portfolio.description') }}</p>
             </div>
 
@@ -32,7 +32,7 @@
         </div>
     </div>
 
-    <div class="rounded-[28px] border border-zinc-200 bg-zinc-50/60 p-5 shadow-sm">
+    <div class="rounded-2xl border border-zinc-200 bg-zinc-50/60 p-5 shadow-sm">
         <div class="flex flex-wrap gap-2">
             @php
                 $tabs = ['events', 'media', 'projects'];

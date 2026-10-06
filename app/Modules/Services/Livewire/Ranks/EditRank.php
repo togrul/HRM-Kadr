@@ -6,18 +6,21 @@ use App\Livewire\Forms\RankForm;
 use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\Rank;
 use App\Models\RankCategory;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 class EditRank extends Component
 {
+    use AuthorizesSettingsAccess;
     use DropdownConstructTrait;
+
     public string $title;
 
     public RankForm $form;
 
-    public function mount(Rank $rankModel)
+    public function mount(Rank $rankModel): void
     {
         $this->title = __('services::ranks.titles.edit');
         $rankModel->load('rankCategory');
@@ -40,14 +43,14 @@ class EditRank extends Component
         );
     }
 
-    public function store()
+    public function store(): void
     {
         $this->form->update();
 
         $this->dispatch('rankAdded', __('services::ranks.messages.updated'));
     }
 
-    public function render()
+    public function render(): View
     {
         return view('services::livewire.services.ranks.edit-rank');
     }

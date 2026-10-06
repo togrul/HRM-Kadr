@@ -9,6 +9,19 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * @property int $id
+ * @property int $performance_form_template_section_id
+ * @property int|null $training_competency_id
+ * @property string $name
+ * @property string|null $description
+ * @property float|string $weight_percent
+ * @property float|string $low_score_threshold
+ * @property bool $requires_comment
+ * @property int $sort_order
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ */
 class PerformanceFormTemplateItem extends Model
 {
     use HasFactory;
@@ -31,16 +44,19 @@ class PerformanceFormTemplateItem extends Model
         'requires_comment' => 'boolean',
     ];
 
+    /** @return BelongsTo<PerformanceFormTemplateSection, $this> */
     public function section(): BelongsTo
     {
         return $this->belongsTo(PerformanceFormTemplateSection::class, 'performance_form_template_section_id');
     }
 
+    /** @return BelongsTo<TrainingCompetency, $this> */
     public function competency(): BelongsTo
     {
         return $this->belongsTo(TrainingCompetency::class, 'training_competency_id');
     }
 
+    /** @return HasMany<PerformanceFormScore, $this> */
     public function scores(): HasMany
     {
         return $this->hasMany(PerformanceFormScore::class, 'performance_form_template_item_id');

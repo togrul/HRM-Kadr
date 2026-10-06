@@ -2,12 +2,13 @@
 
 namespace App\Modules\UI\Livewire\Filter;
 
-use Livewire\Component;
-use Livewire\Attributes\On;
 use App\Livewire\Traits\DropdownConstructTrait;
-use Livewire\Attributes\Computed;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
+use Livewire\Component;
 
 class Detail extends Component
 {
@@ -15,20 +16,32 @@ class Detail extends Component
 
     // --- State ---
     public array $filter = [];
+
     public bool $ready = true;
+
     public array $loadedOptionGroups = [];
+
     public int $openSequence = 0;
 
     // Search terms (debounce/lazy in Blade)
     public string $searchStructure = '';
+
     public string $searchPosition = '';
+
     public string $searchNationality = '';
+
     public string $searchPreviousNationality = '';
+
     public string $searchCity = '';
+
     public string $searchRank = '';
+
     public string $searchInstitution = '';
+
     public string $searchEducationDegree = '';
+
     public string $searchAward = '';
+
     public string $searchPunishment = '';
 
     #[On('filterResetted')]
@@ -54,7 +67,7 @@ class Detail extends Component
         $this->dispatch('openFilterWasSet');
     }
 
-    public function placeholder()
+    public function placeholder(): View
     {
         return view('ui::livewire.filter.placeholders.detail');
     }
@@ -63,7 +76,7 @@ class Detail extends Component
     {
         return [
             'structure_id' => null,
-            'position_id'  => null,
+            'position_id' => null,
             'nationality_id' => null,
             'born_country_id' => null,
             'born_city_id' => null,
@@ -131,9 +144,9 @@ class Detail extends Component
         }
     }
 
-    public function search()
+    public function search(): void
     {
-        //datani gondermek birbasa query stringe
+        // datani gondermek birbasa query stringe
         $this->dispatch('filterSelected', $this->filter);
     }
 
@@ -169,7 +182,7 @@ class Detail extends Component
         $selected = data_get($this->filter, 'structure_id');
 
         $base = \App\Models\Structure::query()
-            ->select('id', DB::raw("name as label"))
+            ->select('id', DB::raw('name as label'))
             ->orderBy('name');
 
         return $this->optionsForFilter(
@@ -193,7 +206,7 @@ class Detail extends Component
         $selected = data_get($this->filter, 'position_id');
 
         $base = \App\Models\Position::query()
-            ->select('id', DB::raw("name as label"))
+            ->select('id', DB::raw('name as label'))
             ->orderBy('name');
 
         return $this->optionsForFilter(
@@ -225,13 +238,13 @@ class Detail extends Component
             searchColumn: $localeCol,
             searchTerm: $this->searchRank,
             selectedId: $selected,
-            cacheKey: "personnel:ranks:".app()->getLocale(),
+            cacheKey: 'personnel:ranks:'.app()->getLocale(),
             optionKey: 'rank',
             limit: 50
         );
     }
 
-   #[Computed]
+    #[Computed]
     public function institutionOptions(): array
     {
         if (! $this->ready) {
@@ -241,7 +254,7 @@ class Detail extends Component
         $selected = data_get($this->filter, 'educational_institution_id');
 
         $base = \App\Models\EducationalInstitution::query()
-            ->select('id', DB::raw("name as label"));
+            ->select('id', DB::raw('name as label'));
 
         return $this->optionsForFilter(
             base: $base,
@@ -261,7 +274,7 @@ class Detail extends Component
             return [];
         }
 
-        $selected  = data_get($this->filter, 'education_degree_id');
+        $selected = data_get($this->filter, 'education_degree_id');
         $localeCol = 'title_'.app()->getLocale();
 
         $base = \App\Models\EducationDegree::query()
@@ -272,7 +285,7 @@ class Detail extends Component
             searchColumn: $localeCol,
             searchTerm: $this->searchEducationDegree,
             selectedId: $selected,
-            cacheKey: "personnel:education_degrees:".app()->getLocale(),
+            cacheKey: 'personnel:education_degrees:'.app()->getLocale(),
             optionKey: 'educationDegree',
             limit: 50
         );
@@ -288,7 +301,7 @@ class Detail extends Component
         $selected = data_get($this->filter, 'award_id');
 
         $base = \App\Models\Award::query()
-            ->select('id', DB::raw("name as label"))
+            ->select('id', DB::raw('name as label'))
             ->orderBy('name');
 
         return $this->optionsForFilter(
@@ -312,7 +325,7 @@ class Detail extends Component
         $selected = data_get($this->filter, 'punishment_id');
 
         $base = \App\Models\Punishment::query()
-            ->select('id', DB::raw("name as label"))
+            ->select('id', DB::raw('name as label'))
             ->criminalType('other') // local scope
             ->orderBy('name');
 
@@ -335,7 +348,9 @@ class Detail extends Component
         }
 
         $countryId = data_get($this->filter, 'born_country_id');
-        if (!$countryId) return [];
+        if (! $countryId) {
+            return [];
+        }
 
         $selectedId = data_get($this->filter, 'born_city_id');
 
@@ -355,9 +370,10 @@ class Detail extends Component
         );
     }
 
-    private function getBaseQueryCountry()
+    private function getBaseQueryCountry(): Builder
     {
         $locale = app()->getLocale();
+
         return \App\Models\Country::query()
             ->select('countries.id', DB::raw('t.title as label'))
             ->join('country_translations as t', function ($join) use ($locale) {
@@ -383,7 +399,7 @@ class Detail extends Component
             searchColumn: 't.title',
             searchTerm: $this->searchNationality,
             selectedId: $selected,
-            cacheKey: "personnel:countries:".app()->getLocale(),
+            cacheKey: 'personnel:countries:'.app()->getLocale(),
             optionKey: 'nationality',
             limit: 80
         );
@@ -405,7 +421,7 @@ class Detail extends Component
             searchColumn: 't.title',
             searchTerm: $this->searchPreviousNationality,
             selectedId: $selected,
-            cacheKey: "personnel:countries:".app()->getLocale(),
+            cacheKey: 'personnel:countries:'.app()->getLocale(),
             optionKey: 'bornCountry',
             limit: 80
         );
@@ -455,5 +471,8 @@ class Detail extends Component
         return false;
     }
 
-    public function render() { return view('ui::livewire.filter.detail'); }
+    public function render(): View
+    {
+        return view('ui::livewire.filter.detail');
+    }
 }

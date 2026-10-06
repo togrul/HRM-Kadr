@@ -18,6 +18,6 @@ class AttendanceGuidePageTest extends TestCase
             ->assertOk()
             ->assertSee('Davamiyyət modulu')
             ->assertSee('Davamiyyət istifadəçi bələdçisi')
-            ->assertSee('Davamiyyət iş axını');
+            ->assertSee('Ayı bağla');
     }
 }

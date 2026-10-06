@@ -3,14 +3,24 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Modules\Compensation\Application\Services\CompensationService;
+use App\Modules\Compensation\Contracts\OrderCompensationSync;
+use App\Modules\Integration\Domain\Contracts\IntegrationOutbox;
+use App\Modules\Integration\Domain\Contracts\PayrollOwnership;
+use App\Modules\Integration\Infrastructure\NullIntegrationOutbox;
+use App\Modules\Integration\Support\ConfiguredPayrollOwnership;
 use App\Services\Features\FeatureState;
 use App\Services\HrPolicies\HrPolicyPackService;
 use App\Services\NumberToWordsService;
 use App\Services\Profiles\ProfileState;
+use App\Services\StructurePathService;
 use App\Services\StructureService;
+use App\Services\UserPersonnelLinkResolver;
+use App\Support\Database\InstalledTables;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Blaze\Blaze;
 
@@ -21,14 +31,42 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // Every read path that guards an optional module table shares one table listing
+        // per request instead of a Schema::hasTable() round trip apiece.
+        $this->app->singleton(InstalledTables::class);
+
         $this->app->singleton(ProfileState::class, fn () => new ProfileState(
             config('profiles.profiles', []),
             (string) config('profiles.active', 'default'),
             config('modules.catalog', []),
         ));
 
+        // Records nothing unless the integration module is loaded and overrides
+        // it. The Orders engine always records; the binding decides whether that
+        // means anything. Without a default here a standalone installation could
+        // not resolve the dependency at all.
+        $this->app->bind(IntegrationOutbox::class, NullIntegrationOutbox::class);
+
+        // Bound here rather than in the integration module's provider: that one
+        // is not loaded when the module is off, and the Payroll module must be
+        // able to resolve this either way.
+        $this->app->bind(PayrollOwnership::class, ConfiguredPayrollOwnership::class);
+        // Bound here, not in OrdersServiceProvider: BonusService depends on it even when the
+        // orders module is switched off (company mode never drafts an order).
+        $this->app->bind(\App\Modules\Orders\Contracts\OrderDrafter::class, \App\Modules\Orders\Infrastructure\Document\OrderDraftService::class);
+
+        // Same reason: order effects (hire/transfer/termination) resolve this whether or
+        // not the compensation module's provider is loaded.
+        $this->app->bind(OrderCompensationSync::class, CompensationService::class);
+
         $this->app->singleton(NumberToWordsService::class, fn () => new NumberToWordsService);
         $this->app->singleton(StructureService::class, fn () => new StructureService);
+
+        // Per-request: it reads the org chart once and every unit label on the page is
+        // answered from that map. A fresh instance per caller re-reads it — on a table
+        // that means once per row.
+        $this->app->scoped(StructurePathService::class);
+        $this->app->scoped(UserPersonnelLinkResolver::class);
         $this->app->singleton(FeatureState::class, fn () => new FeatureState($this->app->make(ProfileState::class)->features()));
         $this->app->singleton(HrPolicyPackService::class, fn () => new HrPolicyPackService(
             $this->app->make(ProfileState::class),
@@ -44,10 +82,44 @@ class AppServiceProvider extends ServiceProvider
         //        DB::prohibitDestructiveCommands(
         //            $this->app->isProduction(),
         //        );
+        $this->configureUrlScheme();
         $this->configureModels();
         $this->registerMacros();
         $this->registerBladeDirectives();
         $this->configureBlazeOptimization();
+        $this->loadLogDatabaseMigrationsInTests();
+    }
+
+    /**
+     * The activity log lives in its own database — a separate MySQL schema today and
+     * PostgreSQL under `docs/log-db-ayirma-postgresql-plan.md` — so its migrations sit
+     * outside the default path and deployments run them as their own step, against
+     * their own connection and their own ledger.
+     *
+     * Tests point every connection at the same sqlite database, so there the schema
+     * comes along with the ordinary migration run instead.
+     */
+    private function loadLogDatabaseMigrationsInTests(): void
+    {
+        if ($this->app->runningUnitTests()) {
+            $this->loadMigrationsFrom(database_path('migrations_logs'));
+        }
+    }
+
+    /**
+     * Generate https URLs whenever the app is served over TLS.
+     *
+     * ponytail: TrustProxies alone is not enough here — the proxy in front of
+     * this deployment does not forward a usable X-Forwarded-Proto, so Laravel
+     * saw plain http and Livewire built an http:// update endpoint that the
+     * browser blocked as mixed content. Keyed off APP_URL rather than a new
+     * env flag: that value has to be right for mail and queued jobs anyway.
+     */
+    private function configureUrlScheme(): void
+    {
+        if (str_starts_with((string) config('app.url'), 'https://')) {
+            URL::forceScheme('https');
+        }
     }
 
     /**

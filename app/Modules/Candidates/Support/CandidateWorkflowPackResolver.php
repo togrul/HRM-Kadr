@@ -7,13 +7,14 @@ use App\Services\Profiles\ProfileState;
 class CandidateWorkflowPackResolver
 {
     public const MILITARY = 'military';
+
     public const PUBLIC = 'public';
+
     public const PRIVATE = 'private';
+
     public const AUTO = 'auto';
 
-    public function __construct(private readonly ProfileState $profileState)
-    {
-    }
+    public function __construct(private readonly ProfileState $profileState) {}
 
     public function resolve(): string
     {

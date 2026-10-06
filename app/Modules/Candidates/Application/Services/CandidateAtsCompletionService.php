@@ -8,9 +8,10 @@ use App\Models\CandidateOffer;
 use App\Models\CandidateStageEvent;
 use App\Models\CandidateTalentPoolEntry;
 use App\Models\JobRequisition;
+use App\Support\Database\InstalledTables;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\ValidationException;
 
 class CandidateAtsCompletionService
 {
@@ -28,6 +29,8 @@ class CandidateAtsCompletionService
 
     public function approveRequisition(JobRequisition $requisition, int $actorId, ?string $note = null): JobRequisition
     {
+        $this->ensurePendingApproval($requisition);
+
         $requisition->forceFill([
             'approval_status' => 'approved',
             'status' => 'approved',
@@ -43,6 +46,8 @@ class CandidateAtsCompletionService
 
     public function rejectRequisition(JobRequisition $requisition, int $actorId, ?string $note = null): JobRequisition
     {
+        $this->ensurePendingApproval($requisition);
+
         $requisition->forceFill([
             'approval_status' => 'rejected',
             'status' => 'rejected',
@@ -54,6 +59,19 @@ class CandidateAtsCompletionService
         ])->save();
 
         return $requisition->refresh();
+    }
+
+    /**
+     * A requisition is decided only after it was submitted: approving or rejecting a draft
+     * would skip the approval step entirely.
+     */
+    private function ensurePendingApproval(JobRequisition $requisition): void
+    {
+        if ($requisition->approval_status !== 'pending') {
+            throw ValidationException::withMessages([
+                'approvalNote' => __('candidates::recruitment.messages.requisition_must_be_pending'),
+            ]);
+        }
     }
 
     public function scheduleInterview(CandidateApplication $application, array $payload): CandidateInterview
@@ -209,7 +227,7 @@ class CandidateAtsCompletionService
 
     public function requisitionAging(int $warningDays = 14): array
     {
-        if (! Schema::hasTable('job_requisitions') || ! Schema::hasColumn('job_requisitions', 'approval_status')) {
+        if (! InstalledTables::has('job_requisitions') || ! InstalledTables::hasColumn('job_requisitions', 'approval_status')) {
             return [
                 'warning_days' => $warningDays,
                 'total_open' => 0,

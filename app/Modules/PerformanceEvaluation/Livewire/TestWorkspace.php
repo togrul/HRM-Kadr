@@ -7,6 +7,7 @@ use App\Modules\PerformanceEvaluation\Livewire\Concerns\InteractsWithTestWorkspa
 use App\Modules\PerformanceEvaluation\Livewire\Concerns\InteractsWithTestWorkspaceResults;
 use App\Modules\PerformanceEvaluation\Livewire\Concerns\InteractsWithTestWorkspaceRunner;
 use App\Modules\PerformanceEvaluation\Livewire\Concerns\InteractsWithTestWorkspaceSessions;
+use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
 class TestWorkspace extends Component
@@ -57,7 +58,7 @@ class TestWorkspace extends Component
         $this->bumpRunnerVersion();
     }
 
-    public function render()
+    public function render(): View
     {
         return view('performance-evaluation::livewire.performance-evaluation.test-workspace');
     }

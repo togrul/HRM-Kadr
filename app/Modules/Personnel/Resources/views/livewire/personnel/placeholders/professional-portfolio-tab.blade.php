@@ -15,9 +15,9 @@
 
     <div class="space-y-3">
         @foreach (range(1, 2) as $index)
-            <div class="rounded-[24px] border border-zinc-200 bg-zinc-50/70 p-4">
+            <div class="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4">
                 <div class="space-y-3">
-                    <div class="h-14 animate-pulse rounded-[22px] border border-zinc-200 bg-white"></div>
+                    <div class="h-14 animate-pulse rounded-2xl border border-zinc-200 bg-white"></div>
                     <div class="flex flex-wrap gap-2">
                         <div class="h-8 w-24 animate-pulse rounded-full bg-zinc-100"></div>
                         <div class="h-8 w-24 animate-pulse rounded-full bg-zinc-100"></div>

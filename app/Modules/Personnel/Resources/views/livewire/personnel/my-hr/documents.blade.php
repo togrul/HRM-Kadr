@@ -1,54 +1,68 @@
 @php
     $payload = $this->payload;
+    $metricDots = [
+        'total' => 'bg-[#a1a1aa]',
+        'pdf' => 'bg-[#e11d48]',
+        'image' => 'bg-[#7c3aed]',
+        'other' => 'bg-[#0284c7]',
+    ];
+    $metrics = collect(['total', 'pdf', 'image', 'other'])
+        ->map(fn (string $metric): array => [
+            'label' => __('personnel::my_hr.documents.summary.'.$metric),
+            'value' => $payload['summary'][$metric],
+            'dot' => $metricDots[$metric],
+        ])
+        ->all();
 @endphp
 
-<div class="space-y-6">
-    <div class="rounded-[28px] border border-zinc-200 bg-white p-6 shadow-sm">
-        <div class="space-y-2">
-            <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('personnel::my_hr.documents.kicker') }}</x-ui.field-label>
-            <h2 class="text-3xl font-semibold tracking-tight text-zinc-950">{{ __('personnel::my_hr.documents.title') }}</h2>
-            <p class="max-w-3xl text-sm leading-6 text-zinc-500">{{ __('personnel::my_hr.documents.description') }}</p>
+<div class="flex flex-col gap-4">
+    <section class="rounded-xl border border-hairline bg-white">
+        <div class="border-b border-hairline-subtle px-4 py-3">
+            <p class="hrm-eyebrow">{{ __('personnel::my_hr.documents.kicker') }}</p>
+            <p class="mt-1 max-w-2xl text-[12.5px] leading-relaxed text-ink-muted">{{ __('personnel::my_hr.documents.description') }}</p>
         </div>
 
-        <div class="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-            @foreach (['total', 'pdf', 'image', 'other'] as $metric)
-                <div class="rounded-2xl border border-zinc-200 bg-zinc-50/70 px-4 py-4">
-                    <x-ui.field-label as="div" class="tracking-tight">{{ __('personnel::my_hr.documents.summary.'.$metric) }}</x-ui.field-label>
-                    <p class="mt-2 text-2xl font-semibold tracking-tight text-zinc-950">{{ $payload['summary'][$metric] }}</p>
-                </div>
-            @endforeach
-        </div>
-    </div>
+        @include('personnel::livewire.personnel.my-hr.partials.metric-strip', ['metrics' => $metrics])
+    </section>
 
     @if ($payload['documents'] === [])
-        <div class="rounded-[28px] border border-zinc-200 bg-white p-6 shadow-sm">
-            <h3 class="text-xl font-semibold tracking-tight text-zinc-950">{{ __('personnel::my_hr.documents.empty.title') }}</h3>
-            <p class="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">{{ __('personnel::my_hr.documents.empty.body') }}</p>
-        </div>
+        <x-ui.empty-state icon="icons.document-icon" :title="__('personnel::my_hr.documents.empty.title')" :message="__('personnel::my_hr.documents.empty.body')" />
     @else
-        <div class="space-y-4">
-            @foreach ($payload['documents'] as $document)
-                <div class="rounded-[28px] border border-zinc-200 bg-white p-6 shadow-sm">
-                    <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                        <div class="space-y-3">
-                            <div class="inline-flex items-center rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                                <h3 class="text-base font-semibold tracking-tight text-zinc-950">{{ $document['title'] }}</h3>
-                            </div>
+        <section class="rounded-xl border border-hairline bg-white">
+            <div class="divide-y divide-hairline-subtle">
+                @foreach ($payload['documents'] as $document)
+                    @php
+                        $ext = strtolower((string) $document['extension']);
+                        $isPdf = str_contains($ext, 'pdf');
+                        $isImage = in_array($ext, ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp', 'heic'], true);
+                        $tileClasses = $isPdf
+                            ? 'bg-[#ffe4e6] text-[#be123c]'
+                            : ($isImage ? 'bg-[#ede9fe] text-[#6d28d9]' : 'bg-[#e0f2fe] text-[#0369a1]');
+                    @endphp
+                    <div wire:key="my-hr-document-{{ $document['id'] }}" class="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center">
+                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-[11px] {{ $tileClasses }}">
+                            <x-icons.document-icon size="w-4 h-4" color="text-current" hover="text-current" />
+                        </span>
 
-                            <div class="flex flex-wrap gap-2">
-                                <span class="inline-flex items-center rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700">{{ $document['extension'] }}</span>
-                                <span class="inline-flex items-center rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700">{{ $document['category_label'] }}</span>
-                                <span class="inline-flex items-center rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700">{{ $document['created_at'] }}</span>
-                                <span class="inline-flex items-center rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700">{{ $document['size_label'] }}</span>
+                        <div class="min-w-0 flex-1 leading-tight">
+                            <h3 class="truncate text-[13px] font-medium text-ink">{{ $document['title'] }}</h3>
+                            <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11.5px] text-ink-faint">
+                                <x-small-badge mode="secondary">{{ $document['extension'] }}</x-small-badge>
+                                <span>{{ $document['category_label'] }}</span>
+                                <span class="text-hairline">&bull;</span>
+                                <span class="hrm-num">{{ $document['created_at'] }}</span>
+                                <span class="text-hairline">&bull;</span>
+                                <span class="hrm-num">{{ $document['size_label'] }}</span>
                             </div>
                         </div>
 
-                        <button type="button" wire:click="openDocument({{ $document['id'] }})" class="inline-flex items-center justify-center rounded-2xl bg-zinc-950 px-5 py-3 text-sm font-semibold tracking-tight text-white transition hover:bg-zinc-800">
+                        <x-pill-button wire:click="openDocument({{ $document['id'] }})" wire:loading.attr="disabled" wire:target="openDocument" class="shrink-0">
                             {{ __('personnel::my_hr.documents.actions.open') }}
-                        </button>
+                            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7m0 0H8m9 0v9"/></svg>
+                        </x-pill-button>
                     </div>
-                </div>
-            @endforeach
-        </div>
+                @endforeach
+            </div>
+        </section>
     @endif
 </div>

@@ -4,6 +4,7 @@ namespace App\Modules\Notifications\Livewire;
 
 use App\Models\NotificationCampaign;
 use App\Modules\Notifications\Livewire\Concerns\InteractsWithNotificationAuthorization;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -32,7 +33,7 @@ class SettingsHub extends Component
         $this->selectTab($tab);
     }
 
-    public function render()
+    public function render(): View
     {
         $pendingApprovalCount = ($this->activeTab === 'approval' && $this->canApproveCampaigns())
             ? NotificationCampaign::query()->where('approval_status', 'pending')->count()

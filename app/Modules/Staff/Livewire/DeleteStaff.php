@@ -3,6 +3,7 @@
 namespace App\Modules\Staff\Livewire;
 
 use App\Models\StaffSchedule;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
@@ -16,7 +17,7 @@ class DeleteStaff extends Component
     public ?array $staffIds = null;
 
     #[On('setDeleteStaff')]
-    public function setDeleteStaff($staffId)
+    public function setDeleteStaff($staffId): void
     {
         $ids = StaffSchedule::query()
             ->where('structure_id', $staffId)
@@ -34,7 +35,7 @@ class DeleteStaff extends Component
         $this->dispatch('deleteStaffWasSet');
     }
 
-    public function deleteStaff()
+    public function deleteStaff(): void
     {
         if (empty($this->staffIds)) {
             return;
@@ -49,7 +50,7 @@ class DeleteStaff extends Component
         $this->dispatch('staffWasDeleted', __('staff::common.messages.staff_deleted'));
     }
 
-    public function render()
+    public function render(): View
     {
         return view('staff::livewire.staff-schedule.delete-staff');
     }

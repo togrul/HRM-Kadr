@@ -7,6 +7,7 @@ use App\Models\TrainingFeedbackForm;
 use App\Modules\TrainingNeeds\Livewire\Concerns\HandlesTrainingDeliveryMutations;
 use App\Modules\TrainingNeeds\Livewire\Concerns\HandlesTrainingFeedbackMutations;
 use App\Services\HrPolicies\HrPolicyPackService;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Isolate;
 use Livewire\Attributes\On;
 use Livewire\WithFileUploads;
@@ -84,7 +85,7 @@ class ResultsWorkspace extends AbstractTrainingNeedsWorkspace
         $this->resultsSummaryVersion++;
     }
 
-    public function render()
+    public function render(): View
     {
         return view('training-needs::livewire.training-needs.results-workspace');
     }

@@ -5,8 +5,8 @@ namespace App\Models;
 use App\Traits\PersonnelTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class AttendanceManualEntry extends Model
 {
@@ -27,6 +27,7 @@ class AttendanceManualEntry extends Model
         'calculation_shift_id',
         'absence_code',
         'reason',
+        'rejection_reason',
         'approval_status',
         'entered_by',
         'approved_by',

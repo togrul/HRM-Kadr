@@ -2,6 +2,10 @@
 
 namespace App\Modules\Personnel\Providers;
 
+use App\Modules\Personnel\Application\Services\MyHr\ApprovalRouteResolverService;
+use App\Modules\Personnel\Application\Services\MyHr\LearningAssignmentManagerService;
+use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestReviewService;
+use App\Modules\Personnel\Application\Services\MyHr\OnboardingAssignmentManagerService;
 use App\Modules\Personnel\Console\Commands\PersonnelCrudQueryBudgetCommand;
 use App\Modules\Personnel\Console\Commands\PersonnelCrudRenderBenchmarkCommand;
 use App\Modules\Personnel\Console\Commands\PersonnelListQueryBudgetCommand;
@@ -11,6 +15,11 @@ use App\Modules\Personnel\Console\Commands\ProfessionalPortfolioCheckMediaLinksC
 use App\Modules\Personnel\Console\Commands\ProfessionalPortfolioEnforcePoliciesCommand;
 use App\Modules\Personnel\Console\Commands\ProfessionalPortfolioSyncRegistriesCommand;
 use App\Modules\Personnel\Console\Commands\RepairLegacySelfServiceVacationOrdersCommand;
+use App\Modules\Personnel\Contracts\ApprovalRouteResolver;
+use App\Modules\Personnel\Contracts\LearningAssignmentManager;
+use App\Modules\Personnel\Contracts\MyHrRequestReview;
+use App\Modules\Personnel\Contracts\OnboardingAssignmentManager;
+use App\Modules\Personnel\Support\MyHr\MyHrAccess;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
 use Illuminate\Support\Facades\Gate;
@@ -22,6 +31,16 @@ class PersonnelServiceProvider extends ServiceProvider
 
     public function register(): void
     {
+        // Sanctioned cross-module surface: other modules depend on the contract,
+        // never on the concrete MyHr service. See Contracts\ApprovalRouteResolver.
+        // One instance per request so its baseline-permission memo actually holds.
+        $this->app->singleton(MyHrAccess::class);
+
+        $this->app->bind(ApprovalRouteResolver::class, ApprovalRouteResolverService::class);
+        $this->app->bind(LearningAssignmentManager::class, LearningAssignmentManagerService::class);
+        $this->app->bind(OnboardingAssignmentManager::class, OnboardingAssignmentManagerService::class);
+        $this->app->bind(MyHrRequestReview::class, MyHrRequestReviewService::class);
+
         if ($this->app->runningInConsole()) {
             $this->commands([
                 PersonnelListQueryBudgetCommand::class,
@@ -63,7 +82,10 @@ class PersonnelServiceProvider extends ServiceProvider
     protected function componentMap(): array
     {
         return [
+            'home' => \App\Modules\Personnel\Livewire\Home::class,
             'all-personnel' => \App\Modules\Personnel\Livewire\AllPersonnel::class,
+            'profile' => \App\Modules\Personnel\Livewire\PersonnelProfile::class,
+            'quick-view' => \App\Modules\Personnel\Livewire\PersonnelQuickView::class,
             'table-panel' => \App\Modules\Personnel\Livewire\TablePanel::class,
             'add-personnel' => \App\Modules\Personnel\Livewire\AddPersonnel::class,
             'edit-personnel' => \App\Modules\Personnel\Livewire\EditPersonnel::class,
@@ -89,6 +111,7 @@ class PersonnelServiceProvider extends ServiceProvider
             'my-hr.learning' => \App\Modules\Personnel\Livewire\MyHr\MyHrLearning::class,
             'my-hr.learning-assignment-manager' => \App\Modules\Personnel\Livewire\MyHr\LearningAssignmentManager::class,
             'my-hr.documents' => \App\Modules\Personnel\Livewire\MyHr\MyHrDocuments::class,
+            'my-hr.payslips' => \App\Modules\Personnel\Livewire\MyHr\MyHrPayslips::class,
             'my-hr.hierarchy' => \App\Modules\Personnel\Livewire\MyHr\MyHrHierarchy::class,
             'my-hr.account-provisioning' => \App\Modules\Personnel\Livewire\MyHr\MyHrAccountProvisioning::class,
             'my-hr.self-service-request-reviews' => \App\Modules\Personnel\Livewire\MyHr\SelfServiceRequestReviews::class,

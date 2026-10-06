@@ -3,6 +3,7 @@
 namespace App\Modules\Personnel\Livewire;
 
 use App\Models\Personnel;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -41,7 +42,7 @@ class DeletePersonnel extends Component
         }
 
         $personnel = Personnel::query()
-            ->select('id', 'tabel_no', 'name', 'surname' , 'patronymic')
+            ->select('id', 'tabel_no', 'name', 'surname', 'patronymic')
             ->find($this->personnelId);
 
         if (! $personnel) {
@@ -59,7 +60,7 @@ class DeletePersonnel extends Component
         $this->dispatch('personnelWasDeleted', __('personnel::common.messages.personnel_deleted'));
     }
 
-    public function render()
+    public function render(): View
     {
         return view('personnel::livewire.personnel.delete-personnel');
     }

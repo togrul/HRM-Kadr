@@ -5,7 +5,9 @@ namespace App\Modules\Personnel\Livewire;
 use App\Helpers\UsefulHelpers;
 use App\Models\Personnel;
 use App\Models\Vacation;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -43,7 +45,7 @@ class VacationList extends Component
         $this->dispatch('vacation-updated', __('personnel::vacations.messages.updated'));
     }
 
-    public function goToVacations(int $vacationYear)
+    public function goToVacations(int $vacationYear): void
     {
         $preparedQuery = [
             'vacation_status' => 'all',
@@ -54,7 +56,8 @@ class VacationList extends Component
             'fullname' => $this->personnelModelData->fullname,
         ];
         session()->flash('vacation-updated', $preparedQuery);
-        return $this->redirect(route('vacations.list'));
+
+        $this->redirect(route('vacations.list'));
     }
 
     public function resetVacation(): void
@@ -62,7 +65,7 @@ class VacationList extends Component
         $this->reset('selectedVacation', 'reservedMonthId');
     }
 
-    public function mount()
+    public function mount(): void
     {
         $this->personnelModelData = Personnel::with(['yearlyVacation'])
             ->where('tabel_no', $this->personnelModel)
@@ -78,11 +81,12 @@ class VacationList extends Component
         ]);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('personnel::livewire.personnel.vacation-list');
     }
 
+    #[Computed]
     public function monthOptions(): array
     {
         return collect($this->months)

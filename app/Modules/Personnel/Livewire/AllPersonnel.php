@@ -12,14 +12,16 @@ use App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioPer
 use App\Services\StructureService;
 use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 #[On(['personnelAdded', 'fileAdded', 'personnelWasDeleted'])]
 class AllPersonnel extends Component
@@ -34,6 +36,9 @@ class AllPersonnel extends Component
 
     #[Url]
     public array $filters = [];
+
+    #[Url(as: 'q')]
+    public string $search = '';
 
     #[Url(as: 'structure')]
     public array $structure = [];
@@ -55,7 +60,7 @@ class AllPersonnel extends Component
         $this->handleRowAction($type, $payload);
     }
 
-    public function exportExcel()
+    public function exportExcel(): BinaryFileResponse
     {
         $this->authorize('export', Personnel::class);
 
@@ -67,7 +72,7 @@ class AllPersonnel extends Component
     }
 
     #[On('filterSelected')]
-    public function filterSelected(array $filter)
+    public function filterSelected(array $filter): void
     {
         $normalized = $this->normalizeAndPersistFilters($filter);
 
@@ -103,12 +108,12 @@ class AllPersonnel extends Component
         $this->dispatch('setOpenFilter', filter: $this->filters);
     }
 
-    public function setDeletePersonnel($personnelId)
+    public function setDeletePersonnel($personnelId): void
     {
         $this->dispatch('setDeletePersonnel', $personnelId);
     }
 
-    public function restoreData($id)
+    public function restoreData($id): void
     {
         $personnel = Personnel::withTrashed()->where('tabel_no', $id)->first();
 
@@ -125,7 +130,7 @@ class AllPersonnel extends Component
         $this->dispatch('personnelAdded', __('personnel::common.messages.personnel_updated'));
     }
 
-    public function forceDeleteData($id)
+    public function forceDeleteData($id): void
     {
         $model = Personnel::withTrashed()->where('tabel_no', $id)->first();
 
@@ -194,7 +199,7 @@ class AllPersonnel extends Component
         ];
     }
 
-    public function setStatus($newStatus)
+    public function setStatus($newStatus): void
     {
         if (! is_string($newStatus) || ! in_array($newStatus, $this->allowedStatuses, true)) {
             return;
@@ -208,7 +213,7 @@ class AllPersonnel extends Component
         $this->resetPage();
     }
 
-    public function setPosition($new)
+    public function setPosition($new): void
     {
         if (! is_numeric($new)) {
             return;
@@ -224,13 +229,13 @@ class AllPersonnel extends Component
         $this->resetPage();
     }
 
-    public function resetFilter()
+    public function resetFilter(): void
     {
         $this->reset('selectedPosition');
         $this->resetPage();
     }
 
-    public function resetSelectedFilter()
+    public function resetSelectedFilter(): void
     {
         $this->filters = [];
         $this->resetPage();
@@ -240,7 +245,7 @@ class AllPersonnel extends Component
         }
     }
 
-    public function fillFilter()
+    public function fillFilter(): void
     {
         $normalizer = app(PersonnelListStateNormalizer::class);
 
@@ -263,16 +268,22 @@ class AllPersonnel extends Component
     }
 
     #[Computed(persist: true)]
-    public function positions()
+    public function positions(): Collection
     {
         return app(PersonnelLookupService::class)->positions();
     }
 
-    public function mount()
+    public function mount(): void
     {
         $this->authorize('viewAny', Personnel::class);
         $this->fillFilter();
         $this->filters = $this->getSafeFilterPayload();
+
+        // Deep link from the command palette / quick links: land with the form open.
+        if (request()->boolean('create') && (auth()->user()?->can('add-personnels') ?? false)) {
+            $this->openSideMenu('add-personnel');
+            $this->forgetDeepLinkParams('create');
+        }
     }
 
     public function canEditPersonnels(): bool
@@ -350,12 +361,22 @@ class AllPersonnel extends Component
         }
 
         match ($actionType) {
+            'quick-view' => $this->openQuickView($value),
             'open' => $this->openPersonnelProfileSideMenu((string) data_get($payload, 'menu'), $value),
             'restore' => $this->restoreData($value),
             'delete' => $this->setDeletePersonnel($value),
             'force-delete' => $this->forceDeleteData($value),
             default => null,
         };
+    }
+
+    protected function openQuickView(string $tabelNo): void
+    {
+        if ($tabelNo === '' || ! auth()->user()?->can('show-personnels')) {
+            return;
+        }
+
+        $this->openSideMenu('quick-view', $tabelNo);
     }
 
     protected function openPersonnelProfileSideMenu(string $menu, string $value): void
@@ -422,15 +443,21 @@ class AllPersonnel extends Component
         return $this->accessibleStructureCache = resolve(StructureService::class)->getAccessibleStructures();
     }
 
-    protected function personnelQuery(bool $withStructureTree = true): Builder
+    /**
+     * Status tallies for the context panel and the header strip. Computed so the
+     * single query behind them runs once per render, not once per consumer.
+     *
+     * @return array<string,int>
+     */
+    #[Computed]
+    public function statusCounts(): array
     {
-        return app(PersonnelQueryService::class)->build(
-            status: $this->status,
+        return app(PersonnelQueryService::class)->statusCounts(
             filters: $this->filters,
             selectedStructureIds: $this->selectedStructureIds(),
             accessibleStructureIds: $this->accessibleStructureIds(),
             selectedPosition: $this->selectedPosition,
-            withStructureTree: $withStructureTree,
+            search: $this->search,
         );
     }
 
@@ -456,7 +483,7 @@ class AllPersonnel extends Component
         return app(PersonnelListStateNormalizer::class)->normalizeStructure($value);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('personnel::livewire.personnel.all-personnel');
     }

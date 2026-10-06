@@ -4,6 +4,7 @@ namespace App\Modules\Personnel\Livewire\ProfessionalPortfolio;
 
 use App\Models\Personnel;
 use App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioPermissionMatrix;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -91,7 +92,7 @@ class ProfessionalPortfolio extends Component
         return ProfessionalPortfolioPermissionMatrix::canViewAnalytics(auth()->user());
     }
 
-    public function render()
+    public function render(): View
     {
         return view('personnel::livewire.personnel.professional-portfolio.shell');
     }

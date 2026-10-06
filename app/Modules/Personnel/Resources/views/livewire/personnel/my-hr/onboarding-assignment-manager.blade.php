@@ -14,9 +14,9 @@
 <div class="flex flex-col gap-6 px-6 py-5">
     <div class="space-y-2">
         <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('personnel::my_hr.onboarding_admin.labels.kicker') }}</x-ui.field-label>
-        <div class="flex flex-col gap-3 rounded-[28px] border border-zinc-200 bg-white p-6 shadow-sm">
+        <div class="flex flex-col gap-3 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
             <div class="flex flex-col gap-2">
-                <h2 class="text-2xl font-semibold tracking-tight text-zinc-950">{{ $personnel->fullname }}</h2>
+                <h2 class="text-[18px] font-semibold tracking-tight text-zinc-950">{{ $personnel->fullname }}</h2>
                 <p class="text-sm text-zinc-500">{{ __('personnel::my_hr.onboarding_admin.messages.assignment_intro') }}</p>
             </div>
 
@@ -42,19 +42,19 @@
     </div>
 
     @if ($this->canAssignDocuments())
-        <div class="rounded-[28px] border border-zinc-200 bg-white p-6 shadow-sm">
+        <div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div class="space-y-2">
                     <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('personnel::my_hr.onboarding_admin.labels.assignment_panel') }}</x-ui.field-label>
                     <h3 class="text-xl font-semibold tracking-tight text-zinc-950">{{ __('personnel::my_hr.onboarding_admin.titles.assign_document') }}</h3>
                     <p class="max-w-2xl text-sm leading-6 text-zinc-500">{{ __('personnel::my_hr.onboarding_admin.messages.assignment_help') }}</p>
                 </div>
-                <a href="{{ route('onboarding-library') }}" class="inline-flex items-center justify-center rounded-2xl bg-[#f5f5f7] px-4 py-2.5 text-sm font-semibold tracking-tight text-zinc-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] transition hover:bg-zinc-950 hover:text-white">
+                <a href="{{ route('onboarding-library') }}" class="inline-flex items-center justify-center rounded-2xl bg-[#f5f5f7] px-4 py-2.5 text-sm font-semibold tracking-tight text-zinc-800 shadow-card transition hover:bg-zinc-950 hover:text-white">
                     {{ __('personnel::my_hr.onboarding_admin.actions.open_library') }}
                 </a>
             </div>
 
-            <div class="mt-5 rounded-[24px] border border-zinc-200 bg-zinc-50/70 px-4 py-4 text-sm leading-6 text-zinc-600">
+            <div class="mt-5 rounded-2xl border border-zinc-200 bg-zinc-50/70 px-4 py-4 text-sm leading-6 text-zinc-600">
                 {{ __('personnel::my_hr.onboarding_admin.messages.library_source') }}
             </div>
 
@@ -86,7 +86,7 @@
         </div>
     @endif
 
-    <div class="rounded-[28px] border border-zinc-200 bg-white p-6 shadow-sm">
+    <div class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
         <div class="space-y-2">
             <x-ui.field-label as="div" class="tracking-tight text-zinc-500">{{ __('personnel::my_hr.onboarding_admin.labels.current_assignments') }}</x-ui.field-label>
             <h3 class="text-xl font-semibold tracking-tight text-zinc-950">{{ __('personnel::my_hr.onboarding_admin.titles.current_assignments') }}</h3>
@@ -94,21 +94,21 @@
 
         <div class="mt-5 space-y-4">
             @forelse ($rows as $row)
-                <div class="rounded-[28px] border border-zinc-200 bg-zinc-50/60 p-5 shadow-sm">
+                <div class="rounded-2xl border border-zinc-200 bg-zinc-50/60 p-5 shadow-sm">
                     <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                         <div class="min-w-0 flex-1 space-y-3">
-                            <div class="inline-flex max-w-full rounded-[24px] border border-zinc-200 bg-white px-5 py-3">
+                            <div class="inline-flex max-w-full rounded-2xl border border-zinc-200 bg-white px-5 py-3">
                                 <h3 class="max-w-[38rem] text-lg font-semibold tracking-tight text-zinc-950">{{ $row['title'] }}</h3>
                             </div>
                             <div class="flex flex-wrap gap-2">
                                 <span class="inline-flex items-center rounded-full border px-4 py-2 text-sm font-semibold tracking-tight {{ $toneClasses[$row['status_mode']] ?? $toneClasses['muted'] }}">{{ $row['status_label'] }}</span>
-                                <span class="inline-flex items-center rounded-full bg-[#f5f5f7] px-4 py-2 text-sm font-semibold tracking-tight text-zinc-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)]">{{ $row['document_type_label'] }}</span>
+                                <span class="inline-flex items-center rounded-full bg-[#f5f5f7] px-4 py-2 text-sm font-semibold tracking-tight text-zinc-700 shadow-card">{{ $row['document_type_label'] }}</span>
                                 <span class="inline-flex items-center rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-medium tracking-tight text-zinc-600">v{{ $row['version'] }}</span>
                             </div>
                         </div>
                         <div class="flex flex-wrap gap-3">
                             @if ($row['file_url'])
-                                <a href="{{ $row['file_url'] }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center rounded-2xl bg-[#f5f5f7] px-4 py-2 text-sm font-semibold tracking-tight text-zinc-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_18px_rgba(0,0,0,0.035)] transition hover:bg-zinc-950 hover:text-white">{{ __('personnel::my_hr.onboarding_admin.actions.open_template') }}</a>
+                                <a href="{{ $row['file_url'] }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center rounded-2xl bg-[#f5f5f7] px-4 py-2 text-sm font-semibold tracking-tight text-zinc-800 shadow-card transition hover:bg-zinc-950 hover:text-white">{{ __('personnel::my_hr.onboarding_admin.actions.open_template') }}</a>
                             @endif
                             @if ($this->canAssignDocuments())
                                 <x-ui.async-button wire:click="waiveAssignment({{ $row['id'] }})" wire:target="waiveAssignment({{ $row['id'] }})" variant="secondary">

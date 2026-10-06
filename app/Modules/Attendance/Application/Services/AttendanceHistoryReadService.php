@@ -4,6 +4,7 @@ namespace App\Modules\Attendance\Application\Services;
 
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -183,7 +184,7 @@ class AttendanceHistoryReadService
         string $dateFrom,
         string $dateTo,
         ?int $subjectId = null
-    ) {
+    ): Builder {
         return Activity::query()
             ->where('log_name', 'attendance')
             ->with('causer:id,name,email')

@@ -3,6 +3,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Hide Alpine-cloaked elements until Alpine initialises (prevents edit-mode flash). */
+[x-cloak] { display: none !important; }
+
 @layer base {
   input[type='checkbox']:not(.label__checkbox) {
     -webkit-appearance: none;
@@ -233,3 +236,250 @@
         opacity: 1;
     }
   }
+
+/* ---------------------------------------------------------------------------
+   Premium shell — "Nazik rail" design system tokens.
+   Shared by the icon rail, contextual panel and every module page.
+   --------------------------------------------------------------------------- */
+:root {
+  --hrm-ink: #18181b;
+  --hrm-ink-hover: #000000;
+  --hrm-body: #27272a;
+  --hrm-muted: #52525b;
+  --hrm-faint: #71717a;
+  --hrm-line: #e4e4e7;
+  --hrm-line-subtle: #f4f4f5;
+  --hrm-surface: #ffffff;
+  --hrm-surface-muted: #fafafa;
+  --hrm-rail: 96px;
+  --hrm-panel: 300px;
+}
+
+body {
+  background-color: var(--hrm-surface-muted);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* numeric / tabular data always renders in the mono face (core rule of the system) */
+.num,
+.hrm-num {
+  font-family: 'IBMPlexMono', 'IBM Plex Mono', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/*
+ * Markup a page repeats dozens of times ships its whole utility chain in every copy —
+ * the staff tree and the select-dropdown panels alone were ~25KB of duplicated class
+ * attributes. Only chains with that kind of repetition are named here; one-off styling
+ * stays inline where it is readable. `group` is a marker class, so it stays in the
+ * markup — @apply cannot take it.
+ */
+.hrm-metric {
+  @apply flex w-12 shrink-0 flex-col items-center gap-1;
+}
+.hrm-metric-value {
+  @apply text-[14px] font-semibold tabular-nums leading-none;
+}
+.hrm-select-option {
+  @apply relative cursor-pointer select-none rounded-lg py-2 pl-2.5 pr-9 text-ink-soft transition hover:bg-[#f4f4f5] hover:text-ink;
+}
+.hrm-select-check {
+  @apply absolute inset-y-0 right-0 flex items-center pr-3 text-ink;
+}
+.hrm-tree-row {
+  @apply flex items-center gap-3 border-b border-zinc-100 px-3 py-2.5 transition-colors hover:bg-zinc-50/70;
+}
+.hrm-tree-toggle {
+  @apply flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-zinc-200/60 hover:text-zinc-600;
+}
+/* Structure sidebar (x-tree.item): one per org unit, so hundreds per render. The
+ * selected state keys off aria-current, which Alpine toggles client-side. */
+.hrm-structure-node {
+  @apply relative flex min-w-0 flex-1 items-start gap-1.5 rounded-lg py-1 pl-2 pr-2 text-left text-[14px] leading-snug transition-colors duration-150 hover:bg-[#fafafa] focus:outline-none;
+}
+.hrm-structure-node[aria-current='true'] {
+  @apply bg-[#f4f4f5] pl-3 font-semibold text-ink;
+}
+.hrm-structure-node[aria-current='true']::before {
+  content: '';
+  @apply absolute left-0 top-1/2 h-[18px] w-[3px] -translate-y-1/2 rounded-full bg-ink;
+}
+.hrm-structure-toggle {
+  @apply flex h-5 w-4 flex-none items-center justify-center rounded text-ink-faint transition-colors hover:text-ink-muted focus:outline-none;
+}
+.hrm-structure-subs {
+  @apply relative ml-[.55rem] flex flex-col border-l border-hairline pl-1;
+}
+
+.hrm-eyebrow {
+  font-size: 10.5px;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--hrm-faint);
+}
+
+/* thin scrollbars used by the rail, the contextual panel and long tables */
+/* Chip strips supply their own scroll affordance (fades + arrows), so the bar itself
+   is hidden — a visible scrollbar under a one-row strip reads as a stray line. */
+.hrm-scroll-hidden {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.hrm-scroll-hidden::-webkit-scrollbar {
+  display: none;
+}
+
+.hrm-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #d4d4d8 transparent;
+}
+.hrm-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.hrm-scroll::-webkit-scrollbar-thumb {
+  background: #d4d4d8;
+  border-radius: 9999px;
+}
+.hrm-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Selection lists: the thin bar stays invisible until the list is hovered, like macOS overlay scrollbars. */
+.hrm-scroll-hover:not(:hover) {
+  scrollbar-color: transparent transparent;
+}
+.hrm-scroll-hover:not(:hover)::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
+/* force legacy blade icons to inherit the surrounding currentColor */
+.hrm-icon svg [stroke]:not([stroke='none']),
+.hrm-rail-link svg [stroke]:not([stroke='none']) {
+  stroke: currentColor !important;
+}
+.hrm-icon svg [fill]:not([fill='none']):not([fill='#FFFFFF']),
+.hrm-rail-link svg [fill]:not([fill='none']):not([fill='#FFFFFF']) {
+  fill: currentColor !important;
+}
+
+/* icon rail glyphs are locked to a single size regardless of the icon component default */
+.hrm-rail-link svg {
+  width: 1.3rem;
+  height: 1.3rem;
+}
+
+/*
+ * Rail items use full labels in the mobile drawer and short labels on desktop.
+ */
+.hrm-rail-item {
+  @apply relative flex min-h-11 w-full shrink-0 flex-row items-center gap-3 rounded-xl px-3 py-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-1 lg:min-h-0 lg:w-[88px] lg:flex-col lg:gap-0.5 lg:px-1 lg:py-1;
+}
+.hrm-rail-item svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+.hrm-rail-label {
+  @apply min-w-0 flex-1 truncate text-left text-[14px] font-medium leading-5 tracking-[-0.01em] lg:w-full lg:flex-none lg:text-center lg:text-[11px] lg:leading-[1.2];
+}
+
+/* active-indicator bar next to a pinned rail icon */
+.hrm-rail-link--active::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 50%;
+  width: 3px;
+  height: 22px;
+  border-radius: 9999px;
+  background: var(--hrm-ink);
+  transform: translateY(-50%);
+}
+
+/* Rail hover label.
+   One shared, body-level node driven by a single delegated listener (see includes/header),
+   so N rail icons still cost one element and one listener. It is position:fixed outside the
+   rail's scroll container, which clips overflow on both axes, and it moves only via
+   transform/opacity so hovering never triggers layout or paint of anything else. */
+#hrm-rail-tip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 60;
+  pointer-events: none;
+  white-space: nowrap;
+  max-width: 15rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 5px 9px;
+  border-radius: 8px;
+  background: var(--hrm-ink);
+  color: var(--hrm-surface-muted);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  box-shadow: 0 6px 18px -6px rgb(0 0 0 / 0.35);
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+#hrm-rail-tip[data-show] {
+  opacity: 1;
+}
+
+/* Users who ask the OS for less motion get none: slide-overs, toasts, chevrons and
+   skeleton pulses settle instantly instead of animating. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* The vertical scrollbar keeps its gutter, so opening a modal (which locks scrolling) or a
+   page growing past the fold never shifts the layout sideways. */
+html {
+  scrollbar-gutter: stable;
+}
+
+/* Collapsed context panel, known before Alpine boots (see the head script in layouts/app). */
+@media (min-width: 1024px) {
+  html[data-panel-collapsed] #sidebar {
+    width: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+/* A header body that only holds phone-only controls (e.g. the section chips the context
+   panel replaces on desktop) would leave an empty bordered strip under the header. */
+@media (min-width: 1024px) {
+  .hrm-header-body:not(:has(> :not(.lg\:hidden))) {
+    display: none;
+  }
+}
+
+/* contextual panel collapse animation */
+.hrm-panel-shell {
+  transition: width 220ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* keep the legacy sidebar-collapse toggle hidden while a side modal is open */
+body.side-modal-open .sidebar-collapse-toggle {
+  display: none !important;
+}
+
+/* Status chip: tiny uppercase pill on a soft tint. Uppercase is for status values only —
+   labels and headings stay sentence case (HRM-19). `lang` on <html> makes CSS uppercase
+   Azerbaijani-correct (i → İ). */
+.hrm-badge {
+  @apply inline-flex h-5 w-max shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-2 text-[10px] font-semibold uppercase leading-none tracking-[0.06em];
+}

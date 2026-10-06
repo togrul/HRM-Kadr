@@ -32,6 +32,7 @@ class AttendanceRenderBenchmarkCommandTest extends TestCase
         $this->assertSame('ok', data_get($results, 'shift_management_render.status'));
         $this->assertSame('ok', data_get($results, 'calendar_regimes_render.status'));
         $this->assertSame('ok', data_get($results, 'month_close_render.status'));
+        $this->assertSame('ok', data_get($results, 'puantaj_grid_render.status'));
         $this->assertGreaterThan(0, (int) data_get($results, 'manual_entries_render.response_bytes'));
     }
 

@@ -4,6 +4,7 @@ namespace App\Modules\PerformanceEvaluation\Livewire;
 
 use App\Modules\PerformanceEvaluation\Livewire\Concerns\InteractsWithPerformanceEvaluationAccess;
 use App\Modules\PerformanceEvaluation\Livewire\Concerns\InteractsWithPerformanceEvaluationQueries;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Isolate;
 use Livewire\Component;
 
@@ -18,7 +19,7 @@ class TestsSummary extends Component
         $this->authorizePerformanceEvaluationView();
     }
 
-    public function render()
+    public function render(): View
     {
         return view('performance-evaluation::livewire.performance-evaluation.tests-summary');
     }

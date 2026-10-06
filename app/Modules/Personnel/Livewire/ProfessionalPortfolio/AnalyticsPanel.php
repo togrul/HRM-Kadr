@@ -6,10 +6,12 @@ use App\Models\Personnel;
 use App\Modules\Personnel\Application\Services\ProfessionalPortfolioAnalyticsService;
 use App\Modules\Personnel\Exports\ProfessionalPortfolioAnalyticsExport;
 use App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioPermissionMatrix;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Maatwebsite\Excel\Excel as ExcelWriter;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class AnalyticsPanel extends Component
 {
@@ -28,7 +30,7 @@ class AnalyticsPanel extends Component
         $this->personnelId = $personnelId;
     }
 
-    public function placeholder()
+    public function placeholder(): View
     {
         return view('personnel::livewire.personnel.placeholders.professional-portfolio-tab');
     }
@@ -46,7 +48,7 @@ class AnalyticsPanel extends Component
         );
     }
 
-    public function exportExcel()
+    public function exportExcel(): BinaryFileResponse
     {
         abort_unless(ProfessionalPortfolioPermissionMatrix::canViewAnalytics(auth()->user()), 403);
 
@@ -56,7 +58,7 @@ class AnalyticsPanel extends Component
         );
     }
 
-    public function exportCsv()
+    public function exportCsv(): BinaryFileResponse
     {
         abort_unless(ProfessionalPortfolioPermissionMatrix::canViewAnalytics(auth()->user()), 403);
 
@@ -79,7 +81,7 @@ class AnalyticsPanel extends Component
         return Personnel::query()->select(['id', 'surname', 'name', 'patronymic'])->findOrFail($this->personnelId);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('personnel::livewire.personnel.professional-portfolio.analytics-panel');
     }

@@ -7,6 +7,7 @@ use App\Models\Candidate;
 use App\Models\JobOpening;
 use App\Modules\Candidates\Application\Services\CandidateApplicationStageService;
 use App\Modules\Candidates\Support\Traits\InteractsWithRecruitmentPresentation;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
@@ -59,7 +60,7 @@ class OpeningDetail extends Component
         ]);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('candidates::livewire.candidates.opening-detail');
     }

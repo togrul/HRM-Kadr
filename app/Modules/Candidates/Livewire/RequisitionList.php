@@ -6,6 +6,7 @@ use App\Livewire\Traits\SideModalAction;
 use App\Models\Candidate;
 use App\Models\JobRequisition;
 use App\Modules\Candidates\Support\Traits\InteractsWithRecruitmentPresentation;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -79,10 +80,13 @@ class RequisitionList extends Component
             ->orderByRaw("
                 CASE status
                     WHEN 'open' THEN 1
-                    WHEN 'draft' THEN 2
-                    WHEN 'closed' THEN 3
-                    WHEN 'cancelled' THEN 4
-                    ELSE 5
+                    WHEN 'pending_approval' THEN 2
+                    WHEN 'approved' THEN 3
+                    WHEN 'draft' THEN 4
+                    WHEN 'rejected' THEN 5
+                    WHEN 'closed' THEN 6
+                    WHEN 'cancelled' THEN 7
+                    ELSE 8
                 END
             ")
             ->orderByDesc('id');
@@ -126,7 +130,7 @@ class RequisitionList extends Component
             ->sum('headcount');
     }
 
-    public function render()
+    public function render(): View
     {
         return view('candidates::livewire.candidates.requisition-list');
     }

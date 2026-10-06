@@ -8,8 +8,8 @@ use App\Models\ProfessionalMediaOutletRegistry;
 use App\Models\ProfessionalProjectRegistry;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class ProfessionalPortfolioAnalyticsService
@@ -152,7 +152,7 @@ class ProfessionalPortfolioAnalyticsService
     {
         $row = (clone $query)
             ->selectRaw('COUNT(*) as total')
-            ->selectRaw("SUM(CASE WHEN is_ongoing = 1 THEN 1 ELSE 0 END) as ongoing_projects")
+            ->selectRaw('SUM(CASE WHEN is_ongoing = 1 THEN 1 ELSE 0 END) as ongoing_projects')
             ->selectRaw('COUNT(DISTINCT registry_key) as registry_clusters')
             ->selectRaw("SUM(CASE WHEN verification_status = 'pending' THEN 1 ELSE 0 END) as pending_records")
             ->first();
@@ -169,9 +169,9 @@ class ProfessionalPortfolioAnalyticsService
     {
         $row = Cache::remember('personnel.professional_portfolio.registry_master_counts', now()->addMinutes(5), function () {
             return DB::query()
-                ->selectRaw('(SELECT COUNT(*) FROM '.(new ProfessionalEventRegistry())->getTable().') as events')
-                ->selectRaw('(SELECT COUNT(*) FROM '.(new ProfessionalMediaOutletRegistry())->getTable().') as media_outlets')
-                ->selectRaw('(SELECT COUNT(*) FROM '.(new ProfessionalProjectRegistry())->getTable().') as projects')
+                ->selectRaw('(SELECT COUNT(*) FROM '.(new ProfessionalEventRegistry)->getTable().') as events')
+                ->selectRaw('(SELECT COUNT(*) FROM '.(new ProfessionalMediaOutletRegistry)->getTable().') as media_outlets')
+                ->selectRaw('(SELECT COUNT(*) FROM '.(new ProfessionalProjectRegistry)->getTable().') as projects')
                 ->first();
         });
 

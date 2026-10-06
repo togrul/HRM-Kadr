@@ -1,64 +1,45 @@
-<section>
-    <header>
-        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-            {{ __('ui::profile.titles.profile_information') }}
-        </h2>
+@include('profile.partials.section-head', [
+    'title' => __('ui::profile.titles.profile_information'),
+    'description' => __('ui::profile.descriptions.profile_information'),
+])
 
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            {{ __('ui::profile.descriptions.profile_information') }}
-        </p>
-    </header>
+<form id="send-verification" method="post" action="{{ route('verification.send') }}">
+    @csrf
+</form>
 
-    <form id="send-verification" method="post" action="{{ route('verification.send') }}">
-        @csrf
-    </form>
+<form method="post" action="{{ route('profile.update') }}" class="px-5 py-4">
+    @csrf
+    @method('patch')
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
-        @csrf
-        @method('patch')
-
-        <div>
-            <x-input-label for="name" :value="__('ui::auth.fields.name')" />
-            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)" required autofocus autocomplete="name" />
-            <x-input-error class="mt-2" :messages="$errors->get('name')" />
+    <div class="grid max-w-2xl gap-4 sm:grid-cols-2">
+        <div class="flex flex-col gap-1.5">
+            <x-ui.field-label for="name">{{ __('ui::auth.fields.name') }}</x-ui.field-label>
+            <x-ui.input id="name" name="name" type="text" :value="old('name', $user->name)" required autofocus autocomplete="name" :aria-invalid="$errors->has('name') ? 'true' : null" />
+            <x-input-error :messages="$errors->get('name')" />
         </div>
 
-        <div>
-            <x-input-label for="email" :value="__('ui::auth.fields.email')" />
-            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required autocomplete="username" />
-            <x-input-error class="mt-2" :messages="$errors->get('email')" />
+        <div class="flex flex-col gap-1.5">
+            <x-ui.field-label for="email">{{ __('ui::auth.fields.email') }}</x-ui.field-label>
+            <x-ui.input id="email" name="email" type="email" :value="old('email', $user->email)" required autocomplete="username" :aria-invalid="$errors->has('email') ? 'true' : null" />
+            <x-input-error :messages="$errors->get('email')" />
+        </div>
+    </div>
 
-            @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
-                <div>
-                    <p class="text-sm mt-2 text-gray-800 dark:text-gray-200">
-                        {{ __('ui::auth.messages.email_unverified') }}
+    @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
+        <div class="mt-4 max-w-2xl rounded-xl border border-hairline bg-[#fafafa] px-4 py-3 text-[12.5px] leading-5 text-ink-muted">
+            {{ __('ui::auth.messages.email_unverified') }}
+            <button form="send-verification" class="font-semibold text-ink underline underline-offset-2 hover:text-ink-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400">
+                {{ __('ui::auth.messages.resend_verification_prompt') }}
+            </button>
 
-                        <button form="send-verification" class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
-                            {{ __('ui::auth.messages.resend_verification_prompt') }}
-                        </button>
-                    </p>
-
-                    @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 font-medium text-sm text-green-600 dark:text-green-400">
-                            {{ __('ui::auth.messages.new_verification_link_sent') }}
-                        </p>
-                    @endif
-                </div>
+            @if (session('status') === 'verification-link-sent')
+                <p class="mt-1.5 font-medium text-[#047857]">{{ __('ui::auth.messages.new_verification_link_sent') }}</p>
             @endif
         </div>
+    @endif
 
-        <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('ui::profile.actions.save') }}</x-primary-button>
-
-            @if (session('status') === 'profile-updated')
-                <p
-                    x-data="{ show: true }"
-                    x-show="show"
-                    x-transition
-                    x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-gray-600 dark:text-gray-400"
-                >{{ __('ui::profile.actions.saved') }}</p>
-            @endif
-        </div>
-    </form>
-</section>
+    <div class="mt-5 flex items-center gap-3 border-t border-hairline-subtle pt-4">
+        <x-pill-button type="submit" :variant="$showForceResetBanner ? 'secondary' : 'primary'">{{ __('ui::profile.actions.save') }}</x-pill-button>
+        @include('profile.partials.saved-flash', ['status' => 'profile-updated'])
+    </div>
+</form>

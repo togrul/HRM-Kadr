@@ -6,6 +6,7 @@ use App\Models\Candidate;
 use App\Models\JobRequisition;
 use App\Modules\Candidates\Application\Services\CandidateAtsCompletionService;
 use App\Modules\Candidates\Support\Traits\InteractsWithRecruitmentPresentation;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -38,6 +39,7 @@ class RequisitionDetail extends Component
         $service->submitRequisition($this->requisition, auth()->id(), $data['approvalNote'] ?: null);
         $this->approvalNote = '';
         $this->loadRequisition();
+        $this->dispatch('notify', type: 'success', message: __('candidates::recruitment.messages.requisition_submitted'));
     }
 
     public function approve(CandidateAtsCompletionService $service): void
@@ -51,6 +53,7 @@ class RequisitionDetail extends Component
         $service->approveRequisition($this->requisition, auth()->id(), $data['approvalNote'] ?: null);
         $this->approvalNote = '';
         $this->loadRequisition();
+        $this->dispatch('notify', type: 'success', message: __('candidates::recruitment.messages.requisition_approved'));
     }
 
     public function reject(CandidateAtsCompletionService $service): void
@@ -64,6 +67,7 @@ class RequisitionDetail extends Component
         $service->rejectRequisition($this->requisition, auth()->id(), $data['approvalNote'] ?: null);
         $this->approvalNote = '';
         $this->loadRequisition();
+        $this->dispatch('notify', type: 'success', message: __('candidates::recruitment.messages.requisition_rejected'));
     }
 
     private function loadRequisition(): void
@@ -92,7 +96,7 @@ class RequisitionDetail extends Component
         return (int) $this->requisition->openings->sum(fn ($opening): int => (int) ($opening->getAttributes()['applications_count'] ?? 0));
     }
 
-    public function render()
+    public function render(): View
     {
         return view('candidates::livewire.candidates.requisition-detail');
     }

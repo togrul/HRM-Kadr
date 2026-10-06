@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Services\StructurePathService;
 use App\Traits\DateCastTrait;
 use App\Traits\PersonnelTrait;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -58,6 +60,7 @@ class PersonnelBusinessTrip extends Model
     ];
 
     const INTERNAL_BUSINESS_TRIP = 6;
+
     const FOREIGN_BUSINESS_TRIP = 7;
 
     public function personDidDelete(): BelongsTo
@@ -100,21 +103,21 @@ class PersonnelBusinessTrip extends Model
         return $this->belongsTo(OrderLog::class, 'order_no', 'order_no');
     }
 
-    public function scopeForeignBusinessTrip($query)
+    public function scopeForeignBusinessTrip($query): Builder
     {
         return $query->whereHas('order', function ($where) {
             $where->where('order_type_id', self::FOREIGN_BUSINESS_TRIP);
         });
     }
 
-    public function scopeInternalBusinessTrip($query)
+    public function scopeInternalBusinessTrip($query): Builder
     {
         return $query->whereHas('order', function ($where) {
             $where->where('order_type_id', self::INTERNAL_BUSINESS_TRIP);
         });
     }
 
-    public function scopeFilter($query, array $filters)
+    public function scopeFilter($query, array $filters): void
     {
         $currentDate = Carbon::now()->format('Y-m-d');
 
@@ -122,10 +125,9 @@ class PersonnelBusinessTrip extends Model
             switch ($field) {
                 case 'structure_id':
                     if (! empty($value)) {
-                        $structureModel = Structure::with('subs')->find($value);
-                        if ($structureModel) {
-                            $structure = $structureModel->getAllNestedIds();
-                            $query->whereHas('personnel.structure', function ($qq) use ($structure) {
+                        $structure = app(StructurePathService::class)->descendantIds((int) (is_array($value) ? ($value['id'] ?? 0) : $value));
+                        if ($structure !== []) {
+                            $query->whereHas('personnel', function ($qq) use ($structure) {
                                 $qq->whereIn('structure_id', $structure);
                             });
                         }
@@ -133,9 +135,8 @@ class PersonnelBusinessTrip extends Model
                     break;
                 case 'order_type_id':
                     if (! empty($value)) {
-                        $query->whereHas('order.orderType', function ($qq) use ($value) {
-                            $qq->where('order_type_id', $value);
-                        });
+                        // order_type_id lives on the order itself, not on its type row.
+                        $query->whereHas('order', fn ($qq) => $qq->where('order_type_id', (int) (is_array($value) ? ($value['id'] ?? 0) : $value)));
                     }
                     break;
                 case 'date':
@@ -147,11 +148,13 @@ class PersonnelBusinessTrip extends Model
                     break;
                 case 'business_trip_status':
                     switch ($value) {
+                        // "Ezamiyyətdə" = running today (same rule as the row chip);
+                        // finished or not yet started trips are "İşdə".
                         case 'at_work':
-                            $query->where('end_date', '<', $currentDate);
+                            $query->where(fn ($q) => $q->where('start_date', '>', $currentDate)->orWhere('end_date', '<', $currentDate));
                             break;
                         case 'in_business_trip':
-                            $query->where('end_date', '>=', $currentDate);
+                            $query->where('start_date', '<=', $currentDate)->where('end_date', '>=', $currentDate);
                             break;
                         case 'deleted':
                             $query->onlyTrashed();
@@ -181,12 +184,26 @@ class PersonnelBusinessTrip extends Model
     protected static function boot()
     {
         parent::boot();
-        static::creating(function ($model) {
-            $model->added_by = auth()->user()->id;
+
+        // Two things to be careful about here.
+        //
+        // 1. `auth()->user()->id` assumed a signed-in user. A trip recorded from
+        //    the console — the finance import runs on a schedule — has none, and
+        //    the write died on a null. `auth()->id()` with a fallback is honest:
+        //    the record was made by the system, not by nobody.
+        //
+        // 2. These closures MUST return nothing. `creating` and `deleting` are
+        //    halting events: Eloquent dispatches them through `until()`, which
+        //    stops at the first listener returning a non-null value. An arrow
+        //    body returning the assignment silently swallowed every listener
+        //    registered afterwards.
+        static::creating(function ($model): void {
+            $model->added_by = auth()->id() ?? 1;
         });
-        static::deleting(function ($model) {
+
+        static::deleting(function ($model): void {
             if (! $model->isForceDeleting()) {
-                $model->deleted_by = auth()->user()->id;
+                $model->deleted_by = auth()->id() ?? 1;
                 $model->save();
             }
         });

@@ -19,7 +19,7 @@
     <div class="flex items-end justify-center min-h-screen">
 
       <div  x-show.transition.opacity="showMiniModal"
-            class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" 
+            class="fixed inset-0 transition-opacity bg-zinc-500 bg-opacity-75" 
             aria-hidden="true"
       ></div>
 
@@ -30,13 +30,13 @@
         <div class="absolute top-0 right-0 pt-4 pr-4">
             <button 
                 @click="showMiniModal = false;"
-                class="text-gray-400 hover:text-gray-500"
+                class="text-zinc-400 hover:text-zinc-500"
             >
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
         </div>
         <div class="px-4 pt-5 pb-4 bg-white sm:p-6 sm:pb-4">
-            <h3 class="text-lg font-medium text-center text-gray-900">{{ __('services::settings.titles.add') }}</h3>
+            <h3 class="text-lg font-medium text-center text-zinc-900">{{ __('services::settings.titles.add') }}</h3>
             <form wire:submit.prevent='store' action="#" method="POST" class="px-4 py-6 space-y-4">
                
 
@@ -67,11 +67,11 @@
                 
                 
                    <div class="flex items-center justify-between space-x-3">
-                      <button type="button"  @click="showMiniModal = false;" class="flex items-center justify-center w-1/2 px-6 py-3 text-xs font-medium transition duration-200 ease-in bg-gray-200 border border-gray-200 h-11 rounded-xl hover:border-gray-400">
+                      <button type="button"  @click="showMiniModal = false;" class="flex h-11 w-1/2 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-200 px-4 text-sm font-medium transition hover:border-zinc-400">
                         <span>{{ __('services::common.actions.cancel') }}</span>
                        </button>
                 
-                    <button type="submit" class="flex items-center justify-center w-1/2 px-6 py-3 text-xs font-medium text-white transition duration-200 ease-in bg-blue-500 border border-blue-500 h-11 rounded-xl hover:border-blue-800">
+                    <button type="submit" class="flex h-11 w-1/2 items-center justify-center rounded-xl border border-blue-500 bg-blue-500 px-4 text-sm font-medium text-white transition hover:border-blue-800">
                         <span>{{ __('services::common.actions.add') }}</span>
                     </button>
                 </div>

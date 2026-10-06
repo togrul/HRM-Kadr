@@ -1,0 +1,22 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+    - phpstan-baseline.neon
+
+parameters:
+    level: 6
+    paths:
+        - app
+
+    # Level 6 surfaces every kind of missing type. We deliberately scope the gate to
+    # *return types* (the project convention in CLAUDE.md) and suppress the noisier
+    # parameter / iterable-value / generics / property variants so the signal stays
+    # actionable. Tighten these over time as the codebase is annotated.
+    ignoreErrors:
+        - identifier: missingType.parameter
+        - identifier: missingType.iterableValue
+        - identifier: missingType.generics
+        - identifier: missingType.property
+
+    # Livewire/Eloquent magic that PHPStan can't see without extra stubs — out of scope
+    # for the return-type gate.
+    reportUnmatchedIgnoredErrors: false

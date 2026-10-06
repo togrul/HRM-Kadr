@@ -4,7 +4,8 @@ namespace App\Modules\Services\Livewire\Ranks;
 
 use App\Livewire\Traits\SideModalAction;
 use App\Models\Rank;
-use App\Models\RankCategory;
+use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\On;
@@ -16,30 +17,30 @@ use Livewire\WithPagination;
 class AllRanks extends Component
 {
     use AuthorizesRequests,SideModalAction,WithPagination;
+    use AuthorizesSettingsAccess;
 
     #[Url]
     public $status;
 
-    public function setDeleteRank($rankId)
+    public function setDeleteRank($rankId): void
     {
         $this->dispatch('setDeleteRank', $rankId);
     }
 
-    public function setStatus($newStatus)
+    public function setStatus($newStatus): void
     {
         $this->status = $newStatus;
         $this->resetPage();
     }
 
-
-    public function mount()
+    public function mount(): void
     {
         $this->status = request()->query('status')
                 ? (int) request()->query('status')
                 : 1;
     }
 
-    public function render()
+    public function render(): View
     {
         $_ranks = Rank::with('rankCategory')
             ->where('is_active', $this->status)

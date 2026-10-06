@@ -4,6 +4,7 @@ namespace App\Modules\Candidates\Livewire;
 
 use App\Models\CandidateApplication;
 use App\Modules\Candidates\Application\Services\CandidateApplicationReadService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -38,7 +39,7 @@ class ApplicationStageTimelinePanel extends Component
         $this->application = app(CandidateApplicationReadService::class)->detailForTimeline($this->applicationId);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('candidates::livewire.candidates.application-stage-timeline-panel');
     }

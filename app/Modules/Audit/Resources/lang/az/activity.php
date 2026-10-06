@@ -7,19 +7,21 @@ return [
         'subtitle' => 'Sistemdə baş verən giriş, profil baxışı və məlumat dəyişikliklərini audit bazasından oxuyun. Bu ekran yalnız baxış üçündür.',
     ],
     'metrics' => [
+        'filter_hint' => 'Süzgəc kimi tətbiq et və ya təmizlə',
         'total' => 'Ümumi log',
         'today' => 'Bugün',
         'profile_opened' => 'Profil baxışı',
-        'users' => 'İstifadəçi',
+        'users' => 'İstifadəçi əməliyyatları',
     ],
     'filters' => [
         'search' => 'Axtarış',
-        'search_placeholder' => 'Mətn, event, model və ya log adı...',
+        'search_placeholder' => 'Mətn, hadisə, istifadəçi və ya əməkdaş adı...',
         'log_name' => 'Log tipi',
         'event' => 'Hadisə',
         'from' => 'Başlanğıc',
         'to' => 'Son',
         'per_page' => 'Sətir',
+        'period' => 'Dövr',
         'all' => 'Hamısı',
     ],
     'list' => [
@@ -36,6 +38,9 @@ return [
     ],
     'labels' => [
         'system_actor' => 'Sistem',
+        'read_only_note' => 'Bu ekran yalnız baxış üçündür — qeydlər dəyişdirilə bilməz.',
+        'read_only_short' => 'Yalnız baxış',
+        'results_unit' => 'nəticə',
         'no_subject' => 'Obyekt yoxdur',
         'no_event' => 'Hadisə yoxdur',
         'no_log_name' => 'Log adı yoxdur',

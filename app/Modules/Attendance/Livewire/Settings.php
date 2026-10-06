@@ -5,6 +5,7 @@ namespace App\Modules\Attendance\Livewire;
 use App\Models\AttendanceShift;
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendanceSettingsService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
@@ -74,7 +75,7 @@ class Settings extends Component
         $this->dispatch('notify', type: 'success', message: __('attendance::settings.messages.saved'));
     }
 
-    public function render()
+    public function render(): View
     {
         $shifts = AttendanceShift::query()
             ->where('is_active', true)

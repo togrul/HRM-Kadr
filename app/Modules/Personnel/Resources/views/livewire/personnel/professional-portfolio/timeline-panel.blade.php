@@ -81,7 +81,7 @@
                 </div>
 
                 <div class="min-w-0">
-                    <div class="rounded-[22px] border border-zinc-200 bg-white px-4 py-4 shadow-[0_1px_2px_rgba(16,24,40,0.035)]">
+                    <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-4 shadow-card">
                         <div class="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
                             <div class="min-w-0">
                                 <h3 class="text-base font-semibold leading-snug tracking-tight text-zinc-950">{{ $item['title'] }}</h3>

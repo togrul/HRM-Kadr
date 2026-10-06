@@ -4,6 +4,7 @@ namespace App\Modules\PerformanceEvaluation\Livewire\Concerns;
 
 use App\Models\PerformanceTestSession;
 use App\Services\UserPersonnelLinkResolver;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 trait InteractsWithTestWorkspaceSessions
@@ -41,7 +42,10 @@ trait InteractsWithTestWorkspaceSessions
         });
     }
 
-    protected function sessionQuery()
+    /**
+     * @return Builder<PerformanceTestSession>
+     */
+    protected function sessionQuery(): Builder
     {
         return PerformanceTestSession::query()
             ->where('personnel_id', $this->currentPersonnelId())

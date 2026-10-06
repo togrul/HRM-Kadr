@@ -11,7 +11,6 @@ use App\Livewire\Traits\Helpers\FillComplexArrayTrait;
 use App\Models\City;
 use App\Models\CountryTranslation;
 use App\Models\Structure;
-use App\Modules\Personnel\Support\Traits\DispatchesPersonnelUiEvents;
 use App\Modules\Personnel\Support\Traits\Personnel\HandlesPersonnelStepFlow;
 use App\Modules\Personnel\Support\Traits\Personnel\HandlesPersonnelStepValidation;
 use App\Modules\Personnel\Support\Traits\Personnel\ManagesPersonnelRelationRows;
@@ -19,6 +18,7 @@ use App\Modules\Personnel\Support\Traits\Validations\PersonnelValidationTrait;
 use App\Services\CalculateSeniorityService;
 use App\Services\EducationDurationService;
 use App\Traits\NormalizesDropdownPayloads;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\On;
@@ -29,8 +29,8 @@ trait PersonnelCrud
     use DispatchesPersonnelUiEvents;
     use DropdownConstructTrait;
     use FillComplexArrayTrait;
-    use HandlesPersonnelStepValidation;
     use HandlesPersonnelStepFlow;
+    use HandlesPersonnelStepValidation;
     use ManagesPersonnelRelationRows;
     use NormalizesDropdownPayloads;
     use PersonnelDropdownOptions;
@@ -203,7 +203,7 @@ trait PersonnelCrud
         }
     }
 
-    public function exceptArray($arrayKey, ?int $step = null)
+    public function exceptArray($arrayKey, ?int $step = null): array
     {
         $step ??= (int) $this->step;
 
@@ -214,7 +214,7 @@ trait PersonnelCrud
         return Arr::except($this->validationRules()[$step] ?? [], array_keys($filtered));
     }
 
-    protected function validateCommon($exclude)
+    protected function validateCommon($exclude): void
     {
         $validators = array_map(fn ($field) => $this->exceptArray($field), $exclude);
 
@@ -406,7 +406,7 @@ trait PersonnelCrud
             ??= resolve(EducationDurationService::class);
     }
 
-    public function render()
+    public function render(): View
     {
         $steps = ['steps' => $this->getSteps()];
         $personnelContext = $this->personnelViewContext();

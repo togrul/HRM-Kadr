@@ -5,6 +5,7 @@ namespace App\Modules\Personnel\Livewire\MyHr;
 use App\Models\Personnel;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrDocumentsReadService;
 use App\Modules\Personnel\Support\MyHr\MyHrAccess;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -22,7 +23,7 @@ class MyHrDocuments extends Component
         $this->personnelId = $personnelId;
     }
 
-    public function openDocument(int $documentId)
+    public function openDocument(int $documentId): void
     {
         $document = collect($this->payload['documents'])->firstWhere('id', $documentId);
 
@@ -32,7 +33,7 @@ class MyHrDocuments extends Component
             return;
         }
 
-        return $this->redirect((string) $document['url'], navigate: false);
+        $this->redirect((string) $document['url'], navigate: false);
     }
 
     #[Computed]
@@ -48,7 +49,7 @@ class MyHrDocuments extends Component
             ->findOrFail($this->personnelId);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('personnel::livewire.personnel.my-hr.documents');
     }

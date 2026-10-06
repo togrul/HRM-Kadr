@@ -4,7 +4,8 @@ namespace App\Modules\Personnel\Support\Traits\Information;
 
 use App\Models\PersonnelDisposal;
 
-trait DisposalTrait {
+trait DisposalTrait
+{
     public array $disposals = [];
 
     public int $selectedDisposal;
@@ -22,7 +23,7 @@ trait DisposalTrait {
 
         $modelInstance = new PersonnelDisposal;
         $disposalData = $this->modifyArray($this->disposals, $modelInstance->dateList());
-        $this->personnelModelData->disposals()->updateOrCreate(
+        $this->personnel->disposals()->updateOrCreate(
             ['disposal_date' => $disposalData['disposal_date']],
             $disposalData
         );
@@ -34,6 +35,7 @@ trait DisposalTrait {
 
     public function updateDisposal(PersonnelDisposal $disposalModel): void
     {
+        $this->ensureOwnRecord($disposalModel);
         $this->resetValidation();
         $this->selectedDisposal = $disposalModel->id;
         $this->disposals = $disposalModel->only(['disposal_date', 'disposal_end_date', 'disposal_reason']);
@@ -47,6 +49,7 @@ trait DisposalTrait {
 
     public function forceDeleteDisposal(PersonnelDisposal $disposalModel): void
     {
+        $this->ensureOwnRecord($disposalModel);
         $disposalModel->delete();
         $this->dispatch('contractAdded', __('personnel::information.messages.disposal_deleted'));
         $this->dispatchModalCloseEvent();

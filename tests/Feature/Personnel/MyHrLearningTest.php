@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Personnel;
 
-use App\Models\EmployeeContentAssignment;
 use App\Models\EmployeeContentAsset;
+use App\Models\EmployeeContentAssignment;
 use App\Models\EmployeeContentView;
 use App\Models\Personnel;
 use App\Models\User;

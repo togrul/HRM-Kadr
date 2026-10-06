@@ -12,9 +12,9 @@ RUN npm ci && npm run build
 FROM unit:1.34.1-php8.3
 
 RUN apt update && apt install -y \
-    curl unzip git libicu-dev libzip-dev libpng-dev libjpeg-dev libfreetype6-dev libssl-dev \
+    curl unzip git libicu-dev libzip-dev libpng-dev libjpeg-dev libfreetype6-dev libssl-dev libpq-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) pcntl opcache pdo pdo_mysql intl zip gd exif ftp bcmath \
+    && docker-php-ext-install -j$(nproc) pcntl opcache pdo pdo_mysql pdo_pgsql pgsql intl zip gd exif ftp bcmath \
     && pecl install redis \
     && docker-php-ext-enable redis
 
@@ -22,6 +22,10 @@ RUN printf '%s\n' \
     "opcache.enable=1" \
     "opcache.jit=tracing" \
     "opcache.jit_buffer_size=256M" \
+    "opcache.memory_consumption=256" \
+    "opcache.interned_strings_buffer=32" \
+    "opcache.max_accelerated_files=20000" \
+    "opcache.validate_timestamps=0" \
     "memory_limit=512M" \
     "upload_max_filesize=64M" \
     "post_max_size=64M" \
@@ -44,14 +48,15 @@ COPY . .
 
 COPY --from=frontend /app/public/build /var/www/html/public/build
 
+# Livewire compiles island views into a nested directory of its own. Creating it here
+# means the web user never has to create it at runtime — an artisan command run as root
+# through `docker exec` would otherwise leave it root-owned and every island 500s.
 RUN mkdir -p /var/www/html/storage/framework/cache/data \
- && chown -R unit:unit /var/www/html/storage \
- && chmod -R ug+rwX /var/www/html/storage
-
-RUN chown -R unit:unit /var/www/html/storage /var/www/html/bootstrap/cache \
+             /var/www/html/storage/framework/views/livewire/islands \
+ && chown -R unit:unit /var/www/html/storage /var/www/html/bootstrap/cache \
  && chmod -R ug+rwX /var/www/html/storage /var/www/html/bootstrap/cache
 
-RUN composer install --prefer-dist --optimize-autoloader --no-interaction
+RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
 
 COPY unit.json /docker-entrypoint.d/unit.json
 

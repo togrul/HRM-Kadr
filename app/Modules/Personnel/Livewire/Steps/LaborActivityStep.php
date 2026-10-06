@@ -3,6 +3,7 @@
 namespace App\Modules\Personnel\Livewire\Steps;
 
 use App\Livewire\Forms\Personnel\LaborActivityForm;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Isolate;
 
 #[Isolate]
@@ -38,7 +39,7 @@ class LaborActivityStep extends AbstractPersonnelWizardStep
         return 4;
     }
 
-    public function render()
+    public function render(): View
     {
         return view('personnel::livewire.personnel.steps.labor-activity-step', [
             'stepSearchModels' => $this->activeStepSearchModels(),

@@ -2,74 +2,19 @@
 
 namespace App\Modules\Admin\Livewire;
 
-use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait;
-use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
 use App\Models\ScientificDegreeAndName;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Modules\Admin\Support\ReferenceCrudComponent;
 use Livewire\Attributes\On;
-use Livewire\Component;
 
 #[On(['scientificDegreeUpdated', 'deleted'])]
-class ScientificDegrees extends Component
+class ScientificDegrees extends ReferenceCrudComponent
 {
-    use AdminCrudTrait;
-    use AuthorizesRequests;
-    use CallSwalTrait;
+    protected string $modelClass = ScientificDegreeAndName::class;
 
-    public function rules(): array
+    protected string $savedEvent = 'scientificDegreeUpdated';
+
+    protected function addLabel(): string
     {
-        return [
-            'form.id' => 'required|integer|min:1|unique:scientific_degree_and_names,id'.($this->model ? ','.$this->form['id'] : ''),
-            'form.name' => 'required|string|min:2',
-        ];
-    }
-
-    protected function validationAttributes(): array
-    {
-        return [
-            'form.id' => __('admin::references.fields.id'),
-            'form.name' => __('admin::references.fields.name'),
-        ];
-    }
-
-    public function openCrud(?int $id = null): void
-    {
-        $this->model = $id
-            ? ScientificDegreeAndName::find($id)
-            : null;
-
-        $this->form = $this->model ? $this->model->toArray() : [];
-        $this->isAdded = true;
-    }
-
-    public function deleteModel(?int $id = null): void
-    {
-        if ($id) {
-            $this->model = ScientificDegreeAndName::find($id);
-
-            if ($this->model) {
-                $this->callDeletePromptSwal();
-            }
-        }
-    }
-
-    public function store(): void
-    {
-        $this->validate();
-
-        $this->model
-            ? $this->model->update($this->form)
-            : ScientificDegreeAndName::create($this->form);
-
-        $this->callSuccessSwal();
-
-        $this->dispatch('scientificDegreeUpdated');
-        $this->closeCrud();
-    }
-
-    public function render()
-    {
-        $scientificDegrees = ScientificDegreeAndName::all();
-        return view('admin::livewire.admin.scientific-degrees', compact('scientificDegrees'));
+        return __('admin::references.buttons.add_degree');
     }
 }

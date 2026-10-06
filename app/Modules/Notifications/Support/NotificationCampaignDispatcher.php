@@ -9,45 +9,23 @@ use App\Models\NotificationDispatch;
 use App\Models\NotificationRule;
 use App\Models\NotificationTemplate;
 use App\Models\Personnel;
-use App\Models\Position;
-use App\Models\Structure;
-use App\Modules\Personnel\Application\Services\MyHr\ApprovalRouteResolverService;
 use App\Notifications\BirthdayNotification;
 use App\Notifications\PlatformNotification;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use RuntimeException;
 use Throwable;
 
 class NotificationCampaignDispatcher
 {
-    protected function duplicateTitlePattern(): string
-    {
-        $copySuffix = trim((string) __('notifications::common.badges.copy_suffix'));
-        $copyLabel = trim((string) __('notifications::common.badges.copy_label'));
-
-        $parts = array_filter([
-            preg_quote($copySuffix, '/'),
-            '\('.preg_quote($copyLabel, '/').'\)',
-            '\(surət\)',
-            '\(copy\)',
-        ]);
-
-        return '/(?:\s*(?:'.implode('|', $parts).'))+$/iu';
-    }
-
-    protected function baseDuplicateTitle(string $title): string
-    {
-        return trim((string) preg_replace($this->duplicateTitlePattern(), '', $title));
-    }
-
     public function __construct(
         protected NotificationAudienceResolver $audienceResolver,
         protected NotificationTemplateRenderer $templateRenderer,
         protected NotificationCountCache $countCache,
-        protected ApprovalRouteResolverService $approvalRouteResolver,
         protected DispatchRetryScheduler $retryScheduler,
+        protected NotificationPayloadFactory $payloads,
     ) {}
 
     public function dispatchBirthday(Personnel $personnel): int
@@ -74,10 +52,10 @@ class NotificationCampaignDispatcher
                 'category' => 'birthday',
                 'trigger' => $trigger,
                 'template_id' => $rule->template_id,
-                'title' => 'Ad günü bildirişi: '.$personnel->fullname,
+                'title' => __('notifications::common.campaign_titles.birthday', ['name' => $personnel->fullname]),
                 'channel' => $rule->channel,
                 'audience_config' => $rule->audience_config,
-                'payload' => $this->birthdayPayload($personnel),
+                'payload' => $this->payloads->birthday($personnel),
                 'format' => $rule->template?->format ?? 'text',
                 'status' => $rule->approval_required ? 'draft' : 'queued',
                 'approval_status' => $rule->approval_required ? 'pending' : 'not_required',
@@ -108,7 +86,7 @@ class NotificationCampaignDispatcher
         $sentDispatches = 0;
 
         foreach ($rules as $rule) {
-            $payload = $this->positionChangePayload($personnel, $changes);
+            $payload = $this->payloads->positionChange($personnel, $changes);
             $recipients = $this->audienceResolver->resolve((array) $rule->audience_config, $personnel);
 
             if ($recipients->isEmpty()) {
@@ -119,7 +97,7 @@ class NotificationCampaignDispatcher
                 'category' => 'position_change',
                 'trigger' => $trigger,
                 'template_id' => $rule->template_id,
-                'title' => 'Vəzifə dəyişikliyi: '.$personnel->fullname,
+                'title' => __('notifications::common.campaign_titles.position_change', ['name' => $personnel->fullname]),
                 'channel' => $rule->channel,
                 'audience_config' => $rule->audience_config,
                 'payload' => $payload,
@@ -150,7 +128,7 @@ class NotificationCampaignDispatcher
             ->where('is_active', true)
             ->get();
 
-        $payload = $this->employmentStartedPayload($personnel, $context);
+        $payload = $this->payloads->employmentStarted($personnel, $context);
         $sentDispatches = 0;
 
         if ($rules->isEmpty()) {
@@ -166,7 +144,7 @@ class NotificationCampaignDispatcher
                 'category' => 'employment_started',
                 'trigger' => $trigger,
                 'template_id' => null,
-                'title' => 'İşə başlayan əməkdaş: '.$personnel->fullname,
+                'title' => __('notifications::common.campaign_titles.new_employee', ['name' => $personnel->fullname]),
                 'channel' => 'database',
                 'audience_config' => [
                     'targets' => ['specific_users'],
@@ -193,7 +171,7 @@ class NotificationCampaignDispatcher
                 'category' => 'employment_started',
                 'trigger' => $trigger,
                 'template_id' => $rule->template_id,
-                'title' => 'İşə başlayan əməkdaş: '.$personnel->fullname,
+                'title' => __('notifications::common.campaign_titles.new_employee', ['name' => $personnel->fullname]),
                 'channel' => $rule->channel,
                 'audience_config' => $rule->audience_config,
                 'payload' => $payload,
@@ -227,7 +205,7 @@ class NotificationCampaignDispatcher
         $sentDispatches = 0;
 
         foreach ($rules as $rule) {
-            $payload = $this->holidayPayload($calendar);
+            $payload = $this->payloads->holiday($calendar);
             $context = ['structure_id' => data_get($payload, 'structure_id')];
             $recipients = $this->audienceResolver->resolve((array) $rule->audience_config, null, $context);
 
@@ -239,7 +217,7 @@ class NotificationCampaignDispatcher
                 'category' => 'holiday',
                 'trigger' => $trigger,
                 'template_id' => $rule->template_id,
-                'title' => 'Bayram / tətil bildirişi: '.($calendar->name ?: $calendar->date?->format('d.m.Y')),
+                'title' => __('notifications::common.campaign_titles.holiday', ['name' => $calendar->name ?: $calendar->date?->format('d.m.Y')]),
                 'channel' => $rule->channel,
                 'audience_config' => $rule->audience_config,
                 'payload' => $payload,
@@ -295,8 +273,8 @@ class NotificationCampaignDispatcher
                 'user_ids' => $userIds,
             ],
             'payload' => $category === 'holiday'
-                ? $this->manualHolidayPayload($data)
-                : $this->manualAnnouncementPayload($data),
+                ? $this->payloads->manualHoliday($data)
+                : $this->payloads->manualAnnouncement($data),
             'format' => (string) ($data['format'] ?? 'text'),
             'status' => ! empty($data['approval_required']) ? 'draft' : 'queued',
             'approval_status' => ! empty($data['approval_required']) ? 'pending' : 'not_required',
@@ -356,7 +334,7 @@ class NotificationCampaignDispatcher
             'category' => $campaign->category,
             'trigger' => $campaign->trigger,
             'template_id' => $campaign->template_id,
-            'title' => $this->baseDuplicateTitle($campaign->title),
+            'title' => NotificationTitle::normalize($campaign->title, trailingOnly: true),
             'channel' => $campaign->channel,
             'audience_config' => $campaign->audience_config,
             'payload' => $campaign->payload,
@@ -369,7 +347,7 @@ class NotificationCampaignDispatcher
             'created_by' => auth()->id(),
         ]);
 
-        $this->logCampaignAction($copy, 'duplicated', __('notifications::common.helpers.duplicated_from', ['title' => $this->baseDuplicateTitle($campaign->title)]));
+        $this->logCampaignAction($copy, 'duplicated', __('notifications::common.helpers.duplicated_from', ['title' => NotificationTitle::normalize($campaign->title, trailingOnly: true)]));
 
         if ($dispatchNow) {
             $copy->update([
@@ -629,140 +607,6 @@ class NotificationCampaignDispatcher
         return $this->templateRenderer->render($template->body_template, $payload);
     }
 
-    protected function birthdayPayload(Personnel $personnel): array
-    {
-        $personnel->loadMissing([
-            'position:id,name',
-            'structure:id,parent_id,name',
-        ]);
-
-        return [
-            'type' => 'Birthday',
-            'action' => 'birthday',
-            'personnel_id' => $personnel->id,
-            'tabel_no' => $personnel->tabel_no,
-            'name' => $personnel->fullname,
-            'birthdate' => optional($personnel->birthdate)->format('Y-m-d'),
-            'birthday_label' => optional($personnel->birthdate)->format('d.m.Y'),
-            'position' => $personnel->position?->name,
-            'structure' => $personnel->structure?->fullStructureName(),
-            'category' => __('notifications::common.categories.birthday'),
-            'message' => __('notifications::common.messages.birthday_today'),
-        ];
-    }
-
-    protected function positionChangePayload(Personnel $personnel, array $changes): array
-    {
-        $personnel->loadMissing([
-            'position:id,name',
-            'structure:id,parent_id,name',
-        ]);
-
-        $oldPosition = ! empty($changes['old_position_id'])
-            ? Position::query()->find($changes['old_position_id'])
-            : null;
-        $oldStructure = ! empty($changes['old_structure_id'])
-            ? Structure::query()->find($changes['old_structure_id'])
-            : null;
-
-        return [
-            'type' => 'PositionChange',
-            'action' => 'position_change',
-            'personnel_id' => $personnel->id,
-            'name' => $personnel->fullname,
-            'old_position' => $oldPosition?->name,
-            'new_position' => $personnel->position?->name,
-            'old_structure' => $oldStructure?->fullStructureName(),
-            'new_structure' => $personnel->structure?->fullStructureName(),
-            'change_reason' => $changes['reason'] ?? 'Vəzifə yenilənməsi',
-            'effective_date' => now()->format('d.m.Y'),
-            'category' => __('notifications::common.categories.position_change'),
-            'message' => __('notifications::common.messages.position_changed'),
-        ];
-    }
-
-    protected function holidayPayload(AttendanceCalendar $calendar): array
-    {
-        return [
-            'type' => 'Holiday',
-            'action' => 'holiday',
-            'holiday_name' => $calendar->name ?: __('notifications::common.categories.holiday'),
-            'holiday_date' => optional($calendar->date)->format('d.m.Y'),
-            'duration' => '1 gün',
-            'scope' => $calendar->scope_type === 'structure' ? 'Struktur üzrə' : 'Bütün əməkdaşlar',
-            'scope_type' => $calendar->scope_type,
-            'structure_id' => $calendar->scope_type === 'structure' ? (int) $calendar->scope_id : null,
-            'holiday_rules' => $calendar->is_paid ? 'Ödənişli qeyri-iş günü' : 'Qeyri-iş günü',
-            'category' => __('notifications::common.categories.holiday'),
-            'message' => __('notifications::common.messages.holiday_due'),
-        ];
-    }
-
-    protected function employmentStartedPayload(Personnel $personnel, array $context = []): array
-    {
-        $personnel->loadMissing([
-            'position:id,name,approval_rank,is_approval_target',
-        ]);
-
-        $managerChain = collect($this->approvalRouteResolver->managerChain($personnel))
-            ->values();
-
-        $directManager = $managerChain->first();
-        $preview = $this->approvalRouteResolver->personnelPreviewCard($personnel);
-
-        return [
-            'type' => 'EmploymentStarted',
-            'action' => 'employment_started',
-            'personnel_id' => $personnel->id,
-            'tabel_no' => $personnel->tabel_no,
-            'name' => $personnel->fullname,
-            'position' => data_get($preview, 'position'),
-            'structure' => data_get($preview, 'structure'),
-            'join_work_date' => optional($personnel->join_work_date)->format('Y-m-d'),
-            'join_work_date_label' => optional($personnel->join_work_date)->format('d.m.Y'),
-            'direct_manager' => data_get($directManager, 'fullname'),
-            'manager_chain' => $managerChain->pluck('fullname')->all(),
-            'manager_chain_count' => $managerChain->count(),
-            'order_no' => data_get($context, 'order_no'),
-            'event_source' => data_get($context, 'event_source', 'employment_activation'),
-            'category' => __('notifications::common.categories.employment_started'),
-            'message' => __('notifications::common.messages.employment_started'),
-        ];
-    }
-
-    protected function manualAnnouncementPayload(array $data): array
-    {
-        return [
-            'type' => 'Announcement',
-            'action' => 'announcement',
-            'title' => trim((string) $data['title']),
-            'name' => trim((string) $data['title']),
-            'message' => __('notifications::common.messages.manual_announcement'),
-            'body' => trim((string) $data['body']),
-            'category' => __('notifications::common.categories.announcement'),
-        ];
-    }
-
-    protected function manualHolidayPayload(array $data): array
-    {
-        return [
-            'type' => 'Holiday',
-            'action' => 'holiday',
-            'title' => trim((string) ($data['title'] ?? $data['holiday_name'] ?? '')),
-            'holiday_name' => trim((string) ($data['holiday_name'] ?? $data['title'] ?? '')),
-            'holiday_date' => filled($data['holiday_date'] ?? null)
-                ? Carbon::parse((string) $data['holiday_date'])->format('d.m.Y')
-                : null,
-            'duration' => trim((string) ($data['duration'] ?? '1 gün')),
-            'scope' => trim((string) ($data['scope'] ?? __('notifications::common.helpers.all_employees_scope'))),
-            'holiday_rules' => trim((string) ($data['holiday_rules'] ?? '')),
-            'structure_id' => ($structureIds = $this->parseIntegerList($data['structure_ids'] ?? '')) !== [] ? $structureIds[0] : null,
-            'category' => __('notifications::common.categories.holiday'),
-            'message' => __('notifications::common.messages.holiday_due'),
-            'body' => trim((string) ($data['body'] ?? '')),
-        ];
-    }
-
     protected function deliverToRecipient(
         NotificationCampaign $campaign,
         $recipient,
@@ -776,7 +620,7 @@ class NotificationCampaignDispatcher
 
         if ($channel === 'mail') {
             if (blank($recipient->email)) {
-                throw new \RuntimeException('Recipient e-poçt ünvanı yoxdur.');
+                throw new RuntimeException(__('notifications::common.messages.recipient_email_missing'));
             }
 
             Mail::to($recipient->email)->send(new NotificationCampaignMail(

@@ -20,12 +20,10 @@ class GenerateAttendanceMonthlySnapshotJob implements ShouldQueue
         public int $year,
         public int $month,
         public bool $lock = false
-    ) {
-    }
+    ) {}
 
     public function handle(AttendanceMonthLockService $service): void
     {
         $service->snapshotMonth($this->year, $this->month, $this->lock);
     }
 }
-

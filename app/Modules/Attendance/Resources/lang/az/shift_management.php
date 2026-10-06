@@ -87,4 +87,8 @@ return [
         'active_assignments_exist' => 'Bu növbənin aktiv əməkdaş təyinatları var. Əvvəlcə təyinatları deaktiv edin.',
         'assignment_overlap' => 'Bu tarix aralığı ilə üst-üstə düşən aktiv növbə təyinatı artıq mövcuddur.',
     ],
+    'confirm' => [
+        'deactivate_shift' => 'Bu növbə deaktiv edilsin? Yeni təyinatlarda artıq seçilə bilməyəcək.',
+        'deactivate_assignment' => 'Bu əməkdaşın növbə təyinatı deaktiv edilsin?',
+    ],
 ];

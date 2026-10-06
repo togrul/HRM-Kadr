@@ -4,8 +4,10 @@ use App\Models\User;
 use App\Modules\Notifications\Livewire\NotificationList;
 use App\Modules\Notifications\Livewire\Notifications;
 use Carbon\Carbon;
+use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Notifications\DatabaseNotification;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 
@@ -69,6 +71,105 @@ it('marks single notification as read and redirects based on notification type',
     expect($notification->fresh()->read_at)->not->toBeNull();
 });
 
+it('reads nothing for the dropdown until it is opened, then lists the newest ten', function () {
+    $user = User::factory()->create();
+    foreach (range(1, 12) as $index) {
+        seedUserNotification($user, ['name' => 'Dropdown-'.str_pad((string) $index, 2, '0', STR_PAD_LEFT)], null, $index);
+    }
+
+    $this->actingAs($user);
+
+    $component = Livewire::test(Notifications::class)
+        ->assertSet('notificationCount', '10+')
+        ->assertDontSee('Dropdown-01');
+
+    $component->call('getNotifications')
+        ->assertSet('hasLoaded', true)
+        ->assertSet('isLoading', false)
+        ->assertSee('Dropdown-01')
+        ->assertSee('Dropdown-10')
+        ->assertDontSee('Dropdown-11');
+
+    expect($component->instance()->dropdownNotifications)->toHaveCount(10);
+});
+
+it('keeps no eloquent collection in the snapshot and re-reads only the listed columns', function () {
+    $user = User::factory()->create();
+    seedUserNotification($user);
+    seedUserNotification($user);
+
+    $this->actingAs($user);
+
+    $component = Livewire::test(Notifications::class)->call('getNotifications');
+
+    expect(json_encode($component->snapshot['data']))->not->toContain('DatabaseNotification');
+
+    $queries = [];
+    DB::listen(function (QueryExecuted $query) use (&$queries): void {
+        $queries[] = $query->sql;
+    });
+
+    // Any later round trip (here: the refresh event another component dispatches).
+    $component->dispatch('notifications-refresh-count')->assertSee('Test User');
+
+    expect($queries)->toHaveCount(1)
+        ->and($queries[0])->not->toContain('select *')
+        ->and($queries[0])->toContain('limit 10');
+});
+
+it('updates the badge and the list in the same response after mark all as read', function () {
+    $user = User::factory()->create();
+    seedUserNotification($user, ['name' => 'Unread One']);
+    seedUserNotification($user, ['name' => 'Unread Two']);
+
+    $this->actingAs($user);
+
+    $component = Livewire::test(Notifications::class)
+        ->assertSet('notificationCount', 2)
+        ->call('getNotifications')
+        ->assertSeeHtml('bg-emerald-500')
+        ->call('markAllAsRead')
+        ->assertSet('notificationCount', 0)
+        ->assertSee('Unread One')
+        ->assertDontSeeHtml('bg-emerald-500');
+
+    // The badge refresh goes to the standalone counter, never back to this component.
+    expect(collect($component->effects['dispatches'] ?? [])->pluck('component')->unique()->all())
+        ->toBe(['notification.notifications-counter']);
+});
+
+it('picks up a new notification on the next refresh event', function () {
+    $user = User::factory()->create();
+    seedUserNotification($user, ['name' => 'Older']);
+
+    $this->actingAs($user);
+
+    $component = Livewire::test(Notifications::class)
+        ->call('getNotifications')
+        ->assertSet('notificationCount', 1);
+
+    seedUserNotification($user, ['name' => 'Brand New']);
+
+    $component->dispatch('notifications-refresh-count')
+        ->assertSet('notificationCount', 2)
+        ->assertSee('Brand New');
+});
+
+it('never shows another user\'s notifications', function () {
+    $owner = User::factory()->create();
+    $other = User::factory()->create();
+    seedUserNotification($other, ['name' => 'Not Yours']);
+    seedUserNotification($owner, ['name' => 'Yours']);
+
+    $this->actingAs($owner);
+
+    Livewire::test(Notifications::class)
+        ->assertSet('notificationCount', 1)
+        ->call('getNotifications')
+        ->assertSee('Yours')
+        ->assertDontSee('Not Yours');
+});
+
 it('clears all notifications from notification list', function () {
     $user = User::factory()->create();
     seedUserNotification($user, ['name' => 'N1']);
@@ -100,4 +201,55 @@ it('paginates notification list route with threshold 20', function () {
     $secondPage = $this->get(route('notifications', ['page' => 2]));
     $secondPage->assertOk();
     $secondPage->assertSee('Notif-01');
+});
+
+it('counts unread across every page and marks all read only on request', function () {
+    $user = User::factory()->create();
+    foreach (range(1, 25) as $index) {
+        seedUserNotification($user, ['name' => 'N'.$index]);
+    }
+
+    $this->actingAs($user);
+
+    $component = Livewire::test(NotificationList::class)
+        ->assertViewHas('unreadCount', 25);
+
+    expect($user->unreadNotifications()->count())->toBe(25);
+
+    $component->call('markAllAsRead')->assertViewHas('unreadCount', 0);
+
+    expect($user->unreadNotifications()->count())->toBe(0)
+        ->and($user->notifications()->count())->toBe(25);
+});
+
+it('opens an inbox row like the bell: marks it read and follows it', function () {
+    $user = User::factory()->create();
+    $leave = seedUserNotification($user, ['type' => 'Leave', 'action' => 'leave']);
+    $plain = seedUserNotification($user, ['type' => 'Other', 'action' => 'announcement']);
+
+    $this->actingAs($user);
+
+    Livewire::test(NotificationList::class)
+        ->assertSeeHtml("wire:click=\"open('{$leave->id}')\"")
+        ->call('open', $leave->id)
+        ->assertRedirect(route('leaves'));
+
+    Livewire::test(NotificationList::class)
+        ->call('open', $plain->id)
+        ->assertNoRedirect();
+
+    expect($leave->refresh()->read_at)->not->toBeNull()
+        ->and($plain->refresh()->read_at)->not->toBeNull();
+});
+
+it('does not open another user\'s notification from the inbox', function () {
+    $owner = User::factory()->create();
+    $notification = seedUserNotification($owner);
+
+    $this->actingAs(User::factory()->create());
+
+    expect(fn () => Livewire::test(NotificationList::class)->call('open', $notification->id))
+        ->toThrow(Illuminate\Database\Eloquent\ModelNotFoundException::class);
+
+    expect($notification->refresh()->read_at)->toBeNull();
 });

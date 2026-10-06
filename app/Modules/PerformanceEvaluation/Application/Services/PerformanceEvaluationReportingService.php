@@ -7,11 +7,13 @@ use App\Models\PerformanceTestAttempt;
 use App\Models\PerformanceTestAttemptAnswer;
 use App\Models\PerformanceTestSession;
 use App\Models\PerformanceTrainingNeedLink;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Support\Collection;
 use Spatie\Activitylog\Models\Activity;
 
 class PerformanceEvaluationReportingService
 {
-    public function formSummaryRows()
+    public function formSummaryRows(): EloquentCollection
     {
         return PerformanceForm::query()
             ->leftJoin('performance_cycles', 'performance_cycles.id', '=', 'performance_forms.performance_cycle_id')
@@ -31,7 +33,7 @@ class PerformanceEvaluationReportingService
             ->get();
     }
 
-    public function weakLinkPivotRows()
+    public function weakLinkPivotRows(): EloquentCollection
     {
         return PerformanceTrainingNeedLink::query()
             ->leftJoin('training_need_items', 'training_need_items.id', '=', 'performance_training_need_links.training_need_item_id')
@@ -47,7 +49,7 @@ class PerformanceEvaluationReportingService
             ->get();
     }
 
-    public function formRows()
+    public function formRows(): EloquentCollection
     {
         return PerformanceForm::query()
             ->with([
@@ -61,7 +63,7 @@ class PerformanceEvaluationReportingService
             ->get();
     }
 
-    public function weakLinkRows()
+    public function weakLinkRows(): EloquentCollection
     {
         return PerformanceTrainingNeedLink::query()
             ->with([
@@ -74,7 +76,7 @@ class PerformanceEvaluationReportingService
             ->get();
     }
 
-    public function auditRows()
+    public function auditRows(): EloquentCollection
     {
         return Activity::query()
             ->whereIn('subject_type', [
@@ -94,7 +96,7 @@ class PerformanceEvaluationReportingService
             ->get();
     }
 
-    public function testSessionRows(?int $limit = null)
+    public function testSessionRows(?int $limit = null): EloquentCollection
     {
         $query = PerformanceTestSession::query()
             ->leftJoin('performance_cycles', 'performance_cycles.id', '=', 'performance_test_sessions.performance_cycle_id')
@@ -137,7 +139,7 @@ class PerformanceEvaluationReportingService
         return $query->get();
     }
 
-    public function testAttemptRows(?int $limit = null)
+    public function testAttemptRows(?int $limit = null): EloquentCollection
     {
         $query = PerformanceTestAttempt::query()
             ->join('performance_test_sessions', 'performance_test_sessions.id', '=', 'performance_test_attempts.performance_test_session_id')
@@ -164,7 +166,7 @@ class PerformanceEvaluationReportingService
         return $query->get();
     }
 
-    public function testAnswerRows(?int $limit = null)
+    public function testAnswerRows(?int $limit = null): EloquentCollection
     {
         $query = PerformanceTestAttemptAnswer::query()
             ->join('performance_test_attempts', 'performance_test_attempts.id', '=', 'performance_test_attempt_answers.performance_test_attempt_id')
@@ -199,7 +201,7 @@ class PerformanceEvaluationReportingService
         return $query->get();
     }
 
-    public function testQuestionAnalysisRows(?int $limit = null)
+    public function testQuestionAnalysisRows(?int $limit = null): Collection
     {
         $query = PerformanceTestAttemptAnswer::query()
             ->join('performance_test_questions', 'performance_test_questions.id', '=', 'performance_test_attempt_answers.performance_test_question_id')
@@ -236,7 +238,7 @@ class PerformanceEvaluationReportingService
         });
     }
 
-    public function reviewerTurnaroundRows(?int $limit = null)
+    public function reviewerTurnaroundRows(?int $limit = null): Collection
     {
         $rows = PerformanceTestAttemptAnswer::query()
             ->join('performance_test_attempts', 'performance_test_attempts.id', '=', 'performance_test_attempt_answers.performance_test_attempt_id')
@@ -278,7 +280,7 @@ class PerformanceEvaluationReportingService
         return $rows;
     }
 
-    public function personnelOutcomeRows(?int $limit = null)
+    public function personnelOutcomeRows(?int $limit = null): Collection
     {
         $query = PerformanceTestAttempt::query()
             ->join('performance_test_sessions', 'performance_test_sessions.id', '=', 'performance_test_attempts.performance_test_session_id')

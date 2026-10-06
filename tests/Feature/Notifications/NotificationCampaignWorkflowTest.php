@@ -15,6 +15,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Livewire;
+use RuntimeException;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
@@ -156,7 +157,7 @@ class NotificationCampaignWorkflowTest extends TestCase
         {
             public function send(object $mailable): void
             {
-                throw new \RuntimeException('SMTP provider rejected recipient');
+                throw new RuntimeException('SMTP provider rejected recipient');
             }
         };
 
@@ -212,7 +213,7 @@ class NotificationCampaignWorkflowTest extends TestCase
 
         $this->assertSame('failed', $campaign->status);
         $this->assertSame('failed', $dispatch->status);
-        $this->assertSame('Recipient e-poçt ünvanı yoxdur.', $dispatch->error_message);
+        $this->assertSame('Alıcının e-poçt ünvanı yoxdur.', $dispatch->error_message);
         $this->assertSame(config('mail.default'), data_get($dispatch->meta, 'driver'));
     }
 
@@ -322,6 +323,87 @@ class NotificationCampaignWorkflowTest extends TestCase
         $this->assertSame('sent', $campaign->status);
         $this->assertDatabaseCount('notification_dispatches', 1);
         $this->assertDatabaseCount('notifications', 1);
+    }
+
+    public function test_approval_queue_names_the_creator_instead_of_a_date(): void
+    {
+        $approver = User::factory()->create(['is_active' => true]);
+        $creator = User::factory()->create(['name' => 'Kamran Əliyev']);
+        $this->grantNotificationWorkflowPermissions($approver);
+        $this->actingAs($approver);
+
+        NotificationCampaign::query()->create([
+            'category' => 'announcement',
+            'trigger' => 'manual_announcement',
+            'title' => 'Elan',
+            'channel' => 'database',
+            'audience_config' => ['targets' => ['admins']],
+            'payload' => ['action' => 'announcement', 'name' => 'Elan', 'message' => 'Mətn'],
+            'format' => 'text',
+            'status' => 'draft',
+            'approval_status' => 'pending',
+            'created_by' => $creator->id,
+        ]);
+
+        Livewire::test(\App\Modules\Notifications\Livewire\ApprovalQueue::class)
+            ->assertSee(__('notifications::common.fields.creator').': Kamran Əliyev');
+    }
+
+    private function pendingCampaign(User $creator, string $title = 'Elan'): NotificationCampaign
+    {
+        return NotificationCampaign::query()->create([
+            'category' => 'announcement',
+            'trigger' => 'manual_announcement',
+            'title' => $title,
+            'channel' => 'database',
+            'audience_config' => ['targets' => ['admins']],
+            'payload' => ['action' => 'announcement', 'name' => $title, 'message' => 'Mətn'],
+            'format' => 'text',
+            'status' => 'draft',
+            'approval_status' => 'pending',
+            'created_by' => $creator->id,
+        ]);
+    }
+
+    public function test_approval_queue_reject_requires_a_reason(): void
+    {
+        $approver = User::factory()->create(['is_active' => true]);
+        $this->grantNotificationWorkflowPermissions($approver);
+        $this->actingAs($approver);
+        $campaign = $this->pendingCampaign($approver);
+
+        Livewire::test(\App\Modules\Notifications\Livewire\ApprovalQueue::class)
+            ->set("notes.{$campaign->id}", ' x')
+            ->call('reject', $campaign->id)
+            ->assertHasErrors("notes.{$campaign->id}");
+
+        $this->assertSame('pending', $campaign->refresh()->approval_status);
+
+        Livewire::test(\App\Modules\Notifications\Livewire\ApprovalQueue::class)
+            ->set("notes.{$campaign->id}", 'Mətn natamamdır')
+            ->call('reject', $campaign->id)
+            ->assertHasNoErrors();
+
+        $this->assertSame('rejected', $campaign->refresh()->approval_status);
+    }
+
+    public function test_approval_queue_can_show_every_pending_campaign(): void
+    {
+        $approver = User::factory()->create(['is_active' => true]);
+        $this->grantNotificationWorkflowPermissions($approver);
+        $this->actingAs($approver);
+
+        foreach (range(1, 10) as $index) {
+            $this->pendingCampaign($approver, 'Elan '.$index);
+        }
+
+        $component = Livewire::test(\App\Modules\Notifications\Livewire\ApprovalQueue::class)
+            ->assertViewHas('pendingTotal', 10)
+            ->assertSee(__('notifications::common.buttons.show_all'));
+        $this->assertCount(8, $component->viewData('campaigns'));
+
+        $component->set('showAll', true);
+        $this->assertCount(10, $component->viewData('campaigns'));
     }
 
     public function test_campaign_board_can_duplicate_resend_and_retry_campaigns(): void

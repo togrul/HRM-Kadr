@@ -2,30 +2,53 @@
 
 namespace App\Modules\Notifications\Livewire;
 
-use App\Modules\Notifications\Support\NotificationCountCache;
 use App\Modules\Notifications\Support\DispatchesNotificationRefresh;
-use Illuminate\Support\Collection;
+use App\Modules\Notifications\Support\NotificationCountCache;
+use App\Modules\Notifications\Support\NotificationTarget;
+use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class NotificationList extends Component
 {
-    use WithPagination;
     use DispatchesNotificationRefresh;
+    use WithPagination;
 
     const NOTIFICATION_THRESHOLD = 20;
 
-    public function mount(): void
+    /** Opening the inbox no longer marks everything read; the reader does it on purpose. */
+    public function markAllAsRead(): void
     {
         $user = auth()->user();
-        $user
-            ?->unreadNotifications()
-            ->update(['read_at' => now()]);
+        if (! $user) {
+            return;
+        }
 
-        if ($user) {
-            app(NotificationCountCache::class)->forgetUser((int) $user->id);
-            $this->dispatchNotificationRefresh();
+        $user->unreadNotifications()->update(['read_at' => now()]);
+        app(NotificationCountCache::class)->forgetUser((int) $user->id);
+        $this->dispatchNotificationRefresh();
+    }
+
+    /**
+     * Opening a row does what the bell does: marks it read and follows it to its page.
+     * A notification without a page of its own just turns read in place.
+     */
+    public function open(string $notificationId): void
+    {
+        $user = auth()->user();
+        abort_unless($user, 403);
+
+        $notification = $user->notifications()->whereKey($notificationId)->firstOrFail();
+        $notification->markAsRead();
+        app(NotificationCountCache::class)->forgetUser((int) $user->id);
+        $this->dispatchNotificationRefresh();
+
+        $route = NotificationTarget::route((array) $notification->data);
+
+        if ($route !== 'notifications') {
+            $this->redirectRoute($route, navigate: true);
         }
     }
 
@@ -79,7 +102,7 @@ class NotificationList extends Component
             ->values();
     }
 
-    public function render()
+    public function render(): View
     {
         $user = auth()->user();
 
@@ -98,6 +121,7 @@ class NotificationList extends Component
             return view('notification::livewire.notification.notification-list', [
                 'notifications' => $notifications,
                 'groupedNotifications' => collect([]),
+                'unreadCount' => 0,
             ]);
         }
 
@@ -110,6 +134,8 @@ class NotificationList extends Component
         return view('notification::livewire.notification.notification-list', [
             'notifications' => $notifications,
             'groupedNotifications' => $this->groupedNotifications($notifications->getCollection()),
+            // The whole unread set, not just this page: one cached count query.
+            'unreadCount' => app(NotificationCountCache::class)->unreadCount((int) $user->id),
         ]);
     }
 }

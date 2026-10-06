@@ -4,15 +4,18 @@ namespace App\Modules\LearningLibrary\Livewire;
 
 use App\Models\EmployeeContentAsset;
 use App\Modules\LearningLibrary\Application\Services\LearningLibraryReadService;
-use App\Modules\Personnel\Application\Services\MyHr\LearningAssignmentManagerService;
+use App\Modules\Personnel\Contracts\LearningAssignmentManager;
 use App\Support\Library\LibraryExportAction;
 use App\Support\Livewire\AbstractLibraryDashboard;
 use Livewire\Attributes\Computed;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class Dashboard extends AbstractLibraryDashboard
 {
     public string $searchAsset = '';
+
     public ?int $versionSourceAssetId = null;
+
     public $assetUpload = null;
 
     public array $assetForm = [
@@ -69,7 +72,7 @@ class Dashboard extends AbstractLibraryDashboard
             ? EmployeeContentAsset::query()->find($this->versionSourceAssetId)
             : null;
 
-        $asset = app(LearningAssignmentManagerService::class)->createAsset(
+        $asset = app(LearningAssignmentManager::class)->createAsset(
             data_get($validated, 'assetForm', []),
             $this->assetUpload,
             auth()->user(),
@@ -77,20 +80,9 @@ class Dashboard extends AbstractLibraryDashboard
         );
 
         $this->assignmentForm['asset_id'] = $asset->id;
-        $this->assetUpload = null;
-        $this->assetForm = [
-            'title' => '',
-            'content_type' => 'pdf',
-            'version' => '1.0',
-            'description' => '',
-            'external_url' => '',
-            'visibility' => 'internal',
-            'is_active' => true,
-            'auto_assign_new_hires' => false,
-            'is_required' => false,
-            'estimated_minutes' => null,
-        ];
-        $this->versionSourceAssetId = null;
+        $this->resetLibraryForm();
+        $this->closeSideMenu();
+        unset($this->catalogPayload);
 
         $this->dispatch('notify', type: 'success', message: __('learning-library::dashboard.messages.asset_saved'));
     }
@@ -131,7 +123,7 @@ class Dashboard extends AbstractLibraryDashboard
             return;
         }
 
-        $count = app(LearningAssignmentManagerService::class)->assignByTargets(
+        $count = app(LearningAssignmentManager::class)->assignByTargets(
             data_get($validated, 'selectedPersonnelIds', []),
             data_get($validated, 'selectedStructureIds', []),
             data_get($validated, 'selectedPositionIds', []),
@@ -142,6 +134,7 @@ class Dashboard extends AbstractLibraryDashboard
             auth()->user()
         );
 
+        $this->closeSideMenu();
         $this->dispatch('notify', type: 'success', message: __('learning-library::dashboard.messages.assignment_saved', ['count' => $count]));
     }
 
@@ -149,10 +142,10 @@ class Dashboard extends AbstractLibraryDashboard
     {
         abort_unless($this->canManageLibrary(), 403);
 
-        $asset = \App\Models\EmployeeContentAsset::query()->findOrFail($assetId);
-        app(LearningAssignmentManagerService::class)->toggleAssetActive($asset);
+        $asset = EmployeeContentAsset::query()->findOrFail($assetId);
+        app(LearningAssignmentManager::class)->toggleAssetActive($asset);
 
-        unset($this->payload);
+        unset($this->catalogPayload);
         $this->dispatch('notify', type: 'success', message: __('learning-library::dashboard.messages.asset_state_updated'));
     }
 
@@ -161,9 +154,9 @@ class Dashboard extends AbstractLibraryDashboard
         abort_unless($this->canManageLibrary(), 403);
 
         $asset = EmployeeContentAsset::query()->findOrFail($assetId);
-        app(LearningAssignmentManagerService::class)->setAssetArchived($asset, $asset->archived_at === null, auth()->user());
+        app(LearningAssignmentManager::class)->setAssetArchived($asset, $asset->archived_at === null, auth()->user());
 
-        unset($this->payload);
+        unset($this->catalogPayload);
         $this->dispatch('notify', type: 'success', message: __('learning-library::dashboard.messages.asset_archive_updated'));
     }
 
@@ -186,10 +179,12 @@ class Dashboard extends AbstractLibraryDashboard
             'estimated_minutes' => $asset->estimated_minutes,
         ];
 
+        $this->resetValidation();
+        $this->openSideMenu('library-create');
         $this->dispatch('notify', type: 'info', message: __('learning-library::dashboard.messages.version_prefilled'));
     }
 
-    public function exportAssets()
+    public function exportAssets(): BinaryFileResponse
     {
         abort_unless($this->canView(), 403);
 
@@ -209,7 +204,7 @@ class Dashboard extends AbstractLibraryDashboard
         );
     }
 
-    public function exportAssignments()
+    public function exportAssignments(): BinaryFileResponse
     {
         abort_unless($this->canView(), 403);
 
@@ -228,7 +223,7 @@ class Dashboard extends AbstractLibraryDashboard
         );
     }
 
-    public function exportOverdueAssignments()
+    public function exportOverdueAssignments(): BinaryFileResponse
     {
         abort_unless($this->canView(), 403);
 
@@ -245,7 +240,7 @@ class Dashboard extends AbstractLibraryDashboard
         );
     }
 
-    public function exportCompletedAssignments()
+    public function exportCompletedAssignments(): BinaryFileResponse
     {
         abort_unless($this->canView(), 403);
 
@@ -262,7 +257,7 @@ class Dashboard extends AbstractLibraryDashboard
         );
     }
 
-    public function exportVersionHistory()
+    public function exportVersionHistory(): BinaryFileResponse
     {
         abort_unless($this->canView(), 403);
 
@@ -294,12 +289,6 @@ class Dashboard extends AbstractLibraryDashboard
     }
 
     #[Computed]
-    public function summaryPayload(): array
-    {
-        return app(LearningLibraryReadService::class)->buildSummary();
-    }
-
-    #[Computed]
     public function generalPayload(): array
     {
         return app(LearningLibraryReadService::class)->buildGeneral(
@@ -311,21 +300,9 @@ class Dashboard extends AbstractLibraryDashboard
     }
 
     #[Computed]
-    public function libraryPayload(): array
-    {
-        return app(LearningLibraryReadService::class)->buildLibrary($this->searchAsset);
-    }
-
-    #[Computed]
     public function reportsPayload(): array
     {
         return app(LearningLibraryReadService::class)->buildReports();
-    }
-
-    #[Computed]
-    public function payload(): array
-    {
-        return app(LearningLibraryReadService::class)->build($this->searchAsset, $this->searchPersonnel, $this->searchStructure, $this->searchPosition);
     }
 
     public function canView(): bool
@@ -343,8 +320,66 @@ class Dashboard extends AbstractLibraryDashboard
         return auth()->user()?->can('assign-employee-content') ?? false;
     }
 
-    public function render()
+    protected function readService(): LearningLibraryReadService
     {
-        return view('learning-library::livewire.learning-library.dashboard');
+        return app(LearningLibraryReadService::class);
+    }
+
+    protected function resetLibraryForm(): void
+    {
+        $this->assetUpload = null;
+        $this->versionSourceAssetId = null;
+        $this->assetForm = [
+            'title' => '',
+            'content_type' => 'pdf',
+            'version' => '1.0',
+            'description' => '',
+            'external_url' => '',
+            'visibility' => 'internal',
+            'is_active' => true,
+            'auto_assign_new_hires' => false,
+            'is_required' => false,
+            'estimated_minutes' => null,
+        ];
+    }
+
+    protected function libraryConfig(): array
+    {
+        $types = ['video', 'presentation', 'pdf', 'link', 'other'];
+        $typeOptions = array_combine($types, array_map(fn (string $type): string => __('personnel::my_hr.learning.content_types.'.$type), $types));
+
+        return [
+            'ns' => 'learning-library::dashboard',
+            'icon' => 'learning',
+            'breadcrumb' => __('ui::menu.items.learning_library'),
+            'search' => 'searchAsset',
+            'form' => 'assetForm',
+            'upload' => 'assetUpload',
+            'save' => 'saveAsset',
+            'toggle_active' => 'toggleAssetActive',
+            'toggle_archived' => 'toggleAssetArchived',
+            'new_version' => 'prepareNextAssetVersion',
+            'is_new_version' => $this->versionSourceAssetId !== null,
+            'assign_key' => 'asset_id',
+            'assign_items' => 'assignment_assets',
+            'can_manage' => $this->canManageLibrary(),
+            'can_assign' => $this->canAssignContent(),
+            'type_options' => $typeOptions,
+            'fields' => [
+                ['key' => 'title', 'label' => 'asset_title', 'type' => 'text', 'wide' => true],
+                ['key' => 'content_type', 'label' => 'content_type', 'type' => 'select', 'options' => $typeOptions],
+                ['key' => 'version', 'label' => 'version', 'type' => 'text'],
+                ['key' => 'visibility', 'label' => 'visibility', 'type' => 'select', 'options' => [
+                    'internal' => __('personnel::my_hr.learning_admin.visibility.internal'),
+                    'public' => __('personnel::my_hr.learning_admin.visibility.public'),
+                ]],
+                ['key' => 'estimated_minutes', 'label' => 'estimated_minutes', 'type' => 'number'],
+                ['key' => 'description', 'label' => 'description', 'type' => 'textarea', 'wide' => true],
+                ['key' => 'external_url', 'label' => 'external_url', 'type' => 'url', 'wide' => true],
+                ['key' => 'is_active', 'label' => 'is_active', 'type' => 'checkbox'],
+                ['key' => 'auto_assign_new_hires', 'label' => 'auto_assign_new_hires', 'type' => 'checkbox'],
+                ['key' => 'is_required', 'label' => 'is_required', 'type' => 'checkbox'],
+            ],
+        ];
     }
 }

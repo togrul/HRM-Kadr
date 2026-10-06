@@ -4,15 +4,15 @@ namespace App\Modules\EmployeeLifecycle\Application\Services;
 
 use App\Models\User;
 use App\Notifications\PlatformNotification;
+use App\Support\Database\InstalledTables;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 class LifecycleReminderService
 {
     public function run(?int $daysAhead = null, ?int $cooldownHours = null, ?int $maxPerRun = null): array
     {
-        if (! Schema::hasTable('employee_lifecycle_events') || ! Schema::hasTable('employee_lifecycle_tasks')) {
+        if (! InstalledTables::has('employee_lifecycle_events') || ! InstalledTables::has('employee_lifecycle_tasks')) {
             return [
                 'event_reminders_sent' => 0,
                 'task_reminders_sent' => 0,

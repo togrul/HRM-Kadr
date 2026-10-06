@@ -1,35 +1,7 @@
 <div class="space-y-5 px-4 py-3 lg:px-5">
-    <x-surface-card :title="__('reports::dashboard.comparisons.title')" icon="icons.pending-icon" class="rounded-[2rem] border-zinc-200/90 bg-white shadow-[0_10px_28px_rgba(15,23,42,0.05)]" bodyClass="rounded-[1.6rem] border-zinc-200/90 bg-[linear-gradient(180deg,#ffffff_0%,#fcfcfd_100%)]" contentClass="p-5 lg:p-6">
+    <x-surface-card :title="__('reports::dashboard.comparisons.title')" icon="icons.pending-icon" class="rounded-2xl border-zinc-200/90 bg-white shadow-card" bodyClass="rounded-b-2xl border-zinc-200/90 bg-[linear-gradient(180deg,#ffffff_0%,#fcfcfd_100%)]" contentClass="p-5 lg:p-6">
         <div class="space-y-4">
             <p class="text-sm leading-7 text-zinc-500">{{ __('reports::dashboard.comparisons.description') }}</p>
-
-            <div class="grid gap-4 md:grid-cols-3">
-                <div>
-                    <label class="mb-1 block text-xs font-medium text-zinc-500">{{ __('reports::dashboard.fields.year') }}</label>
-                    <select wire:model.live="year" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-700">
-                        @foreach (range(now()->year - 4, now()->year + 1) as $yearOption)
-                            <option value="{{ $yearOption }}">{{ $yearOption }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label class="mb-1 block text-xs font-medium text-zinc-500">{{ __('reports::dashboard.fields.month') }}</label>
-                    <select wire:model.live="month" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-700">
-                        @foreach (range(1, 12) as $monthOption)
-                            <option value="{{ $monthOption }}">{{ \Carbon\Carbon::create()->month($monthOption)->translatedFormat('F') }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label class="mb-1 block text-xs font-medium text-zinc-500">{{ __('reports::dashboard.fields.structure') }}</label>
-                    <select wire:model.live="structureId" class="w-full rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-700">
-                        <option value="">{{ __('reports::dashboard.labels.all_structures') }}</option>
-                        @foreach ($structureOptions as $option)
-                            <option value="{{ $option['id'] }}">{{ $option['label'] }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
         </div>
     </x-surface-card>
 
@@ -45,7 +17,7 @@
                     @php
                         $width = max(12, min(100, round(($row['value'] / $headcountMax) * 100, 1)));
                     @endphp
-                    <div class="rounded-3xl border border-zinc-200 bg-zinc-50/70 px-4 py-4">
+                    <div class="rounded-2xl border border-zinc-200 bg-zinc-50/70 px-4 py-4">
                         <div class="mb-3 flex items-center justify-between gap-3 text-sm">
                             <span class="font-medium text-zinc-800">{{ $row['label'] }}</span>
                             <span class="text-zinc-500">{{ $row['value'] }}</span>
@@ -64,15 +36,15 @@
         <x-surface-card :title="__('reports::dashboard.comparisons.cards.attendance_mom')" icon="icons.calendar-icon">
             <div class="grid gap-4 md:grid-cols-2">
                 @foreach ($this->payload['attendance_months'] as $row)
-                    <div class="rounded-3xl border border-zinc-200/90 bg-zinc-50/70 px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.55)]">
+                    <div class="rounded-2xl border border-zinc-200/90 bg-zinc-50/70 px-5 py-5 shadow-card">
                         <p class="text-sm font-semibold text-zinc-900">{{ $row['label'] }}</p>
                         <div class="mt-4 space-y-4">
                             <div>
-                                <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-400">{{ __('reports::dashboard.overview.cards.attendance_coverage') }}</p>
+                                <p class="hrm-eyebrow">{{ __('reports::dashboard.overview.cards.attendance_coverage') }}</p>
                                 <p class="mt-2 text-3xl font-semibold text-zinc-950">{{ number_format($row['coverage_pct'], 1) }}%</p>
                             </div>
                             <div>
-                                <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-400">{{ __('reports::dashboard.overview.cards.absence_rate') }}</p>
+                                <p class="hrm-eyebrow">{{ __('reports::dashboard.overview.cards.absence_rate') }}</p>
                                 <p class="mt-2 text-2xl font-semibold text-zinc-950">{{ number_format($row['absence_rate_pct'], 1) }}%</p>
                             </div>
                         </div>
@@ -86,7 +58,7 @@
         <x-surface-card :title="__('reports::dashboard.comparisons.cards.training_yoy')" icon="icons.training-icon">
             <div class="space-y-3">
                 @forelse ($this->payload['training_years'] as $row)
-                    <div class="rounded-3xl border border-zinc-200/90 bg-zinc-50/70 px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.55)]">
+                    <div class="rounded-2xl border border-zinc-200/90 bg-zinc-50/70 px-4 py-4 shadow-card">
                         <div class="flex items-center justify-between gap-3">
                             <p class="text-sm font-semibold text-zinc-900">{{ $row['label'] }}</p>
                             <x-small-badge mode="sky">{{ $row['sessions_count'] }}</x-small-badge>
@@ -109,7 +81,7 @@
                     @php
                         $width = max(12, min(100, round(($row['value'] / $performanceMax) * 100, 1)));
                     @endphp
-                    <div class="rounded-3xl border border-zinc-200/90 bg-zinc-50/70 px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.55)]">
+                    <div class="rounded-2xl border border-zinc-200/90 bg-zinc-50/70 px-4 py-4 shadow-card">
                         <div class="mb-3 flex items-center justify-between gap-3 text-sm">
                             <span class="font-medium text-zinc-800">{{ $row['label'] }}</span>
                             <span class="text-zinc-500">{{ $row['value'] }}</span>

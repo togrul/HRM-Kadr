@@ -40,7 +40,6 @@ class NotificationSettingsHubTest extends TestCase
         $this->actingAs($user);
 
         Livewire::test(\App\Modules\Notifications\Livewire\SettingsHub::class)
-            ->assertSee('Bildirişlər modulu')
             ->assertSee('Ümumi baxış')
             ->assertSee('Analitika')
             ->assertSee('Qaydalar')
@@ -55,7 +54,6 @@ class NotificationSettingsHubTest extends TestCase
         $this->actingAs($user)
             ->get(route('services', ['selectedService' => 'notifications-settings']))
             ->assertOk()
-            ->assertSee('Bildirişlər modulu')
             ->assertSee('Ümumi baxış');
     }
 

@@ -2,21 +2,22 @@
 
 namespace Tests\Feature\Orders;
 
+use App\Models\ChiefDelegation;
 use App\Models\OrderLog;
 use App\Models\OrderWordTemplate;
 use App\Models\Personnel;
 use App\Models\Position;
 use App\Models\Structure;
 use App\Models\User;
+use App\Modules\Orders\Infrastructure\Document\OrderIssueService;
 use App\Modules\Orders\Livewire\OrderComposer;
-use App\Services\Orders\Document\OrderIssueService;
+use DomainException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\PhpWord;
-use PhpOffice\PhpWord\TemplateProcessor;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 use ZipArchive;
@@ -56,7 +57,7 @@ class OrderComposerTest extends TestCase
             'personnelId' => $personnel->id,
         ])
             ->set('orderNumber', '214-M')
-            ->set('orderDate', '14 may 2026-cı il')
+            ->set('orderDate', '2026-05-14')
             ->set('fields', ['var_2' => '19.05.2026-cı il'])
             ->call('issue')
             ->assertFileDownloaded('leave_214-M.docx');
@@ -73,6 +74,32 @@ class OrderComposerTest extends TestCase
         $this->assertStringContainsString('Bayramov Ruslan Bəxtiyar oğluna', $text);
         $this->assertStringContainsString('19.05.2026-cı il', $text);
         $this->assertStringNotContainsString('${', $text);
+    }
+
+    public function test_the_native_date_is_required_and_printed_in_long_form(): void
+    {
+        $this->seedTemplate();
+        $personnel = $this->makePersonnel();
+        $this->actingAs($this->userWith('add-orders'));
+
+        $composer = Livewire::test(OrderComposer::class, ['presetCode' => 'leave', 'personnelId' => $personnel->id])
+            ->assertSet('orderDate', now()->format('Y-m-d'))
+            ->set('orderNumber', 'DT-1')
+            ->set('fields', ['var_2' => '19.05.2026'])
+            ->set('orderDate', '')
+            ->call('issue')
+            ->assertHasErrors('orderDate');
+
+        $this->assertFalse(OrderLog::where('order_no', 'DT-1')->exists());
+
+        $composer->set('orderDate', '2026-05-14')->call('issue')->assertHasNoErrors();
+
+        $order = OrderLog::where('order_no', 'DT-1')->firstOrFail();
+        $this->assertSame('14.05.2026-cı il', data_get($order->template_snapshot, 'order_date_text'));
+
+        // Editing reads the stored long form back into the date input.
+        Livewire::test(OrderComposer::class, ['orderId' => $order->id])
+            ->assertSet('orderDate', '2026-05-14');
     }
 
     public function test_issuing_an_order_whose_number_contains_a_slash_downloads_a_safe_filename(): void
@@ -221,10 +248,10 @@ class OrderComposerTest extends TestCase
         $order = OrderLog::where('order_no', '700-IQ')->firstOrFail();
         $this->assertSame(OrderIssueService::STATUS_PENDING, $order->status_id);
 
-        app(\App\Services\Orders\Document\OrderApprovalService::class)->approve($order);
+        app(\App\Modules\Orders\Infrastructure\Document\OrderApprovalService::class)->approve($order);
 
         $this->assertSame(
-            \App\Services\Orders\Document\OrderApprovalService::STATUS_APPROVED,
+            \App\Modules\Orders\Infrastructure\Document\OrderApprovalService::STATUS_APPROVED,
             $order->fresh()->status_id
         );
     }
@@ -258,7 +285,7 @@ class OrderComposerTest extends TestCase
 
         // No leave yet while pending; approval creates the record.
         $this->assertCount(0, $personnel->vacations()->get());
-        app(\App\Services\Orders\Document\OrderApprovalService::class)->approve($order);
+        app(\App\Modules\Orders\Infrastructure\Document\OrderApprovalService::class)->approve($order);
 
         $vacation = $personnel->vacations()->first();
         $this->assertNotNull($vacation);
@@ -323,7 +350,7 @@ class OrderComposerTest extends TestCase
         $this->assertSame($candidate->id, data_get($order->template_snapshot, 'candidate_id'));
         $this->assertSame(0, Personnel::query()->where('surname', 'Hüseynov')->count());
 
-        app(\App\Services\Orders\Document\OrderApprovalService::class)->approve($order);
+        app(\App\Modules\Orders\Infrastructure\Document\OrderApprovalService::class)->approve($order);
 
         // The candidate is now an active employee in the chosen structure + position.
         $personnel = Personnel::query()->where('surname', 'Hüseynov')->first();
@@ -443,7 +470,7 @@ class OrderComposerTest extends TestCase
         $component->set('fields', ['var_2' => $start, 'var_3' => $end, 'var_4' => '5'])->call('issue');
         $order = OrderLog::where('order_no', '930-M')->firstOrFail();
 
-        $transitions = app(\App\Services\Orders\Document\OrderStatusTransitionService::class);
+        $transitions = app(\App\Modules\Orders\Infrastructure\Document\OrderStatusTransitionService::class);
 
         // Approval deducts the days from the balance…
         $transitions->approve($order);
@@ -582,6 +609,98 @@ class OrderComposerTest extends TestCase
         return [$candidate, $structure, $position];
     }
 
+    public function test_an_order_freezes_the_active_delegate_as_signatory_by_order_date(): void
+    {
+        $this->seedTemplate();
+        $subject = $this->makePersonnel();
+
+        // Permanent chief (highest approval rank) + a delegate acting for a May window.
+        $chief = $this->makeChief('Sührabov', 'Sübhan', approvalRank: 100);
+        $delegate = $this->makeChief('Məmmədov', 'Elçin', approvalRank: 40);
+
+        ChiefDelegation::create([
+            'chief_personnel_id' => $chief->id,
+            'delegate_personnel_id' => $delegate->id,
+            'starts_at' => '2026-05-01',
+            'ends_at' => '2026-05-31',
+            'is_active' => true,
+            'created_by' => 1,
+        ]);
+
+        $this->actingAs($this->userWith('add-orders'));
+
+        // An order dated inside the window is signed by the delegate, and the snapshot
+        // freezes that — re-reading it later still names whoever acted then.
+        Livewire::test(OrderComposer::class, ['presetCode' => 'leave', 'personnelId' => $subject->id])
+            ->set('orderNumber', 'DLG-IN')
+            ->set('orderDate', '2026-05-20')
+            ->set('fields', ['var_2' => '20.05.2026'])
+            ->call('issue');
+
+        $inside = OrderLog::where('order_no', 'DLG-IN')->firstOrFail();
+        $this->assertSame($delegate->id, (int) $inside->signatory_personnel_id);
+        $this->assertSame('delegated', data_get($inside->signatory_snapshot, 'mode'));
+        $this->assertSame($chief->id, (int) data_get($inside->signatory_snapshot, 'permanent_chief_personnel_id'));
+
+        // An order dated after the window reverts to the permanent chief.
+        Livewire::test(OrderComposer::class, ['presetCode' => 'leave', 'personnelId' => $subject->id])
+            ->set('orderNumber', 'DLG-OUT')
+            ->set('orderDate', '2026-07-15')
+            ->set('fields', ['var_2' => '15.07.2026'])
+            ->call('issue');
+
+        $outside = OrderLog::where('order_no', 'DLG-OUT')->firstOrFail();
+        $this->assertSame($chief->id, (int) $outside->signatory_personnel_id);
+        $this->assertSame('permanent', data_get($outside->signatory_snapshot, 'mode'));
+    }
+
+    public function test_the_pickers_search_active_employees_and_ready_candidates(): void
+    {
+        $this->seedTemplate();
+        $personnel = $this->makePersonnel();
+        $structure = Structure::query()->create(['name' => 'Anbar', 'shortname' => 'AN']);
+        $ready = \App\Models\Candidate::query()->create([
+            'surname' => 'Bayramlı', 'name' => 'Ramin', 'patronymic' => 'X', 'height' => 175,
+            'structure_id' => $structure->id, 'status_id' => 30, 'gender' => 1, 'birthdate' => '1995-01-01',
+        ]);
+        \App\Models\Candidate::query()->create([
+            'surname' => 'Bayramlı', 'name' => 'Elvin', 'patronymic' => 'X', 'height' => 175,
+            'structure_id' => $structure->id, 'status_id' => 10, 'gender' => 1, 'birthdate' => '1995-01-01',
+        ]);
+        $this->actingAs($this->userWith('add-orders'));
+
+        $component = Livewire::test(OrderComposer::class)
+            ->set('personnelQuery', 'B')
+            ->assertSet('personnelResults', [])
+            ->set('personnelQuery', 'Bayram')
+            ->set('candidateQuery', 'Bayram');
+
+        $this->assertSame([$personnel->id], array_column($component->get('personnelResults'), 'id'));
+        $this->assertSame([$ready->id], array_column($component->get('candidateResults'), 'id'));
+
+        $component->call('selectCandidate', $ready->id)
+            ->assertSet('candidateId', $ready->id)
+            ->assertSet('hireStructureId', $structure->id)
+            ->assertSet('candidateQuery', '')
+            ->call('clearCandidate')
+            ->assertSet('candidateId', null);
+    }
+
+    public function test_server_set_ids_cannot_be_forged_by_the_client(): void
+    {
+        $this->seedTemplate();
+        $this->actingAs($this->userWith('add-orders'));
+
+        foreach (['editOrderId', 'personnelId', 'candidateId'] as $property) {
+            try {
+                Livewire::test(OrderComposer::class, ['presetCode' => 'leave'])->set($property, 1);
+                $this->fail("{$property} should be locked.");
+            } catch (\Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException) {
+                $this->addToAssertionCount(1);
+            }
+        }
+    }
+
     public function test_unknown_type_surfaces_an_error(): void
     {
         $this->actingAs($this->userWith('add-orders'));
@@ -595,7 +714,7 @@ class OrderComposerTest extends TestCase
     {
         [$order, $personnel] = $this->issueVacationOrder('801-M');
 
-        app(\App\Services\Orders\Document\OrderStatusTransitionService::class)->cancel($order);
+        app(\App\Modules\Orders\Infrastructure\Document\OrderStatusTransitionService::class)->cancel($order);
 
         $this->assertSame(\App\Enums\OrderStatusEnum::CANCELLED->value, (int) $order->fresh()->status_id);
         $this->assertCount(0, $personnel->vacations()->get());
@@ -604,7 +723,7 @@ class OrderComposerTest extends TestCase
     public function test_reverting_an_approved_vacation_order_removes_the_leave(): void
     {
         [$order, $personnel] = $this->issueVacationOrder('802-M');
-        $transitions = app(\App\Services\Orders\Document\OrderStatusTransitionService::class);
+        $transitions = app(\App\Modules\Orders\Infrastructure\Document\OrderStatusTransitionService::class);
 
         $transitions->approve($order);
         $this->assertCount(1, $personnel->vacations()->get());
@@ -618,7 +737,7 @@ class OrderComposerTest extends TestCase
     public function test_cancelling_an_approved_order_reverses_its_effect(): void
     {
         [$order, $personnel] = $this->issueVacationOrder('803-M');
-        $transitions = app(\App\Services\Orders\Document\OrderStatusTransitionService::class);
+        $transitions = app(\App\Modules\Orders\Infrastructure\Document\OrderStatusTransitionService::class);
 
         $transitions->approve($order);
         $transitions->cancel($order);
@@ -630,7 +749,7 @@ class OrderComposerTest extends TestCase
     public function test_reopening_a_cancelled_order_returns_it_to_pending(): void
     {
         [$order] = $this->issueVacationOrder('804-M');
-        $transitions = app(\App\Services\Orders\Document\OrderStatusTransitionService::class);
+        $transitions = app(\App\Modules\Orders\Infrastructure\Document\OrderStatusTransitionService::class);
 
         $transitions->cancel($order);
         $transitions->reopen($order);
@@ -641,11 +760,11 @@ class OrderComposerTest extends TestCase
     public function test_an_illegal_status_jump_is_rejected(): void
     {
         [$order] = $this->issueVacationOrder('805-M');
-        $transitions = app(\App\Services\Orders\Document\OrderStatusTransitionService::class);
+        $transitions = app(\App\Modules\Orders\Infrastructure\Document\OrderStatusTransitionService::class);
         $transitions->cancel($order);
 
         // cancelled → approved is not a permitted move.
-        $this->expectException(\DomainException::class);
+        $this->expectException(DomainException::class);
         $transitions->transition($order->fresh(), \App\Enums\OrderStatusEnum::APPROVED);
     }
 
@@ -755,6 +874,40 @@ class OrderComposerTest extends TestCase
             'structure_id' => $structure->id,
             'position_id' => $position->id,
             'join_work_date' => '2020-01-01',
+            'added_by' => 1,
+            'is_pending' => false,
+        ]));
+    }
+
+    /** A would-be chief: an active employee whose position carries the given approval rank. */
+    private function makeChief(string $surname, string $name, int $approvalRank): Personnel
+    {
+        $structure = Structure::query()->create([
+            'name' => 'İdarə '.$surname,
+            'shortname' => 'İD'.Str::upper(Str::random(3)),
+        ]);
+        $position = Position::query()->create([
+            'name' => 'rəis '.$surname,
+            'approval_rank' => $approvalRank,
+        ]);
+
+        return Personnel::withoutEvents(fn () => Personnel::query()->create([
+            'tabel_no' => 'TB'.Str::upper(Str::random(6)),
+            'surname' => $surname,
+            'name' => $name,
+            'patronymic' => 'Oğuz',
+            'birthdate' => '1980-01-01',
+            'gender' => 1,
+            'email' => Str::lower(Str::random(8)).'@example.com',
+            'mobile' => '994501112233',
+            'nationality_id' => 1,
+            'pin' => 'P'.str_pad((string) random_int(1, 9999999), 7, '0', STR_PAD_LEFT),
+            'residental_address' => 'Main st',
+            'education_degree_id' => 1,
+            'work_norm_id' => 1,
+            'structure_id' => $structure->id,
+            'position_id' => $position->id,
+            'join_work_date' => '2010-01-01',
             'added_by' => 1,
             'is_pending' => false,
         ]));

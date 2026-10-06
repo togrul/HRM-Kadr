@@ -5,6 +5,11 @@ namespace App\Modules\Personnel\Livewire\MyHr;
 use App\Modules\Notifications\Support\DispatchesNotificationRefresh;
 use App\Modules\Notifications\Support\NotificationCountCache;
 use App\Modules\Personnel\Support\MyHr\MyHrAccess;
+use App\Notifications\NewLeaveRequested;
+use App\Notifications\NewPersonnelAdded;
+use App\Notifications\PersonnelWasDeleted;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -16,6 +21,16 @@ class MyHrNotifications extends Component
     use WithPagination;
 
     public const PER_PAGE = 12;
+
+    /**
+     * HR-operator alerts belong to the main notification centre, not the employee's
+     * cabinet — the cabinet neither lists nor clears them.
+     */
+    public const OPERATOR_TYPES = [
+        NewLeaveRequested::class,
+        NewPersonnelAdded::class,
+        PersonnelWasDeleted::class,
+    ];
 
     public ?int $personnelId = null;
 
@@ -30,7 +45,7 @@ class MyHrNotifications extends Component
             return;
         }
 
-        $user->unreadNotifications()->update(['read_at' => now()]);
+        $this->cabinetNotifications($user)->whereNull('read_at')->update(['read_at' => now()]);
         app(NotificationCountCache::class)->forgetUser((int) $user->id);
         $this->dispatchNotificationRefresh();
     }
@@ -42,13 +57,13 @@ class MyHrNotifications extends Component
             return;
         }
 
-        $user->notifications()->delete();
+        $this->cabinetNotifications($user)->delete();
         app(NotificationCountCache::class)->forgetUser((int) $user->id);
         $this->dispatchNotificationRefresh();
         $this->resetPage();
     }
 
-    public function render()
+    public function render(): View
     {
         $user = Auth::user();
 
@@ -65,7 +80,7 @@ class MyHrNotifications extends Component
             ]);
         }
 
-        $notifications = $user->notifications()
+        $notifications = $this->cabinetNotifications($user)
             ->select(['id', 'type', 'data', 'read_at', 'created_at', 'notifiable_id', 'notifiable_type'])
             ->latest()
             ->paginate(self::PER_PAGE);
@@ -77,9 +92,14 @@ class MyHrNotifications extends Component
         ]);
     }
 
+    protected function cabinetNotifications($user): MorphMany
+    {
+        return $user->notifications()->whereNotIn('type', self::OPERATOR_TYPES);
+    }
+
     protected function summary($user): array
     {
-        $baseQuery = $user->notifications();
+        $baseQuery = $this->cabinetNotifications($user);
 
         return [
             'total' => (clone $baseQuery)->count(),

@@ -2,16 +2,9 @@
 
 namespace App\Modules\Audit\Livewire;
 
-use App\Models\AttendanceOvertimeRequest;
 use App\Models\AuditActivity;
-use App\Models\Candidate;
-use App\Models\OrderLog;
-use App\Models\Personnel;
-use App\Models\StaffSchedule;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Modules\Audit\Application\Services\ActivityLogReader;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Livewire\Component;
@@ -33,6 +26,9 @@ class ActivityLogDashboard extends Component
 
     public int $perPage = 25;
 
+    /** Only entries a user caused (the "users" metric card), not system ones. */
+    public bool $usersOnly = false;
+
     public ?int $selectedActivityId = null;
 
     /**
@@ -52,7 +48,7 @@ class ActivityLogDashboard extends Component
 
     public function updated($property): void
     {
-        if (in_array($property, ['search', 'logName', 'event', 'dateFrom', 'dateTo', 'perPage'], true)) {
+        if (in_array($property, ['search', 'logName', 'event', 'dateFrom', 'dateTo', 'perPage', 'usersOnly'], true)) {
             $this->resetPage();
             $this->selectedActivityId = null;
         }
@@ -66,8 +62,45 @@ class ActivityLogDashboard extends Component
         $this->dateFrom = '';
         $this->dateTo = '';
         $this->perPage = 25;
+        $this->usersOnly = false;
         $this->selectedActivityId = null;
         $this->resetPage();
+    }
+
+    /**
+     * The header metric cards double as filters: a click applies the card's filter, a
+     * second click on the active card clears it. "total" clears every card filter.
+     */
+    public function toggleMetric(string $metric): void
+    {
+        $active = $this->metricActive($metric);
+
+        if ($metric === 'total') {
+            $this->dateFrom = $this->dateTo = $this->event = '';
+            $this->usersOnly = false;
+        } elseif ($metric === 'today') {
+            $this->dateFrom = $this->dateTo = $active ? '' : today()->toDateString();
+        } elseif ($metric === 'profile_opened') {
+            $this->event = $active ? '' : 'profile_opened';
+        } elseif ($metric === 'users') {
+            $this->usersOnly = ! $active;
+        }
+
+        $this->selectedActivityId = null;
+        $this->resetPage();
+    }
+
+    public function metricActive(string $metric): bool
+    {
+        $today = today()->toDateString();
+
+        return match ($metric) {
+            'total' => ! $this->metricActive('today') && ! $this->metricActive('profile_opened') && ! $this->usersOnly,
+            'today' => $this->dateFrom === $today && $this->dateTo === $today,
+            'profile_opened' => $this->event === 'profile_opened',
+            'users' => $this->usersOnly,
+            default => false,
+        };
     }
 
     public function selectActivity(int $activityId): void
@@ -89,12 +122,13 @@ class ActivityLogDashboard extends Component
             'event' => $this->event,
             'date_from' => $this->dateFrom,
             'date_to' => $this->dateTo,
+            'users_only' => $this->usersOnly ? '1' : '',
         ], fn ($value) => $value !== ''));
     }
 
-    public function render()
+    public function render(): View
     {
-        $activities = $this->filteredQuery()
+        $activities = $this->reader()->query($this->filters())
             ->select([
                 'id',
                 'log_name',
@@ -123,31 +157,30 @@ class ActivityLogDashboard extends Component
         return view('audit::livewire.activity-log-dashboard', [
             'activities' => $activities,
             'selectedActivity' => $selectedActivity,
-            'summary' => $this->summary($this->hasActiveFilters() ? null : (int) $activities->total()),
+            'summary' => $this->reader()->summary($this->filters()),
             'logNameOptions' => $this->logNameOptions(),
-            'eventOptions' => $this->eventOptions(),
+            'eventCounts' => $this->reader()->eventCounts($this->filters()),
         ]);
     }
 
-    private function filteredQuery(): Builder
+    /**
+     * @return array<string,mixed>
+     */
+    private function filters(): array
     {
-        return AuditActivity::query()
-            ->when($this->logName !== '', fn (Builder $query) => $query->where('log_name', $this->logName))
-            ->when($this->event !== '', fn (Builder $query) => $query->where('event', $this->event))
-            ->when($this->dateFrom !== '', fn (Builder $query) => $query->whereDate('created_at', '>=', $this->dateFrom))
-            ->when($this->dateTo !== '', fn (Builder $query) => $query->whereDate('created_at', '<=', $this->dateTo))
-            ->when($this->search !== '', function (Builder $query) {
-                $term = '%'.str_replace(['%', '_'], ['\\%', '\\_'], trim($this->search)).'%';
+        return [
+            'search' => $this->search,
+            'log_name' => $this->logName,
+            'event' => $this->event,
+            'date_from' => $this->dateFrom,
+            'date_to' => $this->dateTo,
+            'users_only' => $this->usersOnly,
+        ];
+    }
 
-                $query->where(function (Builder $nested) use ($term) {
-                    $nested
-                        ->where('description', 'like', $term)
-                        ->orWhere('event', 'like', $term)
-                        ->orWhere('log_name', 'like', $term)
-                        ->orWhere('subject_type', 'like', $term)
-                        ->orWhere('causer_type', 'like', $term);
-                });
-            });
+    private function reader(): ActivityLogReader
+    {
+        return app(ActivityLogReader::class);
     }
 
     private function selectedActivity(): ?AuditActivity
@@ -157,30 +190,6 @@ class ActivityLogDashboard extends Component
         }
 
         return AuditActivity::query()->find($this->selectedActivityId);
-    }
-
-    /**
-     * @return array<string,int>
-     */
-    private function summary(?int $knownTotal = null): array
-    {
-        $baseQuery = AuditActivity::query();
-
-        return [
-            'total' => $knownTotal ?? (int) (clone $baseQuery)->count(),
-            'today' => (int) (clone $baseQuery)->whereDate('created_at', today())->count(),
-            'profile_opened' => (int) (clone $baseQuery)->where('event', 'profile_opened')->count(),
-            'users' => (int) (clone $baseQuery)->whereNotNull('causer_id')->distinct('causer_id')->count('causer_id'),
-        ];
-    }
-
-    private function hasActiveFilters(): bool
-    {
-        return $this->search !== ''
-            || $this->logName !== ''
-            || $this->event !== ''
-            || $this->dateFrom !== ''
-            || $this->dateTo !== '';
     }
 
     private function logNameOptions(): Collection
@@ -195,93 +204,24 @@ class ActivityLogDashboard extends Component
             ->values();
     }
 
-    private function eventOptions(): Collection
-    {
-        return AuditActivity::query()
-            ->whereNotNull('event')
-            ->select('event')
-            ->distinct()
-            ->orderBy('event')
-            ->pluck('event')
-            ->filter()
-            ->values();
-    }
-
     public function actorLabel(AuditActivity $activity): string
     {
-        if ($activity->causer_id === null) {
-            return __('audit::activity.labels.system_actor');
-        }
-
-        return $this->actorLabels[$this->entityKey($activity->causer_type, $activity->causer_id)]
-            ?? class_basename((string) $activity->causer_type).' #'.$activity->causer_id;
+        return $this->reader()->actorLabel($activity, $this->actorLabels);
     }
 
     public function subjectLabel(AuditActivity $activity): string
     {
-        $fullname = data_get($activity->properties, 'viewed_personnel_fullname')
-            ?: data_get($activity->properties, 'personnel_fullname')
-            ?: data_get($activity->properties, 'fullname');
-
-        if (is_string($fullname) && trim($fullname) !== '') {
-            return trim($fullname);
-        }
-
-        if ($activity->subject_id === null) {
-            return __('audit::activity.labels.no_subject');
-        }
-
-        return $this->subjectLabels[$this->entityKey($activity->subject_type, $activity->subject_id)]
-            ?? class_basename((string) $activity->subject_type).' #'.$activity->subject_id;
+        return $this->reader()->subjectLabel($activity, $this->subjectLabels);
     }
 
     public function eventLabel(?string $event): string
     {
-        if (! $event) {
-            return __('audit::activity.labels.no_event');
-        }
-
-        return $this->translateOr("audit::activity.events.{$this->translationKey($event)}", Str::headline($event));
+        return $this->reader()->eventLabel($event);
     }
 
     public function descriptionLabel(?string $description): string
     {
-        if (! $description) {
-            return '-';
-        }
-
-        $key = match (true) {
-            str_starts_with($description, 'You have ') && str_ends_with($description, ' personnel') => 'personnel_'.$this->translationKey(
-                Str::between($description, 'You have ', ' personnel')
-            ),
-            default => match ($description) {
-                'User logged in' => 'user_logged_in',
-                'User logged out' => 'user_logged_out',
-                'Personnel profile opened' => 'personnel_profile_opened',
-                'Manual attendance entry created.' => 'manual_entry_created',
-                'Manual attendance entry approved.' => 'manual_entry_approved',
-                'Manual attendance entry rejected.' => 'manual_entry_rejected',
-                'Manual attendance entry updated.' => 'manual_entry_updated',
-                'Attendance overtime request created automatically.' => 'attendance_overtime_request_created_automatically',
-                'Attendance overtime request created manually.' => 'attendance_overtime_request_created_manually',
-                'Attendance overtime request approved.' => 'attendance_overtime_request_approved',
-                'Attendance overtime request rejected.' => 'attendance_overtime_request_rejected',
-                'Attendance overtime request removed after recalculation.' => 'attendance_overtime_request_removed_after_recalculation',
-                'Attendance overtime request recalculated.' => 'attendance_overtime_request_recalculated',
-                'Attendance overtime request generation skipped due to missing actor.' => 'attendance_overtime_request_generation_skipped',
-                'Duplicate attendance overtime request deleted.' => 'duplicate_attendance_overtime_request_deleted',
-                'Attendance calendar created.' => 'attendance_calendar_created',
-                'Attendance calendar updated.' => 'attendance_calendar_updated',
-                'Attendance calendar deleted.' => 'attendance_calendar_deleted',
-                'Attendance settings updated.' => 'attendance_settings_updated',
-                'Attendance month closed and locked.' => 'attendance_month_closed_and_locked',
-                'Attendance month unlocked.' => 'attendance_month_unlocked',
-                'Attendance weekend calendar auto-created.' => 'attendance_weekend_calendar_auto_created',
-                default => null,
-            },
-        };
-
-        return $key ? $this->translateOr("audit::activity.descriptions.{$key}", $description) : $description;
+        return $this->reader()->descriptionLabel($description);
     }
 
     public function eventTone(?string $event): string
@@ -293,6 +233,20 @@ class ActivityLogDashboard extends Component
             'deleted', 'force_deleted' => 'rose',
             'restored' => 'sky',
             default => 'zinc',
+        };
+    }
+
+    /**
+     * Tailwind background class for the contextual panel's event dot.
+     */
+    public function eventDot(?string $event): string
+    {
+        return match ($this->eventTone($event)) {
+            'emerald' => 'bg-[#10b981]',
+            'sky' => 'bg-[#0ea5e9]',
+            'amber' => 'bg-[#f59e0b]',
+            'rose' => 'bg-[#f43f5e]',
+            default => 'bg-[#a1a1aa]',
         };
     }
 
@@ -320,8 +274,8 @@ class ActivityLogDashboard extends Component
                 fn (Collection $rows) => $this->normalizeProfileOpenProperties($rows)
             )
             ->map(fn ($value, $key) => [
-                'key' => $this->translateOr(
-                    "audit::activity.properties.{$this->translationKey((string) $key)}",
+                'key' => $this->reader()->translateOr(
+                    "audit::activity.properties.{$this->reader()->translationKey((string) $key)}",
                     Str::headline((string) $key)
                 ),
                 'value' => is_scalar($value) || $value === null
@@ -351,182 +305,14 @@ class ActivityLogDashboard extends Component
 
     private function primeEntityLabels(Collection $activities): void
     {
-        $actorKeys = $this->entityKeysFor($activities, 'causer_type', 'causer_id')->flip();
-        $subjectKeys = $this->entityKeysFor($activities, 'subject_type', 'subject_id')->flip();
-        $labels = $this->labelsFor($activities, [
-            ['causer_type', 'causer_id'],
-            ['subject_type', 'subject_id'],
-        ]);
-
-        $this->actorLabels = array_intersect_key($labels, $actorKeys->all());
-        $this->subjectLabels = array_intersect_key($labels, $subjectKeys->all());
-    }
-
-    private function entityKeysFor(Collection $activities, string $typeColumn, string $idColumn): Collection
-    {
-        return $activities
-            ->filter(fn (AuditActivity $activity) => filled($activity->{$typeColumn}) && filled($activity->{$idColumn}))
-            ->map(fn (AuditActivity $activity) => $this->entityKey($activity->{$typeColumn}, $activity->{$idColumn}))
-            ->unique()
-            ->values();
-    }
-
-    /**
-     * @param  array<int,array{0:string,1:string}>  $columnPairs
-     * @return array<string,string>
-     */
-    private function labelsFor(Collection $activities, array $columnPairs): array
-    {
-        $references = collect($columnPairs)
-            ->flatMap(fn (array $columns) => $activities->map(function (AuditActivity $activity) use ($columns): ?array {
-                [$typeColumn, $idColumn] = $columns;
-
-                if (! filled($activity->{$typeColumn}) || ! filled($activity->{$idColumn})) {
-                    return null;
-                }
-
-                return [
-                    'type' => (string) $activity->{$typeColumn},
-                    'id' => (int) $activity->{$idColumn},
-                ];
-            }))
-            ->filter()
-            ->unique(fn (array $reference) => $this->entityKey($reference['type'], $reference['id']))
-            ->values();
-
-        return $references
-            ->groupBy('type')
-            ->flatMap(function (Collection $items, string $modelClass): array {
-                if (! is_a($modelClass, Model::class, true)) {
-                    return [];
-                }
-
-                $ids = $items->pluck('id')->unique()->values();
-                if ($ids->isEmpty()) {
-                    return [];
-                }
-
-                $models = $modelClass::query()
-                    ->select($this->labelColumnsFor($modelClass))
-                    ->when($this->usesSoftDeletes($modelClass), fn (Builder $query) => $query->withTrashed())
-                    ->whereIn('id', $ids)
-                    ->get()
-                    ->keyBy('id');
-
-                return $ids
-                    ->mapWithKeys(function (int $id) use ($modelClass, $models): array {
-                        $model = $models->get($id);
-
-                        return [
-                            $this->entityKey($modelClass, $id) => $model
-                                ? $this->modelLabel($model)
-                                : class_basename($modelClass).' #'.$id,
-                        ];
-                    })
-                    ->all();
-            })
+        $reader = $this->reader();
+        $labels = $reader->labelsFor($activities);
+        $keys = fn (string $type, string $id): array => $activities
+            ->filter(fn (AuditActivity $activity) => filled($activity->{$type}) && filled($activity->{$id}))
+            ->mapWithKeys(fn (AuditActivity $activity) => [$reader->entityKey($activity->{$type}, $activity->{$id}) => true])
             ->all();
-    }
 
-    private function modelLabel(Model $model): string
-    {
-        if ($model instanceof User) {
-            return trim($model->name) !== ''
-                ? $model->name
-                : (string) $model->email;
-        }
-
-        if ($model instanceof Personnel) {
-            return trim($model->fullname) !== ''
-                ? $model->fullname
-                : (string) $model->tabel_no;
-        }
-
-        if ($model instanceof Candidate) {
-            return trim($model->fullname) !== ''
-                ? $model->fullname
-                : class_basename($model).' #'.$model->getKey();
-        }
-
-        if ($model instanceof StaffSchedule) {
-            return __('audit::activity.labels.staff_schedule', ['id' => $model->getKey()]);
-        }
-
-        if ($model instanceof OrderLog) {
-            return filled($model->order_no)
-                ? __('audit::activity.labels.order_log_with_number', ['number' => $model->order_no])
-                : __('audit::activity.labels.order_log', ['id' => $model->getKey()]);
-        }
-
-        if ($model instanceof AttendanceOvertimeRequest) {
-            return $model->date
-                ? __('audit::activity.labels.attendance_overtime_request_with_date', ['date' => $model->date->format('d.m.Y')])
-                : __('audit::activity.labels.attendance_overtime_request', ['id' => $model->getKey()]);
-        }
-
-        foreach (['name', 'title', 'label'] as $attribute) {
-            if (filled($model->{$attribute} ?? null)) {
-                return (string) $model->{$attribute};
-            }
-        }
-
-        return class_basename($model).' #'.$model->getKey();
-    }
-
-    /**
-     * @return array<int,string>
-     */
-    private function labelColumnsFor(string $modelClass): array
-    {
-        if ($modelClass === User::class) {
-            return ['id', 'name', 'email'];
-        }
-
-        if ($modelClass === Personnel::class) {
-            return ['id', 'surname', 'name', 'patronymic', 'tabel_no'];
-        }
-
-        if ($modelClass === Candidate::class) {
-            return ['id', 'surname', 'name', 'patronymic'];
-        }
-
-        if ($modelClass === StaffSchedule::class) {
-            return ['id'];
-        }
-
-        if ($modelClass === OrderLog::class) {
-            return ['id', 'order_no'];
-        }
-
-        if ($modelClass === AttendanceOvertimeRequest::class) {
-            return ['id', 'date', 'tabel_no', 'status'];
-        }
-
-        return ['id'];
-    }
-
-    private function entityKey(?string $type, mixed $id): string
-    {
-        return ((string) $type).'#'.((string) $id);
-    }
-
-    private function translationKey(string $value): string
-    {
-        return Str::of($value)
-            ->replace(['.', '-'], '_')
-            ->snake()
-            ->toString();
-    }
-
-    private function usesSoftDeletes(string $modelClass): bool
-    {
-        return in_array(SoftDeletes::class, class_uses_recursive($modelClass), true);
-    }
-
-    private function translateOr(string $key, string $fallback): string
-    {
-        $translation = __($key);
-
-        return $translation === $key ? $fallback : $translation;
+        $this->actorLabels = array_intersect_key($labels, $keys('causer_type', 'causer_id'));
+        $this->subjectLabels = array_intersect_key($labels, $keys('subject_type', 'subject_id'));
     }
 }

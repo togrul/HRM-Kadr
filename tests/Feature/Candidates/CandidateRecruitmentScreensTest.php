@@ -427,6 +427,7 @@ class CandidateRecruitmentScreensTest extends TestCase
             ->set('form.to_stage', 'rejected')
             ->set('form.occurred_at', '2026-03-30')
             ->set('form.final_decision', 'rejected')
+            ->set('form.note', 'Tələblərə uyğun deyil')
             ->call('applyStageTransition')
             ->assertForbidden();
 
@@ -441,8 +442,65 @@ class CandidateRecruitmentScreensTest extends TestCase
             ->set('form.to_stage', 'rejected')
             ->set('form.occurred_at', '2026-03-30')
             ->set('form.final_decision', 'rejected')
+            ->set('form.note', 'Tələblərə uyğun deyil')
             ->call('applyStageTransition')
             ->assertDispatched('applicationSaved');
+    }
+
+    public function test_rejecting_an_application_needs_a_reason_and_a_confirmation(): void
+    {
+        [$user, , $opening] = $this->seedRecruitmentData();
+        $candidate = Candidate::query()->firstOrFail();
+
+        $application = CandidateApplication::query()->create([
+            'candidate_id' => $candidate->id,
+            'job_opening_id' => $opening->id,
+            'current_stage' => 'screening',
+            'status' => 'active',
+            'applied_at' => now(),
+            'moved_at' => now(),
+        ]);
+
+        $rejector = User::factory()->create();
+        $rejector->givePermissionTo([
+            Permission::findOrCreate('show-candidates', 'web'),
+            Permission::findOrCreate('candidate-applications.reject', 'web'),
+        ]);
+
+        Livewire::actingAs($rejector)
+            ->test(ApplicationStageActionPanel::class, ['applicationId' => $application->id])
+            ->set('form.to_stage', 'rejected')
+            ->assertSeeHtml('run: () => $wire.applyStageTransition()')
+            ->assertDontSeeHtml('wire:click="applyStageTransition"')
+            ->set('form.note', 'no')
+            ->call('applyStageTransition')
+            ->assertHasErrors(['form.note' => 'min'])
+            ->assertSee(__('candidates::recruitment.messages.rejection_note_required'));
+
+        $this->assertSame('active', $application->refresh()->status);
+    }
+
+    public function test_final_stage_asks_for_confirmation_before_creating_an_employee(): void
+    {
+        [$user, , $opening] = $this->seedRecruitmentData();
+        $candidate = Candidate::query()->firstOrFail();
+
+        $application = CandidateApplication::query()->create([
+            'candidate_id' => $candidate->id,
+            'job_opening_id' => $opening->id,
+            'current_stage' => 'offer',
+            'status' => 'active',
+            'applied_at' => now(),
+            'moved_at' => now(),
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(ApplicationStageActionPanel::class, ['applicationId' => $application->id])
+            ->set('form.to_stage', 'screening')
+            ->assertSeeHtml('wire:click="applyStageTransition"')
+            ->set('form.to_stage', 'hired')
+            ->assertSeeHtml('run: () => $wire.applyStageTransition()')
+            ->assertDontSeeHtml('wire:click="applyStageTransition"');
     }
 
     public function test_candidate_list_shows_deep_links_to_recruitment_context(): void

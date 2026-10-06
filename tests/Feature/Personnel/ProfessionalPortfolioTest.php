@@ -539,6 +539,40 @@ class ProfessionalPortfolioTest extends TestCase
         ]);
     }
 
+    public function test_verified_event_offers_no_reject_and_status_actions_ask_first(): void
+    {
+        $user = $this->makeUserWithPermissions([
+            'view-professional-portfolio',
+            'verify-personnel-event-records',
+        ]);
+        $personnel = $this->makePersonnel($user->id);
+
+        $record = PersonnelEventRecord::query()->create([
+            'personnel_id' => $personnel->id,
+            'event_type' => 'seminar',
+            'participation_role' => 'speaker',
+            'title' => 'Threat forum',
+            'start_date' => '2026-03-20',
+            'attendance_format' => 'offline',
+            'strategic_level' => 'strategic',
+            'visibility' => 'internal',
+            'verification_status' => 'pending',
+            'entered_by' => $user->id,
+        ]);
+
+        $this->actingAs($user);
+
+        $reject = '$wire.reject('.$record->id.')';
+
+        $component = Livewire::test(EventsManager::class, ['personnelId' => $personnel->id])
+            ->assertSee($reject, escape: false)
+            ->assertDontSee('wire:click="reject(', escape: false)
+            ->call('verify', $record->id);
+
+        // Verified → rejected is not an allowed move, so the button is gone.
+        $component->assertDontSee($reject, escape: false);
+    }
+
     public function test_analytics_panel_requires_analytics_permission_and_shows_registry_cards(): void
     {
         $user = $this->makeUserWithPermissions([

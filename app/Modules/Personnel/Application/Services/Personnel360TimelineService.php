@@ -5,14 +5,31 @@ namespace App\Modules\Personnel\Application\Services;
 use App\Models\AuditActivity;
 use App\Models\Personnel;
 use App\Models\User;
+use App\Support\Database\InstalledTables;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class Personnel360TimelineService
 {
+    /**
+     * Event types a timeline can be filtered by, in menu order.
+     */
+    public const TYPES = [
+        'audit',
+        'order',
+        'leave',
+        'vacation',
+        'business_trip',
+        'training_need',
+        'training_delivery',
+        'performance',
+        'event',
+        'media',
+        'project',
+    ];
+
     /**
      * Small per-build lookup cache so repeated audit rows do not re-query the
      * same reference values such as structures, countries and positions.
@@ -26,17 +43,24 @@ class Personnel360TimelineService
         $dateFrom = filled($filters['date_from'] ?? null) ? Carbon::parse($filters['date_from'])->startOfDay() : null;
         $dateTo = filled($filters['date_to'] ?? null) ? Carbon::parse($filters['date_to'])->endOfDay() : null;
 
-        return collect()
-            ->concat($this->orders($personnel))
-            ->concat($this->leaves($personnel))
-            ->concat($this->vacations($personnel))
-            ->concat($this->businessTrips($personnel))
-            ->concat($this->trainingNeeds($personnel))
-            ->concat($this->trainingDeliveries($personnel))
-            ->concat($this->performanceForms($personnel))
-            ->concat($this->lifecycleEvents($personnel))
-            ->concat($this->auditChanges($personnel))
-            ->concat(app(ProfessionalPortfolioTimelineService::class)->build($personnel))
+        // A type filter reads only the source that produces that type.
+        $sources = [
+            'order' => fn (): Collection => $this->orders($personnel),
+            'leave' => fn (): Collection => $this->leaves($personnel),
+            'vacation' => fn (): Collection => $this->vacations($personnel),
+            'business_trip' => fn (): Collection => $this->businessTrips($personnel),
+            'training_need' => fn (): Collection => $this->trainingNeeds($personnel),
+            'training_delivery' => fn (): Collection => $this->trainingDeliveries($personnel),
+            'performance' => fn (): Collection => $this->performanceForms($personnel),
+            'lifecycle' => fn (): Collection => $this->lifecycleEvents($personnel),
+            'audit' => fn (): Collection => $this->auditChanges($personnel),
+            'portfolio' => fn (): Collection => app(ProfessionalPortfolioTimelineService::class)->build($personnel),
+        ];
+        $source = in_array($type, ['event', 'media', 'project'], true) ? 'portfolio' : $type;
+
+        return collect($sources)
+            ->when($source !== null && isset($sources[$source]), fn (Collection $all) => $all->only($source))
+            ->flatMap(fn (callable $read): Collection => $read())
             ->when($search, fn (Collection $items) => $items->filter(fn (array $item): bool => $this->matchesSearch($item, $search)))
             ->when($type, fn (Collection $items) => $items->filter(fn (array $item): bool => ($item['type'] ?? null) === $type))
             ->when($dateFrom, fn (Collection $items) => $items->filter(fn (array $item): bool => $this->itemDate($item)?->gte($dateFrom) ?? false))
@@ -48,7 +72,7 @@ class Personnel360TimelineService
 
     private function orders(Personnel $personnel): Collection
     {
-        if (! Schema::hasTable('order_logs') || ! Schema::hasTable('order_log_personnels')) {
+        if (! InstalledTables::has('order_logs') || ! InstalledTables::has('order_log_personnels')) {
             return collect();
         }
 
@@ -75,7 +99,7 @@ class Personnel360TimelineService
 
     private function leaves(Personnel $personnel): Collection
     {
-        if (! Schema::hasTable('leaves')) {
+        if (! InstalledTables::has('leaves')) {
             return collect();
         }
 
@@ -99,7 +123,7 @@ class Personnel360TimelineService
 
     private function vacations(Personnel $personnel): Collection
     {
-        if (! Schema::hasTable('personnel_vacations')) {
+        if (! InstalledTables::has('personnel_vacations')) {
             return collect();
         }
 
@@ -124,7 +148,7 @@ class Personnel360TimelineService
 
     private function businessTrips(Personnel $personnel): Collection
     {
-        if (! Schema::hasTable('personnel_business_trips')) {
+        if (! InstalledTables::has('personnel_business_trips')) {
             return collect();
         }
 
@@ -150,7 +174,7 @@ class Personnel360TimelineService
 
     private function trainingNeeds(Personnel $personnel): Collection
     {
-        if (! Schema::hasTable('training_need_items')) {
+        if (! InstalledTables::has('training_need_items')) {
             return collect();
         }
 
@@ -179,7 +203,7 @@ class Personnel360TimelineService
 
     private function trainingDeliveries(Personnel $personnel): Collection
     {
-        if (! Schema::hasTable('training_delivery_records')) {
+        if (! InstalledTables::has('training_delivery_records')) {
             return collect();
         }
 
@@ -207,7 +231,7 @@ class Personnel360TimelineService
 
     private function performanceForms(Personnel $personnel): Collection
     {
-        if (! Schema::hasTable('performance_forms')) {
+        if (! InstalledTables::has('performance_forms')) {
             return collect();
         }
 
@@ -236,7 +260,7 @@ class Personnel360TimelineService
 
     private function lifecycleEvents(Personnel $personnel): Collection
     {
-        if (! Schema::hasTable('employee_lifecycle_events')) {
+        if (! InstalledTables::has('employee_lifecycle_events')) {
             return collect();
         }
 
@@ -278,7 +302,7 @@ class Personnel360TimelineService
         $connection = config('activitylog.database_connection') ?: config('database.default');
         $table = (string) config('activitylog.table_name', 'activity_log');
 
-        if (! Schema::connection($connection)->hasTable($table)) {
+        if (! InstalledTables::has($table, $connection)) {
             return collect();
         }
 
@@ -306,21 +330,37 @@ class Personnel360TimelineService
             ->whereIn('id', $activities->pluck('causer_id')->filter()->unique())
             ->pluck('name', 'id');
 
-        return $activities->map(fn (AuditActivity $activity): array => $this->item(
-            type: 'audit',
-            occurredAt: $activity->created_at,
-            title: __('personnel::portfolio.timeline_titles.audit_change', [
-                'event' => $this->auditEventLabel((string) $activity->event),
-            ]),
-            summary: $this->changedFieldSummary($activity) ?: $this->stringify($activity->description),
-            status: (string) $activity->event,
-            recordId: (int) $activity->id,
-            role: $activity->causer_id
-                ? __('personnel::portfolio.timeline_titles.changed_by', [
-                    'actor' => $causerLabels->get($activity->causer_id) ?: __('personnel::portfolio.timeline_titles.unknown_actor'),
-                ])
-                : __('personnel::portfolio.timeline_titles.system_actor'),
-        ));
+        return $activities->map(function (AuditActivity $activity) use ($causerLabels): array {
+            $changes = $this->changedFields($activity);
+
+            return [...$this->item(
+                type: 'audit',
+                occurredAt: $activity->created_at,
+                title: $this->auditTitle($activity, $changes),
+                summary: $this->changedFieldSummary($changes) ?: $this->stringify($activity->description),
+                status: (string) $activity->event,
+                recordId: (int) $activity->id,
+                role: $activity->causer_id
+                    ? __('personnel::portfolio.timeline_titles.changed_by', [
+                        'actor' => $causerLabels->get($activity->causer_id) ?: __('personnel::portfolio.timeline_titles.unknown_actor'),
+                    ])
+                    : __('personnel::portfolio.timeline_titles.system_actor'),
+            ), 'changes' => $changes->all()];
+        });
+    }
+
+    /**
+     * A one-field edit is named after the field; anything wider keeps the generic title.
+     */
+    private function auditTitle(AuditActivity $activity, Collection $changes): string
+    {
+        if ((string) $activity->event === 'updated' && $changes->count() === 1) {
+            return $changes->first()['field'];
+        }
+
+        return __('personnel::portfolio.timeline_titles.audit_change', [
+            'event' => $this->auditEventLabel((string) $activity->event),
+        ]);
     }
 
     private function item(string $type, mixed $occurredAt, string $title, ?string $summary, ?string $status, int $recordId, ?string $role = null): array
@@ -390,36 +430,10 @@ class Personnel360TimelineService
         return filled($value) ? (string) $value : null;
     }
 
-    private function changedFieldSummary(AuditActivity $activity): ?string
+    private function changedFieldSummary(Collection $changes): ?string
     {
-        $properties = $activity->properties;
-        if ($properties instanceof Collection) {
-            $properties = $properties->toArray();
-        }
-
-        if (! is_array($properties)) {
-            return null;
-        }
-
-        $attributes = (array) data_get($properties, 'attributes', []);
-        $old = (array) data_get($properties, 'old', []);
-
-        $changes = collect(array_unique(array_merge(
-            array_keys($attributes),
-            array_keys($old),
-        )))
-            ->reject(fn (string $field): bool => in_array($field, ['created_at', 'updated_at', 'deleted_at'], true))
-            ->map(function (string $field) use ($attributes, $old): string {
-                $oldValue = $this->fieldValueLabel($field, $old[$field] ?? null);
-                $newValue = $this->fieldValueLabel($field, $attributes[$field] ?? null);
-
-                return __('personnel::portfolio.timeline_titles.changed_field_pair', [
-                    'field' => $this->fieldLabel($field),
-                    'old' => $oldValue,
-                    'new' => $newValue,
-                ]);
-            })
-            ->values();
+        $changes = $changes
+            ->map(fn (array $change): string => __('personnel::portfolio.timeline_titles.changed_field_pair', $change));
 
         if ($changes->isEmpty()) {
             return null;
@@ -428,6 +442,37 @@ class Personnel360TimelineService
         return __('personnel::portfolio.timeline_titles.changed_fields', [
             'fields' => $changes->take(8)->implode('; '),
         ]);
+    }
+
+    /**
+     * @return Collection<int, array{field:string,old:string,new:string}>
+     */
+    private function changedFields(AuditActivity $activity): Collection
+    {
+        $properties = $activity->properties;
+        if ($properties instanceof Collection) {
+            $properties = $properties->toArray();
+        }
+
+        if (! is_array($properties)) {
+            return collect();
+        }
+
+        $attributes = (array) data_get($properties, 'attributes', []);
+        $old = (array) data_get($properties, 'old', []);
+
+        return collect(array_unique(array_merge(
+            array_keys($attributes),
+            array_keys($old),
+        )))
+            ->reject(fn (string $field): bool => in_array($field, ['created_at', 'updated_at', 'deleted_at'], true))
+            ->map(fn (string $field): array => [
+                'field' => $this->fieldLabel($field),
+                'old' => $this->fieldValueLabel($field, $old[$field] ?? null),
+                'new' => $this->fieldValueLabel($field, $attributes[$field] ?? null),
+            ])
+            ->take(8)
+            ->values();
     }
 
     private function fieldLabel(string $field): string
@@ -580,7 +625,7 @@ class Personnel360TimelineService
 
     private function countryLabel(mixed $id): ?string
     {
-        if (! Schema::hasTable('country_translations')) {
+        if (! InstalledTables::has('country_translations')) {
             return null;
         }
 
@@ -595,18 +640,18 @@ class Personnel360TimelineService
 
     private function localizedColumnLabel(string $table, mixed $id, string $baseColumn): ?string
     {
-        if (! Schema::hasTable($table)) {
+        if (! InstalledTables::has($table)) {
             return null;
         }
 
         $locale = app()->getLocale() ?: 'az';
         $column = $baseColumn.'_'.($locale === 'az' ? 'az' : $locale);
 
-        if (! Schema::hasColumn($table, $column)) {
+        if (! InstalledTables::hasColumn($table, $column)) {
             $column = $baseColumn.'_az';
         }
 
-        if (! Schema::hasColumn($table, $column)) {
+        if (! InstalledTables::hasColumn($table, $column)) {
             return null;
         }
 
@@ -615,7 +660,7 @@ class Personnel360TimelineService
 
     private function tableLabel(string $table, mixed $id, string $column): ?string
     {
-        if (! Schema::hasTable($table) || ! Schema::hasColumn($table, $column)) {
+        if (! InstalledTables::has($table) || ! InstalledTables::hasColumn($table, $column)) {
             return null;
         }
 
@@ -624,7 +669,7 @@ class Personnel360TimelineService
 
     private function orderStatusLabel(mixed $id): ?string
     {
-        if (! Schema::hasTable('order_statuses')) {
+        if (! InstalledTables::has('order_statuses')) {
             return null;
         }
 
@@ -660,7 +705,7 @@ class Personnel360TimelineService
 
     private function personnelLabel(mixed $id): ?string
     {
-        if (! Schema::hasTable('personnels')) {
+        if (! InstalledTables::has('personnels')) {
             return null;
         }
 

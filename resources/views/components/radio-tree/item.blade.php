@@ -30,7 +30,7 @@
             @if($model->subs->isNotEmpty())
             {{-- arrow animasiyali deyisen--}}
             <button @click="toggle()" class="flex items-center justify-center appearance-none">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-gray-500">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-zinc-500">
                     <path x-show="openSubStructure"
                           stroke-linecap="round"
                           stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"
@@ -65,13 +65,13 @@
             wire:click.prevent="setStructure(@js(['id' => $model->id, 'list' => $listData, 'field' => $field, 'row' => $key, 'coded' => $isCoded ? 1 : 0]))"
             @class([
                 'appearance-none rounded-full w-6 h-6 border p-[3px] flex justify-center items-center transition-all duration-300',
-                'border-gray-300 bg-white' => $model->id != $currentSelection,
+                'border-zinc-300 bg-white' => $model->id != $currentSelection,
                 'border-green-500 bg-green-200' => $model->id == $currentSelection
             ])
         >
               <span @class([
                     'w-full h-full rounded-full transition-all duration-300',
-                    'bg-white border-gray-300' => $model->id != $currentSelection,
+                    'bg-white border-zinc-300' => $model->id != $currentSelection,
                     'bg-green-500 border-green-500' => $model->id ==  $currentSelection
               ])></span>
         </button>

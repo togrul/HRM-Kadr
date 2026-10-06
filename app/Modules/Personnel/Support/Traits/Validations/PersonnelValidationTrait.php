@@ -2,6 +2,8 @@
 
 namespace App\Modules\Personnel\Support\Traits\Validations;
 
+use App\Modules\Personnel\Support\EmploymentTerms;
+
 trait PersonnelValidationTrait
 {
     public function validationRules(): array
@@ -20,8 +22,8 @@ trait PersonnelValidationTrait
 
     protected function getPersonalInfoRules(): array
     {
-        $uniqueTableRule = 'required|min:1|unique:personnels,tabel_no' .
-            ($this->resolvePersonnelId() ? ',' . $this->resolvePersonnelId() : '');
+        $uniqueTableRule = 'required|min:1|unique:personnels,tabel_no'.
+            ($this->resolvePersonnelId() ? ','.$this->resolvePersonnelId() : '');
 
         $personnelState = $this->resolvePersonnelState();
         $hasChangedInitials = (bool) data_get($personnelState, 'has_changed_initials', false);
@@ -66,7 +68,32 @@ trait PersonnelValidationTrait
             'personalForm.personnel.position_id' => 'required|int',
             'personalForm.personnel.work_norm_id' => 'required|int|exists:work_norms,id',
             'personalForm.personnel.join_work_date' => 'required|date',
-        ], $initialsChangeRules, $nationalityChangeRules, $disabilityRules);
+        ], $initialsChangeRules, $nationalityChangeRules, $disabilityRules, $this->employmentTermRules());
+    }
+
+    /**
+     * Contract and working-time terms. Every one of them is optional — the wizard
+     * has always been able to record a hire before its paperwork is settled — but
+     * a stored value has to be one the form itself offers, and a probation length
+     * is meaningless without the unit it is counted in.
+     */
+    protected function employmentTermRules(): array
+    {
+        $in = fn (array $values): string => 'nullable|in:'.implode(',', $values);
+
+        return [
+            'personalForm.personnel.contract_type' => $in(EmploymentTerms::CONTRACT_TYPES),
+            'personalForm.personnel.contract_date' => 'nullable|date',
+            'personalForm.personnel.probation_unit' => $in(EmploymentTerms::PROBATION_UNITS),
+            'personalForm.personnel.probation_amount' => 'nullable|integer|min:1|max:365|required_with:personalForm.personnel.probation_unit',
+            'personalForm.personnel.workplace_type' => $in(EmploymentTerms::WORKPLACE_TYPES),
+            'personalForm.personnel.working_time_type' => $in(EmploymentTerms::WORKING_TIME_TYPES),
+            'personalForm.personnel.work_schedule' => $in(EmploymentTerms::WORK_SCHEDULES),
+            'personalForm.personnel.work_hours' => 'nullable|array',
+            'personalForm.personnel.work_hours.*' => 'nullable|date_format:H:i',
+            'personalForm.personnel.rest_days' => 'nullable|array',
+            'personalForm.personnel.rest_days.*' => $in(EmploymentTerms::REST_DAYS),
+        ];
     }
 
     protected function getDocumentRules(): array
@@ -443,6 +470,13 @@ trait PersonnelValidationTrait
             'personalForm.personnel.position_id' => __('personnel::common.labels.position'),
             'personalForm.personnel.work_norm_id' => __('personnel::common.labels.work_norms'),
             'personalForm.personnel.join_work_date' => __('personnel::common.labels.join_work_date'),
+            'personalForm.personnel.contract_type' => __('personnel::common.labels.contract_type'),
+            'personalForm.personnel.contract_date' => __('personnel::common.labels.contract_date'),
+            'personalForm.personnel.probation_unit' => __('personnel::common.labels.probation_period'),
+            'personalForm.personnel.probation_amount' => __('personnel::common.labels.probation_amount'),
+            'personalForm.personnel.workplace_type' => __('personnel::common.labels.workplace_type'),
+            'personalForm.personnel.working_time_type' => __('personnel::common.labels.working_time_type'),
+            'personalForm.personnel.work_schedule' => __('personnel::common.labels.work_schedule'),
             'personalForm.personnel.disability_id' => __('personnel::common.labels.disability'),
             'personalForm.personnel.disability_given_date' => __('personnel::common.labels.disability_given_date'),
             'documentForm.document.pin' => __('personnel::common.labels.pin'),

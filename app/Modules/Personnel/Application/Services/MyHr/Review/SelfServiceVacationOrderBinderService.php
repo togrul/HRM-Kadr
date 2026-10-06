@@ -9,8 +9,8 @@ use App\Models\OrderLog;
 use App\Models\OrderType;
 use App\Models\PersonnelVacation;
 use App\Models\User;
+use App\Support\Database\InstalledTables;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use RuntimeException;
 
@@ -184,7 +184,7 @@ class SelfServiceVacationOrderBinderService
             'order_model' => PersonnelVacation::class,
         ];
 
-        if (Schema::hasColumn('orders', 'blade')) {
+        if (InstalledTables::hasColumn('orders', 'blade')) {
             $payload['blade'] = Order::BLADE_VACATION;
         }
 

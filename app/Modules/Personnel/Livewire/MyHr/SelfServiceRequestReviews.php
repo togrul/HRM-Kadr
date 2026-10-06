@@ -8,6 +8,7 @@ use App\Models\PersonnelBusinessTrip;
 use App\Models\PersonnelVacation;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestReviewReadService;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestReviewService;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
@@ -67,6 +68,14 @@ class SelfServiceRequestReviews extends Component
 
     public function reject(string $type, int $recordId): void
     {
+        // The employee sees this note as the reason their request was turned down.
+        $noteKey = 'notes.'.$this->noteKey($type, $recordId);
+        $this->validate(
+            [$noteKey => ['required', 'string', 'min:3', 'max:2000']],
+            [],
+            [$noteKey => __('personnel::my_hr.review.labels.review_note')]
+        );
+
         $service = app(MyHrRequestReviewService::class);
         $reviewer = auth()->user();
         $note = trim((string) ($this->notes[$this->noteKey($type, $recordId)] ?? ''));
@@ -85,7 +94,7 @@ class SelfServiceRequestReviews extends Component
         $this->dispatch('notify', type: 'success', message: __('personnel::my_hr.review.messages.rejected'));
     }
 
-    public function render()
+    public function render(): View
     {
         return view('personnel::livewire.personnel.my-hr.self-service-request-reviews');
     }

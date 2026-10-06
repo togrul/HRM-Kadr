@@ -4,10 +4,12 @@ namespace App\Modules\PerformanceEvaluation\Application\Services;
 
 use App\Models\PerformanceForm;
 use App\Models\PerformanceFormScore;
+use App\Models\PerformanceScorecard;
 use App\Models\PerformanceTrainingNeedLink;
 use App\Models\RoleCompetencyRequirement;
 use App\Models\TrainingNeedItem;
 use App\Models\TrainingProgramCompetency;
+use App\Modules\PerformanceEvaluation\Application\Services\Kpi\ScorecardService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -47,7 +49,7 @@ class PerformanceWeakAreaTrainingNeedService
             return null;
         }
 
-        $threshold = (float) ($score->item?->low_score_threshold ?? 60);
+        $threshold = (float) $score->item->low_score_threshold;
         if ((float) $score->score >= $threshold) {
             $this->deleteExistingLink($score);
 
@@ -76,7 +78,7 @@ class PerformanceWeakAreaTrainingNeedService
 
             $need = $link?->trainingNeed;
             if ($need === null) {
-                $need = new TrainingNeedItem();
+                $need = new TrainingNeedItem;
             }
 
             $need->fill([
@@ -111,22 +113,21 @@ class PerformanceWeakAreaTrainingNeedService
 
     public function refreshFormResult(PerformanceForm $form): void
     {
-        $scores = $form->scores()->with('item:id,weight_percent')->get();
+        $scores = $form->scores()
+            ->with('item:id,weight_percent,performance_form_template_section_id', 'item.section:id,weight_percent')
+            ->get();
         if ($scores->isEmpty()) {
             return;
         }
 
-        $weightedTotal = 0.0;
-        $weightSum = 0.0;
+        // Self ratings are for comparison only; per item the manager's rating wins over HR's.
+        $rated = $scores
+            ->where('evaluator_type', '!=', 'self')
+            ->filter(fn (PerformanceFormScore $score): bool => $score->item !== null)
+            ->sortBy(fn (PerformanceFormScore $score): int => $score->evaluator_type === 'manager' ? 0 : 1)
+            ->unique('performance_form_template_item_id');
 
-        foreach ($scores as $score) {
-            $weight = (float) ($score->item?->weight_percent ?? 0);
-            $effectiveWeight = $weight > 0 ? $weight : 1;
-            $weightedTotal += ((float) $score->score) * $effectiveWeight;
-            $weightSum += $effectiveWeight;
-        }
-
-        $finalScore = $weightSum > 0 ? round($weightedTotal / $weightSum, 2) : null;
+        $finalScore = $this->weightedScore($rated);
         $category = match (true) {
             $finalScore === null => null,
             $finalScore >= 85 => 'high',
@@ -139,6 +140,57 @@ class PerformanceWeakAreaTrainingNeedService
             'final_category' => $category,
             'result_status' => $scores->count() > 0 ? 'in_progress' : 'draft',
         ]);
+
+        // A form serving as a KPI card's competency block feeds the card's final score.
+        PerformanceScorecard::query()
+            ->where('performance_form_id', $form->id)
+            ->where('status', '!=', 'closed')
+            ->get()
+            ->each(fn (PerformanceScorecard $card) => app(ScorecardService::class)->recalculate($card));
+    }
+
+    /**
+     * Item-weighted score; when sections carry weights, each section is averaged
+     * on its own and the sections are then combined by their weights.
+     *
+     * @param  Collection<int, PerformanceFormScore>  $scores
+     */
+    private function weightedScore(Collection $scores): ?float
+    {
+        if ($scores->isEmpty()) {
+            return null;
+        }
+
+        $itemAverage = fn (Collection $group): float => $this->weightedAverage(
+            $group->map(fn (PerformanceFormScore $score): array => [(float) $score->score, (float) $score->item->weight_percent])
+        );
+
+        $sections = $scores->groupBy(fn (PerformanceFormScore $score): int => (int) $score->item->performance_form_template_section_id);
+        $hasSectionWeights = $scores->contains(fn (PerformanceFormScore $score): bool => (float) $score->item->section?->weight_percent > 0);
+
+        if (! $hasSectionWeights) {
+            return round($itemAverage($scores), 2);
+        }
+
+        return round($this->weightedAverage(
+            $sections->map(fn (Collection $group): array => [$itemAverage($group), (float) $group->first()->item->section?->weight_percent])
+        ), 2);
+    }
+
+    /**
+     * Weighted mean of [value, weight] pairs; a plain mean when no pair carries a weight.
+     *
+     * @param  Collection<int, array{0: float, 1: float}>  $pairs
+     */
+    private function weightedAverage(Collection $pairs): float
+    {
+        $weightSum = $pairs->sum(fn (array $pair): float => $pair[1]);
+
+        if ($weightSum <= 0) {
+            return (float) $pairs->avg(fn (array $pair): float => $pair[0]);
+        }
+
+        return $pairs->sum(fn (array $pair): float => $pair[0] * $pair[1]) / $weightSum;
     }
 
     private function deleteExistingLink(PerformanceFormScore $score): void

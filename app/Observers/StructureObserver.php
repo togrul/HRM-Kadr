@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Structure;
+use App\Services\StructurePathService;
 use App\Support\OrderLookupCache;
 use App\Support\PersonnelDropdownCache;
 use App\Traits\ObservableTrait;
@@ -25,6 +26,7 @@ class StructureObserver
         'personnel:structures',
         'attendance-calendar-regimes-structures',
     ];
+
     /**
      * Handle the Structure "created" event.
      */
@@ -71,5 +73,9 @@ class StructureObserver
         PersonnelDropdownCache::forgetStructures();
         OrderLookupCache::bump('main_structures');
         OrderLookupCache::bump('structures');
+
+        if (app()->resolved(StructurePathService::class)) {
+            app(StructurePathService::class)->flush();
+        }
     }
 }

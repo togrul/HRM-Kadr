@@ -4,7 +4,7 @@ namespace App\Modules\Attendance\Application\Services;
 
 use App\Models\AttendanceCalendar;
 use App\Models\Personnel;
-use App\Models\Structure;
+use App\Services\StructurePathService;
 use Carbon\Carbon;
 
 class AttendanceCalendarSyncService
@@ -123,33 +123,6 @@ class AttendanceCalendarSyncService
      */
     private function resolveStructureScopeIds(int $rootId): array
     {
-        $rows = Structure::query()->get(['id', 'parent_id']);
-        $childrenByParent = [];
-
-        foreach ($rows as $row) {
-            $parentId = $row->parent_id !== null ? (int) $row->parent_id : 0;
-            $childrenByParent[$parentId] ??= [];
-            $childrenByParent[$parentId][] = (int) $row->id;
-        }
-
-        $result = [];
-        $stack = [$rootId];
-
-        while ($stack !== []) {
-            $id = (int) array_pop($stack);
-            if (isset($result[$id])) {
-                continue;
-            }
-
-            $result[$id] = $id;
-
-            foreach ($childrenByParent[$id] ?? [] as $childId) {
-                if (! isset($result[$childId])) {
-                    $stack[] = $childId;
-                }
-            }
-        }
-
-        return array_values($result);
+        return app(StructurePathService::class)->descendantIds($rootId) ?: [$rootId];
     }
 }

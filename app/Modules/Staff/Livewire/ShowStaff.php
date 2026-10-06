@@ -5,6 +5,7 @@ namespace App\Modules\Staff\Livewire;
 use App\Models\Personnel;
 use App\Models\Position;
 use App\Models\Structure;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -20,7 +21,7 @@ class ShowStaff extends Component
 
     public $title;
 
-    public function mount()
+    public function mount(): void
     {
         $this->authorize('viewAny', \App\Models\StaffSchedule::class);
         $structure = Structure::where('id', $this->structureModel)->value('name');
@@ -28,7 +29,7 @@ class ShowStaff extends Component
         $this->title = "{$structure}($position)";
     }
 
-    public function render()
+    public function render(): View
     {
         $staffs = Personnel::with('structure')
             ->where('structure_id', $this->structureModel)

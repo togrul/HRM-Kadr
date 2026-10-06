@@ -2,14 +2,16 @@
 
 namespace App\Modules\Staff\Livewire;
 
-use App\Modules\Staff\Exports\VacancyExport;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\Personnel;
 use App\Models\StaffSchedule;
 use App\Models\Structure;
+use App\Modules\Staff\Exports\VacancyExport;
+use App\Services\StructurePathService;
 use App\Services\StructureService;
 use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -20,6 +22,7 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 #[On(['staffAdded', 'staffWasDeleted'])]
 class Staffs extends Component
@@ -39,10 +42,29 @@ class Staffs extends Component
     #[Locked]
     public array $accessibleStructureIds = [];
 
+    /**
+     * Structure ids whose children are rendered. `null` until the first render seeds it
+     * with the shallow levels — the whole chart used to ship on every render, and that
+     * cost grows with the org, not with the page.
+     *
+     * @var list<int>|null
+     */
+    public ?array $openNodes = null;
+
+    /** Unit / position name filter for the tree; a match opens every branch that leads to it. */
+    public string $search = '';
+
+    /** "Yalnız vakant olanlar": keep only branches that still have an open slot. */
+    public bool $onlyVacant = false;
+
+    /** Nodes this deep (and shallower) come with the page; anything below opens on demand. */
+    private const TREE_EAGER_DEPTH = 2;
+
     protected array $structureTitleCache = [];
+
     protected ?array $structureMap = null;
 
-    protected function queryString()
+    protected function queryString(): array
     {
         return [
             'structure' => [
@@ -51,17 +73,19 @@ class Staffs extends Component
         ];
     }
 
-    public function exportExcel()
+    public function exportExcel(): BinaryFileResponse
     {
         $this->authorize('export', StaffSchedule::class);
 
         $report = $this->returnData(type: 'excel');
         $name = Carbon::now()->format('d.m.Y H:i');
 
-        return Excel::download(new VacancyExport($report), "vakansiyalar-{$name}.xlsx");
+        $prefix = $this->selectedPage === 'vacancies' ? 'vakansiyalar' : 'stat-cedveli';
+
+        return Excel::download(new VacancyExport($report), "{$prefix}-{$name}.xlsx");
     }
 
-    public function showPage($page)
+    public function showPage($page): void
     {
         $this->selectedPage = $page;
     }
@@ -77,6 +101,17 @@ class Staffs extends Component
 
         $this->selectedStructureId = $id;
         $this->structure = $this->getNestedStructure($id);
+        $this->resetPage();
+    }
+
+    /**
+     * Drop the structure scope. Without this the panel tree, which only renders the
+     * selected branch, would be a one-way trip.
+     */
+    public function clearStructure(): void
+    {
+        $this->selectedStructureId = null;
+        $this->structure = null;
         $this->resetPage();
     }
 
@@ -99,19 +134,30 @@ class Staffs extends Component
         return $id > 0 ? $id : null;
     }
 
-    public function setDeleteStaff($staffId)
+    public function setDeleteStaff($staffId): void
     {
         $this->dispatch('setDeleteStaff', $staffId);
     }
 
-    public function mount(StructureService $structureService)
+    /**
+     * Open the add-staff modal pre-targeted at a specific structure (the tree's
+     * "Vəzifə əlavə et" per-node action).
+     */
+    public function addStaffFor(int $structureId): void
+    {
+        $this->authorize('add-staff', StaffSchedule::class);
+        $this->selectedStructureId = $structureId;
+        $this->openSideMenu('add-staff');
+    }
+
+    public function mount(StructureService $structureService): void
     {
         $this->authorize('viewAny', StaffSchedule::class);
         $this->selectedPage = request()->query('selectedPage', 'all');
         $this->accessibleStructureIds = $structureService->getAccessibleStructures();
     }
 
-    protected function returnData($type = 'normal')
+    protected function returnData($type = 'normal'): array|Collection
     {
         if ($type === 'normal') {
             return Cache::remember($this->staffListCacheKey(), now()->addSeconds(10), fn () => $this->buildStaffRows());
@@ -122,7 +168,7 @@ class Staffs extends Component
         return $result->toArray();
     }
 
-    protected function buildStaffRows(bool $raw = false)
+    protected function buildStaffRows(bool $raw = false): Collection
     {
         $result = StaffSchedule::with([
             'position',
@@ -137,7 +183,7 @@ class Staffs extends Component
 
         if ($this->selectedPage === 'vacancies') {
             $result = $result
-                ->filter(fn ($row) => (int) ($row->vacant ?? 0) > 0 && ! empty($row->structure?->parent_id))
+                ->filter(fn ($row) => (int) ($row->vacant ?? 0) > 0)
                 ->values();
         }
 
@@ -173,7 +219,10 @@ class Staffs extends Component
             ->values()
             ->all();
 
-        $nestedIdsByStructure = $this->buildNestedIdsByStructure($structureIds);
+        $paths = app(StructurePathService::class);
+        $nestedIdsByStructure = collect($structureIds)
+            ->mapWithKeys(fn (int $id): array => [$id => $paths->descendantIds($id) ?: [$id]])
+            ->all();
         $relevantStructureIds = collect($nestedIdsByStructure)
             ->flatten()
             ->map(fn ($id) => (int) $id)
@@ -208,9 +257,9 @@ class Staffs extends Component
         $rows->each(function ($row) use ($activeByStructure, $activeByStructurePosition, $nestedIdsByStructure) {
             $structureId = (int) ($row->structure_id ?? 0);
             $positionId = (int) ($row->position_id ?? 0);
-            $hasParent = ! empty($row->structure?->parent_id);
-
-            if ($positionId > 0 && $hasParent) {
+            // A position row counts the people holding that position in its own unit —
+            // top-level units included, so their vacancies are listed like any other.
+            if ($positionId > 0) {
                 $filled = (int) ($activeByStructurePosition[$structureId][$positionId] ?? 0);
             } else {
                 $filled = 0;
@@ -224,46 +273,7 @@ class Staffs extends Component
         });
     }
 
-    protected function buildNestedIdsByStructure(array $structureIds): array
-    {
-        if (empty($structureIds)) {
-            return [];
-        }
-
-        $childrenByParent = [];
-        foreach ($this->resolveStructureMap() as $id => $meta) {
-            $parentId = (int) ($meta['parent_id'] ?? 0);
-            $childrenByParent[$parentId][] = (int) $id;
-        }
-
-        $memo = [];
-        $collectNestedIds = function (int $id) use (&$collectNestedIds, &$memo, $childrenByParent): array {
-            if (isset($memo[$id])) {
-                return $memo[$id];
-            }
-
-            $ids = [$id];
-            foreach ($childrenByParent[$id] ?? [] as $childId) {
-                $ids = array_merge($ids, $collectNestedIds((int) $childId));
-            }
-
-            return $memo[$id] = array_values(array_unique($ids));
-        };
-
-        $nestedIdsByStructure = [];
-        foreach ($structureIds as $structureId) {
-            $structureId = (int) $structureId;
-            if ($structureId <= 0) {
-                continue;
-            }
-
-            $nestedIdsByStructure[$structureId] = $collectNestedIds($structureId);
-        }
-
-        return $nestedIdsByStructure;
-    }
-
-    protected function buildStructureGroups($rows)
+    protected function buildStructureGroups($rows): Collection
     {
         return $rows
             ->groupBy('structure_id')
@@ -328,12 +338,13 @@ class Staffs extends Component
         }
 
         $this->structureMap = Structure::query()
-            ->select('id', 'parent_id', 'name')
+            ->select('id', 'parent_id', 'name', 'level')
             ->get()
             ->reduce(function (array $carry, Structure $structure) {
                 $carry[(int) $structure->id] = [
                     'parent_id' => $structure->parent_id ? (int) $structure->parent_id : null,
                     'name' => (string) $structure->name,
+                    'level' => (int) ($structure->level ?? 0),
                 ];
 
                 return $carry;
@@ -342,10 +353,289 @@ class Staffs extends Component
         return $this->structureMap;
     }
 
-    public function render()
+    /**
+     * Build the nested structure → position tree for the "all" view: every structure that
+     * has positions (or a descendant with positions) becomes a node, parented per the
+     * structure map, with Cəmi/Dolu/Vakant aggregated recursively (own positions + all
+     * descendants). Display roots are the top of the accessible/selected scope.
+     *
+     * @return array{tree: array<int,array<string,mixed>>, ids: array<int,int>}
+     */
+    protected function buildStructureTree(): array
     {
-        $staffs = $this->returnData();
-        
-        return view('staff::livewire.staff-schedule.staffs', compact('staffs'));
+        $rows = $this->buildStaffRows(raw: true);
+        if ($rows->isEmpty()) {
+            return ['tree' => [], 'ids' => []];
+        }
+
+        $map = $this->resolveStructureMap();
+        $positionsByStructure = $rows->groupBy(fn ($row) => (int) $row->structure_id);
+
+        // Included = every structure with positions plus all of its ancestors.
+        $included = [];
+        foreach ($positionsByStructure->keys() as $structureId) {
+            $cursor = (int) $structureId;
+            while ($cursor > 0 && isset($map[$cursor]) && ! isset($included[$cursor])) {
+                $included[$cursor] = true;
+                $cursor = (int) ($map[$cursor]['parent_id'] ?? 0);
+            }
+        }
+
+        // Children index (name-sorted) among included structures.
+        $childrenByParent = [];
+        foreach (array_keys($included) as $structureId) {
+            $parentId = (int) ($map[$structureId]['parent_id'] ?? 0);
+            $childrenByParent[$parentId][] = $structureId;
+        }
+        foreach ($childrenByParent as &$siblings) {
+            usort($siblings, fn ($a, $b) => strcmp($map[$a]['name'] ?? '', $map[$b]['name'] ?? ''));
+        }
+        unset($siblings);
+
+        $ids = [];
+
+        $build = function (int $structureId) use (&$build, $map, $positionsByStructure, $childrenByParent, &$ids) {
+            $ids[] = $structureId;
+            $meta = $map[$structureId];
+
+            $positions = collect($positionsByStructure->get($structureId, []))
+                ->map(fn ($row) => [
+                    'id' => (int) $row->id,
+                    'title' => (string) ($row->position?->name ?? '—'),
+                    'structure_id' => (int) $row->structure_id,
+                    'position_id' => (int) ($row->position_id ?? 0),
+                    'total' => (int) ($row->total ?? 0),
+                    'filled' => (int) ($row->filled ?? 0),
+                    'vacant' => (int) ($row->vacant ?? 0),
+                ])
+                ->values()
+                ->all();
+
+            $children = [];
+            foreach ($childrenByParent[$structureId] ?? [] as $childId) {
+                $children[] = $build((int) $childId);
+            }
+
+            $total = array_sum(array_column($positions, 'total'));
+            $filled = array_sum(array_column($positions, 'filled'));
+            foreach ($children as $child) {
+                $total += $child['agg']['total'];
+                $filled += $child['agg']['filled'];
+            }
+
+            return [
+                'id' => $structureId,
+                'name' => (string) $meta['name'],
+                'level' => (int) ($meta['level'] ?? 0),
+                'positions' => $positions,
+                'children' => $children,
+                'agg' => [
+                    'total' => $total,
+                    'filled' => $filled,
+                    'vacant' => max(0, $total - $filled),
+                    'rate' => $total > 0 ? (int) round($filled / $total * 100) : 0,
+                ],
+            ];
+        };
+
+        // Display roots: included structures whose parent is outside the included set.
+        $rootIds = [];
+        foreach (array_keys($included) as $structureId) {
+            $parentId = (int) ($map[$structureId]['parent_id'] ?? 0);
+            if (! isset($included[$parentId])) {
+                $rootIds[] = $structureId;
+            }
+        }
+        usort($rootIds, fn ($a, $b) => strcmp($map[$a]['name'] ?? '', $map[$b]['name'] ?? ''));
+
+        $tree = array_map(fn ($id) => $build((int) $id), $rootIds);
+
+        return ['tree' => $tree, 'ids' => $ids];
+    }
+
+    public function toggleNode(int $id): void
+    {
+        $open = $this->openNodes ?? [];
+
+        $this->openNodes = in_array($id, $open, true)
+            ? array_values(array_diff($open, [$id]))
+            : [...$open, $id];
+    }
+
+    public function expandAllNodes(): void
+    {
+        ['ids' => $ids] = $this->cachedStructureTree();
+
+        $this->openNodes = array_values(array_map('intval', $ids));
+    }
+
+    public function collapseAllNodes(): void
+    {
+        $this->openNodes = [];
+    }
+
+    /**
+     * The rows the page opens with: enough of the chart to read at a glance, without
+     * paying for every unit under every department.
+     *
+     * @param  array<int, array<string, mixed>>  $tree
+     * @return list<int>
+     */
+    protected function defaultOpenNodes(array $tree, int $depth = 0): array
+    {
+        if ($depth >= self::TREE_EAGER_DEPTH) {
+            return [];
+        }
+
+        $ids = [];
+
+        foreach ($tree as $node) {
+            $ids[] = (int) $node['id'];
+            $ids = [...$ids, ...$this->defaultOpenNodes($node['children'], $depth + 1)];
+        }
+
+        return $ids;
+    }
+
+    /**
+     * @return array{tree: array<int,array<string,mixed>>, ids: array<int,int>}
+     */
+    protected function cachedStructureTree(): array
+    {
+        return Cache::remember(
+            'staff:tree:'.md5(json_encode([$this->structure, $this->accessibleStructureIds])),
+            now()->addSeconds(10),
+            fn () => $this->buildStructureTree(),
+        );
+    }
+
+    public function render(): View
+    {
+        if ($this->selectedPage === 'all') {
+            ['tree' => $staffTree, 'ids' => $staffTreeIds] = $this->cachedStructureTree();
+
+            $this->openNodes ??= $this->defaultOpenNodes($staffTree);
+
+            $search = trim($this->search);
+            $visibleTree = $this->filterTree($staffTree, $search, $this->onlyVacant);
+
+            return view('staff::livewire.staff-schedule.staffs', [
+                'staffs' => collect(),
+                'staffTree' => $staffTree,
+                'visibleTree' => $visibleTree,
+                // A search result is useless folded away, so every surviving branch opens.
+                'treeOpenIds' => $search !== '' ? $this->collectTreeIds($visibleTree) : $this->openNodes,
+                'treeSearch' => $search,
+                'staffTreeIds' => $staffTreeIds,
+                'staffAllOpen' => count($this->openNodes) >= count($staffTreeIds),
+                'staffSummary' => $this->summarizeTree($staffTree),
+            ]);
+        }
+
+        return view('staff::livewire.staff-schedule.staffs', [
+            'staffs' => $this->returnData(),
+            'staffTree' => [],
+            'visibleTree' => [],
+            'treeOpenIds' => [],
+            'treeSearch' => '',
+            'staffTreeIds' => [],
+            'staffAllOpen' => false,
+            'staffSummary' => $this->summarizeTree([]),
+        ]);
+    }
+
+    /**
+     * Narrow the (cached) tree in memory — no query. A node survives when its name matches
+     * (then its whole subtree stays), when one of its positions matches (only those
+     * positions stay), or when a descendant survives. `onlyVacant` drops every branch
+     * and position without an open slot. Aggregates keep describing the whole unit.
+     *
+     * @param  array<int, array<string, mixed>>  $tree
+     * @return array<int, array<string, mixed>>
+     */
+    /**
+     * Azerbaijani-aware lower case: İ→i and I→ı, one character each, so offsets in the
+     * folded string still point at the same characters of the original.
+     */
+    public static function foldCase(string $text): string
+    {
+        return mb_strtolower(strtr($text, ['İ' => 'i', 'I' => 'ı']));
+    }
+
+    public function filterTree(array $tree, string $search, bool $onlyVacant): array
+    {
+        if ($search === '' && ! $onlyVacant) {
+            return $tree;
+        }
+
+        $needle = self::foldCase($search);
+        $matches = fn (string $text): bool => $needle === '' || mb_strpos(self::foldCase($text), $needle) !== false;
+        $kept = [];
+
+        foreach ($tree as $node) {
+            if ($onlyVacant && (int) $node['agg']['vacant'] <= 0) {
+                continue;
+            }
+
+            $positions = $onlyVacant
+                ? array_values(array_filter($node['positions'], fn (array $p): bool => (int) $p['vacant'] > 0))
+                : $node['positions'];
+
+            if ($search !== '' && $matches($node['name'])) {
+                $kept[] = [...$node, 'positions' => $positions, 'children' => $this->filterTree($node['children'], '', $onlyVacant)];
+
+                continue;
+            }
+
+            $positions = array_values(array_filter($positions, fn (array $p): bool => $matches($p['title'])));
+            $children = $this->filterTree($node['children'], $search, $onlyVacant);
+
+            if ($positions !== [] || $children !== []) {
+                $kept[] = [...$node, 'positions' => $positions, 'children' => $children];
+            }
+        }
+
+        return $kept;
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $tree
+     * @return list<int>
+     */
+    protected function collectTreeIds(array $tree): array
+    {
+        $ids = [];
+
+        foreach ($tree as $node) {
+            $ids = [...$ids, (int) $node['id'], ...$this->collectTreeIds($node['children'])];
+        }
+
+        return $ids;
+    }
+
+    /**
+     * Roll the display roots up into one headline figure for the panel. The roots do not
+     * overlap — each node's aggregate already includes its whole subtree — so summing
+     * them is the establishment total, with no extra query.
+     *
+     * @param  array<int, array<string, mixed>>  $tree
+     * @return array{total: int, filled: int, vacant: int, rate: float}
+     */
+    protected function summarizeTree(array $tree): array
+    {
+        $total = 0;
+        $filled = 0;
+
+        foreach ($tree as $node) {
+            $total += (int) ($node['agg']['total'] ?? 0);
+            $filled += (int) ($node['agg']['filled'] ?? 0);
+        }
+
+        return [
+            'total' => $total,
+            'filled' => $filled,
+            'vacant' => max(0, $total - $filled),
+            'rate' => $total > 0 ? round($filled / $total * 100, 1) : 0.0,
+        ];
     }
 }

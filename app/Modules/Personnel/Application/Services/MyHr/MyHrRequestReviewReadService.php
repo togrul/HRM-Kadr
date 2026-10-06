@@ -7,6 +7,7 @@ use App\Models\Leave;
 use App\Models\PersonnelBusinessTrip;
 use App\Models\PersonnelVacation;
 use App\Models\User;
+use App\Modules\Personnel\Application\Services\MyHr\Review\SelfServiceReviewAuthorizationService;
 use App\Services\UserPersonnelLinkResolver;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -128,6 +129,40 @@ class MyHrRequestReviewReadService
                     $leave->personnel?->structure?->name,
                 ]))),
             ]);
+    }
+
+    /**
+     * The oldest self-service vacation requests this reviewer may decide, trimmed for the
+     * home page's attention tile. Filtered by the same rule that guards the decision
+     * itself, so every row shown can actually be approved.
+     *
+     * @return list<array{id:int,title:string,meta:string}>
+     */
+    public function pendingVacationItems(User $reviewer, int $limit = 5): array
+    {
+        $authorization = app(SelfServiceReviewAuthorizationService::class);
+
+        // ponytail: scans a bounded window of the oldest requests; a reviewer entitled to
+        // none of the first 50 sees an empty list and uses "View all" instead.
+        return PersonnelVacation::query()
+            ->with('personnel:id,tabel_no,surname,name,patronymic,structure_id')
+            ->where('submission_source', 'employee_self_service')
+            ->where('approval_status', 'pending')
+            ->oldest('created_at')
+            ->limit(50)
+            ->get()
+            ->filter(fn (PersonnelVacation $vacation): bool => $authorization->canReviewVacation($vacation, $reviewer))
+            ->take($limit)
+            ->map(fn (PersonnelVacation $vacation): array => [
+                'id' => (int) $vacation->id,
+                'title' => $vacation->personnel?->fullname ?: (string) $vacation->tabel_no,
+                'meta' => trim(implode(' – ', array_filter([
+                    optional($vacation->start_date)->format('d.m.Y'),
+                    optional($vacation->end_date)->format('d.m.Y'),
+                ]))).' · '.__('personnel::my_hr.requests.values.days', ['count' => (int) $vacation->duration]),
+            ])
+            ->values()
+            ->all();
     }
 
     private function vacationRows(bool $reviewAll, ?int $reviewerPersonnelId): Collection

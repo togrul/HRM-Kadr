@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
-use App\Services\Orders\Document\DocxPlaceholderParser;
-use App\Services\Orders\Document\OrderTemplateDocxBuilder;
-use App\Services\Orders\Document\OrderWordTemplateRepository;
+use App\Modules\Orders\Application\Document\DocxPlaceholderParser;
+use App\Modules\Orders\Application\Document\OrderTemplateDocxBuilder;
+use App\Modules\Orders\Application\Document\OrderWordTemplateRepository;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
@@ -49,6 +49,9 @@ class SeedOrderWordTemplatesCommand extends Command
         'İşçi (yönlük)' => 'employee.full_name_dative',
         'İşçi (yiyəlik)' => 'employee.full_name_genitive',
         'İşçi (birgəlik)' => 'employee.full_name_instrumental',
+        // Signatory resolved per order (permanent chief or active delegate, by date).
+        'İmzalayan' => 'system.signatory_full_name',
+        'İmzalayanın vəzifəsi' => 'system.signatory_title',
     ];
 
     public function handle(
@@ -269,6 +272,27 @@ class SeedOrderWordTemplatesCommand extends Command
                     'Bitmə tarixi' => ['type' => 'date'],
                     'Gün sayı' => ['type' => 'number'],
                     'Toplantı yeri' => ['type' => 'text'],
+                    'Əsas mətni' => ['type' => 'text'],
+                ],
+            ],
+
+            // ───────────────────────────── Pul mükafatı (KPI) ───────────────────────────
+            'pul_mukafati' => [
+                'label' => 'Pul mükafatı',
+                'effect' => 'award',
+                'spec' => [
+                    'city' => 'Bakı şəhəri',
+                    'subject' => 'Pul mükafatı verilməsi haqqında',
+                    'preamble' => 'Xidməti fəaliyyətin qiymətləndirilməsinin (KPI) yekunlarını rəhbər tutaraq',
+                    'clauses' => [
+                        '[İş yeri] [Vəzifə] [İşçi] [Mükafatın səbəbi] [Məbləğ] manat məbləğində pul mükafatı ilə mükafatlandırılsın.',
+                        'Mühasibatlıq və Hesabatlıq şöbəsinin rəisi Səbuhi Bağırov bu əmrdən irəli gələn məsələləri həll etsin.',
+                    ],
+                    'basis' => '[Əsas mətni]',
+                ],
+                'manual' => [
+                    'Mükafatın səbəbi' => ['type' => 'text', 'role' => 'reason'],
+                    'Məbləğ' => ['type' => 'number', 'role' => 'amount'],
                     'Əsas mətni' => ['type' => 'text'],
                 ],
             ],

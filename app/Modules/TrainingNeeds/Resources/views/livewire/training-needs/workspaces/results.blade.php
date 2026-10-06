@@ -1,4 +1,5 @@
     @if ($activeTab === 'results')
+        @if ($this->canManageTrainingNeeds)
         <div class="grid gap-4 xl:grid-cols-2">
             <x-surface-card :title="__('training_needs::dashboard.cards.feedback_forms')" icon="icons.folder-plus-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
                 @if ($editingFeedbackFormId)
@@ -12,7 +13,7 @@
                             :label="__('training_needs::dashboard.fields.session')"
                             placeholder="---"
                             mode="gray"
-                            direction="up"
+                            direction="auto"
                             class="w-full"
                             wire:model.live="feedbackForm.training_session_id"
                             :model="$this->sessionOptions()"
@@ -22,30 +23,30 @@
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="feedback-title">{{ __('training_needs::dashboard.fields.feedback_title') }}</x-label>
-                        <x-livewire-input mode="gray" id="feedback-title" wire:model.defer="feedbackForm.title" />
+                        <x-livewire-input mode="gray" id="feedback-title" wire:model="feedbackForm.title" />
                         @error('feedbackForm.title') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="feedback-status">{{ __('training_needs::dashboard.fields.status') }}</x-label>
-                        <select id="feedback-status" wire:model.defer="feedbackForm.status" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                        <x-ui.select id="feedback-status" wire:model="feedbackForm.status">
                             <option value="draft">{{ __('training_needs::dashboard.feedback_statuses.draft') }}</option>
                             <option value="open">{{ __('training_needs::dashboard.feedback_statuses.open') }}</option>
                             <option value="closed">{{ __('training_needs::dashboard.feedback_statuses.closed') }}</option>
-                        </select>
+                        </x-ui.select>
                         @error('feedbackForm.status') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="feedback-question-type">{{ __('training_needs::dashboard.fields.default_question_type') }}</x-label>
-                        <select id="feedback-question-type" wire:model.defer="feedbackForm.default_question_type" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                        <x-ui.select id="feedback-question-type" wire:model="feedbackForm.default_question_type">
                             <option value="rating">{{ __('training_needs::dashboard.question_types.rating') }}</option>
                             <option value="text">{{ __('training_needs::dashboard.question_types.text') }}</option>
                             <option value="multiple_choice">{{ __('training_needs::dashboard.question_types.multiple_choice') }}</option>
-                        </select>
+                        </x-ui.select>
                         @error('feedbackForm.default_question_type') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="feedback-questions">{{ __('training_needs::dashboard.fields.feedback_questions') }}</x-label>
-                        <textarea id="feedback-questions" wire:model.defer="feedbackForm.questions_text" class="min-h-24 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
+                        <textarea id="feedback-questions" wire:model="feedbackForm.questions_text" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 min-h-24 px-3 py-2.5 text-base leading-relaxed sm:text-sm"></textarea>
                         @error('feedbackForm.questions_text') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
@@ -68,7 +69,7 @@
                             :label="__('training_needs::dashboard.fields.feedback_form')"
                             placeholder="---"
                             mode="gray"
-                            direction="up"
+                            direction="auto"
                             class="w-full"
                             wire:model.live="feedbackResponseForm.training_feedback_form_id"
                             :model="$this->feedbackFormOptions()"
@@ -81,7 +82,7 @@
                             :label="__('training_needs::dashboard.fields.personnel')"
                             placeholder="---"
                             mode="gray"
-                            direction="up"
+                            direction="auto"
                             class="w-full"
                             wire:model.live="feedbackResponseForm.personnel_id"
                             :model="$this->personnelOptions()"
@@ -91,17 +92,17 @@
                     </div>
                     <div>
                         <x-label for="feedback-score">{{ __('training_needs::dashboard.fields.overall_score') }}</x-label>
-                        <x-livewire-input mode="gray" id="feedback-score" type="number" min="1" max="5" wire:model.defer="feedbackResponseForm.overall_score" />
+                        <x-livewire-input mode="gray" id="feedback-score" type="number" min="1" max="5" wire:model="feedbackResponseForm.overall_score" />
                         @error('feedbackResponseForm.overall_score') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="feedback-comments">{{ __('training_needs::dashboard.fields.comments') }}</x-label>
-                        <textarea id="feedback-comments" wire:model.defer="feedbackResponseForm.comments" class="min-h-20 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
+                        <textarea id="feedback-comments" wire:model="feedbackResponseForm.comments" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 min-h-20 px-3 py-2.5 text-base leading-relaxed sm:text-sm"></textarea>
                         @error('feedbackResponseForm.comments') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="feedback-answers">{{ __('training_needs::dashboard.fields.feedback_answers') }}</x-label>
-                        <textarea id="feedback-answers" wire:model.defer="feedbackResponseForm.answers_text" class="min-h-24 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
+                        <textarea id="feedback-answers" wire:model="feedbackResponseForm.answers_text" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 min-h-24 px-3 py-2.5 text-base leading-relaxed sm:text-sm"></textarea>
                         @error('feedbackResponseForm.answers_text') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
@@ -110,6 +111,7 @@
                 </div>
             </x-surface-card>
         </div>
+        @endif
 
         <div class="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
             <x-surface-card :title="__('training_needs::dashboard.cards.delivered_trainings')" icon="icons.clock-icon">
@@ -122,11 +124,15 @@
                                     <p class="text-sm text-zinc-600">{{ $record->program?->title ?? __('training_needs::dashboard.labels.no_program') }}</p>
                                 </div>
                                 <div class="flex items-center gap-2">
+                                    @if ($this->canManageTrainingNeeds)
                                     <x-ui.action-pill wire:click="selectDeliveryRecord({{ $record->id }})" icon="icons.edit-icon">{{ __('training_needs::dashboard.actions.replace_certificate') }}</x-ui.action-pill>
+                                    @endif
                                     @if ($record->certificate_path)
                                         <x-ui.action-pill mode="secondary" wire:click="previewDeliveryCertificate({{ $record->id }})">{{ __('training_needs::dashboard.actions.preview_certificate') }}</x-ui.action-pill>
                                         <x-ui.action-pill mode="secondary" wire:click="downloadDeliveryCertificate({{ $record->id }})">{{ __('training_needs::dashboard.actions.download_certificate') }}</x-ui.action-pill>
+                                        @if ($this->canManageTrainingNeeds)
                                         <x-ui.action-pill mode="delete" wire:click="confirmDeleteDeliveryCertificate({{ $record->id }})" icon="icons.delete-icon">{{ __('training_needs::dashboard.actions.delete_certificate') }}</x-ui.action-pill>
+                                        @endif
                                     @endif
                                     <x-small-badge mode="green">{{ __('training_needs::dashboard.delivery_result_statuses.'.$record->result_status) }}</x-small-badge>
                                 </div>
@@ -142,13 +148,14 @@
             <div class="space-y-4">
                 <livewire:training-needs.results-summary :key="'training-needs-results-summary-'.$resultsSummaryVersion" lazy />
 
+                @if ($this->canManageTrainingNeeds)
                 <x-surface-card :title="__('training_needs::dashboard.cards.delivery_documents')" icon="icons.profile-outline-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
                     <div class="grid gap-3">
                         <x-ui.select-dropdown
                             :label="__('training_needs::dashboard.fields.delivery_record')"
                             placeholder="---"
                             mode="gray"
-                            direction="up"
+                            direction="auto"
                             class="w-full"
                             wire:model.live="deliveryDocumentForm.training_delivery_record_id"
                             :model="$this->deliveryRecordOptions()"
@@ -203,6 +210,7 @@
                         <x-button mode="black" wire:click="storeDeliveryDocument">{{ __('training_needs::dashboard.actions.save_certificate') }}</x-button>
                     </div>
                 </x-surface-card>
+                @endif
             </div>
         </div>
     @endif

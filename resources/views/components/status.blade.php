@@ -1,13 +1,23 @@
 @props(['statusId', 'label', 'type' => null, 'design' => 'default'])
 
 @php
+    // Design-system status palette: bg / text / dot, one row per status id.
     $map = [
-        10 => 'bg-neutral-200/60 text-neutral-600 border-neutral-200',
-        20 => 'bg-amber-50 border-amber-200 text-amber-600',
-        30 => 'bg-sky-50 border-sky-200 text-sky-600',
-        40 => 'bg-indigo-50 border-indigo-200 text-indigo-600',
-        70 => 'bg-emerald-50 border-emerald-200 text-emerald-600',
-        90 => 'bg-rose-50 border-rose-200 text-rose-600',
+        10 => 'bg-[#f4f4f5] text-[#52525b]',
+        20 => 'bg-[#fff7ed] text-[#c2410c]',
+        30 => 'bg-[#f0f9ff] text-[#0369a1]',
+        40 => 'bg-[#f5f3ff] text-[#6d28d9]',
+        70 => 'bg-[#ecfdf5] text-[#047857]',
+        90 => 'bg-[#fff1f2] text-[#e11d48]',
+    ];
+
+    $dotMap = [
+        10 => 'bg-[#a1a1aa]',
+        20 => 'bg-[#f97316]',
+        30 => 'bg-[#0ea5e9]',
+        40 => 'bg-[#8b5cf6]',
+        70 => 'bg-[#10b981]',
+        90 => 'bg-[#f43f5e]',
     ];
 
     if ($type === 'order') {
@@ -19,29 +29,11 @@
         };
     }
 
-    $color = $map[$statusId] ?? 'bg-slate-50 text-slate-600 border-slate-200';
-
-    $iconMap = [
-        10 => 'icons.timer-icon',   // nümunə
-        20 => 'icons.clock-icon',
-        30 => 'icons.info-icon',
-        40 => 'icons.sparkle-icon',
-        70 => 'icons.check-icon',
-        90 => 'icons.x-circle-icon',
-    ];
-    $iconComponent = $iconMap[$statusId] ?? null;
+    $color = $map[$statusId] ?? $map[10];
+    $dot = $dotMap[$statusId] ?? $dotMap[10];
 @endphp
 
-@if($design == 'default')
-<span class="text-xs tracking-tight border uppercase font-medium px-3 py-2 rounded-lg w-max {{ $color }}">
-    {{ $label }}
+<span class="hrm-badge {{ $color }}">
+    <span class="h-1.5 w-1.5 shrink-0 rounded-full {{ $dot }}"></span>
+    <span>{{ $label }}</span>
 </span>
-@else
-<span class="inline-flex w-max items-center gap-1.5 rounded-full px-2.5 py-1 font-semibold text-xs uppercase tracking-tight border {{ $color }}">
-        @if($iconComponent)
-            <x-dynamic-component :component="$iconComponent" size="w-5 h-5" color="text-current" />
-        @endif
-        <span>{{ $label }}</span>
-</span>
-@endif
-{{-- text-emerald-700 bg-emerald-50 --}}

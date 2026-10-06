@@ -7,6 +7,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property string $tabel_no
+ * @property mixed $date
+ * @property int $scheduled_minutes
+ * @property int $worked_minutes
+ * @property int $overtime_minutes
+ * @property string|null $attendance_status
+ * @property string|null $absence_code
+ * @property bool $is_locked
+ */
 class AttendanceDailyLedger extends Model
 {
     use HasFactory;
@@ -54,4 +64,3 @@ class AttendanceDailyLedger extends Model
         return $this->belongsTo(User::class, 'approved_by');
     }
 }
-

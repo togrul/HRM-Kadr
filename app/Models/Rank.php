@@ -27,7 +27,7 @@ class Rank extends Model
         return $this->belongsTo(RankCategory::class);
     }
 
-    public function getNameAttribute($value)
+    public function getNameAttribute($value): ?string
     {
         $localeColumn = 'name_'.config('app.locale');
 

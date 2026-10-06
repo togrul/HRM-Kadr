@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Personnel;
 
-use App\Models\User;
 use App\Models\Personnel;
+use App\Models\User;
 use App\Modules\Personnel\Livewire\AddPersonnel;
 use App\Modules\Personnel\Livewire\EditPersonnel;
 use App\Modules\Personnel\Services\PersonnelCrudBenchmarkFixtureService;
@@ -67,6 +67,40 @@ class PersonnelCrudRegressionTest extends TestCase
             ->set('kinshipForm.kinship.fullname', 'Relative')
             ->call('store')
             ->assertHasErrors();
+    }
+
+    public function test_approving_a_pending_personnel_needs_the_confirmation_permission(): void
+    {
+        $user = $this->crudUser();
+        $personnel = app(PersonnelCrudBenchmarkFixtureService::class)->ensureEditablePersonnel($user);
+
+        Livewire::actingAs($user);
+
+        Livewire::test(EditPersonnel::class, ['personnelModel' => $personnel->getKey()])
+            ->call('confirmPersonnel')
+            ->assertForbidden();
+
+        $user->givePermissionTo(Permission::findOrCreate('confirmation-general', 'web'));
+        $user->unsetRelation('permissions');
+        app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+
+        Livewire::test(EditPersonnel::class, ['personnelModel' => $personnel->getKey()])
+            ->call('confirmPersonnel')
+            ->assertDispatched('personnelAdded')
+            ->assertNotDispatched('addError');
+    }
+
+    public function test_row_delete_opens_the_modal_without_a_second_prompt(): void
+    {
+        $personnel = new \App\Models\Personnel(['tabel_no' => 'T-1']);
+        $personnel->id = 1;
+
+        $actions = app(\App\Modules\Personnel\Services\PersonnelRowActionService::class)
+            ->build($personnel, 'current', ['can_edit' => true, 'can_delete' => true]);
+        $delete = collect($actions)->firstWhere('id', 'delete');
+
+        $this->assertNotNull($delete);
+        $this->assertNull($delete->confirmMessage);
     }
 
     public function test_step_navigation_service_clamps_step_range(): void

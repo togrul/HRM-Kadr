@@ -112,9 +112,12 @@ return [
         'open_dynamic' => 'Dinamik aç',
         'open_report' => 'Hesabata keç',
         'view_action' => 'VIEW',
+        'hours_per_month' => 'saat/ay',
     ],
     'actions' => [
         'export_excel' => 'Excel',
+        'build_report' => 'Hesabat qur',
+        'print' => 'Çap et',
         'export_csv' => 'CSV',
         'export_pdf' => 'PDF / Çap',
     ],
@@ -155,7 +158,20 @@ return [
             'new_hires' => 'İşə qəbul',
             'exits' => 'Xitam',
             'absence_rate' => 'Yoxluq faizi',
+            'turnover_rate' => 'Kadr dəyişmə faizi',
+            'turnover_hint' => 'Xitam / aktiv işçi sayı (il ərzində)',
+            'new_hires_year' => 'İşə qəbul (il)',
+            'exits_year' => 'Xitam (il)',
+            'avg_worked_hours' => 'Orta iş saatı',
+            'overtime_hours' => 'Əlavə iş saatı',
+            'movement_chart' => 'İşə qəbul və xitam — :year',
         ],
+    ],
+    'age_buckets' => [
+        'under_30' => '30-a qədər',
+        '30_39' => '30–39',
+        '40_49' => '40–49',
+        '50_plus' => '50+',
     ],
     'standard' => [
         'title' => 'Standart hesabat kataloqu',
@@ -235,5 +251,6 @@ return [
     'empty' => [
         'no_report_data' => 'Seçilmiş filtr üçün hesabat məlumatı tapılmadı.',
         'no_chart_data' => 'Vizualizasiya üçün məlumat yoxdur.',
+        'awaiting_data' => 'Məlumat gözlənilir',
     ],
 ];

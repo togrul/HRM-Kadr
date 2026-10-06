@@ -15,6 +15,7 @@ use App\Models\Structure;
 use App\Models\User;
 use App\Modules\Candidates\Application\Services\CandidateAtsCompletionService;
 use App\Modules\Candidates\Livewire\ApplicationAtsPanel;
+use App\Modules\Candidates\Livewire\EditRequisition;
 use App\Modules\Candidates\Livewire\RequisitionDetail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
@@ -223,6 +224,145 @@ class CandidateAtsCompletionServiceTest extends TestCase
             'approved_by' => $actor->id,
             'approval_note' => 'Ştat uyğunluğu təsdiqləndi',
         ]);
+    }
+
+    public function test_application_ats_panel_shows_one_form_per_tab_and_toasts_saves(): void
+    {
+        Carbon::setTestNow('2026-05-09 10:00:00');
+
+        $actor = $this->recruitmentUser();
+        $application = $this->makeApplication($actor);
+
+        Livewire::actingAs($actor);
+
+        Livewire::test(ApplicationAtsPanel::class, ['application' => $application])
+            ->assertSeeHtml('wire:submit="scheduleInterview"')
+            ->assertDontSeeHtml('wire:submit="createOffer"')
+            ->call('setTab', 'offers')
+            ->assertSeeHtml('wire:submit="createOffer"')
+            ->assertDontSeeHtml('wire:submit="scheduleInterview"')
+            ->call('setTab', 'bogus')
+            ->assertSet('tab', 'interviews')
+            ->set('interviewForm.scheduled_at', '2026-05-10T14:30')
+            ->call('scheduleInterview')
+            ->assertHasNoErrors()
+            ->assertDispatched('notify', type: 'success', message: __('candidates::recruitment.messages.interview_scheduled'));
+    }
+
+    public function test_requisition_reject_is_confirmed_and_toasted(): void
+    {
+        Carbon::setTestNow('2026-05-09 10:00:00');
+
+        $actor = $this->recruitmentUser();
+        $requisition = $this->makeApplication($actor)->opening->requisition;
+
+        Livewire::actingAs($actor);
+
+        app(CandidateAtsCompletionService::class)->submitRequisition($requisition, $actor->id);
+
+        Livewire::test(RequisitionDetail::class, ['requisition' => $requisition->refresh()])
+            ->assertSeeHtml("\$dispatch('confirm-action'")
+            ->assertSee(__('candidates::recruitment.messages.reject_requisition_confirm', ['title' => $requisition->title]))
+            ->assertSeeHtml('run: () => $wire.reject()')
+            ->call('reject')
+            ->assertDispatched('notify', type: 'success', message: __('candidates::recruitment.messages.requisition_rejected'));
+
+        $this->assertDatabaseHas('job_requisitions', ['id' => $requisition->id, 'approval_status' => 'rejected']);
+    }
+
+    public function test_requisition_cannot_be_approved_or_rejected_before_it_is_submitted(): void
+    {
+        $actor = $this->recruitmentUser();
+        $requisition = $this->makeApplication($actor)->opening->requisition;
+
+        Livewire::actingAs($actor);
+
+        Livewire::test(RequisitionDetail::class, ['requisition' => $requisition])
+            ->assertDontSee(__('candidates::recruitment.actions.approve_requisition'))
+            ->call('approve')
+            ->assertHasErrors(['approvalNote'])
+            ->call('reject')
+            ->assertHasErrors(['approvalNote']);
+
+        $this->assertDatabaseMissing('job_requisitions', ['id' => $requisition->id, 'approval_status' => 'approved']);
+        $this->assertDatabaseMissing('job_requisitions', ['id' => $requisition->id, 'approval_status' => 'rejected']);
+    }
+
+    public function test_requisition_approval_controls_are_hidden_and_refused_without_edit_permission(): void
+    {
+        $actor = $this->recruitmentUser();
+        $requisition = $this->makeApplication($actor)->opening->requisition;
+        app(CandidateAtsCompletionService::class)->submitRequisition($requisition, $actor->id);
+
+        Permission::findOrCreate('show-candidates', 'web');
+        $viewer = User::factory()->create(['is_active' => true]);
+        $viewer->givePermissionTo('show-candidates');
+
+        Livewire::actingAs($viewer);
+
+        Livewire::test(RequisitionDetail::class, ['requisition' => $requisition->refresh()])
+            ->assertDontSee(__('candidates::recruitment.actions.approve_requisition'))
+            ->assertDontSee(__('candidates::recruitment.actions.submit_for_approval'))
+            ->call('approve')
+            ->assertForbidden();
+    }
+
+    public function test_requisition_edit_form_keeps_its_approval_status_but_cannot_pick_one(): void
+    {
+        $actor = $this->recruitmentUser();
+        $requisition = $this->makeApplication($actor)->opening->requisition;
+
+        Livewire::actingAs($actor);
+
+        Livewire::test(EditRequisition::class, ['requisitionModel' => $requisition->id])
+            ->set('form.status', 'approved')
+            ->call('store')
+            ->assertHasErrors(['form.status']);
+
+        app(CandidateAtsCompletionService::class)->submitRequisition($requisition, $actor->id);
+
+        Livewire::test(EditRequisition::class, ['requisitionModel' => $requisition->id])
+            ->assertSet('form.status', 'pending_approval')
+            ->call('store')
+            ->assertHasNoErrors(['form.status']);
+    }
+
+    public function test_scorecard_cannot_target_a_cancelled_interview(): void
+    {
+        $actor = $this->recruitmentUser();
+        $application = $this->makeApplication($actor);
+        $interview = CandidateInterview::query()->create([
+            'candidate_application_id' => $application->id,
+            'stage_key' => 'interview',
+            'scheduled_at' => now()->addDay(),
+            'duration_minutes' => 45,
+            'status' => 'cancelled',
+        ]);
+
+        Livewire::actingAs($actor);
+
+        Livewire::test(ApplicationAtsPanel::class, ['application' => $application])
+            ->call('setTab', 'scorecard')
+            ->assertDontSeeHtml('<option value="'.$interview->id.'"')
+            ->set('scoreForm.interview_id', $interview->id)
+            ->call('submitScorecard')
+            ->assertHasErrors(['scoreForm.interview_id']);
+
+        $this->assertSame('cancelled', $interview->refresh()->status);
+    }
+
+    public function test_offer_status_changes_ask_for_confirmation(): void
+    {
+        $actor = $this->recruitmentUser();
+        $application = $this->makeApplication($actor);
+        app(CandidateAtsCompletionService::class)->createOffer($application, ['status' => 'sent', 'created_by' => $actor->id]);
+
+        Livewire::actingAs($actor);
+
+        Livewire::test(ApplicationAtsPanel::class, ['application' => $application])
+            ->call('setTab', 'offers')
+            ->assertDontSeeHtml('wire:click="updateOfferStatus(')
+            ->assertSeeHtml('$wire.updateOfferStatus(');
     }
 
     private function makeApplication(User $actor): CandidateApplication

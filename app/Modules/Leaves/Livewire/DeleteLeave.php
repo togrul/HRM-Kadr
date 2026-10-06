@@ -3,10 +3,11 @@
 namespace App\Modules\Leaves\Livewire;
 
 use App\Models\Leave;
+use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class DeleteLeave extends Component
 {
@@ -16,12 +17,13 @@ class DeleteLeave extends Component
     public ?int $leaveId = null;
 
     #[On('setDeleteLeave')]
-    public function setDeleteLeave($leaveId)
+    public function setDeleteLeave($leaveId): void
     {
         $leave = Leave::query()->select('id')->find($leaveId);
 
         if (! $leave) {
             $this->leaveId = null;
+
             return;
         }
 
@@ -32,7 +34,7 @@ class DeleteLeave extends Component
         $this->dispatch('deleteLeaveWasSet');
     }
 
-    public function deleteLeave()
+    public function deleteLeave(): void
     {
         if (! $this->leaveId) {
             return;
@@ -42,6 +44,7 @@ class DeleteLeave extends Component
 
         if (! $leave) {
             $this->leaveId = null;
+
             return;
         }
 
@@ -54,7 +57,7 @@ class DeleteLeave extends Component
         $this->dispatch('leaveWasDeleted', __('leaves::common.messages.leave_deleted'));
     }
 
-    public function render()
+    public function render(): View
     {
         return view('leaves::livewire.leaves.delete-leave');
     }

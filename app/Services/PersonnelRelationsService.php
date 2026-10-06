@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Traits\NormalizesDropdownPayloads;
 use App\Models\Personnel;
 use App\Models\PersonnelAward;
 use App\Models\PersonnelCard;
@@ -20,8 +19,10 @@ use App\Models\PersonnelPunishment;
 use App\Models\PersonnelRank;
 use App\Models\PersonnelScientificDegreeAndName;
 use App\Models\PersonnelTakenCaptive;
+use App\Traits\NormalizesDropdownPayloads;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Throwable;
 
 class PersonnelRelationsService
 {
@@ -270,7 +271,7 @@ class PersonnelRelationsService
                     if (! empty($item['join_date'])) {
                         try {
                             $currentJoinDate = \Carbon\Carbon::parse($item['join_date'])->toDateString();
-                        } catch (\Throwable $exception) {
+                        } catch (Throwable $exception) {
                             $currentJoinDate = null;
                         }
                     }
@@ -360,7 +361,7 @@ class PersonnelRelationsService
 
     /**
      * @param  mixed  $value
-    */
+     */
     private function isScalarValueFilled($value): bool
     {
         if (is_bool($value)) {

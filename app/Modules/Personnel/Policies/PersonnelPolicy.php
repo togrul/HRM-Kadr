@@ -44,6 +44,6 @@ class PersonnelPolicy
 
     public function export(User $user): bool
     {
-        return $user->can('show-personnels');
+        return $user->can('export-personnels');
     }
 }

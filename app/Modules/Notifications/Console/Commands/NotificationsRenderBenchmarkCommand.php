@@ -15,8 +15,9 @@ use App\Modules\Notifications\Livewire\TemplateManager;
 use App\Support\Livewire\LivewireComponentProfiler;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Schema;
-use Throwable;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
+use Throwable;
 
 class NotificationsRenderBenchmarkCommand extends Command
 {
@@ -141,6 +142,10 @@ class NotificationsRenderBenchmarkCommand extends Command
         }
 
         $user->givePermissionTo($permissions);
+
+        // givePermissionTo() forgets the permission cache; reload it here so the
+        // probe below is not charged for the cache miss.
+        app(PermissionRegistrar::class)->getPermissions();
     }
 
     private function budgetPair(string $prefix): array

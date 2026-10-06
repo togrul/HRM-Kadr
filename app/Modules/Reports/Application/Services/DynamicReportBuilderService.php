@@ -14,8 +14,7 @@ class DynamicReportBuilderService
     public function __construct(
         protected ReportsStructureScopeService $structureScope,
         protected ReportsSqlDialectService $sql
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array<string,mixed>  $filters

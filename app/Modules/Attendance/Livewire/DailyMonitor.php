@@ -2,18 +2,19 @@
 
 namespace App\Modules\Attendance\Livewire;
 
-use App\Services\StructurePathService;
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendanceDailyMonitorReadService;
 use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
+use App\Services\StructurePathService;
 use App\Traits\NestedStructureTrait;
+use Illuminate\Contracts\View\View;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class DailyMonitor extends Component
 {
-    use WithPagination;
     use NestedStructureTrait;
+    use WithPagination;
 
     public string $date = '';
 
@@ -54,7 +55,7 @@ class DailyMonitor extends Component
         $this->resetPage();
     }
 
-    public function render()
+    public function render(): View
     {
         $structureIds = $this->selectedStructureId
             ? $this->getNestedStructure($this->selectedStructureId)
@@ -78,6 +79,7 @@ class DailyMonitor extends Component
         $rows->setCollection(
             $rows->getCollection()->map(function ($row) use ($structurePathService) {
                 $row->structure_path = $structurePathService->resolve((int) ($row->structure_id ?? 0));
+                $row->structure_name = $structurePathService->current((int) ($row->structure_id ?? 0));
 
                 return $row;
             })

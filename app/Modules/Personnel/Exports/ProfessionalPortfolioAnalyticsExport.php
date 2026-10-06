@@ -11,8 +11,7 @@ class ProfessionalPortfolioAnalyticsExport implements FromView
     public function __construct(
         public Personnel $personnel,
         public array $analytics,
-    ) {
-    }
+    ) {}
 
     public function view(): View
     {

@@ -7,6 +7,7 @@ use App\Models\EmployeeContentAssignment;
 use App\Models\Personnel;
 use App\Modules\Personnel\Application\Services\MyHr\LearningAssignmentManagerService;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrLearningReadService;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -188,7 +189,7 @@ class LearningAssignmentManager extends Component
             ->findOrFail($assignmentId);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('personnel::livewire.personnel.my-hr.learning-assignment-manager');
     }

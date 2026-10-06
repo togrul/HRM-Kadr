@@ -58,6 +58,7 @@ class AttendancePunchPairingService
                 $openIn = $time;
                 $openBreak = null;
                 $firstInAt ??= $time;
+
                 continue;
             }
 
@@ -68,6 +69,7 @@ class AttendancePunchPairingService
                     $unmatched++;
                     $missingIn = true;
                 }
+
                 continue;
             }
 
@@ -79,6 +81,7 @@ class AttendancePunchPairingService
                     $unmatched++;
                     $missingOut = true;
                 }
+
                 continue;
             }
 
@@ -86,6 +89,7 @@ class AttendancePunchPairingService
             if ($openIn === null) {
                 $unmatched++;
                 $missingIn = true;
+
                 continue;
             }
 

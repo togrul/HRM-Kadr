@@ -15,7 +15,7 @@ class AttendanceShiftManagementService
      */
     public function upsertShift(array $payload, int $userId, ?AttendanceShift $shift = null): AttendanceShift
     {
-        $shift ??= new AttendanceShift();
+        $shift ??= new AttendanceShift;
 
         $before = $shift->exists ? $shift->only([
             'name',
@@ -120,11 +120,12 @@ class AttendanceShiftManagementService
 
     /**
      * @param  array<string,mixed>  $payload
+     *
      * @throws ValidationException
      */
     public function upsertAssignment(array $payload, int $userId, ?AttendanceShiftAssignment $assignment = null): AttendanceShiftAssignment
     {
-        $assignment ??= new AttendanceShiftAssignment();
+        $assignment ??= new AttendanceShiftAssignment;
 
         $tabelNo = trim((string) ($payload['tabel_no'] ?? ''));
         $effectiveFrom = Carbon::parse((string) ($payload['effective_from'] ?? now()->toDateString()))->toDateString();

@@ -4,6 +4,7 @@ namespace App\Modules\Personnel\Services;
 
 use App\Models\Personnel;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
 class PersonnelQueryService
 {
@@ -20,7 +21,7 @@ class PersonnelQueryService
         array $selectedStructureIds,
         array $accessibleStructureIds,
         ?int $selectedPosition = null,
-        bool $withStructureTree = true
+        ?string $search = null
     ): Builder {
         $query = Personnel::query()
             ->select([
@@ -41,8 +42,7 @@ class PersonnelQueryService
             ])
             ->leftJoin('positions as position_sort', 'position_sort.id', '=', 'personnels.position_id')
             ->leftJoin('structures as structure_sort', 'structure_sort.id', '=', 'personnels.structure_id')
-            ->with($this->listingRelations($status))
-            ->when($withStructureTree, fn (Builder $builder) => $builder->withStructureTree());
+            ->with($this->listingRelations($status));
 
         $this->applySharedScopes(
             query: $query,
@@ -51,6 +51,7 @@ class PersonnelQueryService
             selectedStructureIds: $selectedStructureIds,
             accessibleStructureIds: $accessibleStructureIds,
             selectedPosition: $selectedPosition,
+            search: $search,
         );
 
         return $query
@@ -59,10 +60,81 @@ class PersonnelQueryService
     }
 
     /**
+     * Every status tally the listing panel and header show, in one grouped query — the panel
+     * renders on each keystroke of the structure tree, so five COUNTs would be five
+     * round trips per render.
+     *
+     * @param  array<int, int>  $selectedStructureIds
+     * @param  array<int, int>  $accessibleStructureIds
+     * @param  array<string, mixed>  $filters
+     * @return array<string, int>
+     */
+    public function statusCounts(
+        array $filters,
+        array $selectedStructureIds,
+        array $accessibleStructureIds,
+        ?int $selectedPosition = null,
+        ?string $search = null,
+    ): array {
+        $query = Personnel::query()->withTrashed();
+
+        $query
+            ->when(! empty($selectedStructureIds), function (Builder $builder) use ($selectedStructureIds) {
+                $builder->whereIn('personnels.structure_id', $selectedStructureIds);
+            }, function (Builder $builder) use ($accessibleStructureIds) {
+                $builder->whereIn('personnels.structure_id', $accessibleStructureIds);
+            })
+            ->when(! empty($selectedPosition), function (Builder $builder) use ($selectedPosition) {
+                $builder->where('personnels.position_id', $selectedPosition);
+            });
+
+        if (! empty($filters)) {
+            $query->filter($filters);
+        }
+
+        $this->applyQuickSearch($query, $search);
+
+        $live = 'personnels.deleted_at IS NULL';
+        $settled = "{$live} AND personnels.is_pending = 0";
+        $active = "{$settled} AND personnels.leave_work_date IS NULL";
+
+        // Mirrors the hasActiveVacation relation, inlined so the whole panel is one query.
+        $onVacation = 'EXISTS (SELECT 1 FROM personnel_vacations pv'
+            .' WHERE pv.tabel_no = personnels.tabel_no'
+            .' AND pv.deleted_at IS NULL'
+            .' AND pv.start_date <= ? AND pv.return_work_date > ?)';
+
+        $now = now()->toDateTimeString();
+
+        $row = $query->selectRaw(implode(', ', [
+            "SUM(CASE WHEN {$live} THEN 1 ELSE 0 END) as all_count",
+            "SUM(CASE WHEN {$active} THEN 1 ELSE 0 END) as current_count",
+            "SUM(CASE WHEN {$settled} AND personnels.leave_work_date IS NOT NULL THEN 1 ELSE 0 END) as leaves_count",
+            "SUM(CASE WHEN {$live} AND personnels.is_pending = 1 THEN 1 ELSE 0 END) as pending_count",
+            'SUM(CASE WHEN personnels.deleted_at IS NOT NULL THEN 1 ELSE 0 END) as deleted_count',
+            "SUM(CASE WHEN {$active} AND {$onVacation} THEN 1 ELSE 0 END) as on_vacation_count",
+        ]), [$now, $now])->toBase()->first();
+
+        $current = (int) ($row->current_count ?? 0);
+        $onVacationCount = (int) ($row->on_vacation_count ?? 0);
+
+        return [
+            'all' => (int) ($row->all_count ?? 0),
+            'current' => $current,
+            'leaves' => (int) ($row->leaves_count ?? 0),
+            'pending' => (int) ($row->pending_count ?? 0),
+            'deleted' => (int) ($row->deleted_count ?? 0),
+            'on_vacation' => $onVacationCount,
+            'at_work' => max(0, $current - $onVacationCount),
+        ];
+    }
+
+    /**
      * Lightweight export query without list-only eager loads and sort joins.
      *
      * @param  array<int, int>  $selectedStructureIds
      * @param  array<int, int>  $accessibleStructureIds
+     * @return Builder<Personnel>
      */
     public function buildExport(
         ?string $status,
@@ -139,6 +211,7 @@ class PersonnelQueryService
         array $selectedStructureIds,
         array $accessibleStructureIds,
         ?int $selectedPosition = null,
+        ?string $search = null,
     ): void {
         $query
             ->when(! empty($selectedStructureIds), function (Builder $builder) use ($selectedStructureIds) {
@@ -155,6 +228,62 @@ class PersonnelQueryService
         if (! empty($filters)) {
             $query->filter($filters);
         }
+
+        $this->applyQuickSearch($query, $search);
+    }
+
+    /**
+     * Command-palette lookup: every word must match one of the quick-search columns, so
+     * "Məmmədov Elçin" finds the person; current employees come before those who left.
+     *
+     * @param  array<int, int>  $accessibleStructureIds
+     * @return Collection<int, Personnel>
+     */
+    public function quickFind(string $term, array $accessibleStructureIds, int $limit = 8): Collection
+    {
+        $words = preg_split('/\s+/u', trim($term), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+
+        if ($words === [] || $accessibleStructureIds === []) {
+            return collect();
+        }
+
+        $query = Personnel::query()
+            ->select(['personnels.id', 'personnels.tabel_no', 'personnels.surname', 'personnels.name', 'personnels.patronymic', 'personnels.position_id', 'personnels.leave_work_date'])
+            ->with('position:id,name')
+            ->whereIn('personnels.structure_id', $accessibleStructureIds)
+            ->where('personnels.is_pending', false);
+
+        foreach (array_slice($words, 0, 4) as $word) {
+            $this->applyQuickSearch($query, $word);
+        }
+
+        return $query
+            ->orderByRaw('personnels.leave_work_date is not null')
+            ->orderBy('personnels.surname')
+            ->orderBy('personnels.name')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * Toolbar search: one term matched against name, surname, patronymic,
+     * tabel number or PIN.
+     */
+    protected function applyQuickSearch(Builder $query, ?string $search): void
+    {
+        $term = trim((string) $search);
+
+        if ($term === '') {
+            return;
+        }
+
+        $escaped = str_replace(['%', '_'], ['\\%', '\\_'], $term);
+
+        $query->where(function (Builder $nested) use ($escaped): void {
+            foreach (['surname', 'name', 'patronymic', 'tabel_no', 'pin'] as $field) {
+                $nested->orWhere("personnels.{$field}", 'like', "%{$escaped}%");
+            }
+        });
     }
 
     protected function applyStatusScope(Builder $query, ?string $status): void

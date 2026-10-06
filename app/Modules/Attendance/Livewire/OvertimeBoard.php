@@ -4,16 +4,17 @@ namespace App\Modules\Attendance\Livewire;
 
 use App\Models\AttendanceOvertimeRequest;
 use App\Models\Personnel;
-use App\Services\StructurePathService;
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendanceOvertimeApprovalService;
 use App\Modules\Attendance\Application\Services\AttendanceOvertimeRequestService;
 use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
+use App\Services\StructurePathService;
 use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
+use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -21,8 +22,8 @@ use Livewire\WithPagination;
 
 class OvertimeBoard extends Component
 {
-    use WithPagination;
     use NestedStructureTrait;
+    use WithPagination;
 
     public string $status = 'pending';
 
@@ -31,6 +32,11 @@ class OvertimeBoard extends Component
     public string $toDate = '';
 
     public array $approvedMinutes = [];
+
+    /**
+     * @var array<int,string>
+     */
+    public array $rejectReasons = [];
 
     public int $perPage = 20;
 
@@ -139,19 +145,26 @@ class OvertimeBoard extends Component
             abort(403);
         }
 
+        $this->validate(
+            ['rejectReasons.'.$requestId => ['required', 'string', 'min:3', 'max:1000']],
+            [],
+            ['rejectReasons.'.$requestId => __('attendance::overtime.labels.reject_reason')]
+        );
+
         $request = AttendanceOvertimeRequest::query()->find($requestId);
         if (! $request) {
             return;
         }
 
         try {
-            $service->reject($request, (int) Auth::id());
+            $service->reject($request, (int) Auth::id(), (string) $this->rejectReasons[$requestId]);
         } catch (ValidationException $exception) {
             $this->dispatch('notify', type: 'error', message: collect($exception->errors())->flatten()->first() ?: __('attendance::overtime.messages.validation_failed'));
 
             return;
         }
 
+        unset($this->rejectReasons[$requestId]);
         $this->dispatch('notify', type: 'success', message: __('attendance::overtime.messages.rejected'));
     }
 
@@ -214,6 +227,10 @@ class OvertimeBoard extends Component
                     $structurePathService->resolve((int) $personnel->structure_id)
                 );
                 $personnel->setAttribute(
+                    'structure_name',
+                    $structurePathService->current((int) $personnel->structure_id)
+                );
+                $personnel->setAttribute(
                     'fullname',
                     trim($personnel->surname.' '.$personnel->name.' '.$personnel->patronymic)
                 );
@@ -253,6 +270,10 @@ class OvertimeBoard extends Component
                     $item->personnel->setAttribute(
                         'structure_path',
                         $structurePathService->resolve((int) $item->personnel->structure_id)
+                    );
+                    $item->personnel->setAttribute(
+                        'structure_name',
+                        $structurePathService->current((int) $item->personnel->structure_id)
                     );
                 }
 
@@ -359,7 +380,7 @@ class OvertimeBoard extends Component
         return $emptyStateDescription;
     }
 
-    public function render()
+    public function render(): View
     {
         return view('attendance::livewire.attendance.overtime-board');
     }

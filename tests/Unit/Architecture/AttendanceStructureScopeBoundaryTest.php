@@ -31,11 +31,11 @@ class AttendanceStructureScopeBoundaryTest extends TestCase
             }
 
             $content = File::get($file);
-            $relative = str_replace(base_path() . DIRECTORY_SEPARATOR, '', $file);
+            $relative = str_replace(base_path().DIRECTORY_SEPARATOR, '', $file);
 
             foreach ($forbiddenTokens as $token) {
                 if (str_contains($content, $token)) {
-                    $violations[] = $relative . ': contains forbidden token ' . $token;
+                    $violations[] = $relative.': contains forbidden token '.$token;
                 }
             }
         }

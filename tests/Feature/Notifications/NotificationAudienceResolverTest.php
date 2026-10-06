@@ -2,10 +2,10 @@
 
 namespace Tests\Feature\Notifications;
 
-use App\Models\Personnel;
-use App\Models\PerformanceForm;
 use App\Models\PerformanceCycle;
+use App\Models\PerformanceForm;
 use App\Models\PerformanceFormTemplate;
+use App\Models\Personnel;
 use App\Models\Position;
 use App\Models\Structure;
 use App\Models\User;

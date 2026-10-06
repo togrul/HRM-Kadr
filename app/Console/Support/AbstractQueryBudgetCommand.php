@@ -5,6 +5,7 @@ namespace App\Console\Support;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\PermissionRegistrar;
 use Throwable;
 
 /**
@@ -31,6 +32,8 @@ abstract class AbstractQueryBudgetCommand extends Command
      */
     protected function probe(string $flow, int $budget, callable $callback): array
     {
+        $this->warmPermissionCache();
+
         $connection = DB::connection();
         $wasLogging = method_exists($connection, 'logging') ? (bool) $connection->logging() : false;
 
@@ -65,6 +68,18 @@ abstract class AbstractQueryBudgetCommand extends Command
             'db_time_ms' => round((float) collect($queries)->sum(fn ($query) => (float) ($query['time'] ?? 0)), 2),
             'error' => $error,
         ];
+    }
+
+    /**
+     * Load the permission cache outside the probe.
+     *
+     * A cold spatie/permission cache costs one extra query on the first
+     * authorization check, which would otherwise be charged to the flow under
+     * measurement and make budgets fail on a fresh CI database.
+     */
+    protected function warmPermissionCache(): void
+    {
+        app(PermissionRegistrar::class)->getPermissions();
     }
 
     /**

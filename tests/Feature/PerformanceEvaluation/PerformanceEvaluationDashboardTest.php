@@ -2,12 +2,12 @@
 
 namespace Tests\Feature\PerformanceEvaluation;
 
+use App\Models\PerformanceCycle;
 use App\Models\PerformanceForm;
 use App\Models\PerformanceFormScore;
 use App\Models\PerformanceFormTemplate;
 use App\Models\PerformanceFormTemplateItem;
 use App\Models\PerformanceFormTemplateSection;
-use App\Models\PerformanceCycle;
 use App\Models\PerformanceTrainingNeedLink;
 use App\Models\Personnel;
 use App\Models\Position;
@@ -19,17 +19,15 @@ use App\Models\TrainingNeedItem;
 use App\Models\TrainingProgram;
 use App\Models\TrainingProgramCompetency;
 use App\Models\UserPersonnelLink;
-use App\Modules\PerformanceEvaluation\Livewire\Dashboard;
 use App\Modules\PerformanceEvaluation\Livewire\EvaluationsSummary as PerformanceEvaluationEvaluationsSummary;
 use App\Modules\PerformanceEvaluation\Livewire\EvaluatorScoreCapture;
-use App\Modules\PerformanceEvaluation\Livewire\EvaluatorWorkspace;
 use App\Modules\PerformanceEvaluation\Livewire\FoundationWorkspace as PerformanceEvaluationFoundationWorkspace;
 use App\Modules\PerformanceEvaluation\Livewire\Lists as PerformanceEvaluationLists;
-use App\Modules\PerformanceEvaluation\Livewire\Overview as PerformanceEvaluationOverview;
 use App\Modules\PerformanceEvaluation\Livewire\OperationsWorkspace as PerformanceEvaluationOperationsWorkspace;
+use App\Modules\PerformanceEvaluation\Livewire\Overview as PerformanceEvaluationOverview;
 use App\Modules\PerformanceEvaluation\Livewire\Reports as PerformanceEvaluationReports;
-use App\Modules\PerformanceEvaluation\Livewire\TestWorkspace as PerformanceEvaluationTestWorkspace;
 use App\Modules\PerformanceEvaluation\Livewire\TestsSummary as PerformanceEvaluationTestsSummary;
+use App\Modules\PerformanceEvaluation\Livewire\TestWorkspace as PerformanceEvaluationTestWorkspace;
 use App\Modules\PerformanceEvaluation\Livewire\UserPersonnelLinks as PerformanceEvaluationUserPersonnelLinks;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -61,9 +59,25 @@ class PerformanceEvaluationDashboardTest extends TestCase
         $this->actingAs($user);
 
         Livewire::test(PerformanceEvaluationOverview::class)
-            ->assertSee(__('performance_evaluation::dashboard.cards.foundation_scope'))
+            ->assertSee(__('performance_evaluation::dashboard.panel.score_distribution'))
+            ->assertSee(__('performance_evaluation::dashboard.cards.weak_links'))
             ->assertSee(__('performance_evaluation::dashboard.cards.recent_cycles'))
             ->assertSee(__('performance_evaluation::dashboard.cards.reports'));
+    }
+
+    public function test_evaluator_return_link_points_at_the_dashboard_not_the_current_request(): void
+    {
+        // The overview renders inside a Livewire update request, where url()->current() is the
+        // Livewire endpoint — a `return` built from it sent the back button to a 405 GET.
+        $user = \App\Models\User::factory()->create();
+        $this->grantPerformancePermissions($user);
+
+        $this->actingAs($user);
+
+        Livewire::test(PerformanceEvaluationOverview::class)
+            ->assertSee(route('performance-evaluation.evaluator', [
+                'return' => route('performance-evaluation', ['tab' => 'overview']),
+            ]), false);
     }
 
     public function test_evaluations_summary_component_renders_recent_forms_and_relays_actions(): void

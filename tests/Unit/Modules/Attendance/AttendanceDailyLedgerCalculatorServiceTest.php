@@ -13,7 +13,7 @@ class AttendanceDailyLedgerCalculatorServiceTest extends TestCase
 {
     public function test_calculates_workday_ledger_with_late_and_early_minutes(): void
     {
-        $service = new AttendanceDailyLedgerCalculatorService();
+        $service = new AttendanceDailyLedgerCalculatorService;
 
         $shift = new AttendanceShift([
             'start_time' => '09:00:00',
@@ -56,7 +56,7 @@ class AttendanceDailyLedgerCalculatorServiceTest extends TestCase
 
     public function test_manual_entry_overrides_system_calculation(): void
     {
-        $service = new AttendanceDailyLedgerCalculatorService();
+        $service = new AttendanceDailyLedgerCalculatorService;
 
         $manual = new AttendanceManualEntry([
             'worked_minutes' => 300,
@@ -90,7 +90,7 @@ class AttendanceDailyLedgerCalculatorServiceTest extends TestCase
 
     public function test_uses_approved_overtime_when_policy_is_by_approval(): void
     {
-        $service = new AttendanceDailyLedgerCalculatorService();
+        $service = new AttendanceDailyLedgerCalculatorService;
 
         $shift = new AttendanceShift([
             'start_time' => '09:00:00',
@@ -128,7 +128,7 @@ class AttendanceDailyLedgerCalculatorServiceTest extends TestCase
 
     public function test_handles_night_shift_with_cross_day_late_and_early(): void
     {
-        $service = new AttendanceDailyLedgerCalculatorService();
+        $service = new AttendanceDailyLedgerCalculatorService;
 
         $shift = new AttendanceShift([
             'start_time' => '22:00:00',
@@ -167,7 +167,7 @@ class AttendanceDailyLedgerCalculatorServiceTest extends TestCase
 
     public function test_applies_leave_override(): void
     {
-        $service = new AttendanceDailyLedgerCalculatorService();
+        $service = new AttendanceDailyLedgerCalculatorService;
 
         $shift = new AttendanceShift([
             'start_time' => '09:00:00',
@@ -212,7 +212,7 @@ class AttendanceDailyLedgerCalculatorServiceTest extends TestCase
 
     public function test_half_day_leave_adjusts_expected_shift_window(): void
     {
-        $service = new AttendanceDailyLedgerCalculatorService();
+        $service = new AttendanceDailyLedgerCalculatorService;
 
         $shift = new AttendanceShift([
             'start_time' => '09:00:00',
@@ -261,7 +261,7 @@ class AttendanceDailyLedgerCalculatorServiceTest extends TestCase
 
     public function test_hourly_leave_adjusts_schedule_and_late_threshold(): void
     {
-        $service = new AttendanceDailyLedgerCalculatorService();
+        $service = new AttendanceDailyLedgerCalculatorService;
 
         $shift = new AttendanceShift([
             'start_time' => '09:00:00',
@@ -313,7 +313,7 @@ class AttendanceDailyLedgerCalculatorServiceTest extends TestCase
 
     public function test_cross_midnight_hourly_leave_adjusts_night_shift_window(): void
     {
-        $service = new AttendanceDailyLedgerCalculatorService();
+        $service = new AttendanceDailyLedgerCalculatorService;
 
         $shift = new AttendanceShift([
             'start_time' => '22:00:00',
@@ -364,7 +364,7 @@ class AttendanceDailyLedgerCalculatorServiceTest extends TestCase
 
     public function test_second_half_leave_adjusts_night_shift_expected_end(): void
     {
-        $service = new AttendanceDailyLedgerCalculatorService();
+        $service = new AttendanceDailyLedgerCalculatorService;
 
         $shift = new AttendanceShift([
             'start_time' => '22:00:00',

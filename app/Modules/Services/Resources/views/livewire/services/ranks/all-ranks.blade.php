@@ -1,158 +1,85 @@
-<div
-    class="flex flex-col"
-    x-data
-    x-init="
-        const root = $el;
-        const paintPaginator = () => {
-            const paginator = root.querySelector('span[aria-current=page]>span');
-            if (paginator) {
-                paginator.classList.add('bg-blue-50', 'text-blue-600');
-            }
-        };
-        paintPaginator();
-        if (typeof Livewire !== 'undefined') {
-            Livewire.hook('commit', ({ component, succeed }) => {
-                if (component.id !== $wire.__instance.id) return;
-                succeed(() => queueMicrotask(paintPaginator));
-            });
-        }
-    "
->
+@php
+    $iconBtn = 'flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition';
+    $editBtn = $iconBtn.' hover:bg-[#f4f4f5] hover:text-ink';
+    $delBtn = $iconBtn.' hover:bg-rose-50 hover:text-rose-600';
+@endphp
 
-    <div class="flex flex-col items-center justify-between sm:flex-row filter bg-white py-2 px-2 rounded-xl">
-        <x-filter.nav>
-            <x-filter.item  wire:click.prevent="setStatus(1)" :active="$status === 1">
-                {{ __('services::common.labels.active') }}
-            </x-filter.item>
-            <x-filter.item  wire:click.prevent="setStatus(0)" :active="$status === 0">
-                {{ __('services::common.labels.inactive') }}
-            </x-filter.item>
-        </x-filter.nav>
+<div class="flex flex-col" x-data>
+    <section class="overflow-hidden rounded-xl border border-hairline bg-white">
+        <div class="flex flex-col gap-3 border-b border-hairline-subtle px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <x-filter.nav>
+                <x-filter.item wire:click.prevent="setStatus(1)" :active="$status === 1">
+                    {{ __('services::common.labels.active') }}
+                </x-filter.item>
+                <x-filter.item wire:click.prevent="setStatus(0)" :active="$status === 0">
+                    {{ __('services::common.labels.inactive') }}
+                </x-filter.item>
+            </x-filter.nav>
 
-
-        <div class="flex items-center justify-center space-x-2 action-section">
-            {{-- @can('manage-settings') --}}
-            <x-button class="space-x-2" mode="primary" wire:click.prevent="openSideMenu('add-rank')">
-                <x-icons.add-icon color="text-white" hover="text-gray-50"></x-icons.add-icon>
-               <span>{{ __('services::ranks.actions.add_rank') }}</span>
-            </x-button>
-            {{-- @endcan --}}
-        </div>
-    </div>
-
-    <div class="flex flex-col space-y-2">
-        <div class="relative min-h-[300px] -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-            <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                <div class="overflow-visible">
-                    <x-table.tbl :headers="[__('services::common.labels.id'), __('services::common.labels.category'), __('services::common.labels.name'), __('services::common.labels.duration'), __('services::common.labels.active_question'), __('services::common.labels.action'), __('services::common.labels.action')]">
-                        @forelse ($_ranks as $rank)
-                            <tr wire:key="rank-row-{{ $rank->id }}">
-                                <x-table.td>
-                                      <span class="text-sm font-medium">
-                                          {{ $rank->id }}
-                                      </span>
-                                </x-table.td>
-                                <x-table.td>
-                                      <span @class([
-                                            'text-sm font-medium text-blue-500',
-                                            'bg-slate-100 rounded-sm px-3 py-1' => $rank->rankCategory
-                                      ])>
-                                          {{ $rank->rankCategory?->name }}
-                                      </span>
-                                </x-table.td>
-                                <x-table.td>
-                                    <div class="flex flex-col space-y-1">
-                                        <div class="flex items-center space-x-2">
-                                            <span class="text-medium text-sm text-slate-500">
-                                                AZ -
-                                            </span>
-                                            <span class="text-sm font-medium">
-                                                {{ $rank->name_az }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="flex flex-col space-y-1">
-                                        <div class="flex items-center space-x-2">
-                                            <span class="text-medium text-sm text-slate-500">
-                                                EN -
-                                            </span>
-                                            <span class="text-sm font-medium">
-                                                {{ $rank->name_en }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="flex flex-col space-y-1">
-                                        <div class="flex items-center space-x-2">
-                                            <span class="text-medium text-sm text-slate-500">
-                                                RU -
-                                            </span>
-                                            <span class="text-sm font-medium">
-                                                {{ $rank->name_ru }}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                </x-table.td>
-
-
-                                <x-table.td>
-                                    <span class="text-sm font-normal text-gray-700">
-                                        {{ $rank->duration ?? '-' }}
-                                   </span>
-                                </x-table.td>
-
-                                <x-table.td >
-                                    <div class="flex items-center justify-start">
-                                        <x-icons.check-icon
-                                            size="w-8 h-8"
-                                            :color="$rank->is_active ? 'text-green-400' : 'text-gray-300'"
-                                            :hover="$rank->is_active ? 'text-green-500' : 'text-gray-400'"
-                                        ></x-icons.check-icon>
-                                    </div>
-                                </x-table.td>
-
-                                <x-table.td :isButton="true">
-                                        <x-action-button
-                                        wire:click.prevent="openSideMenu('edit-rank',{{ $rank->id }})"
-                                        class="h-9 w-9 bg-zinc-100 hover:bg-zinc-200"
-                                        :title="__('services::ranks.titles.edit')"
-                                    >
-                                        <x-icons.edit-icon color="text-slate-400" hover="text-slate-500"></x-icons.edit-icon>
-                                    </x-action-button>
-                                </x-table.td>
-
-                                <x-table.td :isButton="true">
-                                    {{-- @can('manage-settings') --}}
-                                    <x-action-button
-                                        wire:click.prevent = "setDeleteRank({{ $rank->id }})"
-                                        class="h-9 w-9 hover:bg-red-100"
-                                        :title="__('services::ranks.titles.delete')"
-                                    >
-                                        <x-icons.delete-icon color="text-rose-500" hover="text-rose-600"></x-icons.delete-icon>
-                                    </x-action-button>
-                                    {{-- @endcan --}}
-                                </x-table.td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5">
-                                </td>
-                            </tr>
-                        @endforelse
-                    </x-table.tbl>
-
-
-
-                </div>
-            </div>
+            <x-pill-button variant="primary" wire:click.prevent="openSideMenu('add-rank')">
+                <x-icons.add-icon color="text-current" hover="text-current" size="w-4 h-4"></x-icons.add-icon>
+                {{ __('services::ranks.actions.add_rank') }}
+            </x-pill-button>
         </div>
 
-        <div>
-            {{ $_ranks->links() }}
-        </div>
-    </div>
+        <x-table.tbl :headers="[
+            __('services::common.labels.id'),
+            __('services::common.labels.category'),
+            __('services::common.labels.name'),
+            __('services::common.labels.duration'),
+            __('services::common.labels.active_question'),
+            __('services::common.labels.action'),
+        ]">
+            @forelse ($_ranks as $rank)
+                <tr wire:key="rank-row-{{ $rank->id }}">
+                    <x-table.td><span class="hrm-num text-[13px] text-ink-faint">{{ $rank->id }}</span></x-table.td>
 
-    {{-- @can('manage-settings') --}}
+                    <x-table.td>
+                        @if ($rank->rankCategory)
+                            <span class="inline-flex items-center rounded-md bg-[#f4f4f5] px-2 py-0.5 text-[11px] font-medium text-ink-muted">{{ $rank->rankCategory->name }}</span>
+                        @else
+                            <span class="text-[13px] text-ink-faint">—</span>
+                        @endif
+                    </x-table.td>
+
+                    <x-table.td standart-width>
+                        <p class="truncate text-[13px] font-medium text-ink">{{ $rank->name_az }}</p>
+                        <p class="truncate text-[11px] text-ink-faint">{{ $rank->name_en }} <span class="px-0.5">·</span> {{ $rank->name_ru }}</p>
+                    </x-table.td>
+
+                    <x-table.td><span class="hrm-num text-[13px] text-ink-soft">{{ $rank->duration ?? '—' }}</span></x-table.td>
+
+                    <x-table.td>
+                        <span @class([
+                            'inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium',
+                            'bg-emerald-50 text-emerald-700' => $rank->is_active,
+                            'bg-[#f4f4f5] text-ink-muted' => ! $rank->is_active,
+                        ])>{{ $rank->is_active ? __('services::common.labels.active') : __('services::common.labels.inactive') }}</span>
+                    </x-table.td>
+
+                    <x-table.td :isButton="true">
+                        <div class="flex items-center justify-end gap-1">
+                            <button type="button" wire:click.prevent="openSideMenu('edit-rank',{{ $rank->id }})" title="{{ __('services::ranks.titles.edit') }}" class="{{ $editBtn }}">
+                                <x-icons.edit-icon color="text-current" hover="text-current" size="w-[17px] h-[17px]"></x-icons.edit-icon>
+                            </button>
+                            <button type="button" wire:click.prevent="setDeleteRank({{ $rank->id }})" title="{{ __('services::ranks.titles.delete') }}" class="{{ $delBtn }}">
+                                <x-icons.delete-icon color="text-current" hover="text-current" size="w-[17px] h-[17px]"></x-icons.delete-icon>
+                            </button>
+                        </div>
+                    </x-table.td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="6" class="px-4 py-4">
+                        <x-ui.empty-state icon="icons.double-arrow-icon" :title="__('services::common.labels.ranks')" />
+                    </td>
+                </tr>
+            @endforelse
+        </x-table.tbl>
+
+        <x-pagination :paginator="$_ranks" :unit="__('services::common.labels.ranks')" />
+    </section>
+
     <x-side-modal>
         @if($showSideMenu == 'add-rank')
             <livewire:services.ranks.add-rank wire:key="services-rank-add-modal" />
@@ -162,11 +89,8 @@
             <livewire:services.ranks.edit-rank :rankModel="$modelName" :key="'services-rank-edit-modal-' . ($modelName ?? 'none')" />
         @endif
     </x-side-modal>
-    {{-- @endcan --}}
 
-    <div class="">
-        @auth
-            <livewire:services.ranks.delete-rank wire:key="services-rank-delete-modal" />
-        @endauth
-    </div>
+    @auth
+        <livewire:services.ranks.delete-rank wire:key="services-rank-delete-modal" />
+    @endauth
 </div>

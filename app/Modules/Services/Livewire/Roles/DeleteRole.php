@@ -1,6 +1,9 @@
 <?php
 
 namespace App\Modules\Services\Livewire\Roles;
+
+use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
@@ -10,15 +13,16 @@ use Spatie\Permission\Models\Role;
 class DeleteRole extends Component
 {
     use AuthorizesRequests;
+    use AuthorizesSettingsAccess;
 
     #[Locked]
     public ?int $roleId = null;
 
     #[On('setDeleteRole')]
-    public function setDeleteRole($roleId)
+    public function setDeleteRole($roleId): void
     {
         $role = Role::query()
-            ->select('id')
+            ->select('id', 'name')
             ->find($roleId);
 
         if (! $role) {
@@ -27,21 +31,23 @@ class DeleteRole extends Component
             return;
         }
 
-        // $this->authorize('delete', $role);
+        if ($this->refuse($role)) {
+            return;
+        }
 
         $this->roleId = (int) $role->id;
 
         $this->dispatch('deleteRoleWasSet');
     }
 
-    public function deleteRole()
+    public function deleteRole(): void
     {
         if (! $this->roleId) {
             return;
         }
 
         $role = Role::query()
-            ->select('id')
+            ->select('id', 'name')
             ->find($this->roleId);
 
         if (! $role) {
@@ -50,7 +56,11 @@ class DeleteRole extends Component
             return;
         }
 
-        // $this->authorize('delete', $role);
+        if ($this->refuse($role)) {
+            $this->roleId = null;
+
+            return;
+        }
 
         $role->delete();
 
@@ -59,7 +69,32 @@ class DeleteRole extends Component
         $this->dispatch('roleWasDeleted', __('services::roles.messages.role_deleted'));
     }
 
-    public function render()
+    /**
+     * The admin role and any role still assigned to users stay; the reason is shown as a toast.
+     */
+    private function refuse(Role $role): bool
+    {
+        $reason = match (true) {
+            self::isAdminRole($role->name) => __('services::roles.messages.admin_role_protected'),
+            $role->users()->exists() => __('services::roles.messages.role_has_users'),
+            default => null,
+        };
+
+        if ($reason === null) {
+            return false;
+        }
+
+        $this->dispatch('notify', type: 'error', message: $reason);
+
+        return true;
+    }
+
+    public static function isAdminRole(string $name): bool
+    {
+        return strcasecmp(trim($name), 'admin') === 0;
+    }
+
+    public function render(): View
     {
         return view('services::livewire.services.roles.delete-role');
     }

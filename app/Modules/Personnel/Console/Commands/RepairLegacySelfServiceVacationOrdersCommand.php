@@ -6,6 +6,7 @@ use App\Models\PersonnelVacation;
 use App\Models\User;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestReviewService;
 use Illuminate\Console\Command;
+use Throwable;
 
 class RepairLegacySelfServiceVacationOrdersCommand extends Command
 {
@@ -47,13 +48,14 @@ class RepairLegacySelfServiceVacationOrdersCommand extends Command
         foreach ($rows as $vacation) {
             if ($this->option('dry-run')) {
                 $result['skipped']++;
+
                 continue;
             }
 
             try {
                 $service->bindOperationalVacationOrder($vacation, $reviewer);
                 $result['repaired']++;
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 $result['errors'][] = [
                     'vacation_id' => $vacation->id,
                     'message' => $e->getMessage(),

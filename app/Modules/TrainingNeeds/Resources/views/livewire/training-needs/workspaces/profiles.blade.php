@@ -1,4 +1,5 @@
     @if ($activeTab === 'profiles')
+        @if ($this->canManageTrainingNeeds)
         <div class="grid gap-4 xl:grid-cols-2">
             <x-surface-card :title="__('training_needs::dashboard.cards.employee_profiles')" icon="icons.profile-icon" bodyClass="overflow-visible" contentClass="overflow-visible p-4">
                 <div class="grid gap-3 md:grid-cols-2">
@@ -7,7 +8,7 @@
                             :label="__('training_needs::dashboard.fields.personnel')"
                             placeholder="---"
                             mode="gray"
-                            direction="up"
+                            direction="auto"
                             class="w-full"
                             wire:model.live="profileForm.personnel_id"
                             :model="$this->personnelOptions()"
@@ -41,17 +42,17 @@
                     </div>
                     <div>
                         <x-label for="profile-source">{{ __('training_needs::dashboard.fields.source') }}</x-label>
-                        <select id="profile-source" wire:model.defer="profileForm.source" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                        <x-ui.select id="profile-source" wire:model="profileForm.source">
                             <option value="manual">{{ __('training_needs::dashboard.sources.manual') }}</option>
                             <option value="manager_review">{{ __('training_needs::dashboard.sources.manager_review') }}</option>
                             <option value="hr_review">{{ __('training_needs::dashboard.sources.hr_review') }}</option>
                             <option value="exam">{{ __('training_needs::dashboard.sources.exam') }}</option>
-                        </select>
+                        </x-ui.select>
                         @error('profileForm.source') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="profile-assessed-at">{{ __('training_needs::dashboard.fields.last_assessed_at') }}</x-label>
-                        <input id="profile-assessed-at" type="date" wire:model.defer="profileForm.last_assessed_at" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                        <input id="profile-assessed-at" type="date" wire:model="profileForm.last_assessed_at" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
                         @error('profileForm.last_assessed_at') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
@@ -112,46 +113,46 @@
                     </div>
                     <div>
                         <x-label for="need-priority">{{ __('training_needs::dashboard.fields.priority') }}</x-label>
-                        <select id="need-priority" wire:model.defer="needForm.priority" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                        <x-ui.select id="need-priority" wire:model="needForm.priority">
                             <option value="low">{{ __('training_needs::dashboard.priorities.low') }}</option>
                             <option value="medium">{{ __('training_needs::dashboard.priorities.medium') }}</option>
                             <option value="high">{{ __('training_needs::dashboard.priorities.high') }}</option>
-                        </select>
+                        </x-ui.select>
                         @error('needForm.priority') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div>
                         <x-label for="need-status">{{ __('training_needs::dashboard.fields.status') }}</x-label>
-                        <select id="need-status" wire:model.defer="needForm.status" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                        <x-ui.select id="need-status" wire:model="needForm.status">
                             <option value="draft">{{ __('training_needs::dashboard.statuses.draft') }}</option>
                             <option value="review">{{ __('training_needs::dashboard.statuses.review') }}</option>
                             <option value="approved">{{ __('training_needs::dashboard.statuses.approved') }}</option>
                             <option value="planned">{{ __('training_needs::dashboard.statuses.planned') }}</option>
-                        </select>
+                        </x-ui.select>
                         @error('needForm.status') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div>
                         <x-label for="need-source">{{ __('training_needs::dashboard.fields.source') }}</x-label>
-                        <select id="need-source" wire:model.defer="needForm.source" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                        <x-ui.select id="need-source" wire:model="needForm.source">
                             <option value="manual">{{ __('training_needs::dashboard.sources.manual') }}</option>
                             <option value="manager_request">{{ __('training_needs::dashboard.sources.manager_request') }}</option>
                             <option value="employee_request">{{ __('training_needs::dashboard.sources.employee_request') }}</option>
                             <option value="performance_gap">{{ __('training_needs::dashboard.sources.performance_gap') }}</option>
-                        </select>
+                        </x-ui.select>
                         @error('needForm.source') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div>
                         <x-label for="need-target-date">{{ __('training_needs::dashboard.fields.target_completion_date') }}</x-label>
-                        <input id="need-target-date" type="date" wire:model.defer="needForm.target_completion_date" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                        <input id="need-target-date" type="date" wire:model="needForm.target_completion_date" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
                         @error('needForm.target_completion_date') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="need-reason">{{ __('training_needs::dashboard.fields.reason') }}</x-label>
-                        <textarea id="need-reason" wire:model.defer="needForm.reason" class="min-h-20 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
+                        <textarea id="need-reason" wire:model="needForm.reason" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 min-h-20 px-3 py-2.5 text-base leading-relaxed sm:text-sm"></textarea>
                         @error('needForm.reason') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
                         <x-label for="need-plan-note">{{ __('training_needs::dashboard.fields.plan_note') }}</x-label>
-                        <textarea id="need-plan-note" wire:model.defer="needForm.plan_note" class="min-h-24 w-full rounded-lg border-none bg-neutral-100 px-3 py-2 text-sm shadow-sm focus:ring-blue-500"></textarea>
+                        <textarea id="need-plan-note" wire:model="needForm.plan_note" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 min-h-24 px-3 py-2.5 text-base leading-relaxed sm:text-sm"></textarea>
                         @error('needForm.plan_note') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div class="md:col-span-2">
@@ -160,6 +161,7 @@
                 </div>
             </x-surface-card>
         </div>
+        @endif
 
         <div class="grid gap-4 xl:grid-cols-2">
             <x-surface-card :title="__('training_needs::dashboard.cards.recent_profiles')" icon="icons.profile-outline-icon">
@@ -189,7 +191,7 @@
             <x-surface-card :title="__('training_needs::dashboard.cards.need_queue')" icon="icons.pending-icon">
                 <div class="space-y-3">
                     @forelse ($this->recentNeeds as $need)
-                        <x-ui.list-card :tone="$need->priority === 'high' ? 'rose' : ($need->priority === 'medium' ? 'sky' : 'neutral')">
+                        <x-ui.list-card :tone="$need->priority === 'high' ? 'rose' : ($need->priority === 'medium' ? 'amber' : 'neutral')">
                             <div class="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
                                 <div>
                                     <p class="text-sm font-semibold text-zinc-900">{{ $need->personnel?->fullname ?? '---' }}</p>
@@ -199,7 +201,7 @@
                                     @endif
                                 </div>
                                 <div class="flex flex-wrap items-center gap-2">
-                                    <x-small-badge mode="{{ $need->priority === 'high' ? 'red' : ($need->priority === 'medium' ? 'green' : 'secondary') }}">
+                                    <x-small-badge mode="{{ $need->priority === 'high' ? 'red' : ($need->priority === 'medium' ? 'amber' : 'secondary') }}">
                                         {{ __('training_needs::dashboard.priorities.'.$need->priority) }}
                                     </x-small-badge>
                                     @if ($need->source === 'performance_gap')

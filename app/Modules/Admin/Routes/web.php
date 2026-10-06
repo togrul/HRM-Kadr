@@ -1,23 +1,23 @@
 <?php
 
 use App\Modules\Admin\Livewire\AppealStatus;
-use App\Modules\Admin\Livewire\AwardTypes;
 use App\Modules\Admin\Livewire\Awards;
+use App\Modules\Admin\Livewire\AwardTypes;
 use App\Modules\Admin\Livewire\Cities;
 use App\Modules\Admin\Livewire\Countries;
 use App\Modules\Admin\Livewire\Dashboard;
 use App\Modules\Admin\Livewire\DocumentTypes;
+use App\Modules\Admin\Livewire\EducationalInstitutions;
 use App\Modules\Admin\Livewire\EducationDegrees;
 use App\Modules\Admin\Livewire\EducationForms;
 use App\Modules\Admin\Livewire\EducationTypes;
-use App\Modules\Admin\Livewire\EducationalInstitutions;
+use App\Modules\Admin\Livewire\HrPolicyDiagnostics;
 use App\Modules\Admin\Livewire\Kinships;
 use App\Modules\Admin\Livewire\Languages;
 use App\Modules\Admin\Livewire\LeaveTypes;
 use App\Modules\Admin\Livewire\OrderCategories;
 use App\Modules\Admin\Livewire\OrderStatuses;
 use App\Modules\Admin\Livewire\Positions;
-use App\Modules\Admin\Livewire\HrPolicyDiagnostics;
 use App\Modules\Admin\Livewire\Punishments;
 use App\Modules\Admin\Livewire\RankCategories;
 use App\Modules\Admin\Livewire\RankReasons;
@@ -31,7 +31,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['web', 'auth', 'can:access-admin'])->prefix('/admin')->group(function () {
     Route::get('/dashboard', Dashboard::class)->name('admin');
-    Route::get('/appeal-statuses',AppealStatus::class)->name('admin.appeal-status');
+    Route::get('/appeal-statuses', AppealStatus::class)->name('admin.appeal-status');
     Route::get('/award-types', AwardTypes::class)->name('admin.award-types');
     Route::get('/awards', Awards::class)->name('admin.awards');
     Route::get('/cities', Cities::class)->name('admin.cities');
@@ -55,6 +55,8 @@ Route::middleware(['web', 'auth', 'can:access-admin'])->prefix('/admin')->group(
     Route::get('/hr-policy-diagnostics', HrPolicyDiagnostics::class)->name('admin.hr-policy-diagnostics');
     Route::get('/social-origins', SocialOrigins::class)->name('admin.social-origins');
     Route::get('/structures', Structures::class)->name('admin.structures');
-    Route::get('/weapons', Weapons::class)->name('admin.weapons');
+    if (app(\App\Services\Features\FeatureState::class)->enabled('weapons')) {
+        Route::get('/weapons', Weapons::class)->name('admin.weapons');
+    }
     Route::get('/work-norms', WorkNorms::class)->name('admin.work-norms');
 });

@@ -1,9 +1,9 @@
 <div class="space-y-6">
     <div class="space-y-2">
-        <h2 class="text-2xl font-semibold tracking-tight text-slate-900">
+        <h2 class="text-[18px] font-semibold tracking-tight text-zinc-900">
             {{ $title }}
         </h2>
-        <p class="text-sm leading-6 text-slate-500">
+        <p class="text-sm leading-6 text-zinc-500">
             {{ __('candidates::recruitment.labels.transition_note') }}
         </p>
     </div>
@@ -71,7 +71,7 @@
                 @error('form.profile_pack') <x-validation>{{ $message }}</x-validation> @enderror
             @else
                 <x-label for="form.profile_pack">{{ __('candidates::recruitment.labels.profile_pack') }}</x-label>
-                <div class="inline-flex h-11 items-center rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-700">
+                <div class="inline-flex h-11 items-center rounded-2xl border border-zinc-200 bg-zinc-50 px-4 text-sm font-semibold text-zinc-700">
                     {{ $this->recruitmentPackLabel($form['profile_pack'] ?? null) }}
                 </div>
             @endif
@@ -90,6 +90,7 @@
         </div>
 
         <div class="flex flex-col">
+            <x-label for="form.headcount">{{ __('candidates::recruitment.labels.headcount') }}</x-label>
             <x-livewire-input mode="gray" type="number" name="form.headcount" wire:model="form.headcount"></x-livewire-input>
             @error('form.headcount') <x-validation>{{ $message }}</x-validation> @enderror
         </div>
@@ -101,7 +102,7 @@
                 mode="gray"
                 class="w-full"
                 wire:model.live="form.status"
-                :model="$this->recruitmentStatusOptions()"
+                :model="$this->requisitionFormStatusOptions()"
             />
             @error('form.status') <x-validation>{{ $message }}</x-validation> @enderror
         </div>

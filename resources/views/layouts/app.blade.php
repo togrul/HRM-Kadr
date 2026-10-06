@@ -12,11 +12,13 @@
     <link rel="stylesheet" href="{{ asset('assets/css/pikaday.min.css') }}">
     <script src="{{ asset('assets/js/moment.min.js') }}"></script>
     <script src="{{ asset('assets/js/pikaday.min.js') }}"></script>
+    {{-- read before first paint, so a collapsed context panel never flashes open and shifts the page --}}
+    <script>try { if (localStorage.getItem('hrm.panelCollapsed') === '1') document.documentElement.setAttribute('data-panel-collapsed', ''); } catch (e) {}</script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
     @stack('css')
 </head>
-<body class="min-h-screen pb-1 font-sans antialiased bg-neutral-200/60 dark:bg-neutral-900/80" x-data>
+<body class="min-h-screen font-sans text-ink antialiased bg-[#fafafa] dark:bg-neutral-900/80" x-data>
     <div class="min-h-full">
         @includeWhen(!\request()->is('admin/*'), 'includes.layout.default')
         @includeWhen(\request()->is('admin/*'), 'includes.layout.admin')

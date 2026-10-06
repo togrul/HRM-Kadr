@@ -7,10 +7,10 @@ return [
     'summary' => [
         'total' => 'Ümumi sənəd',
         'expired' => 'Vaxtı bitib',
-        'expiring_30' => '30 günə bitir',
-        'expiring_60' => '60 günə bitir',
+        'expiring_30' => 'Kritik',
+        'expiring_60' => 'Yaxınlaşır',
         'valid' => 'Qüvvədədir',
-        'missing' => 'Çatışmayan',
+        'missing' => 'Sənəd yoxdur',
         'compliance_score' => 'Uyğunluq balı',
     ],
     'fields' => [
@@ -32,7 +32,7 @@ return [
     ],
     'status' => [
         'expired' => 'Vaxtı bitib',
-        'expiring_30' => 'Təcili yenilənməlidir',
+        'expiring_30' => 'Kritik',
         'expiring_60' => 'Yaxınlaşır',
         'valid' => 'Qüvvədədir',
         'missing' => 'Sənəd yoxdur',
@@ -43,8 +43,10 @@ return [
         'export_csv' => 'CSV-yə ixrac et',
     ],
     'labels' => [
+        'type_window' => 'Kritik ≤ :critical · Yaxınlaşır ≤ :warning gün',
         'unassigned' => 'Təyin edilməyib',
         'result_count' => ':count nəticə',
+        'document_count' => ':count sənəd',
         'required_document' => 'Tələb olunan sənəd əlavə edilməyib',
         'not_available' => 'Yoxdur',
         'indefinite' => 'Müddətsiz',
@@ -55,6 +57,7 @@ return [
     ],
     'columns' => [
         'employee' => 'Əməkdaş',
+        'tabel_no' => 'Tabel nömrəsi',
         'document' => 'Sənəd',
         'expires_at' => 'Bitmə tarixi',
         'days_left' => 'Qalan gün',
@@ -73,6 +76,9 @@ return [
         'notification_title' => 'Sənəd uyğunluğu riski: :count qeyd',
         'notification_created' => 'Bildiriş kampaniyası yaradıldı: #:id',
         'more_items' => 'Əlavə :count riskli qeyd var.',
+        'employee_subject' => 'Sənədləriniz diqqət tələb edir: :count qeyd',
+        'manager_subject' => 'Tabeçilikdə sənəd riski: :count qeyd (vaxtı keçmiş/yox)',
+        'per_recipient' => 'Fərdi bildiriş: :employees əməkdaş, :managers rəhbər (eskalasiya).',
     ],
     'empty' => 'Uyğun sənəd tapılmadı.',
 ];

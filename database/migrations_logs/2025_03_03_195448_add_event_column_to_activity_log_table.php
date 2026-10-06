@@ -1,0 +1,27 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class AddEventColumnToActivityLogTable extends Migration
+{
+    public function up()
+    {
+        // The shared audit database may already carry the column — see the create migration.
+        if (Schema::connection(config('activitylog.database_connection'))->hasColumn(config('activitylog.table_name'), 'event')) {
+            return;
+        }
+
+        Schema::connection(config('activitylog.database_connection'))->table(config('activitylog.table_name'), function (Blueprint $table) {
+            $table->string('event')->nullable()->after('subject_type');
+        });
+    }
+
+    public function down()
+    {
+        Schema::connection(config('activitylog.database_connection'))->table(config('activitylog.table_name'), function (Blueprint $table) {
+            $table->dropColumn('event');
+        });
+    }
+}

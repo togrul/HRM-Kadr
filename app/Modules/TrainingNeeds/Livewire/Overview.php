@@ -5,6 +5,7 @@ namespace App\Modules\TrainingNeeds\Livewire;
 use App\Livewire\Concerns\WithRuntimeMemo;
 use App\Modules\TrainingNeeds\Livewire\Concerns\InteractsWithTrainingNeedsAccess;
 use App\Modules\TrainingNeeds\Livewire\Concerns\InteractsWithTrainingNeedsQueries;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Isolate;
 use Livewire\Component;
 
@@ -20,7 +21,7 @@ class Overview extends Component
         $this->authorizeTrainingNeedsView();
     }
 
-    public function render()
+    public function render(): View
     {
         return view('training-needs::livewire.training-needs.overview');
     }

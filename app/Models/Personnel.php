@@ -3,8 +3,13 @@
 namespace App\Models;
 
 use App\Models\Concerns\FiltersPersonnel;
+use App\Models\Concerns\HasPersonnelAbsenceRelations;
 use App\Models\Concerns\HasPersonnelAttributes;
-use App\Models\Concerns\HasPersonnelRelations;
+use App\Models\Concerns\HasPersonnelCareerRelations;
+use App\Models\Concerns\HasPersonnelDocumentRelations;
+use App\Models\Concerns\HasPersonnelEducationRelations;
+use App\Models\Concerns\HasPersonnelEngagementRelations;
+use App\Models\Concerns\HasPersonnelOrgRelations;
 use App\Observers\PersonnelObserver;
 use App\Traits\DateCastTrait;
 use App\Traits\NestedStructureTrait;
@@ -15,14 +20,41 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * @property string|null $tabel_no
+ * @property string|null $person_uid
+ * @property string|null $surname
+ * @property string|null $name
+ * @property string|null $patronymic
+ * @property mixed $birthdate
+ * @property int|null $gender
+ * @property string|null $pin
+ * @property string|null $phone
+ * @property string|null $mobile
+ * @property string|null $email
+ * @property int|null $structure_id
+ * @property int|null $position_id
+ * @property int|null $work_norm_id
+ * @property mixed $join_work_date
+ * @property mixed $leave_work_date
+ * @property string|null $probation_unit
+ * @property int|null $probation_amount
+ * @property-read Position|null $position
+ * @property-read Structure|null $structure
+ */
 #[ObservedBy(PersonnelObserver::class)]
 class Personnel extends Model
 {
     use DateCastTrait;
     use FiltersPersonnel;
     use HasFactory;
+    use HasPersonnelAbsenceRelations;
     use HasPersonnelAttributes;
-    use HasPersonnelRelations;
+    use HasPersonnelCareerRelations;
+    use HasPersonnelDocumentRelations;
+    use HasPersonnelEducationRelations;
+    use HasPersonnelEngagementRelations;
+    use HasPersonnelOrgRelations;
     use LogsActivity;
     use NestedStructureTrait;
     use SoftDeletes;
@@ -57,8 +89,17 @@ class Personnel extends Model
         'parent_id',
         'position_id',
         'work_norm_id',
+        'contract_type',
+        'contract_date',
         'join_work_date',
         'leave_work_date',
+        'probation_unit',
+        'probation_amount',
+        'workplace_type',
+        'working_time_type',
+        'work_schedule',
+        'work_hours',
+        'rest_days',
         'social_origin_id',
         'disability_id',
         'disability_given_date',
@@ -78,6 +119,7 @@ class Personnel extends Model
     ];
 
     protected $dates = [
+        'contract_date',
         'join_work_date',
         'leave_work_date',
         'birthdate',
@@ -87,6 +129,9 @@ class Personnel extends Model
 
     protected $casts = [
         'birthdate' => self::FORMAT_CAST,
+        'contract_date' => self::FORMAT_CAST,
+        'work_hours' => 'array',
+        'rest_days' => 'array',
         'join_work_date' => self::FORMAT_CAST,
         'leave_work_date' => self::FORMAT_CAST,
         'special_inspection_date' => self::FORMAT_CAST,
@@ -124,7 +169,22 @@ class Personnel extends Model
     protected static function boot()
     {
         parent::boot();
-        static::creating(fn ($model) => $model->added_by = auth()->id() ?? 1);
-        static::deleting(fn ($model) => $model->forceFill(['deleted_by' => auth()->id() ?? 1])->save());
+
+        // These MUST return nothing.
+        //
+        // `creating` and `deleting` are halting events: Eloquent dispatches them
+        // through `until()`, which stops at the first listener returning a
+        // non-null value. An arrow function returns the assignment it performs,
+        // so `fn ($model) => $model->added_by = ...` returned an id and silently
+        // swallowed every listener registered afterwards — including
+        // PersonnelObserver. Nothing depended on those listeners before, so the
+        // breakage stayed invisible.
+        static::creating(function ($model): void {
+            $model->added_by = auth()->id() ?? 1;
+        });
+
+        static::deleting(function ($model): void {
+            $model->forceFill(['deleted_by' => auth()->id() ?? 1])->save();
+        });
     }
 }

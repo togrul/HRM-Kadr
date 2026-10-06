@@ -102,4 +102,3 @@ class AttendanceRecalculateLedgersCommand extends Command
         return true;
     }
 }
-

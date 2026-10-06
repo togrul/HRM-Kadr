@@ -4,13 +4,14 @@ namespace App\Modules\Personnel\Application\Services\MyHr;
 
 use App\Models\EmployeeContentAsset;
 use App\Models\EmployeeContentAssignment;
-use App\Models\User;
 use App\Models\Personnel;
+use App\Models\User;
+use App\Modules\Personnel\Contracts\LearningAssignmentManager;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
-class LearningAssignmentManagerService
+class LearningAssignmentManagerService implements LearningAssignmentManager
 {
     public function createAsset(array $payload, ?UploadedFile $upload, ?User $user, ?EmployeeContentAsset $versionSource = null): EmployeeContentAsset
     {

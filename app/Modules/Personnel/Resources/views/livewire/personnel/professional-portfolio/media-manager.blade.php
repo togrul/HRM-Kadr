@@ -8,12 +8,12 @@
             <div class="grid gap-1 lg:grid-cols-2 2xl:grid-cols-4">
                 <x-ui.input-shell :label="__('personnel::portfolio.fields.search')" labelClass="tracking-tight text-zinc-500"><input wire:model.live.debounce.300ms="search" type="text" placeholder="{{ __('personnel::portfolio.messages.search_placeholder') }}" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-2 text-sm text-zinc-800 placeholder:text-zinc-400 focus:border-zinc-300 focus:outline-none" /></x-ui.input-shell>
                 <x-ui.input-shell :label="__('personnel::portfolio.fields.status')" labelClass="tracking-tight text-zinc-500">
-                    <select wire:model.live="statusFilter" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-2 text-sm text-zinc-800 focus:border-zinc-300 focus:outline-none">
-                        <option value="all">Hamısı</option>
+                    <x-ui.select wire:model.live="statusFilter">
+                        <option value="all">{{ __('personnel::common.labels.all') }}</option>
                         @foreach ($options::mediaStatuses() as $status)
                             <option value="{{ $status }}">{{ __('personnel::portfolio.status.'.$status) }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                 </x-ui.input-shell>
                 <x-ui.input-shell :label="__('personnel::portfolio.fields.date_from')" labelClass="tracking-tight text-zinc-500">
                   <input wire:model.live="dateFrom" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-1.5 text-[13px] text-zinc-800 focus:border-zinc-300 focus:outline-none" /></x-ui.input-shell>
@@ -33,9 +33,9 @@
 
             <div class="space-y-3">
                 @forelse ($this->records as $record)
-                    <div class="rounded-[24px] border {{ $record->verification_status === 'pending' ? 'border-amber-200 bg-amber-50/40 shadow-sm shadow-amber-100/40' : 'border-zinc-200 bg-white' }} p-4">
+                    <div class="rounded-2xl border {{ $record->verification_status === 'pending' ? 'border-amber-200 bg-amber-50/40 shadow-sm shadow-amber-100/40' : 'border-zinc-200 bg-white' }} p-4">
                         <div class="space-y-3">
-                            <div class="rounded-[22px] border border-zinc-200 bg-zinc-50/80 px-4 py-3.5">
+                            <div class="rounded-2xl border border-zinc-200 bg-zinc-50/80 px-4 py-3.5">
                                 <h3 class="max-w-[38rem] text-lg font-semibold tracking-tight text-zinc-950">{{ $record->headline }}</h3>
                             </div>
 
@@ -54,22 +54,22 @@
                                     <x-ui.async-button variant="primary" size="sm" fullWidth="true" wire:click="edit({{ $record->id }})" wire:target="edit({{ $record->id }})" wire:loading.attr="disabled">{{ __('personnel::portfolio.actions.edit') }}</x-ui.async-button>
                                 @endcan
                                 @canany(['verify-professional-portfolio-records', 'verify-personnel-media-records'])
-                                    @if ($record->verification_status !== 'broken_link')
-                                        <x-ui.async-button variant="warning" size="sm" fullWidth="true" wire:click="markBrokenLink({{ $record->id }})" wire:target="markBrokenLink({{ $record->id }})" wire:loading.attr="disabled">{{ __('personnel::portfolio.actions.mark_broken_link') }}</x-ui.async-button>
+                                    @if (in_array('broken_link', $transitions[$record->verification_status] ?? [], true))
+                                        <x-ui.async-button variant="warning" size="sm" fullWidth="true" data-title="{{ __('personnel::portfolio.confirm.title') }}" data-message="{{ __('personnel::portfolio.confirm.broken') }}" data-confirm="{{ __('personnel::portfolio.actions.mark_broken_link') }}" x-on:click="$dispatch('confirm-action', { title: $el.dataset.title, message: $el.dataset.message, confirmText: $el.dataset.confirm, tone: 'amber', run: () => $wire.markBrokenLink({{ (int) $record->id }}) })" wire:target="markBrokenLink({{ $record->id }})" wire:loading.attr="disabled">{{ __('personnel::portfolio.actions.mark_broken_link') }}</x-ui.async-button>
                                     @endif
                                 @endcanany
                             </div>
 
                             @canany(['verify-professional-portfolio-records', 'verify-personnel-media-records'])
                                 <div class="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-                                    @if ($record->verification_status !== 'verified')
-                                        <x-ui.async-button variant="success" size="sm" fullWidth="true" wire:click="verify({{ $record->id }})" wire:target="verify({{ $record->id }})" wire:loading.attr="disabled">{{ __('personnel::portfolio.actions.verify') }}</x-ui.async-button>
+                                    @if (in_array('verified', $transitions[$record->verification_status] ?? [], true))
+                                        <x-ui.async-button variant="success" size="sm" fullWidth="true" data-title="{{ __('personnel::portfolio.confirm.title') }}" data-message="{{ __('personnel::portfolio.confirm.verify') }}" data-confirm="{{ __('personnel::portfolio.actions.verify') }}" x-on:click="$dispatch('confirm-action', { title: $el.dataset.title, message: $el.dataset.message, confirmText: $el.dataset.confirm, tone: 'emerald', run: () => $wire.verify({{ (int) $record->id }}) })" wire:target="verify({{ $record->id }})" wire:loading.attr="disabled">{{ __('personnel::portfolio.actions.verify') }}</x-ui.async-button>
                                     @endif
-                                    @if ($record->verification_status !== 'archived_only')
-                                        <x-ui.async-button variant="secondary" size="sm" fullWidth="true" wire:click="markArchivedOnly({{ $record->id }})" wire:target="markArchivedOnly({{ $record->id }})" wire:loading.attr="disabled">{{ __('personnel::portfolio.actions.mark_archived_only') }}</x-ui.async-button>
+                                    @if (in_array('archived_only', $transitions[$record->verification_status] ?? [], true))
+                                        <x-ui.async-button variant="secondary" size="sm" fullWidth="true" data-title="{{ __('personnel::portfolio.confirm.title') }}" data-message="{{ __('personnel::portfolio.confirm.archived') }}" data-confirm="{{ __('personnel::portfolio.actions.mark_archived_only') }}" x-on:click="$dispatch('confirm-action', { title: $el.dataset.title, message: $el.dataset.message, confirmText: $el.dataset.confirm, tone: 'amber', run: () => $wire.markArchivedOnly({{ (int) $record->id }}) })" wire:target="markArchivedOnly({{ $record->id }})" wire:loading.attr="disabled">{{ __('personnel::portfolio.actions.mark_archived_only') }}</x-ui.async-button>
                                     @endif
-                                    @if ($record->verification_status !== 'rejected')
-                                        <x-ui.async-button variant="danger" size="sm" fullWidth="true" wire:click="reject({{ $record->id }})" wire:target="reject({{ $record->id }})" wire:loading.attr="disabled">{{ __('personnel::portfolio.actions.reject') }}</x-ui.async-button>
+                                    @if (in_array('rejected', $transitions[$record->verification_status] ?? [], true))
+                                        <x-ui.async-button variant="danger" size="sm" fullWidth="true" data-title="{{ __('personnel::portfolio.confirm.title') }}" data-message="{{ __('personnel::portfolio.confirm.reject') }}" data-confirm="{{ __('personnel::portfolio.actions.reject') }}" x-on:click="$dispatch('confirm-action', { title: $el.dataset.title, message: $el.dataset.message, confirmText: $el.dataset.confirm, tone: 'rose', run: () => $wire.reject({{ (int) $record->id }}) })" wire:target="reject({{ $record->id }})" wire:loading.attr="disabled">{{ __('personnel::portfolio.actions.reject') }}</x-ui.async-button>
                                     @endif
                                 </div>
                             @endcanany
@@ -79,7 +79,7 @@
                             <div class="mt-4 space-y-4 border-t border-zinc-100 pt-4">
                                 <x-professional-portfolio.verification-panel :status="$this->selectedRecord->verification_status" :verifier="$this->selectedRecord->verifier?->name" :verified-at="optional($this->selectedRecord->verified_at)?->format('d.m.Y H:i')" />
                                 <div class="space-y-4">
-                                    <div class="rounded-[24px] border border-zinc-200 bg-zinc-50/70 p-4">
+                                    <div class="rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4">
                                         <div class="space-y-4">
                                             <div class="rounded-2xl border border-zinc-200 bg-white px-4 py-3">
                                                 <p class="text-[11px] font-semibold uppercase tracking-tight text-zinc-400">{{ __('personnel::portfolio.fields.summary') }}</p>
@@ -134,7 +134,7 @@
                                     </div>
 
                                     @if ($this->selectedRecord->url)
-                                        <div class="rounded-[24px] border border-zinc-200 bg-white p-4">
+                                        <div class="rounded-2xl border border-zinc-200 bg-white p-4">
                                             <a href="{{ $this->selectedRecord->url }}" target="_blank" rel="noopener noreferrer" class="text-sm font-semibold text-zinc-700 underline">{{ __('personnel::portfolio.actions.open_link') }}</a>
                                         </div>
                                     @endif
@@ -149,56 +149,56 @@
         </div>
 
         @if ($showForm)
-            <div class="rounded-[24px] border border-zinc-200 bg-zinc-50 p-4">
+            <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
                 <div class="flex items-center justify-between">
                     <h3 class="text-lg font-semibold tracking-tight text-zinc-950">{{ $editingId ? __('personnel::portfolio.actions.edit') : __('personnel::portfolio.actions.add_media') }}</h3>
                     <x-ui.async-button variant="secondary" size="sm" wire:click="cancelForm" wire:target="cancelForm" wire:loading.attr="disabled">{{ __('personnel::portfolio.actions.cancel') }}</x-ui.async-button>
                 </div>
                 <div class="mt-4 space-y-3">
-                    <x-ui.input-shell :label="__('personnel::portfolio.fields.headline')" :error="$errors->first('form.headline')"><input wire:model.defer="form.headline" type="text" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
+                    <x-ui.input-shell :label="__('personnel::portfolio.fields.headline')" :error="$errors->first('form.headline')"><input wire:model="form.headline" type="text" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
                     <div class="grid gap-3 md:grid-cols-2">
-                        <x-ui.input-shell :label="__('personnel::portfolio.fields.publisher_name')" :error="$errors->first('form.publisher_name')"><input wire:model.defer="form.publisher_name" type="text" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
-                        <x-ui.input-shell :label="__('personnel::portfolio.fields.published_at')" :error="$errors->first('form.published_at')"><input wire:model.defer="form.published_at" type="datetime-local" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
+                        <x-ui.input-shell :label="__('personnel::portfolio.fields.publisher_name')" :error="$errors->first('form.publisher_name')"><input wire:model="form.publisher_name" type="text" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
+                        <x-ui.input-shell :label="__('personnel::portfolio.fields.published_at')" :error="$errors->first('form.published_at')"><input wire:model="form.published_at" type="datetime-local" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
                     </div>
                     <div class="grid gap-3 md:grid-cols-2">
                         <x-ui.input-shell :label="__('personnel::portfolio.fields.publisher_type')">
-                            <select wire:model.defer="form.publisher_type" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm">
+                            <x-ui.select wire:model="form.publisher_type">
                                 @foreach ($options::mediaPublisherTypes() as $option)
                                     <option value="{{ $option }}">{{ __('personnel::portfolio.options.publisher_type.'.$option) }}</option>
                                 @endforeach
-                            </select>
+                            </x-ui.select>
                         </x-ui.input-shell>
                         <x-ui.input-shell :label="__('personnel::portfolio.fields.mention_type')">
-                            <select wire:model.defer="form.mention_type" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm">
+                            <x-ui.select wire:model="form.mention_type">
                                 @foreach ($options::mediaMentionTypes() as $option)
                                     <option value="{{ $option }}">{{ __('personnel::portfolio.options.mention_type.'.$option) }}</option>
                                 @endforeach
-                            </select>
+                            </x-ui.select>
                         </x-ui.input-shell>
                     </div>
                     <div class="grid gap-3 md:grid-cols-2">
                         <x-ui.input-shell :label="__('personnel::portfolio.fields.sentiment')">
-                            <select wire:model.defer="form.sentiment" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm">
+                            <x-ui.select wire:model="form.sentiment">
                                 @foreach ($options::mediaSentiments() as $option)
                                     <option value="{{ $option }}">{{ __('personnel::portfolio.options.sentiment.'.$option) }}</option>
                                 @endforeach
-                            </select>
+                            </x-ui.select>
                         </x-ui.input-shell>
                         <x-ui.input-shell :label="__('personnel::portfolio.fields.visibility')">
-                            <select wire:model.defer="form.visibility" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm">
+                            <x-ui.select wire:model="form.visibility">
                                 @foreach ($options::mediaVisibilities() as $option)
                                     <option value="{{ $option }}">{{ __('personnel::portfolio.options.visibility.'.$option) }}</option>
                                 @endforeach
-                            </select>
+                            </x-ui.select>
                         </x-ui.input-shell>
                     </div>
-                    <x-ui.input-shell :label="__('personnel::portfolio.fields.url')" :error="$errors->first('form.url')"><input wire:model.defer="form.url" type="url" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
-                    <x-ui.input-shell :label="__('personnel::portfolio.fields.summary')" :error="$errors->first('form.summary')"><textarea wire:model.defer="form.summary" rows="4" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm"></textarea></x-ui.input-shell>
+                    <x-ui.input-shell :label="__('personnel::portfolio.fields.url')" :error="$errors->first('form.url')"><input wire:model="form.url" type="url" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
+                    <x-ui.input-shell :label="__('personnel::portfolio.fields.summary')" :error="$errors->first('form.summary')"><textarea wire:model="form.summary" rows="4" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm"></textarea></x-ui.input-shell>
                     <div class="grid gap-3 md:grid-cols-2">
                         <x-ui.file-upload-shell wire:model="archiveUpload" :label="__('personnel::portfolio.fields.archive')" :error="$errors->first('archiveUpload')" :upload="$archiveUpload" :existing-name="$editingId && $this->selectedRecord?->archiveAttachment ? $this->selectedRecord->archiveAttachment->original_name : null" />
                         <x-ui.file-upload-shell wire:model="screenshotUpload" :label="__('personnel::portfolio.fields.screenshot')" :error="$errors->first('screenshotUpload')" :upload="$screenshotUpload" :existing-name="$editingId && $this->selectedRecord?->screenshotAttachment ? $this->selectedRecord->screenshotAttachment->original_name : null" />
                     </div>
-                    <x-ui.input-shell :label="__('personnel::portfolio.fields.notes')" :error="$errors->first('form.notes')"><textarea wire:model.defer="form.notes" rows="2" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm"></textarea></x-ui.input-shell>
+                    <x-ui.input-shell :label="__('personnel::portfolio.fields.notes')" :error="$errors->first('form.notes')"><textarea wire:model="form.notes" rows="2" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm"></textarea></x-ui.input-shell>
                 </div>
                 <div class="mt-4">
                     <x-ui.async-button variant="primary" fullWidth="true" wire:click="save" wire:target="save" wire:loading.attr="disabled">{{ __('personnel::portfolio.actions.save_record') }}</x-ui.async-button>

@@ -9,4 +9,3 @@ Route::middleware('api')
         Route::post('/punches/ingest', AttendancePunchIngestController::class)
             ->name('attendance.api.punches.ingest');
     });
-

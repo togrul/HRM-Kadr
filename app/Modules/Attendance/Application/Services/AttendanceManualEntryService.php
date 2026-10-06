@@ -143,14 +143,12 @@ class AttendanceManualEntryService
             ]);
         }
 
-        $before = $entry->only(['approval_status', 'approved_by', 'approved_at', 'reason']);
+        $before = $entry->only(['approval_status', 'approved_by', 'approved_at', 'rejection_reason']);
 
         $entry->approval_status = 'rejected';
         $entry->approved_by = $approvedBy;
         $entry->approved_at = now();
-        if ($note !== null && $note !== '') {
-            $entry->reason = trim((string) $entry->reason."\n\n[Reject note] ".$note);
-        }
+        $entry->rejection_reason = filled($note) ? trim((string) $note) : null;
         $entry->save();
 
         app(AttendanceAuditLogger::class)->log(
@@ -161,7 +159,7 @@ class AttendanceManualEntryService
                 'tabel_no' => $entry->tabel_no,
                 'date' => $entry->date?->toDateString(),
                 'before' => $before,
-                'after' => $entry->only(['approval_status', 'approved_by', 'approved_at', 'reason']),
+                'after' => $entry->only(['approval_status', 'approved_by', 'approved_at', 'rejection_reason']),
                 'reject_note' => $note,
             ],
             causerId: $approvedBy

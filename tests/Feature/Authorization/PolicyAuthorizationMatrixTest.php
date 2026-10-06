@@ -48,7 +48,7 @@ class PolicyAuthorizationMatrixTest extends TestCase
             [PersonnelPolicy::class, 'update', 'edit-personnels', Personnel::class],
             [PersonnelPolicy::class, 'delete', 'delete-personnels', Personnel::class],
             [PersonnelPolicy::class, 'forceDelete', 'delete-personnels', Personnel::class],
-            [PersonnelPolicy::class, 'export', 'show-personnels', null],
+            [PersonnelPolicy::class, 'export', 'export-personnels', null],
 
             // OrderPolicy
             [OrderPolicy::class, 'viewAny', 'show-orders', null],
@@ -88,18 +88,21 @@ class PolicyAuthorizationMatrixTest extends TestCase
             [BusinessTripPolicy::class, 'create', 'add-business_trips', null],
             [BusinessTripPolicy::class, 'update', 'edit-business_trips', PersonnelBusinessTrip::class],
             [BusinessTripPolicy::class, 'delete', 'delete-business_trips', PersonnelBusinessTrip::class],
+            [BusinessTripPolicy::class, 'export', 'export-business_trips', null],
 
             // StaffSchedulePolicy
             [StaffSchedulePolicy::class, 'viewAny', 'show-staff', null],
             [StaffSchedulePolicy::class, 'create', 'add-staff', null],
             [StaffSchedulePolicy::class, 'update', 'edit-staff', StaffSchedule::class],
             [StaffSchedulePolicy::class, 'delete', 'delete-staff', StaffSchedule::class],
+            [StaffSchedulePolicy::class, 'export', 'export-staff', null],
 
             // VacationPolicy
             [VacationPolicy::class, 'viewAny', 'show-vacations', null],
             [VacationPolicy::class, 'create', 'add-vacations', null],
             [VacationPolicy::class, 'update', 'edit-vacations', PersonnelVacation::class],
             [VacationPolicy::class, 'delete', 'delete-vacations', PersonnelVacation::class],
+            [VacationPolicy::class, 'export', 'export-vacations', null],
         ];
     }
 
@@ -114,9 +117,9 @@ class PolicyAuthorizationMatrixTest extends TestCase
     ): void {
         Permission::findOrCreate($permission, 'web');
 
-        $policy = new $policyClass();
+        $policy = new $policyClass;
         $args = in_array($method, self::MODEL_METHODS, true) && $modelClass !== null
-            ? [new $modelClass()]
+            ? [new $modelClass]
             : [];
 
         $granted = User::factory()->create();

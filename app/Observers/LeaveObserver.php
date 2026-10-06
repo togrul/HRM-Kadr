@@ -2,15 +2,15 @@
 
 namespace App\Observers;
 
+use App\Enums\OrderStatusEnum;
 use App\Models\Leave;
 use App\Models\User;
-use App\Services\Modules\ModuleState;
 use App\Modules\Attendance\Application\Services\AttendanceLeaveSyncService;
-use App\Notifications\NewLeaveRequested;
 use App\Notifications\LeaveStatusChanged;
+use App\Notifications\NewLeaveRequested;
+use App\Services\Modules\ModuleState;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\Notification;
-use App\Enums\OrderStatusEnum;
 use Spatie\Permission\Models\Permission;
 
 class LeaveObserver
@@ -84,7 +84,7 @@ class LeaveObserver
             ->exists();
 
         if (! $permissionExists) {
-            return new EloquentCollection();
+            return new EloquentCollection;
         }
 
         return User::permission('get-notification')->get();

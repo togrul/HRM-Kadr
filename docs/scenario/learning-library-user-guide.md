@@ -1,104 +1,149 @@
-# Öyrənmə kitabxanası istifadəçi bələdçisi
+# Tədris kitabxanası istifadəçi bələdçisi
 
 ## Bu modul nə üçündür?
-Öyrənmə kitabxanası HR, təlim və inkişaf, həmçinin inzibatçı istifadəçilər üçündür. Burada materiallar hazırlanır, əməkdaşlara göndərilir və onların tamamlanma vəziyyəti izlənir.
+
+`Tədris kitabxanası` təlim materiallarını bir yerdə saxlamaq və onları əməkdaşlara təyin etmək üçündür. Burada video, təqdimat, PDF və ya link əlavə edirsiniz, sonra onu bir əməkdaşa, bütöv struktura, vəzifəyə və ya yeni işə gələnlərə təyin edirsiniz. Əməkdaş təyin olunan materialı öz `Şəxsi kabinet`-ində görür.
 
 ## Harada açılır?
-Sol menyudan `Öyrənmə kitabxanası` bölməsini açın.
 
-## Bu modulda əsasən nə edirsiniz?
-- yeni material yaradırsınız
-- materialı seçilmiş əməkdaşlara göndərirsiniz
-- hansı materialın tamamlandığını izləyirsiniz
-- materialların köhnə və yeni versiyalarına baxırsınız
+Sol dar zolaqda (rail) `Tədris` ikonuna klikləyin. Səhifənin adı `Tədris kitabxanası`-dır.
 
-## Ümumi tabı
-Bu tab gündəlik istifadə üçün əsas hissədir.
+Sol paneldə üç bölmə var:
 
-Burada üç əsas hissə var:
-- `Yeni material`
-- `Toplu təyinat`
-- `Son təyinatlar`
+- `Kitabxana` — materialların kataloqu;
+- `Təyinatlar` — son təyinatların siyahısı;
+- `Hesabatlar` — ixrac və statistika.
 
-### Yeni material nə üçündür?
-Bu hissə yeni fayl, video, PDF və ya digər material yaratmaq üçündür.
+Kiçik ekranda bu bölmələr səhifənin yuxarısında düymələr kimi görünür.
 
-### Yeni material necə yaradılır?
-1. Material adını yazın.
-2. Növünü seçin.
-3. Versiyanı qeyd edin.
-4. Qısa izah əlavə edin.
-5. Faylı yükləyin və ya xarici link verin.
-6. Görünürlük və aktivlik vəziyyətini seçin.
-7. Lazımdırsa:
-   - `Məcburi materialdır`
-   - `Yeni əməkdaşlara avtomatik təyin et`
-   seçimlərini aktiv edin.
-8. `Materialı yarat` düyməsini basın.
+## Bu modul kimlər üçündür?
 
-### Yaradandan sonra nə olur?
-- material sistemdə saxlanılır
-- toplu təyinat hissəsində seçilə bilir
-- kitabxana tabında ümumi siyahıya düşür
+- **Təlimə cavabdeh HR əməkdaşı** — materialları əlavə edir, yeni versiya yaradır, arxivləyir.
+- **Təyinat edən məsul şəxs** — materialı əməkdaşlara təyin edir.
+- **Rəhbər və ya müşahidəçi** — kataloqa və hesabatlara baxır.
 
-## Toplu təyinat
-Bu hissə hazır materialı bir və ya bir neçə əməkdaşa göndərmək üçündür.
+Səhifəni yalnız kitabxanaya baxmaq icazəsi olanlar açır. `Material əlavə et` düyməsi və `⋯` menyusundakı idarəetmə bəndləri yalnız kitabxananı idarə etmək icazəsi olanlara görünür. `Təyin et` düyməsi yalnız təyinat icazəsi olanlara görünür.
 
-### Necə istifadə olunur?
-1. Materialı seçin.
-2. Son tarix daxil edin.
-3. Struktur, vəzifə və ya konkret əməkdaş seçin.
-4. Lazımdırsa yeni əməkdaşları da bu seçimə daxil edin.
-5. `Seçilənlərə təyin et` düyməsini basın.
+## Ekranın quruluşu
 
-### Təyinatdan sonra nə olur?
-- seçilmiş əməkdaşın `Şəxsi kabinet` bölməsində material görünür
-- əməkdaş materialı açır
-- material tamamlananda sistem bunu qeyd edə bilir
+### Başlıq
 
-## Son təyinatlar
-Bu hissədə ən son təyin olunmuş materiallar görünür.
+Sağ yuxarıda yeganə qara düymə — `Material əlavə et`. Klikləyəndə sağdan `Yeni material` paneli açılır.
 
-### Burada nə görə bilərsiniz?
-- material kimə göndərilib
-- nə vaxt göndərilib
-- tamamlanıb ya yox
-- tamamlanma tarixi
+### Göstəricilər
 
-Bu hissə sizə son göndərdiklərinizin vəziyyətini tez görməyə kömək edir.
+`Kitabxana` bölməsinin yuxarısında üç kart var:
 
-## Kitabxana tabı
-Bu tab yaradılmış materialların ümumi siyahısı üçündür.
+- `Aktiv materiallar` — hazırda istifadədə olan materialların sayı;
+- `Bu ay təyin edilən` — bu ay neçə təyinat edilib;
+- `Tamamlanma %` — təyinatların neçə faizi tamamlanıb.
 
-### Burada nə edə bilərsiniz?
-- materialları axtara bilərsiniz
-- materialı aça bilərsiniz
-- yeni versiya yarada bilərsiniz
-- aktiv və ya deaktiv edə bilərsiniz
-- arxivə göndərə və ya arxivdən çıxara bilərsiniz
+### Axtarış və filtrlər
 
-### Yeni versiya nə üçündür?
-Eyni materialın yeni variantı çıxanda köhnəni silmədən yenilənmiş variantı əlavə etmək üçündür.
+- Axtarış xanası — `Material adı ilə axtarın`.
+- `Növ` seçimi — `Bütün növlər`, `Video`, `Təqdimat`, `PDF`, `Link`, `Digər`.
+- Status düymələri, hər birinin yanında say: `Hamısı`, `Aktiv`, `Deaktiv`, `Məcburi`, `Avtomatik təyinat`, `Arxiv`.
 
-## Hesabatlar tabı
-Bu tab ümumi istifadə vəziyyətini görmək üçündür.
+### Material kartları
 
-### Burada nə görə bilərsiniz?
-- neçə material var
-- neçə təyinat aktivdir
-- neçə material tamamlanıb
-- neçə təyinat gecikib
-- ən aktiv strukturlar və vəzifələr
+Hər material kart şəklindədir: adı, növü, versiyası/müddəti. Arxivdə olan materialda sarı `Arxiv`, deaktiv materialda boz `Deaktiv` nişanı görünür. Kartın altında `Təyin et` düyməsi və sağda `⋯` menyusu var.
 
-Bu hissə sizə hansı materialların daha çox istifadə olunduğunu anlamağa kömək edir.
+### Boş kitabxana
 
-## Tipik iş axını
-1. Əvvəl materialı yaradın.
-2. Sonra `Ümumi` tabında uyğun qrupa təyin edin.
-3. Son təyinatlarda ilkin vəziyyəti izləyin.
-4. Hesabatlarda ümumi nəticəni qiymətləndirin.
+Hələ heç bir material yoxdursa, `İlk materialı əlavə edin` mesajı və mərkəzdə `Material əlavə et` düyməsi görünür. Filtrə uyğun heç nə tapılmadıqda `Filtrə uyğun material tapılmadı.` yazılır.
 
-## Nəyə diqqət etmək lazımdır?
-- Toplu təyinat etməzdən əvvəl materialın doğru versiyasını seçin.
-- Məcburi materiallarda son tarix vermək izləməni asanlaşdırır.
-- Eyni material yenilənibsə, yenisini sıfırdan yaratmaq əvəzinə yeni versiya əlavə edin.
+## Əsas əməliyyatlar
+
+### Yeni material əlavə etmək
+
+1. `Material əlavə et` düyməsinə klikləyin.
+2. Açılan `Yeni material` panelində doldurun:
+   - `Material adı` (məcburi);
+   - `Material növü`, `Versiya`, `Görünürlük`;
+   - `Təxmini dəqiqə`, `Qısa xülasə`;
+   - `Xarici link` (material internetdədirsə) və ya `Material faylı` (fayl ən çox 20 MB).
+3. Lazım olan qutuları işarələyin: `Aktivdir`, `Yeni əməkdaşlara avtomatik təyin et`, `Məcburi materialdır`.
+4. `Materialı yarat` düyməsinə basın. Uğurlu olduqda `Öyrənmə materialı yaradıldı.` mesajı çıxır.
+
+### Toplu təyinat (materialı əməkdaşlara təyin etmək)
+
+1. Material kartında `Təyin et` düyməsinə klikləyin (və ya `Təyinatlar` bölməsindəki `Təyin et` düyməsinə).
+2. Sağda `Material təyin et` paneli açılır. `Material` siyahısında axtarış xanası var — adı yazıb lazım olanı seçin.
+3. İstəsəniz `Son tarix` qoyun.
+4. Kimə təyin ediləcəyini seçin — bir neçəsini birlikdə də seçmək olar:
+   - `Struktur seçimi` — bütöv bölmə;
+   - `Vəzifə seçimi` — müəyyən vəzifədəki hər kəs;
+   - `Əməkdaş seçimi` — konkret şəxslər;
+   - `Yeni əməkdaş cohort-unu da daxil et` — son `N` gündə işə gələnlər (`Son neçə günün yeni əməkdaşları`).
+5. `Təyinat qaydası` hissəsində neçə struktur, vəzifə və əməkdaş seçildiyini görürsünüz. Səhv seçim olarsa `Seçimi təmizlə` basın.
+6. `Seçilənlərə təyin et` düyməsinə basın. Mesajda neçə əməkdaşa təyin edildiyi yazılır.
+
+Heç kim seçilməyibsə, sistem `Ən azı bir əməkdaş və ya struktur seçin.` xəbərdarlığı verir.
+
+### Yeni versiya yaratmaq
+
+Material yenilənəndə köhnəsini silmək əvəzinə yeni versiya yaradın:
+
+1. Kartın `⋯` menyusunda `Yeni versiya yarat` seçin.
+2. `Yeni material` paneli köhnə materialın məlumatları ilə dolu açılır, versiya nömrəsi avtomatik bir pillə artır.
+3. Faylı və ya linki yeniləyin, `Materialı yarat` basın.
+
+Köhnə versiya tarixçədə qalır, `Hesabatlar` bölməsində `Versiyalanan ailələr` altında görünür.
+
+### Deaktiv etmək və arxivləmək
+
+- `Deaktiv et` — material yeni təyinatlarda görünmür, mövcud təyinatlar qalır.
+- `Arxivlə` — material kataloqdan gizlənir. `Arxiv` filtrindən tapıb `Arxivdən çıxar` ilə qaytara bilərsiniz.
+
+Hər iki əməliyyatda sistem təsdiq soruşacaq.
+
+### Təyinatlara baxmaq
+
+`Təyinatlar` bölməsində `Son təyinatlar` siyahısı var: material adı, əməkdaş, vəzifə, təyinat tarixi və rəngli status nişanı (yaşıl — tamamlanıb, qırmızı — gecikib). Tamamlanıbsa, tamamlanma tarixi də yazılır.
+
+### Hesabatlar və ixrac
+
+`Hesabatlar` bölməsində `Material növləri`, `Status bölgüsü`, `Ən aktiv strukturlar`, `Ən aktiv vəzifələr` və `Versiyalanan ailələr` göstərilir. Excel-ə ixrac düymələri:
+
+- `Materialları ixrac et`
+- `Təyinatları ixrac et`
+- `Gecikənləri ixrac et`
+- `Tamamlananları ixrac et`
+- `Versiya tarixçəsini ixrac et`
+
+## "⋯" menyusu
+
+Material kartının sağındakı `⋯` menyusunda:
+
+- `Materialı aç` — yalnız materialın faylı və ya linki varsa görünür; yeni pəncərədə açılır.
+- `Yeni versiya yarat` — idarəetmə icazəsi olanlara.
+- `Aktiv et` / `Deaktiv et` — materialın hazırkı vəziyyətinə görə biri görünür; təsdiq soruşulur.
+- `Arxivlə` / `Arxivdən çıxar` — vəziyyətə görə biri görünür; təsdiq soruşulur.
+
+## Tez-tez verilən suallar
+
+**`Material əlavə et` düyməsi niyə görünmür?**
+Kitabxananı idarə etmək icazəniz yoxdur. Administratora müraciət edin.
+
+**Kartda `Təyin et` düyməsi yoxdur.**
+Ya təyinat icazəniz yoxdur, ya da material arxivdədir. Arxivdəki materialı əvvəlcə `Arxivdən çıxar` edin.
+
+**Materialı sildim, amma tapa bilmirəm.**
+Silmə yoxdur — material arxivlənib. `Arxiv` filtrinə keçin.
+
+**Yeni əməkdaşlar materialı avtomatik alırmı?**
+Bəli, əgər materialda `Yeni əməkdaşlara avtomatik təyin et` işarələnibsə. Bu materiallar `Avtomatik təyinat` filtrində görünür.
+
+**Deaktiv materialın köhnə təyinatları nə olur?**
+Qalır. Deaktiv etmək yalnız yeni təyinatların qarşısını alır.
+
+**Əməkdaş materialı harada görür?**
+Öz `Şəxsi kabinet`-ində.
+
+## Yadda saxlayın
+
+- Materialı yeniləyəndə yeni material yox, `Yeni versiya yarat` istifadə edin — tarixçə qorunur.
+- Təyin etməzdən əvvəl siyahıdan doğru versiyanı seçin.
+- Böyük qrupa təyinatda `Struktur seçimi` və ya `Vəzifə seçimi` bir-bir əməkdaş seçməkdən sürətlidir.
+- Arxivləmə geri qaytarılandır, amma təsdiq pəncərəsini oxuyun.
+- Gecikən təyinatları `Gecikənləri ixrac et` ilə mütəmadi yoxlayın.

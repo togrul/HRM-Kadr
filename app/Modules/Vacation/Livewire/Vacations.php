@@ -2,19 +2,26 @@
 
 namespace App\Modules\Vacation\Livewire;
 
-use App\Modules\Vacation\Exports\VacationExport;
 use App\Livewire\Traits\DropdownConstructTrait;
 use App\Livewire\Traits\SideModalAction;
+use App\Models\OrderType;
 use App\Models\PersonnelVacation;
-use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestReviewService;
 use App\Models\Structure;
+use App\Modules\Orders\Contracts\OrderDrafter;
+use App\Modules\Personnel\Contracts\MyHrRequestReview;
+use App\Modules\Vacation\Exports\VacationExport;
+use App\Services\Chief\ChiefResolver;
 use App\Services\NumberToWordsService;
 use App\Services\StructureService;
 use App\Services\WordSuffixService;
 use Carbon\Carbon;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\LazyCollection;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
@@ -23,6 +30,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpWord\TemplateProcessor;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class Vacations extends Component
 {
@@ -45,9 +53,12 @@ class Vacations extends Component
     #[Url(as: 'year', keep: true)]
     public $selectedYear;
 
+    #[Url(as: 'type')]
+    public $selectedType;
+
     protected array $runtimeStructureOptionsCache = [];
 
-    public function exportExcel()
+    public function exportExcel(): BinaryFileResponse
     {
         $this->authorize('export', PersonnelVacation::class);
 
@@ -57,32 +68,62 @@ class Vacations extends Component
         return Excel::download(new VacationExport($report), "vacation-{$name}.xlsx");
     }
 
-    public function searchFilter()
+    public function searchFilter(): void
     {
         $this->search = $this->filter;
+        $this->resetPage();
     }
 
-    public function resetFilter()
+    /** Filters apply as they change; there is no separate "search" step. */
+    public function updatedFilter(): void
+    {
+        $this->searchFilter();
+    }
+
+    /**
+     * Vacations are granted by an order: the header's "Vacation order" opens the order
+     * composer on the vacation template(s).
+     *
+     * @return array<string, string> code → label
+     */
+    #[Computed]
+    public function vacationOrderTemplates(): array
+    {
+        return app(OrderDrafter::class)->personnelTemplates('vacation');
+    }
+
+    #[Computed]
+    public function hasActiveFilters(): bool
+    {
+        return $this->selectedType !== null
+            || collect(Arr::dot($this->search))->except('vacation_status')->contains(fn ($value): bool => filled($value));
+    }
+
+    public function resetFilter(): void
     {
         $this->fillFilter();
         $this->search = $this->filter;
+        $this->selectedType = null;
+        $this->resetPage();
     }
 
     public function getTableHeaders(): array
     {
         return [
-            __('personnel::common.labels.number'),
             __('vacation::common.labels.fullname'),
             __('vacation::common.labels.structure'),
+            __('vacation::common.labels.type'),
             __('vacation::common.labels.dates'),
-            __('vacation::common.labels.locations'),
+            __('vacation::common.labels.duration'),
             __('vacation::common.labels.order'),
             __('personnel::common.labels.action'),
         ];
     }
 
-    public function printVacationDocument(PersonnelVacation $model)
+    public function printVacationDocument(PersonnelVacation $model): ?BinaryFileResponse
     {
+        $this->authorize('export', PersonnelVacation::class);
+
         $model->load([
             'personnel',
             'personnel.latestRank.rank',
@@ -96,12 +137,12 @@ class Vacations extends Component
             return null;
         }
 
-        //        $chief = Personnel::with(['latestRank.rank'])
-        //            ->where(['structure_id' => 8, 'position_id' => 10])
-        //            ->active()
-        //            ->firstOrFail();
-        $chiefName = cache('settings')['Chief'];
-        $chiefRank = cache('settings')['Chief rank'];
+        // Signatory resolved as-of the order's date: an active temporary delegate
+        // (müvəqqəti həvalə) on that date signs in place of the permanent chief, and
+        // re-printing an old vacation paper keeps naming whoever was acting then.
+        $signatory = app(ChiefResolver::class)->current($model->order_date);
+        $chiefName = $signatory['fullname'];
+        $chiefRank = $signatory['title'];
 
         $dates = [
             'givenDate' => Carbon::parse($model->order_date),
@@ -119,7 +160,7 @@ class Vacations extends Component
             return [
                 'day' => $date->format('d'),
                 'month' => $date->locale('AZ')->monthName,
-                'year' => $year . $suffixService->getNumberSuffix((int) $year),
+                'year' => $year.$suffixService->getNumberSuffix((int) $year),
             ];
         }, $dates);
 
@@ -148,17 +189,21 @@ class Vacations extends Component
         $templateProcessor->setValue('person_signature', $chiefName);
 
         $filename = "{$model->personnel->fullname}_mezuniyyet_{$model->start_date->format('d.m.Y')}";
-        $templateProcessor->saveAs($filename . '.docx');
+        $templateProcessor->saveAs($filename.'.docx');
 
-        return response()->download($filename . '.docx')->deleteFileAfterSend();
+        return response()->download($filename.'.docx')->deleteFileAfterSend();
+    }
+
+    /** Who may bind an approved self-service vacation to an order — the button uses the same rule. */
+    #[Computed]
+    public function canBindOrder(): bool
+    {
+        return auth()->user()?->can('review-self-service-requests') || auth()->user()?->can('edit-vacations');
     }
 
     public function bindOperationalOrder(PersonnelVacation $model): void
     {
-        abort_unless(
-            auth()->user()?->can('review-self-service-requests') || auth()->user()?->can('edit-vacations'),
-            403
-        );
+        abort_unless($this->canBindOrder(), 403);
 
         abort_unless(
             (string) $model->submission_source === 'employee_self_service'
@@ -167,7 +212,7 @@ class Vacations extends Component
             422
         );
 
-        app(MyHrRequestReviewService::class)->bindOperationalVacationOrder($model, auth()->user());
+        app(MyHrRequestReview::class)->bindOperationalVacationOrder($model, auth()->user());
 
         $this->dispatch('notify', type: 'success', message: __('vacation::common.messages.order_bound'));
     }
@@ -180,17 +225,20 @@ class Vacations extends Component
         ];
     }
 
-    protected function returnData($type = 'normal')
+    /**
+     * The visibility-scoped, filtered vacation query every read shares — the table,
+     * the panel status counts and the panel type counts. It deliberately leaves the
+     * status bucket out so the counts can be computed per bucket.
+     *
+     * @return Builder<PersonnelVacation>
+     */
+    protected function baseQuery(): Builder
     {
-        $result = PersonnelVacation::with([
-            'personnel' => fn($q) => $q->with([
-                'structure',
-                'position',
-                'latestRank.rank',
-            ]),
-        ])
-            ->whereHas('personnel', fn($query) => $query->whereIn('structure_id', $this->accessibleStructureIds))
+        return PersonnelVacation::query()
+            ->whereHas('personnel', fn ($query) => $query->whereIn('structure_id', $this->accessibleStructureIds))
             ->where(function ($query) {
+                // A self-service request only joins the register once it is approved;
+                // pending ones live in the review inbox (MyHrOperationalRequestVisibilityTest).
                 $query->whereNull('submission_source')
                     ->orWhere(function ($selfService) {
                         $selfService->where('submission_source', '!=', 'employee_self_service')
@@ -200,8 +248,43 @@ class Vacations extends Component
                             });
                     });
             })
-            ->filter($this->search)
-            ->when((empty($this->search['date']['min'] ?? null) && empty($this->search['date']['max'] ?? null)), fn($qq) => $qq->whereDateInYear($this->selectedYear))
+            ->filter(Arr::except($this->search, ['vacation_status']))
+            ->when(
+                empty($this->search['date']['min'] ?? null) && empty($this->search['date']['max'] ?? null),
+                fn ($query) => $query->whereDateInYear($this->selectedYear)
+            );
+    }
+
+    /**
+     * The base query narrowed to the selected status bucket and vacation type — what
+     * the table actually lists.
+     *
+     * @return Builder<PersonnelVacation>
+     */
+    protected function scopedQuery(): Builder
+    {
+        return $this->baseQuery()
+            ->filter(Arr::only($this->search, ['vacation_status']))
+            ->when($this->selectedType, fn ($query) => $query->whereHas(
+                'order',
+                fn ($order) => Str::startsWith((string) $this->selectedType, 'tpl:')
+                    ? $order->where('template_snapshot->template_code', Str::after((string) $this->selectedType, 'tpl:'))
+                    : $order->where('order_type_id', (int) $this->selectedType)
+            ));
+    }
+
+    protected function returnData($type = 'normal'): LengthAwarePaginator|LazyCollection
+    {
+        $result = $this->scopedQuery()
+            ->with([
+                'personnel' => fn ($q) => $q->with([
+                    'structure',
+                    'position',
+                    'latestRank.rank',
+                ]),
+                'order:id,order_no,order_id,order_type_id,template_snapshot',
+                'order.orderType:id,name',
+            ])
             ->orderByDesc('end_date')
             ->orderByDesc('return_work_date');
 
@@ -239,9 +322,104 @@ class Vacations extends Component
     }
 
     #[Computed]
-    public function vacations()
+    public function vacations(): LengthAwarePaginator|LazyCollection
     {
         return $this->returnData();
+    }
+
+    /**
+     * Status bucket counts plus the total vacation days, in one pass — the panel and
+     * the header stat strip read the same numbers.
+     *
+     * @return array{all: int, at_work: int, in_vacation: int, days: int}
+     */
+    #[Computed]
+    public function summary(): array
+    {
+        $now = Carbon::now();
+
+        $row = $this->baseQuery()
+            ->toBase()
+            ->selectRaw(
+                'count(*) as total,'
+                .' sum(case when start_date <= ? and return_work_date > ? then 1 else 0 end) as in_vacation,'
+                .' coalesce(sum(duration), 0) as days',
+                [$now, $now]
+            )
+            ->first();
+
+        return [
+            'all' => (int) ($row->total ?? 0),
+            'at_work' => (int) ($row->total ?? 0) - (int) ($row->in_vacation ?? 0),
+            'in_vacation' => (int) ($row->in_vacation ?? 0),
+            'days' => (int) ($row->days ?? 0),
+        ];
+    }
+
+    /**
+     * Vacation types for the panel. A vacation has no type of its own — it inherits it
+     * from the order it was issued under, so the buckets are the linked order's type
+     * (legacy block orders) or its frozen Word-template label.
+     *
+     * @return list<array{key: string, label: string, count: int}>
+     */
+    #[Computed]
+    public function typeFilters(): array
+    {
+        $rows = $this->baseQuery()
+            ->toBase()
+            ->join('order_logs', 'order_logs.order_no', '=', 'personnel_vacations.order_no')
+            ->selectRaw('count(*) as aggregate')
+            ->addSelect([
+                'order_logs.order_type_id',
+                'order_logs.template_snapshot->template_code as template_code',
+                'order_logs.template_snapshot->label as template_label',
+            ])
+            ->groupBy('order_logs.order_type_id', 'order_logs.template_snapshot->template_code', 'order_logs.template_snapshot->label')
+            ->get();
+
+        $orderTypeNames = $rows->pluck('order_type_id')->filter()->unique()->isEmpty()
+            ? collect()
+            : OrderType::query()->whereIn('id', $rows->pluck('order_type_id')->filter()->unique())->pluck('name', 'id');
+
+        // MySQL's json_extract keeps the JSON quoting, SQLite's does not.
+        $unquote = fn (?string $value): string => trim((string) $value, '"');
+
+        return $rows
+            ->map(function ($row) use ($orderTypeNames, $unquote): ?array {
+                if ($row->order_type_id) {
+                    return [
+                        'key' => (string) $row->order_type_id,
+                        'label' => (string) ($orderTypeNames[$row->order_type_id] ?? $row->order_type_id),
+                        'count' => (int) $row->aggregate,
+                    ];
+                }
+
+                $code = $unquote($row->template_code);
+
+                return $code === '' ? null : [
+                    'key' => 'tpl:'.$code,
+                    'label' => $unquote($row->template_label) ?: $code,
+                    'count' => (int) $row->aggregate,
+                ];
+            })
+            ->filter()
+            ->sortBy('label', SORT_NATURAL | SORT_FLAG_CASE)
+            ->values()
+            ->all();
+    }
+
+    public function setStatus(string $value): void
+    {
+        $this->filter['vacation_status'] = $value;
+        $this->searchFilter();
+        $this->resetPage();
+    }
+
+    public function selectType(string $key): void
+    {
+        $this->selectedType = $key === '' ? null : $key;
+        $this->resetPage();
     }
 
     protected function fillYear(): void
@@ -262,7 +440,7 @@ class Vacations extends Component
         $this->selectedYear = request()->has('year') ? request()->get('year') : $this->years->first();
     }
 
-    public function mount()
+    public function mount(): void
     {
         $this->authorize('viewAny', PersonnelVacation::class);
         $this->accessibleStructureIds = resolve(StructureService::class)->getAccessibleStructures();
@@ -278,7 +456,7 @@ class Vacations extends Component
         }
     }
 
-    public function render()
+    public function render(): View
     {
         return view('vacation::livewire.vacation.vacations');
     }
@@ -288,7 +466,7 @@ class Vacations extends Component
     {
         $search = $this->dropdownSearch('searchStructure');
         $selected = $this->selectedStructureFilterId();
-        $runtimeCacheKey = md5($search . '|' . ($selected ?? 'none'));
+        $runtimeCacheKey = md5($search.'|'.($selected ?? 'none'));
 
         if (array_key_exists($runtimeCacheKey, $this->runtimeStructureOptionsCache)) {
             return $this->runtimeStructureOptionsCache[$runtimeCacheKey];

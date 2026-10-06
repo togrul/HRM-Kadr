@@ -73,13 +73,42 @@ trait InteractsWithRequisitionForm
             'form.employment_type' => ['required', Rule::in(['full_time', 'part_time', 'contract', 'internship'])],
             'form.hiring_reason' => ['nullable', 'string', 'max:255'],
             'form.headcount' => ['required', 'integer', 'min:1', 'max:999'],
-            'form.status' => ['required', Rule::in(['draft', 'open', 'closed', 'cancelled'])],
+            'form.status' => ['required', Rule::in($this->requisitionFormStatuses())],
             'form.opens_at' => ['nullable', 'date'],
             'form.closes_at' => ['nullable', 'date', 'after_or_equal:form.opens_at'],
             'form.requested_by' => ['nullable', 'exists:users,id'],
             'form.owner_id' => ['nullable', 'exists:users,id'],
             'form.note' => ['nullable', 'string'],
         ];
+    }
+
+    /**
+     * Statuses the form may set. The approval states (pending/approved/rejected) belong to the
+     * approval flow, so the form only keeps the one the saved requisition already has — it
+     * shows up in the dropdown and saves unchanged, but cannot be picked to skip approval.
+     *
+     * @return array<int, string>
+     */
+    public function requisitionFormStatuses(): array
+    {
+        $statuses = ['draft', 'open', 'closed', 'cancelled'];
+        $current = (string) (($this->requisition ?? null)?->status ?? '');
+
+        if (in_array($current, ['pending_approval', 'approved', 'rejected'], true)) {
+            $statuses[] = $current;
+        }
+
+        return $statuses;
+    }
+
+    /**
+     * @return array<int, array{id:string,label:string}>
+     */
+    public function requisitionFormStatusOptions(): array
+    {
+        return collect($this->requisitionFormStatuses())
+            ->map(fn (string $status): array => ['id' => $status, 'label' => $this->recruitmentStatusLabel($status)])
+            ->all();
     }
 
     protected function requisitionValidationAttributes(): array

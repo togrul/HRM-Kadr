@@ -6,10 +6,11 @@ use App\Models\OnboardingDocumentAssignment;
 use App\Models\OnboardingDocumentTemplate;
 use App\Models\Personnel;
 use App\Models\User;
+use App\Modules\Personnel\Contracts\OnboardingAssignmentManager;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 
-class OnboardingAssignmentManagerService
+class OnboardingAssignmentManagerService implements OnboardingAssignmentManager
 {
     public function createTemplate(array $payload, UploadedFile $upload, ?User $user, ?OnboardingDocumentTemplate $versionSource = null): OnboardingDocumentTemplate
     {

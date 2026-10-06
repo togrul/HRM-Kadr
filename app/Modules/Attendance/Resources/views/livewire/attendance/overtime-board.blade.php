@@ -10,20 +10,20 @@
             <div class="grid gap-2 sm:grid-cols-3">
                 <div>
                     <x-label for="attendance-ot-status">{{ __('attendance::overtime.filters.status') }}</x-label>
-                    <select id="attendance-ot-status" wire:model.live="status" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500">
+                    <x-ui.select id="attendance-ot-status" wire:model.live="status">
                         <option value="pending">{{ __('attendance::overtime.statuses.pending') }}</option>
                         <option value="approved">{{ __('attendance::overtime.statuses.approved') }}</option>
                         <option value="rejected">{{ __('attendance::overtime.statuses.rejected') }}</option>
                         <option value="all">{{ __('attendance::overtime.statuses.all') }}</option>
-                    </select>
+                    </x-ui.select>
                 </div>
                 <div>
                     <x-label for="attendance-ot-from">{{ __('attendance::overtime.filters.from') }}</x-label>
-                    <input id="attendance-ot-from" wire:model.live="fromDate" type="date" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                    <input id="attendance-ot-from" wire:model.live="fromDate" type="date" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
                 </div>
                 <div>
                     <x-label for="attendance-ot-to">{{ __('attendance::overtime.filters.to') }}</x-label>
-                    <input id="attendance-ot-to" wire:model.live="toDate" type="date" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                    <input id="attendance-ot-to" wire:model.live="toDate" type="date" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
                 </div>
             </div>
 
@@ -58,18 +58,18 @@
                             <button
                                 type="button"
                                 wire:click="selectPersonnel('{{ $personnel->tabel_no }}', '{{ addslashes($personnel->fullname) }}')"
-                                class="flex w-full flex-col rounded-md px-2 py-1 text-left text-slate-600 transition-all duration-300 hover:bg-white drop-shadow-sm"
+                                class="flex w-full flex-col rounded-md px-2 py-1 text-left text-zinc-600 transition-all duration-300 hover:bg-white drop-shadow-sm"
                             >
                                 <span>{{ $personnel->fullname }}</span>
                                 <span class="text-xs font-mono text-zinc-500">{{ $personnel->tabel_no }}</span>
                                 @if($personnel->structure_path)
                                     <span class="max-w-[18rem] truncate text-[11px] text-zinc-400 md:max-w-[24rem]" title="{{ $personnel->structure_path }}">
-                                        {{ $personnel->structure_path }}
+                                        {{ $personnel->structure_name }}
                                     </span>
                                 @endif
                             </button>
                         @empty
-                            <span class="mx-auto text-sm font-medium text-slate-500">
+                            <span class="mx-auto text-sm font-medium text-zinc-500">
                                 {{ __('attendance::overtime.create.placeholder') }}
                             </span>
                         @endforelse
@@ -77,18 +77,18 @@
                 </div>
                 <div>
                     <x-label for="attendance-ot-create-date">{{ __('attendance::overtime.create.date') }}</x-label>
-                    <input id="attendance-ot-create-date" wire:model.live="manualRequest.date" type="date" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                    <input id="attendance-ot-create-date" wire:model.live="manualRequest.date" type="date" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
                 </div>
                 <div>
                     <x-label for="attendance-ot-create-minutes">{{ __('attendance::overtime.create.requested_minutes') }}</x-label>
-                    <input id="attendance-ot-create-minutes" wire:model.defer="manualRequest.requested_minutes" type="number" min="1" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                    <input id="attendance-ot-create-minutes" wire:model="manualRequest.requested_minutes" type="number" min="1" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
                 </div>
                 <div class="md:col-span-2 xl:col-span-3">
                     <x-label for="attendance-ot-create-reason">{{ __('attendance::overtime.create.reason') }}</x-label>
-                    <input id="attendance-ot-create-reason" wire:model.defer="manualRequest.reason" type="text" class="h-10 w-full rounded-lg border-none bg-neutral-100 px-3 text-sm shadow-sm focus:ring-blue-500" />
+                    <input id="attendance-ot-create-reason" wire:model="manualRequest.reason" type="text" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
                 </div>
                 <div class="flex items-end">
-                    <x-button mode="success" class="w-full !h-10" wire:click="createManualRequest">
+                    <x-button mode="black" class="w-full !h-10" wire:click="createManualRequest">
                         {{ __('attendance::overtime.create.action') }}
                     </x-button>
                 </div>
@@ -146,7 +146,7 @@
                                 <span>{{ $item->personnel?->surname }} {{ $item->personnel?->name }} {{ $item->personnel?->patronymic }}</span>
                                 @if($item->personnel?->structure_path)
                                     <span class="max-w-[18rem] truncate text-xs text-zinc-500 md:max-w-[24rem]" title="{{ $item->personnel->structure_path }}">
-                                        {{ $item->personnel->structure_path }}
+                                        {{ $item->personnel->structure_name }}
                                     </span>
                                 @endif
                             </div>
@@ -177,17 +177,40 @@
                                         <span>{{ __('attendance::overtime.table.pending_approval_hint') }}</span>
                                     @endif
                                 </div>
+                                @if($item->status === 'rejected' && filled($item->rejection_reason))
+                                    <p class="line-clamp-2 max-w-[18rem] whitespace-normal text-[12px] leading-snug text-ink-muted" title="{{ $item->rejection_reason }}">
+                                        <span class="font-medium">{{ __('attendance::overtime.labels.reject_reason') }}:</span> {{ $item->rejection_reason }}
+                                    </p>
+                                @endif
                             </div>
                         </x-table.td>
                         <x-table.td :isButton="true">
                             @if($canApprove && $item->status === 'pending')
-                                <div class="inline-flex items-center gap-2">
-                                    <x-button mode="success" class="!h-8 !px-3 !text-xs" wire:click="approve({{ $item->id }})">
-                                        {{ __('attendance::overtime.actions.approve') }}
-                                    </x-button>
-                                    <x-button mode="danger" class="!h-8 !px-3 !text-xs" wire:click="reject({{ $item->id }})">
-                                        {{ __('attendance::overtime.actions.reject') }}
-                                    </x-button>
+                                <div class="flex flex-col items-end gap-1">
+                                    <div class="inline-flex items-center gap-2">
+                                        <input
+                                            wire:model="rejectReasons.{{ $item->id }}"
+                                            type="text"
+                                            required
+                                            maxlength="1000"
+                                            aria-label="{{ __('attendance::overtime.labels.reject_reason') }}"
+                                            placeholder="{{ __('attendance::overtime.placeholders.reject_reason') }}"
+                                            @class([
+                                                'h-8 w-44 rounded-[10px] border bg-[#f4f4f5] px-2.5 text-xs text-ink outline-none transition placeholder:text-ink-faint focus:bg-white focus:border-ink',
+                                                'border-rose-300' => $errors->has('rejectReasons.'.$item->id),
+                                                'border-hairline' => ! $errors->has('rejectReasons.'.$item->id),
+                                            ])
+                                        />
+                                        <x-button mode="success" class="!h-8 !px-3 !text-xs" wire:click="approve({{ $item->id }})">
+                                            {{ __('attendance::overtime.actions.approve') }}
+                                        </x-button>
+                                        <x-button mode="danger" class="!h-8 !px-3 !text-xs" wire:click="reject({{ $item->id }})">
+                                            {{ __('attendance::overtime.actions.reject') }}
+                                        </x-button>
+                                    </div>
+                                    @error('rejectReasons.'.$item->id)
+                                        <span class="text-[11px] text-rose-600">{{ $message }}</span>
+                                    @enderror
                                 </div>
                             @else
                                 <span class="text-xs text-zinc-500">

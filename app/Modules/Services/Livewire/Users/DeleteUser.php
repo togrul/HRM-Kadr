@@ -1,7 +1,10 @@
 <?php
 
 namespace App\Modules\Services\Livewire\Users;
+
 use App\Models\User;
+use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
@@ -10,12 +13,13 @@ use Livewire\Component;
 class DeleteUser extends Component
 {
     use AuthorizesRequests;
+    use AuthorizesSettingsAccess;
 
     #[Locked]
     public ?int $userId = null;
 
     #[On('setDeleteUser')]
-    public function setDeleteUser($userId)
+    public function setDeleteUser($userId): void
     {
         $user = User::query()
             ->select('id')
@@ -27,14 +31,14 @@ class DeleteUser extends Component
             return;
         }
 
-        // $this->authorize('delete', $user);
+        $this->authorize('access-settings');
 
         $this->userId = (int) $user->id;
 
         $this->dispatch('deleteUserWasSet');
     }
 
-    public function deleteUser()
+    public function deleteUser(): void
     {
         if (! $this->userId) {
             return;
@@ -50,16 +54,22 @@ class DeleteUser extends Component
             return;
         }
 
-        // $this->authorize('delete', $user);
+        $this->authorize('access-settings');
 
         $user->delete();
+
+        activity('users')
+            ->performedOn($user)
+            ->event('deleted')
+            ->withProperties(['user_id' => $user->id])
+            ->log('user.deleted');
 
         $this->userId = null;
 
         $this->dispatch('userWasDeleted', __('services::users.messages.deleted'));
     }
 
-    public function render()
+    public function render(): View
     {
         return view('services::livewire.services.users.delete-user');
     }

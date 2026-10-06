@@ -3,6 +3,8 @@
 namespace App\Support\Navigation;
 
 use App\Support\Translations\ModuleTranslation;
+use Illuminate\Contracts\Auth\Access\Authorizable;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Route;
 
@@ -41,10 +43,42 @@ class MenuPresentation
         return 'icons.'.$icon;
     }
 
+    /** Rail pin order for people who run the HR office. */
+    public const HR_PINS = ['personnel.index', 'orders', 'staffs', 'vacations.list', 'leaves', 'candidates', 'attendance'];
+
+    /** Rail pin order for an employee working on their own requests. */
+    public const EMPLOYEE_PINS = ['my-hr', 'leaves', 'vacations.list', 'business-trips.list', 'attendance'];
+
+    /**
+     * Splits the menus the user may open into the rail's pinned block and the rest.
+     * Pins follow the user's working role — HR staff (can open the personnel list) get
+     * the HR office modules, everyone else their self-service ones — and any slot left
+     * over is filled in the configured menu order.
+     *
+     * @param  Collection<int, object{routeBase: string}>  $visibleMenus  already permission-gated
+     * @return array{0: Collection<int, object>, 1: Collection<int, object>}
+     */
+    public static function splitPinned(Collection $visibleMenus, ?Authorizable $user, int $count = 5): array
+    {
+        $priority = $user?->can('show-personnels') ? self::HR_PINS : self::EMPLOYEE_PINS;
+
+        $ranked = $visibleMenus->values()->sortBy(function (object $menu, int $index) use ($priority): int {
+            $rank = array_search($menu->routeBase, $priority, true);
+
+            return $rank === false ? count($priority) + $index : $rank;
+        });
+
+        $pinned = $ranked->take($count)->values();
+        $pinnedKeys = $pinned->map(fn (object $menu): string => spl_object_hash($menu))->all();
+
+        return [$pinned, $visibleMenus->reject(fn (object $menu): bool => in_array(spl_object_hash($menu), $pinnedKeys, true))->values()];
+    }
+
     public static function moduleName(string $routeBase): string
     {
         return [
             'home' => 'personnel',
+            'personnel.index' => 'personnel',
             'my-hr' => 'personnel',
             'self-service-reviews' => 'personnel',
             'onboarding-library' => 'onboarding-library',
@@ -104,6 +138,22 @@ class MenuPresentation
         return self::label((string) ($menu->name ?? ''));
     }
 
+    /**
+     * The name printed under the rail icon. The rail column is narrow, so a module may
+     * publish a shorter form under `ui::menu.rail.*`; everything else keeps its full
+     * menu label, which the hover tooltip and the command palette still show.
+     */
+    public static function railShortLabel(object $menu): string
+    {
+        $definition = self::definition($menu);
+        $name = is_array($definition) ? (string) ($definition['name'] ?? '') : '';
+        $short = str_replace('.items.', '.rail.', $name);
+
+        return $name !== '' && $short !== $name && Lang::has($short)
+            ? __($short)
+            : self::railLabel($menu);
+    }
+
     public static function visibleInRail(object $menu): bool
     {
         $definition = self::definition($menu);
@@ -152,6 +202,8 @@ class MenuPresentation
             'Şəxsi kabinet müraciətləri' => 'ui::menu.items.self_service_reviews',
             'Uyğunlaşma kitabxanası' => 'ui::menu.items.onboarding_library',
             'Öyrənmə kitabxanası' => 'ui::menu.items.learning_library',
+            'Adaptasiya kitabxanası' => 'ui::menu.items.onboarding_library',
+            'Tədris kitabxanası' => 'ui::menu.items.learning_library',
             'Davamiyyət' => 'ui::menu.items.attendance',
             'Təlim' => 'ui::menu.items.training',
             'Performans' => 'ui::menu.items.performance',

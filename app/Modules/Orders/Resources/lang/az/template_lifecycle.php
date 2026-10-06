@@ -2,7 +2,7 @@
 
 return [
     'defaults' => [
-        'auto_created_from_onboarding_wizard' => 'Onboarding wizard tərəfindən avtomatik yaradılıb',
+        'auto_created_from_onboarding_wizard' => 'Şablon sehrbazı tərəfindən avtomatik yaradılıb',
     ],
     'messages' => [
         'no_order_types_for_selected_template' => 'Seçilmiş şablon üçün sifariş tipi tapılmadı.',

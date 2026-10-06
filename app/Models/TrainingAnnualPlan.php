@@ -8,6 +8,17 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * @property int $id
+ * @property string $title
+ * @property int $plan_year
+ * @property int|null $plan_quarter
+ * @property string $status
+ * @property int|null $planned_participants
+ * @property int|null $covered_need_count
+ * @property bool $auto_generated
+ * @property string|null $notes
+ */
 class TrainingAnnualPlan extends Model
 {
     use HasFactory;

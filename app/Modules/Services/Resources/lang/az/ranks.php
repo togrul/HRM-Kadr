@@ -19,6 +19,7 @@ return [
         'created' => 'Rütbə uğurla əlavə olundu!',
         'updated' => 'Rütbə uğurla yeniləndi!',
         'deleted' => 'Rütbə silindi!',
+        'in_use' => 'Bu rütbə əməkdaşların məlumatlarında istifadə olunur, silmək olmaz.',
         'delete_description' => 'Bu məlumatı silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarılmır.',
     ],
 ];

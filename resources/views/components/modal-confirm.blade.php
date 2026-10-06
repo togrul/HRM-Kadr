@@ -46,7 +46,7 @@
               x-transition:leave="transition origin-top ease-out duration-300"
               x-transition:leave-start="opacity-100"
               x-transition:leave-end="opacity-0"
-              class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
+              class="fixed inset-0 transition-opacity bg-zinc-500 bg-opacity-75"
               aria-hidden="true"
         ></div>
 
@@ -68,7 +68,7 @@
             <div class="absolute top-0 right-0 py-2 pr-4">
                 <button
                     @click="openDeleteModal = false"
-                    class="text-gray-400 hover:text-gray-500"
+                    class="text-zinc-400 hover:text-zinc-500"
                 >
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
@@ -82,20 +82,20 @@
                         </svg>
                     </div>
                     <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                        <h3 class="text-xl font-medium leading-6 text-gray-900" id="modal-title">
+                        <h3 class="text-xl font-medium leading-6 text-zinc-900" id="modal-title">
                             {{ $modalTitle }}
                         </h3>
-                        <div class="flex flex-col py-2 space-y-2 text-gray-600" x-html="bodyMessage">
+                        <div class="flex flex-col py-2 space-y-2 text-zinc-600" x-html="bodyMessage">
                             {{ $slot }}
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="px-4 py-3 bg-gray-50 sm:px-6 sm:flex sm:flex-row-reverse rounded-lg">
+            <div class="px-4 py-3 bg-zinc-50 sm:px-6 sm:flex sm:flex-row-reverse rounded-lg">
                 <button wire:click='{{ $wireClick }}' x-ref="confirmButton" type="button" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white bg-rose-500 border border-transparent rounded-xl shadow-sm hover:bg-rose-600 sm:ml-3 sm:w-auto">
                     {{ $modalConfirmButtonText }}
                 </button>
-                <button @click="openDeleteModal = false" type="button" class="inline-flex justify-center w-full px-4 py-2 mt-3 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-xl shadow-sm hover:bg-gray-50  sm:mt-0 sm:ml-3 sm:w-auto">
+                <button @click="openDeleteModal = false" type="button" class="inline-flex justify-center w-full px-4 py-2 mt-3 text-base font-medium text-zinc-700 bg-white border border-zinc-300 rounded-xl shadow-sm hover:bg-zinc-50  sm:mt-0 sm:ml-3 sm:w-auto">
                     {{ __('ui::common.actions.cancel') }}
                 </button>
             </div>

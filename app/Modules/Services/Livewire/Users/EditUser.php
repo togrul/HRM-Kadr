@@ -4,6 +4,9 @@ namespace App\Modules\Services\Livewire\Users;
 
 use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\User;
+use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
+use DB;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -14,6 +17,7 @@ use Spatie\Permission\Models\Role;
 class EditUser extends Component
 {
     use AuthorizesRequests;
+    use AuthorizesSettingsAccess;
     use DropdownConstructTrait;
 
     public $userModel;
@@ -26,7 +30,7 @@ class EditUser extends Component
 
     public string $searchRole = '';
 
-    protected function rules()
+    protected function rules(): array
     {
         $rules = [
             'user.name' => 'required|min:1',
@@ -52,20 +56,21 @@ class EditUser extends Component
         return $rules;
     }
 
-    protected function validationAttributes()
+    protected function validationAttributes(): array
     {
         return [
             'user.name' => __('services::common.labels.name'),
             'user.email' => __('services::common.labels.email'),
             'user.password' => __('services::common.labels.password'),
             'user.confirm-password' => __('services::common.labels.confirm_password'),
+            'user.old_password' => __('services::common.labels.current_password'),
             'roleId' => __('services::common.labels.role'),
         ];
     }
 
-    public function mount()
+    public function mount(): void
     {
-        $this->authorize('manage-settings');
+        $this->authorize('access-settings');
         $this->title = __('services::users.titles.edit');
         $userId = is_array($this->userModel)
             ? ($this->userModel['id'] ?? null)
@@ -76,14 +81,19 @@ class EditUser extends Component
         $role = $this->userModel->roles->first();
         $this->roleId = $role?->id;
 
-        $this->user['name'] = $this->userModel->name;
-        $this->user['email'] = $this->userModel->email;
+        $this->user['name'] = trim((string) $this->userModel->name);
+        $this->user['email'] = trim((string) $this->userModel->email);
         $this->user['is_active'] = (bool) $this->userModel->is_active;
     }
 
-    public function store()
+    public function store(): void
     {
-        $this->authorize('manage-settings');
+        $this->authorize('access-settings');
+
+        // Livewire updates skip the HTTP TrimStrings middleware, so trim here — a stray
+        // trailing space would otherwise fail the `email` rule on otherwise-valid input.
+        $this->user['name'] = trim((string) ($this->user['name'] ?? ''));
+        $this->user['email'] = trim((string) ($this->user['email'] ?? ''));
 
         $this->validate();
 
@@ -106,7 +116,7 @@ class EditUser extends Component
         $this->dispatch('userAdded', __('services::users.messages.updated'));
     }
 
-    public function render()
+    public function render(): View
     {
         return view('services::livewire.services.users.edit-user');
     }
@@ -118,7 +128,7 @@ class EditUser extends Component
         $search = $this->dropdownSearch('searchRole');
 
         $base = Role::query()
-            ->select('id', \DB::raw('name as label'))
+            ->select('id', DB::raw('name as label'))
             ->orderBy('name');
 
         if ($search === '') {

@@ -4,7 +4,8 @@ namespace App\Modules\Personnel\Support\Traits\Information;
 
 use App\Models\PersonnelPensionCard;
 
-trait PensionCardTrait {
+trait PensionCardTrait
+{
     public array $pensionCards = [];
 
     protected function getPensionCardsRules(): array
@@ -23,7 +24,7 @@ trait PensionCardTrait {
         $modelInstance = new PersonnelPensionCard;
         $pensionCardData = $this->modifyArray($this->pensionCards, $modelInstance->dateList());
 
-        $this->personnelModelData->pensionCards()->create($pensionCardData);
+        $this->personnel->pensionCards()->create($pensionCardData);
 
         $this->dispatch('contractAdded', __('personnel::information.messages.pension_card_created'));
         $this->dispatchModalCloseEvent();
@@ -32,6 +33,7 @@ trait PensionCardTrait {
 
     public function forceDeletePensionCard(PersonnelPensionCard $pensionCard): void
     {
+        $this->ensureOwnRecord($pensionCard);
         $pensionCard->delete();
         $this->dispatch('contractAdded', __('personnel::information.messages.pension_card_deleted'));
         $this->dispatchModalCloseEvent();

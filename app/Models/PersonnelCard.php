@@ -11,11 +11,11 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class PersonnelCard extends Model
 {
+    use DateCastTrait;
     // xidmeti vesiqeler
     use HasFactory;
-    use PersonnelTrait;
-    use DateCastTrait;
     use LogsActivity;
+    use PersonnelTrait;
 
     public function getActivitylogOptions(): LogOptions
     {

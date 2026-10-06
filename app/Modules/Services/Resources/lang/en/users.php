@@ -17,8 +17,10 @@ return [
         'created' => 'User was added successfully!',
         'updated' => 'User was updated successfully!',
         'deleted' => 'User was deleted!',
-        'delete_description' => 'Are you sure you want to delete this user? This action cannot be undone.',
+        'delete_description' => 'Are you sure you want to delete this user? A deleted user can be restored later from the Deleted tab.',
         'force_delete_confirm' => 'Are you sure you want to remove this user?',
-        'old_password_mismatch' => "Old Password didn't match",
+        'old_password_mismatch' => 'The current password is incorrect',
+        'restored' => 'User was restored!',
+        'restore_confirm' => 'Are you sure you want to restore this user? The account will become active again.',
     ],
 ];

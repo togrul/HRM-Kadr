@@ -4,8 +4,6 @@ namespace App\Listeners;
 
 use App\Events\StaffScheduleUpdated;
 use App\Models\StaffSchedule;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 
 class UpdateStaffSchedule
 {

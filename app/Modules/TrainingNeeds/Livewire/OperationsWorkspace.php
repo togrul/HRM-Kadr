@@ -8,6 +8,7 @@ use App\Modules\TrainingNeeds\Livewire\Concerns\HandlesTrainingCalendarMutations
 use App\Modules\TrainingNeeds\Livewire\Concerns\HandlesTrainingPlanWorkbenchMutations;
 use App\Modules\TrainingNeeds\Livewire\Concerns\HandlesTrainingSessionWorkbenchMutations;
 use App\Services\HrPolicies\HrPolicyPackService;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Isolate;
 use Livewire\Attributes\On;
 
@@ -88,7 +89,7 @@ class OperationsWorkspace extends AbstractTrainingNeedsWorkspace
         $this->sessionDetailWorkspaceVersion++;
     }
 
-    public function render()
+    public function render(): View
     {
         return view('training-needs::livewire.training-needs.operations-workspace');
     }

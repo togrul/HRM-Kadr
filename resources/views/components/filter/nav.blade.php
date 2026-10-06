@@ -1,12 +1,18 @@
 @props([
-     'mode' => 'default'
+     'mode' => 'default',
+     'wrap' => false,
 ])
 
-<nav {{ $attributes->merge(['class' => 'flex flex-col items-start justify-start text-sm']) }}>
+{{-- Horizontal section / filter chips (prototype toolbar spec).
+     `wrap` trades the scroller for a second row: a section nav is a map of the module, so
+     hiding half of it behind a horizontal scroll costs more than the extra row. --}}
+<nav {{ $attributes->merge(['class' => $wrap
+     ? '-mx-1 flex max-w-full px-1'
+     : 'hrm-scroll -mx-1 flex max-w-full items-center overflow-x-auto px-1']) }}>
      <ul @class([
-          'flex flex-wrap py-[1px] px-[1px] border font-medium rounded-lg gap-[1px]',
-          'border-gray-200 bg-gray-100' => $mode == 'default',
-          'border-slate-800 bg-slate-900' => $mode == 'dark'
+          'flex items-center gap-1.5',
+          'flex-wrap' => $wrap,
+          'flex-nowrap' => ! $wrap,
      ])>
           {{ $slot }}
      </ul>

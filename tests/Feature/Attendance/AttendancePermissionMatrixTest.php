@@ -191,6 +191,16 @@ class AttendancePermissionMatrixTest extends TestCase
             ->assertDontSee(__('attendance::dashboard.tabs.calendar_regimes'));
     }
 
+    public function test_the_context_panel_links_to_this_modules_user_guide(): void
+    {
+        $this->actingAs($this->userForRole('HR Admin'));
+
+        $this->get(route('attendance'))
+            ->assertOk()
+            ->assertSee(route('docs.guide', ['focus' => 'attendance']), false)
+            ->assertSee(__('ui::common.labels.user_guide'));
+    }
+
     private function userForRole(string $roleName): User
     {
         $role = Role::query()->firstOrCreate([

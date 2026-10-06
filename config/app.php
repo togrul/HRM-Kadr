@@ -89,7 +89,7 @@ return [
 
     'locale' => 'az',
     'locales' => [
-        'az','en','ru'
+        'az', 'en', 'ru',
     ],
 
     /*

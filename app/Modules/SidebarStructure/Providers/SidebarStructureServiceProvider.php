@@ -29,7 +29,6 @@ class SidebarStructureServiceProvider extends ServiceProvider
     {
         $map = [
             'sidebar' => \App\Modules\SidebarStructure\Livewire\Sidebar::class,
-            'orders' => \App\Modules\SidebarStructure\Livewire\Orders::class,
             'services' => \App\Modules\SidebarStructure\Livewire\Services::class,
         ];
 

@@ -110,16 +110,23 @@ class PersonalInformationForm extends Form
     protected function defaultPersonnel(): array
     {
         return [
-            'has_changed_initials'    => false,
+            'has_changed_initials' => false,
             'has_changed_nationality' => false,
-            'nationality_id'          => null,
+            'nationality_id' => null,
             'previous_nationality_id' => null,
-            'education_degree_id'     => null,
-            'structure_id'            => null,
-            'position_id'             => null,
-            'work_norm_id'            => null,
-            'disability_id'           => null,
-            'social_origin_id'        => null,
+            'education_degree_id' => null,
+            'structure_id' => null,
+            'position_id' => null,
+            'work_norm_id' => null,
+            'disability_id' => null,
+            'social_origin_id' => null,
+            'contract_type' => null,
+            'probation_unit' => null,
+            'workplace_type' => null,
+            'working_time_type' => null,
+            'work_schedule' => null,
+            'work_hours' => [],
+            'rest_days' => [],
         ];
     }
 
@@ -129,7 +136,7 @@ class PersonalInformationForm extends Form
     protected function defaultPersonnelExtra(): array
     {
         return [
-            'participation_in_war'   => null,
+            'participation_in_war' => null,
             'discrediting_information' => null,
         ];
     }
@@ -195,8 +202,17 @@ class PersonalInformationForm extends Form
             'pin',
             'residental_address',
             'registered_address',
+            'contract_type',
+            'contract_date',
             'join_work_date',
             'leave_work_date',
+            'probation_unit',
+            'probation_amount',
+            'workplace_type',
+            'working_time_type',
+            'work_schedule',
+            'work_hours',
+            'rest_days',
             'extra_important_information',
             'computer_knowledge',
             'scientific_works_inventions',
@@ -219,5 +235,4 @@ class PersonalInformationForm extends Form
             'discrediting_information',
         ];
     }
-
 }

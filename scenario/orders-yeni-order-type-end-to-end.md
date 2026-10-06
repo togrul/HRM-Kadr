@@ -174,7 +174,7 @@ php artisan orders:templates:query-budget --order-type=<ID> --order-no=<ORDER_NO
 
 ## CI gate lokal yoxlama
 ```bash
-composer ci:orders-template-gate
+composer ci:orders-gate
 ```
 
 ---

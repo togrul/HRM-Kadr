@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Services\Orders;
 
-use App\Services\Orders\Variables\OrderVariableRegistry;
-use App\Services\Orders\Variables\VariableInterpolator;
+use App\Modules\Orders\Application\Variables\OrderVariableRegistry;
+use App\Modules\Orders\Application\Variables\VariableInterpolator;
 use PHPUnit\Framework\TestCase;
 
 class VariableInterpolatorTest extends TestCase

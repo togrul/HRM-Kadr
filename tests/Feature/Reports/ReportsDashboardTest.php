@@ -4,6 +4,7 @@ namespace Tests\Feature\Reports;
 
 use App\Models\User;
 use App\Modules\Reports\Livewire\Comparisons;
+use App\Modules\Reports\Livewire\Dashboard;
 use App\Modules\Reports\Livewire\DynamicBuilder;
 use App\Modules\Reports\Livewire\Overview;
 use App\Modules\Reports\Livewire\StandardReports;
@@ -105,6 +106,84 @@ class ReportsDashboardTest extends TestCase
         $this->actingAs($user)
             ->get(route('reports'))
             ->assertForbidden();
+    }
+
+    public function test_header_export_downloads_the_report_behind_the_active_tab(): void
+    {
+        $user = User::factory()->create();
+        $this->grantReportsPermissions($user);
+
+        $this->actingAs($user);
+
+        Livewire::test(Dashboard::class)
+            ->call('exportExcel')
+            ->assertFileDownloaded();
+    }
+
+    public function test_header_export_requires_export_permission(): void
+    {
+        $user = User::factory()->create();
+        Permission::findOrCreate('show-reports', 'web');
+        Permission::findOrCreate('export-reports', 'web');
+        $user->givePermissionTo('show-reports');
+
+        $this->actingAs($user);
+
+        Livewire::test(Dashboard::class)
+            ->call('exportExcel')
+            ->assertForbidden();
+    }
+
+    public function test_header_print_is_hidden_without_export_permission(): void
+    {
+        $user = User::factory()->create();
+        Permission::findOrCreate('show-reports', 'web');
+        $user->givePermissionTo('show-reports');
+
+        $this->actingAs($user);
+
+        Livewire::test(Dashboard::class)
+            ->assertDontSee(__('reports::dashboard.actions.print'))
+            ->assertDontSee('/reports/print/', false);
+    }
+
+    public function test_header_print_and_export_follow_the_tabs_current_selection(): void
+    {
+        $user = User::factory()->create();
+        $this->grantReportsPermissions($user);
+
+        $this->actingAs($user);
+
+        Livewire::test(StandardReports::class)
+            ->set('report', 'demographics')
+            ->assertDispatched('reports-selection', report: 'demographics');
+
+        Livewire::withQueryParams(['tab' => 'standard'])
+            ->test(Dashboard::class)
+            ->dispatch('reports-selection', report: 'demographics')
+            ->assertSet('report', 'demographics')
+            ->assertSee('report=demographics', false);
+
+        Livewire::test(DynamicBuilder::class)
+            ->set('groupBy', 'gender')
+            ->assertDispatched('reports-selection', source: 'personnel', groupBy: 'gender', metric: 'count');
+    }
+
+    public function test_comparisons_take_the_panel_period(): void
+    {
+        $user = User::factory()->create();
+        $this->grantReportsPermissions($user);
+
+        $this->actingAs($user);
+
+        Livewire::test(Comparisons::class, ['year' => 2024, 'month' => 2, 'structureId' => 5])
+            ->assertSet('year', 2024)
+            ->assertSet('month', 2)
+            ->assertSet('structureId', 5);
+
+        Livewire::withQueryParams(['tab' => 'comparisons', 'year' => 2024, 'month' => 2])
+            ->test(Dashboard::class)
+            ->assertSeeHtml('reports-comparisons-2024-2-all');
     }
 
     protected function grantReportsPermissions(User $user): void

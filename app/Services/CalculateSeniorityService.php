@@ -107,7 +107,7 @@ class CalculateSeniorityService
             $duration = $this->calculate($item['join_date'], $leaveDate, $coefficient);
 
             $old = $oldMilitary = $current = [];
-            if (!$item['is_current']) {
+            if (! $item['is_current']) {
                 $key = $item['is_special_service'] ? 'oldMilitary' : 'old';
                 ${$key} = $this->calculate($item['join_date'], $leaveDate, $coefficient);
             } else {

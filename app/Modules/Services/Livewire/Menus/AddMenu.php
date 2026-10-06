@@ -4,6 +4,8 @@ namespace App\Modules\Services\Livewire\Menus;
 
 use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\Menu;
+use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
@@ -13,6 +15,7 @@ use Spatie\Permission\Models\Permission;
 class AddMenu extends Component
 {
     use AuthorizesRequests;
+    use AuthorizesSettingsAccess;
     use DropdownConstructTrait;
 
     public $title;
@@ -23,7 +26,7 @@ class AddMenu extends Component
 
     public string $searchPermission = '';
 
-    protected function rules()
+    protected function rules(): array
     {
         return [
             'menu.name' => 'required|string|min:1',
@@ -35,7 +38,7 @@ class AddMenu extends Component
         ];
     }
 
-    protected function validationAttributes()
+    protected function validationAttributes(): array
     {
         return [
             'menu.name' => __('services::common.labels.name'),
@@ -75,7 +78,7 @@ class AddMenu extends Component
         );
     }
 
-    public function store()
+    public function store(): void
     {
         $this->validate();
 
@@ -84,12 +87,12 @@ class AddMenu extends Component
         $this->dispatch('menuAdded', __('services::menus.messages.created'));
     }
 
-    public function mount()
+    public function mount(): void
     {
         $this->title = __('services::menus.titles.add');
     }
 
-    public function render()
+    public function render(): View
     {
         return view('services::livewire.services.menus.add-menu');
     }

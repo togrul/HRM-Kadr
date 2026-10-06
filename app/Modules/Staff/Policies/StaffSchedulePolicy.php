@@ -44,6 +44,6 @@ class StaffSchedulePolicy
 
     public function export(User $user): bool
     {
-        return $user->can('show-staff');
+        return $user->can('export-staff');
     }
 }

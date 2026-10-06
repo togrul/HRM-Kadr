@@ -134,8 +134,8 @@ class TranslationCatalogLinter
     }
 
     /**
-     * @param array<string|int, mixed> $catalog
-     * @param array<int, array<string, mixed>> $findings
+     * @param  array<string|int, mixed>  $catalog
+     * @param  array<int, array<string, mixed>>  $findings
      */
     private function lintArrayKeys(array $catalog, string $relativeFile, array &$findings, string $path = ''): void
     {
@@ -180,7 +180,7 @@ class TranslationCatalogLinter
     }
 
     /**
-     * @param array<string|int, mixed> $catalog
+     * @param  array<string|int, mixed>  $catalog
      * @return array<int, string>
      */
     private function flattenKeys(array $catalog, string $prefix = ''): array
@@ -196,6 +196,7 @@ class TranslationCatalogLinter
 
             if (is_array($value)) {
                 array_push($keys, ...$this->flattenKeys($value, $path));
+
                 continue;
             }
 

@@ -22,6 +22,7 @@ class AttendanceWeekendCalendarSeederService
         while ($cursor->lte($end)) {
             if (! $cursor->isWeekend()) {
                 $cursor->addDay();
+
                 continue;
             }
 
@@ -37,6 +38,7 @@ class AttendanceWeekendCalendarSeederService
             if ($existing instanceof AttendanceCalendar) {
                 $skippedExisting++;
                 $cursor->addDay();
+
                 continue;
             }
 

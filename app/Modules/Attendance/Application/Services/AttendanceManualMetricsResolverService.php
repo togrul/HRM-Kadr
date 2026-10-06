@@ -233,8 +233,7 @@ class AttendanceManualMetricsResolverService
         Carbon $date,
         ?AttendanceShift $defaultShift = null,
         ?AttendanceShift $explicitShift = null
-    ): array
-    {
+    ): array {
         if ($explicitShift !== null) {
             return [$explicitShift, 'explicit_shift'];
         }

@@ -5,9 +5,9 @@
     'blockedMessages' => [],
 ])
 
-<div class="rounded-lg border border-slate-200 bg-slate-50 p-3 space-y-3">
+<div class="rounded-lg border border-zinc-200 bg-zinc-50 p-3 space-y-3">
     <div class="flex flex-wrap items-center justify-between gap-2">
-        <h4 class="text-sm font-semibold text-slate-700">{{ $title }}</h4>
+        <h4 class="text-sm font-semibold text-zinc-700">{{ $title }}</h4>
         @if($ready)
             <x-small-badge mode="green">{{ __('orders::publish_readiness.labels.ready_to_publish') }}</x-small-badge>
         @else
@@ -17,8 +17,8 @@
 
     <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
         @foreach($checks as $check)
-            <div class="flex items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2">
-                <span class="text-xs text-slate-700">{{ $check['label'] ?? '-' }}</span>
+            <div class="flex items-center justify-between rounded-md border border-zinc-200 bg-white px-3 py-2">
+                <span class="text-xs text-zinc-700">{{ $check['label'] ?? '-' }}</span>
                 @if(!empty($check['ok']))
                     <x-small-badge mode="green">{{ __('orders::publish_readiness.labels.ok') }}</x-small-badge>
                 @else

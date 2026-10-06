@@ -6,18 +6,17 @@
 ])
 
 @php
-     $extraClass = match($mode)
-     {
-          'default' => 'bg-white',
-          'gray' => 'bg-neutral-100'
-     };
-     $isError = $errors->has($name)?'bg-red-50':'';
+     $wireModel = collect($attributes->getAttributes())
+          ->first(fn ($value, $key) => str_starts_with($key, 'wire:model'));
+     $hasError = $errors->has($name) || (is_string($wireModel) && $errors->has($wireModel));
+     $isError = $hasError ? 'border-rose-300 bg-rose-50' : '';
 @endphp
 
 <textarea
      id="{{ $name }}"
      rows="3"
-     {{ $disabled ? 'disabled' : '' }}
-     {!! $attributes->merge(['class' => 'p-2.5 w-full border-none mt-1 rounded-lg shadow-sm text-sm font-normal text-neutral-900 block focus:ring-blue-500 focus:border-blue-500 '.$extraClass]) !!}
+     @disabled($disabled)
+     @if ($hasError) aria-invalid="true" @endif
+     {!! $attributes->merge(['class' => \App\Support\Ui\FieldStyles::textarea(trim('mt-1 block '.$isError))]) !!}
      placeholder="{{$placeholder}}">
 </textarea>

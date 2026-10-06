@@ -7,6 +7,7 @@ use App\Modules\Attendance\Livewire\CalendarRegimes;
 use App\Modules\Attendance\Livewire\ManualEntries;
 use App\Modules\Attendance\Livewire\MonthClose;
 use App\Modules\Attendance\Livewire\OvertimeBoard;
+use App\Modules\Attendance\Livewire\PuantajGrid;
 use App\Modules\Attendance\Livewire\ShiftManagement;
 use App\Support\Livewire\LivewireComponentProfiler;
 use Carbon\Carbon;
@@ -28,6 +29,8 @@ class AttendanceRenderBenchmarkCommand extends Command
         {--calendar-render-budget= : Max render time in ms for calendar regimes render}
         {--month-close-response-budget= : Max response size for month close render}
         {--month-close-render-budget= : Max render time in ms for month close render}
+        {--puantaj-response-budget= : Max response size for the puantaj grid render (full month)}
+        {--puantaj-render-budget= : Max render time in ms for the puantaj grid render (full month)}
         {--json : Print report as JSON}';
 
     protected $description = 'Benchmark Livewire render time and payload size for Attendance admin workbench flows';
@@ -51,6 +54,7 @@ class AttendanceRenderBenchmarkCommand extends Command
             'shift_management_render' => $this->budgetPair('shift_management_render', 'shifts'),
             'calendar_regimes_render' => $this->budgetPair('calendar_regimes_render', 'calendar'),
             'month_close_render' => $this->budgetPair('month_close_render', 'month_close'),
+            'puantaj_grid_render' => $this->budgetPair('puantaj_grid_render', 'puantaj'),
         ];
 
         $results = [];
@@ -59,6 +63,7 @@ class AttendanceRenderBenchmarkCommand extends Command
         $results[] = $this->probe('shift_management_render', $budgets['shift_management_render'], fn () => $profiler->measureRender($user, ShiftManagement::class));
         $results[] = $this->probe('calendar_regimes_render', $budgets['calendar_regimes_render'], fn () => $profiler->measureRender($user, CalendarRegimes::class, ['year' => $year, 'month' => $month]));
         $results[] = $this->probe('month_close_render', $budgets['month_close_render'], fn () => $profiler->measureRender($user, MonthClose::class, ['year' => $year, 'month' => $month]));
+        $results[] = $this->probe('puantaj_grid_render', $budgets['puantaj_grid_render'], fn () => $profiler->measureRender($user, PuantajGrid::class, ['year' => $year, 'month' => $month]));
 
         $summary = [
             'failed_probes' => collect($results)->where('status', 'failed')->count(),

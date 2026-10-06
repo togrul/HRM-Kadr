@@ -3,14 +3,23 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\LeaveType;
+use App\Models\User;
 use App\Modules\Admin\Livewire\LeaveTypes;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 class LeaveTypesTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->actingAs(User::factory()->create()->givePermissionTo(Permission::findOrCreate('access-admin', 'web')));
+    }
 
     public function test_it_normalizes_attendance_code_to_compact_uppercase(): void
     {
