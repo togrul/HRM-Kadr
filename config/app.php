@@ -174,6 +174,7 @@ return [
         App\Providers\AuthServiceProvider::class,
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\ModuleServiceProvider::class,
+        App\Modules\Demo\Providers\DemoServiceProvider::class, // yalnız DEMO_MODE=true olanda işə düşür
         App\Providers\EventServiceProvider::class,
         Spatie\Permission\PermissionServiceProvider::class,
     ])->toArray(),
