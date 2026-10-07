@@ -53,6 +53,7 @@ class OrderDocumentBuilder
             'system.order_number' => $composition->orderNumber,
             'system.order_date' => $composition->orderDate,
             'system.organization_city' => $composition->organizationCity,
+            'system.organization_name' => app(OrganizationName::class)->current(),
             'system.signatory_full_name' => (string) ($signatory['fullname'] ?? ''),
             'system.signatory_title' => (string) ($signatory['title'] ?? ''),
         ];

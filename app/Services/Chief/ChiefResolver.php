@@ -5,6 +5,7 @@ namespace App\Services\Chief;
 use App\Models\ChiefDelegation;
 use App\Models\Personnel;
 use App\Models\Setting;
+use App\Support\PositionLevel;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Carbon;
 
@@ -48,6 +49,9 @@ class ChiefResolver
                     ->orWhereDate('personnels.leave_work_date', '>=', $date->toDateString());
             })
             ->orderByDesc('positions.approval_rank')
+            // Unranked installs (every approval_rank 0) fall back to the seniority band,
+            // so the head of the organisation signs rather than whoever was created first.
+            ->orderByRaw('COALESCE(positions.level, ?)', [PositionLevel::UNKNOWN])
             ->orderBy('personnels.id')
             ->first();
     }

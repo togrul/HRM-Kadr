@@ -31,6 +31,20 @@ class ChiefResolverTest extends TestCase
         $this->assertNotSame($manager->id, $snapshot['personnel_id']);
     }
 
+    public function test_with_no_approval_ranks_the_most_senior_level_signs(): void
+    {
+        $this->seedReferenceData();
+        DB::table('positions')->update(['approval_rank' => 0]);
+        DB::table('positions')->insert(['id' => 3, 'name' => 'Hüquqşünas', 'approval_rank' => 0, 'is_approval_target' => true, 'level' => 6]);
+        DB::table('positions')->where('id', 2)->update(['level' => 1]);
+
+        // Created first, so the old id tie-break made a lawyer the signatory.
+        $this->makePersonnel('T-001', 'Lawyer', 'First', positionId: 3);
+        $director = $this->makePersonnel('T-002', 'Director', 'Real', positionId: 2);
+
+        $this->assertSame($director->id, app(ChiefResolver::class)->current('2026-06-13')['personnel_id']);
+    }
+
     public function test_it_resolves_active_delegation_for_effective_date(): void
     {
         $this->seedReferenceData();

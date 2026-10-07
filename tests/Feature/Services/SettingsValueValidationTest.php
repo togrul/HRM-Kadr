@@ -18,9 +18,10 @@ beforeEach(function (): void {
 it('rejects a non-numeric value for a numeric setting and keeps the stored one', function (): void {
     $setting = Setting::query()->create(['name' => 'Work coefficient', 'value' => '1.5', 'type' => 'double']);
 
-    Livewire::test(SettingsList::class, ['section' => 'general'])
-        ->set('setting.0.value', 'abc')
-        ->assertHasErrors(['setting.0.value' => 'numeric']);
+    $component = Livewire::test(SettingsList::class, ['section' => 'general']);
+    $key = 'setting.'.settingRowIndex($component, $setting).'.value';
+
+    $component->set($key, 'abc')->assertHasErrors([$key => 'numeric']);
 
     expect($setting->fresh()->getRawOriginal('value'))->toBe('1.5');
 });
@@ -28,9 +29,15 @@ it('rejects a non-numeric value for a numeric setting and keeps the stored one',
 it('saves a valid value for its type', function (): void {
     $setting = Setting::query()->create(['name' => 'Work coefficient', 'value' => '1.5', 'type' => 'double']);
 
-    Livewire::test(SettingsList::class, ['section' => 'general'])
-        ->set('setting.0.value', '2.25')
-        ->assertHasNoErrors();
+    $component = Livewire::test(SettingsList::class, ['section' => 'general']);
+
+    $component->set('setting.'.settingRowIndex($component, $setting).'.value', '2.25')->assertHasNoErrors();
 
     expect($setting->fresh()->getRawOriginal('value'))->toBe('2.25');
 });
+
+/** Other settings may exist (migrations seed some), so find the row instead of assuming 0. */
+function settingRowIndex($component, Setting $setting): int
+{
+    return (int) collect($component->get('setting'))->search(fn (array $row): bool => (int) $row['id'] === $setting->id);
+}

@@ -302,7 +302,7 @@
     @can('add-orders')
         <x-side-modal size="xx-large">
             @if ($showSideMenu === 'order-composer')
-                <livewire:orders.order-composer :presetCode="$modelName ?: null" :key="'vacation-order-'.($modelName ?: 'any')" />
+                <livewire:orders.order-composer :presetCode="(string) $modelName" :key="'vacation-order-'.($modelName ?: 'any')" />
             @endif
         </x-side-modal>
     @endcan
