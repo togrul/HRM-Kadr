@@ -1,44 +1,16 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-9468ea3a.css",
+    "file": "assets/app-4ff8aafd.css",
     "isEntry": true,
     "src": "resources/css/app.css"
   },
-  "resources/fonts/CircularSpTitle-Bold.woff2": {
-    "file": "assets/CircularSpTitle-Bold-1d752805.woff2",
-    "src": "resources/fonts/CircularSpTitle-Bold.woff2"
+  "resources/fonts/SatoshiAZ-Variable.woff2": {
+    "file": "assets/SatoshiAZ-Variable-dd0edf4f.woff2",
+    "src": "resources/fonts/SatoshiAZ-Variable.woff2"
   },
-  "resources/fonts/CircularSpTitle-Tall.woff2": {
-    "file": "assets/CircularSpTitle-Tall-c54f9e75.woff2",
-    "src": "resources/fonts/CircularSpTitle-Tall.woff2"
-  },
-  "resources/fonts/CircularSpotify-Black.woff2": {
-    "file": "assets/CircularSpotify-Black-ec2b383c.woff2",
-    "src": "resources/fonts/CircularSpotify-Black.woff2"
-  },
-  "resources/fonts/CircularSpotify-Bold.woff2": {
-    "file": "assets/CircularSpotify-Bold-faad3530.woff2",
-    "src": "resources/fonts/CircularSpotify-Bold.woff2"
-  },
-  "resources/fonts/CircularSpotify-Regular.woff2": {
-    "file": "assets/CircularSpotify-Regular-5fe0f1f2.woff2",
-    "src": "resources/fonts/CircularSpotify-Regular.woff2"
-  },
-  "resources/fonts/IBMPlexMono-Bold.woff2": {
-    "file": "assets/IBMPlexMono-Bold-a2e9daf1.woff2",
-    "src": "resources/fonts/IBMPlexMono-Bold.woff2"
-  },
-  "resources/fonts/IBMPlexMono-Medium.woff2": {
-    "file": "assets/IBMPlexMono-Medium-9706e6b3.woff2",
-    "src": "resources/fonts/IBMPlexMono-Medium.woff2"
-  },
-  "resources/fonts/IBMPlexMono-Regular.woff2": {
-    "file": "assets/IBMPlexMono-Regular-2cbc4e2a.woff2",
-    "src": "resources/fonts/IBMPlexMono-Regular.woff2"
-  },
-  "resources/fonts/IBMPlexMono-SemiBold.woff2": {
-    "file": "assets/IBMPlexMono-SemiBold-83bc182a.woff2",
-    "src": "resources/fonts/IBMPlexMono-SemiBold.woff2"
+  "resources/fonts/SatoshiAZ-VariableItalic.woff2": {
+    "file": "assets/SatoshiAZ-VariableItalic-981781f4.woff2",
+    "src": "resources/fonts/SatoshiAZ-VariableItalic.woff2"
   },
   "resources/js/app.js": {
     "file": "assets/app-6598b64a.js",

@@ -18,7 +18,7 @@
         table { width: 100%; border-collapse: collapse; margin-top: 24px; }
         th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: #71717a; border-bottom: 1px solid #e4e4e7; padding: 6px 4px; }
         td { font-size: 13px; padding: 7px 4px; border-bottom: 1px solid #f4f4f5; }
-        td.amt { text-align: right; font-variant-numeric: tabular-nums; }
+        td.amt { text-align: right; }
         .ded { color: #dc2626; }
         .totals { margin-top: 20px; border-top: 2px solid #18181b; }
         .totals .row { display: flex; justify-content: space-between; padding: 6px 4px; font-size: 14px; }
