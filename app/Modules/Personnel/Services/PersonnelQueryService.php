@@ -3,11 +3,16 @@
 namespace App\Modules\Personnel\Services;
 
 use App\Models\Personnel;
+use App\Support\PositionLevel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 class PersonnelQueryService
 {
+    public const SORT_POSITION = 'position';
+
+    public const SORT_STRUCTURE = 'structure';
+
     /**
      * Build personnel listing query with eager loads, filters and ordering.
      *
@@ -21,7 +26,8 @@ class PersonnelQueryService
         array $selectedStructureIds,
         array $accessibleStructureIds,
         ?int $selectedPosition = null,
-        ?string $search = null
+        ?string $search = null,
+        string $sort = self::SORT_POSITION,
     ): Builder {
         $query = Personnel::query()
             ->select([
@@ -54,13 +60,23 @@ class PersonnelQueryService
             search: $search,
         );
 
-        return $query
-            // Senior posts first: approval_rank is the seniority the approval routes use;
-            // unranked posts fall back to id, which follows the order they were set up in.
-            ->orderByDesc('position_sort.approval_rank')
-            ->orderBy('position_sort.id')
-            ->orderBy('structure_sort.name')
-            ->orderBy('personnels.surname');
+        // Senior posts first by the hidden positions.level band; unclassified posts last.
+        $seniority = fn (Builder $q): Builder => $q
+            ->orderByRaw('COALESCE(position_sort.level, ?)', [PositionLevel::UNKNOWN])
+            ->orderByDesc('position_sort.approval_rank');
+
+        // ponytail: units order by tree depth then code, not a full depth-first walk;
+        // fine for flat org charts, use StructurePathResolver paths if trees get deep.
+        $unit = fn (Builder $q): Builder => $q
+            ->orderBy('structure_sort.level')
+            ->orderBy('structure_sort.code')
+            ->orderBy('structure_sort.id');
+
+        $sort === self::SORT_STRUCTURE
+            ? $seniority($unit($query))
+            : $unit($seniority($query));
+
+        return $query->orderBy('personnels.surname')->orderBy('personnels.name');
     }
 
     /**

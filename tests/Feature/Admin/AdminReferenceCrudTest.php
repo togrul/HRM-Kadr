@@ -235,3 +235,29 @@ it('keeps a reference row id fixed on edit, since other tables point at it', fun
 })->with([
     'positions' => [Livewire\Positions::class, 'positions', []],
 ]);
+
+it('gives a new position a sorting level from its name and lets HR override it', function (): void {
+    $admin = referenceCrudAdmin();
+
+    LivewireTest::actingAs($admin)->test(Livewire\Positions::class)
+        ->call('openCrud')
+        ->set('form.id', 950)
+        ->set('form.name', 'Direktor müavini')
+        ->call('store')
+        ->assertHasNoErrors();
+
+    expect(DB::table('positions')->where('id', 950)->value('level'))->toBe(2);
+
+    LivewireTest::actingAs($admin)->test(Livewire\Positions::class)
+        ->call('openCrud', 950)
+        ->assertSet('form.level', 2)
+        ->set('form.level', 3)
+        ->call('store')
+        ->assertHasNoErrors();
+
+    expect(DB::table('positions')->where('id', 950)->value('level'))->toBe(3);
+
+    // Sorting-only: the list never shows the level.
+    LivewireTest::actingAs($admin)->test(Livewire\Positions::class)
+        ->assertDontSee(__('admin::references.position_levels.3'));
+});

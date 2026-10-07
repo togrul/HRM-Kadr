@@ -11,6 +11,7 @@ use App\Models\WorkNorm;
 use App\Services\Staff\StaffScheduleVacancyService;
 use App\Support\OrderLookupCache;
 use App\Support\PersonnelDropdownCache;
+use App\Support\PositionLevel;
 use Carbon\Carbon;
 use DateTime;
 use Illuminate\Console\Command;
@@ -401,7 +402,7 @@ class ImportPersonnelFromXlsxCommand extends Command
             // positions.id is not auto-increment, but the model thinks it is: on MySQL
             // ->id after create() is lastInsertId() = 0, so keep the id we chose.
             $id = (int) Position::query()->max('id') + 1;
-            Position::query()->insert(['id' => $id, 'name' => $name]);
+            Position::query()->insert(['id' => $id, 'name' => $name, 'level' => PositionLevel::guess($name)]);
             $this->positionIds[$key] = $id;
         }
 

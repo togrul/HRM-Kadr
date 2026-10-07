@@ -33,11 +33,13 @@ class TablePanel extends Component
 
     public string $search = '';
 
+    public string $sort = PersonnelQueryService::SORT_POSITION;
+
     protected ?array $accessibleStructureCache = null;
 
     protected ?array $rowActionCapabilities = null;
 
-    public function mount(string $status = 'current', array $filters = [], array $structure = [], ?int $selectedPosition = null, string $search = ''): void
+    public function mount(string $status = 'current', array $filters = [], array $structure = [], ?int $selectedPosition = null, string $search = '', string $sort = PersonnelQueryService::SORT_POSITION): void
     {
         $this->authorize('viewAny', Personnel::class);
         $normalizer = app(PersonnelListStateNormalizer::class);
@@ -47,6 +49,7 @@ class TablePanel extends Component
         $this->structure = $normalizer->normalizeStructure($structure);
         $this->selectedPosition = $normalizer->normalizePosition($selectedPosition);
         $this->search = trim($search);
+        $this->sort = $sort === PersonnelQueryService::SORT_STRUCTURE ? $sort : PersonnelQueryService::SORT_POSITION;
     }
 
     public function placeholder(): View
@@ -95,6 +98,7 @@ class TablePanel extends Component
             accessibleStructureIds: $this->accessibleStructureIds(),
             selectedPosition: $this->selectedPosition,
             search: $this->search,
+            sort: $this->sort,
         );
     }
 

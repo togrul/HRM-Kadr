@@ -7,6 +7,7 @@ use App\Models\Position;
 use App\Models\RankCategory;
 use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait;
 use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
+use App\Support\PositionLevel;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Arr;
@@ -32,6 +33,7 @@ class Positions extends Component
             'form.rank_category_id' => 'nullable|integer|exists:rank_categories,id',
             'form.approval_rank' => 'required|integer|min:0|max:999',
             'form.is_approval_target' => 'boolean',
+            'form.level' => 'nullable|integer|in:'.implode(',', PositionLevel::LEVELS),
         ];
     }
 
@@ -43,6 +45,7 @@ class Positions extends Component
             'form.rank_category_id' => __('admin::references.fields.rank_category'),
             'form.approval_rank' => __('admin::references.fields.approval_rank'),
             'form.is_approval_target' => __('admin::references.fields.is_approval_target'),
+            'form.level' => __('admin::references.fields.position_level'),
         ];
     }
 
@@ -54,6 +57,7 @@ class Positions extends Component
             'rank_category_id' => null,
             'approval_rank' => 0,
             'is_approval_target' => true,
+            'level' => null,
         ];
     }
 
@@ -71,6 +75,7 @@ class Positions extends Component
             $this->form['rank_category_id'] = $this->model->rank_category_id;
             $this->form['approval_rank'] = $this->model->approval_rank ?? 0;
             $this->form['is_approval_target'] = (bool) ($this->model->is_approval_target ?? true);
+            $this->form['level'] = $this->model->level;
         }
         $this->isAdded = true;
     }

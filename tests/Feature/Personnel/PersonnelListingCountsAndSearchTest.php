@@ -33,27 +33,39 @@ class PersonnelListingCountsAndSearchTest extends TestCase
         $this->assertSame(1, $counts['at_work']);
     }
 
-    public function test_the_list_puts_senior_positions_first(): void
+    public function test_the_list_puts_senior_positions_first_or_groups_by_unit(): void
     {
         $this->seedRoster();
 
-        // Ranked posts by approval_rank (desc); unranked ones keep their set-up order (id).
+        // Hidden level bands, independent of id order: the Director has the highest id.
         DB::table('positions')->insert([
-            ['id' => 1, 'name' => 'Sürücü', 'approval_rank' => 0],
-            ['id' => 2, 'name' => 'Baş mühəndis', 'approval_rank' => 0],
-            ['id' => 3, 'name' => 'Direktor', 'approval_rank' => 90],
+            ['id' => 1, 'name' => 'Mühasib', 'level' => 6],
+            ['id' => 2, 'name' => 'Şöbə rəisi', 'level' => 4],
+            ['id' => 3, 'name' => 'Direktor', 'level' => 1],
         ]);
+        DB::table('structures')->insert([
+            ['id' => 6, 'name' => 'Rəhbərlik', 'shortname' => 'R', 'level' => 1, 'code' => 1],
+            ['id' => self::STRUCTURE_ID, 'name' => 'Maliyyə', 'shortname' => 'M', 'level' => 1, 'code' => 2],
+        ]);
+        // T-002, T-003 stay Mühasib in Maliyyə.
         DB::table('personnels')->where('tabel_no', 'T-001')->update(['position_id' => 2]);
-        DB::table('personnels')->where('tabel_no', 'T-004')->update(['position_id' => 3]);
+        DB::table('personnels')->where('tabel_no', 'T-004')->update(['position_id' => 3, 'structure_id' => 6]);
 
-        $order = app(PersonnelQueryService::class)->build(
+        $order = fn (string $sort): array => app(PersonnelQueryService::class)->build(
             status: 'all',
             filters: [],
             selectedStructureIds: [],
-            accessibleStructureIds: [self::STRUCTURE_ID],
+            accessibleStructureIds: [self::STRUCTURE_ID, 6],
+            sort: $sort,
         )->pluck('tabel_no')->all();
 
-        $this->assertSame(['T-004', 'T-002', 'T-003', 'T-001'], $order);
+        $this->assertSame(['T-004', 'T-001', 'T-002', 'T-003'], $order(PersonnelQueryService::SORT_POSITION));
+        $this->assertSame(['T-004', 'T-001', 'T-002', 'T-003'], $order(PersonnelQueryService::SORT_STRUCTURE));
+
+        // Grouping by unit puts a whole unit before the next, even a junior one.
+        DB::table('structures')->where('id', 6)->update(['code' => 3]);
+        $this->assertSame(['T-004', 'T-001', 'T-002', 'T-003'], $order(PersonnelQueryService::SORT_POSITION));
+        $this->assertSame(['T-001', 'T-002', 'T-003', 'T-004'], $order(PersonnelQueryService::SORT_STRUCTURE));
     }
 
     public function test_header_totals_add_up_to_the_live_roster(): void
