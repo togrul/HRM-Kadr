@@ -74,6 +74,26 @@ class Leaves extends Component
         $this->statsCache = null;
     }
 
+    /**
+     * The status select binds straight to $status; anything outside the offered set
+     * (or the deleted bucket without delete rights) falls back to "all".
+     */
+    public function updatedStatus(mixed $value): void
+    {
+        $this->authorize('viewAny', \App\Models\Leave::class);
+
+        $allowed = $this->appealStatuses()->pluck('id')->map(fn ($id): int => (int) $id)->all();
+
+        $this->status = match (true) {
+            is_numeric($value) && in_array((int) $value, $allowed, true) => (int) $value,
+            $value === 'deleted' && (auth()->user()?->can('delete', \App\Models\Leave::class) ?? false) => 'deleted',
+            default => 'all',
+        };
+
+        $this->resetPage();
+        $this->statsCache = null;
+    }
+
     public function exportExcel(): BinaryFileResponse
     {
         $this->authorize('export', \App\Models\Leave::class);

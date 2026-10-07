@@ -53,15 +53,22 @@ class VacationsAccessTest extends TestCase
         return $user;
     }
 
-    public function test_contextual_panel_renders_inside_the_component_root(): void
+    public function test_status_type_and_year_filters_are_selects_bound_to_the_component(): void
     {
         $this->actingAs($this->userWith('show-vacations'));
 
-        // The panel is teleported from INSIDE the Livewire root; rendered through a
-        // <x-slot name="sidebar"> its wire:click handlers would be inert.
+        // The selects must live in the component's own output (not the layout's sidebar
+        // slot), or their wire:model bindings are unreachable from the UI.
         Livewire::test(Vacations::class)
-            ->assertSee('setStatus')
-            ->assertSee(__('vacation::common.labels.in_vacation'));
+            ->assertSeeHtml('vacations-status-filter')
+            ->assertSeeHtml('vacations-year-filter')
+            ->assertSee(__('vacation::common.labels.in_vacation'))
+            ->set('filter.vacation_status', 'in_vacation')
+            ->assertSet('search.vacation_status', 'in_vacation')
+            ->set('selectedType', 'tpl:annual')
+            ->assertSet('selectedType', 'tpl:annual')
+            ->set('selectedType', '')
+            ->assertSet('selectedType', null);
     }
 
     public function test_summary_counts_the_scoped_vacations_and_their_days(): void

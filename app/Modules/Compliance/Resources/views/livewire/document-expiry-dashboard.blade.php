@@ -10,6 +10,20 @@
         'missing' => 'bg-[#a1a1aa]',
     ];
 
+    $statusOptions = collect(array_keys($statusFacets))
+        ->map(fn (string $option): array => [
+            'id' => $option,
+            'label' => __('compliance::documents.status.'.$option).' · '.$num($summary[$option] ?? 0),
+        ])
+        ->all();
+    $typeOptions = collect($typeCounts)
+        ->map(fn ($count, string $option): array => [
+            'id' => $option,
+            'label' => __('compliance::documents.types.'.$option).' · '.$num($count),
+        ])
+        ->values()
+        ->all();
+
     $metrics = [
         ['key' => 'total', 'tone' => 'ink'],
         ['key' => 'expired', 'tone' => 'rose'],
@@ -36,39 +50,6 @@
             :title="__('compliance::documents.kicker')"
             :subtitle="__('compliance::documents.labels.document_count', ['count' => $num($summary['total'] ?? 0)])"
         >
-            <x-context-panel.section>
-                <x-context-panel.item
-                    wire:click.prevent="$set('status', '')"
-                    :active="$status === ''"
-                    :count="$num($summary['total'] ?? 0)"
-                >{{ __('compliance::documents.filters.all_statuses') }}</x-context-panel.item>
-
-                @foreach ($statusFacets as $option => $dot)
-                    <x-context-panel.item
-                        wire:key="compliance-status-{{ $option }}"
-                        wire:click.prevent="$set('status', '{{ $option }}')"
-                        :active="$status === $option"
-                        :dot="$dot"
-                        :count="$num($summary[$option] ?? 0)"
-                    >{{ __('compliance::documents.status.'.$option) }}</x-context-panel.item>
-                @endforeach
-            </x-context-panel.section>
-
-            <x-context-panel.section :title="__('compliance::documents.fields.document_type')">
-                <x-context-panel.item wire:click.prevent="$set('type', '')" :active="$type === ''">
-                    {{ __('compliance::documents.filters.all_types') }}
-                </x-context-panel.item>
-                @foreach ($typeCounts as $option => $count)
-                    <x-context-panel.item
-                        wire:key="compliance-type-{{ $option }}"
-                        wire:click.prevent="$set('type', '{{ $option }}')"
-                        :active="$type === $option"
-                        :count="$num($count)"
-                        :note="__('compliance::documents.labels.type_window', $typeWindows[$option])"
-                    >{{ __('compliance::documents.types.'.$option) }}</x-context-panel.item>
-                @endforeach
-            </x-context-panel.section>
-
             <x-context-panel.section :title="__('compliance::documents.summary.compliance_score')" :padded="false">
                 <div class="px-3.5 pb-3.5 pt-1">
                     <p class="hrm-num text-[22px] font-semibold leading-none tracking-[-0.035em] text-ink">
@@ -104,7 +85,32 @@
             </x-pill-button>
         </x-slot:actions>
 
-        <p class="max-w-3xl text-[13px] leading-6 text-ink-muted">{{ __('compliance::documents.description') }}</p>
+        {{-- toolbar: status / document-type selects live inside the header card --}}
+        <div class="flex flex-col gap-3">
+            <p class="max-w-3xl text-[13px] leading-6 text-ink-muted">{{ __('compliance::documents.description') }}</p>
+
+            <div class="flex flex-col gap-2.5 sm:flex-row sm:items-center">
+                <x-ui.select-dropdown
+                    :aria-label="__('compliance::documents.columns.status')"
+                    wire:key="compliance-status-filter"
+                    :placeholder="__('compliance::documents.filters.all_statuses')"
+                    mode="gray"
+                    class="w-full sm:w-56 [&>div]:mt-0"
+                    wire:model.live="status"
+                    :model="$statusOptions"
+                />
+
+                <x-ui.select-dropdown
+                    :aria-label="__('compliance::documents.fields.document_type')"
+                    wire:key="compliance-type-filter"
+                    :placeholder="__('compliance::documents.filters.all_types')"
+                    mode="gray"
+                    class="w-full sm:w-56 [&>div]:mt-0"
+                    wire:model.live="type"
+                    :model="$typeOptions"
+                />
+            </div>
+        </div>
     </x-page-header>
 
     {{-- ===================== body ===================== --}}

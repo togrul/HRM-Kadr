@@ -1,14 +1,24 @@
 @php
     $num = fn ($value): string => number_format((int) $value, 0, ',', ' ');
     $counts = $this->statusCounts;
-    $statusDot = fn ($id): string => match ((int) $id) {
-        10 => 'bg-[#f59e0b]',
-        20 => 'bg-[#10b981]',
-        30 => 'bg-[#f43f5e]',
-        default => 'bg-[#a1a1aa]',
-    };
     $dayEquivalent = rtrim(rtrim(number_format($counts['day_equivalent'], 1, '.', ''), '0'), '.');
-    $selectedLeaveType = data_get($search, 'leave_type_id');
+    $statusOptions = collect([['id' => 'all', 'label' => __('leaves::common.labels.all').' · '.$num($counts['all'])]])
+        ->concat($_appeal_statuses->map(fn ($_status): array => [
+            'id' => $_status->id,
+            'label' => $_status->name.' · '.$num($counts['by_status'][(int) $_status->id] ?? 0),
+        ]))
+        ->when(auth()->user()?->can('delete', App\Models\Leave::class), fn ($options) => $options->push([
+            'id' => 'deleted',
+            'label' => __('leaves::common.labels.deleted').' · '.$num($counts['deleted']),
+        ]))
+        ->values()
+        ->all();
+    $leaveTypeOptions = collect($this->leaveTypes())
+        ->map(fn ($leaveType): array => [
+            'id' => data_get($leaveType, 'id'),
+            'label' => data_get($leaveType, 'label').' · '.$num(data_get($stats, data_get($leaveType, 'label').'.count', 0)),
+        ])
+        ->all();
 @endphp
 
 <div class="flex flex-col">
@@ -19,59 +29,7 @@
         <x-context-panel
             :title="__('leaves::common.titles.leaves')"
             :subtitle="$num($counts['all']).' '.__('leaves::common.labels.unit')"
-        >
-            <x-context-panel.section>
-                <x-context-panel.item
-                    wire:click.prevent="setStatus('all')"
-                    wire:loading.attr="disabled"
-                    wire:target="setStatus"
-                    :active="$status === 'all'"
-                    :dot="$statusDot(null)"
-                    :count="$num($counts['all'])"
-                >{{ __('leaves::common.labels.all') }}</x-context-panel.item>
-
-                @foreach ($_appeal_statuses as $_status)
-                    <x-context-panel.item
-                        wire:key="leave-panel-status-{{ $_status->id }}"
-                        wire:click.prevent="setStatus({{ $_status->id }})"
-                        wire:loading.attr="disabled"
-                        wire:target="setStatus"
-                        :active="$status === $_status->id"
-                        :dot="$statusDot($_status->id)"
-                        :count="$num($counts['by_status'][(int) $_status->id] ?? 0)"
-                    >{{ $_status->name }}</x-context-panel.item>
-                @endforeach
-
-                @can('delete', App\Models\Leave::class)
-                    <x-context-panel.item
-                        wire:click.prevent="setStatus('deleted')"
-                        wire:loading.attr="disabled"
-                        wire:target="setStatus"
-                        :active="$status === 'deleted'"
-                        :dot="$statusDot(null)"
-                        :count="$num($counts['deleted'])"
-                    >{{ __('leaves::common.labels.deleted') }}</x-context-panel.item>
-                @endcan
-            </x-context-panel.section>
-
-            <x-context-panel.section :title="__('leaves::common.labels.leave_type')">
-                @if ($selectedLeaveType)
-                    <x-context-panel.item wire:click.prevent="applyFilter({ leave_type_id: null })">
-                        &larr; {{ __('leaves::common.labels.show_all') }}
-                    </x-context-panel.item>
-                @endif
-
-                @foreach ($this->leaveTypes() as $leaveType)
-                    @php $leaveTypeLabel = data_get($leaveType, 'label'); @endphp
-                    <x-context-panel.item
-                        wire:key="leave-panel-type-{{ data_get($leaveType, 'id') }}"
-                        wire:click.prevent="applyFilter({ leave_type_id: {{ (int) data_get($leaveType, 'id') }} })"
-                        :active="(string) $selectedLeaveType === (string) data_get($leaveType, 'id')"
-                        :count="$num(data_get($stats, $leaveTypeLabel.'.count', 0))"
-                    >{{ $leaveTypeLabel }}</x-context-panel.item>
-                @endforeach
-            </x-context-panel.section>
-        </x-context-panel>
+        ></x-context-panel>
     @endteleport
 
     {{-- ===================== header ===================== --}}
@@ -133,6 +91,28 @@
                     <x-livewire-input mode="gray" type="text" name="filter.reason" wire:model.live.debounce.400ms="filter.reason" />
                 </label>
 
+                <x-ui.select-dropdown
+                    :aria-label="__('leaves::common.labels.status')"
+                    wire:key="leaves-status-filter"
+                    :placeholder="__('leaves::common.labels.all')"
+                    :clearable="false"
+                    mode="gray"
+                    class="w-full sm:w-52 [&>div]:mt-0"
+                    wire:model.live="status"
+                    :model="$statusOptions"
+                />
+
+                <x-ui.select-dropdown
+                    :aria-label="__('leaves::common.labels.leave_type')"
+                    wire:key="leaves-type-filter"
+                    :placeholder="__('leaves::common.labels.leave_type')"
+                    mode="gray"
+                    class="w-full sm:w-64 [&>div]:mt-0"
+                    searchable
+                    wire:model.live="filter.leave_type_id"
+                    :model="$leaveTypeOptions"
+                />
+
                 <x-filter.reset :active="$this->hasActiveFilters" />
             </div>
 
@@ -158,18 +138,6 @@
             </div>
 
             <p class="text-[11.5px] text-ink-faint">{{ __('leaves::common.labels.approval_note') }}</p>
-
-            {{-- small-screen fallback for the panel's status list --}}
-            <x-filter.nav wrap class="min-w-0 lg:hidden">
-                <x-filter.item wire:click.prevent="setStatus('all')" :active="$status === 'all'">
-                    {{ __('leaves::common.labels.all') }}
-                </x-filter.item>
-                @foreach ($_appeal_statuses as $_status)
-                    <x-filter.item wire:click.prevent="setStatus({{ $_status->id }})" :active="$status === $_status->id">
-                        {{ $_status->name }}
-                    </x-filter.item>
-                @endforeach
-            </x-filter.nav>
         </div>
     </x-page-header>
 

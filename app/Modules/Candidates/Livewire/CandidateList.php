@@ -91,6 +91,14 @@ class CandidateList extends Component
         $this->resetPage();
     }
 
+    /**
+     * The status select binds straight to $status; same sanitising as setStatus().
+     */
+    public function updatedStatus(mixed $value): void
+    {
+        $this->setStatus($value);
+    }
+
     public function setDeleteCandidate($candidateId): void
     {
         $this->dispatch('setDeleteCandidate', $candidateId);

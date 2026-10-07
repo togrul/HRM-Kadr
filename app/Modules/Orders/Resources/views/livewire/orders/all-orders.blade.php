@@ -1,12 +1,15 @@
 @php
     $counts = $this->statusCounts;
-    $statusDot = fn ($id): string => match ((int) $id) {
-        10 => 'bg-[#f59e0b]',
-        20 => 'bg-[#10b981]',
-        30 => 'bg-[#f43f5e]',
-        default => 'bg-[#a1a1aa]',
-    };
     $isAdmin = auth()->user()?->hasRole('Admin');
+    $countLabel = fn (string $label, int $count): string => $label.' · '.number_format($count, 0, ',', ' ');
+    $statusOptions = collect([['id' => 'all', 'label' => $countLabel(__('orders::order_list.filters.all'), $counts['all'] ?? 0)]])
+        ->concat($this->statuses->map(fn ($_status): array => ['id' => (string) $_status->id, 'label' => $countLabel($_status->name, $counts[(int) $_status->id] ?? 0)]))
+        ->when($isAdmin, fn ($options) => $options->push(['id' => 'deleted', 'label' => $countLabel(__('orders::order_list.filters.deleted'), $counts['deleted'] ?? 0)]))
+        ->values()
+        ->all();
+    $typeOptions = collect($this->typeFilters)
+        ->map(fn (array $_type): array => ['id' => $_type['key'], 'label' => $countLabel($_type['label'], $_type['count'])])
+        ->all();
     // Confirm-modal payload for component tags: the js directive inside an x-tag attribute breaks the
     // compiler, so the dispatch expression is built here with Js::from() and echoed.
     $confirm = fn (string $title, string $message, string $confirmText, string $tone, string $method, string $orderNo): string => sprintf(
@@ -24,60 +27,6 @@
             :title="__('orders::order_list.table.title')"
             :subtitle="number_format($counts['all'] ?? 0, 0, ',', ' ').' '.__('orders::order_list.table.unit')"
         >
-            <x-context-panel.section>
-                <x-context-panel.item
-                    wire:click.prevent="setStatus('all')"
-                    wire:loading.attr="disabled"
-                    wire:target="setStatus"
-                    :active="(string) $status === 'all'"
-                    :dot="$statusDot(null)"
-                    :count="number_format($counts['all'] ?? 0, 0, ',', ' ')"
-                >{{ __('orders::order_list.filters.all') }}</x-context-panel.item>
-
-                @foreach ($this->statuses as $_status)
-                    <x-context-panel.item
-                        wire:key="orders-panel-status-{{ $_status->id }}"
-                        wire:click.prevent="setStatus({{ $_status->id }})"
-                        wire:loading.attr="disabled"
-                        wire:target="setStatus"
-                        :active="(string) $status === (string) $_status->id"
-                        :dot="$statusDot($_status->id)"
-                        :count="number_format($counts[(int) $_status->id] ?? 0, 0, ',', ' ')"
-                    >{{ $_status->name }}</x-context-panel.item>
-                @endforeach
-
-                @if ($isAdmin)
-                    <x-context-panel.item
-                        wire:click.prevent="setStatus('deleted')"
-                        wire:loading.attr="disabled"
-                        wire:target="setStatus"
-                        :active="(string) $status === 'deleted'"
-                        :dot="$statusDot(null)"
-                        :count="number_format($counts['deleted'] ?? 0, 0, ',', ' ')"
-                    >{{ __('orders::order_list.filters.deleted') }}</x-context-panel.item>
-                @endif
-            </x-context-panel.section>
-
-            {{-- order types, counted inside the current scope --}}
-            <x-context-panel.section :title="__('orders::order_list.filters.order_type')">
-                @if ($selectedOrder)
-                    <x-context-panel.item wire:click.prevent="selectOrder('')">
-                        &larr; {{ __('orders::order_list.filters.show_all') }}
-                    </x-context-panel.item>
-                @endif
-
-                @foreach ($this->typeFilters as $_type)
-                    <x-context-panel.item
-                        wire:key="orders-panel-type-{{ $_type['key'] }}"
-                        wire:click.prevent="selectOrder('{{ $_type['key'] }}')"
-                        wire:loading.attr="disabled"
-                        wire:target="selectOrder"
-                        :active="(string) $selectedOrder === $_type['key']"
-                        :count="number_format($_type['count'], 0, ',', ' ')"
-                    >{{ $_type['label'] }}</x-context-panel.item>
-                @endforeach
-            </x-context-panel.section>
-
         </x-context-panel>
     @endteleport
 
@@ -143,6 +92,28 @@
                         />
                     </span>
                 </label>
+
+                <x-ui.select-dropdown
+                    :aria-label="__('orders::order_list.table.status')"
+                    wire:key="orders-status-filter"
+                    :placeholder="__('orders::order_list.filters.all')"
+                    :clearable="false"
+                    mode="gray"
+                    class="w-full sm:w-52 [&>div]:mt-0"
+                    wire:model.live="status"
+                    :model="$statusOptions"
+                />
+
+                <x-ui.select-dropdown
+                    :aria-label="__('orders::order_list.filters.order_type')"
+                    wire:key="orders-type-filter"
+                    :placeholder="__('orders::order_list.filters.show_all')"
+                    mode="gray"
+                    class="w-full sm:w-72 [&>div]:mt-0"
+                    searchable
+                    wire:model.live="selectedOrder"
+                    :model="$typeOptions"
+                />
 
                 <div class="shrink-0">
                     <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('orders::order_list.filters.given_date') }}</span>

@@ -94,6 +94,7 @@ return [
         'education_degree' => 'Təhsil dərəcəsi',
         'structure' => 'Struktur',
         'position' => 'Vəzifə',
+        'all_positions' => 'Bütün vəzifələr',
         'work_norms' => 'Əməyin ödənilməsi',
         'contract_type' => 'Müqavilənin bağlanma növü',
         'contract_date' => 'Müqavilənin bağlanma tarixi',

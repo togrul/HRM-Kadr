@@ -1,13 +1,16 @@
 @php
     $summary = $this->summary;
     $canBindOrder = $this->canBindOrder;
-    $activeStatus = data_get($filter, 'vacation_status', 'all');
-    $statusFilters = [
-        'all' => ['label' => __('vacation::common.labels.all'), 'dot' => 'bg-[#a1a1aa]', 'count' => $summary['all']],
-        'in_vacation' => ['label' => __('vacation::common.labels.in_vacation'), 'dot' => 'bg-[#0ea5e9]', 'count' => $summary['in_vacation']],
-        'at_work' => ['label' => __('vacation::common.labels.at_work'), 'dot' => 'bg-[#10b981]', 'count' => $summary['at_work']],
-    ];
     $num = fn ($value): string => number_format((int) $value, 0, ',', ' ');
+    $statusOptions = [
+        ['id' => 'all', 'label' => __('vacation::common.labels.all').' · '.$num($summary['all'])],
+        ['id' => 'in_vacation', 'label' => __('vacation::common.labels.in_vacation').' · '.$num($summary['in_vacation'])],
+        ['id' => 'at_work', 'label' => __('vacation::common.labels.at_work').' · '.$num($summary['at_work'])],
+    ];
+    $typeOptions = collect($this->typeFilters)
+        ->map(fn (array $type): array => ['id' => $type['key'], 'label' => $type['label'].' · '.$num($type['count'])])
+        ->all();
+    $yearOptions = collect($years)->map(fn ($year): array => ['id' => $year, 'label' => (string) $year])->values()->all();
 @endphp
 
 <div class="flex flex-col">
@@ -18,56 +21,7 @@
         <x-context-panel
             :title="__('vacation::common.titles.vacations')"
             :subtitle="$num($summary['all']).' '.__('vacation::common.labels.unit')"
-        >
-            <x-context-panel.section>
-                @foreach ($statusFilters as $value => $option)
-                    <x-context-panel.item
-                        wire:key="vacation-panel-status-{{ $value }}"
-                        wire:click.prevent="setStatus('{{ $value }}')"
-                        wire:loading.attr="disabled"
-                        wire:target="setStatus"
-                        :active="$activeStatus === $value"
-                        :dot="$option['dot']"
-                        :count="$num($option['count'])"
-                    >{{ $option['label'] }}</x-context-panel.item>
-                @endforeach
-            </x-context-panel.section>
-
-            {{-- a vacation inherits its type from the order it was issued under --}}
-            @if ($this->typeFilters !== [])
-                <x-context-panel.section :title="__('vacation::common.labels.vacation_type')">
-                    @if ($selectedType)
-                        <x-context-panel.item wire:click.prevent="selectType('')">
-                            &larr; {{ __('vacation::common.labels.show_all') }}
-                        </x-context-panel.item>
-                    @endif
-
-                    @foreach ($this->typeFilters as $_type)
-                        <x-context-panel.item
-                            wire:key="vacation-panel-type-{{ $_type['key'] }}"
-                            wire:click.prevent="selectType('{{ $_type['key'] }}')"
-                            wire:loading.attr="disabled"
-                            wire:target="selectType"
-                            :active="(string) $selectedType === $_type['key']"
-                            :count="$num($_type['count'])"
-                        >{{ $_type['label'] }}</x-context-panel.item>
-                    @endforeach
-                </x-context-panel.section>
-            @endif
-
-            <x-context-panel.section :title="__('vacation::common.labels.year')">
-                <div class="px-1 pb-1">
-                    <x-ui.select
-                        wire:model.live="selectedYear"
-                        :disabled="! empty($filter['date']['min'] ?? null) || ! empty($filter['date']['max'] ?? null)"
-                    >
-                        @foreach ($years as $year)
-                            <option value="{{ $year }}">{{ $year }}</option>
-                        @endforeach
-                    </x-ui.select>
-                </div>
-            </x-context-panel.section>
-        </x-context-panel>
+        ></x-context-panel>
     @endteleport
 
     {{-- ===================== header ===================== --}}
@@ -167,6 +121,43 @@
                         search-model="searchStructure"
                     />
                 </div>
+
+                <x-ui.select-dropdown
+                    :aria-label="__('vacation::common.labels.status')"
+                    wire:key="vacations-status-filter"
+                    :placeholder="__('vacation::common.labels.all')"
+                    :clearable="false"
+                    mode="gray"
+                    class="w-full sm:w-52 [&>div]:mt-0"
+                    wire:model.live="filter.vacation_status"
+                    :model="$statusOptions"
+                />
+
+                @if ($typeOptions !== [])
+                    {{-- a vacation inherits its type from the order it was issued under --}}
+                    <x-ui.select-dropdown
+                        :aria-label="__('vacation::common.labels.vacation_type')"
+                        wire:key="vacations-type-filter"
+                        :placeholder="__('vacation::common.labels.vacation_type')"
+                        mode="gray"
+                        class="w-full sm:w-64 [&>div]:mt-0"
+                        :searchable="count($typeOptions) > 8"
+                        wire:model.live="selectedType"
+                        :model="$typeOptions"
+                    />
+                @endif
+
+                <x-ui.select-dropdown
+                    :aria-label="__('vacation::common.labels.year')"
+                    wire:key="vacations-year-filter"
+                    :placeholder="__('vacation::common.labels.year')"
+                    :clearable="false"
+                    :disabled="! empty($filter['date']['min'] ?? null) || ! empty($filter['date']['max'] ?? null)"
+                    mode="gray"
+                    class="w-full sm:w-32 [&>div]:mt-0"
+                    wire:model.live="selectedYear"
+                    :model="$yearOptions"
+                />
 
                 <x-filter.reset :active="$this->hasActiveFilters" />
             </div>

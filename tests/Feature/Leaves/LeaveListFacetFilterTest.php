@@ -64,6 +64,26 @@ class LeaveListFacetFilterTest extends TestCase
         $this->assertSame(1, $counts['by_status'][10]);
     }
 
+    public function test_status_and_leave_type_filters_are_selects_bound_to_the_component(): void
+    {
+        $this->seedReferenceData();
+        $this->actingAs($this->permittedUser());
+
+        Livewire::test(Leaves::class)
+            ->assertSeeHtml('leaves-status-filter')
+            ->assertSeeHtml('leaves-type-filter')
+            ->set('status', '10')
+            ->assertSet('status', 10)
+            ->set('status', 'deleted') // needs delete rights
+            ->assertSet('status', 'all')
+            ->set('status', 'bogus')
+            ->assertSet('status', 'all')
+            ->set('filter.leave_type_id', 3)
+            ->assertSet('search.leave_type_id', 3)
+            ->set('filter.leave_type_id', null)
+            ->assertSet('search.leave_type_id', null);
+    }
+
     private function permittedUser(): User
     {
         $user = User::factory()->create();

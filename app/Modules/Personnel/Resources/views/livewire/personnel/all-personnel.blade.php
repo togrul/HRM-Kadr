@@ -1,6 +1,14 @@
 @php
     $counts = $this->statusCounts;
-    $statusFilters = $this->getStatusFilters();
+    $statusOptions = collect($this->getStatusFilters())
+        ->reject(fn (array $filter): bool => isset($filter['permission']) && ! auth()->user()?->can($filter['permission']))
+        ->map(fn (array $filter): array => [
+            'id' => $filter['key'],
+            'label' => $filter['label'].' · '.number_format($counts[$filter['key']] ?? 0, 0, ',', ' '),
+        ])
+        ->values()
+        ->all();
+    $positionOptions = $this->positions->map(fn ($position): array => ['id' => $position->id, 'label' => $position->name])->all();
 @endphp
 
 <div class="flex flex-col">
@@ -12,20 +20,6 @@
             :title="__('personnel::common.titles.personnels')"
             :subtitle="__('personnel::common.labels.employee_count', ['count' => number_format($counts['all'], 0, ',', ' ')])"
         >
-            <x-context-panel.section :padded="true">
-                @foreach ($statusFilters as $filter)
-                    @continue (array_key_exists('permission', $filter) && ! auth()->user()?->can($filter['permission']))
-
-                    <x-context-panel.item
-                        wire:click.prevent="setStatus('{{ $filter['key'] }}')"
-                        wire:loading.attr="disabled"
-                        wire:target="setStatus"
-                        :active="$status === $filter['key']"
-                        :count="number_format($counts[$filter['key']] ?? 0, 0, ',', ' ')"
-                    >{{ $filter['label'] }}</x-context-panel.item>
-                @endforeach
-            </x-context-panel.section>
-
             <livewire:structure.sidebar :selected="$this->structure[0] ?? null" wire:key="personnel-structure-sidebar" />
         </x-context-panel>
     @endteleport
@@ -52,7 +46,7 @@
             @include('partials.personnel.action-buttons')
         </x-slot:actions>
 
-        {{-- toolbar: search + position chips live inside the header card --}}
+        {{-- toolbar: search + status / position selects live inside the header card --}}
         <div class="flex flex-col gap-3">
             <div class="flex flex-col gap-2.5 sm:flex-row sm:items-center">
                 <label class="relative w-full sm:max-w-[360px]">
@@ -66,9 +60,27 @@
                     />
                 </label>
 
-                <div class="min-w-0 flex-1">
-                    @include('partials.personnel.position-filters')
-                </div>
+                <x-ui.select-dropdown
+                    :aria-label="__('personnel::common.labels.status')"
+                    wire:key="personnel-status-filter"
+                    :placeholder="__('personnel::common.labels.active')"
+                    :clearable="false"
+                    mode="gray"
+                    class="w-full sm:w-52 [&>div]:mt-0"
+                    wire:model.live="status"
+                    :model="$statusOptions"
+                />
+
+                <x-ui.select-dropdown
+                    :aria-label="__('personnel::common.labels.position')"
+                    wire:key="personnel-position-filter"
+                    :placeholder="__('personnel::common.labels.all_positions')"
+                    mode="gray"
+                    class="w-full sm:w-72 [&>div]:mt-0"
+                    searchable
+                    wire:model.live="selectedPosition"
+                    :model="$positionOptions"
+                />
             </div>
         </div>
     </x-page-header>

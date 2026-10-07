@@ -74,7 +74,7 @@ class PersonnelListingCountsAndSearchTest extends TestCase
         $this->assertSame([], $this->searchTabelNos('%'));
     }
 
-    public function test_status_nav_is_rendered_inside_the_component_so_its_clicks_bind(): void
+    public function test_status_and_position_filters_are_selects_bound_to_the_component(): void
     {
         $this->seedRoster();
 
@@ -83,11 +83,18 @@ class PersonnelListingCountsAndSearchTest extends TestCase
         $user->givePermissionTo('show-personnels');
         $this->actingAs($user);
 
-        // Same guard as the profile: the panel must live in the component's own output,
-        // not in the layout's sidebar slot, or setStatus() is unreachable from the UI.
+        // The selects must live in the component's own output (not the layout's sidebar
+        // slot), or their wire:model bindings are unreachable from the UI.
         Livewire::test(AllPersonnel::class)
-            ->assertSee('setStatus', escape: false)
-            ->assertSee(__('personnel::common.labels.active'));
+            ->assertSeeHtml('personnel-status-filter')
+            ->assertSeeHtml('personnel-position-filter')
+            ->assertSee(__('personnel::common.labels.active'))
+            ->set('status', 'leaves')
+            ->assertSet('status', 'leaves')
+            ->set('status', 'deleted') // needs access-admin
+            ->assertSet('status', 'current')
+            ->set('status', 'bogus')
+            ->assertSet('status', 'current');
     }
 
     /**

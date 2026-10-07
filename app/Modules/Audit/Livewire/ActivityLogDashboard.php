@@ -18,7 +18,8 @@ class ActivityLogDashboard extends Component
 
     public string $logName = '';
 
-    public string $event = '';
+    /** Nullable only so the select's cleared state (null) can land; normalised to ''. */
+    public ?string $event = '';
 
     public string $dateFrom = '';
 
@@ -52,6 +53,11 @@ class ActivityLogDashboard extends Component
             $this->resetPage();
             $this->selectedActivityId = null;
         }
+    }
+
+    public function updatedEvent(): void
+    {
+        $this->event ??= '';
     }
 
     public function resetFilters(): void

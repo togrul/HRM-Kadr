@@ -18,9 +18,10 @@ class Dashboard extends Component
 
     public string $search = '';
 
-    public string $type = '';
+    /** Nullable only so the type/status selects can send null for "all"; updated() folds it back to ''. */
+    public ?string $type = '';
 
-    public string $status = '';
+    public ?string $status = '';
 
     public array $templateForm = [
         'name' => '',
@@ -122,6 +123,7 @@ class Dashboard extends Component
     public function updated(string $property): void
     {
         if (in_array($property, ['search', 'type', 'status'], true)) {
+            $this->{$property} = (string) $this->{$property};
             $this->resetPage();
         }
     }

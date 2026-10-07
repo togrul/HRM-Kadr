@@ -213,6 +213,28 @@ class AllPersonnel extends Component
         $this->resetPage();
     }
 
+    /**
+     * The status select binds straight to $status; anything outside the allowed set
+     * (or a status the user may not see) falls back to the default list.
+     */
+    public function updatedStatus(mixed $value): void
+    {
+        $allowed = collect($this->getStatusFilters())
+            ->reject(fn (array $filter): bool => isset($filter['permission']) && ! auth()->user()?->can($filter['permission']))
+            ->pluck('key');
+
+        if (! $allowed->contains($value)) {
+            $this->status = 'current';
+        }
+
+        $this->resetPage();
+    }
+
+    public function updatedSelectedPosition(): void
+    {
+        $this->resetPage();
+    }
+
     public function setPosition($new): void
     {
         if (! is_numeric($new)) {

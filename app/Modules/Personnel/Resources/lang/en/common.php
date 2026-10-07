@@ -94,6 +94,7 @@ return [
         'education_degree' => 'Education degree',
         'structure' => 'Structure',
         'position' => 'Position',
+        'all_positions' => 'All positions',
         'work_norms' => 'Remuneration',
         'contract_type' => 'Contract term type',
         'contract_date' => 'Contract signing date',

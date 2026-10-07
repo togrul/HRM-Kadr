@@ -1,6 +1,9 @@
 @php
     $num = fn ($value): string => number_format((int) $value, 0, ',', ' ');
-    $eventTotal = (int) $eventCounts->sum();
+    $eventOptions = $eventCounts
+        ->map(fn ($count, $option): array => ['id' => $option, 'label' => $this->eventLabel($option).' · '.$num($count)])
+        ->values()
+        ->all();
 @endphp
 
 <div class="flex flex-col">
@@ -11,44 +14,7 @@
         <x-context-panel
             :title="__('audit::activity.header.title')"
             :subtitle="__('audit::activity.header.kicker')"
-        >
-            <x-context-panel.section :title="__('audit::activity.filters.event')">
-                <x-context-panel.item
-                    wire:click.prevent="$set('event', '')"
-                    :active="$event === ''"
-                    :count="$num($eventTotal)"
-                >{{ __('audit::activity.filters.all') }}</x-context-panel.item>
-
-                @foreach ($eventCounts as $option => $count)
-                    <x-context-panel.item
-                        wire:key="audit-panel-event-{{ $option }}"
-                        wire:click.prevent="$set('event', '{{ $option }}')"
-                        :active="$event === $option"
-                        :dot="$this->eventDot($option)"
-                        :count="$num($count)"
-                    >{{ $this->eventLabel($option) }}</x-context-panel.item>
-                @endforeach
-            </x-context-panel.section>
-
-            {{-- The period narrows every number on the screen, so it belongs beside the
-                 facet rather than in a toolbar the table scrolls away from. --}}
-            <x-context-panel.section :title="__('audit::activity.filters.period')" :padded="false">
-                <div class="space-y-2.5 px-3.5 pb-3.5 pt-1">
-                    <label class="block">
-                        <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('audit::activity.filters.from') }}</span>
-                        <x-ui.input type="date" wire:model.live="dateFrom" />
-                    </label>
-                    <label class="block">
-                        <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('audit::activity.filters.to') }}</span>
-                        <x-ui.input type="date" wire:model.live="dateTo" />
-                    </label>
-                </div>
-
-                <x-slot name="footer">
-                    <p class="text-[11px] leading-snug text-ink-faint">{{ __('audit::activity.labels.read_only_note') }}</p>
-                </x-slot>
-            </x-context-panel.section>
-        </x-context-panel>
+        />
     @endteleport
 
     {{-- ===================== header ===================== --}}
@@ -82,6 +48,32 @@
                 {{ __('audit::activity.actions.export_csv') }}
             </x-pill-button>
         </x-slot:actions>
+
+        {{-- toolbar: event select + period live inside the header card; the period narrows
+             every number on the screen, so it sits above the cards rather than in the table --}}
+        <div class="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center">
+            <x-ui.select-dropdown
+                :aria-label="__('audit::activity.filters.event')"
+                wire:key="audit-event-filter"
+                :placeholder="__('audit::activity.filters.all_events')"
+                mode="gray"
+                class="w-full sm:w-64 [&>div]:mt-0"
+                searchable
+                wire:model.live="event"
+                :model="$eventOptions"
+            />
+
+            <div class="flex items-center gap-2" role="group" aria-label="{{ __('audit::activity.filters.period') }}">
+                <label class="flex min-w-0 flex-1 items-center gap-1.5 sm:flex-none">
+                    <span class="shrink-0 text-[12px] font-medium text-ink-muted">{{ __('audit::activity.filters.from') }}</span>
+                    <x-ui.input type="date" wire:model.live="dateFrom" class="sm:w-[150px]" />
+                </label>
+                <label class="flex min-w-0 flex-1 items-center gap-1.5 sm:flex-none">
+                    <span class="shrink-0 text-[12px] font-medium text-ink-muted">{{ __('audit::activity.filters.to') }}</span>
+                    <x-ui.input type="date" wire:model.live="dateTo" class="sm:w-[150px]" />
+                </label>
+            </div>
+        </div>
     </x-page-header>
 
     {{-- ===================== body ===================== --}}
