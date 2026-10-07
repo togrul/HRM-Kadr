@@ -395,11 +395,17 @@ class ImportPersonnelFromXlsxCommand extends Command
 
     private function positionId(string $name): int
     {
-        // positions.id is not auto-increment.
-        return $this->positionIds[$this->key($name)] ??= (int) Position::query()->create([
-            'id' => (int) Position::query()->max('id') + 1,
-            'name' => $name,
-        ])->id;
+        $key = $this->key($name);
+
+        if (! isset($this->positionIds[$key])) {
+            // positions.id is not auto-increment, but the model thinks it is: on MySQL
+            // ->id after create() is lastInsertId() = 0, so keep the id we chose.
+            $id = (int) Position::query()->max('id') + 1;
+            Position::query()->insert(['id' => $id, 'name' => $name]);
+            $this->positionIds[$key] = $id;
+        }
+
+        return $this->positionIds[$key];
     }
 
     /**
