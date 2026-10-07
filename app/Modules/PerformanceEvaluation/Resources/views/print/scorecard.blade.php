@@ -32,7 +32,7 @@
         table { width: 100%; border-collapse: collapse; }
         th, td { border-bottom: 1px solid #e4e4e7; padding: 5px 6px; text-align: left; vertical-align: top; }
         th { font-size: 10.5px; color: #71717a; font-weight: 600; background: #fafafa; }
-        td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        td.num, th.num { text-align: right; white-space: nowrap; }
         .signatures { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 40px; }
         .signature { border-top: 1px solid #18181b; padding-top: 6px; }
         .signature .name { font-weight: 600; }

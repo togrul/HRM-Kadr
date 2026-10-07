@@ -21,10 +21,13 @@ export default {
     darkMode: 'class',
     theme: {
         extend: {
+            letterSpacing: {
+                tight: '-0.01em',
+            },
             fontFamily: {
-                sans: ['CircularSpotify', ...defaultTheme.fontFamily.sans],
-                title: ['CircularSpTitle', ...defaultTheme.fontFamily.sans],
-                mono: ['IBMPlexMono', 'IBM Plex Mono', ...defaultTheme.fontFamily.mono],
+                sans: ['SatoshiAZ', ...defaultTheme.fontFamily.sans],
+                title: ['SatoshiAZ', ...defaultTheme.fontFamily.sans],
+                mono: ['SatoshiAZ', ...defaultTheme.fontFamily.mono],
             },
             colors: {
                 ink: {

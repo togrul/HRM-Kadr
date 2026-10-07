@@ -1,124 +1,21 @@
 /*
+ * SatoshiAZ is the only face: one variable file (weights 300–900, Azerbaijani glyphs) per
+ * style.
  * font-display: swap — text renders in the fallback at once instead of staying invisible
- * while the face downloads. IBM Plex Mono ships only the weights the UI uses (numbers are
- * 400–600, bold parents inherit 700), as woff2; the unused DM Sans faces are gone.
+ * while the face downloads.
  */
 @font-face {
-    font-family: 'CircularSpotify';
+    font-family: 'SatoshiAZ';
     font-style: normal;
-    font-weight: 100;
+    font-weight: 300 900;
     font-display: swap;
-    src: local('CircularSpotify-Regular'), url('../fonts/CircularSpotify-Regular.woff2') format('woff2');
+    src: url('../fonts/SatoshiAZ-Variable.woff2') format('woff2');
 }
 
 @font-face {
-    font-family: 'CircularSpotify';
-    font-style: normal;
-    font-weight: 200;
+    font-family: 'SatoshiAZ';
+    font-style: italic;
+    font-weight: 300 900;
     font-display: swap;
-    src: local('CircularSpotify-Regular'), url('../fonts/CircularSpotify-Regular.woff2') format('woff2');
-}
-
-@font-face {
-    font-family: 'CircularSpotify';
-    font-style: normal;
-    font-weight: 300;
-    font-display: swap;
-    src: local('CircularSpotify-Regular'), url('../fonts/CircularSpotify-Regular.woff2') format('woff2');
-}
-
-@font-face {
-    font-family: 'CircularSpotify';
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: local('CircularSpotify-Regular'), url('../fonts/CircularSpotify-Regular.woff2') format('woff2');
-}
-
-@font-face {
-    font-family: 'CircularSpotify';
-    font-style: normal;
-    font-weight: 500;
-    font-display: swap;
-    src: local('CircularSpotify-Regular'), url('../fonts/CircularSpotify-Regular.woff2') format('woff2');
-}
-
-@font-face {
-    font-family: 'CircularSpotify';
-    font-style: normal;
-    font-weight: 600;
-    font-display: swap;
-    src: local('CircularSpotify-Bold'), url('../fonts/CircularSpotify-Bold.woff2') format('woff2');
-}
-
-@font-face {
-    font-family: 'CircularSpotify';
-    font-style: normal;
-    font-weight: 700;
-    font-display: swap;
-    src: local('CircularSpotify-Bold'), url('../fonts/CircularSpotify-Bold.woff2') format('woff2');
-}
-
-@font-face {
-    font-family: 'CircularSpotify';
-    font-style: normal;
-    font-weight: 800;
-    font-display: swap;
-    src: local('CircularSpotify-Bold'), url('../fonts/CircularSpotify-Bold.woff2') format('woff2');
-}
-
-@font-face {
-    font-family: 'CircularSpotify';
-    font-style: normal;
-    font-weight: 900;
-    font-display: swap;
-    src: local('CircularSpotify-Black'), url('../fonts/CircularSpotify-Black.woff2') format('woff2');
-}
-
-@font-face {
-    font-family: 'CircularSpTitle';
-    font-style: normal;
-    font-weight: 500;
-    font-display: swap;
-    src: local('CircularSpTitle-Tall'), url('../fonts/CircularSpTitle-Tall.woff2') format('woff2');
-}
-
-@font-face {
-    font-family: 'CircularSpTitle';
-    font-style: normal;
-    font-weight: 600;
-    font-display: swap;
-    src: local('CircularSpTitle-Bold'), url('../fonts/CircularSpTitle-Bold.woff2') format('woff2');
-}
-
-@font-face {
-    font-family: 'IBMPlexMono';
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: local('IBMPlexMono-Regular'), url('../fonts/IBMPlexMono-Regular.woff2') format('woff2');
-}
-
-@font-face {
-    font-family: 'IBMPlexMono';
-    font-style: normal;
-    font-weight: 500;
-    font-display: swap;
-    src: local('IBMPlexMono-Medium'), url('../fonts/IBMPlexMono-Medium.woff2') format('woff2');
-}
-
-@font-face {
-    font-family: 'IBMPlexMono';
-    font-style: normal;
-    font-weight: 600;
-    font-display: swap;
-    src: local('IBMPlexMono-SemiBold'), url('../fonts/IBMPlexMono-SemiBold.woff2') format('woff2');
-}
-
-@font-face {
-    font-family: 'IBMPlexMono';
-    font-style: normal;
-    font-weight: 700;
-    font-display: swap;
-    src: local('IBMPlexMono-Bold'), url('../fonts/IBMPlexMono-Bold.woff2') format('woff2');
+    src: url('../fonts/SatoshiAZ-VariableItalic.woff2') format('woff2');
 }

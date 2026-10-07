@@ -583,7 +583,7 @@
                     <div class="mt-6">
                         <div class="mb-2 flex items-center justify-between">
                             <p class="text-[13px] font-semibold text-zinc-900">{{ __($t.'.fields.items') }}</p>
-                            <span class="text-[12px] tabular-nums {{ abs(collect($templateItems)->sum(fn ($item) => (float) ($item['weight'] ?: 0)) - 100) > 0.001 ? 'text-rose-600' : 'text-emerald-600' }}">
+                            <span class="text-[12px] {{ abs(collect($templateItems)->sum(fn ($item) => (float) ($item['weight'] ?: 0)) - 100) > 0.001 ? 'text-rose-600' : 'text-emerald-600' }}">
                                 {{ __($t.'.template_weight', ['sum' => collect($templateItems)->sum(fn ($item) => (float) ($item['weight'] ?: 0))]) }}
                             </span>
                         </div>

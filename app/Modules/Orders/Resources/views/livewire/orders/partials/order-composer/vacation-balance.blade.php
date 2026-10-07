@@ -9,11 +9,11 @@
         <div class="flex items-center gap-2 text-sm font-semibold text-zinc-900">
             <svg class="h-4 w-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
             {{ __('orders::order_composer.vacation.balance') }}
-            <span class="rounded-md bg-zinc-100 px-1.5 py-0.5 text-[11px] font-medium text-zinc-500 tabular-nums">{{ $vb['year'] }}</span>
+            <span class="rounded-md bg-zinc-100 px-1.5 py-0.5 text-[11px] font-medium text-zinc-500">{{ $vb['year'] }}</span>
         </div>
         @if ($vb['requested'] > 0)
             <span @class([
-                'inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-[12px] font-semibold tabular-nums ring-1 ring-inset',
+                'inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-[12px] font-semibold ring-1 ring-inset',
                 'bg-rose-50 text-rose-700 ring-rose-100' => $over,
                 'bg-emerald-50 text-emerald-700 ring-emerald-100' => ! $over,
             ])>{{ __('orders::order_composer.labels.fields') }}: {{ $vb['requested'] }} {{ __('orders::order_composer.vacation.days_suffix') }}</span>
@@ -23,11 +23,11 @@
     <div class="mt-4 grid grid-cols-3 gap-3">
         <div class="rounded-xl bg-zinc-50 px-3 py-2.5 ring-1 ring-inset ring-zinc-200/70">
             <p class="text-[11px] font-medium text-zinc-400">{{ __('orders::order_composer.vacation.total') }}</p>
-            <p class="mt-0.5 text-xl font-semibold tracking-tight text-zinc-900 tabular-nums">{{ $vb['total'] }}</p>
+            <p class="mt-0.5 text-xl font-semibold tracking-tight text-zinc-900">{{ $vb['total'] }}</p>
         </div>
         <div class="rounded-xl bg-zinc-50 px-3 py-2.5 ring-1 ring-inset ring-zinc-200/70">
             <p class="text-[11px] font-medium text-zinc-400">{{ __('orders::order_composer.vacation.used') }}</p>
-            <p class="mt-0.5 text-xl font-semibold tracking-tight text-zinc-700 tabular-nums">{{ $vb['used'] }}</p>
+            <p class="mt-0.5 text-xl font-semibold tracking-tight text-zinc-700">{{ $vb['used'] }}</p>
         </div>
         <div @class([
             'rounded-xl px-3 py-2.5 ring-1 ring-inset',
@@ -36,7 +36,7 @@
         ])>
             <p class="text-[11px] font-medium text-zinc-400">{{ __('orders::order_composer.vacation.remaining') }}</p>
             <p @class([
-                'mt-0.5 text-xl font-semibold tracking-tight tabular-nums',
+                'mt-0.5 text-xl font-semibold tracking-tight',
                 'text-rose-700' => $vb['remaining'] <= 0 || $over,
                 'text-emerald-700' => $vb['remaining'] > 0 && ! $over,
             ])>{{ $vb['remaining'] }}</p>

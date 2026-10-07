@@ -18,7 +18,7 @@
     @livewireStyles
     @stack('css')
 </head>
-<body class="min-h-screen font-sans text-ink antialiased bg-[#fafafa] dark:bg-neutral-900/80" x-data>
+<body class="min-h-screen font-sans text-ink bg-[#fafafa] dark:bg-neutral-900/80" x-data>
     <div class="min-h-full">
         @includeWhen(!\request()->is('admin/*'), 'includes.layout.default')
         @includeWhen(\request()->is('admin/*'), 'includes.layout.admin')

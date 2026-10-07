@@ -103,7 +103,7 @@
                 <div class="relative grid h-40 w-40 place-items-center rounded-full"
                      style="background: conic-gradient(#10b981 {{ $overallPct * 3.6 }}deg, #eef0f2 {{ $overallPct * 3.6 }}deg);">
                     <div class="grid h-[7.6rem] w-[7.6rem] place-items-center rounded-full bg-white shadow-card">
-                        <span class="text-3xl font-semibold tracking-tight text-zinc-900 tabular-nums">{{ $overallPct }}<span class="text-lg text-zinc-400">%</span></span>
+                        <span class="text-3xl font-semibold tracking-tight text-zinc-900">{{ $overallPct }}<span class="text-lg text-zinc-400">%</span></span>
                         <span class="mt-0.5 text-[11px] font-medium text-zinc-400">{{ $enabledAll }} / {{ $totalAll }}</span>
                     </div>
                 </div>
@@ -120,12 +120,12 @@
                     <span class="inline-flex h-10 w-10 items-center justify-center rounded-2xl ring-1 ring-inset {{ $accentMap[$kpi['accent']] }}">
                         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">{!! $kpi['icon'] !!}</svg>
                     </span>
-                    <span class="text-[11px] font-semibold text-zinc-400 tabular-nums">{{ $pct }}%</span>
+                    <span class="text-[11px] font-semibold text-zinc-400">{{ $pct }}%</span>
                 </div>
                 <p class="mt-4 text-[13px] font-medium text-zinc-500">{{ $kpi['label'] }}</p>
                 <p class="mt-1 flex items-baseline gap-1.5">
-                    <span class="text-[28px] font-semibold leading-none tracking-tight text-zinc-900 tabular-nums">{{ $kpi['value'] }}</span>
-                    <span class="text-sm font-medium text-zinc-400 tabular-nums">/ {{ $kpi['total'] }}</span>
+                    <span class="text-[28px] font-semibold leading-none tracking-tight text-zinc-900">{{ $kpi['value'] }}</span>
+                    <span class="text-sm font-medium text-zinc-400">/ {{ $kpi['total'] }}</span>
                 </p>
                 <div class="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-zinc-100">
                     <div class="h-full rounded-full {{ $barMap[$kpi['accent']] }} transition-all duration-500" style="width: {{ $pct }}%"></div>
@@ -204,11 +204,11 @@
                         <div class="mt-3 flex items-center gap-2 text-[12px]">
                             <span class="inline-flex items-center gap-1.5 rounded-lg bg-zinc-50 px-2.5 py-1 font-medium text-zinc-600 ring-1 ring-inset ring-zinc-200/70">
                                 <span class="text-zinc-400">{{ __('admin::references.diagnostics.visible_menus') }}</span>
-                                <span class="font-semibold text-zinc-900 tabular-nums">{{ $pack['menu_count'] }}</span>
+                                <span class="font-semibold text-zinc-900">{{ $pack['menu_count'] }}</span>
                             </span>
                             <span class="inline-flex items-center gap-1.5 rounded-lg bg-zinc-50 px-2.5 py-1 font-medium text-zinc-600 ring-1 ring-inset ring-zinc-200/70">
                                 <span class="text-zinc-400">{{ __('admin::references.diagnostics.enabled_permissions') }}</span>
-                                <span class="font-semibold text-zinc-900 tabular-nums">{{ $pack['permission_count'] }}</span>
+                                <span class="font-semibold text-zinc-900">{{ $pack['permission_count'] }}</span>
                             </span>
                         </div>
                     </div>
@@ -302,7 +302,7 @@
             </div>
             <div class="flex shrink-0 items-center gap-2.5">
                 @if ($approvalOverrides->isNotEmpty())
-                    <span class="inline-flex items-center rounded-full bg-zinc-100 px-3 py-1.5 text-[12px] font-semibold text-zinc-600 tabular-nums">{{ $approvalOverrides->count() }}</span>
+                    <span class="inline-flex items-center rounded-full bg-zinc-100 px-3 py-1.5 text-[12px] font-semibold text-zinc-600">{{ $approvalOverrides->count() }}</span>
                 @endif
                 <a href="{{ route('admin.self-service-approval-routes') }}" wire:navigate
                    class="inline-flex items-center gap-1.5 rounded-xl bg-zinc-900 px-3.5 py-2 text-[12.5px] font-semibold text-white shadow-sm transition hover:bg-zinc-800">

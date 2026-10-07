@@ -63,7 +63,7 @@
                     <span class="h-1.5 w-1.5 rounded-full {{ $tile['dot'] }}"></span>
                     <p class="text-[11px] font-semibold uppercase tracking-wide text-zinc-400">{{ $tile['label'] }}</p>
                 </div>
-                <p class="mt-2 text-[2rem] font-semibold leading-none tracking-tight tabular-nums text-zinc-900">{{ $tile['value'] }}</p>
+                <p class="mt-2 text-[2rem] font-semibold leading-none tracking-tight text-zinc-900">{{ $tile['value'] }}</p>
             </div>
         @endforeach
     </div>

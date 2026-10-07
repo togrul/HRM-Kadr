@@ -86,7 +86,7 @@
                         <span class="h-1.5 w-1.5 rounded-full {{ $tile['dot'] }}"></span>
                         <p class="text-[11px] font-semibold uppercase tracking-wide text-zinc-400">{{ $tile['label'] }}</p>
                     </div>
-                    <p class="mt-2 text-[2rem] font-semibold leading-none tracking-tight tabular-nums text-zinc-900">{{ $tile['value'] }}</p>
+                    <p class="mt-2 text-[2rem] font-semibold leading-none tracking-tight text-zinc-900">{{ $tile['value'] }}</p>
                 </div>
             @endforeach
 
@@ -96,7 +96,7 @@
                     <span class="h-1.5 w-1.5 rounded-full bg-{{ $avgTone }}-500"></span>
                     <p class="text-[11px] font-semibold uppercase tracking-wide text-zinc-400">{{ __('performance_evaluation::goals.summary.avg_progress') }}</p>
                 </div>
-                <p class="mt-2 text-[2rem] font-semibold leading-none tracking-tight tabular-nums text-{{ $avgTone }}-600">{{ $avg }}%</p>
+                <p class="mt-2 text-[2rem] font-semibold leading-none tracking-tight text-{{ $avgTone }}-600">{{ $avg }}%</p>
                 <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-zinc-100">
                     <div class="h-full rounded-full bg-{{ $avgTone }}-500" style="width: {{ max(2, $avg) }}%"></div>
                 </div>
