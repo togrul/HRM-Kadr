@@ -43,6 +43,7 @@ class ImportPersonnelFromXlsxCommand extends Command
         {file : Path to the .xlsx employee list}
         {--target= : This install database name or APP_URL host (guards against the wrong app)}
         {--parent= : Structure id under which missing departments are created (default: top level)}
+        {--structure=* : Map an Excel department to an existing structure id, e.g. --structure="İnsan resursları=4"}
         {--work-norm=ştat : work_norms.name_az given to every imported employee}
         {--apply : Write to the database (without it the command only validates and reports)}
         {--force : Skip the confirmation prompt (non-interactive runs)}';
@@ -74,6 +75,12 @@ class ImportPersonnelFromXlsxCommand extends Command
 
     private int $placeholderPins = 0;
 
+    /** @var array<string, int> normalised structure name => id */
+    private array $structureIds = [];
+
+    /** @var array<string, int> normalised position name => id */
+    private array $positionIds = [];
+
     private int $placeholderAddresses = 0;
 
     public function handle(StaffScheduleVacancyService $staff): int
@@ -99,7 +106,7 @@ class ImportPersonnelFromXlsxCommand extends Command
         $workNorm = WorkNorm::query()->where('name_az', $this->option('work-norm'))->first();
 
         if (! $workNorm) {
-            $this->error('Work norm not found: '.$this->option('work-norm'));
+            $this->error('Work norm not found: '.$this->option('work-norm').'. Available (--work-norm="..."): '.WorkNorm::query()->pluck('name_az')->implode(', '));
 
             return self::FAILURE;
         }
@@ -121,12 +128,49 @@ class ImportPersonnelFromXlsxCommand extends Command
         }
 
         [$records, $errors] = $this->validateRows($rows);
-        $existing = Personnel::withTrashed()->whereIn('tabel_no', array_column($records, 'tabel_no'))->pluck('tabel_no')->all();
+        $existingPeople = Personnel::withTrashed()->whereIn('tabel_no', array_column($records, 'tabel_no'))
+            ->get(['tabel_no', 'surname', 'name'])->keyBy('tabel_no');
+
+        // A taken tabel_no is only "already imported" when it is the same person; otherwise it is a clash.
+        foreach ($records as $line => $record) {
+            $person = $existingPeople[$record['tabel_no']] ?? null;
+
+            if ($person && mb_strtolower($person->surname.' '.$person->name) !== mb_strtolower($record['surname'].' '.$record['name'])) {
+                $errors[$line] = "Tabel # {$record['tabel_no']} already belongs to {$person->surname} {$person->name}";
+            }
+        }
+
+        $existing = $existingPeople->keys()->map(fn ($t): string => (string) $t)->all();
         $toImport = array_values(array_filter($records, fn (array $r): bool => ! in_array($r['tabel_no'], $existing, true)));
-        $newStructures = $this->missing(array_column($toImport, 'structure'), Structure::query()->pluck('name'));
-        $newPositions = $this->missing(array_column($toImport, 'position'), Position::query()->pluck('name'));
+        // Matched in PHP, not SQL: MySQL LOWER() and mb_strtolower() disagree on "İ".
+        foreach (Structure::query()->get(['id', 'name']) as $structure) {
+            $this->structureIds[$this->key($structure->name, true)] ??= (int) $structure->id;
+        }
+
+        foreach (Position::query()->get(['id', 'name']) as $position) {
+            $this->positionIds[$this->key($position->name)] ??= (int) $position->id;
+        }
+
+        foreach ((array) $this->option('structure') as $mapping) {
+            [$name, $id] = array_pad(explode('=', (string) $mapping, 2), 2, '');
+
+            if (! Structure::query()->whereKey((int) $id)->exists()) {
+                $this->error("--structure=\"{$mapping}\": structure id \"{$id}\" not found.");
+
+                return self::FAILURE;
+            }
+
+            $this->structureIds[$this->key($name, true)] = (int) $id;
+        }
+
+        $newStructures = $this->missing(array_column($toImport, 'structure'), $this->structureIds, true);
+        $newPositions = $this->missing(array_column($toImport, 'position'), $this->positionIds);
 
         $this->report($rows, $errors, $existing, $toImport, $newStructures, $newPositions);
+        $this->table(['Excel struktur', 'DB structure'], collect(array_unique(array_column($records, 'structure')))
+            ->map(fn (string $n): array => [$n, isset($this->structureIds[$this->key($n, true)])
+                ? '['.$this->structureIds[$this->key($n, true)].'] '.Structure::query()->whereKey($this->structureIds[$this->key($n, true)])->value('name')
+                : '+ new'])->values()->all());
 
         if ($errors !== []) {
             $this->error('Fix the errors above and re-run. Nothing written.');
@@ -253,7 +297,7 @@ class ImportPersonnelFromXlsxCommand extends Command
             }
             $record['gender'] = self::GENDERS[mb_strtolower((string) $row['gender'])] ?? null;
             $record['nationality_id'] = $countries[mb_strtolower((string) $row['citizenship'])] ?? null;
-            $record['education_degree_id'] = $degrees[$this->degreeKey((string) $row['education'])] ?? null;
+            $record['education_degree_id'] = $degrees[mb_strtolower((string) $row['education'])] ?? $degrees[$this->degreeKey((string) $row['education'])] ?? null;
             $record['birthdate'] = $this->date($row['birthdate']);
             $record['join_work_date'] = $this->date($row['join_work_date']);
 
@@ -319,26 +363,27 @@ class ImportPersonnelFromXlsxCommand extends Command
         return null;
     }
 
+    /** Case/space-insensitive name key; for departments a trailing "şöbəsi" is ignored. */
+    private function key(string $name, bool $department = false): string
+    {
+        $key = trim(preg_replace('/\s+/u', ' ', mb_strtolower($name)));
+
+        return $department ? trim(preg_replace('/\s*şöbəsi$/u', '', $key)) : $key;
+    }
+
     /**
      * @param  array<int, string>  $wanted
+     * @param  array<string, int>  $known
      * @return array<int, string>
      */
-    private function missing(array $wanted, \Illuminate\Support\Collection $existing): array
+    private function missing(array $wanted, array $known, bool $department = false): array
     {
-        $known = $existing->map(fn ($n): string => mb_strtolower(trim((string) $n)))->flip();
-
-        return array_values(array_unique(array_filter($wanted, fn (string $n): bool => ! isset($known[mb_strtolower($n)]))));
+        return array_values(array_unique(array_filter($wanted, fn (string $n): bool => ! isset($known[$this->key($n, $department)]))));
     }
 
     private function structureId(string $name, ?Structure $parent): int
     {
-        $existing = Structure::query()->whereRaw('LOWER(TRIM(name)) = ?', [mb_strtolower($name)])->value('id');
-
-        if ($existing) {
-            return (int) $existing;
-        }
-
-        return (int) Structure::query()->create([
+        return $this->structureIds[$this->key($name, true)] ??= (int) Structure::query()->create([
             'parent_id' => $parent?->id,
             'name' => $name,
             'shortname' => Str::limit($name, 64, ''),
@@ -350,14 +395,8 @@ class ImportPersonnelFromXlsxCommand extends Command
 
     private function positionId(string $name): int
     {
-        $existing = Position::query()->whereRaw('LOWER(TRIM(name)) = ?', [mb_strtolower($name)])->value('id');
-
-        if ($existing) {
-            return (int) $existing;
-        }
-
         // positions.id is not auto-increment.
-        return (int) Position::query()->create([
+        return $this->positionIds[$this->key($name)] ??= (int) Position::query()->create([
             'id' => (int) Position::query()->max('id') + 1,
             'name' => $name,
         ])->id;

@@ -6,6 +6,7 @@ use App\Models\Country;
 use App\Models\CountryTranslation;
 use App\Models\EducationDegree;
 use App\Models\Personnel;
+use App\Models\Position;
 use App\Models\StaffSchedule;
 use App\Models\Structure;
 use App\Models\User;
@@ -77,6 +78,39 @@ class ImportPersonnelFromXlsxCommandTest extends TestCase
 
         $this->assertDatabaseHas('personnels', ['tabel_no' => '7', 'pin' => 'Z000007', 'residental_address' => 'Məlum deyil', 'registered_address' => null]);
         $this->assertDatabaseHas('personnels', ['tabel_no' => '8', 'pin' => 'Z000008']);
+    }
+
+    public function test_a_tabel_number_held_by_someone_else_blocks_the_import(): void
+    {
+        $file = $this->xlsx([
+            ['Samid', 'Nəcəfli', 'Maarif oğlu', 'Azərbaycan', 'Kişi', 33671, 'Direktor', 'Rəhbərlik', '+994502122724', '5ABC12D', 'Bakı, Nəsimi', 'Bakı', 'Ali təhsil - bakalavriat', 45043, 'Vaxtamuzd', 1],
+        ]);
+        $this->artisan('personnel:import-xlsx', ['file' => $file, '--target' => 'acme.example.az', '--apply' => true, '--force' => true])->assertSuccessful();
+        Personnel::query()->where('tabel_no', '1')->update(['surname' => 'Başqası']);
+
+        $this->artisan('personnel:import-xlsx', ['file' => $file, '--target' => 'acme.example.az'])
+            ->expectsOutputToContain('already belongs to Başqası Samid')
+            ->assertFailed();
+    }
+
+    public function test_it_reuses_existing_departments_named_with_sobesi_and_explicit_mappings(): void
+    {
+        $finance = Structure::query()->create(['parent_id' => 1, 'name' => 'Maliyyə şöbəsi', 'shortname' => 'M', 'code' => 1, 'level' => 1]);
+        $hr = Structure::query()->create(['parent_id' => 1, 'name' => ' Kadrlarla iş şöbəsi', 'shortname' => 'K', 'code' => 2, 'level' => 1]);
+        Position::query()->create(['id' => 5, 'name' => 'İnformasiya texnologiyaları üzrə aparıcı mütəxəssis']);
+
+        $file = $this->xlsx([
+            ['A', 'B', 'C', 'Azərbaycan', 'Kişi', 33671, 'Mühasib', 'Maliyyə', '+994500000000', '', 'X', 'Y', 'Ali təhsil - bakalavriat', 45043, 'Vaxtamuzd', 11],
+            ['D', 'E', 'F', 'Azərbaycan', 'Qadın', 33671, 'İnformasiya texnologiyaları üzrə aparıcı mütəxəssis', 'İnsan resursları', '+994500000001', '', 'X', 'Y', 'Ali təhsil - bakalavriat', 45043, 'Vaxtamuzd', 12],
+        ]);
+
+        $this->artisan('personnel:import-xlsx', ['file' => $file, '--target' => 'acme.example.az', '--parent' => 1, '--structure' => ['İnsan resursları='.$hr->id], '--apply' => true, '--force' => true])
+            ->assertSuccessful();
+
+        $this->assertSame(3, Structure::query()->count());
+        $this->assertSame(1, Position::query()->where('name', 'like', 'İnformasiya%')->count());
+        $this->assertDatabaseHas('personnels', ['tabel_no' => '11', 'structure_id' => $finance->id]);
+        $this->assertDatabaseHas('personnels', ['tabel_no' => '12', 'structure_id' => $hr->id, 'position_id' => 5]);
     }
 
     /**
