@@ -67,6 +67,7 @@ class OrderDraftService implements OrderDrafter
             'system.order_number' => $orderNumber,
             'system.order_date' => $orderDate,
             'system.organization_city' => self::ORGANIZATION_CITY,
+            'system.organization_name' => app(OrganizationName::class)->current(),
             'system.signatory_full_name' => (string) ($signatory['fullname'] ?? ''),
             'system.signatory_title' => (string) ($signatory['title'] ?? ''),
         ]);

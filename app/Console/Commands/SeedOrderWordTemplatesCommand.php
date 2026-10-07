@@ -28,18 +28,15 @@ class SeedOrderWordTemplatesCommand extends Command
 
     protected $description = 'Build and register the customer order templates in the Word engine';
 
-    private const ORGANIZATION = '“DİNÇER VƏ CARÇIOĞLU” BİRGƏ MÜƏSSİSƏSİ';
-
-    private const SIGNATORY = [
-        'Baş direktorun İnsan resursları,',
-        'təşkilati idarəetmə və',
-        'kommunikasiyalar üzrə müavini',
-    ];
-
-    private const SIGNATORY_NAME = 'Sübhan İsmayılov';
+    /**
+     * The header is a placeholder, not a company name: every install is a different
+     * company, resolved per order from Admin → Settings (see OrganizationName).
+     */
+    private const ORGANIZATION = '[Təşkilatın adı]';
 
     /** Automatic variable labels shared across templates: label => employee/system key. */
     private const AUTO = [
+        'Təşkilatın adı' => 'system.organization_name',
         'Əmrin nömrəsi' => 'system.order_number',
         'Tarix' => 'system.order_date',
         'İş yeri' => 'employee.structure_genitive',
@@ -68,11 +65,7 @@ class SeedOrderWordTemplatesCommand extends Command
             }
 
             // 1) Build a clean bracketed .docx from the spec.
-            $spec = $template['spec'] + [
-                'organization' => self::ORGANIZATION,
-                'signatory' => self::SIGNATORY,
-                'signatory_name' => self::SIGNATORY_NAME,
-            ];
+            $spec = $template['spec'] + ['organization' => self::ORGANIZATION];
             $bracketed = $builder->build($spec);
 
             // 2) Detect placeholders (document order) and map each to its source.

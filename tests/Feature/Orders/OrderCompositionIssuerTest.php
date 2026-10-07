@@ -12,6 +12,7 @@ use App\Modules\Orders\Application\Document\OrderComposition;
 use App\Modules\Orders\Infrastructure\Document\OrderCompositionIssuer;
 use App\Modules\Orders\Infrastructure\Document\OrderDocumentBuilder;
 use App\Modules\Orders\Infrastructure\Document\OrderSubjectResolver;
+use App\Modules\Orders\Infrastructure\Document\OrganizationName;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -130,6 +131,7 @@ class OrderCompositionIssuerTest extends TestCase
             'system.order_number' => '5-M',
             'system.order_date' => '1 iyun 2026',
             'system.organization_city' => 'Bakı şəhəri',
+            'system.organization_name' => app(OrganizationName::class)->current(),
             'system.signatory_full_name' => 'Sührabov Sübhan',
             'system.signatory_title' => 'rəis',
         ], $context);
