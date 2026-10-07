@@ -95,6 +95,12 @@ class BusinessTrips extends Component
         $this->resetPage();
     }
 
+    /** The location select binds straight to $selectedLocation; same normalisation as selectLocation(). */
+    public function updatedSelectedLocation(mixed $value): void
+    {
+        $this->selectLocation((string) $value);
+    }
+
     protected function fillFilter(): void
     {
         $this->filter = [

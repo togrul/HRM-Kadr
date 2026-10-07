@@ -21,18 +21,28 @@ class DocumentExpiryDashboardTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_panel_filters_render_inside_the_livewire_root(): void
+    public function test_status_and_type_filters_are_selects_bound_to_the_component(): void
     {
         $user = User::factory()->create();
         $user->givePermissionTo(Permission::findOrCreate('show-document-compliance', 'web'));
 
-        // A context panel put in the raw sidebar slot is rendered by the layout, outside the
-        // Livewire root, and every wire:click in it dies silently — so assert the teleport.
+        // The selects must live in the component's own output (not the layout's sidebar
+        // slot), or their wire:model bindings are unreachable from the UI. Clearing a
+        // select sends null, which must fall back to the "all" state ('').
         Livewire::actingAs($user)
             ->test(DocumentExpiryDashboard::class)
-            ->assertSee("\$set('status', 'expired')", false)
-            ->assertSee("\$set('type', 'passport')", false)
-            ->assertSee(__('compliance::documents.summary.compliance_score'));
+            ->assertSeeHtml('compliance-status-filter')
+            ->assertSeeHtml('compliance-type-filter')
+            ->assertSee(__('compliance::documents.filters.all_statuses'))
+            ->assertSee(__('compliance::documents.summary.compliance_score'))
+            ->set('status', 'expired')
+            ->assertSet('status', 'expired')
+            ->set('status', null)
+            ->assertSet('status', '')
+            ->set('type', 'passport')
+            ->assertSet('type', 'passport')
+            ->set('type', null)
+            ->assertSet('type', '');
     }
 
     public function test_document_table_is_paginated_and_filters_reset_the_page(): void

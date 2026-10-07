@@ -23,6 +23,7 @@ return [
         'per_page' => 'Sətir',
         'period' => 'Dövr',
         'all' => 'Hamısı',
+        'all_events' => 'Bütün hadisələr',
     ],
     'list' => [
         'kicker' => 'Hadisələr',

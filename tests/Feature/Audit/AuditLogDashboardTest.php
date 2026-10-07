@@ -105,8 +105,9 @@ class AuditLogDashboardTest extends TestCase
 
         $component = Livewire::actingAs($user)->test(ActivityLogDashboard::class);
 
-        // The panel is teleported into the Livewire root, so its rows keep their wire:click.
-        $component->assertSee("\$set('event', 'login')", false);
+        // The event select lives in the component's own output, so its wire:model binds.
+        $component->assertSeeHtml('audit-event-filter')
+            ->assertSeeHtml('data-option-id="login"');
 
         // Selecting an event must not zero out the other rows, or the facet cannot be
         // clicked back out of.
@@ -116,6 +117,9 @@ class AuditLogDashboardTest extends TestCase
 
         $component->set('event', 'login');
         $this->assertSame(['login' => 2, 'updated' => 3], $counts($component));
+
+        // Clearing the select sends null, which falls back to "all events".
+        $component->set('event', null)->assertSet('event', '');
     }
 
     public function test_metric_cards_toggle_their_filter(): void

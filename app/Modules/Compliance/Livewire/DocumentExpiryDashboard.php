@@ -16,9 +16,10 @@ class DocumentExpiryDashboard extends Component
 
     public string $search = '';
 
-    public string $status = '';
+    /** Nullable only so the select's cleared state (null) can land; normalised to ''. */
+    public ?string $status = '';
 
-    public string $type = '';
+    public ?string $type = '';
 
     public function mount(): void
     {
@@ -38,6 +39,16 @@ class DocumentExpiryDashboard extends Component
         if (in_array($property, ['search', 'status', 'type'], true)) {
             $this->resetPage();
         }
+    }
+
+    public function updatedStatus(): void
+    {
+        $this->status ??= '';
+    }
+
+    public function updatedType(): void
+    {
+        $this->type ??= '';
     }
 
     public function exportCsv(DocumentExpiryReadService $service): StreamedResponse

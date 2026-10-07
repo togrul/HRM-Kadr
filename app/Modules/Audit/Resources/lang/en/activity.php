@@ -23,6 +23,7 @@ return [
         'per_page' => 'Rows',
         'period' => 'Period',
         'all' => 'All',
+        'all_events' => 'All events',
     ],
     'list' => [
         'kicker' => 'Events',

@@ -6,40 +6,29 @@
 <div class="flex flex-col">
     {{-- ===================== contextual panel ===================== --}}
     @php
-        $reviewTypes = [
+        $typeOptions = collect([
             'all' => __('personnel::my_hr.requests.filters.all'),
             'leave' => __('personnel::my_hr.requests.types.leave'),
             'vacation' => __('personnel::my_hr.requests.types.vacation'),
             'business_trip' => __('personnel::my_hr.requests.types.business_trip'),
             'correction' => __('personnel::my_hr.review.types.correction'),
+        ])
+            ->map(fn (string $label, string $value): array => [
+                'id' => $value,
+                'label' => $label.' · '.($value === 'all' ? $summary['total'] : ($summary[$value] ?? 0)),
+            ])
+            ->values()
+            ->all();
+        $scopeOptions = [
+            ['id' => 'mine', 'label' => __('personnel::my_hr.review.scope.mine')],
+            ['id' => 'all', 'label' => __('personnel::my_hr.review.scope.all')],
         ];
     @endphp
 
     <x-slot name="sidebar"><div id="hrm-context-panel"></div></x-slot>
 
     @teleport('#hrm-context-panel')
-        <x-context-panel>
-            <x-context-panel.section :title="__('personnel::my_hr.requests.fields.type')">
-                @foreach ($reviewTypes as $value => $label)
-                    <x-context-panel.item
-                        wire:click.prevent="$set('typeFilter', '{{ $value }}')"
-                        :active="$typeFilter === $value"
-                        :count="$value === 'all' ? $summary['total'] : ($summary[$value] ?? 0)"
-                    >{{ $label }}</x-context-panel.item>
-                @endforeach
-            </x-context-panel.section>
-
-            @if (auth()->user()?->can('review-all-self-service-requests'))
-                <x-context-panel.section :title="__('personnel::my_hr.review.labels.scope')">
-                    <x-context-panel.item wire:click.prevent="$set('scopeFilter', 'mine')" :active="$scopeFilter === 'mine'">
-                        {{ __('personnel::my_hr.review.scope.mine') }}
-                    </x-context-panel.item>
-                    <x-context-panel.item wire:click.prevent="$set('scopeFilter', 'all')" :active="$scopeFilter === 'all'">
-                        {{ __('personnel::my_hr.review.scope.all') }}
-                    </x-context-panel.item>
-                </x-context-panel.section>
-            @endif
-        </x-context-panel>
+        <x-context-panel :title="__('personnel::my_hr.review.title')" :subtitle="__('personnel::my_hr.review.kicker')" />
     @endteleport
 
     <x-page-header :title="__('personnel::my_hr.review.title')" :breadcrumb="__('personnel::my_hr.review.kicker')">
@@ -55,33 +44,48 @@
             <x-page-header.stat :value="$summary['correction']" :label="__('personnel::my_hr.review.types.correction')" />
         </x-slot:stats>
 
-        <p class="max-w-3xl text-[12.5px] leading-relaxed text-ink-muted">{{ __('personnel::my_hr.review.description') }}</p>
+        {{-- toolbar: search + type / scope selects live inside the header card --}}
+        <div class="flex flex-col gap-3">
+            <p class="max-w-3xl text-[12.5px] leading-relaxed text-ink-muted">{{ __('personnel::my_hr.review.description') }}</p>
+
+            <div class="flex flex-col gap-2.5 sm:flex-row sm:items-center">
+                <div class="w-full sm:max-w-[360px]">
+                    <x-ui.input
+                        icon="search"
+                        wire:model.live.debounce.300ms="search"
+                        :aria-label="__('personnel::my_hr.requests.fields.search')"
+                        placeholder="{{ __('personnel::my_hr.review.messages.search_placeholder') }}"
+                    />
+                </div>
+
+                <x-ui.select-dropdown
+                    :aria-label="__('personnel::my_hr.requests.fields.type')"
+                    wire:key="self-service-reviews-type-filter"
+                    :placeholder="__('personnel::my_hr.requests.filters.all')"
+                    :clearable="false"
+                    mode="gray"
+                    class="w-full sm:w-56 [&>div]:mt-0"
+                    wire:model.live="typeFilter"
+                    :model="$typeOptions"
+                />
+
+                @if (auth()->user()?->can('review-all-self-service-requests'))
+                    <x-ui.select-dropdown
+                        :aria-label="__('personnel::my_hr.review.labels.scope')"
+                        wire:key="self-service-reviews-scope-filter"
+                        :placeholder="__('personnel::my_hr.review.scope.mine')"
+                        :clearable="false"
+                        mode="gray"
+                        class="w-full sm:w-52 [&>div]:mt-0"
+                        wire:model.live="scopeFilter"
+                        :model="$scopeOptions"
+                    />
+                @endif
+            </div>
+        </div>
     </x-page-header>
 
     <div class="space-y-6 px-4 py-4 sm:px-5">
-    <x-ui.filter-panel>
-            <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.search')" labelClass="tracking-tight text-zinc-500">
-                <x-ui.filter-input wire:model.live.debounce.300ms="search" type="text" placeholder="{{ __('personnel::my_hr.review.messages.search_placeholder') }}" />
-            </x-ui.input-shell>
-            <x-ui.input-shell :label="__('personnel::my_hr.requests.fields.type')" labelClass="tracking-tight text-zinc-500">
-                <x-ui.filter-native-select wire:model.live="typeFilter">
-                    <option value="all">{{ __('personnel::my_hr.requests.filters.all') }}</option>
-                    <option value="leave">{{ __('personnel::my_hr.requests.types.leave') }}</option>
-                    <option value="vacation">{{ __('personnel::my_hr.requests.types.vacation') }}</option>
-                    <option value="business_trip">{{ __('personnel::my_hr.requests.types.business_trip') }}</option>
-                    <option value="correction">{{ __('personnel::my_hr.review.types.correction') }}</option>
-                </x-ui.filter-native-select>
-            </x-ui.input-shell>
-            @if (auth()->user()?->can('review-all-self-service-requests'))
-                <x-ui.input-shell :label="__('personnel::my_hr.review.labels.scope')" labelClass="tracking-tight text-zinc-500">
-                    <x-ui.filter-native-select wire:model.live="scopeFilter">
-                        <option value="mine">{{ __('personnel::my_hr.review.scope.mine') }}</option>
-                        <option value="all">{{ __('personnel::my_hr.review.scope.all') }}</option>
-                    </x-ui.filter-native-select>
-                </x-ui.input-shell>
-            @endif
-    </x-ui.filter-panel>
-
     <div class="space-y-4">
         @forelse ($payload['rows'] as $row)
             <div class="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">

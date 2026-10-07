@@ -7,6 +7,8 @@
   'selectedLabel' => null,
   'loadOnOpen' => null,
   'searchModel' => null,
+  'clearable' => true, // false hides the "---" option for selects that always hold a value
+  'searchable' => false, // client-side search box only: filters the rendered options, no round trip
   'searchPlaceholder' => null,
   'direction' => 'auto',
   'instance' => null,
@@ -117,6 +119,19 @@
               />
             </div>
           </li>
+        @elseif ($searchable)
+          <li class="sticky top-0 z-20 bg-white px-0.5 pb-1.5 pt-0.5">
+            <div class="px-1">
+              <input
+                type="search"
+                x-model.debounce.100ms="localSearch"
+                placeholder="{{ $searchPlaceholder ?? __('ui::common.placeholders.search') }}"
+                class="{{ \App\Support\Ui\FieldStyles::input('mt-1') }}"
+                x-on:click.stop
+                x-on:keydown.stop="setOpen(true)"
+              />
+            </div>
+          </li>
         @elseif (isset($slot) && ! $slot->isEmpty())
           <li class="sticky top-0 z-20 bg-white px-0.5 pb-1.5 pt-0.5">
             <div class="px-1">
@@ -126,6 +141,7 @@
         @endif
 
         {{-- null/placeholder option --}}
+        @if ($clearable)
         <li class="group hrm-select-option"
             x-show="matchesSearch(placeholder)"
             x-on:click.prevent.stop="select(null, placeholder)">
@@ -139,6 +155,7 @@
             </span>
           </div>
         </li>
+        @endif
 
         @foreach($model as $idx => $opt)
           <li

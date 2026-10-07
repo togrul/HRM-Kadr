@@ -1,13 +1,15 @@
 @php
     $summary = $this->summary;
-    $activeStatus = data_get($filter, 'business_trip_status', 'all');
-    $statusFilters = [
-        'all' => ['label' => __('business_trips::common.filters.all'), 'dot' => 'bg-[#a1a1aa]', 'count' => $summary['all']],
-        'in_business_trip' => ['label' => __('business_trips::common.filters.in_business_trip'), 'dot' => 'bg-[#0ea5e9]', 'count' => $summary['in_business_trip']],
-        'at_work' => ['label' => __('business_trips::common.filters.at_work'), 'dot' => 'bg-[#10b981]', 'count' => $summary['at_work']],
-        'deleted' => ['label' => __('business_trips::common.filters.deleted'), 'dot' => 'bg-[#f43f5e]', 'count' => $summary['deleted']],
-    ];
     $num = fn ($value): string => number_format((int) $value, 0, ',', ' ');
+    $statusOptions = [
+        ['id' => 'all', 'label' => __('business_trips::common.filters.all').' · '.$num($summary['all'])],
+        ['id' => 'in_business_trip', 'label' => __('business_trips::common.filters.in_business_trip').' · '.$num($summary['in_business_trip'])],
+        ['id' => 'at_work', 'label' => __('business_trips::common.filters.at_work').' · '.$num($summary['at_work'])],
+        ['id' => 'deleted', 'label' => __('business_trips::common.filters.deleted').' · '.$num($summary['deleted'])],
+    ];
+    $locationOptions = collect($this->locationFilters)
+        ->map(fn (array $location): array => ['id' => $location['key'], 'label' => $location['key'].' · '.$num($location['count'])])
+        ->all();
     $isDeletedView = \Illuminate\Support\Arr::get($search, 'business_trip_status', '') === 'deleted';
 @endphp
 
@@ -19,43 +21,7 @@
         <x-context-panel
             :title="__('business_trips::common.table.title')"
             :subtitle="$num($summary['all']).' '.__('business_trips::common.table.unit')"
-        >
-            <x-context-panel.section>
-                @foreach ($statusFilters as $value => $option)
-                    <x-context-panel.item
-                        wire:key="trip-panel-status-{{ $value }}"
-                        wire:click.prevent="setStatus('{{ $value }}')"
-                        wire:loading.attr="disabled"
-                        wire:target="setStatus"
-                        :active="$activeStatus === $value"
-                        :dot="$option['dot']"
-                        :count="$num($option['count'])"
-                    >{{ $option['label'] }}</x-context-panel.item>
-                @endforeach
-            </x-context-panel.section>
-
-            {{-- destinations, straight from the trips' own location column --}}
-            @if ($this->locationFilters !== [])
-                <x-context-panel.section :title="__('business_trips::common.filters.locations')">
-                    @if ($selectedLocation)
-                        <x-context-panel.item wire:click.prevent="selectLocation('')">
-                            &larr; {{ __('business_trips::common.filters.show_all') }}
-                        </x-context-panel.item>
-                    @endif
-
-                    @foreach ($this->locationFilters as $_location)
-                        <x-context-panel.item
-                            wire:key="trip-panel-location-{{ md5($_location['key']) }}"
-                            wire:click.prevent="selectLocation('{{ addslashes($_location['key']) }}')"
-                            wire:loading.attr="disabled"
-                            wire:target="selectLocation"
-                            :active="(string) $selectedLocation === $_location['key']"
-                            :count="$num($_location['count'])"
-                        >{{ $_location['key'] }}</x-context-panel.item>
-                    @endforeach
-                </x-context-panel.section>
-            @endif
-        </x-context-panel>
+        ></x-context-panel>
     @endteleport
 
     {{-- ===================== header ===================== --}}
@@ -132,6 +98,31 @@
                     :model="$this->orderTypeOptions"
                 />
             </div>
+
+            <x-ui.select-dropdown
+                :aria-label="__('business_trips::common.filters.status')"
+                wire:key="business-trips-status-filter"
+                :placeholder="__('business_trips::common.filters.all')"
+                :clearable="false"
+                mode="gray"
+                class="w-full sm:w-52 [&>div]:mt-0"
+                wire:model.live="filter.business_trip_status"
+                :model="$statusOptions"
+            />
+
+            @if ($locationOptions !== [])
+                {{-- destinations, straight from the trips' own location column --}}
+                <x-ui.select-dropdown
+                    :aria-label="__('business_trips::common.filters.locations')"
+                    wire:key="business-trips-location-filter"
+                    :placeholder="__('business_trips::common.filters.locations')"
+                    mode="gray"
+                    class="w-full sm:w-56 [&>div]:mt-0"
+                    :searchable="count($locationOptions) > 8"
+                    wire:model.live="selectedLocation"
+                    :model="$locationOptions"
+                />
+            @endif
 
             <x-filter.reset :active="$this->hasActiveFilters" />
         </div>

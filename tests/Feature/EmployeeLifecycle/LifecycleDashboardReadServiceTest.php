@@ -659,7 +659,7 @@ class LifecycleDashboardReadServiceTest extends TestCase
         $this->assertSame('Lifecycle HQ', $event['structure_name']);
     }
 
-    public function test_context_panel_filters_survive_the_teleport(): void
+    public function test_type_and_status_filters_are_header_selects_whose_cleared_value_means_all(): void
     {
         Permission::findOrCreate('show-employee-lifecycle', 'web');
 
@@ -669,10 +669,16 @@ class LifecycleDashboardReadServiceTest extends TestCase
         Livewire::actingAs($user);
 
         Livewire::test(\App\Modules\EmployeeLifecycle\Livewire\Dashboard::class)
-            ->assertSee('$set(\'type\', \'onboarding\')', false)
-            ->assertSee('$set(\'status\', \'in_progress\')', false)
+            ->assertSeeHtml('lifecycle-type-filter')
+            ->assertSeeHtml('lifecycle-status-filter')
             ->set('type', 'onboarding')
-            ->assertSet('type', 'onboarding');
+            ->assertSet('type', 'onboarding')
+            ->set('type', null) // the select's placeholder option = all types
+            ->assertSet('type', '')
+            ->set('status', 'in_progress')
+            ->assertSet('status', 'in_progress')
+            ->set('status', null)
+            ->assertSet('status', '');
     }
 
     public function test_dashboard_validation_errors_use_localized_attribute_labels(): void

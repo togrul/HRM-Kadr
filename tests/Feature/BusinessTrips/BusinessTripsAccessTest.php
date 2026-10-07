@@ -41,6 +41,20 @@ class BusinessTripsAccessTest extends TestCase
             ->assertSet('search.business_trip_status', 'active');
     }
 
+    public function test_status_and_location_filters_are_selects_bound_to_the_component(): void
+    {
+        $this->actingAs($this->userWith('show-business_trips'));
+
+        Livewire::test(BusinessTrips::class)
+            ->assertSeeHtml('business-trips-status-filter')
+            ->set('filter.business_trip_status', 'deleted')
+            ->assertSet('search.business_trip_status', 'deleted')
+            ->set('selectedLocation', 'Gəncə')
+            ->assertSet('selectedLocation', 'Gəncə')
+            ->set('selectedLocation', null)
+            ->assertSet('selectedLocation', null);
+    }
+
     public function test_reset_filter_restores_defaults(): void
     {
         $this->actingAs($this->userWith('show-business_trips'));

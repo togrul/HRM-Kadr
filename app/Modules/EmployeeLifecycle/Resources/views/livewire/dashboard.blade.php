@@ -1,21 +1,15 @@
 @php
     $num = fn ($value): string => number_format((int) $value, 0, ',', ' ');
 
-    $processDots = [
-        'onboarding' => 'bg-[#0ea5e9]',
-        'probation' => 'bg-[#f59e0b]',
-        'movement' => 'bg-[#8b5cf6]',
-        'offboarding' => 'bg-[#f43f5e]',
-        'profile_change' => 'bg-[#a1a1aa]',
-    ];
+    $processTypes = ['onboarding', 'probation', 'movement', 'offboarding', 'profile_change'];
+    $processStatuses = ['planned', 'in_progress', 'blocked', 'completed', 'cancelled'];
 
-    $statusDots = [
-        'planned' => 'bg-[#a1a1aa]',
-        'in_progress' => 'bg-[#0ea5e9]',
-        'blocked' => 'bg-[#f43f5e]',
-        'completed' => 'bg-[#10b981]',
-        'cancelled' => 'bg-[#d4d4d8]',
-    ];
+    $typeOptions = collect($processTypes)
+        ->map(fn (string $option): array => ['id' => $option, 'label' => __('employee-lifecycle::dashboard.types.'.$option).' · '.$num($typeCounts[$option] ?? 0)])
+        ->all();
+    $statusOptions = collect($processStatuses)
+        ->map(fn (string $option): array => ['id' => $option, 'label' => __('employee-lifecycle::dashboard.statuses.'.$option).' · '.$num($statusCounts[$option] ?? 0)])
+        ->all();
 
     $lifecycleMetrics = ['active_templates', 'active_events', 'overdue_tasks', 'probation_queue', 'movement_queue', 'offboarding_queue'];
 
@@ -55,42 +49,6 @@
             :title="__('employee-lifecycle::dashboard.kicker')"
             :subtitle="__('employee-lifecycle::dashboard.labels.active_process_count', ['count' => $num($summary['active_events'] ?? 0)])"
         >
-            <x-context-panel.section :title="__('employee-lifecycle::dashboard.fields.type')">
-                <x-context-panel.item
-                    wire:click.prevent="$set('type', '')"
-                    :active="$type === ''"
-                    :count="$num($typeCounts[''] ?? 0)"
-                >{{ __('employee-lifecycle::dashboard.filters.all_types') }}</x-context-panel.item>
-
-                @foreach ($processDots as $option => $dot)
-                    <x-context-panel.item
-                        wire:key="lifecycle-type-{{ $option }}"
-                        wire:click.prevent="$set('type', '{{ $option }}')"
-                        :active="$type === $option"
-                        :dot="$dot"
-                        :count="$num($typeCounts[$option] ?? 0)"
-                    >{{ __('employee-lifecycle::dashboard.types.'.$option) }}</x-context-panel.item>
-                @endforeach
-            </x-context-panel.section>
-
-            <x-context-panel.section :title="__('employee-lifecycle::dashboard.fields.status')">
-                <x-context-panel.item
-                    wire:click.prevent="$set('status', '')"
-                    :active="$status === ''"
-                    :count="$num($statusCounts[''] ?? 0)"
-                >{{ __('employee-lifecycle::dashboard.filters.all_statuses') }}</x-context-panel.item>
-
-                @foreach ($statusDots as $option => $dot)
-                    <x-context-panel.item
-                        wire:key="lifecycle-status-{{ $option }}"
-                        wire:click.prevent="$set('status', '{{ $option }}')"
-                        :active="$status === $option"
-                        :dot="$dot"
-                        :count="$num($statusCounts[$option] ?? 0)"
-                    >{{ __('employee-lifecycle::dashboard.statuses.'.$option) }}</x-context-panel.item>
-                @endforeach
-            </x-context-panel.section>
-
             <x-context-panel.section :padded="false">
                 <div class="p-2.5">
                     <x-context-panel.meta :items="collect($lifecycleMetrics)->map(fn ($metric) => [
@@ -138,20 +96,44 @@
             @endif
         </x-slot:actions>
 
+        {{-- toolbar: search + type / status selects --}}
+        <div class="flex flex-col gap-2.5 sm:flex-row sm:items-center">
+            <div class="w-full sm:max-w-[360px]">
+                <x-ui.input
+                    icon="search"
+                    wire:model.live.debounce.300ms="search"
+                    placeholder="{{ __('employee-lifecycle::dashboard.placeholders.search') }}"
+                />
+            </div>
+
+            <x-ui.select-dropdown
+                :aria-label="__('employee-lifecycle::dashboard.fields.type')"
+                wire:key="lifecycle-type-filter"
+                :placeholder="__('employee-lifecycle::dashboard.filters.all_types').' · '.$num($typeCounts[''] ?? 0)"
+                mode="gray"
+                class="w-full sm:w-56 [&>div]:mt-0"
+                wire:model.live="type"
+                :model="$typeOptions"
+            />
+
+            <x-ui.select-dropdown
+                :aria-label="__('employee-lifecycle::dashboard.fields.status')"
+                wire:key="lifecycle-status-filter"
+                :placeholder="__('employee-lifecycle::dashboard.filters.all_statuses').' · '.$num($statusCounts[''] ?? 0)"
+                mode="gray"
+                class="w-full sm:w-56 [&>div]:mt-0"
+                wire:model.live="status"
+                :model="$statusOptions"
+            />
+        </div>
+
         <p class="max-w-3xl text-[13px] leading-6 text-ink-muted">{{ __('employee-lifecycle::dashboard.description') }}</p>
     </x-page-header>
 
     {{-- ===================== body ===================== --}}
     <div class="flex flex-col gap-4 px-4 py-4 sm:px-5">
         <section class="overflow-hidden rounded-xl border border-hairline bg-white">
-            <div class="flex flex-col gap-3 border-b border-hairline-subtle px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-                <div class="w-full sm:max-w-[420px]">
-                    <x-ui.input
-                        icon="search"
-                        wire:model.live.debounce.300ms="search"
-                        placeholder="{{ __('employee-lifecycle::dashboard.placeholders.search') }}"
-                    />
-                </div>
+            <div class="flex items-center justify-end border-b border-hairline-subtle px-4 py-3">
                 <p class="hrm-num shrink-0 text-[11.5px] text-ink-faint">
                     {{ __('employee-lifecycle::dashboard.labels.result_count', ['count' => $num($events->total())]) }}
                 </p>

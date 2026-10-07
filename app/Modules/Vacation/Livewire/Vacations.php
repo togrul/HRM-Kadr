@@ -422,6 +422,17 @@ class Vacations extends Component
         $this->resetPage();
     }
 
+    /** The type select binds straight to $selectedType; same normalisation as selectType(). */
+    public function updatedSelectedType(mixed $value): void
+    {
+        $this->selectType((string) $value);
+    }
+
+    public function updatedSelectedYear(): void
+    {
+        $this->resetPage();
+    }
+
     protected function fillYear(): void
     {
         $yearExpression = DB::connection()->getDriverName() === 'sqlite'

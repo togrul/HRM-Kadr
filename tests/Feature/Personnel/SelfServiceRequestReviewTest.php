@@ -126,6 +126,8 @@ class SelfServiceRequestReviewTest extends TestCase
         $this->actingAs($reviewer);
 
         Livewire::test(SelfServiceRequestReviews::class)
+            ->assertSeeHtml('self-service-reviews-type-filter')
+            ->assertSeeHtml('self-service-reviews-scope-filter')
             ->set('scopeFilter', 'all')
             ->assertSet('scopeFilter', 'all')
             ->assertSee(__('personnel::my_hr.review.labels.audit_timeline'))

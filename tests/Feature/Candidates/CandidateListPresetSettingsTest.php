@@ -63,6 +63,18 @@ class CandidateListPresetSettingsTest extends TestCase
             ->call('setStatus', 'all')
             ->assertSet('status', 'all');
 
+        // The status filter is a header select bound to $status; it sanitises like setStatus().
+        $component
+            ->assertSeeHtml('candidates-status-filter')
+            ->assertSee('Status B')
+            ->assertDontSee('Hidden Status')
+            ->set('status', '30')
+            ->assertSet('status', 30)
+            ->set('status', 40)
+            ->assertSet('status', 'all')
+            ->set('status', 'all')
+            ->assertSet('status', 'all');
+
         $this->assertSame(
             ['Status A', 'Status B', 'Status C'],
             $component->instance()->appealStatusTabs->pluck('name')->all()

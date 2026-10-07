@@ -62,6 +62,31 @@ class AllOrders extends Component
         $this->resetPage();
     }
 
+    /**
+     * The status select binds straight to $status; anything outside the offered set
+     * ('all', a status id, 'deleted' for admins) falls back to 'all'.
+     */
+    public function updatedStatus(mixed $value): void
+    {
+        $allowed = $this->statuses->pluck('id')->map(fn ($id): string => (string) $id)
+            ->push('all')
+            ->when(auth()->user()?->hasRole('Admin'), fn ($keys) => $keys->push('deleted'));
+
+        if (! $allowed->contains((string) $value)) {
+            $this->status = 'all';
+        }
+
+        $this->resetPage();
+    }
+
+    /**
+     * The type select binds straight to $selectedOrder; its placeholder (null) means "all types".
+     */
+    public function updatedSelectedOrder(mixed $value): void
+    {
+        $this->selectOrder($value ?? '');
+    }
+
     public function fillFilter(): void
     {
         $this->status = request()->query('status') ?? 'all';

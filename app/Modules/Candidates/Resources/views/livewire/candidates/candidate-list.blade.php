@@ -1,6 +1,11 @@
 @php
     $num = fn ($value): string => number_format((int) $value, 0, ',', ' ');
     $summary = $this->recruitmentSummary;
+    $statusOptions = collect([['id' => 'all', 'label' => __('candidates::common.labels.all')]])
+        ->concat($this->appealStatusTabs->map(fn ($_status): array => ['id' => $_status->id, 'label' => $_status->name]))
+        ->when($this->canShowDeletedTab, fn ($options) => $options->push(['id' => 'deleted', 'label' => __('candidates::common.labels.deleted')]))
+        ->values()
+        ->all();
 @endphp
 
 <div class="flex flex-col">
@@ -15,24 +20,6 @@
             @include('candidates::livewire.candidates.partials.recruitment-context-panel', [
                 'panelCounts' => $this->recruitmentPanelCounts(),
             ])
-
-            <x-context-panel.section :title="__('candidates::common.labels.status')">
-                <x-context-panel.item wire:click.prevent="setStatus('all')" :active="$status === 'all'">
-                    {{ __('candidates::common.labels.all') }}
-                </x-context-panel.item>
-                @foreach ($this->appealStatusTabs as $_status)
-                    <x-context-panel.item
-                        wire:key="candidate-panel-status-{{ $_status->id }}"
-                        wire:click.prevent="setStatus({{ $_status->id }})"
-                        :active="$status === $_status->id"
-                    >{{ $_status->name }}</x-context-panel.item>
-                @endforeach
-                @if ($this->canShowDeletedTab)
-                    <x-context-panel.item wire:click.prevent="setStatus('deleted')" :active="$status === 'deleted'">
-                        {{ __('candidates::common.labels.deleted') }}
-                    </x-context-panel.item>
-                @endif
-            </x-context-panel.section>
         </x-context-panel>
     @endteleport
 
@@ -80,6 +67,17 @@
                         <x-livewire-input mode="gray" name="filter.fullname" wire:model.live.debounce.400ms="filter.fullname" />
                     </label>
                 @endif
+
+                <x-ui.select-dropdown
+                    :aria-label="__('candidates::common.labels.status')"
+                    wire:key="candidates-status-filter"
+                    :placeholder="__('candidates::common.labels.all')"
+                    :clearable="false"
+                    mode="gray"
+                    class="w-full sm:w-52 [&>div]:mt-0"
+                    wire:model.live="status"
+                    :model="$statusOptions"
+                />
 
                 @if ($this->filterEnabled('appeal_date'))
                     <div class="shrink-0">

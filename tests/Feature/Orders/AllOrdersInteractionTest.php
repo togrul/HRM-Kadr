@@ -104,13 +104,21 @@ class AllOrdersInteractionTest extends TestCase
             'creator_id' => $user->id,
         ]);
 
-        // The panel is teleported from INSIDE the Livewire root; rendering it through a
-        // <x-slot name="sidebar"> would put it outside and every wire:click would be inert.
+        // The status / type selects live in the component's own header toolbar, so their
+        // wire:model bindings reach the component.
         Livewire::test(AllOrders::class)
-            ->assertSee('setStatus')
-            ->assertSee('selectOrder')
+            ->assertSeeHtml('orders-status-filter')
+            ->assertSeeHtml('orders-type-filter')
             ->assertSee('İşə qəbul')
-            ->assertSee('Təsdiq gözləyən');
+            ->assertSee('Təsdiq gözləyən')
+            ->set('status', 20)
+            ->assertSet('status', 20)
+            ->set('status', 'deleted') // admin only
+            ->assertSet('status', 'all')
+            ->set('selectedOrder', 1010)
+            ->assertSet('selectedOrder', 1010)
+            ->set('selectedOrder', null)
+            ->assertSet('selectedOrder', null);
     }
 
     public function test_excel_export_streams_a_file_for_a_permitted_user(): void
