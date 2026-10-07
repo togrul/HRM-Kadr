@@ -40,12 +40,15 @@ trait HandlesPersonnelStepValidation
         ];
 
         foreach ($stepConditions[$step] ?? [] as $field => $payload) {
-            $hasValue = match ($field) {
-                'documentForm.document' => $this->payloadHasValues($payload),
+            // List sections (cards, passports, …) skip their draft-row rules once rows
+            // exist. The identity document is a single record: skip it only while it is
+            // empty — a partly filled one must be validated, or the insert hits NOT NULL.
+            $skip = match ($field) {
+                'documentForm.document' => ! $this->payloadHasValues($payload),
                 default => ! empty($payload),
             };
 
-            if ($hasValue) {
+            if ($skip) {
                 $exceptedValidations[] = $field;
             }
         }

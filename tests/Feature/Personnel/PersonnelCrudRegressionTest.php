@@ -69,6 +69,57 @@ class PersonnelCrudRegressionTest extends TestCase
             ->assertHasErrors();
     }
 
+    public function test_a_partly_filled_identity_document_fails_validation_instead_of_the_insert(): void
+    {
+        $user = $this->crudUser();
+        $personnel = app(PersonnelCrudBenchmarkFixtureService::class)->ensureEditablePersonnel($user);
+
+        Livewire::actingAs($user);
+
+        // Used to skip the document rules exactly when the document had data, so the
+        // insert hit NOT NULL columns and the user got a 500.
+        Livewire::test(EditPersonnel::class, ['personnelModel' => $personnel->getKey()])
+            ->call('selectStep', 2)
+            ->set('documentForm.document.series', 'AA')
+            ->call('store')
+            ->assertHasErrors([
+                'documentForm.document.pin',
+                'documentForm.document.nationality_id',
+                'documentForm.document.number',
+            ])
+            ->assertHasNoErrors('documentForm.document.series');
+
+        $this->assertDatabaseMissing('personnel_identity_documents', ['tabel_no' => $personnel->tabel_no]);
+    }
+
+    public function test_an_empty_identity_document_stays_optional(): void
+    {
+        $user = $this->crudUser();
+        $personnel = app(PersonnelCrudBenchmarkFixtureService::class)->ensureEditablePersonnel($user);
+
+        Livewire::actingAs($user);
+
+        Livewire::test(EditPersonnel::class, ['personnelModel' => $personnel->getKey()])
+            ->call('selectStep', 2)
+            ->call('store')
+            ->assertHasNoErrors();
+    }
+
+    public function test_a_nationality_without_a_translation_in_the_current_locale_is_kept_on_edit(): void
+    {
+        $user = $this->crudUser();
+        $personnel = app(PersonnelCrudBenchmarkFixtureService::class)->ensureEditablePersonnel($user);
+
+        Livewire::actingAs($user);
+
+        // The fixture country has no translation row, so the nationality relation is
+        // empty; the form used to null the stored id and every save failed "required".
+        Livewire::test(EditPersonnel::class, ['personnelModel' => $personnel->getKey()])
+            ->assertSet('personalForm.personnel.nationality_id', $personnel->nationality_id)
+            ->call('store')
+            ->assertHasNoErrors('personalForm.personnel.nationality_id');
+    }
+
     public function test_approving_a_pending_personnel_needs_the_confirmation_permission(): void
     {
         $user = $this->crudUser();
@@ -171,6 +222,10 @@ class PersonnelCrudRegressionTest extends TestCase
     {
         $user = $this->crudUser();
         app(PersonnelCrudBenchmarkFixtureService::class)->ensureEditablePersonnel($user);
+
+        // The document is now validated (it used to be skipped when filled), so the
+        // city it points at must exist.
+        \Illuminate\Support\Facades\DB::table('cities')->insertOrIgnore(['id' => 1, 'country_id' => 1, 'name' => 'Bakı']);
 
         Livewire::actingAs($user);
 

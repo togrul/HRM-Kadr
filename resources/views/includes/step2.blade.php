@@ -62,7 +62,7 @@
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="documentForm.document.number">{{ __('personnel::common.labels.number') }}</x-label>
+                <x-label for="documentForm.document.number">{{ __('personnel::common.labels.document_number') }}</x-label>
                 <x-livewire-input mode="gray" type="number" name="documentForm.document.number" wire:model="documentForm.document.number"></x-livewire-input>
                 @error('documentForm.document.number')
                 <x-validation> {{ $message }} </x-validation>
