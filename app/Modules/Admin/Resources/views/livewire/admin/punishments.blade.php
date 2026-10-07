@@ -49,7 +49,8 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 mt-4 w-full">
                 <div class="flex flex-col">
                     <x-label for="form.id">{{ __('admin::references.fields.id') }}</x-label>
-                    <x-livewire-input mode="default" type="number" name="form.id" wire:model="form.id"></x-livewire-input>
+                    {{-- id is referenced by other tables: fixed once created, like cities --}}
+                    <x-livewire-input :mode="$model ? 'disabled' : 'default'" :disabled="(bool) $model" type="number" name="form.id" wire:model="form.id"></x-livewire-input>
                     @error('form.id')
                     <x-validation> {{ $message }} </x-validation>
                     @enderror

@@ -10,6 +10,7 @@ use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -35,7 +36,7 @@ class Awards extends Component
     public function rules(): array
     {
         return [
-            'form.id' => 'required|integer|min:1|unique:awards,id'.($this->model ? ','.$this->form['id'] : ''),
+            'form.id' => 'required|integer|min:1|unique:awards,id'.($this->model ? ','.$this->model->id : ''),
             'form.name' => 'required|string|min:2',
             'form.award_type_id' => 'required|integer|exists:award_types,id',
         ];
@@ -118,7 +119,7 @@ class Awards extends Component
 
         $this->form['is_foreign'] = $this->form['is_foreign'] ?? false;
         $this->model
-            ? $this->model->update($this->form)
+            ? $this->model->update(Arr::except($this->form, 'id'))
             : Award::create($this->form);
 
         $this->callSuccessSwal();
