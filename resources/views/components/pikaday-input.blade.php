@@ -8,8 +8,10 @@
 ])
 
 @php
-     $wireModel = collect($attributes->getAttributes())
-          ->first(fn ($value, $key) => str_starts_with($key, 'wire:model'));
+     $wireModelKey = collect($attributes->getAttributes())
+          ->keys()
+          ->first(fn ($key) => str_starts_with($key, 'wire:model'));
+     $wireModel = $wireModelKey ? $attributes->get($wireModelKey) : null;
      $hasError = $errors->has($name) || (is_string($wireModel) && $errors->has($wireModel));
      $isError = $hasError ? 'border-rose-300 bg-rose-50' : '';
 
@@ -25,7 +27,9 @@
     name="{{ $name }}"
     x-data="{ picker: null, destroy() { if (this.picker) this.picker.destroy(); this.picker = null; } }"
     x-ref="input"
-    x-on:change="$dispatch('input', $el.value)"
+    {{-- Sync on change only (blur after typing, or a picker pick — Pikaday fires change):
+         a .live binding sent every keystroke ("1", "12.0"…) to the server mid-typing. --}}
+    @if ($wireModel) wire:model.change="{{ $wireModel }}" @endif
     x-init="picker = (function (pikaday, $el) {
           pikaday.defaultDate = $el.value;
           {{ $script ?? '' }} ;
@@ -38,6 +42,6 @@
          }), $el)"
     @disabled($disabled)
     @if ($hasError) aria-invalid="true" @endif
-    {!! $attributes->merge(['class' => \App\Support\Ui\FieldStyles::input(trim('mt-1 block '.$isError))]) !!}
+    {!! $attributes->except(array_filter([$wireModelKey]))->merge(['class' => \App\Support\Ui\FieldStyles::input(trim('mt-1 block '.$isError))]) !!}
 
 >

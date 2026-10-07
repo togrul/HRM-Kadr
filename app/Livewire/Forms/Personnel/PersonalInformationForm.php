@@ -160,7 +160,9 @@ class PersonalInformationForm extends Form
     ): void {
         $entity = data_get($payload, $relation);
         if (! $entity) {
-            $this->personnel[$target] = null;
+            // A missing relation row (e.g. a country with no translation in the current
+            // locale) must not wipe the stored id, or every save fails "required".
+            $this->personnel[$target] = data_get($payload, $target);
             if (is_callable($extraCallback)) {
                 $extraCallback(null);
             }

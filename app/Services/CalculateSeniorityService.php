@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Support\DateInput;
 use Carbon\Carbon;
 
 class CalculateSeniorityService
@@ -11,8 +12,14 @@ class CalculateSeniorityService
         $leave_date,
         $coefficient
     ): array {
-        $start = Carbon::parse($join_date);
-        $end = Carbon::parse($leave_date);
+        $start = $this->date($join_date);
+        $end = $this->date($leave_date);
+
+        // A half-typed or impossible date: no figure yet instead of a 500 mid-typing;
+        // saving still runs the date validation and reports the field.
+        if (! $start || ! $end) {
+            return ['diff' => 0, 'diff_days' => 0, 'duration' => 0, 'duration_days' => 0, 'year' => 0, 'month' => 0, 'day' => 0];
+        }
 
         if ($start->greaterThan($end)) {
             [$start, $end] = [$end, $start];
@@ -35,12 +42,18 @@ class CalculateSeniorityService
         ];
     }
 
+    private function date(mixed $value): ?Carbon
+    {
+        return DateInput::parse($value)
+            ?? rescue(fn (): Carbon => Carbon::parse($value), null, false);
+    }
+
     public function calculateEducation(array $education): array
     {
         $result = $this->calculate(
             $education['admission_year'],
-            $education['graduated_year'] ?: Carbon::now()->format('Y-m-d'),
-            $education['coefficient']
+            ($education['graduated_year'] ?? null) ?: Carbon::now()->format('Y-m-d'),
+            $education['coefficient'] ?? null
         );
         $calculateCoefficientYearMonth = $this->calculateYearAndMonth($result['duration']);
         $result['year_coefficient'] = $calculateCoefficientYearMonth['year'];

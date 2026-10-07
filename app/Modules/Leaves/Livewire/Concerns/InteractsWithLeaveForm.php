@@ -8,6 +8,7 @@ use App\Models\LeaveType;
 use App\Models\OrderStatus;
 use App\Models\Personnel;
 use App\Modules\Personnel\Contracts\ApprovalRouteResolver;
+use App\Support\DateInput;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -359,8 +360,16 @@ trait InteractsWithLeaveForm
             : 'day';
 
         if ($durationUnit === 'day') {
-            $start = Carbon::parse($this->leave->starts_at);
-            $end = Carbon::parse($this->leave->ends_at ?: $this->leave->starts_at);
+            $start = DateInput::parse($this->leave->starts_at);
+            $end = DateInput::parse($this->leave->ends_at ?: $this->leave->starts_at);
+
+            // Wait for complete dates; a half-typed one used to throw (500) mid-typing.
+            if (! $start || ! $end) {
+                $this->leave->total_days = null;
+                $this->leave->total_minutes = null;
+
+                return;
+            }
 
             $this->leave->total_days = $start->diffInDays($end) + 1;
             $this->leave->total_minutes = null;
