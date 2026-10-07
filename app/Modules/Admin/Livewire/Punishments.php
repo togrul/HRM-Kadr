@@ -10,6 +10,7 @@ use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -35,7 +36,7 @@ class Punishments extends Component
     public function rules(): array
     {
         return [
-            'form.id' => 'required|integer|min:1|unique:punishments,id'.($this->model ? ','.$this->form['id'] : ''),
+            'form.id' => 'required|integer|min:1|unique:punishments,id'.($this->model ? ','.$this->model->id : ''),
             'form.name' => 'required|string|min:2',
             'form.punishment_type_id' => 'required|integer|exists:punishment_types,id',
         ];
@@ -115,7 +116,7 @@ class Punishments extends Component
         $this->validate();
 
         $this->model
-            ? $this->model->update($this->form)
+            ? $this->model->update(Arr::except($this->form, 'id'))
             : Punishment::create($this->form);
 
         $this->callSuccessSwal();

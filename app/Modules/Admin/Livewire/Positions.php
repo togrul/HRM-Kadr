@@ -9,6 +9,7 @@ use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait;
 use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -26,7 +27,7 @@ class Positions extends Component
     public function rules(): array
     {
         return [
-            'form.id' => 'required|integer|min:1|unique:positions,id'.($this->model ? ','.$this->form['id'] : ''),
+            'form.id' => 'required|integer|min:1|unique:positions,id'.($this->model ? ','.$this->model->id : ''),
             'form.name' => 'required|string|min:2',
             'form.rank_category_id' => 'nullable|integer|exists:rank_categories,id',
             'form.approval_rank' => 'required|integer|min:0|max:999',
@@ -92,7 +93,7 @@ class Positions extends Component
         $this->validate();
 
         $this->model
-            ? $this->model->update($this->form)
+            ? $this->model->update(Arr::except($this->form, 'id'))
             : Position::create($this->form);
 
         $this->callSuccessSwal();

@@ -217,3 +217,21 @@ it('renders, creates, edits and deletes a type from its child panel', function (
     'award types' => [Livewire\AwardTypes::class, 'award_types'],
     'punishment types' => [Livewire\PunishmentTypes::class, 'punishment_types'],
 ]);
+
+it('keeps a reference row id fixed on edit, since other tables point at it', function (string $component, string $table, array $extra): void {
+    $admin = referenceCrudAdmin();
+    DB::table($table)->insert(['id' => 34, 'name' => 'Direktor müavini'] + $extra);
+
+    LivewireTest::actingAs($admin)->test($component)
+        ->call('openCrud', 34)
+        ->assertSeeHtml('disabled')
+        ->set('form.id', 2)
+        ->set('form.name', 'Direktorun müavini')
+        ->call('store')
+        ->assertHasNoErrors();
+
+    expect(DB::table($table)->where('id', 34)->value('name'))->toBe('Direktorun müavini')
+        ->and(DB::table($table)->where('id', 2)->exists())->toBeFalse();
+})->with([
+    'positions' => [Livewire\Positions::class, 'positions', []],
+]);
