@@ -9,6 +9,7 @@ use App\Modules\Demo\Console\Commands\DemoCreateCommand;
 use App\Modules\Demo\Console\Commands\DemoDeleteCommand;
 use App\Modules\Demo\Console\Commands\DemoExtendCommand;
 use App\Modules\Demo\Console\Commands\DemoListCommand;
+use App\Modules\Demo\Console\Commands\DemoMigrateCommand;
 use App\Modules\Demo\Http\Middleware\ResolveDemoTenant;
 use App\Modules\Demo\Models\DemoTenant;
 use Illuminate\Contracts\Http\Kernel as HttpKernelContract;
@@ -47,6 +48,7 @@ class DemoServiceProvider extends ServiceProvider
                 DemoListCommand::class,
                 DemoExtendCommand::class,
                 DemoDeleteCommand::class,
+                DemoMigrateCommand::class,
             ]);
         }
     }

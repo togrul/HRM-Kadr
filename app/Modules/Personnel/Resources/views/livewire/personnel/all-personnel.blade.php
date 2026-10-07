@@ -81,6 +81,20 @@
                     wire:model.live="selectedPosition"
                     :model="$positionOptions"
                 />
+
+                <x-ui.select-dropdown
+                    :aria-label="__('personnel::common.labels.sort_by')"
+                    wire:key="personnel-sort"
+                    :placeholder="__('personnel::common.labels.sort_by_position')"
+                    :clearable="false"
+                    mode="gray"
+                    class="w-full sm:w-48 [&>div]:mt-0"
+                    wire:model.live="sort"
+                    :model="[
+                        ['id' => 'position', 'label' => __('personnel::common.labels.sort_by_position')],
+                        ['id' => 'structure', 'label' => __('personnel::common.labels.sort_by_structure')],
+                    ]"
+                />
             </div>
         </div>
     </x-page-header>
@@ -92,6 +106,7 @@
             'structure' => $this->structure,
             'selectedPosition' => $this->selectedPosition,
             'search' => $this->search,
+            'sort' => $this->sort,
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     @endphp
 
@@ -101,6 +116,7 @@
         :structure="$this->structure"
         :selected-position="$this->selectedPosition"
         :search="$this->search"
+        :sort="$this->sort"
         :key="'personnel-table-'.$tableKey"
         lazy
     />

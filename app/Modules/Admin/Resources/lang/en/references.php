@@ -30,6 +30,7 @@ return [
         'level' => 'Level',
         'locale' => 'Locale',
         'rank_category' => 'Rank category',
+        'position_level' => 'Position level (sorting only)',
         'approval_rank' => 'Approval rank',
         'is_approval_target' => 'Can approve?',
         'award_types' => 'Award types',
@@ -191,5 +192,14 @@ return [
     'messages' => [
         'approval_route_help' => 'Use this page to configure the hierarchy-based approval policy per request type. The system resolves the employee structure and position, finds the nearest approver-capable manager, optionally includes the next upper manager, and keeps HR as a watcher when enabled.',
         'approval_route_scope_required' => 'Scope selection is no longer used on this page; the policy is configured per request type.',
+    ],
+    'position_levels' => [
+        1 => 'Head of organisation',
+        2 => 'Deputy head',
+        3 => 'Adviser / senior leadership',
+        4 => 'Unit head',
+        5 => 'Lead / senior specialist',
+        6 => 'Specialist',
+        7 => 'Support staff',
     ],
 ];

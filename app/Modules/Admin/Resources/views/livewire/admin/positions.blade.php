@@ -45,6 +45,18 @@
                     @enderror
                 </div>
                 <div class="flex flex-col">
+                    <x-ui.select-dropdown
+                        :label="__('admin::references.fields.position_level')"
+                        mode="default"
+                        class="w-full"
+                        wire:model="form.level"
+                        :model="\App\Support\PositionLevel::options()"
+                    />
+                    @error('form.level')
+                        <x-validation> {{ $message }} </x-validation>
+                    @enderror
+                </div>
+                <div class="flex flex-col">
                     <x-label for="form.approval_rank">{{ __('admin::references.fields.approval_rank') }}</x-label>
                     <x-livewire-input mode="default" type="number" name="form.approval_rank" wire:model="form.approval_rank"></x-livewire-input>
                     @error('form.approval_rank')

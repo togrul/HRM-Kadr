@@ -30,6 +30,7 @@ return [
         'level' => 'Səviyyə',
         'locale' => 'Dil',
         'rank_category' => 'Rütbə kateqoriyası',
+        'position_level' => 'Vəzifə səviyyəsi (yalnız sıralama üçün)',
         'approval_rank' => 'Təsdiq sırası',
         'is_approval_target' => 'Təsdiqləyən ola bilər?',
         'award_types' => 'Mükafat növləri',
@@ -191,5 +192,14 @@ return [
     'messages' => [
         'approval_route_help' => 'Burada hər müraciət növü üçün ierarxik təsdiq siyasəti qurulur. Sistem əməkdaşın strukturunu və vəzifəsini götürüb ən yaxın təsdiqləyən rəhbəri, istəsəniz onun da yuxarı xəttini və ayrıca HR izləyicisini avtomatik müəyyən edir.',
         'approval_route_scope_required' => 'Bu ekranda artıq scope seçimi yoxdur; siyasət müraciət növü səviyyəsində qurulur.',
+    ],
+    'position_levels' => [
+        1 => 'Təşkilat rəhbəri',
+        2 => 'Rəhbər müavini',
+        3 => 'Müşavir / baş rəhbər heyət',
+        4 => 'Bölmə rəhbəri',
+        5 => 'Aparıcı / böyük mütəxəssis',
+        6 => 'Mütəxəssis',
+        7 => 'Köməkçi heyət',
     ],
 ];

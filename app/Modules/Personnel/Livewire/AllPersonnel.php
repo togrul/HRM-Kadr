@@ -46,6 +46,9 @@ class AllPersonnel extends Component
     #[Url(as: 'position')]
     public ?int $selectedPosition = null;
 
+    #[Url(as: 'sort')]
+    public string $sort = PersonnelQueryService::SORT_POSITION;
+
     public bool $filterDetailMounted = false;
 
     public bool $pendingFilterOpen = false;
@@ -232,6 +235,15 @@ class AllPersonnel extends Component
 
     public function updatedSelectedPosition(): void
     {
+        $this->resetPage();
+    }
+
+    public function updatedSort(mixed $value): void
+    {
+        if ($value !== PersonnelQueryService::SORT_STRUCTURE) {
+            $this->sort = PersonnelQueryService::SORT_POSITION;
+        }
+
         $this->resetPage();
     }
 
