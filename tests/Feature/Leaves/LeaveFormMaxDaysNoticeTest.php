@@ -52,6 +52,21 @@ class LeaveFormMaxDaysNoticeTest extends TestCase
             ]));
     }
 
+    public function test_a_half_typed_or_impossible_date_waits_instead_of_failing(): void
+    {
+        $this->actingAs($this->userWithCreatePermission());
+
+        // Typing into the date field used to throw InvalidFormatException (a 500).
+        Livewire::test(AddLeave::class)
+            ->set('leave.starts_at', '32.13.2024')
+            ->assertSet('leave.total_days', null)
+            ->set('leave.starts_at', 'abc')
+            ->assertSet('leave.total_days', null)
+            ->set('leave.starts_at', '10.03.2026')
+            ->set('leave.ends_at', '12.03.2026')
+            ->assertSet('leave.total_days', 3);
+    }
+
     public function test_document_is_required_when_selected_leave_type_requires_it(): void
     {
         $this->actingAs($this->userWithCreatePermission());
