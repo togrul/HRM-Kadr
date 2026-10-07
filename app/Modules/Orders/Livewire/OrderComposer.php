@@ -34,7 +34,12 @@ class OrderComposer extends Component
 {
     use AuthorizesRequests, InteractsWithOrderSubjectPicker, WithFileUploads;
 
-    public string $presetCode = '';
+    /**
+     * Nullable only because Livewire assigns a same-named mount param to the property
+     * before mount() runs: a caller passing null (no preset) used to throw a TypeError.
+     * mount() normalises it to '' right away.
+     */
+    public ?string $presetCode = '';
 
     /** @var array<string,mixed> manual field key => value */
     public array $fields = [];

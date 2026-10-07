@@ -46,6 +46,17 @@ class OrderComposerTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_it_opens_without_a_preset_when_a_caller_passes_null(): void
+    {
+        $this->actingAs($this->userWith('add-orders'));
+
+        // Vacations opens the composer with no preset when the company has no vacation
+        // template; Livewire assigned that null to the string property — a 500.
+        Livewire::test(OrderComposer::class, ['presetCode' => null])
+            ->assertOk()
+            ->assertSet('presetCode', '');
+    }
+
     public function test_it_issues_a_filled_docx_order_and_downloads_it(): void
     {
         $this->seedTemplate();
