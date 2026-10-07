@@ -20,7 +20,7 @@
 @else
 <span class="w-4 flex-none"></span>
 @endif
-<button type="button" @class(['hrm-structure-node', 'font-medium text-ink-soft' => $isRoot, 'font-normal text-ink-muted' => ! $isRoot]) x-on:click="pick({{ $id }})" :aria-current="sel({{ $id }})" @if ($id === $this->selectedStructure) aria-current="true" @endif>
+<button type="button" @class(['hrm-structure-node', 'font-medium', 'text-ink-soft' => $isRoot, 'text-ink-muted' => ! $isRoot]) x-on:click="pick({{ $id }})" :aria-current="sel({{ $id }})" @if ($id === $this->selectedStructure) aria-current="true" @endif>
 @if ($isRoot)
 <svg class="mt-px h-4 w-4 shrink-0 text-ink-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 18V15C10 13.8954 10.8954 13 12 13V13C13.1046 13 14 13.8954 14 15V18"/><path d="M2 8L11.7317 3.13416C11.9006 3.04971 12.0994 3.0497 12.2683 3.13416L22 8"/><path d="M20 11V19C20 20.1046 19.1046 21 18 21H6C4.89543 21 4 20.1046 4 19V11"/></svg>
 @endif
