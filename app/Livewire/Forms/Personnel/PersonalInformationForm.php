@@ -67,6 +67,13 @@ class PersonalInformationForm extends Form
             Arr::only($payload, $this->personnelAttributes())
         );
 
+        // A NULL json column (rows older than the employment-terms fields, or imported)
+        // would replace the [] default; checkbox groups bound to null act as one boolean,
+        // so ticking a single rest day ticks them all and "must be an array" fails.
+        foreach (['work_hours', 'rest_days'] as $listField) {
+            $this->personnel[$listField] = (array) ($this->personnel[$listField] ?? []);
+        }
+
         $this->personnelExtra = array_replace_recursive(
             $this->personnelExtra,
             Arr::only($payload, $this->personnelExtraAttributes())

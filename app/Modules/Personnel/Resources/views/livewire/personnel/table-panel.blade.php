@@ -2,7 +2,8 @@
     $personnels = $this->personnels;
     $status = $this->status;
 
-    // One presence state per row drives both the chip and the avatar tint.
+    // One presence state per row drives the chip colour and the avatar tint; the
+    // avatar stays grey for the common at-work state so tinted avatars flag exceptions.
     $stateOf = function ($personnel): array {
         if (filled($personnel->leave_work_date)) {
             return ['key' => 'resigned', 'tone' => 'rose', 'label' => __('personnel::common.labels.resigned')];
@@ -20,7 +21,7 @@
             return ['key' => 'trip', 'tone' => 'blue', 'label' => __('personnel::common.states.in_business_trip')];
         }
 
-        return ['key' => 'at_work', 'tone' => 'neutral', 'label' => __('personnel::common.states.at_work')];
+        return ['key' => 'at_work', 'tone' => 'green', 'label' => __('personnel::common.states.at_work')];
     };
 @endphp
 
@@ -43,7 +44,7 @@
             >
                 <x-table.td>
                     <a href="{{ route('personnel.show', $personnel->id) }}" wire:navigate class="flex items-center gap-3">
-                        <x-avatar :name="$personnel->fullname" :tone="$state['tone']" />
+                        <x-avatar :name="$personnel->fullname" :tone="$state['key'] === 'at_work' ? 'neutral' : $state['tone']" />
                         <div class="min-w-0 max-w-[240px] leading-tight">
                             <p class="truncate text-[13px] font-medium text-ink group-hover/row:underline">{{ $personnel->fullname }}</p>
                             <p class="hrm-num mt-0.5 text-[11.5px] text-ink-faint">#{{ $personnel->tabel_no }}</p>
@@ -60,7 +61,7 @@
                 </x-table.td>
 
                 <x-table.td wire:click="handleRowAction('quick-view', { type: 'quick-view', value: '{{ $personnel->tabel_no }}' })" class="cursor-pointer">
-                    <x-small-badge :mode="$state['tone'] === 'neutral' ? 'secondary' : $state['tone']" dot>
+                    <x-small-badge :mode="$state['tone']" dot>
                         {{ $state['label'] }}
                     </x-small-badge>
 

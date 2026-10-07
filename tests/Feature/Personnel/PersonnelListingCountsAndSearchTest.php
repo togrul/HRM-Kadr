@@ -33,6 +33,29 @@ class PersonnelListingCountsAndSearchTest extends TestCase
         $this->assertSame(1, $counts['at_work']);
     }
 
+    public function test_the_list_puts_senior_positions_first(): void
+    {
+        $this->seedRoster();
+
+        // Ranked posts by approval_rank (desc); unranked ones keep their set-up order (id).
+        DB::table('positions')->insert([
+            ['id' => 1, 'name' => 'Sürücü', 'approval_rank' => 0],
+            ['id' => 2, 'name' => 'Baş mühəndis', 'approval_rank' => 0],
+            ['id' => 3, 'name' => 'Direktor', 'approval_rank' => 90],
+        ]);
+        DB::table('personnels')->where('tabel_no', 'T-001')->update(['position_id' => 2]);
+        DB::table('personnels')->where('tabel_no', 'T-004')->update(['position_id' => 3]);
+
+        $order = app(PersonnelQueryService::class)->build(
+            status: 'all',
+            filters: [],
+            selectedStructureIds: [],
+            accessibleStructureIds: [self::STRUCTURE_ID],
+        )->pluck('tabel_no')->all();
+
+        $this->assertSame(['T-004', 'T-002', 'T-003', 'T-001'], $order);
+    }
+
     public function test_header_totals_add_up_to_the_live_roster(): void
     {
         $this->seedRoster();

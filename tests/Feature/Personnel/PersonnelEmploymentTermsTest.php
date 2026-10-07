@@ -5,6 +5,7 @@ namespace Tests\Feature\Personnel;
 use App\Models\Personnel;
 use App\Models\User;
 use App\Modules\Personnel\Livewire\AddPersonnel;
+use App\Modules\Personnel\Livewire\EditPersonnel;
 use App\Modules\Personnel\Services\PersonnelCrudBenchmarkFixtureService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -52,6 +53,22 @@ class PersonnelEmploymentTermsTest extends TestCase
         $this->assertSame('five_day', $personnel->work_schedule);
         $this->assertSame('13:00', $personnel->work_hours['lunch_start']);
         $this->assertSame(['saturday', 'sunday'], $personnel->rest_days);
+    }
+
+    public function test_a_row_with_null_rest_days_edits_as_an_empty_checkbox_list(): void
+    {
+        $user = $this->crudUser();
+        $personnel = app(PersonnelCrudBenchmarkFixtureService::class)->ensureEditablePersonnel($user);
+        Personnel::query()->whereKey($personnel->getKey())->update(['rest_days' => null, 'work_hours' => null]);
+
+        Livewire::actingAs($user);
+
+        // Bound to null, the rest-day checkboxes behave as one boolean: one tick ticks all.
+        Livewire::test(EditPersonnel::class, ['personnelModel' => $personnel->getKey()])
+            ->assertSet('personalForm.personnel.rest_days', [])
+            ->assertSet('personalForm.personnel.work_hours', [])
+            ->set('personalForm.personnel.rest_days', ['sunday'])
+            ->assertSet('personalForm.personnel.rest_days', ['sunday']);
     }
 
     public function test_a_shift_rota_asks_for_the_hours_of_every_shift_it_runs(): void

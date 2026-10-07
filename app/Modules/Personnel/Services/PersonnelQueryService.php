@@ -55,8 +55,12 @@ class PersonnelQueryService
         );
 
         return $query
-            ->orderBy('position_sort.name')
-            ->orderBy('structure_sort.name');
+            // Senior posts first: approval_rank is the seniority the approval routes use;
+            // unranked posts fall back to id, which follows the order they were set up in.
+            ->orderByDesc('position_sort.approval_rank')
+            ->orderBy('position_sort.id')
+            ->orderBy('structure_sort.name')
+            ->orderBy('personnels.surname');
     }
 
     /**
