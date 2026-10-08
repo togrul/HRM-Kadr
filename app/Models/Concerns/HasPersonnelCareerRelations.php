@@ -41,6 +41,7 @@ trait HasPersonnelCareerRelations
             ->orderByDesc('leave_date');
     }
 
+    /** @return HasOne<PersonnelLaborActivity, $this> */
     public function currentWork(): HasOne
     {
         return $this->hasOne(PersonnelLaborActivity::class, 'tabel_no', 'tabel_no')
@@ -72,6 +73,7 @@ trait HasPersonnelCareerRelations
         return $this->hasMany(PersonnelRank::class, 'tabel_no', 'tabel_no')->orderBy('given_date');
     }
 
+    /** @return HasOne<PersonnelRank, $this> */
     public function latestRank(): HasOne
     {
         return $this->hasOne(PersonnelRank::class, 'tabel_no', 'tabel_no')

@@ -45,6 +45,7 @@ class CandidateApplication extends Model
         return $this->belongsTo(Candidate::class);
     }
 
+    /** @return BelongsTo<JobOpening, $this> */
     public function opening(): BelongsTo
     {
         return $this->belongsTo(JobOpening::class, 'job_opening_id');

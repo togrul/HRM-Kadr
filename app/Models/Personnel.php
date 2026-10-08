@@ -42,6 +42,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property int|null $probation_amount
  * @property-read Position|null $position
  * @property-read Structure|null $structure
+ * @property bool|null $is_pending
  */
 #[ObservedBy(PersonnelObserver::class)]
 class Personnel extends Model

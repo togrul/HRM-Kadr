@@ -38,14 +38,14 @@ class NotificationList extends Component
     public function open(string $notificationId): void
     {
         $user = auth()->user();
-        abort_unless($user, 403);
+        abort_unless($user !== null, 403);
 
         $notification = $user->notifications()->whereKey($notificationId)->firstOrFail();
         $notification->markAsRead();
         app(NotificationCountCache::class)->forgetUser((int) $user->id);
         $this->dispatchNotificationRefresh();
 
-        $route = NotificationTarget::route((array) $notification->data);
+        $route = NotificationTarget::route((array) $notification->getAttribute('data'));
 
         if ($route !== 'notifications') {
             $this->redirectRoute($route, navigate: true);

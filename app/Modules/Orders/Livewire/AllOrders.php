@@ -34,6 +34,9 @@ use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/**
+ * @property-read Collection $statuses Livewire computed (getStatusesProperty)
+ */
 #[On(['orderAdded', 'orderWasDeleted'])]
 class AllOrders extends Component
 {
@@ -168,7 +171,7 @@ class AllOrders extends Component
             default => (int) $order->status_id,
         };
 
-        return [$color, (string) ($order->status?->name ?? '—')];
+        return [$color, (string) ($order->status->name ?? '—')];
     }
 
     #[Renderless]

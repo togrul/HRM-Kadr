@@ -8,6 +8,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * @property string|null $file_path
+ * @property string|null $disk
+ */
 class OnboardingDocumentTemplate extends Model
 {
     use HasFactory;

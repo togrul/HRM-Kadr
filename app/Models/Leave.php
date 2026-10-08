@@ -24,6 +24,14 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property mixed $starts_at
  * @property mixed $ends_at
  * @property int|null $total_days
+ * @property string|null $tabel_no
+ * @property int|null $status_id
+ * @property string|null $partial_day_part
+ * @property string|null $starts_time
+ * @property string|null $ends_time
+ * @property int|null $total_minutes
+ * @property \Carbon\CarbonInterface|null $approved_at
+ * @property string|null $submission_source
  */
 class Leave extends Model
 {
@@ -97,6 +105,7 @@ class Leave extends Model
         return $this->hasOne(LeaveStatusLog::class, 'leave_id')->latestOfMany('changed_at');
     }
 
+    /** @return BelongsTo<Personnel, $this> */
     public function approver(): BelongsTo
     {
         return $this->belongsTo(Personnel::class, 'approved_by', 'id');
@@ -107,6 +116,7 @@ class Leave extends Model
         return $this->belongsTo(Personnel::class, 'assigned_to', 'id');
     }
 
+    /** @return BelongsTo<Personnel, $this> */
     public function fallbackApprover(): BelongsTo
     {
         return $this->belongsTo(Personnel::class, 'fallback_approver_personnel_id', 'id');
@@ -411,7 +421,7 @@ class Leave extends Model
                     $start = CarbonImmutable::parse($model->starts_at->format('Y-m-d').' '.(string) $model->starts_time);
                     $end = CarbonImmutable::parse($model->starts_at->format('Y-m-d').' '.(string) $model->ends_time);
                     $model->total_minutes = $end->greaterThan($start)
-                        ? $start->diffInMinutes($end)
+                        ? (int) $start->diffInMinutes($end)
                         : null;
                 } else {
                     $model->total_minutes = null;

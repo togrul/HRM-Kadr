@@ -170,12 +170,14 @@ class OnboardingLibraryReadService extends AbstractLibraryReadService
      */
     protected function itemMeta(Model $item): ?string
     {
-        return filled($item->version) ? 'v'.$item->version : null;
+        $version = $item->getAttribute('version');
+
+        return filled($version) ? 'v'.$version : null;
     }
 
     protected function itemUrl(Model $item): ?string
     {
-        return $item->fileUrl();
+        return $item instanceof OnboardingDocumentTemplate ? $item->fileUrl() : null;
     }
 
     protected function summaryData(): array

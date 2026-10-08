@@ -92,7 +92,7 @@ trait InteractsWithRequisitionForm
     public function requisitionFormStatuses(): array
     {
         $statuses = ['draft', 'open', 'closed', 'cancelled'];
-        $current = (string) (($this->requisition ?? null)?->status ?? '');
+        $current = (string) (($this->requisition ?? null)->status ?? '');
 
         if (in_array($current, ['pending_approval', 'approved', 'rejected'], true)) {
             $statuses[] = $current;

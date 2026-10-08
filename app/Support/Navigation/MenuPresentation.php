@@ -56,7 +56,7 @@ class MenuPresentation
      * over is filled in the configured menu order.
      *
      * @param  Collection<int, object{routeBase: string}>  $visibleMenus  already permission-gated
-     * @return array{0: Collection<int, object>, 1: Collection<int, object>}
+     * @return array{0: Collection<int, object{routeBase: string}>, 1: Collection<int, object{routeBase: string}>}
      */
     public static function splitPinned(Collection $visibleMenus, ?Authorizable $user, int $count = 5): array
     {

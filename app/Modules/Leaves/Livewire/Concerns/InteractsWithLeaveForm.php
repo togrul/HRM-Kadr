@@ -61,7 +61,7 @@ trait InteractsWithLeaveForm
 
         if ($key === 'assigned_to') {
             // Nobody approves their own leave.
-            if ($personnelId !== null && $personnelId === $this->selectedApplicantPersonnel?->id) {
+            if ($personnelId !== null && $personnelId === $this->selectedApplicantPersonnel()?->id) {
                 $this->addError('leave.assigned_to.id', __('leaves::common.validation.self_approver'));
 
                 return;
@@ -687,7 +687,7 @@ trait InteractsWithLeaveForm
 
     private function buildAssignmentPreview(): array
     {
-        $personnel = $this->selectedApplicantPersonnel;
+        $personnel = $this->selectedApplicantPersonnel();
 
         if (! $personnel) {
             return [

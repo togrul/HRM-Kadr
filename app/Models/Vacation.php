@@ -6,6 +6,11 @@ use App\Traits\PersonnelTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int|null $year
+ * @property int|null $vacation_days_total
+ * @property int|null $remaining_days
+ */
 class Vacation extends Model
 {
     use HasFactory;

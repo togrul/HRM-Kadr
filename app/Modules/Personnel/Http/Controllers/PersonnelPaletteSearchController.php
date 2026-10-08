@@ -30,7 +30,7 @@ class PersonnelPaletteSearchController
                 'id' => $personnel->id,
                 'name' => $personnel->fullname,
                 'tabel_no' => (string) $personnel->tabel_no,
-                'position' => (string) ($personnel->position?->name ?? ''),
+                'position' => (string) ($personnel->position->name ?? ''),
                 'left' => $personnel->leave_work_date !== null,
                 'url' => route('personnel.show', $personnel->id),
             ])

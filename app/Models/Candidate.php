@@ -133,6 +133,7 @@ class Candidate extends Model
         return $this->hasMany(CandidateApplication::class);
     }
 
+    /** @return HasOne<CandidateApplication, $this> */
     public function latestApplication(): HasOne
     {
         return $this->hasOne(CandidateApplication::class)->latestOfMany('id');

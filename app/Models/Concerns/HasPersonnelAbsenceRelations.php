@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  */
 trait HasPersonnelAbsenceRelations
 {
+    /** @return HasMany<Vacation, $this> */
     public function yearlyVacation(): HasMany
     {
         return $this->hasMany(Vacation::class, 'tabel_no', 'tabel_no')->orderByDesc('year');
