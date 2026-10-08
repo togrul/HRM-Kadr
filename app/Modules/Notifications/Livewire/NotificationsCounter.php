@@ -15,6 +15,9 @@ class NotificationsCounter extends Component
 
     public int|string|null $notificationCount = null;
 
+    /** The exact unread total, for the badge's label (the badge itself caps at "9+"). */
+    public int $unreadTotal = 0;
+
     public function mount(): void
     {
         $this->refreshCount();
@@ -26,11 +29,13 @@ class NotificationsCounter extends Component
         $user = auth()->user();
         if (! $user) {
             $this->notificationCount = null;
+            $this->unreadTotal = 0;
 
             return;
         }
 
         $count = app(NotificationCountCache::class)->unreadCount((int) $user->id);
+        $this->unreadTotal = $count;
 
         $this->notificationCount = $count > self::NOTIFICATION_THRESHOLD
             ? self::NOTIFICATION_THRESHOLD.'+'

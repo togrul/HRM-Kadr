@@ -404,7 +404,7 @@ return [
         'certificate_personnel_value' => 'Əməkdaş: :personnel',
         'delivery_summary_meta' => 'Sessiya: :sessions • tamamlanan: :completed • qeyd: :records • sertifikat: :certificates',
         'delivery_pivot_meta' => 'Orta rəy balı: :score',
-        'full_lists_hint' => 'Dashboard kartları limitlidir. Tam siyahılara burada səhifələmə ilə baxın.',
+        'full_lists_hint' => 'İdarə paneli kartları məhduddur. Tam siyahılara burada səhifələmə ilə baxın.',
         'certificate_viewer_hint' => 'Yüklənmiş sənədi burada daha geniş görünüşdə yoxlayın.',
         'all_statuses' => 'Bütün statuslar',
         'visible_records' => 'Görünən',

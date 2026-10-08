@@ -148,6 +148,18 @@ return [
             'private' => 'Private',
             'military' => 'Military',
         ],
+        'pack_descriptions' => [
+            'corporate' => 'Standard HR rules for a company-type installation.',
+            'public' => 'A steadier, standard approval flow for public bodies.',
+            'private' => 'A ready-made pack for private organisations with a lighter HR line.',
+            'military' => 'Military profile with a hierarchical, multi-level approval flow.',
+        ],
+        'pack_recommended_for' => [
+            'corporate' => 'Private companies and corporate organisations',
+            'public' => 'Government offices and public organisations',
+            'private' => 'Small and medium private organisations',
+            'military' => 'Military and strict chain-of-command organisations',
+        ],
         'profiles' => [
             'default' => 'Default',
             'public' => 'Public',
@@ -173,6 +185,13 @@ return [
             'templates' => 'Templates',
             'evaluations' => 'Evaluations',
             'tests' => 'Tests',
+            'kpi_scorecards' => 'KPI scorecards',
+            'kpi_analytics' => 'KPI analytics',
+            'kpi_bonus' => 'KPI bonus',
+            'kpi_library' => 'KPI library',
+            'goals' => 'Goals',
+            'succession' => 'Succession',
+            'feedback' => '360° feedback',
         ],
         'workflow_test_tabs' => [
             'banks' => 'Banks',

@@ -31,7 +31,7 @@ return [
         'corporate' => [
             'meta' => [
                 'label' => 'Corporate',
-                'description' => 'Şirkət tipli deployment üçün standart HR qaydaları.',
+                'description' => 'Şirkət tipli quraşdırma üçün standart HR qaydaları.',
                 'recommended_for' => 'Özəl şirkətlər və korporativ qurumlar',
             ],
             'menu_visibility' => $allMenuVisibility,
@@ -121,7 +121,7 @@ return [
         'private' => [
             'meta' => [
                 'label' => 'Private',
-                'description' => 'Daha yüngül HR xətti olan özəl təşkilatlar üçün preset.',
+                'description' => 'Daha yüngül HR xətti olan özəl təşkilatlar üçün hazır paket.',
                 'recommended_for' => 'Kiçik və orta özəl qurumlar',
             ],
             'menu_visibility' => $allMenuVisibility,

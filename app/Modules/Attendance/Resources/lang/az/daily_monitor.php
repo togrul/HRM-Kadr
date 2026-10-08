@@ -4,19 +4,19 @@ return [
     'title' => 'Günlük monitor',
     'filters' => [
         'title' => 'Filtrlər',
-        'description' => 'Seçilmiş scope üzrə bugünkü davamiyyət statusunu, gecikmələri və çatışmayan qeydləri nəzərdən keçirin.',
+        'description' => 'Seçilmiş əhatə üzrə bugünkü davamiyyət statusunu, gecikmələri və çatışmayan qeydləri nəzərdən keçirin.',
         'date' => 'Tarix',
         'status' => 'Status',
         'search' => 'Axtarış',
         'search_placeholder' => 'Ad və ya tabel nömrəsi',
     ],
     'scope' => [
-        'badge' => 'Struktur scope',
+        'badge' => 'Struktur əhatəsi',
         'description' => 'Yalnız seçilmiş struktur ağacındakı əməkdaşlar göstərilir.',
     ],
     'breakdown' => [
         'title' => 'Günlük status bölgüsü',
-        'description' => 'Seçilmiş tarix və struktur scope üçün canlı sayğaclar.',
+        'description' => 'Seçilmiş tarix və struktur əhatəsi üçün canlı sayğaclar.',
     ],
     'cards' => [
         'present' => 'İşdə',

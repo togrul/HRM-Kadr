@@ -7,7 +7,7 @@ return [
     ],
     'actions' => [
         'add_settings' => 'Tənzimləmə əlavə et',
-        'save_presets' => 'Presetləri yadda saxla',
+        'save_presets' => 'Hazır seçimləri yadda saxla',
         'create_delegation' => 'Həvalə yarat',
         'stop_delegation' => 'Dayandır',
     ],
@@ -33,7 +33,7 @@ return [
         'basis_placeholder' => 'Əmr nömrəsi və ya əsas',
         'active_delegations' => 'Aktiv həvalələr',
         'instead_of' => ':chief əvəzinə',
-        'candidate_status_whitelist_presets' => 'Namizəd status whitelist presetləri',
+        'candidate_status_whitelist_presets' => 'Namizəd statuslarının icazəli siyahıları',
         'military_mode_status_ids' => 'Hərbi rejim status ID-ləri',
         'civilian_mode_status_ids' => 'Mülki rejim status ID-ləri',
         'military_short' => 'Hərbi',

@@ -111,7 +111,7 @@ return [
         'period_points' => 'dövr nöqtəsi',
         'open_dynamic' => 'Dinamik aç',
         'open_report' => 'Hesabata keç',
-        'view_action' => 'VIEW',
+        'view_action' => 'Bax',
         'hours_per_month' => 'saat/ay',
     ],
     'actions' => [

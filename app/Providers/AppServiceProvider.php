@@ -17,11 +17,14 @@ use App\Services\StructurePathService;
 use App\Services\StructureService;
 use App\Services\UserPersonnelLinkResolver;
 use App\Support\Database\InstalledTables;
+use App\Support\Livewire\ClearFieldErrorOnUpdate;
+use App\Support\Ui\ContextPanelState;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Blaze\Blaze;
+use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -33,6 +36,9 @@ class AppServiceProvider extends ServiceProvider
         // Every read path that guards an optional module table shares one table listing
         // per request instead of a Schema::hasTable() round trip apiece.
         $this->app->singleton(InstalledTables::class);
+
+        // Per request: the page's context panel reports whether it has content (see layout).
+        $this->app->scoped(ContextPanelState::class);
 
         $this->app->singleton(ProfileState::class, fn () => new ProfileState(
             config('profiles.profiles', []),
@@ -86,6 +92,7 @@ class AppServiceProvider extends ServiceProvider
         $this->registerBladeDirectives();
         $this->configureBlazeOptimization();
         $this->loadLogDatabaseMigrationsInTests();
+        Livewire::componentHook(ClearFieldErrorOnUpdate::class);
     }
 
     /**

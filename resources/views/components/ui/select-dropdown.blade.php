@@ -51,7 +51,8 @@
     @if($wireModel) currentValue: @entangle($wireModel).live, @endif
   }"
   x-on:click.window="if (!$el.contains($event.target) && !($refs.panel && $refs.panel.contains($event.target))) setOpen(false)"
-  x-on:keydown.escape.window="setOpen(false)"
+  {{-- capture phase: an open list takes Esc for itself, so the side panel around it stays open --}}
+  x-on:keydown.escape.window.capture="if (isOpen) { $event.stopPropagation(); closeAndFocusButton(); }"
   x-on:ui-select-opened.window="if ($event.detail?.uid !== uid) setOpen(false)"
   x-on:ui-select-option-group-loaded.window="
     if ($event.detail?.group !== loadOnOpen || !pendingReopen) return;
@@ -76,11 +77,14 @@
       x-ref="button"
       class="{{ \App\Support\Ui\FieldStyles::select('relative flex items-center text-left') }} {{ $hasError ? 'border-rose-300 bg-rose-50' : '' }} {{ $disabled ? 'cursor-not-allowed opacity-60' : '' }}"
       :aria-expanded="isOpen"
-      @if ($hasError) aria-invalid="true" @endif
+      aria-haspopup="listbox"
+      aria-controls="{{ $uid }}-listbox"
+      @if ($hasError) aria-invalid="true" data-error-classes="border-rose-300 bg-rose-50" data-error-key="{{ $wireModel }}" @endif
       @if ($attributes->get('aria-required')) aria-required="{{ $attributes->get('aria-required') }}" @endif
       @if ($label) aria-labelledby="{{ $labelId }}" @elseif ($attributes->get('aria-label')) aria-label="{{ $attributes->get('aria-label') }}" @endif
       :disabled="isDisabled"
       x-on:click.prevent.stop="toggle()"
+      x-on:keydown="onTriggerKeydown($event)"
     >
       <span class="flex items-center">
         <span class="block truncate text-ink" x-text="selectedLabel()">{{ $placeholder }}</span>
@@ -95,6 +99,8 @@
     <template x-teleport="body">
       <ul
         x-ref="panel"
+        id="{{ $uid }}-listbox"
+        role="listbox"
         x-show="isOpen && positioned && !isDisabled" x-transition.opacity.duration.100ms x-cloak
         :class="openUp ? 'origin-bottom' : 'origin-top'"
         :style="panelStyles"
@@ -110,11 +116,13 @@
                 wire:model.live.debounce.300ms="{{ $searchModel }}"
                 x-model.live.debounce.150ms="localSearch"
                 placeholder="{{ $searchPlaceholder ?? __('ui::common.placeholders.search') }}"
+                x-ref="search"
+                data-dirty-ignore
                 x-on:click.stop="$event.stopPropagation()"
                 x-on:focus.stop="setOpen(true)"
-                x-on:input.stop="setOpen(true)"
-                x-on:keyup.stop="setOpen(true)"
-                x-on:keydown.stop="setOpen(true)"
+                x-on:input.stop="setOpen(true); resetActive()"
+                x-on:keyup.stop="null"
+                x-on:keydown.stop="onSearchKeydown($event)"
                 x-on:change.stop="null"
               />
             </div>
@@ -124,11 +132,15 @@
             <div class="px-1">
               <input
                 type="search"
+                x-ref="search"
+                data-dirty-ignore
                 x-model.debounce.100ms="localSearch"
                 placeholder="{{ $searchPlaceholder ?? __('ui::common.placeholders.search') }}"
+                aria-controls="{{ $uid }}-listbox"
                 class="{{ \App\Support\Ui\FieldStyles::input('mt-1') }}"
                 x-on:click.stop
-                x-on:keydown.stop="setOpen(true)"
+                x-on:input.stop="resetActive()"
+                x-on:keydown.stop="onSearchKeydown($event)"
               />
             </div>
           </li>
@@ -143,6 +155,8 @@
         {{-- null/placeholder option --}}
         @if ($clearable)
         <li class="group hrm-select-option"
+            role="option"
+            data-select-option
             x-show="matchesSearch(placeholder)"
             x-on:click.prevent.stop="select(null, placeholder)">
           <div class="flex items-center">
@@ -161,6 +175,8 @@
           <li
             wire:key="{{ $uid }}-{{ data_get($opt,'id') }}"
             class="group hrm-select-option"
+            role="option"
+            data-select-option
             data-option-id="{{ data_get($opt,'id') }}"
             data-option-label="{{ data_get($opt,'label', data_get($opt,'name', data_get($opt,'title', data_get($opt,'text')))) }}"
             x-show="matchesSearch($el.dataset.optionLabel)"

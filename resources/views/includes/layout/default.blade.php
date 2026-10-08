@@ -1,5 +1,12 @@
 @php
     $hasSidebar = isset($sidebar);
+    // A page whose context panel has nothing but its title starts collapsed (decided here,
+    // on the server, so the empty column never flashes). The user's own toggle on such a
+    // page is remembered per page and wins; pages with content keep the global choice.
+    $panelEmpty = $hasSidebar && app(\App\Support\Ui\ContextPanelState::class)->pull();
+    $panelStorageKey = $panelEmpty
+        ? 'hrm.panel.'.(request()->route()?->getName() ?? trim(request()->path(), '/'))
+        : 'hrm.panelCollapsed';
 @endphp
 
 @once
@@ -9,10 +16,13 @@
                 railOpen: false,
                 paletteOpen: false,
                 mobilePanelOpen: false,
-                panelCollapsed: localStorage.getItem('hrm.panelCollapsed') === '1',
+                // seeded by the per-page script next to the panel (it runs before Alpine)
+                panelCollapsed: document.documentElement.hasAttribute('data-panel-collapsed'),
                 togglePanel() {
                     this.panelCollapsed = ! this.panelCollapsed;
-                    localStorage.setItem('hrm.panelCollapsed', this.panelCollapsed ? '1' : '0');
+                    try {
+                        localStorage.setItem(window.__hrmPanelKey || 'hrm.panelCollapsed', this.panelCollapsed ? '1' : '0');
+                    } catch (e) {}
                     document.documentElement.toggleAttribute('data-panel-collapsed', this.panelCollapsed);
                 },
                 openPalette() {
@@ -55,6 +65,28 @@
 
         <main class="flex w-full flex-col items-stretch gap-2 px-2 pb-4 pt-2 lg:flex-row lg:items-start">
             @if ($hasSidebar)
+                {{-- runs while the page is parsed (and again after wire:navigate), before the panel paints --}}
+                <script>
+                    (function () {
+                        var key = @js($panelStorageKey);
+                        var collapsed = @js($panelEmpty);
+                        try {
+                            var stored = localStorage.getItem(key);
+                            if (stored !== null) {
+                                collapsed = stored === '1';
+                            }
+                        } catch (e) {}
+                        window.__hrmPanelKey = key;
+                        document.documentElement.toggleAttribute('data-panel-collapsed', collapsed);
+                        var shell = window.Alpine && window.Alpine.store ? window.Alpine.store('hrmShell') : null;
+                        if (shell) {
+                            shell.panelCollapsed = collapsed;
+                        }
+                    })();
+                </script>
+            @endif
+
+            @if ($hasSidebar && ! $panelEmpty)
                 {{-- phones: the context panel (sections, status filters, structure tree) opens from one compact control --}}
                 <button
                     type="button"
@@ -67,8 +99,12 @@
                     <span>{{ __('ui::common.labels.sections_and_filters') }}</span>
                     <svg class="h-3.5 w-3.5 text-ink-faint transition" :class="$store.hrmShell.mobilePanelOpen && 'rotate-180'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
                 </button>
+            @endif
+
+            @if ($hasSidebar)
                 <aside
                     id="sidebar"
+                    @if ($panelEmpty) data-panel-empty @endif
                     :class="{ '!block': $store.hrmShell.mobilePanelOpen, 'lg:w-0 lg:opacity-0 lg:pointer-events-none': $store.hrmShell.panelCollapsed, 'lg:w-panel lg:opacity-100': ! $store.hrmShell.panelCollapsed }"
                     class="hrm-panel-shell hidden w-full shrink-0 overflow-x-hidden lg:sticky lg:top-2 lg:block lg:w-panel"
                     role="complementary"

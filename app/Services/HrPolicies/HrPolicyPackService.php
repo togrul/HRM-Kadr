@@ -37,8 +37,8 @@ class HrPolicyPackService
                 return [
                     'key' => $key,
                     'label' => $this->translatedPackLabel($key, (string) Arr::get($config, 'meta.label', ucfirst($key))),
-                    'description' => (string) Arr::get($config, 'meta.description', ''),
-                    'recommended_for' => (string) Arr::get($config, 'meta.recommended_for', ''),
+                    'description' => $this->translatedPackMeta('pack_descriptions', $key, (string) Arr::get($config, 'meta.description', '')),
+                    'recommended_for' => $this->translatedPackMeta('pack_recommended_for', $key, (string) Arr::get($config, 'meta.recommended_for', '')),
                     'menu_count' => count(array_filter((array) Arr::get($config, 'menu_visibility', []))),
                     'permission_count' => count(array_filter((array) Arr::get($config, 'permission_flags', []))),
                 ];
@@ -112,8 +112,8 @@ class HrPolicyPackService
             'active_profile' => $this->translatedProfileLabel($this->activeProfile()),
             'active_pack' => $pack,
             'pack_label' => $this->translatedPackLabel($pack, (string) Arr::get($config, 'meta.label', ucfirst($pack))),
-            'pack_description' => (string) Arr::get($config, 'meta.description', ''),
-            'recommended_for' => (string) Arr::get($config, 'meta.recommended_for', ''),
+            'pack_description' => $this->translatedPackMeta('pack_descriptions', $pack, (string) Arr::get($config, 'meta.description', '')),
+            'recommended_for' => $this->translatedPackMeta('pack_recommended_for', $pack, (string) Arr::get($config, 'meta.recommended_for', '')),
             'modules' => collect($moduleEntries)
                 ->map(fn (array $entry, string $slug): array => [
                     'key' => $slug,
@@ -170,6 +170,14 @@ class HrPolicyPackService
         $translationKey = 'admin::references.diagnostics.pack_labels.'.$key;
 
         return Lang::has($translationKey) ? __($translationKey) : $fallback;
+    }
+
+    /** Pack descriptions shown on the diagnostics screen; config text only as a fallback. */
+    private function translatedPackMeta(string $group, string $key, string $fallback): string
+    {
+        $translationKey = 'admin::references.diagnostics.'.$group.'.'.$key;
+
+        return Lang::has($translationKey) ? (string) __($translationKey) : $fallback;
     }
 
     private function translatedProfileLabel(string $key): string
