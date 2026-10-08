@@ -12,6 +12,7 @@ use App\Modules\Personnel\Application\Services\MyHr\ApprovalRouteResolverService
 use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestCorrectionService;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestsReadService;
 use App\Modules\Personnel\Support\MyHr\MyHrAccess;
+use App\Support\Uploads\UploadRules;
 use Carbon\Carbon;
 use Closure;
 use Illuminate\Contracts\View\View;
@@ -325,20 +326,22 @@ class MyHrRequests extends Component
             'leaveForm.starts_time' => ['required_if:leaveForm.duration_unit,hour', 'nullable', 'date_format:H:i'],
             'leaveForm.ends_time' => ['required_if:leaveForm.duration_unit,hour', 'nullable', 'date_format:H:i', 'after:leaveForm.starts_time'],
             'leaveForm.reason' => ['nullable', 'string', 'max:2000'],
-            'leaveDocument' => [
-                $requiresDocument ? 'required' : 'nullable',
-                function (string $attribute, mixed $value, Closure $fail): void {
-                    if ($value === null || $value === '') {
-                        return;
-                    }
+            'leaveDocument' => $this->leaveDocument instanceof TemporaryUploadedFile
+                ? UploadRules::document($requiresDocument)
+                : [
+                    $requiresDocument ? 'required' : 'nullable',
+                    function (string $attribute, mixed $value, Closure $fail): void {
+                        if ($value === null || $value === '') {
+                            return;
+                        }
 
-                    if ($value instanceof TemporaryUploadedFile || is_string($value)) {
-                        return;
-                    }
+                        if ($value instanceof TemporaryUploadedFile || is_string($value)) {
+                            return;
+                        }
 
-                    $fail(__('validation.file', ['attribute' => __('personnel::my_hr.requests.fields.supporting_document')]));
-                },
-            ],
+                        $fail(__('validation.file', ['attribute' => __('personnel::my_hr.requests.fields.supporting_document')]));
+                    },
+                ],
         ];
     }
 

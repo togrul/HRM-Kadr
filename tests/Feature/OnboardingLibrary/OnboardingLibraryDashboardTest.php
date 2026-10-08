@@ -279,6 +279,37 @@ class OnboardingLibraryDashboardTest extends TestCase
         $this->assertLessThanOrEqual(16, count(DB::getQueryLog()));
     }
 
+    public function test_template_upload_rejects_disguised_and_browser_executable_files(): void
+    {
+        Storage::fake('public');
+        $this->seedReferenceData();
+
+        $user = User::factory()->create(['is_active' => true]);
+        $user->givePermissionTo(
+            Permission::findOrCreate('view-onboarding-library', 'web'),
+            Permission::findOrCreate('manage-onboarding-document-templates', 'web'),
+        );
+        $this->actingAs($user);
+
+        $uploads = [
+            UploadedFile::fake()->create('rules.pdf', 1, 'text/plain'),
+            UploadedFile::fake()->create('page.html', 1, 'text/html'),
+            UploadedFile::fake()->create('image.svg', 1, 'image/svg+xml'),
+        ];
+
+        foreach ($uploads as $upload) {
+            Livewire::test(Dashboard::class)
+                ->set('templateForm.title', 'Daxili qaydalar')
+                ->set('templateForm.document_type', 'policy')
+                ->set('templateForm.version', '1.0')
+                ->set('templateUpload', $upload)
+                ->call('saveTemplate')
+                ->assertHasErrors(['templateUpload' => 'mimes']);
+        }
+
+        $this->assertSame(0, OnboardingDocumentTemplate::query()->count());
+    }
+
     private function makePersonnel(string $email): Personnel
     {
         return Personnel::withoutEvents(fn () => Personnel::query()->create([

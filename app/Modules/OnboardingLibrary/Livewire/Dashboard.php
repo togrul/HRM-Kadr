@@ -7,6 +7,7 @@ use App\Modules\OnboardingLibrary\Application\Services\OnboardingLibraryReadServ
 use App\Modules\Personnel\Contracts\OnboardingAssignmentManager;
 use App\Support\Library\LibraryExportAction;
 use App\Support\Livewire\AbstractLibraryDashboard;
+use App\Support\Uploads\UploadRules;
 use Livewire\Attributes\Computed;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -51,7 +52,7 @@ class Dashboard extends AbstractLibraryDashboard
             'templateForm.requires_acknowledgement' => 'boolean',
             'templateForm.is_active' => 'boolean',
             'templateForm.auto_assign_new_hires' => 'boolean',
-            'templateUpload' => 'required|file|max:10240',
+            'templateUpload' => UploadRules::document(),
         ], attributes: [
             'templateForm.title' => __('onboarding-library::dashboard.fields.template_title'),
             'templateForm.document_type' => __('onboarding-library::dashboard.fields.document_type'),

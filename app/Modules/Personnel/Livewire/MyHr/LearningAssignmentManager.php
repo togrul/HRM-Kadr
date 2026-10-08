@@ -7,6 +7,7 @@ use App\Models\EmployeeContentAssignment;
 use App\Models\Personnel;
 use App\Modules\Personnel\Application\Services\MyHr\LearningAssignmentManagerService;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrLearningReadService;
+use App\Support\Uploads\UploadRules;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Computed;
@@ -60,7 +61,7 @@ class LearningAssignmentManager extends Component
             'assetForm.visibility' => 'required|in:internal,public',
             'assetForm.is_required' => 'boolean',
             'assetForm.estimated_minutes' => 'nullable|integer|min:1|max:600',
-            'assetUpload' => 'nullable|file|max:20480',
+            'assetUpload' => UploadRules::learningAsset(),
         ], attributes: [
             'assetForm.title' => __('personnel::my_hr.learning_admin.fields.asset_title'),
             'assetForm.content_type' => __('personnel::my_hr.learning_admin.fields.content_type'),

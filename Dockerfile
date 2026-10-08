@@ -58,6 +58,11 @@ RUN mkdir -p /var/www/html/storage/framework/cache/data \
 
 RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
 
+# Yüklənmiş faylların (/storage/...) veb ilə açılması üçün public/storage → storage/app/public
+# linki image-in içində yaradılır. Nisbi link konteynerin yolundan asılı deyil.
+RUN mkdir -p storage/app/public && chown unit:unit storage/app/public \
+ && rm -rf public/storage && ln -s ../storage/app/public public/storage
+
 COPY unit.json /docker-entrypoint.d/unit.json
 
 EXPOSE 8000
