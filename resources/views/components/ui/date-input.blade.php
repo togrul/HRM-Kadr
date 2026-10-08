@@ -25,7 +25,11 @@
     $errorClasses = 'border-rose-300 bg-rose-50';
     $minDate = filled($min) ? \Carbon\Carbon::parse($min)->toDateString() : null;
     $maxDate = filled($max) ? \Carbon\Carbon::parse($max)->toDateString() : null;
-    $fieldAttributes = $attributes->except(array_filter([$wireModelKey, 'name', 'value', 'type', 'min', 'max', 'wire:key']));
+    // x-model (an Alpine parent, e.g. the date half of x-ui.datetime-input) binds the ISO value too.
+    $alpineModelKey = collect($attributes->getAttributes())
+        ->keys()
+        ->first(fn ($key) => str_starts_with((string) $key, 'x-model'));
+    $fieldAttributes = $attributes->except(array_filter([$wireModelKey, $alpineModelKey, 'name', 'value', 'type', 'min', 'max', 'wire:key']));
 @endphp
 
 <div
@@ -37,6 +41,7 @@
             @if ($syncLive) iso: @entangle($wireModel).live, @else iso: @entangle($wireModel), @endif
         @endif
     }"
+    @if ($alpineModelKey) x-modelable="iso" {{ $alpineModelKey }}="{{ $attributes->get($alpineModelKey) }}" @endif
 >
     <input
         type="text"
@@ -53,7 +58,7 @@
         @if ($hasError) aria-invalid="true" data-error-classes="{{ $errorClasses }}" @endif
         {{ $fieldAttributes->except('placeholder')->merge(['class' => \App\Support\Ui\FieldStyles::input('hrm-num '.($hasError ? $errorClasses : ''))]) }}
     />
-    @if (! $wireModel && filled($name))
+    @if (! $wireModel && ! $alpineModelKey && filled($name))
         <input type="hidden" name="{{ $name }}" x-bind:value="iso" value="{{ $value }}" />
     @endif
 </div>

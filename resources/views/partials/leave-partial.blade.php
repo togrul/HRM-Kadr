@@ -103,7 +103,7 @@
         @if ($leave->duration_unit === 'hour')
             <div class="flex flex-col">
                 <x-label for="leave.starts_time">{{ __('leaves::common.labels.start_time') }}</x-label>
-                <input id="leave.starts_time" type="time" wire:model.live="leave.starts_time" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
+                <x-ui.time-input id="leave.starts_time" wire:model.live="leave.starts_time" />
                 @error('leave.starts_time')
                     <x-validation>{{ $message }}</x-validation>
                 @enderror
@@ -111,7 +111,7 @@
 
             <div class="flex flex-col">
                 <x-label for="leave.ends_time">{{ __('leaves::common.labels.end_time') }}</x-label>
-                <input id="leave.ends_time" type="time" wire:model.live="leave.ends_time" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
+                <x-ui.time-input id="leave.ends_time" wire:model.live="leave.ends_time" />
                 @error('leave.ends_time')
                     <x-validation>{{ $message }}</x-validation>
                 @enderror

@@ -104,12 +104,12 @@
                     </div>
                     <div>
                         <x-label for="session-start">{{ __('training_needs::dashboard.fields.scheduled_start_at') }}</x-label>
-                        <input id="session-start" type="datetime-local" wire:model="sessionForm.scheduled_start_at" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
+                        <x-ui.datetime-input id="session-start" wire:model="sessionForm.scheduled_start_at" />
                         @error('sessionForm.scheduled_start_at') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div>
                         <x-label for="session-end">{{ __('training_needs::dashboard.fields.scheduled_end_at') }}</x-label>
-                        <input id="session-end" type="datetime-local" wire:model="sessionForm.scheduled_end_at" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
+                        <x-ui.datetime-input id="session-end" wire:model="sessionForm.scheduled_end_at" />
                         @error('sessionForm.scheduled_end_at') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div>

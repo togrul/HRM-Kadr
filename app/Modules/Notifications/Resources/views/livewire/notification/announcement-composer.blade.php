@@ -60,7 +60,7 @@
                 @if ($form['schedule_mode'] === 'custom')
                     <div class="mt-4 space-y-2">
                         <label class="hrm-eyebrow">{{ __('notifications::common.fields.scheduled_at') }}</label>
-                        <input type="datetime-local" wire:model="form.scheduled_at" class="w-full rounded-2xl border border-zinc-200 bg-zinc-50/70 px-4 py-3 text-sm text-zinc-800">
+                        <x-ui.datetime-input wire:model="form.scheduled_at" />
                         @error('form.scheduled_at') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                 @endif

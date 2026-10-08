@@ -53,17 +53,16 @@
         </div>
 
         @can('manage-performance-evaluation')
-            {{-- status: a coloured pill backed by a native <select> — its option list is
-                 rendered by the browser, so it is never clipped by ancestor overflow. --}}
-            <div class="relative hidden shrink-0 sm:block">
-                <select wire:change="setStatus({{ $node['id'] }}, $event.target.value)"
+            {{-- status: a coloured pill; the shared list is teleported to the page body, so
+                 ancestor overflow never clips it. --}}
+            <div class="hidden shrink-0 sm:block">
+                <x-ui.select wire:change="setStatus({{ $node['id'] }}, $event.target.value)" class="w-auto"
                     title="{{ __('performance_evaluation::goals.statuses.'.$node['status']) }}"
-                    class="h-10 cursor-pointer appearance-none rounded-lg border-0 py-0 pl-3 pr-8 align-middle text-base font-semibold leading-10 sm:text-sm {{ $statusChip }} focus:outline-none focus:ring-2 focus:ring-zinc-200">
+                    :trigger-class="'h-10 cursor-pointer rounded-lg border-0 py-0 pl-3 pr-9 text-base font-semibold leading-10 sm:text-sm '.$statusChip.' focus:outline-none focus:ring-2 focus:ring-zinc-200'">
                     @foreach (['active','at_risk','done','cancelled'] as $st)
                         <option value="{{ $st }}" @selected($node['status'] === $st)>{{ __('performance_evaluation::goals.statuses.'.$st) }}</option>
                     @endforeach
-                </select>
-                <svg class="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </x-ui.select>
             </div>
 
             <div class="flex shrink-0 items-center gap-1">

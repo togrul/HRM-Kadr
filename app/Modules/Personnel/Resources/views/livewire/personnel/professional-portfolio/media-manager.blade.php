@@ -158,7 +158,7 @@
                     <x-ui.input-shell :label="__('personnel::portfolio.fields.headline')" :error="$errors->first('form.headline')"><input wire:model="form.headline" type="text" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
                     <div class="grid gap-3 md:grid-cols-2">
                         <x-ui.input-shell :label="__('personnel::portfolio.fields.publisher_name')" :error="$errors->first('form.publisher_name')"><input wire:model="form.publisher_name" type="text" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
-                        <x-ui.input-shell :label="__('personnel::portfolio.fields.published_at')" :error="$errors->first('form.published_at')"><input wire:model="form.published_at" type="datetime-local" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" /></x-ui.input-shell>
+                        <x-ui.input-shell :label="__('personnel::portfolio.fields.published_at')" :error="$errors->first('form.published_at')"><x-ui.datetime-input wire:model="form.published_at" /></x-ui.input-shell>
                     </div>
                     <div class="grid gap-3 md:grid-cols-2">
                         <x-ui.input-shell :label="__('personnel::portfolio.fields.publisher_type')">

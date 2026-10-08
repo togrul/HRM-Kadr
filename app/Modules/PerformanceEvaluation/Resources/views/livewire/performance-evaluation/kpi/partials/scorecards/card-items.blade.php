@@ -33,7 +33,7 @@
                             </p>
                             <p class="mt-0.5 text-[11.5px] text-ink-faint"><span class="hrm-num">{{ $item->kpi?->code }}</span> · {{ __($t.'.directions_short.'.$item->kpi?->direction) }} · {{ __($t.'.units.'.$item->kpi?->unit) }}</p>
                             @if ($card->status === 'draft' && in_array($role, ['hr', 'manager'], true) && $this->goalOptions !== [])
-                                <x-ui.select wire:change="linkGoal({{ $item->id }}, $event.target.value)" aria-label="{{ __($t.'.a11y.goal', ['kpi' => $item->kpi?->name]) }}" class="mt-1.5 h-10 max-w-[260px] rounded-lg border border-hairline bg-white px-2 text-base text-ink-muted focus:outline-none sm:text-sm">
+                                <x-ui.select wire:change="linkGoal({{ $item->id }}, $event.target.value)" aria-label="{{ __($t.'.a11y.goal', ['kpi' => $item->kpi?->name]) }}" class="mt-1.5 max-w-[260px]">
                                     <option value="">{{ __($t.'.no_goal') }}</option>
                                     @foreach ($this->goalOptions as $goalId => $goalTitle)
                                         <option value="{{ $goalId }}" @selected((int) $item->performance_goal_id === (int) $goalId)>{{ $goalTitle }}</option>
