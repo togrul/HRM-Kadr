@@ -24,6 +24,8 @@ class OrderPeriodGuard
     private const ABSENCE_EFFECTS = [
         'vacation' => AbsencePeriod::TYPE_VACATION,
         'social_leave' => AbsencePeriod::TYPE_VACATION,
+        'education_leave' => AbsencePeriod::TYPE_VACATION,
+        'unpaid_leave' => AbsencePeriod::TYPE_VACATION,
         'business_trip' => AbsencePeriod::TYPE_BUSINESS_TRIP,
     ];
 

@@ -182,9 +182,10 @@ class SeedOrderWordTemplatesCommand extends Command
             ],
 
             // ───────────────────────────── Atalıq məzuniyyəti ───────────────────────────
+            // ƏM m.125.4 — sosial məzuniyyət: illik əmək məzuniyyəti balansından çıxılmır.
             'ataliq_mezuniyyeti' => [
                 'label' => 'Atalıq məzuniyyəti',
-                'effect' => 'vacation',
+                'effect' => 'social_leave',
                 'spec' => [
                     'city' => 'Bakı şəhəri',
                     'subject' => 'Atalıq məzuniyyətinin verilməsi haqqında',
@@ -197,7 +198,7 @@ class SeedOrderWordTemplatesCommand extends Command
                     'basis' => '[Əsas mətni]',
                 ],
                 'manual' => [
-                    'Gün sayı' => ['type' => 'number', 'role' => 'days'],
+                    'Gün sayı' => ['type' => 'number', 'role' => 'days', 'default' => '14'],
                     'Başlama tarixi' => ['type' => 'date', 'role' => 'start_date'],
                     'Bitmə tarixi' => ['type' => 'date', 'role' => 'end_date'],
                     'İşə başlama tarixi' => ['type' => 'date', 'role' => 'return_date'],
@@ -206,13 +207,14 @@ class SeedOrderWordTemplatesCommand extends Command
             ],
 
             // ──────────────────────────── Təhsil məzuniyyəti ────────────────────────────
+            // ƏM m.112.1(c), m.123 — təhsil məzuniyyəti: illik əmək məzuniyyəti balansından çıxılmır.
             'tehsil_mezuniyyeti' => [
                 'label' => 'Təhsil məzuniyyəti',
-                'effect' => 'vacation',
+                'effect' => 'education_leave',
                 'spec' => [
                     'city' => 'Bakı şəhəri',
                     'subject' => 'Ödənişli təhsil məzuniyyətinin verilməsi haqqında',
-                    'preamble' => 'Azərbaycan Respublikası Əmək Məcəlləsinin 124-cü maddəsinin 3-cü hissəsini rəhbər tutaraq',
+                    'preamble' => 'Azərbaycan Respublikası Əmək Məcəlləsinin 123-cü maddəsini rəhbər tutaraq',
                     'clauses' => [
                         '[İş yeri] [Vəzifə], [Təhsil məlumatı] [İşçi (yönlük)] [Gün sayı] təqvim günü müddətində ödənişli təhsil məzuniyyəti verilsin.',
                         'Məzuniyyətin başlanma tarixi [Başlama tarixi], məzuniyyətin bitmə tarixi [Bitmə tarixi], işə başlama tarixi [İşə başlama tarixi] müəyyən edilsin.',
@@ -231,9 +233,10 @@ class SeedOrderWordTemplatesCommand extends Command
             ],
 
             // ──────────────────────────── Ödənişsiz məzuniyyət ──────────────────────────
+            // ƏM m.128–130 — ödənişsiz məzuniyyət: illik əmək məzuniyyəti balansından çıxılmır.
             'odenissiz_mezuniyyet' => [
                 'label' => 'Ödənişsiz məzuniyyət',
-                'effect' => 'vacation',
+                'effect' => 'unpaid_leave',
                 'spec' => [
                     'city' => 'Bakı şəhəri',
                     'subject' => 'Ödənişsiz məzuniyyətin verilməsi haqqında',

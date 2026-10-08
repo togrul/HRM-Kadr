@@ -5,6 +5,7 @@ namespace App\Modules\Orders\Providers;
 use App\Models\OrderType;
 use App\Modules\Orders\Console\Commands\OrdersListQueryBudgetCommand;
 use App\Modules\Orders\Console\Commands\OrdersListRenderBenchmarkCommand;
+use App\Modules\Orders\Console\Commands\ReclassifyNonAnnualLeaveCommand;
 use App\Modules\Orders\Contracts\HireOrderTemplates;
 use App\Modules\Orders\Domain\Contracts\OrderTypeStatusLookupReadRepository;
 use App\Modules\Orders\Infrastructure\Document\HireOrderTemplateLookup;
@@ -25,6 +26,7 @@ class OrdersServiceProvider extends ServiceProvider
             $this->commands([
                 OrdersListQueryBudgetCommand::class,
                 OrdersListRenderBenchmarkCommand::class,
+                ReclassifyNonAnnualLeaveCommand::class,
             ]);
         }
 

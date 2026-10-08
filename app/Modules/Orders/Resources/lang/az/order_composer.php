@@ -156,6 +156,8 @@ return [
     ],
     'effects' => [
         'social_leave' => 'Sosial məzuniyyət (illik balansdan çıxılmır)',
+        'education_leave' => 'Təhsil məzuniyyəti (illik balansdan çıxılmır)',
+        'unpaid_leave' => 'Ödənişsiz məzuniyyət (illik balansdan çıxılmır)',
         'business_trip' => 'Ezamiyyət (işçi ezamiyyətə göndərilir)',
         'none' => 'Yoxdur (yalnız sənəd)',
         'vacation' => 'Məzuniyyət (işçi məzuniyyətə düşür)',
