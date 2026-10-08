@@ -155,12 +155,18 @@
             }
         },
         {
-            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-400 bg-white",
-            "title": "",
-            "text": "",
-            "markup": "<!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->",
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-400 bg-white italic",
+            "title": "İş rejimi: iş günü | Qrafik üzrə: 8 saat (faktiki qeyd yoxdur)",
+            "text": "8",
+            "markup": "<!--[if BLOCK]><![endif]--> 8 <!--[if ENDBLOCK]><![endif]-->",
             "svgs": [],
-            "detail": null
+            "detail": {
+                "label": "Brown <b> Tom & Co Ray • 11.03.2026",
+                "lines": [
+                    "İş rejimi: iş günü",
+                    "Qrafik üzrə: 8 saat (faktiki qeyd yoxdur)"
+                ]
+            }
         },
         {
             "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-900 bg-white",
@@ -1196,12 +1202,18 @@
             }
         },
         {
-            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-400 bg-white",
-            "title": "",
-            "text": "",
-            "markup": "<!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->",
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-400 bg-white italic",
+            "title": "İş rejimi: iş günü | Qrafik üzrə: 8 saat (faktiki qeyd yoxdur)",
+            "text": "8",
+            "markup": "<!--[if BLOCK]><![endif]--> 8 <!--[if ENDBLOCK]><![endif]-->",
             "svgs": [],
-            "detail": null
+            "detail": {
+                "label": "O'Brien Ann \"Q\" Lee • 18.03.2026",
+                "lines": [
+                    "İş rejimi: iş günü",
+                    "Qrafik üzrə: 8 saat (faktiki qeyd yoxdur)"
+                ]
+            }
         },
         {
             "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-900 bg-white",
@@ -1761,12 +1773,18 @@
             }
         },
         {
-            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-400 bg-white",
-            "title": "",
-            "text": "",
-            "markup": "<!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->",
+            "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-400 bg-white italic",
+            "title": "İş rejimi: iş günü | Qrafik üzrə: 8 saat (faktiki qeyd yoxdur)",
+            "text": "8",
+            "markup": "<!--[if BLOCK]><![endif]--> 8 <!--[if ENDBLOCK]><![endif]-->",
             "svgs": [],
-            "detail": null
+            "detail": {
+                "label": "Əliyev Şəhla  • 25.03.2026",
+                "lines": [
+                    "İş rejimi: iş günü",
+                    "Qrafik üzrə: 8 saat (faktiki qeyd yoxdur)"
+                ]
+            }
         },
         {
             "class": "py-2.5 align-middle text-[13px] text-ink-soft px-5 whitespace-nowrap relative text-center text-xs text-zinc-900 bg-white",

@@ -360,6 +360,85 @@ class CompensationDashboardTest extends TestCase
             ->call('editBank', $account->id);
     }
 
+    public function test_scale_currency_defaults_to_azn_and_is_offered_as_iso_codes(): void
+    {
+        $this->actingAsManager();
+
+        $component = Livewire::test(ScalesTab::class)->assertSet('scaleForm.currency', 'AZN');
+
+        $this->assertSame(
+            ['AZN', 'USD', 'EUR', 'GBP', 'RUB', 'TRY'],
+            array_column($component->instance()->currencyOptions(), 'id')
+        );
+    }
+
+    public function test_scale_rejects_a_currency_outside_the_iso_list(): void
+    {
+        $this->actingAsManager();
+        $regimeId = CompensationRegime::where('code', 'private')->value('id');
+
+        Livewire::test(ScalesTab::class)
+            ->set('scaleForm.name', 'Yanlış valyuta')
+            ->set('scaleForm.regime_id', $regimeId)
+            ->set('scaleForm.currency', 'XYZ123')
+            ->set('scaleForm.effective_from', '2026-01-01')
+            ->call('saveScale')
+            ->assertHasErrors(['scaleForm.currency' => 'in']);
+
+        $this->assertDatabaseMissing('pay_scales', ['name' => 'Yanlış valyuta']);
+
+        Livewire::test(ScalesTab::class)
+            ->set('scaleForm.name', 'Dollar şkalası')
+            ->set('scaleForm.regime_id', $regimeId)
+            ->set('scaleForm.currency', 'USD')
+            ->set('scaleForm.effective_from', '2026-01-01')
+            ->call('saveScale')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('pay_scales', ['name' => 'Dollar şkalası', 'currency' => 'USD']);
+    }
+
+    public function test_editing_a_scale_with_a_legacy_currency_keeps_it_visible_but_requires_a_valid_code(): void
+    {
+        $this->actingAsManager();
+        $scale = \App\Models\PayScale::create([
+            'name' => 'Köhnə şkala',
+            'regime_id' => CompensationRegime::where('code', 'private')->value('id'),
+            'currency' => 'XYZ',
+            'effective_from' => '2026-01-01',
+            'is_active' => true,
+        ]);
+
+        $component = Livewire::test(ScalesTab::class)
+            ->call('editScale', $scale->id)
+            ->assertSet('scaleForm.currency', 'XYZ');
+
+        $legacy = collect($component->instance()->currencyOptions())->firstWhere('id', 'XYZ');
+        $this->assertSame(__('compensation::dashboard.fields.currency_legacy', ['code' => 'XYZ']), $legacy['label'] ?? null);
+
+        $component->call('saveScale')->assertHasErrors(['scaleForm.currency' => 'in']);
+
+        $component->set('scaleForm.currency', 'AZN')->call('saveScale')->assertHasNoErrors();
+        $this->assertSame('AZN', $scale->fresh()->currency);
+    }
+
+    public function test_assignment_rejects_a_currency_outside_the_iso_list(): void
+    {
+        $this->actingAsManager();
+        $personnel = $this->makePersonnel('cur@example.test');
+
+        Livewire::test(AssignmentsTab::class, ['tabelNo' => $personnel->tabel_no])
+            ->assertSet('assignmentForm.currency', 'AZN')
+            ->set('assignmentForm.regime_id', CompensationRegime::where('code', 'private')->value('id'))
+            ->set('assignmentForm.base_amount', '1000')
+            ->set('assignmentForm.currency', 'XYZ123')
+            ->set('assignmentForm.effective_from', '2026-01-01')
+            ->call('saveAssignment')
+            ->assertHasErrors(['assignmentForm.currency' => 'in']);
+
+        $this->assertSame(0, EmployeeCompensation::where('tabel_no', $personnel->tabel_no)->count());
+    }
+
     public function test_seed_catalog_is_available(): void
     {
         $this->assertSame(3, CompensationRegime::count());

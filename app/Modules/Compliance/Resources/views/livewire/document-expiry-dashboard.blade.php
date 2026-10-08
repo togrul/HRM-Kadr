@@ -26,11 +26,12 @@
 
     $metrics = [
         ['key' => 'total', 'tone' => 'ink'],
+        ['key' => 'critical', 'tone' => 'rose', 'hint' => __('compliance::documents.summary.critical_hint')],
         ['key' => 'expired', 'tone' => 'rose'],
+        ['key' => 'missing', 'tone' => 'rose'],
         ['key' => 'expiring_30', 'tone' => 'amber'],
         ['key' => 'expiring_60', 'tone' => 'blue'],
         ['key' => 'valid', 'tone' => 'green'],
-        ['key' => 'missing', 'tone' => 'ink'],
     ];
 
     $statusTone = fn (string $status): string => match ($status) {
@@ -115,13 +116,14 @@
 
     {{-- ===================== body ===================== --}}
     <div class="flex flex-col gap-4 px-4 py-4 sm:px-5">
-        <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+        <section class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-7">
             @foreach ($metrics as $metric)
                 <x-ui.metric-tile
                     wire:key="compliance-metric-{{ $metric['key'] }}"
                     :label="__('compliance::documents.summary.'.$metric['key'])"
                     :value="$num($summary[$metric['key']] ?? 0)"
                     :tone="$metric['tone']"
+                    :hint="$metric['hint'] ?? null"
                 />
             @endforeach
         </section>
@@ -144,7 +146,6 @@
                 __('compliance::documents.columns.employee'),
                 __('compliance::documents.columns.document'),
                 __('compliance::documents.columns.expires_at'),
-                __('compliance::documents.columns.days_left'),
                 __('compliance::documents.columns.status'),
             ]">
                 @forelse ($rows as $row)
@@ -152,7 +153,7 @@
                         <x-table.td standart-width>
                             <div class="flex items-center gap-2.5">
                                 <x-avatar :name="(string) $row['personnel_name']" :tone="in_array($row['status'], ['expired', 'missing'], true) ? 'rose' : 'neutral'" />
-                                <div class="min-w-0 max-w-[240px] leading-tight">
+                                <div class="min-w-0 max-w-[220px] leading-tight">
                                     <p class="truncate text-[13px] font-medium text-ink">{{ $row['personnel_name'] }}</p>
                                     <p class="truncate text-[11px] text-ink-faint">{{ $row['structure_name'] }} <span class="px-0.5">›</span> {{ $row['position_name'] }}</p>
                                 </div>
@@ -160,16 +161,18 @@
                         </x-table.td>
 
                         <x-table.td standart-width>
-                            <p class="max-w-[200px] truncate text-[13px] text-ink-soft">{{ $row['document_label'] }}</p>
-                            <p class="hrm-num max-w-[200px] truncate text-[11px] text-ink-faint">{{ $row['document_number'] }}</p>
+                            <p class="max-w-[180px] truncate text-[13px] text-ink-soft">{{ $row['document_label'] }}</p>
+                            <p class="hrm-num max-w-[180px] truncate text-[11px] text-ink-faint">{{ $row['document_number'] }}</p>
                         </x-table.td>
 
+                        {{-- date and days left share one column so the status stays in view on laptop widths --}}
                         <x-table.td>
-                            <span class="hrm-num text-[13px] text-ink-soft">{{ $row['expires_at'] }}</span>
-                        </x-table.td>
-
-                        <x-table.td>
-                            <span class="hrm-num text-[13px] text-ink-muted">{{ $row['days_left'] ?? '—' }}</span>
+                            <p class="hrm-num text-[13px] text-ink-soft">{{ $row['expires_at'] }}</p>
+                            @if ($row['days_left'] !== null)
+                                <p class="hrm-num text-[11px] text-ink-faint">{{ $row['days_left'] < 0
+                                    ? __('compliance::documents.labels.days_overdue', ['days' => abs($row['days_left'])])
+                                    : __('compliance::documents.labels.days_left', ['days' => $row['days_left']]) }}</p>
+                            @endif
                         </x-table.td>
 
                         <x-table.td>
@@ -180,7 +183,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-4 py-10">
+                        <td colspan="4" class="px-4 py-10">
                             <x-ui.empty-state icon="icons.document-icon" :message="__('compliance::documents.labels.result_count', ['count' => 0])" />
                         </td>
                     </tr>

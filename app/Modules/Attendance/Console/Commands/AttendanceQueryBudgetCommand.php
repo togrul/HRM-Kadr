@@ -103,8 +103,9 @@ class AttendanceQueryBudgetCommand extends AbstractQueryBudgetCommand
 
                 $page = $puantajReadService->paginatePersonnels('', $perPage, [], $from, $to);
                 $tabelNos = $page->getCollection()->pluck('tabel_no')->filter()->values()->all();
-                $puantajReadService->loadLedgerMap($tabelNos, $from, $to);
-                $puantajReadService->globalCalendarDayTypeByDate($from, $to);
+                $ledgerMap = $puantajReadService->loadLedgerMap($tabelNos, $from, $to);
+                $puantajReadService->loadScheduleDefaults($page->getCollection(), $from, $to, $ledgerMap);
+                $puantajReadService->calendarOverrides($from, $to);
             });
             $results[] = $this->probe('history_log_load', $budgets['history_log_load'], function () use ($historyReadService, $year, $month, $perPage): void {
                 $from = Carbon::createFromDate($year, $month, 1)->startOfMonth()->toDateString();

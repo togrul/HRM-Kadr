@@ -30,11 +30,15 @@ class AttendanceDailyLedgerCalculatorService
         ?AttendanceSetting $setting = null,
         string $calendarDayType = 'workday',
         ?array $override = null,
-        ?int $approvedOvertimeMinutes = null
+        ?int $approvedOvertimeMinutes = null,
+        bool $isPreHoliday = false
     ): array {
         $policy = app(AttendanceRulePolicyService::class);
 
-        $scheduledMinutes = $this->resolveScheduledMinutes($date, $shift, $calendarDayType);
+        $scheduledMinutes = $this->resolveScheduledMinutes($date, $shift, $calendarDayType, $isPreHoliday);
+        $preHolidayReduction = $isPreHoliday && $scheduledMinutes > 0
+            ? AttendanceWorkNormService::PRE_HOLIDAY_REDUCTION_MINUTES
+            : 0;
 
         if ($manualEntry !== null) {
             $workedMinutes = (int) $manualEntry->worked_minutes;
@@ -102,7 +106,7 @@ class AttendanceDailyLedgerCalculatorService
 
             $window = app(AttendanceShiftWindowService::class)->resolve($date, $shift);
             $shiftStart = $window['shift_start'];
-            $shiftEnd = $window['shift_end'];
+            $shiftEnd = $window['shift_end']->copy()->subMinutes($preHolidayReduction);
 
             if (! empty($pairing['first_in_at'])) {
                 $firstIn = Carbon::parse((string) $pairing['first_in_at']);
@@ -151,6 +155,7 @@ class AttendanceDailyLedgerCalculatorService
             'source_summary' => 'system',
             'meta' => [
                 'calendar_day_type' => $calendarDayType,
+                'pre_holiday' => $preHolidayReduction > 0,
                 'unmatched_punches' => (int) ($pairing['unmatched'] ?? 0),
                 'pair_count' => count($pairing['pairs'] ?? []),
                 'approved_overtime_minutes' => max(0, (int) ($approvedOvertimeMinutes ?? 0)),
@@ -160,7 +165,7 @@ class AttendanceDailyLedgerCalculatorService
         ];
     }
 
-    private function resolveScheduledMinutes(Carbon $date, ?AttendanceShift $shift, string $calendarDayType): int
+    private function resolveScheduledMinutes(Carbon $date, ?AttendanceShift $shift, string $calendarDayType, bool $isPreHoliday = false): int
     {
         if ($shift === null || $calendarDayType !== 'workday') {
             return 0;
@@ -169,8 +174,11 @@ class AttendanceDailyLedgerCalculatorService
         $window = app(AttendanceShiftWindowService::class)->resolve($date, $shift);
         $start = $window['shift_start'];
         $end = $window['shift_end'];
+        $minutes = max(0, (int) $start->diffInMinutes($end) - (int) $shift->break_minutes);
 
-        return max(0, $start->diffInMinutes($end) - (int) $shift->break_minutes);
+        return $isPreHoliday
+            ? max(0, $minutes - AttendanceWorkNormService::PRE_HOLIDAY_REDUCTION_MINUTES)
+            : $minutes;
     }
 
     /**

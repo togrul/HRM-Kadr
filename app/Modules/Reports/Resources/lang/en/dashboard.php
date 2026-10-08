@@ -165,6 +165,7 @@ return [
             'avg_worked_hours' => 'Average worked hours',
             'overtime_hours' => 'Overtime hours',
             'movement_chart' => 'Hires and exits — :year',
+            'delta_vs_last_year' => 'Compared with the same period last year (then: :value)',
         ],
     ],
     'age_buckets' => [

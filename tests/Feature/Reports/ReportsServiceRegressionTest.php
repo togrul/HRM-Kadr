@@ -311,6 +311,66 @@ class ReportsServiceRegressionTest extends TestCase
         );
     }
 
+    public function test_overview_age_split_ignores_future_and_implausible_birthdates(): void
+    {
+        $this->seedPersonnelSupportTables();
+
+        $this->createPersonnelRecord('AV-001', 1, ['birthdate' => '2000-01-01']);
+        // Born after the report date — a data-entry error, not a 0-year-old.
+        $this->createPersonnelRecord('AV-002', 1, ['birthdate' => '2030-05-01']);
+        // Ten years old and 130 years old: both impossible working ages.
+        $this->createPersonnelRecord('AV-003', 1, ['birthdate' => '2016-01-01']);
+        $this->createPersonnelRecord('AV-004', 1, ['birthdate' => '1896-01-01']);
+        $this->createPersonnelRecord('AV-005', 1, ['birthdate' => '1960-01-01']);
+
+        $payload = app(ReportsOverviewService::class)->build(2026, 3);
+
+        $this->assertSame(5, data_get($payload, 'kpis.active_personnel_count'));
+        $this->assertSame(
+            ['under_30' => 1, '30_39' => 0, '40_49' => 0, '50_plus' => 1],
+            collect($payload['age_split'])->pluck('value', 'key')->all()
+        );
+    }
+
+    public function test_standard_demographics_leave_invalid_birthdates_out_of_the_age_split(): void
+    {
+        $this->seedPersonnelSupportTables();
+
+        $this->createPersonnelRecord('SD-001', 1, ['birthdate' => now()->subYears(30)->toDateString()]);
+        $this->createPersonnelRecord('SD-002', 1, ['birthdate' => now()->addYears(2)->toDateString()]);
+        $this->createPersonnelRecord('SD-003', 1, ['birthdate' => now()->subYears(130)->toDateString()]);
+
+        $report = app(StandardReportService::class)->build('demographics', ['year' => (int) now()->year, 'month' => (int) now()->month]);
+
+        $ageRows = collect($report['rows'])
+            ->where('dimension', __('reports::dashboard.fields.age_distribution'))
+            ->pluck('employee_count', 'bucket')
+            ->all();
+
+        $this->assertSame(['26-35' => 1], $ageRows);
+    }
+
+    public function test_overview_movement_delta_compares_the_same_elapsed_window_a_year_earlier(): void
+    {
+        $this->travelTo('2026-10-08 12:00:00');
+        $this->seedPersonnelSupportTables();
+
+        // This year: two hires up to today, one booked for later this month.
+        $this->createPersonnelRecord('YD-001', 1, ['join_work_date' => '2026-02-01']);
+        $this->createPersonnelRecord('YD-002', 1, ['join_work_date' => '2026-10-01']);
+        $this->createPersonnelRecord('YD-003', 1, ['join_work_date' => '2026-10-20']);
+        // Last year: four hires to 08.10.2025, one later in October 2025.
+        foreach (['2025-01-10', '2025-03-10', '2025-06-10', '2025-10-08', '2025-10-25'] as $i => $date) {
+            $this->createPersonnelRecord('YP-00'.$i, 1, ['join_work_date' => $date]);
+        }
+
+        $kpis = app(ReportsOverviewService::class)->build(2026, 10)['kpis'];
+
+        $this->assertSame(2, $kpis['new_hires']);
+        $this->assertSame(4, $kpis['new_hires_previous']);
+        $this->assertSame(-50.0, $kpis['new_hires_delta_pct']);
+    }
+
     public function test_overview_movement_trend_carries_monthly_hires_and_exits(): void
     {
         $this->seedPersonnelSupportTables();

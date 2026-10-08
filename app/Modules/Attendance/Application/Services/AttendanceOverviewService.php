@@ -2,7 +2,6 @@
 
 namespace App\Modules\Attendance\Application\Services;
 
-use App\Models\AttendanceCalendar;
 use App\Models\AttendanceDailyLedger;
 use App\Models\AttendanceDailyStructureSummary;
 use Carbon\Carbon;
@@ -41,6 +40,29 @@ class AttendanceOverviewService
     }
 
     /**
+     * Yalnız gözləyən növbələrin sayları (tək UNION sorğusu) — səhifənin ilk görüntüsü üçün yüngül oxuma.
+     *
+     * @param  array<int,int>|null  $structureIds
+     * @return array{manual_pending_count:int,raw_pending_count:int,open_exception_count:int,pending_overtime_count:int}
+     */
+    public function pendingCounts(int $year, int $month, ?int $structureId = null, ?array $structureIds = null): array
+    {
+        $start = Carbon::createFromDate($year, $month, 1)->startOfMonth();
+        $counts = $this->pendingActionCounts(
+            $start,
+            $start->copy()->endOfMonth(),
+            $this->normalizeStructureIds($structureId, $structureIds)
+        );
+
+        return [
+            'manual_pending_count' => (int) ($counts['manual_pending'] ?? 0),
+            'raw_pending_count' => (int) ($counts['raw_pending'] ?? 0),
+            'open_exception_count' => (int) ($counts['open_exceptions'] ?? 0),
+            'pending_overtime_count' => (int) ($counts['pending_overtime'] ?? 0),
+        ];
+    }
+
+    /**
      * @return array<string,mixed>
      */
     private function buildUncached(int $year, int $month, ?int $structureId = null, array $structureIds = []): array
@@ -50,7 +72,9 @@ class AttendanceOverviewService
         $previousStart = $start->copy()->subMonthNoOverflow()->startOfMonth();
         $previousEnd = $previousStart->copy()->endOfMonth();
 
-        [$workdays, $weekendDays] = $this->resolveDayCounts($start, $end, $structureId);
+        $norm = app(AttendanceWorkNormService::class)->monthNorm($year, $month, $structureId);
+        $workdays = $norm['workdays'];
+        $weekendDays = $norm['non_workdays'];
 
         $summaryQuery = $this->summaryQuery($start, $end, $structureIds);
         $summaryAgg = (clone $summaryQuery)
@@ -109,7 +133,7 @@ class AttendanceOverviewService
         $compliantDays = (int) ($useSummary ? ($summaryAgg?->compliant_days ?? 0) : ($ledgerAgg?->compliant_days ?? 0));
 
         if ($scheduledMinutes === 0 && $workedMinutes === 0 && $overtimeMinutes === 0) {
-            $scheduledMinutes = $workdays * 9 * 60;
+            $scheduledMinutes = $norm['minutes'];
         }
 
         $coveragePct = $scheduledMinutes > 0
@@ -138,6 +162,8 @@ class AttendanceOverviewService
         return [
             'workdays' => $workdays,
             'holidays' => $weekendDays,
+            'pre_holidays' => $norm['pre_holidays'],
+            'daily_norm_minutes' => $norm['daily_minutes'],
             'scheduled_minutes' => $scheduledMinutes,
             'worked_minutes' => $workedMinutes,
             'overtime_minutes' => $overtimeMinutes,
@@ -244,64 +270,6 @@ class AttendanceOverviewService
         return DB::table('personnels')
             ->select('tabel_no')
             ->whereIn('structure_id', $structureIds);
-    }
-
-    /**
-     * @return array{0:int,1:int}
-     */
-    private function resolveDayCounts(Carbon $start, Carbon $end, ?int $structureId = null): array
-    {
-        $calendarRows = AttendanceCalendar::query()
-            ->whereDate('date', '>=', $start->toDateString())
-            ->whereDate('date', '<=', $end->toDateString())
-            ->where(function ($query) use ($structureId): void {
-                $query->where('scope_type', 'global');
-
-                if ($structureId !== null) {
-                    $query->orWhere(function ($q) use ($structureId): void {
-                        $q->where('scope_type', 'structure')
-                            ->where('scope_id', $structureId);
-                    });
-                }
-            })
-            ->get(['date', 'day_type', 'scope_type', 'scope_id']);
-
-        $globalMap = [];
-        $structureMap = [];
-
-        foreach ($calendarRows as $row) {
-            $dateKey = $row->date?->toDateString();
-            if (! $dateKey) {
-                continue;
-            }
-
-            if ($row->scope_type === 'structure' && $row->scope_id !== null) {
-                $structureMap[$dateKey] = (string) $row->day_type;
-
-                continue;
-            }
-
-            $globalMap[$dateKey] = (string) $row->day_type;
-        }
-
-        $workdays = 0;
-        $nonWorkdays = 0;
-        $cursor = $start->copy();
-
-        while ($cursor->lte($end)) {
-            $dateKey = $cursor->toDateString();
-            $dayType = $structureMap[$dateKey] ?? $globalMap[$dateKey] ?? ($cursor->isWeekend() ? 'weekend' : 'workday');
-
-            if ($dayType === 'workday') {
-                $workdays++;
-            } else {
-                $nonWorkdays++;
-            }
-
-            $cursor->addDay();
-        }
-
-        return [$workdays, $nonWorkdays];
     }
 
     /**

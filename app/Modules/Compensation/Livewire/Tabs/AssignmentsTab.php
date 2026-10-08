@@ -5,6 +5,7 @@ namespace App\Modules\Compensation\Livewire\Tabs;
 use App\Models\CompensationComponent;
 use App\Models\EmployeeCompensation;
 use App\Modules\Compensation\Application\Services\CompensationService;
+use App\Support\Currency;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Reactive;
 
@@ -20,7 +21,7 @@ class AssignmentsTab extends CompensationTab
         'regime_id' => null,
         'pay_grade_id' => null,
         'base_amount' => '',
-        'currency' => 'AZN',
+        'currency' => Currency::DEFAULT,
         'effective_from' => '',
         'order_no' => '',
         'note' => '',
@@ -54,6 +55,15 @@ class AssignmentsTab extends CompensationTab
         return app(CompensationService::class)->currentFor($this->tabelNo);
     }
 
+    /**
+     * @return list<array{id: string, label: string}>
+     */
+    #[Computed]
+    public function currencyOptions(): array
+    {
+        return Currency::options();
+    }
+
     public function addAssignmentLine(): void
     {
         $this->assignmentLines[] = ['component_id' => null, 'amount' => '', 'percent' => '', 'note' => ''];
@@ -74,7 +84,7 @@ class AssignmentsTab extends CompensationTab
             'assignmentForm.regime_id' => 'required|exists:compensation_regimes,id',
             'assignmentForm.pay_grade_id' => 'nullable|exists:pay_grades,id',
             'assignmentForm.base_amount' => 'required|numeric|min:0',
-            'assignmentForm.currency' => 'required|string|size:3',
+            'assignmentForm.currency' => Currency::rules(),
             'assignmentForm.effective_from' => 'required|date',
             'assignmentForm.order_no' => 'nullable|string|max:64',
             'assignmentForm.note' => 'nullable|string|max:2000',
@@ -99,7 +109,7 @@ class AssignmentsTab extends CompensationTab
 
         $this->assignmentForm = [
             'regime_id' => null, 'pay_grade_id' => null, 'base_amount' => '',
-            'currency' => 'AZN', 'effective_from' => '', 'order_no' => '', 'note' => '',
+            'currency' => Currency::DEFAULT, 'effective_from' => '', 'order_no' => '', 'note' => '',
         ];
         $this->assignmentLines = [];
         unset($this->currentAssignment);

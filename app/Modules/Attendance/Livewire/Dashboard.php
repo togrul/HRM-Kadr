@@ -9,6 +9,7 @@ use App\Support\Livewire\InteractsWithTabbedWorkspace;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -35,13 +36,8 @@ class Dashboard extends Component
      */
     public array $availableTabs = [];
 
-    public array $overview = [];
-
-    public function mount(
-        AttendanceOverviewService $overviewService,
-        AttendanceAuthorizationService $authorization,
-        AttendanceStructureScopeReadService $structureScopeRead
-    ): void {
+    public function mount(AttendanceAuthorizationService $authorization): void
+    {
         $authorization->authorize('attendance.view');
 
         $now = Carbon::now();
@@ -62,45 +58,65 @@ class Dashboard extends Component
             : null;
 
         $this->bootActiveTabFromRequest();
-
-        $this->overview = $overviewService->build(
-            $this->year,
-            $this->month,
-            $this->selectedStructureId,
-            true,
-            $structureScopeRead->resolveIds($this->selectedStructureId)
-        );
     }
 
-    public function updatedYear(AttendanceOverviewService $overviewService): void
+    /**
+     * Ayın tam xülasəsi (ledger/xülasə aqreqatları). Yalnız "Xülasə" bölməsinin gecikdirilmiş
+     * adasında oxunur ki, səhifə skeletlə dərhal görünsün.
+     *
+     * @return array<string,mixed>
+     */
+    #[Computed]
+    public function overview(): array
     {
-        $this->refreshOverview($overviewService);
-    }
-
-    public function updatedMonth(AttendanceOverviewService $overviewService): void
-    {
-        $this->refreshOverview($overviewService);
-    }
-
-    /** Steps the period one month back or forward, rolling the year over. */
-    public function shiftMonth(int $step, AttendanceOverviewService $overviewService): void
-    {
-        $period = CarbonImmutable::create((int) $this->year, (int) $this->month, 1)->addMonths($step <=> 0);
-
-        $this->year = $period->year;
-        $this->month = $period->month;
-        $this->refreshOverview($overviewService);
-    }
-
-    private function refreshOverview(AttendanceOverviewService $overviewService): void
-    {
-        $this->overview = $overviewService->build(
+        return app(AttendanceOverviewService::class)->build(
             $this->year,
             $this->month,
             $this->selectedStructureId,
             true,
             app(AttendanceStructureScopeReadService::class)->resolveIds($this->selectedStructureId)
         );
+    }
+
+    /**
+     * Gözləyən iş növbələrinin sayları — bölmə nişanları və "Diqqət tələb edir" kartları üçün (tək sorğu).
+     *
+     * @return array<string,int>
+     */
+    #[Computed]
+    public function pendingCounts(): array
+    {
+        return app(AttendanceOverviewService::class)->pendingCounts(
+            $this->year,
+            $this->month,
+            $this->selectedStructureId,
+            app(AttendanceStructureScopeReadService::class)->resolveIds($this->selectedStructureId)
+        );
+    }
+
+    public function updatedYear(): void
+    {
+        $this->refreshOverview();
+    }
+
+    public function updatedMonth(): void
+    {
+        $this->refreshOverview();
+    }
+
+    /** Steps the period one month back or forward, rolling the year over. */
+    public function shiftMonth(int $step): void
+    {
+        $period = CarbonImmutable::create((int) $this->year, (int) $this->month, 1)->addMonths($step <=> 0);
+
+        $this->year = $period->year;
+        $this->month = $period->month;
+        $this->refreshOverview();
+    }
+
+    private function refreshOverview(): void
+    {
+        unset($this->overview, $this->pendingCounts);
     }
 
     protected function allowedTabs(): array
@@ -116,14 +132,14 @@ class Dashboard extends Component
         }
 
         $this->selectedStructureId = is_numeric($payload) ? (int) $payload : null;
-        $this->refreshOverview(app(AttendanceOverviewService::class));
+        $this->refreshOverview();
     }
 
     #[On('filterSelected')]
     public function clearSelectedStructure(): void
     {
         $this->selectedStructureId = null;
-        $this->refreshOverview(app(AttendanceOverviewService::class));
+        $this->refreshOverview();
     }
 
     /**
