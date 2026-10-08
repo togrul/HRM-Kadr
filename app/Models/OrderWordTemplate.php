@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $label
  * @property string $effect
  * @property string $docx_path
- * @property array<int,array{token:string,label:string,source:string,auto_key:?string,field:?array{key:string,type:string,required?:bool,default?:mixed},effect_role:?string}> $variables
+ * @property array<int,array<string,mixed>>|null $variables Stored JSON {token,label,source,auto_key,field,effect_role}; rows from older versions may miss keys, so readers treat every key as optional.
  * @property bool $is_active
  */
 class OrderWordTemplate extends Model

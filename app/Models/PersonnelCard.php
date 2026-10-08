@@ -12,6 +12,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class PersonnelCard extends Model
 {
     use DateCastTrait;
+
     // xidmeti vesiqeler
     use HasFactory;
     use LogsActivity;

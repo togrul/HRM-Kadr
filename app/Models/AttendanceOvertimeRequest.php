@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property \Illuminate\Support\Carbon|null $date
+ */
 class AttendanceOvertimeRequest extends Model
 {
     use HasFactory;

@@ -10,7 +10,7 @@ use App\Models\Personnel;
 use App\Models\Structure;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
 class AttendancePuantajReadService

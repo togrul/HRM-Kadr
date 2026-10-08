@@ -2,6 +2,8 @@
 
 namespace App\Modules\Attendance\Providers;
 
+use App\Contracts\EmployeeRecordSource;
+use App\Modules\Attendance\Application\Services\AttendanceEmployeeRecordSource;
 use App\Modules\Attendance\Application\Services\ManualEntryApproverService;
 use App\Modules\Attendance\Console\Commands\AttendanceMonthlySnapshotCommand;
 use App\Modules\Attendance\Console\Commands\AttendanceProcessPunchesCommand;
@@ -35,6 +37,8 @@ class AttendanceServiceProvider extends ServiceProvider
 
         $this->app->bind(PayrollAttendanceReadRepository::class, EloquentPayrollAttendanceReadRepository::class);
         $this->app->bind(ManualEntryApprover::class, ManualEntryApproverService::class);
+
+        $this->app->tag([AttendanceEmployeeRecordSource::class], EmployeeRecordSource::TAG);
     }
 
     public function boot(): void

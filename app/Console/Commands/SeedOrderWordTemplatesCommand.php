@@ -62,7 +62,7 @@ class SeedOrderWordTemplatesCommand extends Command
         $only = $this->option('only');
         $count = 0;
 
-        foreach ($this->templates() as $code => $template) {
+        foreach ($this->catalogue() as $code => $template) {
             if ($only && $only !== $code) {
                 continue;
             }
@@ -153,7 +153,7 @@ class SeedOrderWordTemplatesCommand extends Command
      *
      * @return array<string,array{label:string,effect:string,spec:array<string,mixed>,manual?:array<string,array{type:string,role?:string,required?:bool,default?:string}>}>
      */
-    private function templates(): array
+    public function catalogue(): array
     {
         return [
             // ───────────────────────────── Əmək məzuniyyəti ─────────────────────────────
@@ -163,11 +163,11 @@ class SeedOrderWordTemplatesCommand extends Command
                 'spec' => [
                     'city' => 'Bakı şəhəri',
                     'subject' => 'Əmək məzuniyyətinin verilməsi haqqında',
-                    'preamble' => 'Azərbaycan Respublikası Əmək Məcəlləsinin 138-ci maddəsinin 2-ci hissəsini rəhbər tutaraq',
+                    'preamble' => 'Azərbaycan Respublikası Əmək Məcəlləsinin 114-cü və 131-ci maddələrini, 138-ci maddəsinin 1-ci hissəsini rəhbər tutaraq',
                     'clauses' => [
                         '[İş yeri] [Vəzifə] vəzifəsində çalışan [İşçi (yönlük)] [İş ili] iş ilinə görə [Gün sayı] təqvim günü müddətində əmək məzuniyyəti verilsin.',
                         'Məzuniyyətin başlanma tarixi [Başlama tarixi], məzuniyyətin bitmə tarixi [Bitmə tarixi], işə başlama tarixi [İşə başlama tarixi] müəyyən edilsin.',
-                        'Mühasibatlıq və Hesabatlıq şöbəsinin rəisi Bağırov Səbuhi bu əmrdən irəli gələn məsələləri həll etsin.',
+                        'Mühasibatlıq bu əmrdən irəli gələn məsələləri həll etsin.',
                     ],
                     'basis' => '[Əsas mətni]',
                 ],
@@ -192,7 +192,7 @@ class SeedOrderWordTemplatesCommand extends Command
                     'clauses' => [
                         '[İş yeri] [Vəzifə] [İşçi (yönlük)] [Gün sayı] təqvim günü müddətinə ödənişli atalıq məzuniyyəti verilsin.',
                         'Məzuniyyətin başlanma tarixi [Başlama tarixi], məzuniyyətin bitmə tarixi [Bitmə tarixi], işə başlama tarixi [İşə başlama tarixi] müəyyən edilsin.',
-                        'Mühasibatlıq və Hesabatlıq şöbəsinin rəisi Səbuhi Bağırov bu əmrdən irəli gələn məsələləri həll etsin.',
+                        'Mühasibatlıq bu əmrdən irəli gələn məsələləri həll etsin.',
                     ],
                     'basis' => '[Əsas mətni]',
                 ],
@@ -212,11 +212,11 @@ class SeedOrderWordTemplatesCommand extends Command
                 'spec' => [
                     'city' => 'Bakı şəhəri',
                     'subject' => 'Ödənişli təhsil məzuniyyətinin verilməsi haqqında',
-                    'preamble' => 'Azərbaycan Respublikası Əmək Məcəlləsinin 124-cü maddəsinin 3-cü hissəsini rəhbər tutaraq',
+                    'preamble' => 'Azərbaycan Respublikası Əmək Məcəlləsinin 123-cü və 124-cü maddələrini rəhbər tutaraq',
                     'clauses' => [
                         '[İş yeri] [Vəzifə], [Təhsil məlumatı] [İşçi (yönlük)] [Gün sayı] təqvim günü müddətində ödənişli təhsil məzuniyyəti verilsin.',
                         'Məzuniyyətin başlanma tarixi [Başlama tarixi], məzuniyyətin bitmə tarixi [Bitmə tarixi], işə başlama tarixi [İşə başlama tarixi] müəyyən edilsin.',
-                        'Mühasibatlıq və Hesabatlıq şöbəsinin rəisi Bağırov Səbuhi bu əmrdən irəli gələn məsələləri həll etsin.',
+                        'Mühasibatlıq bu əmrdən irəli gələn məsələləri həll etsin.',
                     ],
                     'basis' => '[Əsas mətni]',
                 ],
@@ -241,7 +241,7 @@ class SeedOrderWordTemplatesCommand extends Command
                     'clauses' => [
                         '[İş yeri] [Vəzifə] [İşçi (yönlük)], [Səbəb], [Başlama tarixi]-[Bitmə tarixi] tarixləri ödənişsiz məzuniyyət günləri hesab edilsin.',
                         'İşə başlama tarixi [İşə başlama tarixi] müəyyən edilsin.',
-                        'Mühasibatlıq və Hesabatlıq şöbəsinin rəisi Səbuhi Bağırov bu əmrdən irəli gələn məsələləri nəzərə alsın.',
+                        'Mühasibatlıq bu əmrdən irəli gələn məsələləri nəzərə alsın.',
                     ],
                     'basis' => '[Əsas mətni]',
                 ],
@@ -264,7 +264,7 @@ class SeedOrderWordTemplatesCommand extends Command
                     'preamble' => 'Səfərbərlik və Hərbi Xidmətə Çağırış üzrə Dövlət Xidmətinin [Hərbi idarə] çağırış vərəqəsini nəzərə alaraq',
                     'clauses' => [
                         '[İş yeri] [Vəzifə] [İşçi (yiyəlik)], Azərbaycan Respublikası Əmək Məcəlləsinin 179-cu maddəsinin 2-ci hissəsinin “g” bəndinə əsasən, orta əmək haqqı ödənilməklə, [Başlama tarixi] tarixindən [Bitmə tarixi] tarixinədək, [Gün sayı] təqvim günü müddətinə, [Toplantı yeri] keçiriləcək hərbi toplantıda iştirakına icazə verilsin.',
-                        'Mühasibatlıq və Hesabatlıq şöbəsinin rəisi Səbuhi Bağırov bu əmrdən irəli gələn məsələləri həll etsin.',
+                        'Mühasibatlıq bu əmrdən irəli gələn məsələləri həll etsin.',
                     ],
                     'basis' => '[Əsas mətni]',
                 ],
@@ -288,7 +288,7 @@ class SeedOrderWordTemplatesCommand extends Command
                     'preamble' => 'Xidməti fəaliyyətin qiymətləndirilməsinin (KPI) yekunlarını rəhbər tutaraq',
                     'clauses' => [
                         '[İş yeri] [Vəzifə] [İşçi] [Mükafatın səbəbi] [Məbləğ] manat məbləğində pul mükafatı ilə mükafatlandırılsın.',
-                        'Mühasibatlıq və Hesabatlıq şöbəsinin rəisi Səbuhi Bağırov bu əmrdən irəli gələn məsələləri həll etsin.',
+                        'Mühasibatlıq bu əmrdən irəli gələn məsələləri həll etsin.',
                     ],
                     'basis' => '[Əsas mətni]',
                 ],
@@ -309,7 +309,7 @@ class SeedOrderWordTemplatesCommand extends Command
                     'preamble' => 'Azərbaycan Respublikasının Əmək Məcəlləsinin 81-ci maddəsinin 1-ci hissəsini rəhbər tutaraq',
                     'clauses' => [
                         '[İşçi] [İşə qəbul tarixi] tarixindən [İş yeri (yönlük)] [Vəzifə] peşəsinə qəbul edilsin.',
-                        'Mühasibatlıq və Hesabatlıq şöbəsinin rəisi Səbuhi Bağırov bu əmrdən irəli gələn məsələləri həll etsin.',
+                        'Mühasibatlıq bu əmrdən irəli gələn məsələləri həll etsin.',
                     ],
                     'basis' => '[Əsas mətni]',
                 ],
@@ -347,7 +347,7 @@ class SeedOrderWordTemplatesCommand extends Command
                 'spec' => [
                     'city' => 'Bakı şəhəri',
                     'subject' => 'Başqa işə keçirilmə haqqında',
-                    'preamble' => '“Dinçer və Carçıoğlu” Birgə Müəssisəsinin təsdiq edilmiş yeni təşkilati strukturunu və ştat cədvəlini nəzərə alaraq, Azərbaycan Respublikası Əmək Məcəlləsinin 59-cu maddəsinə əsasən',
+                    'preamble' => 'Təşkilatın təsdiq edilmiş yeni təşkilati strukturunu və ştat cədvəlini nəzərə alaraq, Azərbaycan Respublikası Əmək Məcəlləsinin 59-cu maddəsinə əsasən',
                     'clauses' => [
                         '[İş yeri] [Vəzifə] [İşçi] [Köçürmə tarixi] tarixdən “[Yeni iş yeri]” strukturunun “[Yeni vəzifə]” vəzifəsinə keçirilsin.',
                         'İnsan Resursları və Maliyyə, Vergi, Mühasibatlıq departamentləri bu əmrdən irəli gələn məsələləri mövcud qanunvericiliyə uyğun olaraq həll etsinlər.',
@@ -372,7 +372,7 @@ class SeedOrderWordTemplatesCommand extends Command
                     'preamble' => '[İş yeri] [Vəzifə] [İşçi (yiyəlik)] ərizəsini nəzərə alaraq',
                     'clauses' => [
                         '[İş yeri] [Vəzifə] [İşçi (birgəlik)] bağlanmış əmək müqaviləsinə Azərbaycan Respublikası Əmək Məcəlləsinin [Maddə] əsasən, [Səbəb], [Xitam tarixi] tarixdən xitam verilsin.',
-                        'Mühasibatlıq və Hesabatlıq şöbəsinin rəisi Səbuhi Bağırov bu əmrdən irəli gələn məsələləri həll etsin.',
+                        'Mühasibatlıq bu əmrdən irəli gələn məsələləri həll etsin.',
                     ],
                     'basis' => '[Əsas mətni]',
                 ],
@@ -399,7 +399,7 @@ class SeedOrderWordTemplatesCommand extends Command
                     'clauses' => [
                         '[İşçi (birgəlik)] bağlanılmış əmək müqaviləsi, Azərbaycan Respublikası Əmək Məcəlləsinin [Maddə] əsasən, [Səbəb], [Xitam tarixi] tarixdən ləğv edilsin.',
                         '[Məsul şəxs] bu əmrdən irəli gələn məsələləri həll etsin.',
-                        'Əmrin surəti “Dinçer və Carçıoğlu” Birgə Müəssisəsinin bütün struktur bölmələrinə göndərilsin.',
+                        'Əmrin surəti bütün struktur bölmələrinə göndərilsin.',
                         'Struktur bölmə rəhbərləri tabeçiliyində olan işçiləri əmrlə tanış etsinlər və gələcəkdə bu cür halların qarşısını almaq üçün zəruri tədbirlər görsünlər.',
                         'Əmrin icrasına nəzarəti öz üzərimdə saxlayıram.',
                     ],
@@ -423,7 +423,7 @@ class SeedOrderWordTemplatesCommand extends Command
                 'spec' => [
                     'city' => 'Bakı şəhəri',
                     'subject' => 'Əməkdaşın ezamiyyətə göndərilməsi haqqında',
-                    'preamble' => 'İşin zərurətini nəzərə alaraq, Azərbaycan Respublikası Əmək Məcəlləsinin 178-ci maddəsini rəhbər tutaraq',
+                    'preamble' => 'İşin zərurətini nəzərə alaraq, Azərbaycan Respublikası Əmək Məcəlləsinin 179-cu maddəsinin 2-ci hissəsinin “x” bəndini və 181-ci maddəsini rəhbər tutaraq',
                     'clauses' => [
                         '[İş yeri] [Vəzifə] [İşçi] [Ezamiyyətin məqsədi] məqsədilə [Başlama tarixi] tarixindən [Bitmə tarixi] tarixinədək [Ezamiyyə yeri] ezamiyyətə göndərilsin.',
                         'Ezamiyyətə gediş-gəliş [Nəqliyyat] ilə təşkil edilsin, işə başlama tarixi [İşə başlama tarixi] müəyyən edilsin.',
@@ -476,7 +476,7 @@ class SeedOrderWordTemplatesCommand extends Command
                 'spec' => [
                     'city' => 'Bakı şəhəri',
                     'subject' => 'İntizam tənbehinin verilməsi haqqında',
-                    'preamble' => '[İş yeri] [Vəzifə] [İşçi (yiyəlik)] [Pozuntunun təsviri] ilə əlaqədar, onun izahatını nəzərə alaraq, Azərbaycan Respublikası Əmək Məcəlləsinin 186-cı maddəsini rəhbər tutaraq',
+                    'preamble' => '[İş yeri] [Vəzifə] [İşçi (yiyəlik)] [Pozuntunun təsviri] ilə əlaqədar, onun izahatını nəzərə alaraq, Azərbaycan Respublikası Əmək Məcəlləsinin 186-cı və 187-ci maddələrini rəhbər tutaraq',
                     'clauses' => [
                         '[İş yeri] [Vəzifə] [İşçi (yönlük)] [Tənbehin növü] intizam tənbehi verilsin.',
                         'Əmr əməkdaşa imza etdirilməklə tanış edilsin.',
@@ -497,7 +497,7 @@ class SeedOrderWordTemplatesCommand extends Command
                 'spec' => [
                     'city' => 'Bakı şəhəri',
                     'subject' => 'Vəzifənin müvəqqəti icrasının həvalə edilməsi haqqında',
-                    'preamble' => '[Əvəz edilən əməkdaş] işdə olmadığı müddətdə işin fasiləsizliyini təmin etmək məqsədilə, Azərbaycan Respublikası Əmək Məcəlləsinin 159-cu maddəsini rəhbər tutaraq',
+                    'preamble' => '[Əvəz edilən əməkdaş] işdə olmadığı müddətdə işin fasiləsizliyini təmin etmək məqsədilə, Azərbaycan Respublikası Əmək Məcəlləsinin 61-ci və 162-ci maddələrini rəhbər tutaraq',
                     'clauses' => [
                         '[İş yeri] [Vəzifə] [İşçi (yönlük)] öz işi ilə yanaşı [Başlama tarixi] tarixindən [Bitmə tarixi] tarixinədək [Əvəz edilən vəzifə] vəzifəsinin icrası həvalə edilsin.',
                         'Əvəzetmə müddətində [İşçi (yönlük)] [Əlavə ödəniş] məbləğində əlavə ödəniş edilsin.',

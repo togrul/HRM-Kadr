@@ -96,7 +96,7 @@ class Notifications extends Component
 
         $user = auth()->user();
         $notification = $user->notifications()->whereKey($notificationId)->firstOrFail();
-        $route = NotificationTarget::route((array) $notification->data);
+        $route = NotificationTarget::route((array) $notification->getAttribute('data'));
 
         $notification->markAsRead();
         app(NotificationCountCache::class)->forgetUser((int) $user->id);

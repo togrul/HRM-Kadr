@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int|null $shift_id
+ * @property \Carbon\CarbonInterface|null $effective_from
+ * @property \Carbon\CarbonInterface|null $effective_to
+ */
 class AttendanceShiftAssignment extends Model
 {
     use HasFactory;

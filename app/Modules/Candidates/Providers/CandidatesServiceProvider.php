@@ -2,9 +2,11 @@
 
 namespace App\Modules\Candidates\Providers;
 
+use App\Modules\Candidates\Application\Services\CandidateHireReversalService;
 use App\Modules\Candidates\Console\Commands\CandidateAtsQueryBudgetCommand;
 use App\Modules\Candidates\Console\Commands\CandidateListQueryBudgetCommand;
 use App\Modules\Candidates\Console\Commands\CandidateListRenderBenchmarkCommand;
+use App\Modules\Candidates\Contracts\CandidateHireReversal;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
 use Illuminate\Support\ServiceProvider;
@@ -22,6 +24,8 @@ class CandidatesServiceProvider extends ServiceProvider
                 CandidateListRenderBenchmarkCommand::class,
             ]);
         }
+
+        $this->app->bind(CandidateHireReversal::class, CandidateHireReversalService::class);
     }
 
     public function boot(): void

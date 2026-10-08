@@ -36,18 +36,27 @@ class EducationDegree extends Model
     /** @return Attribute<string|null, string|null> */
     protected function titleAz(): Attribute
     {
-        return Attribute::set(fn (?string $value): ?string => self::normalizeTitle($value));
+        return Attribute::make(
+            get: fn (?string $value): ?string => $value,
+            set: fn (?string $value): ?string => self::normalizeTitle($value),
+        );
     }
 
     /** @return Attribute<string|null, string|null> */
     protected function titleEn(): Attribute
     {
-        return Attribute::set(fn (?string $value): ?string => self::normalizeTitle($value));
+        return Attribute::make(
+            get: fn (?string $value): ?string => $value,
+            set: fn (?string $value): ?string => self::normalizeTitle($value),
+        );
     }
 
     /** @return Attribute<string|null, string|null> */
     protected function titleRu(): Attribute
     {
-        return Attribute::set(fn (?string $value): ?string => self::normalizeTitle($value));
+        return Attribute::make(
+            get: fn (?string $value): ?string => $value,
+            set: fn (?string $value): ?string => self::normalizeTitle($value),
+        );
     }
 }

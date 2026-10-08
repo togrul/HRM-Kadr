@@ -8,6 +8,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property string $tabel_no
+ * @property \Illuminate\Support\Carbon|null $date
+ * @property string|null $check_in_at
+ * @property string|null $check_out_at
+ * @property string|null $absence_code
+ * @property string|null $reason
+ * @property string|null $rejection_reason
+ * @property string|null $approval_status
+ * @property \Illuminate\Support\Carbon|null $approved_at
+ */
 class AttendanceManualEntry extends Model
 {
     use HasFactory;

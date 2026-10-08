@@ -58,7 +58,9 @@ class LeavesServiceProvider extends ServiceProvider
         Leave::observe(LeaveObserver::class);
 
         // Any leave write invalidates the list's page/stat caches.
-        $bump = fn (): mixed => $this->app->make(LeaveListCacheVersion::class)->bump();
+        $bump = function (): void {
+            $this->app->make(LeaveListCacheVersion::class)->bump();
+        };
         Leave::saved($bump);
         Leave::deleted($bump);
         Leave::restored($bump);

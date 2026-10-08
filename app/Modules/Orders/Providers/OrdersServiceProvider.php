@@ -2,13 +2,16 @@
 
 namespace App\Modules\Orders\Providers;
 
+use App\Contracts\EmployeeRecordSource;
 use App\Models\OrderType;
+use App\Modules\Orders\Console\Commands\NeutralizeOrderWordTemplatesCommand;
 use App\Modules\Orders\Console\Commands\OrdersListQueryBudgetCommand;
 use App\Modules\Orders\Console\Commands\OrdersListRenderBenchmarkCommand;
 use App\Modules\Orders\Contracts\HireOrderTemplates;
 use App\Modules\Orders\Domain\Contracts\OrderTypeStatusLookupReadRepository;
 use App\Modules\Orders\Infrastructure\Document\HireOrderTemplateLookup;
 use App\Modules\Orders\Infrastructure\Persistence\Eloquent\EloquentOrderTypeStatusLookupReadRepository;
+use App\Modules\Orders\Infrastructure\Persistence\OrderEmployeeRecordSource;
 use App\Observers\OrderTypeObserver;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
@@ -25,11 +28,14 @@ class OrdersServiceProvider extends ServiceProvider
             $this->commands([
                 OrdersListQueryBudgetCommand::class,
                 OrdersListRenderBenchmarkCommand::class,
+                NeutralizeOrderWordTemplatesCommand::class,
             ]);
         }
 
         $this->app->bind(OrderTypeStatusLookupReadRepository::class, EloquentOrderTypeStatusLookupReadRepository::class);
         $this->app->bind(HireOrderTemplates::class, HireOrderTemplateLookup::class);
+
+        $this->app->tag([OrderEmployeeRecordSource::class], EmployeeRecordSource::TAG);
     }
 
     public function boot(): void

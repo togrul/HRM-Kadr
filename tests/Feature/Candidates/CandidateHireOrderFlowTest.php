@@ -145,30 +145,100 @@ class CandidateHireOrderFlowTest extends TestCase
             ->assertDontSee(__('candidates::common.actions.prepare_hire_order'));
     }
 
-    public function test_an_approved_hire_cannot_be_revoked_so_the_candidate_stays_hired(): void
+    public function test_an_approved_hire_without_records_can_be_revoked_and_the_candidate_is_ready_again(): void
     {
         $this->seedHireTemplate('ise_qebul');
         $this->actingAs($this->hrUser());
         $candidate = $this->makeCandidate(statusId: 30, withOpening: true);
+        DB::table('compensation_regimes')->insert(['code' => 'civil', 'name' => 'Mülki', 'is_active' => true, 'sort' => 1]);
+        $order = $this->issueAndApproveHire($candidate, '78-K');
 
-        Livewire::test(OrderComposer::class, app(CandidateHireOrderService::class)->composerParameters($candidate))
-            ->set('orderNumber', '78-K')
-            ->set('fields', ['var_2' => '01.10.2026-cı il'])
-            ->call('issue');
+        $personnel = Personnel::query()->where('surname', 'Hüseynov')->firstOrFail();
+        // The hire seeded a draft compensation; it is the hire's own record, not a blocker.
+        $this->assertTrue(DB::table('employee_compensations')->where('tabel_no', $personnel->tabel_no)->where('status', 'draft')->exists());
+        $this->assertSame(1, (int) StaffSchedule::query()->where('position_id', $this->position->id)->value('filled'));
 
-        $order = OrderLog::query()->where('order_no', '78-K')->firstOrFail();
-        app(OrderApprovalService::class)->approve($order);
+        app(OrderStatusTransitionService::class)->revert($order->fresh());
 
-        try {
-            app(OrderStatusTransitionService::class)->revert($order->fresh());
-            $this->fail('An approved hire must not be revertible.');
-        } catch (DomainException) {
-            $this->addToAssertionCount(1);
+        $this->assertSame(OrderStatusEnum::PENDING->value, (int) $order->fresh()->status_id);
+
+        // The employee is soft-deleted (kept for the audit trail), the slot is free again.
+        $this->assertSoftDeleted('personnels', ['id' => $personnel->id]);
+        $this->assertFalse(DB::table('employee_compensations')->where('tabel_no', $personnel->tabel_no)->exists());
+        $this->assertSame(0, (int) StaffSchedule::query()->where('position_id', $this->position->id)->value('filled'));
+
+        // The candidate is back on "Əmrə hazır" with every hire link cleared.
+        $candidate->refresh();
+        $this->assertSame(30, (int) $candidate->status_id);
+        $this->assertNull($candidate->hired_personnel_id);
+        $this->assertNull($candidate->hire_order_id);
+        $this->assertNull($candidate->hire_order_no);
+        $this->assertNull($candidate->hired_at);
+        $this->assertNull(CandidateApplication::query()->where('candidate_id', $candidate->id)->value('personnel_id'));
+        $this->assertFalse(DB::table('employee_lifecycle_events')
+            ->where('source_type', 'candidate_order_conversion')->where('source_id', $candidate->id)->exists());
+        $this->assertTrue(app(CandidateHireOrderService::class)->canPrepare($candidate));
+
+        $this->assertDatabaseHas('activity_log', [
+            'log_name' => 'candidates',
+            'event' => 'hire_revoked',
+            'subject_id' => $personnel->id,
+        ]);
+        $this->assertDatabaseHas('activity_log', ['log_name' => 'orders', 'event' => 'reverted', 'subject_id' => $order->id]);
+
+        // Approving again hires the candidate afresh under a new staff number.
+        app(OrderApprovalService::class)->approve($order->fresh());
+
+        $rehired = Personnel::query()->where('surname', 'Hüseynov')->firstOrFail();
+        $this->assertNotSame($personnel->id, $rehired->id);
+        $this->assertNotSame($personnel->tabel_no, $rehired->tabel_no);
+        $this->assertSame($rehired->id, $candidate->fresh()->hired_personnel_id);
+        $this->assertSame(70, (int) $candidate->fresh()->status_id);
+    }
+
+    public function test_an_approved_hire_whose_employee_already_has_records_cannot_be_revoked(): void
+    {
+        $this->seedHireTemplate('ise_qebul');
+        $this->actingAs($this->hrUser());
+        $candidate = $this->makeCandidate(statusId: 30, withOpening: true);
+        $order = $this->issueAndApproveHire($candidate, '80-K');
+        $personnel = Personnel::query()->where('surname', 'Hüseynov')->firstOrFail();
+
+        DB::table('personnel_vacations')->insert([
+            'tabel_no' => $personnel->tabel_no, 'vacation_places' => 'Bakı', 'duration' => 5,
+            'start_date' => '2026-11-02', 'end_date' => '2026-11-06', 'return_work_date' => '2026-11-07',
+            'order_given_by' => 'Direktor', 'added_by' => auth()->id(),
+        ]);
+
+        foreach (['revert', 'cancel'] as $action) {
+            try {
+                app(OrderStatusTransitionService::class)->{$action}($order->fresh());
+                $this->fail('A hire whose employee has records must not be revocable.');
+            } catch (DomainException $exception) {
+                $this->assertSame(__('orders::order_composer.errors.hire_revoke_blocked', [
+                    'records' => __('orders::order_composer.hire_revoke.records.vacations').': 1',
+                ]), $exception->getMessage());
+            }
         }
 
         $this->assertSame(OrderStatusEnum::APPROVED->value, (int) $order->fresh()->status_id);
+        $this->assertNotSoftDeleted('personnels', ['id' => $personnel->id]);
         $this->assertSame(70, (int) $candidate->fresh()->status_id);
-        $this->assertNotNull($candidate->fresh()->hired_personnel_id);
+        $this->assertSame($personnel->id, $candidate->fresh()->hired_personnel_id);
+    }
+
+    public function test_cancelling_an_approved_hire_without_records_also_reverts_the_candidate(): void
+    {
+        $this->seedHireTemplate('ise_qebul');
+        $this->actingAs($this->hrUser());
+        $candidate = $this->makeCandidate(statusId: 30, withOpening: true);
+        $order = $this->issueAndApproveHire($candidate, '81-K');
+
+        app(OrderStatusTransitionService::class)->cancel($order->fresh());
+
+        $this->assertSame(OrderStatusEnum::CANCELLED->value, (int) $order->fresh()->status_id);
+        $this->assertSame(30, (int) $candidate->fresh()->status_id);
+        $this->assertSame(0, Personnel::query()->where('surname', 'Hüseynov')->count());
     }
 
     public function test_cancelling_a_pending_hire_order_leaves_the_candidate_ready(): void
@@ -262,6 +332,20 @@ class CandidateHireOrderFlowTest extends TestCase
 
         OrderWordTemplate::query()->where('code', 'ise_qebul')->update(['is_active' => false]);
         $this->assertSame('a_hire_custom', app(HireOrderTemplates::class)->hireTemplateCode());
+    }
+
+    private function issueAndApproveHire(Candidate $candidate, string $orderNo): OrderLog
+    {
+        Livewire::test(OrderComposer::class, app(CandidateHireOrderService::class)->composerParameters($candidate))
+            ->set('orderNumber', $orderNo)
+            ->set('fields', ['var_2' => '01.10.2026-cı il'])
+            ->call('issue')
+            ->assertHasNoErrors();
+
+        $order = OrderLog::query()->where('order_no', $orderNo)->firstOrFail();
+        app(OrderApprovalService::class)->approve($order);
+
+        return $order;
     }
 
     private function hrUser(): User

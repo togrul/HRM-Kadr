@@ -142,14 +142,16 @@ class LearningLibraryReadService extends AbstractLibraryReadService
 
     protected function itemMeta(Model $item): ?string
     {
-        return filled($item->estimated_minutes)
-            ? __('learning-library::dashboard.catalog.minutes', ['count' => (int) $item->estimated_minutes])
+        $minutes = $item->getAttribute('estimated_minutes');
+
+        return filled($minutes)
+            ? __('learning-library::dashboard.catalog.minutes', ['count' => (int) $minutes])
             : null;
     }
 
     protected function itemUrl(Model $item): ?string
     {
-        return $item->contentUrl();
+        return $item instanceof EmployeeContentAsset ? $item->contentUrl() : null;
     }
 
     protected function summaryData(): array

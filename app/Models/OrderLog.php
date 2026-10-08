@@ -25,6 +25,10 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property int|null $status_id
  * @property array<string, mixed>|null $template_snapshot
  * @property string|null $template_render_mode
+ * @property array<string, mixed>|null $signatory_snapshot
+ * @property array<mixed>|null $description
+ * @property string|null $status_label
+ * @property int|null $status_color_id
  */
 class OrderLog extends Model
 {
@@ -94,6 +98,7 @@ class OrderLog extends Model
         );
     }
 
+    /** @return BelongsTo<OrderStatus, $this> */
     public function status(): BelongsTo
     {
         return $this->belongsTo(OrderStatus::class, 'status_id', 'id')

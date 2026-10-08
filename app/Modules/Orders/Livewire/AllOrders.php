@@ -34,6 +34,9 @@ use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/**
+ * @property-read Collection $statuses Livewire computed (getStatusesProperty)
+ */
 #[On(['orderAdded', 'orderWasDeleted'])]
 class AllOrders extends Component
 {
@@ -168,7 +171,7 @@ class AllOrders extends Component
             default => (int) $order->status_id,
         };
 
-        return [$color, (string) ($order->status?->name ?? '—')];
+        return [$color, (string) ($order->status->name ?? '—')];
     }
 
     #[Renderless]
@@ -254,7 +257,7 @@ class AllOrders extends Component
 
     /**
      * Run a guarded status transition (approve/cancel/reopen/revert) on a Word-engine
-     * order, surfacing any domain error (illegal jump, irreversible hire) to the user.
+     * order, surfacing any domain error (illegal jump, a hire whose employee already has records) to the user.
      */
     private function changeStatus(string $order_no, string $action, string $successKey): void
     {

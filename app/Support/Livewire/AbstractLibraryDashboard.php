@@ -13,6 +13,8 @@ use Livewire\WithPagination;
 /**
  * Shared shell of the learning and onboarding library pages. Both render the same view
  * (partials.library.dashboard) and differ only in the config array from libraryConfig().
+ *
+ * @property array<string, mixed> $assignmentForm Declared by each concrete dashboard with its own defaults.
  */
 abstract class AbstractLibraryDashboard extends Component
 {

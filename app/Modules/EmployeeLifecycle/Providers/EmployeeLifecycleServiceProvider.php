@@ -2,6 +2,8 @@
 
 namespace App\Modules\EmployeeLifecycle\Providers;
 
+use App\Contracts\EmployeeRecordSource;
+use App\Modules\EmployeeLifecycle\Application\Services\LifecycleEmployeeRecordSource;
 use App\Modules\EmployeeLifecycle\Console\Commands\EmployeeLifecycleQueryBudgetCommand;
 use App\Modules\EmployeeLifecycle\Console\Commands\SendLifecycleDeadlineRemindersCommand;
 use App\Providers\Concerns\RegistersLivewireAliases;
@@ -20,6 +22,8 @@ class EmployeeLifecycleServiceProvider extends ServiceProvider
                 SendLifecycleDeadlineRemindersCommand::class,
             ]);
         }
+
+        $this->app->tag([LifecycleEmployeeRecordSource::class], EmployeeRecordSource::TAG);
     }
 
     public function boot(): void

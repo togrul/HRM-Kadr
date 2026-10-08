@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    private const MARKER = "\n\n[Reject note] ";
+    private const MARKER = '[Reject note] ';
 
     /**
      * Rejection notes used to be appended to the entry's own reason behind a marker;
@@ -20,15 +20,15 @@ return new class extends Migration
         });
 
         DB::table('attendance_manual_entries')
-            ->where('reason', 'like', '%[Reject note] %')
+            ->where('reason', 'like', '%'.self::MARKER.'%')
             ->orderBy('id')
             ->select(['id', 'reason'])
             ->chunkById(200, function ($rows): void {
                 foreach ($rows as $row) {
-                    $at = strrpos((string) $row->reason, '[Reject note] ');
+                    $at = strrpos((string) $row->reason, self::MARKER);
                     DB::table('attendance_manual_entries')->where('id', $row->id)->update([
                         'reason' => rtrim(substr((string) $row->reason, 0, $at)),
-                        'rejection_reason' => trim(substr((string) $row->reason, $at + strlen('[Reject note] '))),
+                        'rejection_reason' => trim(substr((string) $row->reason, $at + strlen(self::MARKER))),
                     ]);
                 }
             });

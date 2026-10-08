@@ -219,6 +219,12 @@
                         <span class="{{ $chip }} {{ $chiefChip }}">{{ $chiefChipLabel }}</span>
                     </div>
 
+                    @if (data_get($chiefSnapshot, 'permanent_chief_selection') === 'automatic' && (int) data_get($chiefSnapshot, 'permanent_chief_level') !== 1)
+                        <div class="border-b border-amber-200 bg-amber-50 px-4 py-2.5 text-[12px] font-medium text-amber-800" role="alert" data-chief-level-warning>
+                            {{ __('services::settings.messages.automatic_chief_not_director') }}
+                        </div>
+                    @endif
+
                     <div class="space-y-3 px-4 py-4">
                         <x-ui.input-shell :label="__('services::settings.labels.chief_select')">
                             <x-ui.select wire:model.live="chiefPersonnelId">

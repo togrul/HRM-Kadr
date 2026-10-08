@@ -12,6 +12,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -145,20 +146,16 @@ class ActivityLogReader
      */
     public function labelsFor(Collection $activities): array
     {
-        $references = collect([['causer_type', 'causer_id'], ['subject_type', 'subject_id']])
-            ->flatMap(fn (array $columns) => $activities->map(function (AuditActivity $activity) use ($columns): ?array {
-                [$typeColumn, $idColumn] = $columns;
-
-                if (! filled($activity->{$typeColumn}) || ! filled($activity->{$idColumn})) {
-                    return null;
+        $found = [];
+        foreach ([['causer_type', 'causer_id'], ['subject_type', 'subject_id']] as [$typeColumn, $idColumn]) {
+            foreach ($activities as $activity) {
+                if (filled($activity->{$typeColumn}) && filled($activity->{$idColumn})) {
+                    $found[] = ['type' => (string) $activity->{$typeColumn}, 'id' => (int) $activity->{$idColumn}];
                 }
+            }
+        }
 
-                return [
-                    'type' => (string) $activity->{$typeColumn},
-                    'id' => (int) $activity->{$idColumn},
-                ];
-            }))
-            ->filter()
+        $references = collect($found)
             ->unique(fn (array $reference) => $this->entityKey($reference['type'], $reference['id']))
             ->values();
 
@@ -178,7 +175,7 @@ class ActivityLogReader
 
                 $models = $modelClass::query()
                     ->select($this->labelColumnsFor($modelClass))
-                    ->when($this->usesSoftDeletes($modelClass), fn (Builder $query) => $query->withTrashed())
+                    ->when($this->usesSoftDeletes($modelClass), fn (Builder $query): Builder => $query->withoutGlobalScope(SoftDeletingScope::class))
                     ->whereIn('id', $ids)
                     ->get()
                     ->keyBy('id');

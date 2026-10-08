@@ -57,6 +57,7 @@ class User extends Authenticatable
         return $this->belongsTo(self::class, 'deleted_by', 'id');
     }
 
+    /** @return BelongsTo<Personnel, $this> */
     public function personnel(): BelongsTo
     {
         return $this->belongsTo(Personnel::class, 'email', 'email');

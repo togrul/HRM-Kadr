@@ -46,8 +46,8 @@ class OrderEmployeeVariableResolver
         $position = trim((string) ($personnel->position?->name ?? ''));
 
         // The workplace is written in full: the top organization followed by the
-        // employee's own unit, e.g. "Dinçer və Carçıoğlu Birgə Müəssisəsinin Naxçıvan
-        // Qida Satış Mərkəzinin" — each segment carries its own grammatical case.
+        // employee's own unit, e.g. "Nümunə MMC-nin Naxçıvan
+        // Satış Mərkəzinin" — each segment carries its own grammatical case.
         $structureSegments = $this->structureSegments($personnel->structure_id);
         $structure = implode(' ', $structureSegments);
 

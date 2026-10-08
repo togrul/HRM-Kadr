@@ -8,6 +8,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
 
 /**
  * Document compliance rows, built as ONE SQL union so the database filters, sorts and
@@ -445,6 +446,7 @@ class DocumentExpiryReadService
             'service_card' => ["COALESCE({$table}.card_number, '')", []],
             'passport' => ["COALESCE({$table}.serial_number, '')", []],
             'contract' => $this->contractNumberSql($table),
+            default => throw new InvalidArgumentException("Unknown document type [{$type}]."),
         };
     }
 

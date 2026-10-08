@@ -6,9 +6,13 @@ use App\Models\ChiefDelegation;
 use App\Models\Personnel;
 use App\Models\Setting;
 use App\Models\User;
+use App\Modules\Services\Livewire\Settings\SettingsList;
 use App\Services\Chief\ChiefResolver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class ChiefResolverTest extends TestCase
@@ -43,6 +47,108 @@ class ChiefResolverTest extends TestCase
         $director = $this->makePersonnel('T-002', 'Director', 'Real', positionId: 2);
 
         $this->assertSame($director->id, app(ChiefResolver::class)->current('2026-06-13')['personnel_id']);
+    }
+
+    public function test_a_high_approval_rank_does_not_make_an_engineer_the_chief(): void
+    {
+        // HRM-72: istehsalatda "Mühəndis" vəzifəsinə yüksək approval_rank verilmişdi və o, direktoru üstələyirdi.
+        $this->seedReferenceData();
+        DB::table('structures')->insert(['id' => 2, 'name' => 'İstehsalat', 'shortname' => 'İst', 'parent_id' => 1, 'code' => 2, 'level' => 2, 'coefficient' => 1]);
+        DB::table('positions')->insert([
+            ['id' => 3, 'name' => 'Mühəndis', 'approval_rank' => 500, 'is_approval_target' => true, 'level' => 6],
+            ['id' => 4, 'name' => 'Direktor', 'approval_rank' => 10, 'is_approval_target' => true, 'level' => 1],
+        ]);
+
+        $engineer = $this->makePersonnel('T-001', 'Cumayılov', 'Xaqani', positionId: 3, structureId: 2);
+        $director = $this->makePersonnel('T-002', 'Nəcəfli', 'Samid', positionId: 4);
+
+        $snapshot = app(ChiefResolver::class)->current('2026-06-13');
+
+        $this->assertSame($director->id, $snapshot['personnel_id']);
+        $this->assertNotSame($engineer->id, $snapshot['personnel_id']);
+        $this->assertSame('automatic', $snapshot['permanent_chief_selection']);
+        $this->assertSame(1, $snapshot['permanent_chief_level']);
+    }
+
+    public function test_a_position_without_a_stored_level_is_classified_by_its_name(): void
+    {
+        $this->seedReferenceData();
+        DB::table('positions')->insert([
+            ['id' => 3, 'name' => 'Mühəndis', 'approval_rank' => 500, 'is_approval_target' => true, 'level' => null],
+            ['id' => 4, 'name' => 'Direktor', 'approval_rank' => 0, 'is_approval_target' => true, 'level' => null],
+        ]);
+
+        $this->makePersonnel('T-001', 'Engineer', 'One', positionId: 3);
+        $director = $this->makePersonnel('T-002', 'Director', 'Two', positionId: 4);
+
+        $this->assertSame($director->id, app(ChiefResolver::class)->current('2026-06-13')['personnel_id']);
+    }
+
+    public function test_among_equal_levels_the_root_structure_then_seniority_wins(): void
+    {
+        $this->seedReferenceData();
+        DB::table('structures')->insert(['id' => 2, 'name' => 'Filial', 'shortname' => 'Filial', 'parent_id' => 1, 'code' => 2, 'level' => 2, 'coefficient' => 1]);
+        DB::table('positions')->insert([
+            ['id' => 3, 'name' => 'Filial direktoru', 'approval_rank' => 900, 'is_approval_target' => true, 'level' => 1],
+            ['id' => 4, 'name' => 'Direktor', 'approval_rank' => 10, 'is_approval_target' => true, 'level' => 1],
+        ]);
+
+        $this->makePersonnel('T-001', 'Branch', 'Head', positionId: 3, structureId: 2, joinDate: '2010-01-01');
+        $newer = $this->makePersonnel('T-002', 'Head', 'Newer', positionId: 4, joinDate: '2022-01-01');
+        $older = $this->makePersonnel('T-003', 'Head', 'Older', positionId: 4, joinDate: '2015-01-01');
+
+        $snapshot = app(ChiefResolver::class)->current('2026-06-13');
+
+        $this->assertSame($older->id, $snapshot['personnel_id']);
+        $this->assertNotSame($newer->id, $snapshot['personnel_id']);
+    }
+
+    public function test_a_dismissed_director_is_skipped_and_the_fallback_is_flagged(): void
+    {
+        $this->seedReferenceData();
+        DB::table('positions')->insert(['id' => 4, 'name' => 'Direktor', 'approval_rank' => 0, 'is_approval_target' => true, 'level' => 1]);
+
+        $dismissed = $this->makePersonnel('T-001', 'Former', 'Director', positionId: 4);
+        $dismissed->forceFill(['leave_work_date' => '2026-01-31'])->saveQuietly();
+        $head = $this->makePersonnel('T-002', 'Dept', 'Head', positionId: 1);
+
+        $snapshot = app(ChiefResolver::class)->current('2026-06-13');
+
+        $this->assertSame($head->id, $snapshot['personnel_id']);
+        $this->assertSame('automatic', $snapshot['permanent_chief_selection']);
+        $this->assertSame(4, $snapshot['permanent_chief_level']);
+    }
+
+    public function test_a_manual_choice_overrides_the_automatic_rule(): void
+    {
+        $this->seedReferenceData();
+        $this->makePersonnel('T-001', 'Chief', 'Main', positionId: 2);
+        $manager = $this->makePersonnel('T-002', 'Manager', 'One', positionId: 1);
+        Setting::query()->create(['name' => 'Chief personnel id', 'value' => (string) $manager->id, 'type' => 'string']);
+
+        $snapshot = app(ChiefResolver::class)->current('2026-06-13');
+
+        $this->assertSame($manager->id, $snapshot['personnel_id']);
+        $this->assertSame('manual', $snapshot['permanent_chief_selection']);
+    }
+
+    public function test_settings_warn_when_the_automatic_chief_is_not_a_director(): void
+    {
+        $this->seedReferenceData();
+        $admin = User::factory()->create();
+        $admin->givePermissionTo(Permission::findOrCreate('access-settings', 'web'));
+        $admin->assignRole(Role::findOrCreate('staff', 'web'));
+        $this->actingAs($admin);
+
+        $this->makePersonnel('T-001', 'Manager', 'One', positionId: 1);
+
+        Livewire::test(SettingsList::class)
+            ->assertSee(__('services::settings.messages.automatic_chief_not_director'));
+
+        $this->makePersonnel('T-002', 'Chief', 'Main', positionId: 2);
+
+        Livewire::test(SettingsList::class)
+            ->assertDontSee(__('services::settings.messages.automatic_chief_not_director'));
     }
 
     public function test_it_resolves_active_delegation_for_effective_date(): void
@@ -114,7 +220,7 @@ class ChiefResolverTest extends TestCase
         ]);
     }
 
-    private function makePersonnel(string $tabelNo, string $surname, string $name, int $positionId): Personnel
+    private function makePersonnel(string $tabelNo, string $surname, string $name, int $positionId, int $structureId = 1, string $joinDate = '2020-01-01'): Personnel
     {
         return Personnel::withoutEvents(fn () => Personnel::query()->create([
             'tabel_no' => $tabelNo,
@@ -128,10 +234,10 @@ class ChiefResolverTest extends TestCase
             'pin' => $tabelNo,
             'residental_address' => 'Baku',
             'education_degree_id' => 1,
-            'structure_id' => 1,
+            'structure_id' => $structureId,
             'position_id' => $positionId,
             'work_norm_id' => 1,
-            'join_work_date' => '2020-01-01',
+            'join_work_date' => $joinDate,
             'added_by' => User::factory()->create()->id,
         ]));
     }

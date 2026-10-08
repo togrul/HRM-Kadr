@@ -33,6 +33,9 @@ use Livewire\WithPagination;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
+/**
+ * @property-read string|null $hireOrderPreset Livewire #[Computed]
+ */
 #[On(['candidateAdded', 'filterSelected', 'candidateWasDeleted'])]
 class CandidateList extends Component
 {
@@ -164,7 +167,11 @@ class CandidateList extends Component
         return $candidate ? app(CandidateHireOrderService::class)->composerParameters($candidate) : null;
     }
 
-    /** Candidates the current user may see (structure access), regardless of list filters. */
+    /**
+     * Candidates the current user may see (structure access), regardless of list filters.
+     *
+     * @return Builder<Candidate>
+     */
     protected function filteredCandidateScope(): Builder
     {
         return Candidate::query()->when(

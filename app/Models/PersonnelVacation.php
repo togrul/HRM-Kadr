@@ -13,6 +13,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property string $tabel_no
+ * @property mixed $start_date
+ * @property mixed $end_date
+ * @property int|null $duration
+ */
 class PersonnelVacation extends Model
 {
     use DateCastTrait,HasFactory,PersonnelTrait,SoftDeletes;
@@ -88,11 +94,13 @@ class PersonnelVacation extends Model
         return $this->belongsTo(User::class, 'reviewed_by_user_id');
     }
 
+    /** @return BelongsTo<Personnel, $this> */
     public function approver(): BelongsTo
     {
         return $this->belongsTo(Personnel::class, 'approver_personnel_id');
     }
 
+    /** @return BelongsTo<Personnel, $this> */
     public function fallbackApprover(): BelongsTo
     {
         return $this->belongsTo(Personnel::class, 'fallback_approver_personnel_id');
