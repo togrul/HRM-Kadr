@@ -12,6 +12,7 @@
     $workScheduleOptions = EmploymentTerms::options(EmploymentTerms::WORK_SCHEDULES, 'work_schedule');
     $restDayOptions = EmploymentTerms::options(EmploymentTerms::REST_DAYS, 'rest_day');
 
+    $isFixedTermContract = ($personal['contract_type'] ?? null) === EmploymentTerms::CONTRACT_TYPE_FIXED;
     $probationUnit = $personal['probation_unit'] ?? null;
     $probationUnitLabel = $probationUnit ? __('personnel::common.employment.probation_unit.'.$probationUnit) : '';
     $workSchedule = $personal['work_schedule'] ?? null;
@@ -294,6 +295,9 @@
                     :disabled="!empty($personnelModel)"
                 >
                 </x-ui.select-dropdown>
+                @if (empty($personnelModel) && $this->positionListFallsBackToAll)
+                    <p class="mt-1 text-[11.5px] leading-4 text-ink-faint">{{ __('personnel::common.hints.positions_without_staff_schedule') }}</p>
+                @endif
                 @error('personalForm.personnel.position_id')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
@@ -365,14 +369,17 @@
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="personnel.leave_work_date">{{ __('personnel::common.labels.leave_work_date') }}</x-label>
-                <x-pikaday-input mode="gray" name="personnel.leave_work_date" format="Y-MM-DD" wire:model.live="personalForm.personnel.leave_work_date">
+                <x-label :required="$isFixedTermContract" for="personnel.contract_end_date">{{ __('personnel::common.labels.contract_end_date') }}</x-label>
+                <x-pikaday-input mode="gray" name="personnel.contract_end_date" format="Y-MM-DD" wire:model.live="personalForm.personnel.contract_end_date">
                     <x-slot name="script">
                       $el.onchange = function () {
-                      @this.set('personalForm.personnel.leave_work_date', $el.value);
+                      @this.set('personalForm.personnel.contract_end_date', $el.value);
                       }
                     </x-slot>
                 </x-pikaday-input>
+                @error('personalForm.personnel.contract_end_date')
+                <x-validation> {{ $message }} </x-validation>
+                @enderror
             </div>
         </div>
         <div class="grid grid-cols-1 gap-3 md:grid-cols-3">

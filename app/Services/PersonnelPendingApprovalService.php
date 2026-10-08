@@ -14,6 +14,34 @@ class PersonnelPendingApprovalService
         protected PersonnelTabelNoGeneratorService $tabelNoGenerator
     ) {}
 
+    /**
+     * Hazırkı vəzifəni əmək fəaliyyəti cədvəlinə cari qeyd kimi yazır (artıq varsa
+     * toxunmur). Təsdiq gözləməyən — birbaşa əlavə edilən — işçi üçün də çağırılır ki,
+     * staj və kartdakı "Əmək fəaliyyəti" hər iki yolda eyni olsun.
+     */
+    public function ensureCurrentLaborActivity(Personnel $personnel, string $joinDate): void
+    {
+        $personnel->loadMissing(['position:id,name', 'structure:id,coefficient']);
+
+        $hasCurrentLabor = $personnel->laborActivities()
+            ->where('is_current', true)
+            ->whereNull('leave_date')
+            ->exists();
+
+        if ($hasCurrentLabor) {
+            return;
+        }
+
+        $personnel->laborActivities()->create([
+            'company_name' => (string) config('app.company', ''),
+            'position' => (string) ($personnel->position?->name ?? ''),
+            'coefficient' => $personnel->structure?->coefficient,
+            'join_date' => $joinDate,
+            'is_special_service' => true,
+            'is_current' => true,
+        ]);
+    }
+
     public function approve(Personnel $personnel): void
     {
         DB::transaction(function () use ($personnel) {
@@ -35,23 +63,7 @@ class PersonnelPendingApprovalService
                 'tabel_no' => $resolvedTabelNo,
             ]);
 
-            $personnel->loadMissing(['position:id,name', 'structure:id,coefficient']);
-
-            $hasCurrentLabor = $personnel->laborActivities()
-                ->where('is_current', true)
-                ->whereNull('leave_date')
-                ->exists();
-
-            if (! $hasCurrentLabor) {
-                $personnel->laborActivities()->create([
-                    'company_name' => (string) config('app.company', ''),
-                    'position' => (string) ($personnel->position?->name ?? ''),
-                    'coefficient' => $personnel->structure?->coefficient,
-                    'join_date' => $joinDate,
-                    'is_special_service' => true,
-                    'is_current' => true,
-                ]);
-            }
+            $this->ensureCurrentLaborActivity($personnel, $joinDate);
 
             DB::afterCommit(function () use ($personnel) {
                 if ($personnel->structure_id && $personnel->position_id) {

@@ -4,6 +4,7 @@ namespace App\Models\Concerns;
 
 use App\Models\PersonnelBusinessTrip;
 use App\Models\PersonnelVacation;
+use App\Support\Language\AzerbaijaniPatronymic;
 use Carbon\Carbon;
 
 /**
@@ -20,9 +21,19 @@ trait HasPersonnelAttributes
         return "{$this->surname} {$this->name} {$this->patronymic}";
     }
 
+    /**
+     * Ata adı şəkilçisiz saxlanılır ("Hikmət oğlu" → "Hikmət"); "oğlu/qızı" göstərilərkən
+     * cinsə görə əlavə olunur. Bu, formadan, idxaldan və namizəddən işçiyə keçiddən
+     * gələn bütün yazılara eyni qaydanı tətbiq edir.
+     */
+    public function setPatronymicAttribute(mixed $value): void
+    {
+        $this->attributes['patronymic'] = is_string($value) ? AzerbaijaniPatronymic::strip($value) : $value;
+    }
+
     public function getFullnameMaxAttribute(): string
     {
-        return $this->fullname.' '.($this->gender == 2 ? 'qızı' : 'oğlu');
+        return AzerbaijaniPatronymic::appendTo($this->fullname, $this->gender);
     }
 
     public function getActiveVacationAttribute(): ?PersonnelVacation

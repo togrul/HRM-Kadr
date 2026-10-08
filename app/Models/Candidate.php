@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Language\AzerbaijaniPatronymic;
 use App\Traits\CreateDeleteTrait;
 use App\Traits\DateCastTrait;
 use Carbon\Carbon;
@@ -109,7 +110,7 @@ class Candidate extends Model
 
     public function getFullnameMaxAttribute(): string
     {
-        return $this->fullname.' '.($this->gender == 2 ? 'qızı' : 'oğlu');
+        return AzerbaijaniPatronymic::appendTo($this->fullname, $this->gender);
     }
 
     public function structure(): BelongsTo

@@ -111,14 +111,21 @@ class AllPersonnel extends Component
         $this->dispatch('setOpenFilter', filter: $this->filters);
     }
 
-    public function setDeletePersonnel($personnelId): void
+    public function setDeletePersonnel(mixed $personnelId): void
     {
-        $this->dispatch('setDeletePersonnel', $personnelId);
+        $id = $this->personnelKey($personnelId);
+
+        if ($id === null) {
+            return;
+        }
+
+        $this->dispatch('setDeletePersonnel', $id);
     }
 
-    public function restoreData($id): void
+    public function restoreData(mixed $id): void
     {
-        $personnel = Personnel::withTrashed()->where('tabel_no', $id)->first();
+        $key = $this->personnelKey($id);
+        $personnel = $key === null ? null : Personnel::onlyTrashed()->find($key);
 
         if (! $personnel) {
             return;
@@ -133,9 +140,10 @@ class AllPersonnel extends Component
         $this->dispatch('personnelAdded', __('personnel::common.messages.personnel_updated'));
     }
 
-    public function forceDeleteData($id): void
+    public function forceDeleteData(mixed $id): void
     {
-        $model = Personnel::withTrashed()->where('tabel_no', $id)->first();
+        $key = $this->personnelKey($id);
+        $model = $key === null ? null : Personnel::onlyTrashed()->find($key);
 
         if (! $model) {
             return;
@@ -145,6 +153,16 @@ class AllPersonnel extends Component
 
         $model->forceDelete();
         $this->dispatch('personnelWasDeleted', __('personnel::common.messages.personnel_deleted'));
+    }
+
+    /**
+     * Sətir əməliyyatları qeydi yalnız müsbət tam id ilə göstərir.
+     */
+    protected function personnelKey(mixed $value): ?int
+    {
+        $id = filter_var($value, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+
+        return $id === false ? null : (int) $id;
     }
 
     #[On('selectStructure')]

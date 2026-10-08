@@ -12,9 +12,12 @@ use App\Livewire\Forms\Personnel\PersonalInformationForm;
 use App\Livewire\Forms\Personnel\ServiceHistoryForm;
 use App\Models\Personnel;
 use App\Modules\Personnel\Services\PersonnelFormAssembler;
+use App\Modules\Personnel\Services\PersonnelLookupService;
 use App\Modules\Personnel\Support\Traits\PersonnelCrud;
 use App\Modules\Personnel\Support\Traits\RelationCruds\RelationCrudTrait;
 use App\Modules\Personnel\Support\Traits\WarnsAboutStaffSlot;
+use App\Services\PersonnelPendingApprovalService;
+use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Isolate;
@@ -92,6 +95,14 @@ class AddPersonnel extends Component
             if (! empty($assembled['personnel_extra'])) {
                 $personnel->update($assembled['personnel_extra']);
             }
+
+            // Təsdiq gözləyən işçidə cari əmək fəaliyyəti təsdiq anında yaranır.
+            if (! $personnel->getAttribute('is_pending') && filled($personnel->getRawOriginal('join_work_date'))) {
+                app(PersonnelPendingApprovalService::class)->ensureCurrentLaborActivity(
+                    $personnel,
+                    Carbon::parse($personnel->getRawOriginal('join_work_date'))->toDateString()
+                );
+            }
         });
         $this->dispatchPersonnelStored(__('personnel::common.messages.personnel_created'));
         $this->dispatchModalCloseEvent();
@@ -105,6 +116,7 @@ class AddPersonnel extends Component
 
         if (isset($this->personalForm)) {
             $this->personalForm->resetForm();
+            $this->personalForm->personnel['nationality_id'] ??= app(PersonnelLookupService::class)->homeCountryId();
         }
 
         if (isset($this->documentForm)) {

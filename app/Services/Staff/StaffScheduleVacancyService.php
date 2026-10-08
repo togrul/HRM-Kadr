@@ -102,6 +102,28 @@ class StaffScheduleVacancyService
         ])->save();
     }
 
+    /**
+     * Ştat cədvəlində strukturun özünə ayrılmış vəzifələr. Struktur üçün ştat
+     * cədvəli qurulmayıbsa boş siyahı qaytarır.
+     *
+     * @return list<int>
+     */
+    public function positionIdsFor(?int $structureId): array
+    {
+        if (! $structureId) {
+            return [];
+        }
+
+        return StaffSchedule::query()
+            ->where('structure_id', $structureId)
+            ->distinct()
+            ->orderBy('position_id')
+            ->pluck('position_id')
+            ->map(fn (mixed $id): int => (int) $id)
+            ->values()
+            ->all();
+    }
+
     private function row(?int $structureId, ?int $positionId): ?StaffSchedule
     {
         if (! $structureId || ! $positionId) {

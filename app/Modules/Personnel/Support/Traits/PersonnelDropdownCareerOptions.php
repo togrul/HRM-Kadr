@@ -16,6 +16,7 @@ use App\Models\ScientificDegreeAndName;
 use App\Models\SocialOrigin;
 use App\Models\Structure;
 use App\Models\WorkNorm;
+use App\Services\Staff\StaffScheduleVacancyService;
 use App\Services\StructureService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -328,8 +329,34 @@ trait PersonnelDropdownCareerOptions
     {
         return $this->positionOptionsFor(
             searchKey: 'searchPosition',
-            selectedId: $this->dropdownSelected('position_id')
+            selectedId: $this->dropdownSelected('position_id'),
+            allowedIds: $this->structurePositionIds()
         );
+    }
+
+    /**
+     * Struktur seçilib, amma onun ştat cədvəlində vəzifə yoxdur — siyahı bütün
+     * vəzifələrə qayıdır və forma bunu ipucu ilə bildirir.
+     */
+    #[Computed]
+    public function positionListFallsBackToAll(): bool
+    {
+        return (int) $this->dropdownSelected('structure_id') > 0
+            && $this->structurePositionIds() === [];
+    }
+
+    /**
+     * Seçilmiş strukturun ştat cədvəlindəki vəzifələr.
+     *
+     * @return list<int>
+     */
+    protected function structurePositionIds(): array
+    {
+        $structureId = (int) $this->dropdownSelected('structure_id');
+
+        return $structureId > 0
+            ? app(StaffScheduleVacancyService::class)->positionIdsFor($structureId)
+            : [];
     }
 
     #[Computed]
@@ -512,20 +539,29 @@ trait PersonnelDropdownCareerOptions
             ->get(['id', 'name', 'parent_id', 'code', 'level']);
     }
 
-    protected function positionOptionsFor(string $searchKey, int|string|null $selectedId): array
+    /**
+     * @param  list<int>  $allowedIds  boş olduqda bütün vəzifələr
+     */
+    protected function positionOptionsFor(string $searchKey, int|string|null $selectedId, array $allowedIds = []): array
     {
         $base = Position::query()
             ->select('id', DB::raw('name as label'))
             ->orderBy('name');
 
+        if ($allowedIds !== []) {
+            $base->whereIn('id', $allowedIds);
+        }
+
         $search = $this->dropdownSearch($searchKey);
 
         if ($search === '') {
             return $this->cachedOptionsWithSelected(
-                cacheKey: 'personnel:positions',
+                cacheKey: $allowedIds === []
+                    ? 'personnel:positions'
+                    : 'personnel:positions:'.md5(implode(',', $allowedIds)),
                 base: $base,
                 selectedId: $selectedId,
-                limit: 40
+                limit: max(40, count($allowedIds))
             );
         }
 

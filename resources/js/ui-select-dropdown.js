@@ -106,9 +106,15 @@ window.uiSelectDropdown = (config) => ({
         });
       });
 
+      // Keyed options are patched in place by Livewire's morph, so a relabelled option
+      // (e.g. a status chip whose count follows the search: "Aktiv · 61" → "Aktiv · 3")
+      // changes only its data-option-label attribute — no child is added or removed.
+      // Watching that attribute keeps the trigger's label in step with the options.
       observer.observe(target, {
         childList: true,
         subtree: true,
+        attributes: true,
+        attributeFilter: ['data-option-id', 'data-option-label'],
       });
 
       this.$root._uiSelectObserver = observer;

@@ -3,6 +3,10 @@
 namespace App\Modules\Personnel\Support\Traits\Validations;
 
 use App\Modules\Personnel\Support\EmploymentTerms;
+use App\Modules\Personnel\Support\PersonnelFieldRules;
+use Closure;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Unique;
 
 trait PersonnelValidationTrait
 {
@@ -22,8 +26,11 @@ trait PersonnelValidationTrait
 
     protected function getPersonalInfoRules(): array
     {
-        $uniqueTableRule = 'required|min:1|unique:personnels,tabel_no'.
-            ($this->resolvePersonnelId() ? ','.$this->resolvePersonnelId() : '');
+        // Qaydalar həmişə normallaşdırılmış dəyər üzərində işləsin: " ab 12345 " FİN-i,
+        // "(050) 123-45-67" nömrəsi və "Hikmət oğlu" ata adı yoxlamadan əvvəl düzəlir.
+        $this->normalizePersonalInput();
+
+        $personnelId = $this->resolvePersonnelId();
 
         $personnelState = $this->resolvePersonnelState();
         $hasChangedInitials = (bool) data_get($personnelState, 'has_changed_initials', false);
@@ -52,15 +59,39 @@ trait PersonnelValidationTrait
         ] : [];
 
         return array_merge([
-            'personalForm.personnel.tabel_no' => $uniqueTableRule,
+            // Tabel nömrəsi DB səviyyəsində unikal indeksə malikdir və bu indeks silinmiş
+            // qeydləri də əhatə edir (nömrə FK-larla bağlıdır, bərpa zamanı geri qayıdır),
+            // ona görə yoxlama da silinmişləri nəzərə alır; redaktədə qeydin özü istisnadır.
+            'personalForm.personnel.tabel_no' => [
+                'required',
+                'string',
+                'max:50',
+                'regex:'.PersonnelFieldRules::TABEL_NO_PATTERN,
+                'not_regex:'.PersonnelFieldRules::TABEL_NO_ZERO_PATTERN,
+                Rule::unique('personnels', 'tabel_no')->ignore($personnelId),
+            ],
             'personalForm.personnel.name' => 'required|min:3',
             'personalForm.personnel.surname' => 'required|min:3',
             'personalForm.personnel.patronymic' => 'required|min:3',
-            'personalForm.personnel.birthdate' => 'required|date',
+            'personalForm.personnel.birthdate' => [
+                'required',
+                'date',
+                'before:today',
+                'after_or_equal:'.now()->subYears(PersonnelFieldRules::MAXIMUM_AGE)->toDateString(),
+                $this->minimumHiringAgeRule(),
+            ],
             'personalForm.personnel.gender' => 'required|int',
             'personalForm.personnel.nationality_id' => 'required|int|exists:countries,id',
-            'personalForm.personnel.mobile' => ['required', 'min:7'],
-            'personalForm.personnel.pin' => 'required|min:7|max:7',
+            'personalForm.personnel.mobile' => ['required', 'string', 'regex:'.PersonnelFieldRules::PHONE_PATTERN],
+            'personalForm.personnel.phone' => ['nullable', 'string', 'regex:'.PersonnelFieldRules::PHONE_PATTERN],
+            'personalForm.personnel.email' => ['nullable', 'string', 'email', 'max:255'],
+            'personalForm.personnel.pin' => [
+                'required',
+                'string',
+                'size:7',
+                'regex:'.PersonnelFieldRules::PIN_PATTERN,
+                $this->pinUniquenessRule($personnelId),
+            ],
             'personalForm.personnel.residental_address' => 'required|min:3',
             'personalForm.personnel.registered_address' => 'required|min:3',
             'personalForm.personnel.education_degree_id' => 'required|int|exists:education_degrees,id',
@@ -69,6 +100,91 @@ trait PersonnelValidationTrait
             'personalForm.personnel.work_norm_id' => 'required|int|exists:work_norms,id',
             'personalForm.personnel.join_work_date' => 'required|date',
         ], $initialsChangeRules, $nationalityChangeRules, $disabilityRules, $this->employmentTermRules());
+    }
+
+    /**
+     * Şəxsi məlumat sahələrini yoxlamadan və saxlamadan əvvəl normallaşdırır.
+     */
+    protected function normalizePersonalInput(): void
+    {
+        if (! property_exists($this, 'personalForm') || ! $this->personalForm) {
+            return;
+        }
+
+        $personnel = $this->personalForm->personnel;
+
+        $normalizers = [
+            'pin' => PersonnelFieldRules::normalizePin(...),
+            'mobile' => PersonnelFieldRules::normalizePhone(...),
+            'phone' => PersonnelFieldRules::normalizePhone(...),
+            'email' => PersonnelFieldRules::normalizeEmail(...),
+            'tabel_no' => PersonnelFieldRules::normalizeTabelNo(...),
+            'patronymic' => PersonnelFieldRules::normalizePatronymic(...),
+        ];
+
+        foreach ($normalizers as $field => $normalize) {
+            if (array_key_exists($field, $personnel)) {
+                $personnel[$field] = $normalize($personnel[$field]);
+            }
+        }
+
+        $this->personalForm->personnel = $personnel;
+    }
+
+    /**
+     * ƏM m.42: işə qəbul günü işçinin ən azı 15 yaşı olmalıdır.
+     */
+    protected function minimumHiringAgeRule(): Closure
+    {
+        return function (string $attribute, mixed $value, Closure $fail): void {
+            $age = PersonnelFieldRules::ageOn($value, data_get($this->resolvePersonnelState(), 'join_work_date'));
+
+            if ($age !== null && $age < PersonnelFieldRules::MINIMUM_HIRING_AGE) {
+                $fail(__('personnel::common.validation.minimum_hiring_age', ['age' => PersonnelFieldRules::MINIMUM_HIRING_AGE]));
+            }
+        };
+    }
+
+    /**
+     * FİN eyni anda yalnız bir işləyən (silinməmiş, işdən çıxmamış) əsas iş yeri
+     * qeydində ola bilər. İşdən çıxmış şəxs yenidən işə qəbul oluna bilər (yeni qeyd),
+     * daxili əvəzçilik isə ayrıca "əlavə iş yeri" qeydi kimi aparılır — hər ikisi
+     * istisnadır.
+     */
+    protected function pinUniquenessRule(?int $personnelId): Unique|string
+    {
+        if (data_get($this->resolvePersonnelState(), 'workplace_type') === 'secondary') {
+            return 'nullable';
+        }
+
+        return Rule::unique('personnels', 'pin')
+            ->ignore($personnelId)
+            ->whereNull('deleted_at')
+            ->whereNull('leave_work_date')
+            ->where(fn ($query) => $query->whereNull('workplace_type')->orWhere('workplace_type', '!=', 'secondary'));
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function messages(): array
+    {
+        return [
+            'personalForm.personnel.pin.size' => __('personnel::common.validation.pin_format'),
+            'personalForm.personnel.pin.regex' => __('personnel::common.validation.pin_format'),
+            'personalForm.personnel.pin.unique' => __('personnel::common.validation.pin_taken'),
+            'personalForm.personnel.mobile.regex' => __('personnel::common.validation.phone_format'),
+            'personalForm.personnel.phone.regex' => __('personnel::common.validation.phone_format'),
+            'personalForm.personnel.tabel_no.regex' => __('personnel::common.validation.tabel_no_format'),
+            'personalForm.personnel.tabel_no.not_regex' => __('personnel::common.validation.tabel_no_format'),
+            'personalForm.personnel.tabel_no.unique' => __('personnel::common.validation.tabel_no_taken'),
+            'personalForm.personnel.birthdate.before' => __('personnel::common.validation.birthdate_in_future'),
+            'personalForm.personnel.birthdate.after_or_equal' => __('personnel::common.validation.birthdate_too_old', ['years' => PersonnelFieldRules::MAXIMUM_AGE]),
+            'personalForm.personnel.contract_end_date.required' => __('personnel::common.validation.contract_end_date_required'),
+            'personalForm.personnel.contract_end_date.after' => __('personnel::common.validation.contract_end_after_start'),
+            'personalForm.personnel.contract_date.before_or_equal' => __('personnel::common.validation.contract_date_after_start'),
+            'personalForm.personnel.probation_amount.max' => __('personnel::common.validation.probation_too_long'),
+        ];
     }
 
     /**
@@ -81,11 +197,22 @@ trait PersonnelValidationTrait
     {
         $in = fn (array $values): string => 'nullable|in:'.implode(',', $values);
 
+        $probationUnit = data_get($this->resolvePersonnelState(), 'probation_unit');
+        $probationMax = PersonnelFieldRules::PROBATION_LIMITS[$probationUnit] ?? 365;
+
         return [
             'personalForm.personnel.contract_type' => $in(EmploymentTerms::CONTRACT_TYPES),
-            'personalForm.personnel.contract_date' => 'nullable|date',
+            // Müqavilə işə başlamadan əvvəl və ya həmin gün imzalanır, sonra yox.
+            'personalForm.personnel.contract_date' => 'nullable|date|before_or_equal:personalForm.personnel.join_work_date',
+            // Müddətli müqavilədə (ƏM m.47) bitmə tarixi mütləqdir və işə başlamadan sonra olmalıdır.
+            'personalForm.personnel.contract_end_date' => [
+                Rule::requiredIf(fn (): bool => data_get($this->resolvePersonnelState(), 'contract_type') === EmploymentTerms::CONTRACT_TYPE_FIXED),
+                'nullable',
+                'date',
+                'after:personalForm.personnel.join_work_date',
+            ],
             'personalForm.personnel.probation_unit' => $in(EmploymentTerms::PROBATION_UNITS),
-            'personalForm.personnel.probation_amount' => 'nullable|integer|min:1|max:365|required_with:personalForm.personnel.probation_unit',
+            'personalForm.personnel.probation_amount' => 'nullable|integer|min:1|max:'.$probationMax.'|required_with:personalForm.personnel.probation_unit',
             'personalForm.personnel.workplace_type' => $in(EmploymentTerms::WORKPLACE_TYPES),
             'personalForm.personnel.working_time_type' => $in(EmploymentTerms::WORKING_TIME_TYPES),
             'personalForm.personnel.work_schedule' => $in(EmploymentTerms::WORK_SCHEDULES),
@@ -472,6 +599,7 @@ trait PersonnelValidationTrait
             'personalForm.personnel.join_work_date' => __('personnel::common.labels.join_work_date'),
             'personalForm.personnel.contract_type' => __('personnel::common.labels.contract_type'),
             'personalForm.personnel.contract_date' => __('personnel::common.labels.contract_date'),
+            'personalForm.personnel.contract_end_date' => __('personnel::common.labels.contract_end_date'),
             'personalForm.personnel.probation_unit' => __('personnel::common.labels.probation_period'),
             'personalForm.personnel.probation_amount' => __('personnel::common.labels.probation_amount'),
             'personalForm.personnel.workplace_type' => __('personnel::common.labels.workplace_type'),

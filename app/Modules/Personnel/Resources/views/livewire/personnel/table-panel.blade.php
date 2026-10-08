@@ -5,6 +5,11 @@
     // One presence state per row drives the chip colour and the avatar tint; the
     // avatar stays grey for the common at-work state so tinted avatars flag exceptions.
     $stateOf = function ($personnel): array {
+        // Silinmiş qeyd işdə/işdən çıxmış statusu ilə göstərilməməlidir.
+        if ($personnel->trashed()) {
+            return ['key' => 'deleted', 'tone' => 'rose', 'label' => __('personnel::common.states.deleted')];
+        }
+
         if (filled($personnel->leave_work_date)) {
             return ['key' => 'resigned', 'tone' => 'rose', 'label' => __('personnel::common.labels.resigned')];
         }
@@ -38,8 +43,8 @@
                 @class([
                     'group/row transition',
                     'bg-[#fffbf5]' => $state['key'] === 'pending',
-                    'bg-[#fff7f8]' => $state['key'] === 'resigned',
-                    'hover:bg-[#fafafa]' => ! in_array($state['key'], ['pending', 'resigned'], true),
+                    'bg-[#fff7f8]' => in_array($state['key'], ['resigned', 'deleted'], true),
+                    'hover:bg-[#fafafa]' => ! in_array($state['key'], ['pending', 'resigned', 'deleted'], true),
                 ])
             >
                 <x-table.td>

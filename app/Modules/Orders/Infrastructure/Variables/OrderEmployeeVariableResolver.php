@@ -5,6 +5,7 @@ namespace App\Modules\Orders\Infrastructure\Variables;
 use App\Models\Personnel;
 use App\Models\Structure;
 use App\Support\Language\AzerbaijaniDeclension;
+use App\Support\Language\AzerbaijaniPatronymic;
 
 /**
  * Resolves the `employee.*` variable namespace from a selected personnel, including
@@ -34,11 +35,12 @@ class OrderEmployeeVariableResolver
 
         $surname = trim((string) $personnel->surname);
         $name = trim((string) $personnel->name);
-        $patronymic = trim((string) $personnel->patronymic);
-        $genderSuffix = (int) ($personnel->gender ?? 0) === 2 ? 'qızı' : 'oğlu';
+        // Köhnə qeydlərdə ata adı "Hikmət oğlu" kimi saxlanıla bilər — şəkilçi təkrarlanmasın.
+        $patronymic = AzerbaijaniPatronymic::strip((string) $personnel->patronymic);
+        $genderSuffix = AzerbaijaniPatronymic::suffixFor($personnel->gender ?? 0);
 
         $fullName = trim(implode(' ', array_filter([$surname, $name, $patronymic])));
-        $fullNameWithSuffix = trim($fullName.' '.$genderSuffix);
+        $fullNameWithSuffix = AzerbaijaniPatronymic::appendTo($fullName, $personnel->gender ?? 0);
         $initials = $this->initials($surname, $name, $patronymic);
 
         $position = trim((string) ($personnel->position?->name ?? ''));
