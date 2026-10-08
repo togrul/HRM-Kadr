@@ -45,6 +45,26 @@ class OrderEffectCatalog
                 ],
                 'handler' => SocialLeaveEffect::class,
             ],
+            'education_leave' => [
+                'label' => __('orders::order_composer.effects.education_leave'),
+                'roles' => [
+                    ['key' => 'start_date', 'label' => __('orders::order_composer.effect_roles.vacation_start_date'), 'type' => 'date'],
+                    ['key' => 'end_date', 'label' => __('orders::order_composer.effect_roles.vacation_end_date'), 'type' => 'date'],
+                    ['key' => 'return_date', 'label' => __('orders::order_composer.effect_roles.vacation_return_date'), 'type' => 'date'],
+                    ['key' => 'days', 'label' => __('orders::order_composer.effect_roles.vacation_days'), 'type' => 'number'],
+                ],
+                'handler' => EducationLeaveEffect::class,
+            ],
+            'unpaid_leave' => [
+                'label' => __('orders::order_composer.effects.unpaid_leave'),
+                'roles' => [
+                    ['key' => 'start_date', 'label' => __('orders::order_composer.effect_roles.vacation_start_date'), 'type' => 'date'],
+                    ['key' => 'end_date', 'label' => __('orders::order_composer.effect_roles.vacation_end_date'), 'type' => 'date'],
+                    ['key' => 'return_date', 'label' => __('orders::order_composer.effect_roles.vacation_return_date'), 'type' => 'date'],
+                    ['key' => 'days', 'label' => __('orders::order_composer.effect_roles.vacation_days'), 'type' => 'number'],
+                ],
+                'handler' => UnpaidLeaveEffect::class,
+            ],
             'business_trip' => [
                 'label' => __('orders::order_composer.effects.business_trip'),
                 'roles' => [

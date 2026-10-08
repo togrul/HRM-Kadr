@@ -196,6 +196,8 @@ class AttendancePuantajReadService
             ? $normService->shiftDailyMinutes($defaultShift)
             : AttendanceWorkNormService::DEFAULT_DAILY_MINUTES;
         $dailyMinutesByShift = [];
+        // Qısaldılmış iş vaxtı (ƏM m.91–92) — yalnız plan saatı hesablanan keçmiş günlər üçün lazımdır.
+        $profiles = $hasPastDays ? $normService->workingTimeProfiles($tabelNos->all()) : [];
 
         $defaults = [];
 
@@ -226,13 +228,17 @@ class AttendancePuantajReadService
                 $dayType = $contextResolver->resolveCalendarDayType($date, $structureId, $context['calendars_global'], $context['calendars_structure']);
                 $nextDayType = $contextResolver->resolveCalendarDayType($date->copy()->addDay(), $structureId, $context['calendars_global'], $context['calendars_structure']);
                 $plannedMinutes = 0;
+                $shortensBeforeHoliday = true;
 
                 if ($isPast) {
                     $shift = $this->resolveShiftForDate($assignmentsByTabel[$tabelNo] ?? [], $date, $shiftsById, $defaultShift);
                     $dailyMinutes = $shift === null
                         ? $defaultDailyMinutes
                         : ($dailyMinutesByShift[(int) $shift->id] ??= $normService->shiftDailyMinutes($shift));
-                    $plannedMinutes = $normService->plannedMinutesForDay($dailyMinutes, $dayType, $nextDayType);
+                    $profile = $profiles[$tabelNo] ?? null;
+                    $dailyMinutes = $normService->personalDailyMinutes($dailyMinutes, $profile, $date);
+                    $shortensBeforeHoliday = $normService->shortensBeforeHoliday($profile, $date);
+                    $plannedMinutes = $normService->plannedMinutesForDay($dailyMinutes, $dayType, $nextDayType, $shortensBeforeHoliday);
                 }
 
                 $entry = $override !== null
@@ -250,7 +256,7 @@ class AttendancePuantajReadService
                 }
 
                 $entry['is_default'] = true;
-                $entry['pre_holiday'] = $plannedMinutes > 0 && $dayType === 'workday' && $nextDayType === 'holiday';
+                $entry['pre_holiday'] = $plannedMinutes > 0 && $dayType === 'workday' && $nextDayType === 'holiday' && $shortensBeforeHoliday;
                 $defaults[$tabelNo][$dateKey] = $entry;
             }
         }

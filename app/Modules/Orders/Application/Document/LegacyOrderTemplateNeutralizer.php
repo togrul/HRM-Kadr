@@ -33,7 +33,7 @@ class LegacyOrderTemplateNeutralizer
         'Əmrin surəti “Dinçer və Carçıoğlu” Birgə Müəssisəsinin bütün struktur bölmələrinə göndərilsin.' => 'Əmrin surəti bütün struktur bölmələrinə göndərilsin.',
         // Labour Code references corrected against the official text.
         'Əmək Məcəlləsinin 138-ci maddəsinin 2-ci hissəsini rəhbər tutaraq' => 'Əmək Məcəlləsinin 114-cü və 131-ci maddələrini, 138-ci maddəsinin 1-ci hissəsini rəhbər tutaraq',
-        'Əmək Məcəlləsinin 124-cü maddəsinin 3-cü hissəsini rəhbər tutaraq' => 'Əmək Məcəlləsinin 123-cü və 124-cü maddələrini rəhbər tutaraq',
+        'Əmək Məcəlləsinin 124-cü maddəsinin 3-cü hissəsini rəhbər tutaraq' => 'Əmək Məcəlləsinin 123-cü maddəsini rəhbər tutaraq',
         'Əmək Məcəlləsinin 178-ci maddəsini rəhbər tutaraq' => 'Əmək Məcəlləsinin 179-cu maddəsinin 2-ci hissəsinin “x” bəndini və 181-ci maddəsini rəhbər tutaraq',
         'Əmək Məcəlləsinin 159-cu maddəsini rəhbər tutaraq' => 'Əmək Məcəlləsinin 61-ci və 162-ci maddələrini rəhbər tutaraq',
         'Əmək Məcəlləsinin 186-cı maddəsini rəhbər tutaraq' => 'Əmək Məcəlləsinin 186-cı və 187-ci maddələrini rəhbər tutaraq',

@@ -43,7 +43,7 @@ class OrderTemplateNeutralizationTest extends TestCase
     {
         $expected = [
             'emek_mezuniyyeti' => '114-cü və 131-ci maddələrini, 138-ci maddəsinin 1-ci hissəsini',
-            'tehsil_mezuniyyeti' => '123-cü və 124-cü maddələrini',
+            'tehsil_mezuniyyeti' => '123-cü maddəsini',
             'odenissiz_mezuniyyet' => '129-cu maddəsinin 1-ci hissəsini',
             'ataliq_mezuniyyeti' => '125-ci maddəsinin 4-cü hissəsini',
             'analiq_mezuniyyeti' => '125-ci maddəsini',

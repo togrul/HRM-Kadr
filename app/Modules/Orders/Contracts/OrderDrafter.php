@@ -21,10 +21,10 @@ interface OrderDrafter
      * Active templates that can be issued for an existing employee (hire templates act on
      * a candidate, so they are left out), keyed by code.
      *
-     * @param  string|null  $effect  only templates with this effect (e.g. 'vacation')
+     * @param  string|array<int, string>|null  $effect  only templates with this effect (e.g. 'vacation') or one of these effects
      * @return array<string, string> code → label
      */
-    public function personnelTemplates(?string $effect = null): array;
+    public function personnelTemplates(string|array|null $effect = null): array;
 
     /**
      * @param  array<string, string>  $fieldsByLabel  placeholder label → value

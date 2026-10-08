@@ -45,6 +45,7 @@ class HomeOverviewService
     private const EXPIRY_SOURCES = [
         'personnel_cards' => 'valid_date',
         'personnel_passports' => 'valid_date',
+        'personnel_identity_documents' => 'valid_date',
         'personnel_contracts' => 'contract_ends_at',
     ];
 

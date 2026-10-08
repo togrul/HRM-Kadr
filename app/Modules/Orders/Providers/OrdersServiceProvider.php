@@ -7,6 +7,7 @@ use App\Models\OrderType;
 use App\Modules\Orders\Console\Commands\NeutralizeOrderWordTemplatesCommand;
 use App\Modules\Orders\Console\Commands\OrdersListQueryBudgetCommand;
 use App\Modules\Orders\Console\Commands\OrdersListRenderBenchmarkCommand;
+use App\Modules\Orders\Console\Commands\ReclassifyNonAnnualLeaveCommand;
 use App\Modules\Orders\Contracts\HireOrderTemplates;
 use App\Modules\Orders\Domain\Contracts\OrderTypeStatusLookupReadRepository;
 use App\Modules\Orders\Infrastructure\Document\HireOrderTemplateLookup;
@@ -29,6 +30,7 @@ class OrdersServiceProvider extends ServiceProvider
                 OrdersListQueryBudgetCommand::class,
                 OrdersListRenderBenchmarkCommand::class,
                 NeutralizeOrderWordTemplatesCommand::class,
+                ReclassifyNonAnnualLeaveCommand::class,
             ]);
         }
 

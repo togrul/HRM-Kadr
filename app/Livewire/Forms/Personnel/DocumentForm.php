@@ -158,6 +158,7 @@ class DocumentForm extends Form
             'height' => null,
             'document_issued_authority' => null,
             'document_issued_date' => null,
+            'valid_date' => null,
         ];
     }
 

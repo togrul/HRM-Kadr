@@ -24,14 +24,15 @@ class OrderWordTemplateRepository
     }
 
     /**
+     * @param  string|array<int, string>|null  $effect  one effect or a list of effects
      * @return array<string, string>
      */
-    public function availableForPersonnel(?string $effect = null): array
+    public function availableForPersonnel(string|array|null $effect = null): array
     {
         return OrderWordTemplate::query()
             ->where('is_active', true)
             ->where('effect', '!=', 'hire')
-            ->when($effect !== null, fn ($query) => $query->where('effect', $effect))
+            ->when($effect !== null, fn ($query) => $query->whereIn('effect', (array) $effect))
             ->orderBy('label')
             ->pluck('label', 'code')
             ->all();

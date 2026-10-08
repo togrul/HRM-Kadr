@@ -91,8 +91,10 @@ class Vacations extends Component
     {
         $drafter = app(OrderDrafter::class);
 
-        // Social leave (maternity) is a vacation too, it just leaves the annual balance alone.
-        return $drafter->personnelTemplates('vacation') + $drafter->personnelTemplates('social_leave');
+        // Annual leave first; social (maternity, paternity), education and unpaid leave are
+        // vacations too, they just leave the annual balance alone.
+        return $drafter->personnelTemplates('vacation')
+            + $drafter->personnelTemplates(['social_leave', 'education_leave', 'unpaid_leave']);
     }
 
     #[Computed]

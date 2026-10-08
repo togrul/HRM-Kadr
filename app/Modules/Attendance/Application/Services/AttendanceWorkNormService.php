@@ -4,6 +4,8 @@ namespace App\Modules\Attendance\Application\Services;
 
 use App\Models\AttendanceCalendar;
 use App\Models\AttendanceShift;
+use App\Modules\Personnel\Contracts\WorkingTimeNormProvider;
+use App\Modules\Personnel\Contracts\WorkingTimeProfile;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Query\Builder;
@@ -15,7 +17,13 @@ use Illuminate\Support\Facades\DB;
  * Gündəlik norma növbədən hesablanır (növbə müddəti − nahar fasiləsi). Növbə
  * yoxdursa, Əmək Məcəlləsinin həftəlik 40 saat həddinə uyğun 5 günlük həftə
  * üçün gündə 8 saat götürülür. Bayram gününə bitişik (bayramqabağı) iş günündə
- * iş vaxtı 1 saat qısaldılır.
+ * iş vaxtı 1 saat qısaldılır (ƏM m.108.1).
+ *
+ * Qısaldılmış iş vaxtı (ƏM m.91–92): əməkdaşın həftəlik norması Personnel modulunun
+ * WorkingTimeNormProvider contract-ından gəlir (yaş, əlillik, fərdi norma). Gündəlik
+ * norma = həftəlik norma ÷ həftədəki iş günləri (m.90.3), növbənin uzunluğundan çox
+ * olmamaqla; qısaldılmış iş vaxtında bayramqabağı 1 saat qısaltma tətbiq edilmir
+ * (m.108.1).
  */
 class AttendanceWorkNormService
 {
@@ -112,19 +120,50 @@ class AttendanceWorkNormService
     }
 
     /**
-     * Günün planlaşdırılmış dəqiqələri: iş günü deyilsə 0, bayramqabağıdırsa 1 saat az.
+     * Günün planlaşdırılmış dəqiqələri: iş günü deyilsə 0, bayramqabağıdırsa 1 saat az
+     * (qısaldılmış iş vaxtı istisna — $shortensBeforeHoliday false).
      */
-    public function plannedMinutesForDay(int $dailyMinutes, string $dayType, ?string $nextDayType): int
+    public function plannedMinutesForDay(int $dailyMinutes, string $dayType, ?string $nextDayType, bool $shortensBeforeHoliday = true): int
     {
         if ($dayType !== 'workday') {
             return 0;
         }
 
-        if ($nextDayType === 'holiday') {
+        if ($nextDayType === 'holiday' && $shortensBeforeHoliday) {
             return max(0, $dailyMinutes - self::PRE_HOLIDAY_REDUCTION_MINUTES);
         }
 
         return max(0, $dailyMinutes);
+    }
+
+    /**
+     * Əməkdaşların iş vaxtı profilləri (Personnel contract-ı ilə, tək sorğu).
+     *
+     * @param  array<int,string>  $tabelNos
+     * @return array<string,WorkingTimeProfile>
+     */
+    public function workingTimeProfiles(array $tabelNos): array
+    {
+        return app(WorkingTimeNormProvider::class)->profiles($tabelNos);
+    }
+
+    /**
+     * Əməkdaşın həmin gün üçün gündəlik norması: qrafikin (növbənin) norması, qısaldılmış
+     * iş vaxtı varsa həftəlik norma ÷ iş günləri — hansı azdırsa.
+     */
+    public function personalDailyMinutes(int $scheduleDailyMinutes, ?WorkingTimeProfile $profile, CarbonInterface $date): int
+    {
+        $reduced = $profile?->dailyMinutesOn($date);
+
+        return $reduced === null ? $scheduleDailyMinutes : min($scheduleDailyMinutes, $reduced);
+    }
+
+    /**
+     * Bayramqabağı 1 saat qısaltma bu əməkdaşa həmin gün tətbiq olunurmu (ƏM m.108.1).
+     */
+    public function shortensBeforeHoliday(?WorkingTimeProfile $profile, CarbonInterface $date): bool
+    {
+        return $profile === null || $profile->shortensBeforeHolidayOn($date);
     }
 
     /**
@@ -191,9 +230,12 @@ class AttendanceWorkNormService
     /**
      * Ayın iş vaxtı norması bir işçi üçün.
      *
+     * Profil verilərsə (qısaldılmış iş vaxtı), hər gün üçün əməkdaşın gündəlik norması
+     * və bayramqabağı qaydası tətbiq olunur; daily_minutes ayın ilk iş gününün normasıdır.
+     *
      * @return array{workdays:int,non_workdays:int,pre_holidays:int,daily_minutes:int,minutes:int}
      */
-    public function monthNorm(int $year, int $month, ?int $structureId = null, ?int $dailyMinutes = null): array
+    public function monthNorm(int $year, int $month, ?int $structureId = null, ?int $dailyMinutes = null, ?WorkingTimeProfile $profile = null): array
     {
         $start = Carbon::createFromDate($year, $month, 1)->startOfMonth();
         $end = $start->copy()->endOfMonth()->startOfDay();
@@ -204,14 +246,17 @@ class AttendanceWorkNormService
         $nonWorkdays = 0;
         $preHolidays = 0;
         $minutes = 0;
+        $firstDaily = null;
         $cursor = $start->copy();
 
         while ($cursor->lte($end)) {
             $dayType = $this->resolveDayType($cursor, $structureId, $maps['global'], $maps['structure']);
             $nextDayType = $this->resolveDayType($cursor->copy()->addDay(), $structureId, $maps['global'], $maps['structure']);
+            $dayDaily = $this->personalDailyMinutes($daily, $profile, $cursor);
 
             if ($dayType === 'workday') {
                 $workdays++;
+                $firstDaily ??= $dayDaily;
                 if ($nextDayType === 'holiday') {
                     $preHolidays++;
                 }
@@ -219,7 +264,7 @@ class AttendanceWorkNormService
                 $nonWorkdays++;
             }
 
-            $minutes += $this->plannedMinutesForDay($daily, $dayType, $nextDayType);
+            $minutes += $this->plannedMinutesForDay($dayDaily, $dayType, $nextDayType, $this->shortensBeforeHoliday($profile, $cursor));
             $cursor->addDay();
         }
 
@@ -227,8 +272,26 @@ class AttendanceWorkNormService
             'workdays' => $workdays,
             'non_workdays' => $nonWorkdays,
             'pre_holidays' => $preHolidays,
-            'daily_minutes' => $daily,
+            'daily_minutes' => $firstDaily ?? $this->personalDailyMinutes($daily, $profile, $start),
             'minutes' => $minutes,
+        ];
+    }
+
+    /**
+     * Bir əməkdaşın ayın iş vaxtı norması: qrafikin norması + qısaldılmış iş vaxtı
+     * (məs. 36 saat / 5 gün = gündə 7,2 saat; 2026-cı ilin oktyabrında 22 iş günü → 158,4 saat).
+     *
+     * @return array{workdays:int,non_workdays:int,pre_holidays:int,daily_minutes:int,minutes:int,weekly_minutes:int,reason:?string}
+     */
+    public function employeeMonthNorm(int $year, int $month, string $tabelNo, ?int $structureId = null, ?int $dailyMinutes = null): array
+    {
+        $profile = $this->workingTimeProfiles([$tabelNo])[$tabelNo] ?? null;
+        $norm = $this->monthNorm($year, $month, $structureId, $dailyMinutes, $profile);
+        $start = Carbon::createFromDate($year, $month, 1)->startOfMonth();
+
+        return $norm + [
+            'weekly_minutes' => $profile?->weeklyMinutesOn($start) ?? WorkingTimeProfile::STANDARD_WEEKLY_MINUTES,
+            'reason' => $profile?->reasonOn($start),
         ];
     }
 }

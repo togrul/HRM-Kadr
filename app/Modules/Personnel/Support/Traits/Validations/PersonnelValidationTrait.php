@@ -184,6 +184,7 @@ trait PersonnelValidationTrait
             'personalForm.personnel.contract_end_date.after' => __('personnel::common.validation.contract_end_after_start'),
             'personalForm.personnel.contract_date.before_or_equal' => __('personnel::common.validation.contract_date_after_start'),
             'personalForm.personnel.probation_amount.max' => __('personnel::common.validation.probation_too_long'),
+            'documentForm.document.valid_date.after' => __('personnel::common.validation.id_card_valid_after_issue'),
         ];
     }
 
@@ -215,6 +216,8 @@ trait PersonnelValidationTrait
             'personalForm.personnel.probation_amount' => 'nullable|integer|min:1|max:'.$probationMax.'|required_with:personalForm.personnel.probation_unit',
             'personalForm.personnel.workplace_type' => $in(EmploymentTerms::WORKPLACE_TYPES),
             'personalForm.personnel.working_time_type' => $in(EmploymentTerms::WORKING_TIME_TYPES),
+            // Həftəlik norma ƏM m.89.3-dəki 40 saatdan çox ola bilməz.
+            'personalForm.personnel.weekly_hours_norm' => 'nullable|numeric|min:1|max:'.EmploymentTerms::STANDARD_WEEKLY_HOURS,
             'personalForm.personnel.work_schedule' => $in(EmploymentTerms::WORK_SCHEDULES),
             'personalForm.personnel.work_hours' => 'nullable|array',
             'personalForm.personnel.work_hours.*' => 'nullable|date_format:H:i',
@@ -253,7 +256,28 @@ trait PersonnelValidationTrait
             'documentForm.document.born_city_id' => 'required|int|exists:cities,id',
             'documentForm.document.is_married' => 'required|boolean',
             'documentForm.document.height' => 'required|int',
+            'documentForm.document.document_issued_date' => 'nullable|date',
+            // Şəxsiyyət vəsiqəsinin etibarlılıq tarixi verilmə tarixindən sonra olmalıdır.
+            'documentForm.document.valid_date' => array_filter([
+                'nullable',
+                'date',
+                filled(data_get($this->resolveDocumentState(), 'document_issued_date'))
+                    ? 'after:documentForm.document.document_issued_date'
+                    : null,
+            ]),
         ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function resolveDocumentState(): array
+    {
+        if (property_exists($this, 'documentForm') && $this->documentForm) {
+            return $this->documentForm->document ?? [];
+        }
+
+        return [];
     }
 
     protected function serviceCardRuleSet(): array
@@ -602,6 +626,7 @@ trait PersonnelValidationTrait
             'personalForm.personnel.contract_end_date' => __('personnel::common.labels.contract_end_date'),
             'personalForm.personnel.probation_unit' => __('personnel::common.labels.probation_period'),
             'personalForm.personnel.probation_amount' => __('personnel::common.labels.probation_amount'),
+            'personalForm.personnel.weekly_hours_norm' => __('personnel::common.labels.weekly_hours_norm'),
             'personalForm.personnel.workplace_type' => __('personnel::common.labels.workplace_type'),
             'personalForm.personnel.working_time_type' => __('personnel::common.labels.working_time_type'),
             'personalForm.personnel.work_schedule' => __('personnel::common.labels.work_schedule'),
@@ -615,6 +640,8 @@ trait PersonnelValidationTrait
             'documentForm.document.born_city_id' => __('personnel::common.labels.city'),
             'documentForm.document.is_married' => __('personnel::common.labels.family_status'),
             'documentForm.document.height' => __('personnel::common.labels.height'),
+            'documentForm.document.document_issued_date' => __('personnel::common.labels.document_issue_date'),
+            'documentForm.document.valid_date' => __('personnel::common.labels.id_card_valid_date'),
             'documentForm.serviceCards.card_number' => __('personnel::common.labels.card_number'),
             'documentForm.serviceCards.valid_date' => __('personnel::common.labels.valid_date'),
             'documentForm.serviceCards.given_date' => __('personnel::common.labels.given_date'),

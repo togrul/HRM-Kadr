@@ -31,6 +31,19 @@ trait HasPersonnelAttributes
         $this->attributes['patronymic'] = is_string($value) ? AzerbaijaniPatronymic::strip($value) : $value;
     }
 
+    /**
+     * The form posts an empty string for a cleared field and may use a decimal comma
+     * ("7,5"); the column takes a number or null.
+     */
+    public function setWeeklyHoursNormAttribute(mixed $value): void
+    {
+        $value = is_string($value) ? str_replace(',', '.', trim($value)) : $value;
+
+        $this->attributes['weekly_hours_norm'] = ($value === null || $value === '' || ! is_numeric($value))
+            ? null
+            : round((float) $value, 1);
+    }
+
     public function getFullnameMaxAttribute(): string
     {
         return AzerbaijaniPatronymic::appendTo($this->fullname, $this->gender);

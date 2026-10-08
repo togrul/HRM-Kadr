@@ -157,6 +157,8 @@ return [
     ],
     'effects' => [
         'social_leave' => 'Social leave (not deducted from the annual balance)',
+        'education_leave' => 'Education leave (not deducted from the annual balance)',
+        'unpaid_leave' => 'Unpaid leave (not deducted from the annual balance)',
         'business_trip' => 'Business trip (employee is sent on a trip)',
         'none' => 'None (document only)',
         'vacation' => 'Vacation (employee goes on leave)',

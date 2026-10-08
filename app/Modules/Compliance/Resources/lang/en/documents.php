@@ -30,6 +30,7 @@ return [
     'types' => [
         'service_card' => 'Service card',
         'passport' => 'Passport',
+        'id_card' => 'ID card',
         'contract' => 'Employment contract',
     ],
     'status' => [

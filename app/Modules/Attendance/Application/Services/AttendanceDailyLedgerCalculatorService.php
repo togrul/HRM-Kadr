@@ -5,6 +5,7 @@ namespace App\Modules\Attendance\Application\Services;
 use App\Models\AttendanceManualEntry;
 use App\Models\AttendanceSetting;
 use App\Models\AttendanceShift;
+use App\Modules\Personnel\Contracts\WorkingTimeProfile;
 use Carbon\Carbon;
 
 class AttendanceDailyLedgerCalculatorService
@@ -20,6 +21,7 @@ class AttendanceDailyLedgerCalculatorService
      *   pairs:array<int,array{in:string,out:string,duration_minutes:int}>
      * }  $pairing
      * @param  array<string,mixed>|null  $override
+     * @param  WorkingTimeProfile|null  $workingTime  qısaldılmış iş vaxtı (ƏM m.91–92): planı növbədən qısa edir, bayramqabağı qısaltmanı götürür (m.108.1)
      * @return array<string,mixed>
      */
     public function calculate(
@@ -31,11 +33,21 @@ class AttendanceDailyLedgerCalculatorService
         string $calendarDayType = 'workday',
         ?array $override = null,
         ?int $approvedOvertimeMinutes = null,
-        bool $isPreHoliday = false
+        bool $isPreHoliday = false,
+        ?WorkingTimeProfile $workingTime = null
     ): array {
         $policy = app(AttendanceRulePolicyService::class);
+        $normService = app(AttendanceWorkNormService::class);
 
-        $scheduledMinutes = $this->resolveScheduledMinutes($date, $shift, $calendarDayType, $isPreHoliday);
+        // Qısaldılmış iş vaxtında bayramqabağı qısaltma yoxdur (ƏM m.108.1).
+        $isPreHoliday = $isPreHoliday && $normService->shortensBeforeHoliday($workingTime, $date);
+        $fullShiftMinutes = $this->resolveScheduledMinutes($date, $shift, $calendarDayType);
+        $normMinutes = $fullShiftMinutes > 0 ? $normService->personalDailyMinutes($fullShiftMinutes, $workingTime, $date) : 0;
+        // Növbənin sonu qısaldılmış normaya görə erkən gəlir (erkən çıxış hesabı üçün).
+        $reducedShiftMinutes = $fullShiftMinutes - $normMinutes;
+        $scheduledMinutes = $isPreHoliday
+            ? max(0, $normMinutes - AttendanceWorkNormService::PRE_HOLIDAY_REDUCTION_MINUTES)
+            : $normMinutes;
         $preHolidayReduction = $isPreHoliday && $scheduledMinutes > 0
             ? AttendanceWorkNormService::PRE_HOLIDAY_REDUCTION_MINUTES
             : 0;
@@ -106,7 +118,7 @@ class AttendanceDailyLedgerCalculatorService
 
             $window = app(AttendanceShiftWindowService::class)->resolve($date, $shift);
             $shiftStart = $window['shift_start'];
-            $shiftEnd = $window['shift_end']->copy()->subMinutes($preHolidayReduction);
+            $shiftEnd = $window['shift_end']->copy()->subMinutes($preHolidayReduction + $reducedShiftMinutes);
 
             if (! empty($pairing['first_in_at'])) {
                 $firstIn = Carbon::parse((string) $pairing['first_in_at']);
@@ -165,7 +177,7 @@ class AttendanceDailyLedgerCalculatorService
         ];
     }
 
-    private function resolveScheduledMinutes(Carbon $date, ?AttendanceShift $shift, string $calendarDayType, bool $isPreHoliday = false): int
+    private function resolveScheduledMinutes(Carbon $date, ?AttendanceShift $shift, string $calendarDayType): int
     {
         if ($shift === null || $calendarDayType !== 'workday') {
             return 0;
@@ -174,11 +186,8 @@ class AttendanceDailyLedgerCalculatorService
         $window = app(AttendanceShiftWindowService::class)->resolve($date, $shift);
         $start = $window['shift_start'];
         $end = $window['shift_end'];
-        $minutes = max(0, (int) $start->diffInMinutes($end) - (int) $shift->break_minutes);
 
-        return $isPreHoliday
-            ? max(0, $minutes - AttendanceWorkNormService::PRE_HOLIDAY_REDUCTION_MINUTES)
-            : $minutes;
+        return max(0, (int) $start->diffInMinutes($end) - (int) $shift->break_minutes);
     }
 
     /**
