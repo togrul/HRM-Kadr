@@ -17,7 +17,10 @@
         default => [__('staff::common.structure_levels.unit'), 'bg-zinc-50 text-zinc-400 ring-1 ring-inset ring-zinc-200/70'],
     };
 
-    $hasChildren = count($node['children']) > 0 || count($node['positions']) > 0;
+    $offStaff = $node['off_staff'] ?? [];
+    $over = (int) ($agg['over'] ?? 0);
+    $offStaffCount = (int) ($agg['off_staff'] ?? 0);
+    $hasChildren = count($node['children']) > 0 || count($node['positions']) > 0 || count($offStaff) > 0;
     // Server-side: a closed branch is not in the DOM at all, so the page costs what is
     // on screen rather than the whole org chart.
     $isOpen = in_array((int) $node['id'], $openIds, true);
@@ -44,6 +47,12 @@
 
             <span class="shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide {{ $typeChip }}">{{ $typeLabel }}</span>
             <span class="truncate text-[14px] font-semibold text-zinc-900"><x-staff.highlight :text="$node['name']" :query="$search" /></span>
+            @if ($over > 0)
+                <span class="shrink-0 rounded-md bg-amber-50 px-1.5 py-0.5 text-[11px] font-medium text-amber-700 ring-1 ring-inset ring-amber-200">{{ __('staff::common.fields.over_count', ['count' => $over]) }}</span>
+            @endif
+            @if ($offStaffCount > 0)
+                <span class="shrink-0 rounded-md bg-amber-50 px-1.5 py-0.5 text-[11px] font-medium text-amber-700 ring-1 ring-inset ring-amber-200">{{ __('staff::common.fields.off_staff_count', ['count' => $offStaffCount]) }}</span>
+            @endif
         </div>
 
         <x-staff.metric :value="$total" tone="total" :showLabel="false" />
@@ -84,33 +93,95 @@
     @if ($isOpen)
     <div>
         @foreach ($node['positions'] as $p)
-            <div class="flex items-center gap-3 border-b border-zinc-50 px-3 py-2 transition-colors hover:bg-zinc-50/70">
+            @php
+                $unassigned = ($p['kind'] ?? 'row') === 'unassigned';
+            @endphp
+            <div @class([
+                'flex items-center gap-3 border-b px-3 py-2 transition-colors',
+                'border-zinc-50 hover:bg-zinc-50/70' => ! $unassigned,
+                'border-amber-100 bg-amber-50/60 hover:bg-amber-50' => $unassigned,
+            ])>
                 <div class="flex min-w-0 flex-1 items-center gap-2" style="padding-left: {{ ($depth + 1) * 22 }}px">
                     <span class="h-5 w-5 shrink-0"></span>
                     <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-zinc-50 text-zinc-400 ring-1 ring-inset ring-zinc-200/60">
                         <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     </span>
-                    <span class="truncate text-[14px] text-zinc-700"><x-staff.highlight :text="$p['title']" :query="$search" /></span>
+                    @if ($unassigned)
+                        <span class="truncate text-[14px] font-medium text-amber-700" title="{{ __('staff::common.messages.position_unassigned_hint') }}">{{ $p['title'] }}</span>
+                    @else
+                        <span class="truncate text-[14px] text-zinc-700"><x-staff.highlight :text="$p['title']" :query="$search" /></span>
+                    @endif
                     @if ((int) $p['vacant'] > 0)
                         <x-small-badge mode="rose">{{ __('staff::common.fields.vacant_lower') }}</x-small-badge>
+                    @endif
+                    @if ((int) ($p['over'] ?? 0) > 0)
+                        <span class="shrink-0 rounded-md bg-amber-50 px-1.5 py-0.5 text-[11px] font-medium text-amber-700 ring-1 ring-inset ring-amber-200">{{ __('staff::common.fields.over_count', ['count' => (int) $p['over']]) }}</span>
                     @endif
                 </div>
 
                 <x-staff.metric :value="$p['total']" tone="total" :showLabel="false" />
 
-                <button type="button"
-                    wire:click="openSideMenu('show-staff',{{ $p['structure_id'] }},{{ $p['position_id'] }})"
-                    wire:loading.attr="disabled" wire:target="openSideMenu"
-                    class="rounded-lg transition-colors hover:bg-zinc-100 disabled:cursor-default disabled:opacity-70"
-                    title="{{ __('staff::common.fields.filled') }}">
+                @if ($unassigned)
                     <x-staff.metric :value="$p['filled']" tone="filled" :showLabel="false" />
-                </button>
+                @else
+                    <button type="button"
+                        wire:click="openSideMenu('show-staff',{{ $p['structure_id'] }},{{ $p['position_id'] }})"
+                        wire:loading.attr="disabled" wire:target="openSideMenu"
+                        class="rounded-lg transition-colors hover:bg-zinc-100 disabled:cursor-default disabled:opacity-70"
+                        title="{{ __('staff::common.fields.filled') }}">
+                        <x-staff.metric :value="$p['filled']" tone="filled" :showLabel="false" />
+                    </button>
+                @endif
 
                 <x-staff.metric :value="$p['vacant']" tone="vacant" :showLabel="false" />
 
-                <span class="hidden w-[108px] shrink-0 sm:block" x-show="editMode" x-cloak aria-hidden="true"></span>
+                <span class="hidden w-[108px] shrink-0 items-center justify-end sm:flex" x-show="editMode" x-cloak>
+                    @if ($unassigned && $canEdit)
+                        <button type="button" wire:click="openSideMenu('edit-staff',{{ $p['structure_id'] }})"
+                            wire:loading.attr="disabled" wire:target="openSideMenu"
+                            class="rounded-lg px-2 py-1 text-[12px] font-medium text-amber-700 transition-colors hover:bg-amber-100">
+                            {{ __('staff::common.actions.assign_position') }}
+                        </button>
+                    @endif
+                </span>
             </div>
         @endforeach
+
+        @if (count($offStaff) > 0)
+            <div class="flex items-center gap-2 border-b border-amber-100 bg-amber-50/40 px-3 py-1.5" style="padding-left: {{ ($depth + 1) * 22 + 12 }}px">
+                <span class="text-[11px] font-semibold uppercase tracking-wide text-amber-700">{{ __('staff::common.fields.off_staff') }}</span>
+                <span class="truncate text-[11.5px] text-amber-700/80">{{ __('staff::common.messages.off_staff_hint') }}</span>
+            </div>
+            @foreach ($offStaff as $p)
+                <div class="flex items-center gap-3 border-b border-amber-100/70 px-3 py-2 transition-colors hover:bg-amber-50/50">
+                    <div class="flex min-w-0 flex-1 items-center gap-2" style="padding-left: {{ ($depth + 1) * 22 }}px">
+                        <span class="h-5 w-5 shrink-0"></span>
+                        <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-amber-50 text-amber-500 ring-1 ring-inset ring-amber-200/70">
+                            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+                        </span>
+                        <span class="truncate text-[14px] text-zinc-700"><x-staff.highlight :text="$p['title']" :query="$search" /></span>
+                    </div>
+
+                    <x-staff.metric :value="0" tone="total" :showLabel="false" />
+
+                    @if ((int) $p['position_id'] > 0)
+                        <button type="button"
+                            wire:click="openSideMenu('show-staff',{{ $p['structure_id'] }},{{ $p['position_id'] }})"
+                            wire:loading.attr="disabled" wire:target="openSideMenu"
+                            class="rounded-lg transition-colors hover:bg-zinc-100 disabled:cursor-default disabled:opacity-70"
+                            title="{{ __('staff::common.fields.filled') }}">
+                            <x-staff.metric :value="$p['filled']" tone="filled" :showLabel="false" />
+                        </button>
+                    @else
+                        <x-staff.metric :value="$p['filled']" tone="filled" :showLabel="false" />
+                    @endif
+
+                    <x-staff.metric :value="0" tone="vacant" :showLabel="false" />
+
+                    <span class="hidden w-[108px] shrink-0 sm:block" x-show="editMode" x-cloak aria-hidden="true"></span>
+                </div>
+            @endforeach
+        @endif
 
         @foreach ($node['children'] as $child)
             <x-staff.tree-node wire:key="staff-node-{{ $child['id'] }}" :node="$child" :depth="$depth + 1" :open-ids="$openIds" :search="$search" />

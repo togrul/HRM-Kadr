@@ -245,6 +245,58 @@ class OrderComposerTest extends TestCase
         $this->assertStringNotContainsString('${var_1}', $text);
     }
 
+    public function test_a_transfer_into_a_full_or_missing_slot_prompts_like_a_hire(): void
+    {
+        $this->makeMaster('order-templates/move.docx', 'İşçi ${var_1} ${var_2} keçirilsin.');
+        $personnel = $this->makePersonnel();
+        $target = Structure::query()->create(['name' => 'Yeni Anbar', 'shortname' => 'YA']);
+        $position = Position::query()->create(['name' => 'anbardar']);
+
+        OrderWordTemplate::create([
+            'code' => 'move',
+            'label' => 'Başqa işə keçirilmə',
+            'effect' => 'transfer',
+            'docx_path' => 'order-templates/move.docx',
+            'variables' => [
+                ['token' => 'var_1', 'label' => 'Yeni iş yeri', 'source' => 'manual', 'auto_key' => null, 'field' => ['key' => 'var_1', 'type' => 'structure'], 'effect_role' => 'new_structure'],
+                ['token' => 'var_2', 'label' => 'Yeni vəzifə', 'source' => 'manual', 'auto_key' => null, 'field' => ['key' => 'var_2', 'type' => 'position'], 'effect_role' => 'new_position'],
+            ],
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($this->userWith('add-orders'));
+        $fields = ['var_1' => (string) $target->id, 'var_2' => (string) $position->id];
+
+        // The ştat has no "anbardar" in the target unit → the author is asked first.
+        Livewire::test(OrderComposer::class, ['presetCode' => 'move', 'personnelId' => $personnel->id])
+            ->set('orderNumber', '810-K')
+            ->set('fields', $fields)
+            ->call('issue')
+            ->assertDispatched('order-vacancy-missing');
+        $this->assertNull(OrderLog::where('order_no', '810-K')->first());
+
+        // With a free slot the transfer goes straight through.
+        \App\Models\StaffSchedule::query()->create([
+            'structure_id' => $target->id, 'position_id' => $position->id, 'total' => 1, 'filled' => 0, 'vacant' => 1,
+        ]);
+        Livewire::test(OrderComposer::class, ['presetCode' => 'move', 'personnelId' => $personnel->id])
+            ->set('orderNumber', '811-K')
+            ->set('fields', $fields)
+            ->call('issue')
+            ->assertNotDispatched('order-vacancy-missing');
+        $this->assertNotNull(OrderLog::where('order_no', '811-K')->first());
+
+        // An install that hard-blocks refuses instead of offering to create the slot.
+        config(['staff.hire_guard.block' => true]);
+        $this->makePersonnel()->forceFill(['structure_id' => $target->id, 'position_id' => $position->id])->saveQuietly();
+        Livewire::test(OrderComposer::class, ['presetCode' => 'move', 'personnelId' => $personnel->id])
+            ->set('orderNumber', '812-K')
+            ->set('fields', $fields)
+            ->call('createVacancyAndIssue')
+            ->assertDispatched('orderError');
+        $this->assertNull(OrderLog::where('order_no', '812-K')->first());
+    }
+
     public function test_a_docx_order_can_be_approved(): void
     {
         $this->seedTemplate();
@@ -411,11 +463,15 @@ class OrderComposerTest extends TestCase
     {
         [$candidate, $structure, $position] = $this->seedHireScaffold('hire3');
 
-        // total 4 / filled 4 / vacant 0 — no room.
+        // total 4 / filled 4 / vacant 0 — no room. "Filled" is the live headcount, so the
+        // four people have to actually work there; the stored counter alone is not trusted.
         \App\Models\StaffSchedule::query()->create([
             'structure_id' => $structure->id, 'position_id' => $position->id,
             'total' => 4, 'filled' => 4, 'vacant' => 0,
         ]);
+        foreach (range(1, 4) as $ignored) {
+            $this->makePersonnel()->forceFill(['structure_id' => $structure->id, 'position_id' => $position->id])->saveQuietly();
+        }
 
         $this->actingAs($this->userWith('add-orders'));
 

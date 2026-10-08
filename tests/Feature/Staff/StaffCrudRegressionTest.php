@@ -16,11 +16,13 @@ class StaffCrudRegressionTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_position_requirement_is_resolved_per_row(): void
+    public function test_every_row_needs_a_position_top_level_units_included(): void
     {
         $this->actingAs($this->authorizedUser());
         $this->seedStructuresAndPositions();
 
+        // A position-less row on a top-level unit used to be allowed as an "establishment
+        // total"; it was then counted on top of the position rows beneath it.
         Livewire::test(AddStaff::class)
             ->call('addRow')
             ->call('addRow')
@@ -30,8 +32,9 @@ class StaffCrudRegressionTest extends TestCase
             ->set('staff.1.structure_id', 2)
             ->set('staff.1.total', 1)
             ->call('store')
-            ->assertHasErrors(['staff.1.position_id'])
-            ->assertHasNoErrors(['staff.0.position_id']);
+            ->assertHasErrors(['staff.0.position_id', 'staff.1.position_id']);
+
+        $this->assertDatabaseCount('staff_schedules', 0);
     }
 
     public function test_store_does_not_hit_structure_presence_verifier_for_each_row(): void

@@ -52,6 +52,21 @@
                             ['label' => __('staff::common.fields.vacant'), 'value' => $num($staffSummary['vacant']), 'dot' => $staffSummary['vacant'] > 0 ? 'bg-[#f43f5e]' : 'bg-[#a1a1aa]'],
                         ]" />
                     </div>
+
+                    @if ($staffSummary['over'] > 0 || $staffSummary['off_staff'] > 0)
+                        <div class="mt-2">
+                            <x-context-panel.meta :columns="2" :items="[
+                                ['label' => __('staff::common.fields.over'), 'value' => $num($staffSummary['over']), 'dot' => 'bg-[#f59e0b]'],
+                                ['label' => __('staff::common.fields.off_staff'), 'value' => $num($staffSummary['off_staff']), 'dot' => 'bg-[#f59e0b]'],
+                            ]" />
+                        </div>
+                    @endif
+
+                    @if ($staffSummary['unassigned'] > 0)
+                        <p class="mt-2 rounded-lg bg-amber-50 px-2.5 py-2 text-[12px] leading-snug text-amber-800">
+                            {{ __('staff::common.messages.unassigned_rows', ['count' => $staffSummary['unassigned']]) }}
+                        </p>
+                    @endif
                 </div>
             </x-context-panel.section>
 
@@ -118,6 +133,12 @@
                 <x-page-header.stat :value="$num($staffSummary['total'])" :label="__('staff::common.fields.total')" />
                 <x-page-header.stat :value="$num($staffSummary['filled'])" :label="__('staff::common.fields.filled')" tone="green" />
                 <x-page-header.stat :value="$num($staffSummary['vacant'])" :label="__('staff::common.fields.vacant')" tone="rose" />
+                @if ($staffSummary['over'] > 0)
+                    <x-page-header.stat :value="$num($staffSummary['over'])" :label="__('staff::common.fields.over')" tone="amber" />
+                @endif
+                @if ($staffSummary['off_staff'] > 0)
+                    <x-page-header.stat :value="$num($staffSummary['off_staff'])" :label="__('staff::common.fields.off_staff')" tone="amber" />
+                @endif
             </x-slot:stats>
         @else
             <x-slot:stats>
@@ -218,7 +239,11 @@
                         <span class="block max-w-[420px] truncate text-[13px] text-ink-soft">{{ $staff->structure?->name }}</span>
                     </x-table.td>
                     <x-table.td>
-                        <span class="text-[13px] font-medium text-ink">{{ $staff->position?->name }}</span>
+                        @if ($staff->position)
+                            <span class="text-[13px] font-medium text-ink">{{ $staff->position->name }}</span>
+                        @else
+                            <span class="text-[13px] font-medium text-amber-700">{{ __('staff::common.fields.position_unassigned') }}</span>
+                        @endif
                     </x-table.td>
                     <x-table.td>
                         <span class="hrm-num text-[13px] font-semibold text-[#e11d48]">{{ $staff->vacant }}</span>
