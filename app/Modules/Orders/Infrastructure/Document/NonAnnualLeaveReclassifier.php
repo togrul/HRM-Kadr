@@ -104,7 +104,8 @@ class NonAnnualLeaveReclassifier
             return 0;
         }
 
-        $year = (int) ($this->dates->parse($fields['start_date'] ?? null)?->year ?? now()->year);
+        $start = $this->dates->parse(isset($fields['start_date']) ? (string) $fields['start_date'] : null);
+        $year = $start !== null ? (int) $start->year : (int) now()->year;
 
         if ($this->balance->storedSnapshot($personnel, $year) === null) {
             return 0;
@@ -126,8 +127,8 @@ class NonAnnualLeaveReclassifier
         $fields = [];
         foreach ($template->variables ?? [] as $variable) {
             $role = $variable['effect_role'] ?? null;
-            $token = $variable['token'] ?? null;
-            if ($role && $token && array_key_exists($token, $rawFields)) {
+            $token = $variable['token'];
+            if ($role && $token !== '' && array_key_exists($token, $rawFields)) {
                 $fields[$role] = $rawFields[$token];
             }
         }
