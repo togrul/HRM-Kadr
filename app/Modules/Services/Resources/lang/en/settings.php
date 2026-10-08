@@ -51,7 +51,8 @@ return [
     'messages' => [
         'general_description' => 'System-wide parameters and values.',
         'coefficients_description' => 'Coefficients used in calculations.',
-        'permanent_chief_hint' => 'If left empty, the active employee with the highest approval rank is picked automatically.',
+        'permanent_chief_hint' => 'If left empty, the head of the organisation (the active employee in a director-level position) is picked automatically.',
+        'automatic_chief_not_director' => 'The automatically picked chief is not in a director position — select the chief manually.',
         'delegation_hint' => 'Within the date range this person signs documents on the chief\'s behalf.',
         'no_active_delegation' => 'No active session',
         'no_settings' => 'No settings added',

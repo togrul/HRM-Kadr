@@ -51,7 +51,8 @@ return [
     'messages' => [
         'general_description' => 'Sistem üzrə ümumi parametrlər və dəyərlər.',
         'coefficients_description' => 'Hesablamalarda istifadə olunan əmsallar.',
-        'permanent_chief_hint' => 'Boş saxlanarsa ən yüksək təsdiq sırasına malik aktiv əməkdaş avtomatik seçilir.',
+        'permanent_chief_hint' => 'Boş saxlanarsa təşkilatın rəhbəri (direktor səviyyəli vəzifədəki aktiv əməkdaş) avtomatik seçilir.',
+        'automatic_chief_not_director' => 'Avtomatik seçilən rəhbər direktor vəzifəsində deyil — rəhbəri əl ilə seçin.',
         'delegation_hint' => 'Tarix aralığında sənədlərdə imza sahibi əvəz edən şəxs olacaq.',
         'no_active_delegation' => 'Aktiv sessiya yoxdur',
         'no_settings' => 'Tənzimləmə əlavə edilməyib',
