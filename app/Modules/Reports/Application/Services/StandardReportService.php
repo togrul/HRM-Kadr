@@ -98,11 +98,16 @@ class StandardReportService
             ->groupBy('bucket')
             ->get();
 
+        // A missing, future or implausible birthdate says nothing about age: it is left out
+        // of the age split instead of falling through to the oldest bucket.
         $ageRows = DB::query()
             ->fromSub(clone $base, 'personnel_age')
+            ->whereNotNull('birthdate')
+            ->whereRaw("{$age} BETWEEN ? AND ?", [ReportsOverviewService::MIN_PLAUSIBLE_AGE, ReportsOverviewService::MAX_PLAUSIBLE_AGE])
             ->selectRaw('? as dimension', [__('reports::dashboard.fields.age_distribution')])
             ->selectRaw("
                 CASE
+                    WHEN {$age} < 18 THEN '14-17'
                     WHEN {$age} BETWEEN 18 AND 25 THEN '18-25'
                     WHEN {$age} BETWEEN 26 AND 35 THEN '26-35'
                     WHEN {$age} BETWEEN 36 AND 45 THEN '36-45'

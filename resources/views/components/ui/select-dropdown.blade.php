@@ -77,8 +77,8 @@
       class="{{ \App\Support\Ui\FieldStyles::select('relative flex items-center text-left') }} {{ $hasError ? 'border-rose-300 bg-rose-50' : '' }} {{ $disabled ? 'cursor-not-allowed opacity-60' : '' }}"
       :aria-expanded="isOpen"
       @if ($hasError) aria-invalid="true" @endif
-      @if ($attributes->get('aria-required')) aria-required="{{ $attributes->get('aria-required') }}" @endif
-      @if ($label) aria-labelledby="{{ $labelId }}" @elseif ($attributes->get('aria-label')) aria-label="{{ $attributes->get('aria-label') }}" @endif
+      @if ($attributes->get('aria-required')) aria-required="{!! $attributes->get('aria-required') !!}" @endif
+      @if ($label) aria-labelledby="{{ $labelId }}" @elseif ($attributes->get('aria-label')) aria-label="{!! $attributes->get('aria-label') !!}" @endif
       :disabled="isDisabled"
       x-on:click.prevent.stop="toggle()"
     >

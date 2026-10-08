@@ -14,6 +14,12 @@ use Illuminate\Support\Facades\DB;
 
 class ReportsOverviewService
 {
+    /** Youngest age the age split accepts (ƏM: employment from 15, light work from 14). */
+    public const MIN_PLAUSIBLE_AGE = 14;
+
+    /** Oldest age the age split accepts; anything beyond is a data-entry error. */
+    public const MAX_PLAUSIBLE_AGE = 100;
+
     public function __construct(
         protected ReportsStructureScopeService $structureScope
     ) {}
@@ -26,7 +32,7 @@ class ReportsOverviewService
         $reportDate = CarbonImmutable::create($year, $month, 1)->endOfMonth();
         $yearStart = $reportDate->startOfYear();
         $structureIds = $this->structureScope->resolveIds($structureId);
-        $personnelSnapshot = $this->personnelSnapshot($yearStart, $reportDate, $structureIds);
+        $personnelSnapshot = $this->personnelSnapshot($yearStart, $reportDate, $structureIds, $this->movementEnd($reportDate));
         $activePersonnelCount = (int) ($personnelSnapshot->active_personnel_count ?? 0);
         $structuresCovered = (int) ($personnelSnapshot->structures_covered ?? 0);
         $newHires = (int) ($personnelSnapshot->new_hires ?? 0);
@@ -82,6 +88,10 @@ class ReportsOverviewService
                 'overtime_hours' => round((float) data_get($attendance, 'overtime_minutes', 0) / 60, 1),
                 'new_hires_delta_pct' => $this->deltaPercent($newHires, $previousNewHires),
                 'exits_delta_pct' => $this->deltaPercent($exits, $previousExits),
+                // The baseline the two deltas above are taken against — the same calendar
+                // window a year earlier — so the tile can say what "-83%" is relative to.
+                'new_hires_previous' => $previousNewHires,
+                'exits_previous' => $previousExits,
                 'overtime_delta_pct' => $this->deltaPercent(
                     (float) data_get($attendance, 'overtime_minutes', 0),
                     (float) data_get($attendance, 'previous_overtime_minutes', 0)
@@ -125,14 +135,20 @@ class ReportsOverviewService
      * matter how many tiles it grows. Age buckets compare `birthdate` against boundaries
      * computed in PHP, which keeps the SQL portable (no date maths in the query).
      */
-    protected function personnelSnapshot(CarbonImmutable $yearStart, CarbonImmutable $reportDate, array $structureIds = []): object
+    protected function personnelSnapshot(CarbonImmutable $yearStart, CarbonImmutable $reportDate, array $structureIds = [], ?CarbonImmutable $movementEnd = null): object
     {
         $activeCondition = 'join_work_date <= ? AND (leave_work_date IS NULL OR leave_work_date >= ?)';
         $reportDateString = $reportDate->toDateString();
         $yearStartString = $yearStart->toDateString();
+        $movementEnd ??= $reportDate;
+        $movementEndString = $movementEnd->toDateString();
         $previousYearStart = $yearStart->subYear()->toDateString();
-        $previousReportDate = $reportDate->subYear()->toDateString();
+        $previousMovementEnd = $movementEnd->subYear()->toDateString();
         $born = fn (int $age): string => $reportDate->subYears($age)->toDateString();
+        // Only a birthdate giving a plausible working age lands in a bucket; a missing or
+        // future one (data-entry error) must not be counted as "under 30".
+        $youngest = $born(self::MIN_PLAUSIBLE_AGE);
+        $oldest = $reportDate->subYears(self::MAX_PLAUSIBLE_AGE + 1)->toDateString();
 
         return Personnel::query()
             ->where('is_pending', false)
@@ -140,17 +156,30 @@ class ReportsOverviewService
             ->when($structureIds !== [], fn (Builder $query) => $query->whereIn('structure_id', $structureIds))
             ->selectRaw("SUM(CASE WHEN {$activeCondition} THEN 1 ELSE 0 END) as active_personnel_count", [$reportDateString, $reportDateString])
             ->selectRaw("COUNT(DISTINCT CASE WHEN {$activeCondition} THEN structure_id END) as structures_covered", [$reportDateString, $reportDateString])
-            ->selectRaw('SUM(CASE WHEN join_work_date BETWEEN ? AND ? THEN 1 ELSE 0 END) as new_hires', [$yearStartString, $reportDateString])
-            ->selectRaw('SUM(CASE WHEN leave_work_date IS NOT NULL AND leave_work_date BETWEEN ? AND ? THEN 1 ELSE 0 END) as exits', [$yearStartString, $reportDateString])
-            ->selectRaw('SUM(CASE WHEN join_work_date BETWEEN ? AND ? THEN 1 ELSE 0 END) as previous_new_hires', [$previousYearStart, $previousReportDate])
-            ->selectRaw('SUM(CASE WHEN leave_work_date IS NOT NULL AND leave_work_date BETWEEN ? AND ? THEN 1 ELSE 0 END) as previous_exits', [$previousYearStart, $previousReportDate])
+            ->selectRaw('SUM(CASE WHEN join_work_date BETWEEN ? AND ? THEN 1 ELSE 0 END) as new_hires', [$yearStartString, $movementEndString])
+            ->selectRaw('SUM(CASE WHEN leave_work_date IS NOT NULL AND leave_work_date BETWEEN ? AND ? THEN 1 ELSE 0 END) as exits', [$yearStartString, $movementEndString])
+            ->selectRaw('SUM(CASE WHEN join_work_date BETWEEN ? AND ? THEN 1 ELSE 0 END) as previous_new_hires', [$previousYearStart, $previousMovementEnd])
+            ->selectRaw('SUM(CASE WHEN leave_work_date IS NOT NULL AND leave_work_date BETWEEN ? AND ? THEN 1 ELSE 0 END) as previous_exits', [$previousYearStart, $previousMovementEnd])
             ->selectRaw("SUM(CASE WHEN gender = 1 AND {$activeCondition} THEN 1 ELSE 0 END) as male_count", [$reportDateString, $reportDateString])
             ->selectRaw("SUM(CASE WHEN gender = 2 AND {$activeCondition} THEN 1 ELSE 0 END) as female_count", [$reportDateString, $reportDateString])
-            ->selectRaw("SUM(CASE WHEN birthdate > ? AND {$activeCondition} THEN 1 ELSE 0 END) as age_under_30", [$born(30), $reportDateString, $reportDateString])
+            ->selectRaw("SUM(CASE WHEN birthdate <= ? AND birthdate > ? AND {$activeCondition} THEN 1 ELSE 0 END) as age_under_30", [$youngest, $born(30), $reportDateString, $reportDateString])
             ->selectRaw("SUM(CASE WHEN birthdate <= ? AND birthdate > ? AND {$activeCondition} THEN 1 ELSE 0 END) as age_30_39", [$born(30), $born(40), $reportDateString, $reportDateString])
             ->selectRaw("SUM(CASE WHEN birthdate <= ? AND birthdate > ? AND {$activeCondition} THEN 1 ELSE 0 END) as age_40_49", [$born(40), $born(50), $reportDateString, $reportDateString])
-            ->selectRaw("SUM(CASE WHEN birthdate <= ? AND {$activeCondition} THEN 1 ELSE 0 END) as age_50_plus", [$born(50), $reportDateString, $reportDateString])
+            ->selectRaw("SUM(CASE WHEN birthdate <= ? AND birthdate > ? AND {$activeCondition} THEN 1 ELSE 0 END) as age_50_plus", [$born(50), $oldest, $reportDateString, $reportDateString])
             ->first();
+    }
+
+    /**
+     * Last day the year-to-date movement counts (hires, exits) run to. For a month still in
+     * progress (or a future one) that is today, not the month's end: otherwise hires already booked with a
+     * later start date count now, and the "same period last year" baseline covers days this
+     * year has not reached yet.
+     */
+    protected function movementEnd(CarbonImmutable $reportDate): CarbonImmutable
+    {
+        $today = CarbonImmutable::today()->endOfDay();
+
+        return $today->lessThan($reportDate) ? $today : $reportDate;
     }
 
     /** Percentage change against the same window a year (or a month) earlier. */
