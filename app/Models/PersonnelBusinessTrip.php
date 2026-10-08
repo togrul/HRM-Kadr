@@ -134,9 +134,13 @@ class PersonnelBusinessTrip extends Model
                     }
                     break;
                 case 'order_type_id':
-                    if (! empty($value)) {
+                    $value = is_array($value) ? ($value['id'] ?? null) : $value;
+                    if (is_string($value) && str_starts_with($value, 'tpl:')) {
+                        // Word-engine orders have no order type; they carry their template code.
+                        $query->whereHas('order', fn ($qq) => $qq->where('template_snapshot->template_code', substr($value, 4)));
+                    } elseif (! empty($value)) {
                         // order_type_id lives on the order itself, not on its type row.
-                        $query->whereHas('order', fn ($qq) => $qq->where('order_type_id', (int) (is_array($value) ? ($value['id'] ?? 0) : $value)));
+                        $query->whereHas('order', fn ($qq) => $qq->where('order_type_id', (int) $value));
                     }
                     break;
                 case 'date':

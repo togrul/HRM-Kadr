@@ -25,6 +25,7 @@ class OrderCompositionIssuer
         private readonly OrderVacationRules $vacationRules,
         private readonly VacationBalanceService $balances,
         private readonly StaffScheduleVacancyService $vacancies,
+        private readonly OrderPeriodGuard $periods,
     ) {}
 
     /**
@@ -41,7 +42,9 @@ class OrderCompositionIssuer
             return OrderIssueOutcome::rejected($subjectErrors);
         }
 
-        $rejection = $this->missingFields($template, $composition) ?? $this->vacationRejection($template, $composition);
+        $rejection = $this->missingFields($template, $composition)
+            ?? $this->periodRejection($template, $composition)
+            ?? $this->vacationRejection($template, $composition);
         if ($rejection !== null) {
             return $rejection;
         }
@@ -98,6 +101,10 @@ class OrderCompositionIssuer
         $errors = [];
         $missing = [];
         foreach ($template->manualFields() as $field) {
+            if (! $field['required']) {
+                continue;
+            }
+
             $value = $composition->fields[$field['key']] ?? null;
             if ($value === null || trim((string) $value) === '') {
                 $errors['fields.'.$field['key']] = __('orders::order_composer.errors.field_required');
@@ -108,6 +115,31 @@ class OrderCompositionIssuer
         return $missing === [] ? null : OrderIssueOutcome::rejected($errors, __('orders::order_composer.errors.fields_required', [
             'fields' => implode(', ', $missing),
         ]));
+    }
+
+    /**
+     * Period gate: coherent dates (end ≥ start, return after end, day count within the
+     * span, sensible work year), an active employee, and no overlap with another live
+     * leave, vacation or business trip. Re-checked on approval (OrderStatusTransitionService).
+     */
+    private function periodRejection(OrderWordTemplate $template, OrderComposition $composition): ?OrderIssueOutcome
+    {
+        if ($template->isHire()) {
+            return null;
+        }
+
+        $personnel = $this->subjects->personnel($composition->personnelId);
+
+        $errors = $this->periods->dateErrors($template, $composition->fields, $personnel);
+        if ($errors !== []) {
+            return OrderIssueOutcome::rejected($errors, __('orders::order_composer.errors.dates_invalid', [
+                'details' => implode(' ', array_unique(array_values($errors))),
+            ]));
+        }
+
+        $blocker = $this->periods->absenceBlocker($template, $composition->fields, $personnel);
+
+        return $blocker === null ? null : OrderIssueOutcome::rejected(['personnelId' => $blocker], $blocker);
     }
 
     /**

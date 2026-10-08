@@ -49,6 +49,7 @@ class OrderStatusTransitionService
         private readonly AzerbaijaniDateFormatter $dates,
         private readonly OrderCompensationSync $compensation,
         private readonly IntegrationOutbox $outbox,
+        private readonly OrderPeriodGuard $periods,
     ) {}
 
     /** Approve a pending order (applies its HR side-effect). */
@@ -230,6 +231,14 @@ class OrderStatusTransitionService
 
         $effect = $this->effects->for($template->effect);
         $personnel = $this->personnel($snapshot);
+
+        // Defensive: a draft stored before the date rules existed (or whose employee has
+        // since gone away on these dates) must not put a broken period on record.
+        $blocker = $this->periods->approvalBlocker($template, (array) ($snapshot['fields'] ?? []), $personnel);
+        if ($blocker !== null) {
+            throw new DomainException(__('orders::order_composer.errors.approval_blocked', ['reason' => $blocker]));
+        }
+
         if ($effect && $personnel) {
             $effect->apply($order, $this->effectFields($template, (array) ($snapshot['fields'] ?? [])), $personnel);
         }

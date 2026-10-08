@@ -5,6 +5,7 @@ namespace App\Modules\Orders\Livewire;
 use App\Models\OrderLog;
 use App\Models\OrderWordTemplate;
 use App\Modules\Orders\Application\Document\OrderComposition;
+use App\Modules\Orders\Application\Document\OrderLeaveDateRules;
 use App\Modules\Orders\Application\Document\OrderTemplateProvider;
 use App\Modules\Orders\Infrastructure\Document\OrderCompositionIssuer;
 use App\Modules\Orders\Infrastructure\Document\OrderDocumentBuilder;
@@ -83,6 +84,7 @@ class OrderComposer extends Component
         }
 
         $this->presetCode = $presetCode ?? '';
+        $this->applyFieldDefaults();
         $this->orderDate = now()->format('Y-m-d');
         $this->pickPersonnel($personnelId);
     }
@@ -171,7 +173,10 @@ class OrderComposer extends Component
         return $template ? $issuer->vacationBalance($template, $this->composition(), persist: false) : null;
     }
 
-    /** Clear a field's "required" error the moment the author fills it in. */
+    /**
+     * Clear a field's "required" error the moment the author fills it in, and fill the
+     * dates that follow from it (day count ↔ end date, end date → return-to-work date).
+     */
     public function updatedFields($value, $key = null): void
     {
         // A single field updated (wire:model.live) → ($value, $key); the whole array
@@ -182,6 +187,11 @@ class OrderComposer extends Component
                 $this->resetErrorBag('fields.'.$k);
             }
         }
+
+        $template = $this->template();
+        if ($template && is_string($key) && $key !== '') {
+            $this->fields = app(OrderLeaveDateRules::class)->autofill($template, $this->fields, $key);
+        }
     }
 
     public function updatedPresetCode(): void
@@ -191,6 +201,18 @@ class OrderComposer extends Component
         $this->previewHtml = '';
         $this->templateLoaded = false;
         $this->resetHireSubject();
+
+        $this->applyFieldDefaults();
+    }
+
+    /** Fields with a usual value start with it (e.g. 126 days of maternity leave). */
+    private function applyFieldDefaults(): void
+    {
+        foreach ($this->template()?->manualFields() ?? [] as $field) {
+            if (filled($field['default']) && blank($this->fields[$field['key']] ?? null)) {
+                $this->fields[$field['key']] = (string) $field['default'];
+            }
+        }
     }
 
     /**

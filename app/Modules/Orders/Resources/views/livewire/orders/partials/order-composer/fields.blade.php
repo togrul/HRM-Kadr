@@ -7,7 +7,7 @@
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         @foreach ($fieldDefs as $field)
             <div>
-                <x-label for="fields.{{ $field['key'] }}">{{ $field['label'] }}</x-label>
+                <x-label for="fields.{{ $field['key'] }}">{{ $field['label'] }}@unless ($field['required'] ?? true) <span class="font-normal text-zinc-400">({{ __('orders::order_composer.labels.optional') }})</span>@endunless</x-label>
                 @if (isset($lookupOptions[$field['type']]))
                     <x-orders.lookup-picker wire:model="fields.{{ $field['key'] }}"
                         :options="$lookupOptions[$field['type']]" />
