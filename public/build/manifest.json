@@ -1,6 +1,6 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-90c6a202.css",
+    "file": "assets/app-3bbd282b.css",
     "isEntry": true,
     "src": "resources/css/app.css"
   },
@@ -13,7 +13,7 @@
     "src": "resources/fonts/SatoshiAZ-VariableItalic.woff2"
   },
   "resources/js/app.js": {
-    "file": "assets/app-0c383601.js",
+    "file": "assets/app-f347bf7f.js",
     "isEntry": true,
     "src": "resources/js/app.js"
   }
