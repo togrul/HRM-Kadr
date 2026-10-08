@@ -103,6 +103,26 @@ class StaffScheduleVacancyService
     }
 
     /**
+     * Give back the slot a revoked hire had consumed (filled -1, vacant recomputed). The live
+     * headcount already frees it once the employee is gone; this keeps the legacy cache in step.
+     */
+    public function releaseForRevokedHire(?int $structureId, ?int $positionId): void
+    {
+        $row = $this->row($structureId, $positionId);
+
+        if (! $row || (int) $row->filled <= 0) {
+            return;
+        }
+
+        $filled = (int) $row->filled - 1;
+
+        $row->forceFill([
+            'filled' => $filled,
+            'vacant' => max(0, (int) $row->total - $filled),
+        ])->save();
+    }
+
+    /**
      * Ştat cədvəlində strukturun özünə ayrılmış vəzifələr. Struktur üçün ştat
      * cədvəli qurulmayıbsa boş siyahı qaytarır.
      *

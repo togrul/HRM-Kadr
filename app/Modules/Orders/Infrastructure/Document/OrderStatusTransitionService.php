@@ -28,6 +28,9 @@ use RuntimeException;
  *
  *   pending(10)  → approved(20)  | cancelled(30)
  *   approved(20) → cancelled(30) | pending(10, revert)
+ *
+ * A hire is reversible only while the new employee has no dependent records
+ * ({@see HireOrderRevocation}); otherwise the employment ends by a termination order.
  *   cancelled(30)→ pending(10, reopen)
  */
 class OrderStatusTransitionService
@@ -50,6 +53,7 @@ class OrderStatusTransitionService
         private readonly OrderCompensationSync $compensation,
         private readonly IntegrationOutbox $outbox,
         private readonly OrderPeriodGuard $periods,
+        private readonly HireOrderRevocation $hireRevocation,
     ) {}
 
     /** Approve a pending order (applies its HR side-effect). */
@@ -160,8 +164,8 @@ class OrderStatusTransitionService
             'employee_external_id' => $personnel ? (string) $personnel->id : null,
             'person_uid' => $personnel?->person_uid,
             'status' => $effectDirection === 'applied' ? 'approved' : 'reversed',
-            // A hire cannot be undone here, so the counterpart must not offer an
-            // undo it would be unable to honour.
+            // A hire can be undone here only while the employee has no records yet, so the
+            // counterpart must not offer an undo of its own; a revocation still arrives as 'reversed'.
             'reversible' => ! $template->isHire(),
             'start_date' => $this->dateField($fields, 'start_date'),
             'end_date' => $this->dateField($fields, 'end_date'),
@@ -252,9 +256,12 @@ class OrderStatusTransitionService
             return;
         }
 
-        // Converting a candidate into an employee cannot be safely undone here.
+        // A hire is undone only while the new employee has no records of their own yet;
+        // otherwise HireOrderRevocation refuses and the employment must end by a termination order.
         if ($template->isHire()) {
-            throw new DomainException(__('orders::order_composer.errors.hire_irreversible'));
+            $this->hireRevocation->revoke($order, $snapshot);
+
+            return;
         }
 
         $effect = $this->effects->for($template->effect);

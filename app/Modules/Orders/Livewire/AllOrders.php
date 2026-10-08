@@ -254,7 +254,7 @@ class AllOrders extends Component
 
     /**
      * Run a guarded status transition (approve/cancel/reopen/revert) on a Word-engine
-     * order, surfacing any domain error (illegal jump, irreversible hire) to the user.
+     * order, surfacing any domain error (illegal jump, a hire whose employee already has records) to the user.
      */
     private function changeStatus(string $order_no, string $action, string $successKey): void
     {

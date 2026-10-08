@@ -2,6 +2,8 @@
 
 namespace App\Modules\Compensation\Providers;
 
+use App\Contracts\EmployeeRecordSource;
+use App\Modules\Compensation\Application\Services\CompensationEmployeeRecordSource;
 use App\Modules\Compensation\Console\Commands\CompensationQueryBudgetCommand;
 use App\Modules\Compensation\Console\Commands\CompensationRenderBenchmarkCommand;
 use App\Modules\Compensation\Domain\Contracts\CompensationReadRepository;
@@ -24,6 +26,8 @@ class CompensationServiceProvider extends ServiceProvider
         }
 
         $this->app->bind(CompensationReadRepository::class, EloquentCompensationReadRepository::class);
+
+        $this->app->tag([CompensationEmployeeRecordSource::class], EmployeeRecordSource::TAG);
     }
 
     public function boot(): void
