@@ -364,6 +364,29 @@ class PayrollRunTest extends TestCase
             ->assertSee('Doe Jane');
     }
 
+    public function test_loan_currency_defaults_to_azn_and_rejects_codes_outside_the_iso_list(): void
+    {
+        $personnel = $this->makePersonnel('loancur@example.test');
+
+        $user = \App\Models\User::factory()->create();
+        foreach (['show-payroll', 'manage-payroll'] as $perm) {
+            $user->givePermissionTo(Permission::findOrCreate($perm, 'web'));
+        }
+        $this->actingAs($user);
+
+        Livewire::test(LoansTab::class, ['tabelNo' => $personnel->tabel_no, 'label' => 'Jane Doe'])
+            ->assertSet('loanForm.currency', 'AZN')
+            ->set('loanForm.type', 'loan')
+            ->set('loanForm.principal', '500')
+            ->set('loanForm.monthly_installment', '100')
+            ->set('loanForm.currency', 'XYZ123')
+            ->set('loanForm.start_on', '2026-07-01')
+            ->call('saveLoan')
+            ->assertHasErrors(['loanForm.currency' => 'in']);
+
+        $this->assertDatabaseMissing('employee_loans', ['tabel_no' => $personnel->tabel_no]);
+    }
+
     private function assignCompensation(string $tabelNo, int $regimeId, float $base, float $percent): void
     {
         $lines = [];

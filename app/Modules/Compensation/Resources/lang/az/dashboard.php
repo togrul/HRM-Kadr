@@ -94,6 +94,7 @@ return [
         'name' => 'Ad',
         'regime' => 'Rejim',
         'currency' => 'Valyuta',
+        'currency_legacy' => ':code (dəstəklənməyən kod)',
         'effective_from' => 'Qüvvəyə minmə',
         'effective_to' => 'Bitmə',
         'code' => 'Kod',

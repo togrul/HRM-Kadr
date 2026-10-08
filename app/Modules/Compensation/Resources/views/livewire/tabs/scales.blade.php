@@ -138,9 +138,10 @@
                             <x-ui.select-dropdown :label="__('compensation::dashboard.fields.regime')" mode="gray" direction="auto" wire:model.live="scaleForm.regime_id" :model="$this->regimeOptions" />
                             @error('scaleForm.regime_id') <x-validation>{{ $message }}</x-validation> @enderror
                         </div>
-                        <x-ui.input-shell :label="__('compensation::dashboard.fields.currency')">
-                            <x-ui.input maxlength="3" class="uppercase" wire:model="scaleForm.currency" />
-                        </x-ui.input-shell>
+                        <div class="min-w-0">
+                            <x-ui.select-dropdown :label="__('compensation::dashboard.fields.currency')" mode="gray" direction="auto" :clearable="false" wire:model.live="scaleForm.currency" :model="$this->currencyOptions" />
+                            @error('scaleForm.currency') <x-validation>{{ $message }}</x-validation> @enderror
+                        </div>
                         <x-ui.input-shell :label="__('compensation::dashboard.fields.effective_from')" :error="$errors->first('scaleForm.effective_from')">
                             <x-ui.input type="date" wire:model="scaleForm.effective_from" />
                         </x-ui.input-shell>
