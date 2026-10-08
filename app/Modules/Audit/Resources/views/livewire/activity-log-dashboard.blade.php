@@ -126,7 +126,7 @@
                     <x-ui.select wire:model.live="logName" class="w-[150px]">
                         <option value="">{{ __('audit::activity.filters.log_name') }}</option>
                         @foreach ($logNameOptions as $option)
-                            <option value="{{ $option }}">{{ $option }}</option>
+                            <option value="{{ $option }}">{{ $this->logNameLabel($option) }}</option>
                         @endforeach
                     </x-ui.select>
 
@@ -153,7 +153,7 @@
                             <x-small-badge :mode="$this->eventTone($activity->event)" dot>
                                 {{ $this->eventLabel($activity->event) }}
                             </x-small-badge>
-                            <span class="mt-1 block text-[11px] text-ink-faint">{{ $activity->log_name ?: __('audit::activity.labels.no_log_name') }}</span>
+                            <span class="mt-1 block text-[11px] text-ink-faint">{{ $this->logNameLabel($activity->log_name) }}</span>
                         </x-table.td>
 
                         <x-table.td :standart-width="true" extra-classes="min-w-[260px] max-w-[380px]">
@@ -217,25 +217,49 @@
                 </div>
 
                 <div class="grid gap-3 sm:grid-cols-2">
-                    <x-fact-tile :label="__('audit::activity.detail.log_name')" :value="$selectedActivity->log_name ?: '—'" />
+                    <x-fact-tile :label="__('audit::activity.detail.log_name')" :value="$this->logNameLabel($selectedActivity->log_name)" />
                     <x-fact-tile :label="__('audit::activity.detail.event')" :value="$this->eventLabel($selectedActivity->event)" />
                     <x-fact-tile :label="__('audit::activity.detail.actor')" :value="$this->actorLabel($selectedActivity)" />
                     <x-fact-tile :label="__('audit::activity.detail.subject')" :value="$this->subjectLabel($selectedActivity)" />
                 </div>
 
-                <div>
-                    <p class="hrm-eyebrow">{{ __('audit::activity.detail.properties') }}</p>
-                    <div class="mt-2 space-y-2">
-                        @forelse ($this->propertyRows($selectedActivity) as $row)
-                            <div class="rounded-xl border border-hairline bg-[#fafafa] px-4 py-3">
-                                <p class="text-[11.5px] font-medium text-ink-muted">{{ $row['key'] }}</p>
-                                <pre class="mt-1.5 max-h-48 overflow-auto whitespace-pre-wrap break-words text-[12px] leading-5 text-ink-soft">{{ $row['value'] }}</pre>
-                            </div>
-                        @empty
-                            <x-ui.empty-state icon="icons.document-icon" :message="__('audit::activity.detail.no_properties')" />
-                        @endforelse
+                @php $changeRows = $this->changeRows($selectedActivity); @endphp
+                @if ($changeRows !== [])
+                    <div>
+                        <p class="hrm-eyebrow">{{ __('audit::activity.detail.changes') }}</p>
+                        <div class="mt-2 divide-y divide-hairline-subtle rounded-xl border border-hairline bg-[#fafafa]">
+                            @foreach ($changeRows as $change)
+                                <div class="px-4 py-2.5" wire:key="audit-change-{{ $change['key'] }}">
+                                    <p class="text-[11.5px] font-medium text-ink-muted">{{ $change['field'] }}</p>
+                                    <p class="mt-1 break-words text-[12.5px] leading-5 text-ink-soft">
+                                        @if ($change['old'] !== null)
+                                            <span class="text-ink-faint line-through">{{ $change['old'] }}</span>
+                                            <span class="px-1 text-ink-faint">→</span>
+                                        @endif
+                                        <span class="font-medium text-ink">{{ $change['new'] }}</span>
+                                    </p>
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
-                </div>
+                @endif
+
+                @php $propertyRows = $this->propertyRows($selectedActivity); @endphp
+                @if ($propertyRows !== [] || $changeRows === [])
+                    <div>
+                        <p class="hrm-eyebrow">{{ __('audit::activity.detail.properties') }}</p>
+                        <div class="mt-2 space-y-2">
+                            @forelse ($propertyRows as $row)
+                                <div class="rounded-xl border border-hairline bg-[#fafafa] px-4 py-3">
+                                    <p class="text-[11.5px] font-medium text-ink-muted">{{ $row['key'] }}</p>
+                                    <pre class="mt-1.5 max-h-48 overflow-auto whitespace-pre-wrap break-words text-[12px] leading-5 text-ink-soft">{{ $row['value'] }}</pre>
+                                </div>
+                            @empty
+                                <x-ui.empty-state icon="icons.document-icon" :message="__('audit::activity.detail.no_properties')" />
+                            @endforelse
+                        </div>
+                    </div>
+                @endif
             </div>
 
             <div class="flex justify-end border-t border-hairline-subtle bg-white px-5 py-3">

@@ -28,6 +28,17 @@ class ActivityLogReader
 {
     public const NO_EVENT = '__none__';
 
+    /** Columns that are bookkeeping, not a change anyone acted on — never listed as changes. */
+    private const HIDDEN_CHANGE_FIELDS = [
+        'id',
+        'created_at',
+        'updated_at',
+        'password',
+        'remember_token',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+    ];
+
     /** Cap on name matches a search expands into, so a one-letter term stays cheap. */
     private const NAME_MATCH_LIMIT = 500;
 
@@ -259,11 +270,91 @@ class ActivityLogReader
                 'Attendance month closed and locked.' => 'attendance_month_closed_and_locked',
                 'Attendance month unlocked.' => 'attendance_month_unlocked',
                 'Attendance weekend calendar auto-created.' => 'attendance_weekend_calendar_auto_created',
-                default => null,
+                default => $this->genericDescriptionKey($description),
             },
         };
 
         return $key ? $this->translateOr("audit::activity.descriptions.{$key}", $description) : $description;
+    }
+
+    /**
+     * Log type as a human label ("default" → "Ümumi", "orders" → "Əmrlər"); an unknown
+     * log name is shown as it was stored.
+     */
+    public function logNameLabel(?string $logName): string
+    {
+        if (! $logName) {
+            return __('audit::activity.labels.no_log_name');
+        }
+
+        return $this->translateOr("audit::activity.log_names.{$this->translationKey($logName)}", $logName);
+    }
+
+    /**
+     * The field-by-field change list of a model event (properties.attributes / .old):
+     * one row per field that actually changed, with a human label. Internal columns
+     * (id, timestamps, secrets) and no-op pairs ("boş → boş", "5 → 5") are left out.
+     *
+     * @return list<array{key:string,field:string,old:?string,new:string}>
+     */
+    public function changeRows(AuditActivity $activity): array
+    {
+        $properties = $activity->properties;
+        if ($properties instanceof Collection) {
+            $properties = $properties->toArray();
+        }
+
+        if (! is_array($properties)) {
+            return [];
+        }
+
+        $attributes = is_array($properties['attributes'] ?? null) ? $properties['attributes'] : [];
+        $old = is_array($properties['old'] ?? null) ? $properties['old'] : [];
+        $hasOld = array_key_exists('old', $properties);
+
+        $rows = [];
+        foreach (array_unique([...array_keys($attributes), ...array_keys($old)]) as $field) {
+            $field = (string) $field;
+
+            if (in_array($field, self::HIDDEN_CHANGE_FIELDS, true)) {
+                continue;
+            }
+
+            $before = $this->normalizedChangeValue($old[$field] ?? null);
+            $after = $this->normalizedChangeValue($attributes[$field] ?? null);
+
+            if ($before === $after) {
+                continue;
+            }
+
+            $rows[] = [
+                'key' => $field,
+                'field' => $this->attributeLabel($field),
+                'old' => $hasOld ? $this->changeValueLabel($before) : null,
+                'new' => $this->changeValueLabel($after),
+            ];
+        }
+
+        return $rows;
+    }
+
+    /**
+     * Human label of a model column: the audit map, then the shared personnel field
+     * labels, then the validation attribute names, then a headline of the column name.
+     */
+    public function attributeLabel(string $field): string
+    {
+        $key = $this->translationKey($field);
+
+        foreach (["audit::activity.attributes.{$key}", "personnel::common.labels.{$key}", "validation.attributes.{$key}"] as $translationKey) {
+            $label = __($translationKey);
+
+            if (is_string($label) && $label !== $translationKey) {
+                return $label;
+            }
+        }
+
+        return Str::headline(Str::endsWith($field, '_id') ? Str::beforeLast($field, '_id') : $field);
     }
 
     public function entityKey(?string $type, mixed $id): string
@@ -284,6 +375,49 @@ class ActivityLogReader
         $translation = __($key);
 
         return $translation === $key ? $fallback : $translation;
+    }
+
+    /**
+     * Keys for descriptions the logging libraries write in English: spatie's bare
+     * event name ("created"), the "This model has been created" pattern, and dotted
+     * domain verbs ("order.approved", "user.deleted").
+     */
+    private function genericDescriptionKey(string $description): ?string
+    {
+        if (in_array($description, ['created', 'updated', 'deleted', 'restored', 'force_deleted'], true)) {
+            return 'model_'.$description;
+        }
+
+        if (preg_match('/^This model has been ([a-z_]+)$/', $description, $matches) === 1) {
+            return 'model_'.$matches[1];
+        }
+
+        if (preg_match('/^([a-z_]+)\.([a-z_]+)$/', $description, $matches) === 1) {
+            return $matches[1].'_'.$matches[2];
+        }
+
+        return null;
+    }
+
+    /** Blank and "no value" read the same; scalars compare by their text. */
+    private function normalizedChangeValue(mixed $value): ?string
+    {
+        if ($value === null || $value === '' || $value === []) {
+            return null;
+        }
+
+        if (is_bool($value)) {
+            return $value ? '1' : '0';
+        }
+
+        return is_scalar($value)
+            ? (string) $value
+            : (string) json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    }
+
+    private function changeValueLabel(?string $value): string
+    {
+        return $value ?? __('audit::activity.changes.empty');
     }
 
     /**

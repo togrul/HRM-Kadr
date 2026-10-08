@@ -16,6 +16,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
  * @property mixed $starts_at
@@ -24,7 +26,21 @@ use Illuminate\Support\Str;
  */
 class Leave extends Model
 {
-    use HasFactory, PersonnelTrait, SoftDeletes;
+    use HasFactory, LogsActivity, PersonnelTrait, SoftDeletes;
+
+    /**
+     * İcazənin yaradılması, dəyişdirilməsi və silinməsi audit jurnalına düşür —
+     * kadr və əmr qeydləri kimi (yalnız dəyişən sahələr, boş qeyd yazılmır).
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logExcept(['created_at', 'updated_at'])
+            ->logOnlyDirty()
+            ->useLogName('leaves')
+            ->dontSubmitEmptyLogs();
+    }
 
     /** @var array<int, string> */
     protected $fillable = [

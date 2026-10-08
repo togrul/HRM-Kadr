@@ -145,6 +145,28 @@ class Personnel360TimelineServiceTest extends TestCase
         $this->assertCount(1, $audit['changes']);
     }
 
+    public function test_internal_ids_and_blank_to_blank_changes_are_not_listed(): void
+    {
+        $personnel = $this->makePersonnel();
+
+        AuditActivity::query()->create([
+            'log_name' => 'personnel',
+            'description' => 'You have updated personnel',
+            'event' => 'updated',
+            'subject_type' => Personnel::class,
+            'subject_id' => $personnel->id,
+            'properties' => [
+                'old' => ['id' => 5, 'photo' => null, 'gender' => 1, 'email' => 'old@example.test'],
+                'attributes' => ['id' => 5, 'photo' => '', 'gender' => '1', 'email' => 'new@example.test'],
+            ],
+        ]);
+
+        $audit = app(Personnel360TimelineService::class)->build($personnel, null, 80, ['type' => 'audit'])->first();
+
+        $this->assertCount(1, $audit['changes']);
+        $this->assertSame('new@example.test', $audit['changes'][0]['new']);
+    }
+
     private function makePersonnel(): Personnel
     {
         $this->seedReferenceData();

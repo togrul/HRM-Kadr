@@ -84,7 +84,7 @@ class ActivityLogExport implements FromQuery, ShouldAutoSize, WithHeadings, With
         return [
             $row->id,
             $row->created_at instanceof Carbon ? $row->created_at->format('Y-m-d H:i:s') : (string) $row->created_at,
-            (string) $row->log_name,
+            $this->reader->logNameLabel($row->log_name),
             $this->reader->eventLabel($row->event),
             $this->reader->descriptionLabel($row->description),
             $this->reader->actorLabel($row, $this->labels),

@@ -465,7 +465,9 @@ class Personnel360TimelineService
             array_keys($attributes),
             array_keys($old),
         )))
-            ->reject(fn (string $field): bool => in_array($field, ['created_at', 'updated_at', 'deleted_at'], true))
+            ->reject(fn (string $field): bool => in_array($field, ['id', 'created_at', 'updated_at', 'deleted_at'], true))
+            // "Photo: boş → boş" is not a change: blank on both sides, or the same value, is noise.
+            ->reject(fn (string $field): bool => $this->normalizedChangeValue($old[$field] ?? null) === $this->normalizedChangeValue($attributes[$field] ?? null))
             ->map(fn (string $field): array => [
                 'field' => $this->fieldLabel($field),
                 'old' => $this->fieldValueLabel($field, $old[$field] ?? null),
@@ -473,6 +475,16 @@ class Personnel360TimelineService
             ])
             ->take(8)
             ->values();
+    }
+
+    /** Blank values compare equal, scalars compare as strings (3 vs "3"). */
+    private function normalizedChangeValue(mixed $value): ?string
+    {
+        if ($value === null || $value === '' || $value === []) {
+            return null;
+        }
+
+        return is_scalar($value) ? (string) $value : (string) json_encode($value);
     }
 
     private function fieldLabel(string $field): string
