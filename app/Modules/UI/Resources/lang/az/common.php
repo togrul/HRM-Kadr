@@ -87,4 +87,12 @@ return [
         'filtered_title' => 'Nəticə tapılmadı',
         'filtered_hint' => 'Axtarışa uyğun qeyd yoxdur. Filtri dəyişin və ya sıfırlayın.',
     ],
+    'absence_overlap' => [
+        'message' => 'Bu tarixlərdə əməkdaşın artıq :type qeydi var (:dates).',
+        'types' => [
+            'leave' => 'icazə',
+            'vacation' => 'məzuniyyət',
+            'business_trip' => 'ezamiyyət',
+        ],
+    ],
 ];

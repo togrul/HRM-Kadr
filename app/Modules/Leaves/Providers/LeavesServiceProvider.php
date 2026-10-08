@@ -2,7 +2,10 @@
 
 namespace App\Modules\Leaves\Providers;
 
+use App\Contracts\AbsenceSource;
 use App\Models\Leave;
+use App\Modules\Leaves\Application\Services\LeaveAbsenceSource;
+use App\Modules\Leaves\Application\Services\LeaveListCacheVersion;
 use App\Modules\Leaves\Console\Commands\LeavesQueryBudgetCommand;
 use App\Modules\Leaves\Console\Commands\LeavesRenderBenchmarkCommand;
 use App\Observers\LeaveObserver;
@@ -31,6 +34,8 @@ class LeavesServiceProvider extends ServiceProvider
             return;
         }
 
+        // Contributes this module's absences to the cross-module overlap check.
+        $this->app->tag([LeaveAbsenceSource::class], AbsenceSource::TAG);
         $this->loadRoutesFrom(__DIR__.'/../Routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'leaves');
         $this->loadMigrations();
@@ -51,6 +56,12 @@ class LeavesServiceProvider extends ServiceProvider
     protected function registerObservers(): void
     {
         Leave::observe(LeaveObserver::class);
+
+        // Any leave write invalidates the list's page/stat caches.
+        $bump = fn (): mixed => $this->app->make(LeaveListCacheVersion::class)->bump();
+        Leave::saved($bump);
+        Leave::deleted($bump);
+        Leave::restored($bump);
     }
 
     protected function registerPolicies(): void

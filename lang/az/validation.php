@@ -4,14 +4,14 @@ return [
 
     'accepted' => ':attribute qəbul edilməlidir',
     'active_url' => ':attribute doğru URL deyil',
-    'after' => ':attribute :date tarixindən sonra olmalıdır',
-    'after_or_equal' => ':attribute :date tarixi ilə eyni və ya sonra olmalıdır',
+    'after' => ':attribute :date ilə müqayisədə daha gec olmalıdır',
+    'after_or_equal' => ':attribute :date ilə eyni və ya ondan gec olmalıdır',
     'alpha' => ':attribute yalnız hərflərdən ibarət ola bilər',
     'alpha_dash' => ':attribute yalnız hərf, rəqəm və tire simvolundan ibarət ola bilər',
     'alpha_num' => ':attribute yalnız hərf və rəqəmlərdən ibarət ola bilər',
     'array' => ':attribute massiv formatında olmalıdır',
-    'before' => ':attribute :date tarixindən əvvəl olmalıdır',
-    'before_or_equal' => ':attribute :date tarixindən əvvəl və ya bərabər olmalıdır',
+    'before' => ':attribute :date ilə müqayisədə daha erkən olmalıdır',
+    'before_or_equal' => ':attribute :date ilə eyni və ya ondan erkən olmalıdır',
     'between' => [
         'numeric' => ':attribute :min ilə :max arasında olmalıdır',
         'file' => ':attribute :min ilə :max KB ölçüsü intervalında olmalıdır',

@@ -8,6 +8,7 @@ use App\Livewire\Traits\SideModalAction;
 use App\Models\Leave;
 use App\Models\OrderStatus;
 use App\Models\Structure;
+use App\Modules\Leaves\Application\Services\LeaveListCacheVersion;
 use App\Modules\Leaves\Exports\LeaveExport;
 use App\Services\StructurePathService;
 use Illuminate\Contracts\View\View;
@@ -350,6 +351,7 @@ class Leaves extends Component
     protected function listCacheKey(): string
     {
         return 'leaves:list:'.md5(json_encode([
+            'version' => app(LeaveListCacheVersion::class)->current(),
             'status' => $this->status,
             'search' => $this->search->toArray(),
             'page' => method_exists($this, 'getPage') ? $this->getPage() : 1,
@@ -359,6 +361,7 @@ class Leaves extends Component
     protected function statsCacheKey(): string
     {
         return 'leaves:stats:'.md5(json_encode([
+            'version' => app(LeaveListCacheVersion::class)->current(),
             'status' => $this->status,
             'search' => $this->search->toArray(),
         ]));

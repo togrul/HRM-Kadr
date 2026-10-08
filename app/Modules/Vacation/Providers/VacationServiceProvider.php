@@ -2,6 +2,8 @@
 
 namespace App\Modules\Vacation\Providers;
 
+use App\Contracts\AbsenceSource;
+use App\Modules\Vacation\Application\Services\VacationAbsenceSource;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
 use Illuminate\Support\Facades\Gate;
@@ -22,6 +24,8 @@ class VacationServiceProvider extends ServiceProvider
             return;
         }
 
+        // Contributes this module's absences to the cross-module overlap check.
+        $this->app->tag([VacationAbsenceSource::class], AbsenceSource::TAG);
         $this->loadRoutesFrom(__DIR__.'/../Routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'vacation');
         $this->registerPolicies();

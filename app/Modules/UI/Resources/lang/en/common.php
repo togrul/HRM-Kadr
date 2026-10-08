@@ -87,4 +87,12 @@ return [
         'filtered_title' => 'No results',
         'filtered_hint' => 'No records match the search. Change or clear the filters.',
     ],
+    'absence_overlap' => [
+        'message' => 'The employee already has a :type record on these dates (:dates).',
+        'types' => [
+            'leave' => 'leave',
+            'vacation' => 'vacation',
+            'business_trip' => 'business trip',
+        ],
+    ],
 ];
