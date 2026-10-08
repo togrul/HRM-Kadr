@@ -106,9 +106,15 @@ window.uiSelectDropdown = (config) => ({
         });
       });
 
+      // Livewire's morph keeps keyed <li>s and only patches their label (attribute +
+      // text), so a counted label like "Hamısı · 3" changes without any child being
+      // added — watch attributes and text too, or the button keeps the stale count.
       observer.observe(target, {
         childList: true,
         subtree: true,
+        characterData: true,
+        attributes: true,
+        attributeFilter: ['data-option-id', 'data-option-label'],
       });
 
       this.$root._uiSelectObserver = observer;
