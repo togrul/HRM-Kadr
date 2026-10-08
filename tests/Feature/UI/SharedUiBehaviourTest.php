@@ -128,6 +128,128 @@ it('leaves no raw native date input in any view: every date field goes through t
     expect($offenders)->toBe([]);
 });
 
+it('leaves no raw native select, time or datetime-local control in any view', function (): void {
+    $shared = [
+        'components/ui/select.blade.php', // the hidden native select behind the shared list, and `multiple`
+    ];
+    $patterns = [
+        'select' => '/<select\b(?![^>]*\bmultiple\b)/i',
+        'time' => '/<input\b(?:[^>"\']|"[^"]*"|\'[^\']*\')*\btype="time"/s',
+        'datetime-local' => '/<input\b(?:[^>"\']|"[^"]*"|\'[^\']*\')*\btype="datetime-local"/s',
+    ];
+
+    $offenders = collect([resource_path('views'), app_path()])
+        ->flatMap(fn (string $root) => File::allFiles($root))
+        ->filter(fn (SplFileInfo $file): bool => str_ends_with($file->getFilename(), '.blade.php'))
+        ->reject(fn (SplFileInfo $file): bool => collect($shared)->contains(fn (string $path): bool => str_ends_with(str_replace('\\', '/', $file->getPathname()), $path)))
+        ->flatMap(function (SplFileInfo $file) use ($patterns): array {
+            $source = (string) file_get_contents($file->getPathname());
+            // comments may name the elements they replace
+            $source = (string) preg_replace('/\{\{--.*?--\}\}/s', '', $source);
+
+            return collect($patterns)
+                ->filter(fn (string $pattern): bool => preg_match($pattern, $source) === 1)
+                ->keys()
+                ->map(fn (string $kind): string => $kind.': '.Str::after($file->getPathname(), base_path().DIRECTORY_SEPARATOR))
+                ->all();
+        })
+        ->values()
+        ->all();
+
+    expect($offenders)->toBe([]);
+});
+
+it('draws x-ui.select as the shared dropdown, keeping the binding on a hidden native select', function (): void {
+    $html = renderInLivewire(<<<'BLADE'
+        <x-label for="pick-field">Seçim</x-label>
+        <x-ui.select id="pick-field" wire:model.live="pick" class="w-40">
+            <option value="">Hamısı</option>
+            <optgroup label="Qrup">
+                <option value="1">Bir</option>
+                <option value="2" disabled>İki</option>
+            </optgroup>
+        </x-ui.select>
+        BLADE);
+
+    expect($html)
+        ->toContain('window.uiSelectDropdown')
+        ->toContain('role="listbox"')
+        ->toContain('id="pick-field"')
+        ->toContain("nativeModel: 'pick'")
+        ->toContain('data-ui-native-select')
+        ->toContain('wire:model.live="pick"')
+        ->toContain('data-option-id="1"')
+        ->toContain('data-option-disabled')
+        ->toContain('>Qrup</li>')
+        ->toContain('class="relative isolate w-40"')
+        ->not->toContain('x-ref="search"');
+
+    $options = collect(range(1, 9))->map(fn (int $i): string => '<option value="'.$i.'">'.$i.'</option>')->implode('');
+    expect(renderInLivewire('<x-ui.select wire:model="pick">'.$options.'</x-ui.select>'))
+        ->toContain('x-ref="search"')
+        ->toContain("placeholder: '---'");
+});
+
+it('keeps wire:change and the selected option of a select without wire:model', function (): void {
+    $html = Blade::render('<x-ui.select wire:change="setStatus(5, $event.target.value)" trigger-class="h-7 bg-emerald-50"><option value="a">A</option><option value="b" selected>B</option></x-ui.select>');
+
+    expect($html)
+        ->toContain('wire:change="setStatus(5, $event.target.value)"')
+        ->toContain('data-selected-label="B"')
+        ->toContain('h-7 bg-emerald-50')
+        ->toContain('nativeModel: null');
+});
+
+it('keeps a multiple select native', function (): void {
+    expect(Blade::render('<x-ui.select multiple wire:model="tags"><option value="a">A</option></x-ui.select>'))
+        ->toContain('<select')
+        ->toContain('multiple')
+        ->not->toContain('uiSelectDropdown');
+});
+
+it('reads option markup like the browser does', function (): void {
+    $options = \App\Support\Ui\NativeSelectOptions::parse('<option>Mətn</option><option value="x" label="Etiket" selected>y</option><optgroup label="G" disabled><option value="z">Z</option></optgroup>');
+
+    expect($options)->toBe([
+        ['id' => 'Mətn', 'label' => 'Mətn', 'disabled' => false, 'selected' => false, 'group' => null],
+        ['id' => 'x', 'label' => 'Etiket', 'disabled' => false, 'selected' => true, 'group' => null],
+        ['id' => 'z', 'label' => 'Z', 'disabled' => true, 'selected' => false, 'group' => 'G'],
+    ]);
+});
+
+it('renders time fields as the shared 24-hour field, keeping the HH:MM binding', function (): void {
+    $html = renderInLivewire('<x-ui.input type="time" wire:model.live="dateFrom" step="900" />');
+
+    expect($html)
+        ->not->toContain('type="time"')
+        ->toContain('window.hrmTimeField')
+        ->toContain('data-time-input')
+        ->toContain(".entangle('dateFrom').live")
+        ->toContain('step: 900')
+        ->toContain(__('ui::date.time_placeholder'));
+
+    expect(renderInLivewire('<x-livewire-input type="time" name="form.due" wire:model="form.due" />'))
+        ->toContain('window.hrmTimeField')
+        ->toContain(".entangle('form.due'),");
+});
+
+it('renders datetime-local as the shared date + time pair bound to one Y-m-d\TH:i value', function (): void {
+    $html = renderInLivewire('<x-ui.datetime-input id="when" wire:model="form.due" />');
+
+    expect($html)
+        ->not->toContain('datetime-local')
+        ->toContain('window.hrmDateTimeField')
+        ->toContain(".entangle('form.due'),")
+        ->toContain('x-modelable="iso" x-model="datePart"')
+        ->toContain('x-modelable="value" x-model="timePart"')
+        ->toContain('window.hrmDateField')
+        ->toContain('window.hrmTimeField');
+
+    expect(renderInLivewire('<x-ui.input type="datetime-local" wire:model.live="form.due" />'))
+        ->toContain('window.hrmDateTimeField')
+        ->toContain(".entangle('form.due').live");
+});
+
 it('keeps x-pikaday-input syncing on change and adds the typing mask and limits', function (): void {
     $html = Blade::render('<x-pikaday-input name="d" wire:model.live="form.date" min="2026-01-01" />');
 

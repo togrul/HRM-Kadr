@@ -157,15 +157,12 @@
                                     </span>
                                     <div class="flex items-center gap-2">
                                         @can('manage-performance-evaluation')
-                                            <div class="relative">
-                                                <x-ui.select wire:change="setCandidateReadiness({{ $candidate->id }}, $event.target.value)"
-                                                    class="h-7 cursor-pointer appearance-none rounded-lg border-0 py-0 pl-2.5 pr-7 align-middle text-[11px] font-semibold leading-7 {{ $readinessChip[$candidate->readiness] ?? 'bg-zinc-100 text-zinc-500' }} focus:outline-none focus:ring-2 focus:ring-zinc-200">
-                                                    @foreach ($readiness as $r)
-                                                        <option value="{{ $r }}" @selected($candidate->readiness === $r)>{{ __('performance_evaluation::succession.readiness.'.$r) }}</option>
-                                                    @endforeach
-                                                </x-ui.select>
-                                                <svg class="pointer-events-none absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-                                            </div>
+                                            <x-ui.select wire:change="setCandidateReadiness({{ $candidate->id }}, $event.target.value)" class="w-auto"
+                                                :trigger-class="'h-7 cursor-pointer rounded-lg border-0 py-0 pl-2.5 pr-8 text-[11px] font-semibold leading-7 '.($readinessChip[$candidate->readiness] ?? 'bg-zinc-100 text-zinc-500').' focus:outline-none focus:ring-2 focus:ring-zinc-200'">
+                                                @foreach ($readiness as $r)
+                                                    <option value="{{ $r }}" @selected($candidate->readiness === $r)>{{ __('performance_evaluation::succession.readiness.'.$r) }}</option>
+                                                @endforeach
+                                            </x-ui.select>
                                             @php $removeLabel = __('performance_evaluation::succession.remove.candidate', ['name' => trim($candidate->personnel->surname.' '.$candidate->personnel->name), 'plan' => $plan->role_title]); $removeConfirm = __('performance_evaluation::succession.remove.candidate_confirm', ['name' => trim($candidate->personnel->surname.' '.$candidate->personnel->name), 'plan' => $plan->role_title]); @endphp
                                             <button type="button" aria-label="{{ $removeLabel }}" title="{{ $removeLabel }}"
                                                 x-on:click="$dispatch('confirm-action', { title: @js($removeLabel), message: @js($removeConfirm), confirmText: @js(__('performance_evaluation::succession.remove.action')), tone: 'rose', run: () => $wire.removeCandidate({{ $candidate->id }}) })"

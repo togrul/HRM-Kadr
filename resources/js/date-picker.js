@@ -184,6 +184,13 @@ window.hrmDateField = (config = {}) => ({
         const field = this.$refs.display;
         this.render();
 
+        // registered before the Pikaday check: an x-model parent can set the value at any time
+        this.$watch('iso', () => {
+            if (document.activeElement !== field) {
+                this.render();
+            }
+        });
+
         if (typeof window.Pikaday !== 'function') {
             return;
         }
@@ -198,12 +205,6 @@ window.hrmDateField = (config = {}) => ({
             defaultDate: parseDisplay(this.iso) || undefined,
             setDefaultDate: Boolean(parseDisplay(this.iso)),
             onSelect: (date) => this.commit(date),
-        });
-
-        this.$watch('iso', () => {
-            if (document.activeElement !== field) {
-                this.render();
-            }
         });
     },
 

@@ -22,12 +22,17 @@ window.uiSelectDropdown = (config) => ({
     preferredDirection: config.preferredDirection,
     isDisabled: config.isDisabled,
     loadOnOpen: config.loadOnOpen,
+    native: Boolean(config.native),
+    nativeModel: config.nativeModel ?? null,
+    nativeEmpty: config.nativeEmpty ?? '',
     pendingReopen: false,
     pendingSelectionClose: false,
     selectedCache: { id: null, label: '' },
     initialSelectedLabel: null,
     toId(v){ return (v===null||v===undefined||v==='') ? null : String(v).trim(); },
     toWireValue(v){
+      // Native mode writes into a real <select>: its values are strings, '---' is the empty option.
+      if (this.native) return (v===null || v===undefined || v==='') ? this.nativeEmpty : String(v);
       if (v===null || v===undefined || v==='') return null;
       const s = String(v).trim();
       return /^[0-9]+$/.test(s) ? Number(s) : s;
@@ -120,7 +125,64 @@ window.uiSelectDropdown = (config) => ({
       this.$root._uiSelectObserver = observer;
     },
 
+    /** The hidden native <select> that <x-ui.select> keeps for wire:model / wire:change. */
+    nativeSelect(){
+      return this.$root.querySelector('select[data-ui-native-select]');
+    },
+
+    /** Native mode with wire:model: $wire is reactive, so this re-runs whenever the property changes. */
+    syncFromWire(){
+      if (!this.nativeModel || !this.$wire) return;
+      const path = this.nativeModel;
+      const value = path.startsWith('$parent.')
+        ? this.$wire.$parent?.$get(path.slice(8))
+        : this.$wire.$get(path);
+      const next = Array.isArray(value) ? null : value;
+      if (this.toId(next) !== this.toId(this.currentValue)) {
+        this.currentValue = next;
+      }
+    },
+
+    /** Native mode without wire:model: the server marks the choice with the selected attribute. */
+    syncFromNative(){
+      const select = this.nativeSelect();
+      if (!select) return;
+      const options = Array.from(select.options);
+      const marked = options.find((option) => option.hasAttribute('selected'));
+      const picked = marked ?? (select.selectedIndex >= 0 ? options[select.selectedIndex] : options[0]);
+      const next = picked ? picked.value : null;
+      if (this.toId(next) !== this.toId(this.currentValue)) {
+        this.currentValue = next;
+      }
+    },
+
+    observeNative(){
+      const select = this.nativeSelect();
+      if (!select || typeof MutationObserver === 'undefined') return;
+      const observer = new MutationObserver(() => this.syncFromNative());
+      observer.observe(select, { childList: true, subtree: true, attributes: true, attributeFilter: ['selected', 'value'] });
+      this.$root._uiNativeObserver = observer;
+    },
+
+    writeNative(value){
+      const select = this.nativeSelect();
+      if (!select) return;
+      select.value = value ?? '';
+      // wire:model listens for change on a <select>; .blur variants commit on blur.
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+      select.dispatchEvent(new FocusEvent('blur'));
+    },
+
+    destroy(){
+      this.$root._uiSelectObserver?.disconnect();
+      this.$root._uiNativeObserver?.disconnect();
+    },
+
     init(){
+      if (this.native && !this.nativeModel) {
+        this.syncFromNative();
+        this.observeNative();
+      }
       this.initialSelectedLabel = this.$root.dataset.selectedLabel || null;
       this.cachedOptions = this.normalizeOptions(this.cachedOptions);
       this.lastValue = this.toId(this.currentValue);
@@ -247,6 +309,7 @@ window.uiSelectDropdown = (config) => ({
       }
       this.currentValue = wireValue;
       this.initialSelectedLabel = null;
+      if (this.native) this.writeNative(wireValue);
       // Lets a surrounding side panel count the pick as an edit and a field error clear itself.
       this.$root.dispatchEvent(new CustomEvent('ui-select-change', { bubbles: true, detail: { uid: this.uid, value: wireValue } }));
       this.isOpen = false;
@@ -261,7 +324,7 @@ window.uiSelectDropdown = (config) => ({
     visibleOptions(){
       const panel = this.$refs.panel;
       if (!panel) return [];
-      return Array.from(panel.querySelectorAll('[data-select-option]'))
+      return Array.from(panel.querySelectorAll('[data-select-option]:not([data-option-disabled])'))
         .filter((node) => node.style.display !== 'none');
     },
 

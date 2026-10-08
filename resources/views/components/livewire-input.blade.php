@@ -22,6 +22,9 @@
 @if ($type === 'date')
      {{-- one calendar app-wide instead of the browser's native date picker --}}
      <x-ui.date-input :disabled="$disabled" id="{{ $attributes->get('id', $name) }}" {{ $attributes->except('id')->merge(['class' => 'mt-1']) }} />
+@elseif ($type === 'time')
+     {{-- the app's 24-hour time field instead of the browser's own --}}
+     <div class="mt-1"><x-ui.time-input :disabled="$disabled" id="{{ $attributes->get('id', $name) }}" {{ $attributes->except('id') }} /></div>
 @else
 <input
      type="{{ $type }}"

@@ -52,7 +52,7 @@
 
                 <label class="space-y-1">
                     <span class="block text-[12px] font-medium text-ink-muted">{{ __('candidates::recruitment.labels.scheduled_at') }}</span>
-                    <input type="datetime-local" wire:model="interviewForm.scheduled_at" class="h-10 w-full rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base text-ink focus:border-ink focus:bg-white focus:ring-0 sm:text-sm">
+                    <x-ui.datetime-input wire:model="interviewForm.scheduled_at" />
                     @error('interviewForm.scheduled_at') <x-validation>{{ $message }}</x-validation> @enderror
                 </label>
 
