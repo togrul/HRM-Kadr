@@ -4,6 +4,7 @@ namespace App\Modules\Orders\Providers;
 
 use App\Contracts\EmployeeRecordSource;
 use App\Models\OrderType;
+use App\Modules\Orders\Console\Commands\NeutralizeOrderWordTemplatesCommand;
 use App\Modules\Orders\Console\Commands\OrdersListQueryBudgetCommand;
 use App\Modules\Orders\Console\Commands\OrdersListRenderBenchmarkCommand;
 use App\Modules\Orders\Contracts\HireOrderTemplates;
@@ -27,6 +28,7 @@ class OrdersServiceProvider extends ServiceProvider
             $this->commands([
                 OrdersListQueryBudgetCommand::class,
                 OrdersListRenderBenchmarkCommand::class,
+                NeutralizeOrderWordTemplatesCommand::class,
             ]);
         }
 
