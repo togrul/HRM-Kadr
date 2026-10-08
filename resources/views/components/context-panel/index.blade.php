@@ -10,6 +10,11 @@
     <x-context-panel.progress>; put it in a page's <x-slot name="sidebar">.
 --}}
 
+@php
+    // An empty panel (title only) starts collapsed — the layout reads this after the page.
+    app(\App\Support\Ui\ContextPanelState::class)->record(! $slot->isEmpty() || isset($footer));
+@endphp
+
 <div {{ $attributes->merge(['class' => 'flex flex-col overflow-hidden rounded-2xl border border-hairline bg-white shadow-card lg:min-h-[calc(100vh-1.5rem)]']) }}>
     @if ($title)
         <div class="border-b border-hairline py-3 pl-3.5 pr-14">

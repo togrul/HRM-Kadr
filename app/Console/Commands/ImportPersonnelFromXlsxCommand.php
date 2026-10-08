@@ -276,7 +276,7 @@ class ImportPersonnelFromXlsxCommand extends Command
         $countries = CountryTranslation::query()->get(['country_id', 'title'])
             ->mapWithKeys(fn (CountryTranslation $c): array => [mb_strtolower($c->title) => $c->country_id]);
         $degrees = EducationDegree::query()->get(['id', 'title_az'])
-            ->mapWithKeys(fn (EducationDegree $d): array => [mb_strtolower(trim($d->title_az)) => $d->id]);
+            ->mapWithKeys(fn (EducationDegree $d): array => [mb_strtolower((string) EducationDegree::normalizeTitle($d->title_az)) => $d->id]);
 
         $records = [];
         $errors = [];
@@ -299,7 +299,7 @@ class ImportPersonnelFromXlsxCommand extends Command
             }
             $record['gender'] = self::GENDERS[mb_strtolower((string) $row['gender'])] ?? null;
             $record['nationality_id'] = $countries[mb_strtolower((string) $row['citizenship'])] ?? null;
-            $record['education_degree_id'] = $degrees[mb_strtolower((string) $row['education'])] ?? $degrees[$this->degreeKey((string) $row['education'])] ?? null;
+            $record['education_degree_id'] = $degrees[mb_strtolower((string) EducationDegree::normalizeTitle((string) $row['education']))] ?? $degrees[$this->degreeKey((string) $row['education'])] ?? null;
             $record['birthdate'] = $this->date($row['birthdate']);
             $record['join_work_date'] = $this->date($row['join_work_date']);
 
@@ -340,10 +340,10 @@ class ImportPersonnelFromXlsxCommand extends Command
         return [$records, $errors];
     }
 
-    /** "Ali təhsil - bakalavriat" => "ali", "Orta ixtisas təhsili" => "orta ixtisas". */
+    /** "Ali təhsil - bakalavriat" (or " — ") => "ali", "Orta ixtisas təhsili" => "orta ixtisas". */
     private function degreeKey(string $label): string
     {
-        $level = Str::before($label, ' - ');
+        $level = Str::before((string) EducationDegree::normalizeTitle($label), ' — ');
 
         return trim(preg_replace('/\s+/u', ' ', str_ireplace(['təhsili', 'təhsil'], '', mb_strtolower($level))));
     }

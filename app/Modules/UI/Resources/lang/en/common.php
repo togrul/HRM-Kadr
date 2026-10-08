@@ -87,4 +87,10 @@ return [
         'filtered_title' => 'No results',
         'filtered_hint' => 'No records match the search. Change or clear the filters.',
     ],
+    'unsaved' => [
+        'title' => 'Unsaved changes',
+        'message' => 'Your unsaved changes will be lost. Close anyway?',
+        'discard' => 'Close',
+        'keep_editing' => 'Keep editing',
+    ],
 ];

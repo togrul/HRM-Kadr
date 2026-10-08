@@ -154,8 +154,10 @@ window.uiSelectDropdown = (config) => ({
       this.$watch('isOpen', (open) => {
         if (open) {
           this.scheduleReposition();
+          this.focusSearch();
         } else {
           this.positioned = false;
+          this.resetActive();
         }
       });
     },
@@ -245,10 +247,100 @@ window.uiSelectDropdown = (config) => ({
       }
       this.currentValue = wireValue;
       this.initialSelectedLabel = null;
+      // Lets a surrounding side panel count the pick as an edit and a field error clear itself.
+      this.$root.dispatchEvent(new CustomEvent('ui-select-change', { bubbles: true, detail: { uid: this.uid, value: wireValue } }));
       this.isOpen = false;
       queueMicrotask(() => { this.isOpen = false; });
       requestAnimationFrame(() => { this.isOpen = false; });
       setTimeout(() => { this.isOpen = false; }, 0);
+    },
+
+    activeIndex: -1,
+
+    /** Options the user can currently see (the search filter hides the rest). */
+    visibleOptions(){
+      const panel = this.$refs.panel;
+      if (!panel) return [];
+      return Array.from(panel.querySelectorAll('[data-select-option]'))
+        .filter((node) => node.style.display !== 'none');
+    },
+
+    resetActive(){
+      this.activeIndex = -1;
+      this.$refs.panel?.querySelectorAll('[data-select-option][data-active]')
+        .forEach((node) => node.removeAttribute('data-active'));
+    },
+
+    moveActive(step){
+      const options = this.visibleOptions();
+      if (options.length === 0) return;
+      const next = this.activeIndex < 0
+        ? (step > 0 ? 0 : options.length - 1)
+        : (this.activeIndex + step + options.length) % options.length;
+      options.forEach((node, index) => node.toggleAttribute('data-active', index === next));
+      this.activeIndex = next;
+      options[next].scrollIntoView({ block: 'nearest' });
+    },
+
+    selectActive(){
+      const option = this.visibleOptions()[this.activeIndex];
+      if (option) option.click();
+    },
+
+    /** Searchable lists take the keyboard at once: typing goes straight into the search box. */
+    focusSearch(){
+      this.$nextTick(() => requestAnimationFrame(() => {
+        if (this.isOpen && this.$refs.search) this.$refs.search.focus({ preventScroll: true });
+      }));
+    },
+
+    closeAndFocusButton(){
+      this.setOpen(false);
+      this.$refs.button?.focus({ preventScroll: true });
+    },
+
+    onSearchKeydown(event){
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        this.setOpen(true);
+        this.moveActive(event.key === 'ArrowDown' ? 1 : -1);
+        return;
+      }
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        if (this.activeIndex < 0) this.moveActive(1);
+        this.selectActive();
+        return;
+      }
+      if (event.key === 'Tab') {
+        this.setOpen(false);
+        return;
+      }
+      if (event.key !== 'Escape') this.setOpen(true);
+    },
+
+    onTriggerKeydown(event){
+      if (this.isDisabled) return;
+      // Enter/Space on a closed list are left to the button's native click.
+      if (!this.isOpen && ['ArrowDown', 'ArrowUp'].includes(event.key)) {
+        event.preventDefault();
+        event.stopPropagation();
+        this.toggle();
+        return;
+      }
+      if (!this.isOpen) return;
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        this.moveActive(event.key === 'ArrowDown' ? 1 : -1);
+      } else if (event.key === 'Enter' || event.key === ' ') {
+        if (this.activeIndex >= 0) {
+          event.preventDefault();
+          event.stopPropagation();
+          this.selectActive();
+        }
+      } else if (event.key === 'Tab') {
+        this.setOpen(false);
+      }
     },
 
     toggle(){

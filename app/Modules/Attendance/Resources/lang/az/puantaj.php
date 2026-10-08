@@ -13,7 +13,7 @@ return [
         'placeholder' => 'məs. 12345 və ya Əliyev',
     ],
     'scope' => [
-        'badge' => 'Struktur scope',
+        'badge' => 'Struktur əhatəsi',
         'description' => 'Yalnız seçilmiş struktur ağacındakı əməkdaşlar göstərilir.',
     ],
     'tooltips' => [
@@ -79,7 +79,7 @@ return [
         'calendar_description' => ':type, :scope, :paid',
     ],
     'calendar' => [
-        'global_scope' => 'Ümumi scope',
+        'global_scope' => 'Ümumi əhatə',
         'paid' => 'ödənişli',
         'unpaid' => 'ödənişsiz',
     ],

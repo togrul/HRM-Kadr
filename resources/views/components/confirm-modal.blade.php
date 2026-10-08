@@ -46,7 +46,9 @@
                 ? detail.run
                 : (detail.wireId && detail.method ? () => Livewire.find(detail.wireId)?.$call(detail.method) : null);
             this.show = true;
-            this.$nextTick(() => this.$refs.confirmBtn && this.$refs.confirmBtn.focus());
+            // focus: 'cancel' for prompts whose confirm discards work (e.g. unsaved changes)
+            const focusRef = detail.focus === 'cancel' ? 'cancelBtn' : 'confirmBtn';
+            this.$nextTick(() => this.$refs[focusRef] && this.$refs[focusRef].focus());
         },
         closeModal() { this.show = false; this.run = null; },
         accept() {
@@ -60,7 +62,7 @@
 >
     <template x-teleport="body">
         <div x-show="show" x-cloak class="fixed inset-0 z-[120]" role="dialog" aria-modal="true"
-             x-on:keydown.escape.window="show && closeModal()">
+             x-on:keydown.escape.window.capture="if (show) { $event.stopPropagation(); closeModal(); }">
 
             {{-- Backdrop --}}
             <div x-show="show"
@@ -103,7 +105,7 @@
 
                     {{-- Footer --}}
                     <div class="flex items-center justify-end gap-2.5 border-t border-zinc-100 bg-zinc-50/60 px-6 py-4">
-                        <button type="button" x-on:click="closeModal()"
+                        <button type="button" x-ref="cancelBtn" x-on:click="closeModal()"
                                 class="inline-flex h-9 items-center justify-center rounded-full border border-hairline bg-white px-4 text-[13px] font-medium text-ink-soft transition hover:bg-[#f4f4f5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300">
                             <span x-text="cancelText"></span>
                         </button>

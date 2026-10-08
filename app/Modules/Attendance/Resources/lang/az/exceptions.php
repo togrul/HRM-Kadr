@@ -11,7 +11,7 @@ return [
         'to' => 'Son',
     ],
     'scope' => [
-        'badge' => 'Struktur scope',
+        'badge' => 'Struktur əhatəsi',
         'description' => 'Yalnız seçilmiş struktur ağacındakı əməkdaşlar göstərilir.',
     ],
     'table' => [

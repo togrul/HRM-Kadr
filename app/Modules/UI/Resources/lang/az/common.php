@@ -87,4 +87,10 @@ return [
         'filtered_title' => 'Nəticə tapılmadı',
         'filtered_hint' => 'Axtarışa uyğun qeyd yoxdur. Filtri dəyişin və ya sıfırlayın.',
     ],
+    'unsaved' => [
+        'title' => 'Yadda saxlanmamış dəyişikliklər',
+        'message' => 'Yadda saxlanmamış dəyişikliklər itəcək. Bağlansın?',
+        'discard' => 'Bağla',
+        'keep_editing' => 'Davam et',
+    ],
 ];
