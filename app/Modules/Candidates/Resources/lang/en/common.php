@@ -59,6 +59,10 @@ return [
         'search' => 'Search',
         'reset' => 'Reset',
         'save' => 'Save',
+        'hired_employee' => 'Employee record',
+        'hire_order' => 'Hire order',
+        'hire_order_number' => 'Order No. :number',
+        'hired_on' => 'Hired on',
     ],
     'messages' => [
         'candidate_added' => 'Candidate was added successfully!',
@@ -75,5 +79,21 @@ return [
         'restore_candidate' => 'Restore candidate',
         'delete' => 'Delete',
         'force_delete' => 'Force delete',
+        'prepare_hire_order' => 'Prepare hire order',
+        'open_hired_employee' => 'Open employee record',
+        'open_hire_order' => 'Open order',
+    ],
+    'validation' => [
+        'birthdate_past' => 'The birth date must be before today.',
+        'age_range' => 'The candidate must be between :min and :max years old.',
+        'phone_format' => 'The phone number must have 9–15 digits (a leading + is allowed).',
+        'date_not_future' => 'The :attribute must be today or earlier.',
+        'date_too_early' => 'The :attribute must be :date or later.',
+        'date_order' => 'The :attribute must be on or after the :other.',
+    ],
+    'hire' => [
+        'unavailable' => 'A hire order cannot be prepared for this candidate.',
+        'hint' => 'Once the order is approved the candidate is registered as an employee and moves to “Hired”.',
+        'hired_note' => 'The candidate was hired by an approved order.',
     ],
 ];

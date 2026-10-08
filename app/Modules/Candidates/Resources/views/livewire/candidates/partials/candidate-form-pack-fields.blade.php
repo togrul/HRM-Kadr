@@ -33,17 +33,17 @@
             @if ($shouldRender)
                 <div class="flex flex-col {{ $colSpan }}">
                     @if ($fieldType === 'date')
-                        <x-label for="candidate.{{ $fieldKey }}">{{ $fieldLabel }}</x-label>
+                        <x-label :required="(bool) ($field['required'] ?? false)" for="candidate.{{ $fieldKey }}">{{ $fieldLabel }}</x-label>
                         <x-pikaday-input mode="gray" name="candidate.{{ $fieldKey }}" format="Y-MM-DD" wire:model.live="candidate.{{ $fieldKey }}">
                             <x-slot name="script">
                                 $el.onchange = function () { @this.set('candidate.{{ $fieldKey }}', $el.value); }
                             </x-slot>
                         </x-pikaday-input>
                     @elseif ($fieldType === 'textarea')
-                        <x-label for="candidate.{{ $fieldKey }}">{{ $fieldLabel }}</x-label>
+                        <x-label :required="(bool) ($field['required'] ?? false)" for="candidate.{{ $fieldKey }}">{{ $fieldLabel }}</x-label>
                         <x-textarea mode="gray" name="candidate.{{ $fieldKey }}" wire:model="candidate.{{ $fieldKey }}"></x-textarea>
                     @elseif ($fieldType === 'radio')
-                        <x-label for="candidate.{{ $fieldKey }}">{{ $fieldLabel }}</x-label>
+                        <x-label :required="(bool) ($field['required'] ?? false)" for="candidate.{{ $fieldKey }}">{{ $fieldLabel }}</x-label>
                         <div class="flex flex-row flex-wrap gap-2">
                             @foreach ($this->candidateFieldOptions($field) as $option)
                                 <label class="inline-flex items-center rounded bg-zinc-100 px-2 py-2 shadow-sm">
@@ -53,7 +53,7 @@
                             @endforeach
                         </div>
                     @else
-                        <x-label for="candidate.{{ $fieldKey }}">{{ $fieldLabel }}</x-label>
+                        <x-label :required="(bool) ($field['required'] ?? false)" for="candidate.{{ $fieldKey }}">{{ $fieldLabel }}</x-label>
                         <x-livewire-input mode="gray" type="{{ $fieldType === 'number' ? 'number' : 'text' }}" name="candidate.{{ $fieldKey }}" wire:model="candidate.{{ $fieldKey }}"></x-livewire-input>
                     @endif
 

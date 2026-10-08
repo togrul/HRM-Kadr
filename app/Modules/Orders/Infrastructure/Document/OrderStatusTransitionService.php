@@ -284,6 +284,9 @@ class OrderStatusTransitionService
             'structure_id' => $structureId,
             'position_id' => (int) $positionId,
             'join_date' => $joinDate?->toDateString() ?? today()->toDateString(),
+            // Lets the Candidates module link the hired candidate back to this order.
+            'order_id' => $order->id,
+            'order_no' => $order->order_no,
         ]], OrderStatusEnum::APPROVED->value);
 
         $this->seedHireCompensation((int) $candidateId, $joinDate, $order->order_no);

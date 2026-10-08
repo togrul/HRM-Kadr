@@ -264,6 +264,19 @@
                                     @endif
                                     <x-ui.row-menu.item :href="route('candidates.applications', ['candidate' => $_candidate->id])" wire:navigate>{{ __('candidates::recruitment.actions.open_candidate_pipeline') }}</x-ui.row-menu.item>
                                 @endif
+                                @if ($_candidate->hired_personnel_id)
+                                    <x-ui.row-menu.item :href="route('personnel.show', $_candidate->hired_personnel_id)">{{ __('candidates::common.actions.open_hired_employee') }}</x-ui.row-menu.item>
+                                    @if ($_candidate->hire_order_no)
+                                        <x-ui.row-menu.item :href="route('orders', ['search' => ['order_no' => $_candidate->hire_order_no]])">{{ __('candidates::common.actions.open_hire_order') }}</x-ui.row-menu.item>
+                                    @endif
+                                @elseif ($this->canPrepareHireOrder($_candidate))
+                                    @can('update', $_candidate)
+                                        <x-ui.row-menu.item wire:click="openHireOrder({{ $_candidate->id }})">
+                                            <x-icons.document-icon color="text-current" hover="text-current" />
+                                            {{ __('candidates::common.actions.prepare_hire_order') }}
+                                        </x-ui.row-menu.item>
+                                    @endcan
+                                @endif
                                 @can('update', $_candidate)
                                     <x-ui.row-menu.item wire:click="openSideMenu('candidate-files',{{ $_candidate->id }})">
                                         <x-icons.document-icon color="text-current" hover="text-current" />
@@ -304,7 +317,7 @@
 
     <x-pagination :paginator="$this->candidateRows" :unit="__('candidates::recruitment.labels.candidates_unit')" />
 
-    <x-side-modal>
+    <x-side-modal :size="$showSideMenu === 'order-composer' ? 'xx-large' : 'large'">
         @can('create', App\Models\Candidate::class)
             @if ($showSideMenu == 'add-candidate')
                 <livewire:candidates.add-candidate wire:key="candidate-add-modal" lazy />
@@ -317,6 +330,18 @@
 
         @if ($showSideMenu === 'candidate-files')
             <livewire:candidates.candidate-files :candidateModel="$modelName" :key="'candidate-files-modal-' . ($modelName ?? 'none')" />
+        @endif
+
+        @if ($showSideMenu === 'order-composer' && $this->hireOrderComposerParameters)
+            @can('add-orders')
+                <livewire:orders.order-composer
+                    :presetCode="$this->hireOrderComposerParameters['presetCode']"
+                    :candidateId="$this->hireOrderComposerParameters['candidateId']"
+                    :candidateLabel="$this->hireOrderComposerParameters['candidateLabel']"
+                    :hireStructureId="$this->hireOrderComposerParameters['hireStructureId']"
+                    :hirePositionId="$this->hireOrderComposerParameters['hirePositionId']"
+                    :key="'candidate-hire-order-' . $this->hireOrderComposerParameters['candidateId']" />
+            @endcan
         @endif
     </x-side-modal>
 

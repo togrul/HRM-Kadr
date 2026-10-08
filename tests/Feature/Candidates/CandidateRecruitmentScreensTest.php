@@ -577,9 +577,14 @@ class CandidateRecruitmentScreensTest extends TestCase
         [$user] = $this->seedRecruitmentData();
         $candidate = Candidate::query()->firstOrFail();
 
-        Livewire::actingAs($user)
-            ->test(EditCandidate::class, ['candidateModel' => $candidate->id])
-            ->assertSee('Public')
+        $component = Livewire::actingAs($user)
+            ->test(EditCandidate::class, ['candidateModel' => $candidate->id]);
+
+        // The pack drives the fields; it is no longer printed as a "Rejim: Public" badge.
+        $this->assertSame('public', $component->instance()->candidateWorkflowPack());
+
+        $component
+            ->assertDontSee(__('candidates::common.labels.mode').': Public')
             ->assertDontSee(__('candidates::common.labels.height'))
             ->assertDontSee(__('candidates::common.labels.knowledge_test'))
             ->assertDontSee(__('candidates::common.labels.military_service'))
@@ -600,9 +605,14 @@ class CandidateRecruitmentScreensTest extends TestCase
         [$user] = $this->seedRecruitmentData();
         $candidate = Candidate::query()->firstOrFail();
 
-        Livewire::actingAs($user)
-            ->test(EditCandidate::class, ['candidateModel' => $candidate->id])
-            ->assertSee('Public')
+        $component = Livewire::actingAs($user)
+            ->test(EditCandidate::class, ['candidateModel' => $candidate->id]);
+
+        // The pack drives the fields; it is no longer printed as a "Rejim: Public" badge.
+        $this->assertSame('public', $component->instance()->candidateWorkflowPack());
+
+        $component
+            ->assertDontSee(__('candidates::common.labels.mode').': Public')
             ->assertDontSee(__('candidates::common.labels.height'))
             ->assertDontSee(__('candidates::common.labels.knowledge_test'))
             ->assertDontSee(__('candidates::common.labels.military_service'));

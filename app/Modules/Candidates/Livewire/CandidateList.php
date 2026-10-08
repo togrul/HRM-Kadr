@@ -10,6 +10,7 @@ use App\Models\CandidateDocument;
 use App\Models\JobOpening;
 use App\Models\JobRequisition;
 use App\Models\Setting;
+use App\Modules\Candidates\Application\Services\CandidateHireOrderService;
 use App\Modules\Candidates\Exports\CandidateExport;
 use App\Modules\Candidates\Support\CandidateModeResolver;
 use App\Modules\Candidates\Support\Traits\InteractsWithRecruitmentPresentation;
@@ -102,6 +103,74 @@ class CandidateList extends Component
     public function setDeleteCandidate($candidateId): void
     {
         $this->dispatch('setDeleteCandidate', $candidateId);
+    }
+
+    /**
+     * Open the Orders composer with the hire ("İşə qəbul") preset, prefilled from the
+     * candidate. Fired by the row action and by the candidate form.
+     */
+    #[On('candidateHireOrderRequested')]
+    public function openHireOrder(int $candidateId): void
+    {
+        $this->authorize('add-orders');
+
+        $candidate = $this->filteredCandidateScope()->find($candidateId);
+
+        abort_if($candidate === null, 404);
+        $this->authorize('update', $candidate);
+
+        if (! app(CandidateHireOrderService::class)->canPrepare($candidate)) {
+            $this->dispatch('addError', __('candidates::common.hire.unavailable'));
+
+            return;
+        }
+
+        $this->openSideMenu('order-composer', $candidate->id);
+    }
+
+    /**
+     * The hire preset when the user may issue orders and the company has a hire template;
+     * null hides the "İşə qəbul əmri hazırla" action everywhere on the page.
+     */
+    #[Computed]
+    public function hireOrderPreset(): ?string
+    {
+        if (! (auth()->user()?->can('add-orders') ?? false)) {
+            return null;
+        }
+
+        return app(CandidateHireOrderService::class)->hireTemplateCode();
+    }
+
+    public function canPrepareHireOrder(Candidate $candidate): bool
+    {
+        return $this->hireOrderPreset !== null && app(CandidateHireOrderService::class)->isEligible($candidate);
+    }
+
+    /**
+     * Mount parameters for the composer side panel (see CandidateHireOrderService).
+     *
+     * @return array<string, mixed>|null
+     */
+    #[Computed]
+    public function hireOrderComposerParameters(): ?array
+    {
+        if ($this->showSideMenu !== 'order-composer' || ! is_numeric($this->modelName)) {
+            return null;
+        }
+
+        $candidate = $this->filteredCandidateScope()->find((int) $this->modelName);
+
+        return $candidate ? app(CandidateHireOrderService::class)->composerParameters($candidate) : null;
+    }
+
+    /** Candidates the current user may see (structure access), regardless of list filters. */
+    protected function filteredCandidateScope(): Builder
+    {
+        return Candidate::query()->when(
+            ! empty($this->accessibleStructureIds),
+            fn ($query) => $query->whereIn('structure_id', $this->accessibleStructureIds)
+        );
     }
 
     public function searchFilter(): void

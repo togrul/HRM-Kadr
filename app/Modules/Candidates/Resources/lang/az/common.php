@@ -59,6 +59,10 @@ return [
         'search' => 'Axtar',
         'reset' => 'Sıfırla',
         'save' => 'Yadda saxla',
+        'hired_employee' => 'İşçi kartı',
+        'hire_order' => 'İşə qəbul əmri',
+        'hire_order_number' => 'Əmr № :number',
+        'hired_on' => 'Qəbul tarixi',
     ],
     'messages' => [
         'candidate_added' => 'Namizəd uğurla əlavə olundu!',
@@ -75,5 +79,21 @@ return [
         'restore_candidate' => 'Namizədi bərpa et',
         'delete' => 'Sil',
         'force_delete' => 'Tam sil',
+        'prepare_hire_order' => 'İşə qəbul əmri hazırla',
+        'open_hired_employee' => 'İşçi kartını aç',
+        'open_hire_order' => 'Əmri aç',
+    ],
+    'validation' => [
+        'birthdate_past' => 'Doğum tarixi bu gündən əvvəl olmalıdır.',
+        'age_range' => 'Namizədin yaşı :min ilə :max arasında olmalıdır.',
+        'phone_format' => 'Telefon nömrəsi 9–15 rəqəmdən ibarət olmalıdır (əvvəlində + ola bilər).',
+        'date_not_future' => ':attribute bu gün və ya daha əvvəl olmalıdır.',
+        'date_too_early' => ':attribute :date və ya daha sonrakı tarix olmalıdır.',
+        'date_order' => ':attribute :other ilə eyni gün və ya ondan sonra olmalıdır.',
+    ],
+    'hire' => [
+        'unavailable' => 'Bu namizəd üçün işə qəbul əmri hazırlamaq mümkün deyil.',
+        'hint' => 'Əmr təsdiqlənəndə namizəd işçi kimi qeydə alınır və statusu “Qəbul olundu” olur.',
+        'hired_note' => 'Namizəd təsdiqlənmiş əmr əsasında işə qəbul olunub.',
     ],
 ];
