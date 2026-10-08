@@ -14,7 +14,7 @@
             <tr>
                 <th>{{ $loop->iteration }}</th>
                 <th>{{ $r['structure']['name'] ?? '' }} </th>
-                <th>{{ $r['position']['name'] ?? '' }} </th>
+                <th>{{ $r['position']['name'] ?? __('staff::common.fields.position_unassigned') }} </th>
                 <th>{{ $r['total'] ?? '' }} </th>
                 <th>{{ $r['filled'] ?? '' }} </th>
                 <th>{{ $r['vacant'] ?? '' }} </th>

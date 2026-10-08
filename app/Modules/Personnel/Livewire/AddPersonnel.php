@@ -14,6 +14,7 @@ use App\Models\Personnel;
 use App\Modules\Personnel\Services\PersonnelFormAssembler;
 use App\Modules\Personnel\Support\Traits\PersonnelCrud;
 use App\Modules\Personnel\Support\Traits\RelationCruds\RelationCrudTrait;
+use App\Modules\Personnel\Support\Traits\WarnsAboutStaffSlot;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Isolate;
@@ -25,6 +26,7 @@ class AddPersonnel extends Component
     use AuthorizesRequests;
     use PersonnelCrud;
     use RelationCrudTrait;
+    use WarnsAboutStaffSlot;
 
     public PersonalInformationForm $personalForm;
 
@@ -56,6 +58,10 @@ class AddPersonnel extends Component
 
     protected function persistPersonnel(): void
     {
+        if ($this->staffSlotBlocksSave()) {
+            return;
+        }
+
         $modelInstance = new Personnel;
 
         if (! empty($this->avatar)) {

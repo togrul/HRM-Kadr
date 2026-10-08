@@ -3,11 +3,11 @@
 namespace App\Modules\Staff\Livewire;
 
 use App\Livewire\Traits\SideModalAction;
-use App\Models\Personnel;
+use App\Models\Position;
 use App\Models\StaffSchedule;
 use App\Models\Structure;
+use App\Modules\Staff\Application\Services\StaffHeadcountService;
 use App\Modules\Staff\Exports\VacancyExport;
-use App\Services\StructurePathService;
 use App\Services\StructureService;
 use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
@@ -15,7 +15,6 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
@@ -170,16 +169,7 @@ class Staffs extends Component
 
     protected function buildStaffRows(bool $raw = false): Collection
     {
-        $result = StaffSchedule::with([
-            'position',
-            'structure:id,parent_id,name',
-        ])
-            ->when(! empty($this->structure), fn ($q) => $q->whereIn('structure_id', $this->structure))
-            ->when(empty($this->structure), fn ($q) => $q->whereIn('structure_id', $this->accessibleStructureIds))
-            ->orderBy('structure_id')
-            ->get();
-
-        $this->hydrateFilledAndVacant($result);
+        $result = $this->staffSnapshot()['rows'];
 
         if ($this->selectedPage === 'vacancies') {
             $result = $result
@@ -196,6 +186,34 @@ class Staffs extends Component
             : $result;
     }
 
+    /**
+     * Every ştat row in scope with its live Dolu / Vakant / Artıq, plus the people who work
+     * in a (structure, position) the ştat has no row for. Two queries for the figures: the
+     * rows and one grouped headcount.
+     *
+     * @return array{rows: Collection<int, StaffSchedule>, offStaff: array<int, array<int, int>>}
+     */
+    protected function staffSnapshot(): array
+    {
+        $scope = ! empty($this->structure) ? (array) $this->structure : $this->accessibleStructureIds;
+        $scopeIds = array_values(array_unique(array_map('intval', $scope)));
+
+        $rows = StaffSchedule::with([
+            'position:id,name',
+            'structure:id,parent_id,name',
+        ])
+            ->whereIn('structure_id', $scopeIds)
+            ->orderBy('structure_id')
+            ->orderBy('id')
+            ->get();
+
+        $headcount = app(StaffHeadcountService::class);
+        $counts = $headcount->activeCounts($scopeIds);
+        $headcount->hydrate($rows, $counts);
+
+        return ['rows' => $rows, 'offStaff' => $headcount->offStaff($rows, $counts)];
+    }
+
     protected function staffListCacheKey(): string
     {
         return 'staff:list:'.md5(json_encode([
@@ -203,74 +221,6 @@ class Staffs extends Component
             'structure' => $this->structure,
             'accessible' => $this->accessibleStructureIds,
         ]));
-    }
-
-    protected function hydrateFilledAndVacant(Collection $rows): void
-    {
-        if ($rows->isEmpty()) {
-            return;
-        }
-
-        $structureIds = $rows
-            ->pluck('structure_id')
-            ->filter()
-            ->map(fn ($id) => (int) $id)
-            ->unique()
-            ->values()
-            ->all();
-
-        $paths = app(StructurePathService::class);
-        $nestedIdsByStructure = collect($structureIds)
-            ->mapWithKeys(fn (int $id): array => [$id => $paths->descendantIds($id) ?: [$id]])
-            ->all();
-        $relevantStructureIds = collect($nestedIdsByStructure)
-            ->flatten()
-            ->map(fn ($id) => (int) $id)
-            ->unique()
-            ->values()
-            ->all();
-
-        $activeByStructure = Personnel::query()
-            ->active()
-            ->whereIn('structure_id', $relevantStructureIds)
-            ->select('structure_id', DB::raw('count(*) as aggregate'))
-            ->groupBy('structure_id')
-            ->pluck('aggregate', 'structure_id')
-            ->map(fn ($value) => (int) $value)
-            ->all();
-
-        $activeByStructurePosition = Personnel::query()
-            ->active()
-            ->whereIn('structure_id', $relevantStructureIds)
-            ->whereNotNull('position_id')
-            ->select('structure_id', 'position_id', DB::raw('count(*) as aggregate'))
-            ->groupBy('structure_id', 'position_id')
-            ->get()
-            ->reduce(function (array $carry, $row) {
-                $structureId = (int) $row->structure_id;
-                $positionId = (int) $row->position_id;
-                $carry[$structureId][$positionId] = (int) $row->aggregate;
-
-                return $carry;
-            }, []);
-
-        $rows->each(function ($row) use ($activeByStructure, $activeByStructurePosition, $nestedIdsByStructure) {
-            $structureId = (int) ($row->structure_id ?? 0);
-            $positionId = (int) ($row->position_id ?? 0);
-            // A position row counts the people holding that position in its own unit —
-            // top-level units included, so their vacancies are listed like any other.
-            if ($positionId > 0) {
-                $filled = (int) ($activeByStructurePosition[$structureId][$positionId] ?? 0);
-            } else {
-                $filled = 0;
-                foreach ($nestedIdsByStructure[$structureId] ?? [$structureId] as $nestedId) {
-                    $filled += (int) ($activeByStructure[(int) $nestedId] ?? 0);
-                }
-            }
-
-            $row->filled = $filled;
-            $row->vacant = max(0, (int) ($row->total ?? 0) - $filled);
-        });
     }
 
     protected function buildStructureGroups($rows): Collection
@@ -355,25 +305,27 @@ class Staffs extends Component
 
     /**
      * Build the nested structure → position tree for the "all" view: every structure that
-     * has positions (or a descendant with positions) becomes a node, parented per the
-     * structure map, with Cəmi/Dolu/Vakant aggregated recursively (own positions + all
-     * descendants). Display roots are the top of the accessible/selected scope.
+     * has ştat rows or off-staff people (or a descendant with either) becomes a node,
+     * parented per the structure map. Each node's aggregate is its own rows plus all
+     * descendants; vacancies and over-staffing are summed per row, never netted.
+     * Display roots are the top of the accessible/selected scope.
      *
      * @return array{tree: array<int,array<string,mixed>>, ids: array<int,int>}
      */
     protected function buildStructureTree(): array
     {
-        $rows = $this->buildStaffRows(raw: true);
-        if ($rows->isEmpty()) {
+        ['rows' => $rows, 'offStaff' => $offStaff] = $this->staffSnapshot();
+        if ($rows->isEmpty() && $offStaff === []) {
             return ['tree' => [], 'ids' => []];
         }
 
         $map = $this->resolveStructureMap();
         $positionsByStructure = $rows->groupBy(fn ($row) => (int) $row->structure_id);
+        $offStaffPositionNames = $this->offStaffPositionNames($offStaff);
 
-        // Included = every structure with positions plus all of its ancestors.
+        // Included = every structure with rows or off-staff people plus all of its ancestors.
         $included = [];
-        foreach ($positionsByStructure->keys() as $structureId) {
+        foreach ([...$positionsByStructure->keys()->all(), ...array_keys($offStaff)] as $structureId) {
             $cursor = (int) $structureId;
             while ($cursor > 0 && isset($map[$cursor]) && ! isset($included[$cursor])) {
                 $included[$cursor] = true;
@@ -393,48 +345,72 @@ class Staffs extends Component
         unset($siblings);
 
         $ids = [];
+        $unassignedTitle = __('staff::common.fields.position_unassigned');
+        $noPositionTitle = __('staff::common.fields.no_position');
 
-        $build = function (int $structureId) use (&$build, $map, $positionsByStructure, $childrenByParent, &$ids) {
+        $build = function (int $structureId) use (&$build, $map, $positionsByStructure, $offStaff, $offStaffPositionNames, $childrenByParent, &$ids, $unassignedTitle, $noPositionTitle) {
             $ids[] = $structureId;
             $meta = $map[$structureId];
 
             $positions = collect($positionsByStructure->get($structureId, []))
                 ->map(fn ($row) => [
                     'id' => (int) $row->id,
-                    'title' => (string) ($row->position?->name ?? '—'),
+                    'kind' => $row->unassigned ? 'unassigned' : 'row',
+                    'title' => $row->unassigned ? $unassignedTitle : (string) ($row->position?->name ?? $unassignedTitle),
                     'structure_id' => (int) $row->structure_id,
                     'position_id' => (int) ($row->position_id ?? 0),
                     'total' => (int) ($row->total ?? 0),
                     'filled' => (int) ($row->filled ?? 0),
                     'vacant' => (int) ($row->vacant ?? 0),
+                    'over' => (int) ($row->over ?? 0),
                 ])
                 ->values()
                 ->all();
+
+            $offStaffEntries = [];
+            foreach ($offStaff[$structureId] ?? [] as $positionId => $count) {
+                $offStaffEntries[] = [
+                    'id' => 0,
+                    'kind' => 'off_staff',
+                    'title' => $positionId > 0 ? (string) ($offStaffPositionNames[$positionId] ?? $noPositionTitle) : $noPositionTitle,
+                    'structure_id' => $structureId,
+                    'position_id' => (int) $positionId,
+                    'total' => 0,
+                    'filled' => (int) $count,
+                    'vacant' => 0,
+                    'over' => 0,
+                ];
+            }
 
             $children = [];
             foreach ($childrenByParent[$structureId] ?? [] as $childId) {
                 $children[] = $build((int) $childId);
             }
 
-            $total = array_sum(array_column($positions, 'total'));
-            $filled = array_sum(array_column($positions, 'filled'));
+            $agg = [
+                'total' => array_sum(array_column($positions, 'total')),
+                'filled' => array_sum(array_column($positions, 'filled')),
+                'vacant' => array_sum(array_column($positions, 'vacant')),
+                'over' => array_sum(array_column($positions, 'over')),
+                'off_staff' => array_sum(array_column($offStaffEntries, 'filled')),
+                'unassigned' => count(array_filter($positions, fn (array $p): bool => $p['kind'] === 'unassigned')),
+                'covered' => array_sum(array_map(fn (array $p): int => min($p['filled'], $p['total']), $positions)),
+            ];
             foreach ($children as $child) {
-                $total += $child['agg']['total'];
-                $filled += $child['agg']['filled'];
+                foreach (array_keys($agg) as $key) {
+                    $agg[$key] += (int) $child['agg'][$key];
+                }
             }
+            $agg['rate'] = $agg['total'] > 0 ? (int) round($agg['covered'] / $agg['total'] * 100) : 0;
 
             return [
                 'id' => $structureId,
                 'name' => (string) $meta['name'],
                 'level' => (int) ($meta['level'] ?? 0),
                 'positions' => $positions,
+                'off_staff' => $offStaffEntries,
                 'children' => $children,
-                'agg' => [
-                    'total' => $total,
-                    'filled' => $filled,
-                    'vacant' => max(0, $total - $filled),
-                    'rate' => $total > 0 ? (int) round($filled / $total * 100) : 0,
-                ],
+                'agg' => $agg,
             ];
         };
 
@@ -451,6 +427,24 @@ class Staffs extends Component
         $tree = array_map(fn ($id) => $build((int) $id), $rootIds);
 
         return ['tree' => $tree, 'ids' => $ids];
+    }
+
+    /**
+     * @param  array<int, array<int, int>>  $offStaff
+     * @return array<int, string>
+     */
+    protected function offStaffPositionNames(array $offStaff): array
+    {
+        $positionIds = collect($offStaff)
+            ->flatMap(fn (array $byPosition): array => array_keys($byPosition))
+            ->filter(fn ($id): bool => (int) $id > 0)
+            ->unique()
+            ->values()
+            ->all();
+
+        return $positionIds === []
+            ? []
+            : Position::query()->whereIn('id', $positionIds)->pluck('name', 'id')->map(fn ($name): string => (string) $name)->all();
     }
 
     public function toggleNode(int $id): void
@@ -581,17 +575,21 @@ class Staffs extends Component
                 ? array_values(array_filter($node['positions'], fn (array $p): bool => (int) $p['vacant'] > 0))
                 : $node['positions'];
 
+            // Off-staff people hold no slot, so a "vacant only" view has nothing to show for them.
+            $offStaff = $onlyVacant ? [] : ($node['off_staff'] ?? []);
+
             if ($search !== '' && $matches($node['name'])) {
-                $kept[] = [...$node, 'positions' => $positions, 'children' => $this->filterTree($node['children'], '', $onlyVacant)];
+                $kept[] = [...$node, 'positions' => $positions, 'off_staff' => $offStaff, 'children' => $this->filterTree($node['children'], '', $onlyVacant)];
 
                 continue;
             }
 
             $positions = array_values(array_filter($positions, fn (array $p): bool => $matches($p['title'])));
+            $offStaff = array_values(array_filter($offStaff, fn (array $p): bool => $matches($p['title'])));
             $children = $this->filterTree($node['children'], $search, $onlyVacant);
 
-            if ($positions !== [] || $children !== []) {
-                $kept[] = [...$node, 'positions' => $positions, 'children' => $children];
+            if ($positions !== [] || $offStaff !== [] || $children !== []) {
+                $kept[] = [...$node, 'positions' => $positions, 'off_staff' => $offStaff, 'children' => $children];
             }
         }
 
@@ -616,26 +614,29 @@ class Staffs extends Component
     /**
      * Roll the display roots up into one headline figure for the panel. The roots do not
      * overlap — each node's aggregate already includes its whole subtree — so summing
-     * them is the establishment total, with no extra query.
+     * them is the establishment total, with no extra query. Vakant is the sum of per-row
+     * vacancies (an over-staffed unit never cancels another unit's opening) and Doluluq
+     * only credits a row up to its own total.
      *
      * @param  array<int, array<string, mixed>>  $tree
-     * @return array{total: int, filled: int, vacant: int, rate: float}
+     * @return array{total: int, filled: int, vacant: int, over: int, off_staff: int, unassigned: int, rate: float}
      */
     protected function summarizeTree(array $tree): array
     {
-        $total = 0;
-        $filled = 0;
+        $summary = ['total' => 0, 'filled' => 0, 'vacant' => 0, 'over' => 0, 'off_staff' => 0, 'unassigned' => 0, 'covered' => 0];
 
         foreach ($tree as $node) {
-            $total += (int) ($node['agg']['total'] ?? 0);
-            $filled += (int) ($node['agg']['filled'] ?? 0);
+            foreach (array_keys($summary) as $key) {
+                $summary[$key] += (int) ($node['agg'][$key] ?? 0);
+            }
         }
 
+        $covered = $summary['covered'];
+        unset($summary['covered']);
+
         return [
-            'total' => $total,
-            'filled' => $filled,
-            'vacant' => max(0, $total - $filled),
-            'rate' => $total > 0 ? round($filled / $total * 100, 1) : 0.0,
+            ...$summary,
+            'rate' => $summary['total'] > 0 ? round($covered / $summary['total'] * 100, 1) : 0.0,
         ];
     }
 }

@@ -14,7 +14,8 @@ use App\Services\Vacation\VacationBalanceService;
 
 /**
  * Issues (or re-saves, when editing) a composed Word order: validates the input, gates
- * vacation balance and hire vacancy, persists the order and stores its filled document.
+ * vacation balance and the hire/transfer ştat slot, persists the order and stores its
+ * filled document.
  */
 class OrderCompositionIssuer
 {
@@ -46,16 +47,27 @@ class OrderCompositionIssuer
             return $rejection;
         }
 
-        // Staff-schedule (ştat cədvəli) vacancy gate for new hire orders: there must be
-        // a free slot for the chosen structure+position, or the author confirms creating one.
-        if ($template->isHire() && ! $composition->isEditing()) {
-            if ($autoVacancy) {
-                $this->vacancies->ensureOneVacancy((int) $composition->hireStructureId, (int) $composition->hirePositionId);
-            } elseif ($this->vacancies->vacancy($composition->hireStructureId, $composition->hirePositionId) <= 0) {
-                return OrderIssueOutcome::vacancyMissing(__('orders::order_composer.vacancy.confirm', [
-                    'structure' => Structure::find($composition->hireStructureId)->name ?? '—',
-                    'position' => Position::find($composition->hirePositionId)->name ?? '—',
-                ]));
+        // Staff-schedule (ştat cədvəli) gate for new hire and transfer orders: the target
+        // structure+position should have a free slot. By default the author is asked to
+        // create one (or go ahead); with `staff.hire_guard.block` the order is refused.
+        $target = $composition->isEditing() ? null : $this->staffTarget($template, $composition);
+        if ($target !== null) {
+            [$structureId, $positionId] = $target;
+            $check = $this->vacancies->check($structureId, $positionId);
+
+            if ($check->blocks()) {
+                return OrderIssueOutcome::rejected([], $check->message());
+            }
+
+            if ($check->hasWarning()) {
+                if ($autoVacancy) {
+                    $this->vacancies->ensureOneVacancy($structureId, $positionId);
+                } else {
+                    return OrderIssueOutcome::vacancyMissing(__('orders::order_composer.vacancy.confirm', [
+                        'structure' => Structure::find($structureId)->name ?? '—',
+                        'position' => Position::find($positionId)->name ?? '—',
+                    ]));
+                }
             }
         }
 
@@ -87,6 +99,45 @@ class OrderCompositionIssuer
             : $this->balances->previewSnapshot($personnel, $request['year']);
 
         return [...$balance, ...$request];
+    }
+
+    /**
+     * The structure+position an order puts someone into: the hire's chosen slot, or a
+     * transfer's new structure/position (an unchanged half falls back to the employee's
+     * current one). Null when the order moves nobody.
+     *
+     * @return array{0:int,1:int}|null
+     */
+    private function staffTarget(OrderWordTemplate $template, OrderComposition $composition): ?array
+    {
+        if ($template->isHire()) {
+            return $composition->hireStructureId && $composition->hirePositionId
+                ? [(int) $composition->hireStructureId, (int) $composition->hirePositionId]
+                : null;
+        }
+
+        if ($template->effect !== 'transfer') {
+            return null;
+        }
+
+        $roles = [];
+        foreach ($template->variables ?? [] as $variable) {
+            $role = $variable['effect_role'] ?? null;
+            $key = $variable['field']['key'] ?? $variable['token'];
+            if ($role && $key && ! empty($composition->fields[$key])) {
+                $roles[$role] = (int) $composition->fields[$key];
+            }
+        }
+
+        if (! isset($roles['new_structure']) && ! isset($roles['new_position'])) {
+            return null;
+        }
+
+        $personnel = $this->subjects->personnel($composition->personnelId);
+        $structureId = $roles['new_structure'] ?? (int) ($personnel->structure_id ?? 0);
+        $positionId = $roles['new_position'] ?? (int) ($personnel->position_id ?? 0);
+
+        return $structureId > 0 && $positionId > 0 ? [$structureId, $positionId] : null;
     }
 
     /**

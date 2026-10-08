@@ -297,6 +297,9 @@
                 @error('personalForm.personnel.position_id')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
+                @if (empty($personnelModel) && method_exists($this, 'staffSlotCheck') && $this->staffSlotCheck->hasWarning())
+                    <p class="mt-1 rounded-lg bg-amber-50 px-2.5 py-1.5 text-[12px] leading-snug text-amber-800" role="status">{{ $this->staffSlotCheck->message() }}</p>
+                @endif
             </div>
         </div>
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">

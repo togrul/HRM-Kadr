@@ -1,6 +1,15 @@
 <?php
 
 return [
+    /*
+     * Hiring or transferring someone into a structure + position with no free ştat slot
+     * (no row, or the row is full). Off (default): the forms warn, the save goes through —
+     * companies often hire before the ştat is amended. On: the save is refused.
+     */
+    'hire_guard' => [
+        'block' => (bool) env('STAFF_HIRE_GUARD_BLOCK', false),
+    ],
+
     'performance' => [
         'render_budget' => [
             'staffs_render' => [

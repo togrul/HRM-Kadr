@@ -24,17 +24,7 @@
     </div>
 
     @foreach ($this->staff as $key => $stf)
-    @php
-        $hidePosition = (bool) data_get($stf, 'hide_position', false);
-    @endphp
-    <div
-        @class([
-            'grid grid-cols-1 gap-2',
-            'sm:grid-cols-5' => !$hidePosition,
-            'sm:grid-cols-3' => $hidePosition,
-        ])
-    >
-        @if(!$hidePosition)
+    <div class="grid grid-cols-1 gap-2 sm:grid-cols-5">
         <div class="flex flex-col sm:col-span-2">
             <x-ui.select-dropdown
                 :label="__('staff::common.fields.position')"
@@ -51,7 +41,6 @@
             <x-validation> {{ $message }} </x-validation>
             @enderror
         </div>
-        @endif
         <div class="flex flex-col">
             <x-label for="staff.{{ $key }}.total">{{ __('staff::common.fields.total') }}</x-label>
             <x-livewire-input mode="gray" type="number" name="staff.{{ $key }}.total" wire:model.live.debounce.300ms="staff.{{ $key }}.total"></x-livewire-input>

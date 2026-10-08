@@ -7,11 +7,13 @@
 @php
     $hasChildren = count($node['children']) > 0;
     $filled = (int) ($node['agg']['filled'] ?? 0);
+    $total = (int) ($node['agg']['total'] ?? 0);
     $isSelected = $selected !== null && (int) $selected === (int) $node['id'];
 @endphp
 
 {{--
-    Contextual-panel row for one structure of the ştat tree: name + its filled headcount.
+    Contextual-panel row for one structure of the ştat tree: name + "dolu/cəmi" (same
+    aggregate as the main tree, so the two never disagree).
     Clicking scopes the whole page to that structure; the caret only folds the panel list.
     Expand state comes from the surrounding x-data (the panel keeps its own, because a
     @teleport lands outside the page component's Alpine scope).
@@ -45,7 +47,7 @@
                 'font-semibold' => $isSelected,
                 'font-medium' => ! $isSelected,
             ])>{{ $node['name'] }}</span>
-            <span class="hrm-num shrink-0 text-[12px] text-ink-faint">{{ number_format($filled, 0, ',', ' ') }}</span>
+            <span class="hrm-num shrink-0 text-[12px] text-ink-faint" title="{{ __('staff::common.fields.filled_of_total') }}">{{ number_format($filled, 0, ',', ' ') }}/{{ number_format($total, 0, ',', ' ') }}</span>
         </button>
     </div>
 

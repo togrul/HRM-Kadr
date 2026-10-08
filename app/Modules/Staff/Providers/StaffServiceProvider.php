@@ -2,8 +2,10 @@
 
 namespace App\Modules\Staff\Providers;
 
+use App\Modules\Staff\Application\Services\StaffHeadcountService;
 use App\Modules\Staff\Console\Commands\StaffListQueryBudgetCommand;
 use App\Modules\Staff\Console\Commands\StaffListRenderBenchmarkCommand;
+use App\Modules\Staff\Contracts\StaffingLookup;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
 use Illuminate\Support\Facades\Gate;
@@ -15,6 +17,10 @@ class StaffServiceProvider extends ServiceProvider
 
     public function register(): void
     {
+        // Bound even when the module is switched off: the service then answers "unknown",
+        // so Personnel/Orders never have to know whether Staff is enabled.
+        $this->app->singleton(StaffingLookup::class, StaffHeadcountService::class);
+
         if ($this->app->runningInConsole()) {
             $this->commands([
                 StaffListQueryBudgetCommand::class,
