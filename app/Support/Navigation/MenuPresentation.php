@@ -238,7 +238,7 @@ class MenuPresentation
                         'url' => (string) ($menu['url'] ?? ''),
                         'icon' => self::normalizeIcon((string) ($menu['icon'] ?? 'document-icon')),
                         'is_active' => (int) ($menu['is_active'] ?? 1),
-                        'permission_name' => self::permissionNameForKey($name),
+                        'permission_name' => $menu['permission_name'] ?? self::permissionNameForKey($name),
                         'aliases' => self::translationAliases($name),
                         'route_aliases' => self::routeAliases($name),
                     ],
