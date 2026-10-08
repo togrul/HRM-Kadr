@@ -25,6 +25,9 @@ return [
         'leave_window' => 'Leave window: :window',
         'covered_leave' => 'Covered by leave: :hours h',
         'calendar' => 'Work regime: :type',
+        'planned' => 'By schedule: :hours h (no recorded fact)',
+        'from_documents' => 'From an approved document (day not calculated yet)',
+        'pre_holiday' => 'Pre-holiday day: working time shortened by 1 hour',
     ],
     'statuses' => [
         'present' => 'present',
@@ -37,6 +40,7 @@ return [
         'holiday' => 'holiday',
         'workday' => 'workday',
         'none' => 'none',
+        'planned' => 'by schedule',
     ],
     'short_labels' => [
         'vacation' => 'VAC',
@@ -58,13 +62,15 @@ return [
         ],
         'items' => [
             'full_day' => 'Full workday',
+            'planned' => 'By schedule',
             'partial_day' => 'Partial workday',
             'absence' => 'Absence',
             'weekend' => 'Weekend',
             'holiday' => 'Holiday',
         ],
         'descriptions' => [
-            'full_day' => 'Days with exactly 9 worked hours stay white with black text.',
+            'full_day' => 'Days worked to the norm (:hours h — shift length minus the lunch break) stay white with black text.',
+            'planned' => 'Past workdays without a recorded fact show the scheduled hours in light grey; a punch or manual entry replaces them.',
             'partial_day' => 'Shows workdays that were partially covered by half-day or hourly leave.',
             'absence' => 'Represents absence or manual absence on a workday.',
             'weekend' => 'Weekend days are indicated with a single calendar marker in the legend.',

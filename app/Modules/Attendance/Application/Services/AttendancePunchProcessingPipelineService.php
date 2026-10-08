@@ -295,6 +295,12 @@ class AttendancePunchProcessingPipelineService
                         globalMap: $context['calendars_global'],
                         structureMap: $context['calendars_structure']
                     );
+                    $nextCalendarDayType = $contextResolver->resolveCalendarDayType(
+                        date: $date->copy()->addDay(),
+                        structureId: $structureId,
+                        globalMap: $context['calendars_global'],
+                        structureMap: $context['calendars_structure']
+                    );
 
                     if ($monthLockService->isPeriodLocked($date)) {
                         $lockedSkipped++;
@@ -314,7 +320,8 @@ class AttendancePunchProcessingPipelineService
                         setting: $settings,
                         calendarDayType: $calendarDayType,
                         override: $override,
-                        approvedOvertimeMinutes: $overtimeApprovedMap[$key] ?? null
+                        approvedOvertimeMinutes: $overtimeApprovedMap[$key] ?? null,
+                        isPreHoliday: $calendarDayType === 'workday' && $nextCalendarDayType === 'holiday'
                     );
 
                     $ledger = $existingLedgerMap[$key] ?? new AttendanceDailyLedger([
