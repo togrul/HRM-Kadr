@@ -23,6 +23,10 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property int|null $gender
  * @property int|null $structure_id
  * @property int|null $status_id
+ * @property int|null $hired_personnel_id
+ * @property int|null $hire_order_id
+ * @property string|null $hire_order_no
+ * @property \Illuminate\Support\Carbon|null $hired_at
  */
 class Candidate extends Model
 {
@@ -90,6 +94,9 @@ class Candidate extends Model
         'requisition_date' => self::FORMAT_CAST,
         'hhk_date' => self::FORMAT_CAST,
         'birthdate' => 'datetime:d.m.Y',
+        'hired_personnel_id' => 'integer',
+        'hire_order_id' => 'integer',
+        'hired_at' => 'datetime',
     ];
 
     protected $likeFilterFields = [

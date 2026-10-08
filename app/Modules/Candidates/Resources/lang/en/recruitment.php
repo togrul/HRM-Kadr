@@ -84,7 +84,7 @@ return [
         'score' => 'Score / result',
         'rejection_reason' => 'Rejection reason',
         'final_decision' => 'Final decision',
-        'transition_note' => 'The current military candidate flow remains intact. The new recruitment kernel shifts the module toward vacancy and application centric workflows.',
+        'transition_note' => 'Candidates, requisitions, openings and applications are managed in one flow.',
         'headcount_short' => 'slots',
         'headcount_counted' => ':count positions',
         'opening' => 'Opening',

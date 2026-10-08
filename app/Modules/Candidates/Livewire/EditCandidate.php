@@ -4,6 +4,7 @@ namespace App\Modules\Candidates\Livewire;
 
 use App\Livewire\Traits\Helpers\FillComplexArrayTrait;
 use App\Models\Candidate;
+use App\Modules\Candidates\Application\Services\CandidateHireOrderService;
 use App\Modules\Candidates\Application\Services\CandidateProfileFieldSchemaService;
 use App\Modules\Candidates\Support\Traits\CandidateCrud;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -47,7 +48,7 @@ class EditCandidate extends Component
 
         $this->candidate = $this->mapAttributes(
             attributes: array_merge([
-                'name', 'surname', 'patronymic', 'phone', 'birthdate', 'gender',
+                'name', 'surname', 'patronymic', 'phone', 'birthdate', 'gender', 'application_date', 'appeal_date',
             ], app(CandidateProfileFieldSchemaService::class)->allCandidateAttributeKeys()),
             getFrom: $updatedData
         );
@@ -56,8 +57,31 @@ class EditCandidate extends Component
         $this->candidate['status_id'] = $updatedData['status_id'] ?? null;
     }
 
+    /** Whether the "İşə qəbul əmri hazırla" action is offered for this candidate. */
+    public function canPrepareHireOrder(): bool
+    {
+        if (! $this->candidateModelData || ! (auth()->user()?->can('add-orders') ?? false)) {
+            return false;
+        }
+
+        return app(CandidateHireOrderService::class)->canPrepare($this->candidateModelData);
+    }
+
+    /**
+     * Hand over to the candidate list, which owns the side panel: it swaps this form for
+     * the Orders composer with the hire preset prefilled from the candidate.
+     */
+    public function requestHireOrder(): void
+    {
+        $this->authorize('add-orders');
+        $this->authorize('update', $this->candidateModelData);
+
+        $this->dispatch('candidateHireOrderRequested', candidateId: (int) $this->candidateModelData->id);
+    }
+
     public function store(): void
     {
+        $this->prepareCandidateForSave();
         $this->validate();
 
         $this->candidateModelData->update($this->modifyArray($this->candidate, $this->candidateModelData->dateList()));
