@@ -15,6 +15,16 @@ class Service extends Component
     #[Url]
     public $selectedService;
 
+    /**
+     * Bölmə seçilməyibsə boş ekran əvəzinə ilk bölmə (Ümumi) açılır.
+     */
+    public function mount(): void
+    {
+        if (blank($this->selectedService)) {
+            $this->selectedService = 'general';
+        }
+    }
+
     #[On('selectService')]
     public function selectService($service): void
     {

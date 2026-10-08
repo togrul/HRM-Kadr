@@ -158,6 +158,22 @@ class Dashboard extends AbstractLibraryDashboard
         $this->dispatch('notify', type: 'success', message: __('onboarding-library::dashboard.messages.template_archive_updated'));
     }
 
+    public function deleteTemplate(int $templateId): void
+    {
+        abort_unless($this->canManageTemplates(), 403);
+
+        $template = OnboardingDocumentTemplate::query()->findOrFail($templateId);
+
+        if (! app(OnboardingAssignmentManager::class)->deleteTemplate($template)) {
+            $this->dispatch('notify', type: 'error', message: __('onboarding-library::dashboard.messages.template_in_use'));
+
+            return;
+        }
+
+        unset($this->catalogPayload);
+        $this->dispatch('notify', type: 'success', message: __('onboarding-library::dashboard.messages.template_deleted'));
+    }
+
     public function prepareNextTemplateVersion(int $templateId): void
     {
         abort_unless($this->canManageTemplates(), 403);
@@ -354,6 +370,7 @@ class Dashboard extends AbstractLibraryDashboard
             'save' => 'saveTemplate',
             'toggle_active' => 'toggleTemplateActive',
             'toggle_archived' => 'toggleTemplateArchived',
+            'delete' => 'deleteTemplate',
             'new_version' => 'prepareNextTemplateVersion',
             'is_new_version' => $this->versionSourceTemplateId !== null,
             'assign_key' => 'template_id',

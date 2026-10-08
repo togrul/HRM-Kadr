@@ -159,6 +159,15 @@
                                                     data-confirm="{{ __($ns.'.catalog.'.$archiveAction) }}"
                                                     x-on:click="$dispatch('confirm-action', { title: $el.dataset.title, message: $el.dataset.message, confirmText: $el.dataset.confirm, tone: 'amber', run: () => $wire.{{ $library['toggle_archived'] }}({{ $item['id'] }}) })"
                                                 >{{ __($ns.'.catalog.'.$archiveAction) }}</x-ui.row-menu.item>
+                                                @if (($library['delete'] ?? null) && $item['can_delete'])
+                                                    <x-ui.row-menu.item
+                                                        :danger="true"
+                                                        data-title="{{ __($ns.'.catalog.confirm.delete_title') }}"
+                                                        data-message="{{ __($ns.'.catalog.confirm.delete_message', ['title' => $item['title']]) }}"
+                                                        data-confirm="{{ __($ns.'.catalog.delete') }}"
+                                                        x-on:click="$dispatch('confirm-action', { title: $el.dataset.title, message: $el.dataset.message, confirmText: $el.dataset.confirm, tone: 'rose', run: () => $wire.{{ $library['delete'] }}({{ $item['id'] }}) })"
+                                                    >{{ __($ns.'.catalog.delete') }}</x-ui.row-menu.item>
+                                                @endif
                                             @endif
                                         </x-ui.row-menu>
                                     @endif

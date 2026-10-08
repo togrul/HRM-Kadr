@@ -38,6 +38,12 @@ interface OnboardingAssignmentManager
 
     public function setTemplateArchived(OnboardingDocumentTemplate $template, bool $archived, ?User $user): void;
 
+    /**
+     * Sənədi faylı ilə birlikdə tam silir. Sənəd kiməsə təyin olunubsa və ya yeni
+     * versiyası varsa silinmir və false qaytarılır (yalnız arxivləmək olar).
+     */
+    public function deleteTemplate(OnboardingDocumentTemplate $template): bool;
+
     public function waive(OnboardingDocumentAssignment $assignment): void;
 
     public function remove(OnboardingDocumentAssignment $assignment): void;

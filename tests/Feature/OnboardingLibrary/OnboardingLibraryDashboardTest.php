@@ -310,6 +310,52 @@ class OnboardingLibraryDashboardTest extends TestCase
         $this->assertSame(0, OnboardingDocumentTemplate::query()->count());
     }
 
+    public function test_unassigned_template_can_be_deleted_with_its_file_but_assigned_one_only_archived(): void
+    {
+        Storage::fake('public');
+        $this->seedReferenceData();
+
+        $user = User::factory()->create(['is_active' => true]);
+        $user->givePermissionTo(
+            Permission::findOrCreate('view-onboarding-library', 'web'),
+            Permission::findOrCreate('manage-onboarding-document-templates', 'web'),
+            Permission::findOrCreate('assign-onboarding-documents', 'web'),
+        );
+        $personnel = $this->makePersonnel('employee@example.test');
+        $this->actingAs($user);
+
+        foreach (['Boş sənəd', 'Təyin olunmuş sənəd'] as $title) {
+            Livewire::test(Dashboard::class)
+                ->set('templateForm.title', $title)
+                ->set('templateForm.document_type', 'policy')
+                ->set('templateForm.version', '1.0')
+                ->set('templateUpload', UploadedFile::fake()->create('rules.pdf', 100, 'application/pdf'))
+                ->call('saveTemplate')
+                ->assertHasNoErrors();
+        }
+
+        $unassigned = OnboardingDocumentTemplate::query()->where('title', 'Boş sənəd')->firstOrFail();
+        $assigned = OnboardingDocumentTemplate::query()->where('title', 'Təyin olunmuş sənəd')->firstOrFail();
+        OnboardingDocumentAssignment::query()->create([
+            'template_id' => $assigned->id,
+            'personnel_id' => $personnel->id,
+            'assigned_at' => now(),
+            'status' => 'pending',
+        ]);
+        Storage::disk('public')->assertExists($unassigned->file_path);
+
+        $component = Livewire::test(Dashboard::class);
+        $items = collect($component->instance()->catalogPayload['items']->items())->keyBy('id');
+        $this->assertTrue($items[$unassigned->id]['can_delete']);
+        $this->assertFalse($items[$assigned->id]['can_delete']);
+
+        $component->call('deleteTemplate', $unassigned->id)->call('deleteTemplate', $assigned->id);
+
+        $this->assertDatabaseMissing('onboarding_document_templates', ['id' => $unassigned->id]);
+        Storage::disk('public')->assertMissing($unassigned->file_path);
+        $this->assertDatabaseHas('onboarding_document_templates', ['id' => $assigned->id]);
+    }
+
     private function makePersonnel(string $email): Personnel
     {
         return Personnel::withoutEvents(fn () => Personnel::query()->create([
