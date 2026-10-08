@@ -26,7 +26,9 @@ class DocumentExpiryReadService
     private const DOCUMENT_SOURCES = [
         'service_card' => ['table' => 'personnel_cards', 'expires' => 'valid_date'],
         'passport' => ['table' => 'personnel_passports', 'expires' => 'valid_date'],
-        'id_card' => ['table' => 'personnel_identity_documents', 'expires' => 'valid_date'],
+        // The ID card's expiry column arrived later than its table; until that migration
+        // has run the branch is left out rather than failing the whole union.
+        'id_card' => ['table' => 'personnel_identity_documents', 'expires' => 'valid_date', 'column_added_later' => true],
         'contract' => ['table' => 'personnel_contracts', 'expires' => 'contract_ends_at'],
     ];
 
@@ -272,7 +274,11 @@ class DocumentExpiryReadService
         $branch = 0;
 
         foreach (self::DOCUMENT_SOURCES as $type => $source) {
-            if (InstalledTables::has($source['table'])) {
+            $installed = ($source['column_added_later'] ?? false)
+                ? InstalledTables::hasColumn($source['table'], $source['expires'])
+                : InstalledTables::has($source['table']);
+
+            if ($installed) {
                 $branches[] = $this->documentBranch($branch, $type, $source['table'], $source['expires'], $this->window($requirements, $type));
             }
             $branch++;
