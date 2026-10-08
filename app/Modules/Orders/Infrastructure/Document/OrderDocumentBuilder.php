@@ -5,11 +5,14 @@ namespace App\Modules\Orders\Infrastructure\Document;
 use App\Models\OrderLog;
 use App\Models\OrderWordTemplate;
 use App\Modules\Orders\Application\Document\DocxTemplateRenderer;
+use App\Modules\Orders\Application\Document\DocxToHtmlRenderer;
 use App\Modules\Orders\Application\Document\DocxToPdfConverter;
 use App\Modules\Orders\Application\Document\OrderComposition;
 use App\Services\Chief\ChiefResolver;
 use App\Support\Language\AzerbaijaniDateFormatter;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use RuntimeException;
 
 /**
  * Turns a composer's input into the filled order document: resolves the template's
@@ -23,6 +26,7 @@ class OrderDocumentBuilder
         private readonly DocxVariableResolver $resolver,
         private readonly DocxTemplateRenderer $renderer,
         private readonly DocxToPdfConverter $pdf,
+        private readonly DocxToHtmlRenderer $html,
         private readonly OrderIssueService $issuer,
         private readonly ChiefResolver $chiefs,
         private readonly AzerbaijaniDateFormatter $dates,
@@ -95,7 +99,7 @@ class OrderDocumentBuilder
     public function renderPdf(OrderWordTemplate $template, array $values): ?string
     {
         $tmp = $this->renderDocx($template, $values);
-        $pdfPath = $this->pdf->convert($tmp);
+        $pdfPath = $this->pdf->isAvailable() ? $this->pdf->convert($tmp) : null;
         @unlink($tmp);
 
         if ($pdfPath === null) {
@@ -106,6 +110,27 @@ class OrderDocumentBuilder
         @unlink($pdfPath);
 
         return $pdf;
+    }
+
+    /**
+     * The filled document as a standalone HTML page — the preview when this host has no
+     * PDF converter. Null (and logged) when even that fails.
+     *
+     * @param  array<string,string>  $values
+     */
+    public function renderHtml(OrderWordTemplate $template, array $values): ?string
+    {
+        $tmp = $this->renderDocx($template, $values);
+
+        try {
+            return $this->html->render($tmp);
+        } catch (RuntimeException $e) {
+            Log::warning('orders.preview.render_failed', ['template' => $template->code, 'error' => $e->getMessage()]);
+
+            return null;
+        } finally {
+            @unlink($tmp);
+        }
     }
 
     /**

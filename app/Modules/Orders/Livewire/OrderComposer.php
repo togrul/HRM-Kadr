@@ -63,6 +63,10 @@ class OrderComposer extends Component
     /** Base64 of the generated PDF, shown inline as a faithful preview. */
     public string $previewPdf = '';
 
+    /** The generated document as HTML — the preview when this host has no LibreOffice. */
+    #[Locked]
+    public string $previewHtml = '';
+
     /** Per-request cache of the selected template (private → not persisted by Livewire). */
     private ?OrderWordTemplate $templateCache = null;
 
@@ -184,6 +188,7 @@ class OrderComposer extends Component
     {
         $this->fields = [];
         $this->previewPdf = '';
+        $this->previewHtml = '';
         $this->templateLoaded = false;
         $this->resetHireSubject();
     }
@@ -196,6 +201,7 @@ class OrderComposer extends Component
     {
         $this->authorize('add-orders');
         $this->previewPdf = '';
+        $this->previewHtml = '';
 
         $template = $this->templateOrError();
         if (! $template) {
@@ -206,11 +212,20 @@ class OrderComposer extends Component
             return;
         }
 
-        $pdf = $documents->renderPdf($template, $documents->values($template, $composition));
+        $values = $documents->values($template, $composition);
+        $pdf = $documents->renderPdf($template, $values);
 
         if ($pdf === null) {
-            // No LibreOffice on this host — point the author to the exact Word download.
-            $this->addError('previewPdf', __('orders::order_composer.errors.preview_unavailable'));
+            // No LibreOffice on this host — fall back to an HTML rendering of the same
+            // document; only if that fails too, point the author to the Word download.
+            $html = $documents->renderHtml($template, $values);
+            if ($html === null) {
+                $this->addError('previewPdf', __('orders::order_composer.errors.preview_unavailable'));
+
+                return;
+            }
+
+            $this->previewHtml = $html;
 
             return;
         }

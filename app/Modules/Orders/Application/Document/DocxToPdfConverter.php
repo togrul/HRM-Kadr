@@ -3,14 +3,17 @@
 namespace App\Modules\Orders\Application\Document;
 
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Symfony\Component\Process\Process;
+use Throwable;
 
 /**
  * Converts a .docx to PDF via headless LibreOffice so the composer can show a 100%
  * faithful in-browser preview of the generated order (PhpWord's HTML reader is lossy).
- * Degrades gracefully: if no LibreOffice binary is present, isAvailable() is false and
- * the UI falls back to the exact Word download.
+ * Degrades gracefully: if no LibreOffice binary is present (the production image ships
+ * none), isAvailable() is false and callers fall back to DocxToHtmlRenderer; a failed
+ * conversion is logged with LibreOffice's own error output.
  */
 class DocxToPdfConverter
 {
@@ -45,11 +48,29 @@ class DocxToPdfConverter
             $docxPath,
         ]);
         $process->setTimeout(60);
-        $process->run();
+
+        try {
+            $process->run();
+        } catch (Throwable $e) {
+            // A timeout or a binary that cannot start must not take the page down.
+            Log::warning('orders.docx_to_pdf.failed', ['docx' => $docxPath, 'error' => $e->getMessage()]);
+
+            return null;
+        }
 
         $pdf = $outDir.'/'.pathinfo($docxPath, PATHINFO_FILENAME).'.pdf';
 
-        return is_file($pdf) ? $pdf : null;
+        if (! is_file($pdf)) {
+            Log::warning('orders.docx_to_pdf.failed', [
+                'docx' => $docxPath,
+                'exit_code' => $process->getExitCode(),
+                'error' => trim($process->getErrorOutput()) ?: trim($process->getOutput()),
+            ]);
+
+            return null;
+        }
+
+        return $pdf;
     }
 
     /**
