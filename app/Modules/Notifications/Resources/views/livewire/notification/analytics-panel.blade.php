@@ -12,10 +12,10 @@
                 @if ($range === 'custom')
                     <div class="grid gap-4 md:grid-cols-2">
                         <x-ui.input-shell :label="__('notifications::common.fields.date_from')">
-                            <input type="date" wire:model.live="dateFrom" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
+                            <x-ui.date-input wire:model.live="dateFrom" />
                         </x-ui.input-shell>
                         <x-ui.input-shell :label="__('notifications::common.fields.date_to')">
-                            <input type="date" wire:model.live="dateTo" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
+                            <x-ui.date-input wire:model.live="dateTo" />
                         </x-ui.input-shell>
                     </div>
                 @else

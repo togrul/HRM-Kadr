@@ -57,7 +57,7 @@
                 <div class="grid grid-cols-[140px_minmax(0,1fr)] gap-2">
                     <label class="block">
                         <span class="text-[11px] text-ink-muted">{{ __($t.'.a11y.checkin_date') }}</span>
-                        <input type="date" wire:model="checkinDate" class="{{ $field }}">
+                        <x-ui.date-input wire:model="checkinDate" />
                     </label>
                     <label class="block">
                         <span class="text-[11px] text-ink-muted">{{ __($t.'.a11y.checkin_progress') }}</span>

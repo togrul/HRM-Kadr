@@ -163,12 +163,12 @@
                 </label>
                 <label class="space-y-1">
                     <span class="block text-[12px] font-medium text-ink-muted">{{ __('candidates::recruitment.labels.start_date') }}</span>
-                    <input type="date" wire:model="offerForm.start_date" class="h-10 w-full rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base text-ink focus:border-ink focus:bg-white focus:ring-0 sm:text-sm">
+                    <x-ui.date-input wire:model="offerForm.start_date" />
                     @error('offerForm.start_date') <x-validation>{{ $message }}</x-validation> @enderror
                 </label>
                 <label class="space-y-1">
                     <span class="block text-[12px] font-medium text-ink-muted">{{ __('candidates::recruitment.labels.expires_at') }}</span>
-                    <input type="date" wire:model="offerForm.expires_at" class="h-10 w-full rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base text-ink focus:border-ink focus:bg-white focus:ring-0 sm:text-sm">
+                    <x-ui.date-input wire:model="offerForm.expires_at" />
                     @error('offerForm.expires_at') <x-validation>{{ $message }}</x-validation> @enderror
                 </label>
                 <label class="space-y-1 sm:col-span-2">
@@ -223,7 +223,7 @@
                 </label>
                 <label class="space-y-1">
                     <span class="block text-[12px] font-medium text-ink-muted">{{ __('candidates::recruitment.labels.valid_until') }}</span>
-                    <input type="date" wire:model="poolForm.valid_until" class="h-10 w-full rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base text-ink focus:border-ink focus:bg-white focus:ring-0 sm:text-sm">
+                    <x-ui.date-input wire:model="poolForm.valid_until" />
                     @error('poolForm.valid_until') <x-validation>{{ $message }}</x-validation> @enderror
                 </label>
                 <label class="space-y-1 sm:col-span-2">

@@ -7,6 +7,7 @@ use App\Support\Ui\ContextPanelState;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\Livewire;
@@ -112,6 +113,19 @@ it('renders x-livewire-input type=date through the same date field', function ()
         ->not->toContain('type="date"')
         ->toContain('window.hrmDateField')
         ->toContain(".entangle('form.due'),");
+});
+
+it('leaves no raw native date input in any view: every date field goes through the shared picker', function (): void {
+    $offenders = collect([resource_path('views'), app_path()])
+        ->flatMap(fn (string $root) => File::allFiles($root))
+        ->filter(fn (SplFileInfo $file): bool => str_ends_with($file->getFilename(), '.blade.php'))
+        ->reject(fn (SplFileInfo $file): bool => str_ends_with(str_replace('\\', '/', $file->getPathname()), 'components/ui/date-input.blade.php'))
+        ->filter(fn (SplFileInfo $file): bool => preg_match('/<input\b(?:[^>"\']|"[^"]*"|\'[^\']*\')*\btype="date"/s', (string) file_get_contents($file->getPathname())) === 1)
+        ->map(fn (SplFileInfo $file): string => Str::after($file->getPathname(), base_path().DIRECTORY_SEPARATOR))
+        ->values()
+        ->all();
+
+    expect($offenders)->toBe([]);
 });
 
 it('keeps x-pikaday-input syncing on change and adds the typing mask and limits', function (): void {

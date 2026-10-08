@@ -82,7 +82,7 @@
 
                     <div class="space-y-2">
                         <label class="hrm-eyebrow">{{ __('notifications::common.fields.holiday_date') }}</label>
-                        <input type="date" wire:model="form.holiday_date" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800">
+                        <x-ui.date-input wire:model="form.holiday_date" />
                         @error('form.holiday_date') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
 

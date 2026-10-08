@@ -166,12 +166,12 @@
                 </div>
                 <div>
                     <x-label for="attendance-assignment-from">{{ __('attendance::shift_management.fields.effective_from') }}</x-label>
-                    <input id="attendance-assignment-from" type="date" wire:model="assignmentForm.effective_from" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
+                    <x-ui.date-input id="attendance-assignment-from" wire:model="assignmentForm.effective_from" />
                     @error('assignmentForm.effective_from') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
                 <div>
                     <x-label for="attendance-assignment-to">{{ __('attendance::shift_management.fields.effective_to') }}</x-label>
-                    <input id="attendance-assignment-to" type="date" wire:model="assignmentForm.effective_to" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
+                    <x-ui.date-input id="attendance-assignment-to" wire:model="assignmentForm.effective_to" />
                     @error('assignmentForm.effective_to') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
             </div>

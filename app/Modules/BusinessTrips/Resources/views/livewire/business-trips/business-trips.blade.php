@@ -72,13 +72,19 @@
             <div class="shrink-0">
                 <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('business_trips::common.filters.date_range') }}</span>
                 <div class="flex items-center gap-2">
-                    <input type="date" wire:model.live="filter.date.min"
-                        aria-label="{{ __('business_trips::common.filters.date_start') }}"
-                        class="hrm-num h-10 w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base sm:text-sm text-ink focus:border-ink focus:bg-white focus:ring-0" />
+                    <div class="w-[150px] shrink-0">
+                        <x-ui.date-input
+                            wire:model.live="filter.date.min"
+                            aria-label="{{ __('business_trips::common.filters.date_start') }}"
+                        />
+                    </div>
                     <span class="shrink-0 text-ink-faint">&ndash;</span>
-                    <input type="date" wire:model.live="filter.date.max"
-                        aria-label="{{ __('business_trips::common.filters.date_end') }}"
-                        class="hrm-num h-10 w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base sm:text-sm text-ink focus:border-ink focus:bg-white focus:ring-0" />
+                    <div class="w-[150px] shrink-0">
+                        <x-ui.date-input
+                            wire:model.live="filter.date.max"
+                            aria-label="{{ __('business_trips::common.filters.date_end') }}"
+                        />
+                    </div>
                 </div>
             </div>
 

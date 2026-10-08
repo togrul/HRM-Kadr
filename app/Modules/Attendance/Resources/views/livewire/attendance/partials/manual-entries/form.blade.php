@@ -79,11 +79,9 @@
         </div>
         <div>
             <x-label for="manual-form-date">{{ __('attendance::manual_entries.labels.date') }}</x-label>
-            <input
+            <x-ui.date-input
                 id="manual-form-date"
                 wire:model.live="form.date"
-                type="date"
-                class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm"
             />
             @error('form.date') <x-validation>{{ $message }}</x-validation> @enderror
         </div>
