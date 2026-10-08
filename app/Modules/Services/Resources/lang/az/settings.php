@@ -46,6 +46,7 @@ return [
         'active_filters_count' => 'filtr',
         'work_coefficient' => 'İş əmsalı',
         'education_coefficient' => 'Təhsil əmsalı',
+        'organization_name' => 'Təşkilatın adı',
     ],
     'messages' => [
         'general_description' => 'Sistem üzrə ümumi parametrlər və dəyərlər.',

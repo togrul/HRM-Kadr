@@ -8,6 +8,7 @@ use App\Models\Personnel;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrOnboardingReadService;
 use App\Modules\Personnel\Application\Services\MyHr\OnboardingAdminReportReadService;
 use App\Modules\Personnel\Application\Services\MyHr\OnboardingAssignmentManagerService;
+use App\Support\Uploads\UploadRules;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Computed;
@@ -61,7 +62,7 @@ class OnboardingAssignmentManager extends Component
             'templateForm.effective_to' => 'nullable|date|after_or_equal:templateForm.effective_from',
             'templateForm.is_required' => 'boolean',
             'templateForm.requires_acknowledgement' => 'boolean',
-            'templateUpload' => 'required|file|max:10240',
+            'templateUpload' => UploadRules::document(),
         ], attributes: [
             'templateForm.title' => __('personnel::my_hr.onboarding_admin.fields.template_title'),
             'templateForm.document_type' => __('personnel::my_hr.onboarding_admin.fields.document_type'),

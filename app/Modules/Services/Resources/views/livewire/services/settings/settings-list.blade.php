@@ -108,7 +108,6 @@
             $chiefChipLabel = __('services::settings.labels.mode_'.($chiefMode === 'delegated' ? 'delegated' : ($chiefMode === 'legacy' ? 'legacy' : 'permanent')));
             $chip = 'inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium';
             $rowLabel = 'text-[13px] font-medium text-ink';
-            $rowHint = 'mt-0.5 text-[11.5px] text-ink-faint';
             $delBtn = 'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-ink-faint transition hover:bg-rose-50 hover:text-rose-600';
             $delIcon = '<svg class="h-[17px] w-[17px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';
         @endphp
@@ -133,7 +132,6 @@
                         <div class="flex items-center justify-between gap-4 px-4 py-3" wire:key="setting-row-{{ $settingValue->id }}">
                             <div class="min-w-0">
                                 <p class="{{ $rowLabel }}">{{ $this->resolveSettingLabel((string) $settingValue->name) }}</p>
-                                <p class="{{ $rowHint }}">{{ $settingValue->name }}</p>
                             </div>
 
                             <div class="flex shrink-0 items-center gap-2">

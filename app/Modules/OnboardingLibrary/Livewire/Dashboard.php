@@ -7,6 +7,7 @@ use App\Modules\OnboardingLibrary\Application\Services\OnboardingLibraryReadServ
 use App\Modules\Personnel\Contracts\OnboardingAssignmentManager;
 use App\Support\Library\LibraryExportAction;
 use App\Support\Livewire\AbstractLibraryDashboard;
+use App\Support\Uploads\UploadRules;
 use Livewire\Attributes\Computed;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -51,7 +52,7 @@ class Dashboard extends AbstractLibraryDashboard
             'templateForm.requires_acknowledgement' => 'boolean',
             'templateForm.is_active' => 'boolean',
             'templateForm.auto_assign_new_hires' => 'boolean',
-            'templateUpload' => 'required|file|max:10240',
+            'templateUpload' => UploadRules::document(),
         ], attributes: [
             'templateForm.title' => __('onboarding-library::dashboard.fields.template_title'),
             'templateForm.document_type' => __('onboarding-library::dashboard.fields.document_type'),
@@ -155,6 +156,22 @@ class Dashboard extends AbstractLibraryDashboard
 
         unset($this->catalogPayload);
         $this->dispatch('notify', type: 'success', message: __('onboarding-library::dashboard.messages.template_archive_updated'));
+    }
+
+    public function deleteTemplate(int $templateId): void
+    {
+        abort_unless($this->canManageTemplates(), 403);
+
+        $template = OnboardingDocumentTemplate::query()->findOrFail($templateId);
+
+        if (! app(OnboardingAssignmentManager::class)->deleteTemplate($template)) {
+            $this->dispatch('notify', type: 'error', message: __('onboarding-library::dashboard.messages.template_in_use'));
+
+            return;
+        }
+
+        unset($this->catalogPayload);
+        $this->dispatch('notify', type: 'success', message: __('onboarding-library::dashboard.messages.template_deleted'));
     }
 
     public function prepareNextTemplateVersion(int $templateId): void
@@ -353,6 +370,7 @@ class Dashboard extends AbstractLibraryDashboard
             'save' => 'saveTemplate',
             'toggle_active' => 'toggleTemplateActive',
             'toggle_archived' => 'toggleTemplateArchived',
+            'delete' => 'deleteTemplate',
             'new_version' => 'prepareNextTemplateVersion',
             'is_new_version' => $this->versionSourceTemplateId !== null,
             'assign_key' => 'template_id',

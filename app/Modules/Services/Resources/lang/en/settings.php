@@ -46,6 +46,7 @@ return [
         'active_filters_count' => 'filters',
         'work_coefficient' => 'Work coefficient',
         'education_coefficient' => 'Education coefficient',
+        'organization_name' => 'Organization name',
     ],
     'messages' => [
         'general_description' => 'System-wide parameters and values.',

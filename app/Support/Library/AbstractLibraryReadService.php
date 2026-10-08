@@ -109,6 +109,8 @@ abstract class AbstractLibraryReadService
             ->latest('created_at')
             ->paginate(12, ['*'], $pageName);
 
+        $deletableIds = $this->deletableIds($items->getCollection()->map(fn (Model $item): int => (int) $item->getKey())->all());
+
         $items->setCollection($items->getCollection()->map(fn (Model $item): array => [
             'id' => (int) $item->getKey(),
             'title' => (string) $item->title,
@@ -118,6 +120,7 @@ abstract class AbstractLibraryReadService
             'is_active' => (bool) $item->is_active,
             'is_archived' => $item->archived_at !== null,
             'required' => (bool) $item->is_required,
+            'can_delete' => in_array((int) $item->getKey(), $deletableIds, true),
         ]));
 
         return [
@@ -129,6 +132,18 @@ abstract class AbstractLibraryReadService
             'status_counts' => $statusCounts,
             'items' => $items,
         ];
+    }
+
+    /**
+     * Kitabxanadan tam silinə bilən elementlərin id-ləri. Defolt olaraq heç biri —
+     * kitabxana öz silmə qaydasını təyin edəndə bu metodu override edir.
+     *
+     * @param  list<int>  $ids
+     * @return list<int>
+     */
+    protected function deletableIds(array $ids): array
+    {
+        return [];
     }
 
     /**

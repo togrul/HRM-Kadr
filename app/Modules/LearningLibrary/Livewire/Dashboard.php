@@ -7,6 +7,7 @@ use App\Modules\LearningLibrary\Application\Services\LearningLibraryReadService;
 use App\Modules\Personnel\Contracts\LearningAssignmentManager;
 use App\Support\Library\LibraryExportAction;
 use App\Support\Livewire\AbstractLibraryDashboard;
+use App\Support\Uploads\UploadRules;
 use Livewire\Attributes\Computed;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -53,7 +54,7 @@ class Dashboard extends AbstractLibraryDashboard
             'assetForm.auto_assign_new_hires' => 'boolean',
             'assetForm.is_required' => 'boolean',
             'assetForm.estimated_minutes' => 'nullable|integer|min:1|max:600',
-            'assetUpload' => 'nullable|file|max:20480',
+            'assetUpload' => UploadRules::learningAsset(),
         ], attributes: [
             'assetForm.title' => __('learning-library::dashboard.fields.asset_title'),
             'assetForm.content_type' => __('learning-library::dashboard.fields.content_type'),
