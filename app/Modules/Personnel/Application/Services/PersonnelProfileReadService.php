@@ -142,8 +142,42 @@ class PersonnelProfileReadService
             $this->meta(__('personnel::common.labels.registered_address'), $personnel->getAttribute('registered_address'), false),
             $this->meta(__('personnel::common.labels.computer_knowledge'), $personnel->getAttribute('computer_knowledge'), false),
             $this->meta(__('personnel::common.labels.disability'), $personnel->disability?->getAttribute('name'), false),
-            $this->meta(__('personnel::common.labels.work_norm'), $personnel->workNorm?->getAttribute('name_az'), false),
+            // "Əməyin ödənilməsi" (work_norm, məs. vaxtamuzd) və "İş rejimi" (work_schedule,
+            // məs. 5 günlük) fərqli sahələrdir — əvvəllər birincisi ikincinin adı ilə göstərilirdi.
+            $this->meta(__('personnel::common.labels.work_norms'), $personnel->workNorm?->getAttribute('name_'.app()->getLocale()) ?? $personnel->workNorm?->getAttribute('name_az'), false),
+            $this->meta(__('personnel::common.labels.work_schedule'), $this->employmentTermLabel('work_schedule', $personnel->getAttribute('work_schedule')), false),
+            $this->meta(__('personnel::common.labels.contract_type'), $this->employmentTermLabel('contract_type', $personnel->getAttribute('contract_type')), false),
+            $this->meta(__('personnel::common.labels.contract_end_date'), $this->date($personnel->getAttribute('contract_end_date')), true),
         ];
+    }
+
+    /**
+     * Müddətli müqavilənin bitmə tarixi keçib, amma işçi hələ işdən azad edilməyib.
+     * Bu, avtomatik xitam deyil (ƏM m.47 üzrə xitam əmrlə rəsmiləşir) — yalnız HR üçün
+     * xəbərdarlıqdır.
+     */
+    public function contractExpired(Personnel $personnel): bool
+    {
+        if (filled($personnel->leave_work_date) || blank($personnel->getAttribute('contract_end_date'))) {
+            return false;
+        }
+
+        try {
+            return CarbonImmutable::parse($personnel->getAttribute('contract_end_date'))->lessThan(CarbonImmutable::today());
+        } catch (Throwable) {
+            return false;
+        }
+    }
+
+    private function employmentTermLabel(string $group, mixed $value): ?string
+    {
+        if (blank($value)) {
+            return null;
+        }
+
+        $key = "personnel::common.employment.{$group}.{$value}";
+
+        return __($key) === $key ? (string) $value : __($key);
     }
 
     /**
@@ -153,7 +187,7 @@ class PersonnelProfileReadService
      */
     public function careerTimeline(Personnel $personnel): array
     {
-        return $personnel->laborActivities
+        $timeline = $personnel->laborActivities
             ->sortByDesc(fn (Model $activity) => $activity->getAttribute('join_date'))
             ->values()
             ->map(function (Model $activity): array {
@@ -168,11 +202,47 @@ class PersonnelProfileReadService
                 ];
             })
             ->all();
+
+        $current = $this->currentPostEntry($personnel, $timeline);
+
+        return $current === null ? $timeline : [$current, ...$timeline];
+    }
+
+    /**
+     * Hazırkı vəzifə əmək fəaliyyəti cədvəlində həmişə qeydə alınmır: o, təsdiq
+     * gözləyən işçi təsdiqlənəndə yaranır, birbaşa təsdiqlə əlavə edilən və ya idxal
+     * olunan işçilərdə isə olmaya bilər. Belə hallarda kartda "Əmək fəaliyyəti 0"
+     * görünməsin deyə hazırkı vəzifəni şəxsi qeyddən (vəzifə, struktur, işə başlama
+     * tarixi) cari giriş kimi əlavə edirik.
+     *
+     * @param  list<array{title:string,organisation:string,from:string,to:string,is_current:bool}>  $timeline
+     * @return array{title:string,organisation:string,from:string,to:string,is_current:bool}|null
+     */
+    private function currentPostEntry(Personnel $personnel, array $timeline): ?array
+    {
+        if (filled($personnel->leave_work_date) || blank($personnel->position_id)) {
+            return null;
+        }
+
+        foreach ($timeline as $entry) {
+            if ($entry['is_current']) {
+                return null;
+            }
+        }
+
+        return [
+            'title' => (string) ($personnel->position?->getAttribute('name') ?: '—'),
+            'organisation' => $this->structurePath($personnel),
+            'from' => $this->year($personnel->join_work_date),
+            'to' => __('personnel::profile.labels.present'),
+            'is_current' => true,
+        ];
     }
 
     public function statusTone(Personnel $personnel): string
     {
         return match (true) {
+            $personnel->trashed() => 'rose',
             filled($personnel->leave_work_date) => 'rose',
             (bool) $personnel->getAttribute('is_pending') => 'amber',
             (bool) $personnel->active_vacation => 'violet',
@@ -184,6 +254,7 @@ class PersonnelProfileReadService
     public function statusLabel(Personnel $personnel): string
     {
         return match (true) {
+            $personnel->trashed() => __('personnel::common.states.deleted'),
             filled($personnel->leave_work_date) => __('personnel::common.labels.resigned'),
             (bool) $personnel->getAttribute('is_pending') => __('personnel::common.states.waiting_for_approval'),
             (bool) $personnel->active_vacation => __('personnel::common.states.in_vacation'),

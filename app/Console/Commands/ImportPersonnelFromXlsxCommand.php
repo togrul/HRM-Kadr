@@ -8,6 +8,7 @@ use App\Models\Personnel;
 use App\Models\Position;
 use App\Models\Structure;
 use App\Models\WorkNorm;
+use App\Modules\Personnel\Support\PersonnelFieldRules;
 use App\Services\Staff\StaffScheduleVacancyService;
 use App\Support\OrderLookupCache;
 use App\Support\PersonnelDropdownCache;
@@ -289,8 +290,8 @@ class ImportPersonnelFromXlsxCommand extends Command
             $record['tabel_no'] = (string) $row['tabel_no'];
             $record['pin'] = Str::upper((string) $row['pin']);
 
-            // Same 7-character rule as the personnel form (PersonnelValidationTrait).
-            if (! preg_match('/^[A-Z0-9]{7}$/', $record['pin'])
+            // Same 7-character rule as the personnel form (PersonnelFieldRules).
+            if (! preg_match(PersonnelFieldRules::PIN_PATTERN, $record['pin'])
                 || $pinCounts[$record['pin']] > 1
                 || (isset($taken[$record['pin']]) && $taken[$record['pin']] !== $record['tabel_no'])) {
                 $record['pin'] = 'Z'.str_pad(substr(preg_replace('/\D/', '', $record['tabel_no']) ?: (string) $line, -6), 6, '0', STR_PAD_LEFT);

@@ -36,6 +36,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property int|null $position_id
  * @property int|null $work_norm_id
  * @property mixed $join_work_date
+ * @property mixed $contract_end_date
  * @property mixed $leave_work_date
  * @property string|null $probation_unit
  * @property int|null $probation_amount
@@ -91,6 +92,7 @@ class Personnel extends Model
         'work_norm_id',
         'contract_type',
         'contract_date',
+        'contract_end_date',
         'join_work_date',
         'leave_work_date',
         'probation_unit',
@@ -120,6 +122,7 @@ class Personnel extends Model
 
     protected $dates = [
         'contract_date',
+        'contract_end_date',
         'join_work_date',
         'leave_work_date',
         'birthdate',
@@ -130,6 +133,7 @@ class Personnel extends Model
     protected $casts = [
         'birthdate' => self::FORMAT_CAST,
         'contract_date' => self::FORMAT_CAST,
+        'contract_end_date' => self::FORMAT_CAST,
         'work_hours' => 'array',
         'rest_days' => 'array',
         'join_work_date' => self::FORMAT_CAST,

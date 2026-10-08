@@ -15,6 +15,13 @@ use Illuminate\Support\Arr;
 class PersonnelFormAssembler
 {
     /**
+     * İşdən çıxma tarixi yalnız xitam əmrinin təsdiqi ilə yazılır (Orders modulunun
+     * TerminationEffect-i). Forma onu göndərsə belə — məsələn, Livewire vəziyyəti əl
+     * ilə dəyişdirilərsə — saxlanmır, yoxsa işçi əmrsiz "işdən ayrılan" olardı.
+     */
+    public const TERMINATION_MANAGED_FIELDS = ['leave_work_date'];
+
+    /**
      * Normalize all form state into persistence-ready payloads.
      *
      * @param  array<int, string>  $dateFields
@@ -39,7 +46,13 @@ class PersonnelFormAssembler
         ?bool $forcePending = null
     ): array {
         $personalPayload = $personalForm->toPayload();
-        $personnelData = $dateNormalizer($personalPayload['personnel'] ?? [], $dateFields);
+        // Tarix normallaşdırıcısı model tarixlərinin hamısını açar kimi qaytarır (boşları
+        // null ilə), ona görə xitam sahəsi ondan SONRA çıxarılır — əks halda hər redaktə
+        // işdən çıxmış əməkdaşın tarixini silib onu yenidən "işdə" edərdi.
+        $personnelData = Arr::except(
+            $dateNormalizer($personalPayload['personnel'] ?? [], $dateFields),
+            self::TERMINATION_MANAGED_FIELDS
+        );
 
         if (! is_null($forcePending)) {
             $personnelData['is_pending'] = $forcePending;

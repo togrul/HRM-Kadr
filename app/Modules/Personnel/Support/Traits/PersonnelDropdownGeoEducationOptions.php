@@ -8,6 +8,7 @@ use App\Models\EducationalInstitution;
 use App\Models\EducationDocumentType;
 use App\Models\EducationForm as EducationFormModel;
 use App\Models\EducationType;
+use App\Modules\Personnel\Services\PersonnelLookupService;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 
@@ -16,10 +17,30 @@ trait PersonnelDropdownGeoEducationOptions
     #[Computed]
     public function nationalityOptions(): array
     {
-        return $this->countryOptions(
+        return $this->homeCountryFirst($this->countryOptions(
             searchTerm: $this->dropdownSearch('searchNationality'),
             selectedId: $this->dropdownSelected('nationality_id')
-        );
+        ));
+    }
+
+    /**
+     * İşçilərin böyük əksəriyyəti Azərbaycan vətəndaşıdır — o, siyahının başında durur.
+     *
+     * @param  array<int, array{id: int|string, label: string}>  $options
+     * @return array<int, array{id: int|string, label: string}>
+     */
+    protected function homeCountryFirst(array $options): array
+    {
+        $homeId = app(PersonnelLookupService::class)->homeCountryId();
+
+        if ($homeId === null) {
+            return $options;
+        }
+
+        $home = array_values(array_filter($options, fn (array $option): bool => (int) $option['id'] === $homeId));
+        $rest = array_values(array_filter($options, fn (array $option): bool => (int) $option['id'] !== $homeId));
+
+        return [...$home, ...$rest];
     }
 
     #[Computed]

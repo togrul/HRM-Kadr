@@ -35,7 +35,7 @@ class PersonnelCrudRegressionTest extends TestCase
             ->set('personalForm.personnel.gender', 1)
             ->set('personalForm.personnel.nationality_id', 1)
             ->set('personalForm.personnel.mobile', '0500000000')
-            ->set('personalForm.personnel.pin', 'ABC1234')
+            ->set('personalForm.personnel.pin', 'ADD1001')
             ->set('personalForm.personnel.residental_address', 'Baku')
             ->set('personalForm.personnel.registered_address', 'Baku')
             ->set('personalForm.personnel.education_degree_id', 1)

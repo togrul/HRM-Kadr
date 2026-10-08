@@ -8,6 +8,10 @@ use App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioPer
 class PersonnelRowActionService
 {
     /**
+     * Silmə, bərpa və tam silmə əməliyyatları qeydi əsas açarla (id) ötürür: tabel
+     * nömrəsi dəyişə bilən biznes dəyəridir və onu identifikator kimi istifadə etmək
+     * səhv qeydin silinməsinə yol aça bilərdi.
+     *
      * @param  array{
      *     can_edit?: bool,
      *     can_delete?: bool,
@@ -49,7 +53,7 @@ class PersonnelRowActionService
                         icon: 'icons.delete-icon',
                         actionPayload: [
                             'type' => 'delete',
-                            'value' => $personnel->tabel_no,
+                            'value' => $personnel->getKey(),
                         ],
                         // The delete modal is the confirmation; a second prompt here asked twice.
                         wireTarget: 'setDeletePersonnel'
@@ -65,7 +69,7 @@ class PersonnelRowActionService
                 icon: 'icons.recover',
                 actionPayload: [
                     'type' => 'restore',
-                    'value' => $personnel->tabel_no,
+                    'value' => $personnel->getKey(),
                 ],
                 iconProps: [
                     'color' => 'text-teal-500',
@@ -80,7 +84,7 @@ class PersonnelRowActionService
                     icon: 'icons.force-delete',
                     actionPayload: [
                         'type' => 'force-delete',
-                        'value' => $personnel->tabel_no,
+                        'value' => $personnel->getKey(),
                     ],
                     confirmMessage: __('personnel::common.messages.remove_data_confirm'),
                     wireTarget: 'forceDeleteData',

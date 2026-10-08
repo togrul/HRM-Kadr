@@ -14,7 +14,10 @@ namespace App\Modules\Personnel\Support;
  */
 final class EmploymentTerms
 {
-    public const CONTRACT_TYPES = ['fixed', 'indefinite'];
+    /** Müddətli əmək müqaviləsi (ƏM m.47) — bitmə tarixi tələb edir. */
+    public const CONTRACT_TYPE_FIXED = 'fixed';
+
+    public const CONTRACT_TYPES = [self::CONTRACT_TYPE_FIXED, 'indefinite'];
 
     public const PROBATION_UNITS = ['day', 'week', 'month'];
 

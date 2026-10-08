@@ -26,7 +26,8 @@ class PersonnelEmploymentTermsTest extends TestCase
 
         $this->personalStep('TERMS-1001')
             ->set('personalForm.personnel.contract_type', 'fixed')
-            ->set('personalForm.personnel.contract_date', '2020-01-05')
+            ->set('personalForm.personnel.contract_date', '2019-12-20')
+            ->set('personalForm.personnel.contract_end_date', '2021-12-31')
             ->set('personalForm.personnel.probation_unit', 'month')
             ->set('personalForm.personnel.probation_amount', 3)
             ->set('personalForm.personnel.workplace_type', 'primary')
@@ -45,7 +46,8 @@ class PersonnelEmploymentTermsTest extends TestCase
         $personnel = Personnel::query()->where('tabel_no', 'TERMS-1001')->sole();
 
         $this->assertSame('fixed', $personnel->contract_type);
-        $this->assertSame('2020-01-05', $personnel->contract_date->toDateString());
+        $this->assertSame('2019-12-20', $personnel->contract_date->toDateString());
+        $this->assertSame('2021-12-31', $personnel->contract_end_date->toDateString());
         $this->assertSame('month', $personnel->probation_unit);
         $this->assertSame(3, (int) $personnel->probation_amount);
         $this->assertSame('primary', $personnel->workplace_type);
