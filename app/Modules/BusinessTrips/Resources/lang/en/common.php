@@ -66,6 +66,7 @@ return [
         'from_orders' => 'Business trips come from business trip orders — prepare an order in the Orders module to add one.',
     ],
     'actions' => [
+        'business_trip_order' => 'Business trip order',
         'go_to_orders' => 'Go to orders',
         'export_excel' => 'Export to Excel',
     ],

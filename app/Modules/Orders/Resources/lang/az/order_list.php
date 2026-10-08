@@ -52,6 +52,7 @@ return [
         'loading' => 'Önizləmə hazırlanır…',
         'unavailable' => 'Önizləmə yaradıla bilmədi. Sənədi “Yüklə” ilə endirib baxın.',
         'no_document' => 'Bu əmrin hələ sənədi yoxdur.',
+        'html_fallback' => 'Sadələşdirilmiş görünüş — dəqiq tərtibat üçün sənədi “Yüklə” ilə endirin.',
     ],
     'hints' => [
         'docx_only' => 'Yalnız DOCX əmrləri redaktə oluna bilər',

@@ -93,4 +93,12 @@ return [
         'discard' => 'Bağla',
         'keep_editing' => 'Davam et',
     ],
+    'absence_overlap' => [
+        'message' => 'Bu tarixlərdə əməkdaşın artıq :type qeydi var (:dates).',
+        'types' => [
+            'leave' => 'icazə',
+            'vacation' => 'məzuniyyət',
+            'business_trip' => 'ezamiyyət',
+        ],
+    ],
 ];

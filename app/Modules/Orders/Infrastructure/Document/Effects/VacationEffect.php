@@ -30,7 +30,10 @@ class VacationEffect implements OrderEffect
         }
 
         $return = $this->dates->parse($fields['return_date'] ?? null) ?? $end->copy()->addDay();
-        $days = (int) ($fields['days'] ?? 0);
+        // Templates without a day-count field (e.g. unpaid leave) record the calendar span.
+        $days = isset($fields['days']) && (int) $fields['days'] > 0
+            ? (int) $fields['days']
+            : (int) $start->diffInDays($end) + 1;
 
         $personnel->vacations()->create([
             'start_date' => $start->format('Y-m-d'),
@@ -44,13 +47,25 @@ class VacationEffect implements OrderEffect
         ]);
 
         // Deduct the taken days from the employee's annual balance.
-        $this->balance->consume($personnel, (int) $start->year, $days);
+        if ($this->countsAgainstAnnualBalance()) {
+            $this->balance->consume($personnel, (int) $start->year, (int) ($fields['days'] ?? 0));
+        }
+    }
+
+    /** Only annual-type leave draws on the employee's yearly vacation balance. */
+    protected function countsAgainstAnnualBalance(): bool
+    {
+        return true;
     }
 
     public function reverse(OrderLog $order, array $fields, Personnel $personnel): void
     {
         // Remove the leave record this order created (matched by its order number).
         $personnel->vacations()->where('order_no', $order->order_no)->delete();
+
+        if (! $this->countsAgainstAnnualBalance()) {
+            return;
+        }
 
         // Give the days back to the annual balance.
         $start = $this->dates->parse($fields['start_date'] ?? null);

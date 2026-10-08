@@ -7,6 +7,7 @@ use App\Models\OrderType;
 use App\Models\PersonnelBusinessTrip;
 use App\Models\Structure;
 use App\Modules\BusinessTrips\Exports\BusinessTripExport;
+use App\Modules\Orders\Contracts\OrderDrafter;
 use App\Services\StructureService;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
@@ -391,19 +392,43 @@ class BusinessTrips extends Component
         );
     }
 
+    /**
+     * Order types a trip can come from: the Word-engine business-trip templates (the
+     * current engine — their trips are addressed by template code, "tpl:<code>") plus
+     * any legacy block order types (order_id 3010).
+     */
     #[Computed]
     public function orderTypeOptions(): array
     {
+        $selected = $this->filter['order_type_id'] ?? null;
+
+        $templates = collect(app(OrderDrafter::class)->personnelTemplates('business_trip'))
+            ->map(fn (string $label, string $code): array => ['id' => 'tpl:'.$code, 'label' => $label])
+            ->values()
+            ->all();
+
         $base = OrderType::query()
             ->select('id', DB::raw('name as label'))
             ->where('order_id', 3010)
             ->orderBy('name');
 
-        return $this->cachedOptionsWithSelected(
+        return [...$templates, ...$this->cachedOptionsWithSelected(
             'businessTrips:order_types',
             $base,
-            $this->filter['order_type_id'] ?? null,
+            is_numeric($selected) ? $selected : null,
             50
-        );
+        )];
+    }
+
+    /**
+     * Trips are granted by an order: the header's "Business trip order" opens the order
+     * composer on the business-trip template in the Orders module.
+     */
+    #[Computed]
+    public function businessTripOrderPreset(): ?string
+    {
+        $code = array_key_first(app(OrderDrafter::class)->personnelTemplates('business_trip'));
+
+        return $code === null ? null : (string) $code;
     }
 }

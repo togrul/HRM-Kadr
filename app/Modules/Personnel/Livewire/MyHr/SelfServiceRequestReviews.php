@@ -8,6 +8,7 @@ use App\Models\PersonnelBusinessTrip;
 use App\Models\PersonnelVacation;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestReviewReadService;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestReviewService;
+use App\Services\Absence\AbsenceOverlapException;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -52,13 +53,20 @@ class SelfServiceRequestReviews extends Component
         $reviewer = auth()->user();
         $note = trim((string) ($this->notes[$this->noteKey($type, $recordId)] ?? ''));
 
-        match ($type) {
-            'leave' => $this->approveLeave($service, $reviewer, $recordId, $note ?: null),
-            'vacation' => $this->approveVacation($service, $reviewer, $recordId, $note ?: null),
-            'business_trip' => $this->approveBusinessTrip($service, $reviewer, $recordId, $note ?: null),
-            'correction' => $this->approveCorrection($service, $reviewer, $recordId, $note ?: null),
-            default => abort(404),
-        };
+        try {
+            match ($type) {
+                'leave' => $this->approveLeave($service, $reviewer, $recordId, $note ?: null),
+                'vacation' => $this->approveVacation($service, $reviewer, $recordId, $note ?: null),
+                'business_trip' => $this->approveBusinessTrip($service, $reviewer, $recordId, $note ?: null),
+                'correction' => $this->approveCorrection($service, $reviewer, $recordId, $note ?: null),
+                default => abort(404),
+            };
+        } catch (AbsenceOverlapException $exception) {
+            // The employee is already away on these dates; the request stays pending.
+            $this->dispatch('notify', type: 'error', message: $exception->getMessage());
+
+            return;
+        }
 
         unset($this->notes[$this->noteKey($type, $recordId)]);
         unset($this->payload);

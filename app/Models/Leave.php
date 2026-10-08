@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Data\AbsencePeriod;
 use App\Data\LeaveFilterData;
 use App\Enums\OrderStatusEnum;
 use App\Traits\PersonnelTrait;
@@ -16,6 +17,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
  * @property mixed $starts_at
@@ -24,7 +27,21 @@ use Illuminate\Support\Str;
  */
 class Leave extends Model
 {
-    use HasFactory, PersonnelTrait, SoftDeletes;
+    use HasFactory, LogsActivity, PersonnelTrait, SoftDeletes;
+
+    /**
+     * Creating, changing and deleting a leave lands in the audit log like personnel and
+     * order records do (changed fields only, no empty entries).
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logExcept(['created_at', 'updated_at'])
+            ->logOnlyDirty()
+            ->useLogName('leaves')
+            ->dontSubmitEmptyLogs();
+    }
 
     /** @var array<int, string> */
     protected $fillable = [
@@ -260,6 +277,31 @@ class Leave extends Model
     }
 
     /* ------------------------------ Domain Logic ----------------------------- */
+
+    /**
+     * The time this leave claims, for the cross-module absence-overlap check; null while
+     * its start date is still missing.
+     */
+    public function absencePeriod(): ?AbsencePeriod
+    {
+        if (! $this->starts_at) {
+            return null;
+        }
+
+        $start = CarbonImmutable::parse($this->starts_at)->startOfDay();
+        $unit = $this->normalizedDurationUnit();
+
+        return new AbsencePeriod(
+            type: AbsencePeriod::TYPE_LEAVE,
+            id: $this->exists ? (int) $this->getKey() : null,
+            from: $start,
+            to: $unit === 'day' && $this->ends_at ? CarbonImmutable::parse($this->ends_at)->startOfDay() : $start,
+            unit: $unit,
+            dayPart: $unit === 'half_day' ? $this->partial_day_part : null,
+            startsTime: $unit === 'hour' && filled($this->starts_time) ? (string) $this->starts_time : null,
+            endsTime: $unit === 'hour' && filled($this->ends_time) ? (string) $this->ends_time : null,
+        );
+    }
 
     /** Inclusive day count (calendar days). Replace with business-day calc if needed. */
     public function durationDays(): int

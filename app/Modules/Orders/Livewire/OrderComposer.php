@@ -5,6 +5,7 @@ namespace App\Modules\Orders\Livewire;
 use App\Models\OrderLog;
 use App\Models\OrderWordTemplate;
 use App\Modules\Orders\Application\Document\OrderComposition;
+use App\Modules\Orders\Application\Document\OrderLeaveDateRules;
 use App\Modules\Orders\Application\Document\OrderTemplateProvider;
 use App\Modules\Orders\Infrastructure\Document\OrderCompositionIssuer;
 use App\Modules\Orders\Infrastructure\Document\OrderDocumentBuilder;
@@ -63,6 +64,10 @@ class OrderComposer extends Component
     /** Base64 of the generated PDF, shown inline as a faithful preview. */
     public string $previewPdf = '';
 
+    /** The generated document as HTML — the preview when this host has no LibreOffice. */
+    #[Locked]
+    public string $previewHtml = '';
+
     /** Per-request cache of the selected template (private → not persisted by Livewire). */
     private ?OrderWordTemplate $templateCache = null;
 
@@ -79,6 +84,7 @@ class OrderComposer extends Component
         }
 
         $this->presetCode = $presetCode ?? '';
+        $this->applyFieldDefaults();
         $this->orderDate = now()->format('Y-m-d');
         $this->pickPersonnel($personnelId);
     }
@@ -167,7 +173,10 @@ class OrderComposer extends Component
         return $template ? $issuer->vacationBalance($template, $this->composition(), persist: false) : null;
     }
 
-    /** Clear a field's "required" error the moment the author fills it in. */
+    /**
+     * Clear a field's "required" error the moment the author fills it in, and fill the
+     * dates that follow from it (day count ↔ end date, end date → return-to-work date).
+     */
     public function updatedFields($value, $key = null): void
     {
         // A single field updated (wire:model.live) → ($value, $key); the whole array
@@ -178,14 +187,32 @@ class OrderComposer extends Component
                 $this->resetErrorBag('fields.'.$k);
             }
         }
+
+        $template = $this->template();
+        if ($template && is_string($key) && $key !== '') {
+            $this->fields = app(OrderLeaveDateRules::class)->autofill($template, $this->fields, $key);
+        }
     }
 
     public function updatedPresetCode(): void
     {
         $this->fields = [];
         $this->previewPdf = '';
+        $this->previewHtml = '';
         $this->templateLoaded = false;
         $this->resetHireSubject();
+
+        $this->applyFieldDefaults();
+    }
+
+    /** Fields with a usual value start with it (e.g. 126 days of maternity leave). */
+    private function applyFieldDefaults(): void
+    {
+        foreach ($this->template()?->manualFields() ?? [] as $field) {
+            if (filled($field['default']) && blank($this->fields[$field['key']] ?? null)) {
+                $this->fields[$field['key']] = (string) $field['default'];
+            }
+        }
     }
 
     /**
@@ -196,6 +223,7 @@ class OrderComposer extends Component
     {
         $this->authorize('add-orders');
         $this->previewPdf = '';
+        $this->previewHtml = '';
 
         $template = $this->templateOrError();
         if (! $template) {
@@ -206,11 +234,20 @@ class OrderComposer extends Component
             return;
         }
 
-        $pdf = $documents->renderPdf($template, $documents->values($template, $composition));
+        $values = $documents->values($template, $composition);
+        $pdf = $documents->renderPdf($template, $values);
 
         if ($pdf === null) {
-            // No LibreOffice on this host — point the author to the exact Word download.
-            $this->addError('previewPdf', __('orders::order_composer.errors.preview_unavailable'));
+            // No LibreOffice on this host — fall back to an HTML rendering of the same
+            // document; only if that fails too, point the author to the Word download.
+            $html = $documents->renderHtml($template, $values);
+            if ($html === null) {
+                $this->addError('previewPdf', __('orders::order_composer.errors.preview_unavailable'));
+
+                return;
+            }
+
+            $this->previewHtml = $html;
 
             return;
         }

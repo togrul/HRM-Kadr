@@ -35,6 +35,29 @@ class OrderEffectCatalog
                 ],
                 'handler' => VacationEffect::class,
             ],
+            'social_leave' => [
+                'label' => __('orders::order_composer.effects.social_leave'),
+                'roles' => [
+                    ['key' => 'start_date', 'label' => __('orders::order_composer.effect_roles.vacation_start_date'), 'type' => 'date'],
+                    ['key' => 'end_date', 'label' => __('orders::order_composer.effect_roles.vacation_end_date'), 'type' => 'date'],
+                    ['key' => 'return_date', 'label' => __('orders::order_composer.effect_roles.vacation_return_date'), 'type' => 'date'],
+                    ['key' => 'days', 'label' => __('orders::order_composer.effect_roles.vacation_days'), 'type' => 'number'],
+                ],
+                'handler' => SocialLeaveEffect::class,
+            ],
+            'business_trip' => [
+                'label' => __('orders::order_composer.effects.business_trip'),
+                'roles' => [
+                    ['key' => 'location', 'label' => __('orders::order_composer.effect_roles.business_trip_location'), 'type' => 'text'],
+                    ['key' => 'purpose', 'label' => __('orders::order_composer.effect_roles.business_trip_purpose'), 'type' => 'text'],
+                    ['key' => 'start_date', 'label' => __('orders::order_composer.effect_roles.business_trip_start_date'), 'type' => 'date'],
+                    ['key' => 'end_date', 'label' => __('orders::order_composer.effect_roles.business_trip_end_date'), 'type' => 'date'],
+                    ['key' => 'return_date', 'label' => __('orders::order_composer.effect_roles.business_trip_return_date'), 'type' => 'date'],
+                    ['key' => 'transport', 'label' => __('orders::order_composer.effect_roles.business_trip_transport'), 'type' => 'text'],
+                    ['key' => 'per_diem', 'label' => __('orders::order_composer.effect_roles.business_trip_per_diem'), 'type' => 'text'],
+                ],
+                'handler' => BusinessTripEffect::class,
+            ],
             'termination' => [
                 'label' => __('orders::order_composer.effects.termination'),
                 'roles' => [

@@ -4,6 +4,8 @@ namespace App\Modules\UI\Livewire\Confirmation;
 
 use App\Enums\OrderStatusEnum;
 use App\Models\Leave;
+use App\Services\Absence\AbsenceOverlapException;
+use App\Services\Absence\AbsenceOverlapGuard;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -31,6 +33,11 @@ class AddComment extends Component
                 throw new RuntimeException('This leave request is already finalized.');
             }
 
+            // An approved leave must not overlap another live leave, vacation or business trip.
+            if ($toStatus === OrderStatusEnum::APPROVED && ($period = $leave->absencePeriod()) !== null) {
+                app(AbsenceOverlapGuard::class)->assertNoOverlap((string) $leave->tabel_no, $period);
+            }
+
             $leave->status_id = $toStatus->value;
 
             if ($toStatus === OrderStatusEnum::APPROVED) {
@@ -54,10 +61,16 @@ class AddComment extends Component
 
     public function confirmComment(?string $action = null, ?int $leaveId = null): void
     {
-        $this->setPermitStatus(
-            $leaveId,
-            OrderStatusEnum::label($action)
-        );
+        try {
+            $this->setPermitStatus(
+                $leaveId,
+                OrderStatusEnum::label($action)
+            );
+        } catch (AbsenceOverlapException $exception) {
+            $this->dispatch('notify', type: 'error', message: $exception->getMessage());
+
+            return;
+        }
 
         if ($action === OrderStatusEnum::APPROVED->name) {
             $successEvent = 'leaveApproved';

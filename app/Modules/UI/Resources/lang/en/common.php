@@ -93,4 +93,12 @@ return [
         'discard' => 'Close',
         'keep_editing' => 'Keep editing',
     ],
+    'absence_overlap' => [
+        'message' => 'The employee already has a :type record on these dates (:dates).',
+        'types' => [
+            'leave' => 'leave',
+            'vacation' => 'vacation',
+            'business_trip' => 'business trip',
+        ],
+    ],
 ];

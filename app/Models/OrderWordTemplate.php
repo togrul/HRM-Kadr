@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $label
  * @property string $effect
  * @property string $docx_path
- * @property array<int,array{token:string,label:string,source:string,auto_key:?string,field:?array{key:string,type:string},effect_role:?string}> $variables
+ * @property array<int,array{token:string,label:string,source:string,auto_key:?string,field:?array{key:string,type:string,required?:bool,default?:mixed},effect_role:?string}> $variables
  * @property bool $is_active
  */
 class OrderWordTemplate extends Model
@@ -54,7 +54,7 @@ class OrderWordTemplate extends Model
      * The placeholders the order author fills in per-order (source = manual),
      * shaped like the composer's existing field defs ({key,label,type}).
      *
-     * @return array<int,array{key:string,label:string,type:string}>
+     * @return array<int,array{key:string,label:string,type:string,required:bool,default:mixed}>
      */
     public function manualFields(): array
     {
@@ -71,6 +71,8 @@ class OrderWordTemplate extends Model
                 'key' => $field['key'],
                 'label' => $variable['label'] ?? $field['key'],
                 'type' => $field['type'] ?? 'text',
+                'required' => (bool) ($field['required'] ?? true),
+                'default' => $field['default'] ?? null,
             ];
         }
 

@@ -21,10 +21,13 @@ use Illuminate\Support\Facades\Storage;
  *
  *   php artisan orders:seed-word-templates
  *   php artisan orders:seed-word-templates --only=emek_mezuniyyeti
+ *   php artisan orders:seed-word-templates --missing
  */
 class SeedOrderWordTemplatesCommand extends Command
 {
-    protected $signature = 'orders:seed-word-templates {--only= : Seed only this template code}';
+    protected $signature = 'orders:seed-word-templates
+        {--only= : Seed only this template code}
+        {--missing : Seed only the codes this install does not have yet (keeps edited templates untouched)}';
 
     protected $description = 'Build and register the customer order templates in the Word engine';
 
@@ -61,6 +64,10 @@ class SeedOrderWordTemplatesCommand extends Command
 
         foreach ($this->templates() as $code => $template) {
             if ($only && $only !== $code) {
+                continue;
+            }
+
+            if ($this->option('missing') && $repository->exists($code)) {
                 continue;
             }
 
@@ -109,7 +116,7 @@ class SeedOrderWordTemplatesCommand extends Command
      * employee/system variable, or a manual field (optionally bound to a lookup list
      * and/or an approval effect role).
      *
-     * @param  array<string,array{type:string,role?:string}>  $manual  label => field def
+     * @param  array<string,array{type:string,role?:string,required?:bool,default?:string}>  $manual  label => field def
      * @return array<string,mixed>
      */
     private function variable(string $token, string $label, array $manual): array
@@ -132,7 +139,9 @@ class SeedOrderWordTemplatesCommand extends Command
             'label' => $label,
             'source' => 'manual',
             'auto_key' => null,
-            'field' => ['key' => $token, 'type' => $def['type']],
+            'field' => ['key' => $token, 'type' => $def['type']]
+                + (isset($def['required']) ? ['required' => $def['required']] : [])
+                + (isset($def['default']) ? ['default' => $def['default']] : []),
             'effect_role' => $def['role'] ?? null,
         ];
     }
@@ -142,7 +151,7 @@ class SeedOrderWordTemplatesCommand extends Command
      * (with [bracket] placeholders) and the manual-field definitions for the
      * non-automatic placeholders.
      *
-     * @return array<string,array{label:string,effect:string,spec:array<string,mixed>,manual?:array<string,array{type:string,role?:string}>}>
+     * @return array<string,array{label:string,effect:string,spec:array<string,mixed>,manual?:array<string,array{type:string,role?:string,required?:bool,default?:string}>}>
      */
     private function templates(): array
     {
@@ -403,6 +412,128 @@ class SeedOrderWordTemplatesCommand extends Command
                     'Səbəb' => ['type' => 'text'],
                     'Xitam tarixi' => ['type' => 'date', 'role' => 'date'],
                     'Məsul şəxs' => ['type' => 'text'],
+                    'Əsas mətni' => ['type' => 'text'],
+                ],
+            ],
+
+            // ──────────────────────────────── Ezamiyyət ────────────────────────────────
+            'ezamiyyet' => [
+                'label' => 'Ezamiyyət',
+                'effect' => 'business_trip',
+                'spec' => [
+                    'city' => 'Bakı şəhəri',
+                    'subject' => 'Əməkdaşın ezamiyyətə göndərilməsi haqqında',
+                    'preamble' => 'İşin zərurətini nəzərə alaraq, Azərbaycan Respublikası Əmək Məcəlləsinin 178-ci maddəsini rəhbər tutaraq',
+                    'clauses' => [
+                        '[İş yeri] [Vəzifə] [İşçi] [Ezamiyyətin məqsədi] məqsədilə [Başlama tarixi] tarixindən [Bitmə tarixi] tarixinədək [Ezamiyyə yeri] ezamiyyətə göndərilsin.',
+                        'Ezamiyyətə gediş-gəliş [Nəqliyyat] ilə təşkil edilsin, işə başlama tarixi [İşə başlama tarixi] müəyyən edilsin.',
+                        'Ezamiyyə xərcləri qanunvericiliyə uyğun ödənilsin. [Ezamiyyə xərcləri (gündəlik)]',
+                        'Mühasibatlıq bu əmrdən irəli gələn məsələləri həll etsin.',
+                    ],
+                    'basis' => '[Əsas mətni]',
+                ],
+                'manual' => [
+                    'Ezamiyyətin məqsədi' => ['type' => 'text', 'role' => 'purpose'],
+                    'Başlama tarixi' => ['type' => 'date', 'role' => 'start_date'],
+                    'Bitmə tarixi' => ['type' => 'date', 'role' => 'end_date'],
+                    'Ezamiyyə yeri' => ['type' => 'text', 'role' => 'location'],
+                    'Nəqliyyat' => ['type' => 'text', 'role' => 'transport'],
+                    'İşə başlama tarixi' => ['type' => 'date', 'role' => 'return_date'],
+                    'Ezamiyyə xərcləri (gündəlik)' => ['type' => 'text', 'role' => 'per_diem', 'required' => false],
+                    'Əsas mətni' => ['type' => 'text'],
+                ],
+            ],
+
+            // ───────────────── Analıq (hamiləlik və doğuşa görə) məzuniyyəti ─────────────────
+            'analiq_mezuniyyeti' => [
+                'label' => 'Hamiləlik və doğuşa görə məzuniyyət',
+                'effect' => 'social_leave',
+                'spec' => [
+                    'city' => 'Bakı şəhəri',
+                    'subject' => 'Hamiləliyə və doğuşa görə sosial məzuniyyətin verilməsi haqqında',
+                    'preamble' => 'Əmək qabiliyyətinin müvəqqəti itirilməsi haqqında vərəqəni nəzərə alaraq, Azərbaycan Respublikası Əmək Məcəlləsinin 125-ci maddəsini rəhbər tutaraq',
+                    'clauses' => [
+                        '[İş yeri] [Vəzifə] [İşçi (yönlük)] hamiləliyə və doğuşa görə [Gün sayı] təqvim günü müddətində sosial məzuniyyət verilsin.',
+                        'Məzuniyyətin başlanma tarixi [Başlama tarixi], məzuniyyətin bitmə tarixi [Bitmə tarixi], işə başlama tarixi [İşə başlama tarixi] müəyyən edilsin.',
+                        'Mühasibatlıq bu əmrdən irəli gələn məsələləri həll etsin.',
+                    ],
+                    'basis' => '[Əsas mətni]',
+                ],
+                'manual' => [
+                    // ƏM m.125: 126 days; 140 for a complicated birth, 180 for two or more children.
+                    'Gün sayı' => ['type' => 'number', 'role' => 'days', 'default' => '126'],
+                    'Başlama tarixi' => ['type' => 'date', 'role' => 'start_date'],
+                    'Bitmə tarixi' => ['type' => 'date', 'role' => 'end_date'],
+                    'İşə başlama tarixi' => ['type' => 'date', 'role' => 'return_date'],
+                    'Əsas mətni' => ['type' => 'text'],
+                ],
+            ],
+
+            // ───────────────────────────── İntizam tənbehi ─────────────────────────────
+            'intizam_tenbehi' => [
+                'label' => 'İntizam tənbehi',
+                'effect' => 'none',
+                'spec' => [
+                    'city' => 'Bakı şəhəri',
+                    'subject' => 'İntizam tənbehinin verilməsi haqqında',
+                    'preamble' => '[İş yeri] [Vəzifə] [İşçi (yiyəlik)] [Pozuntunun təsviri] ilə əlaqədar, onun izahatını nəzərə alaraq, Azərbaycan Respublikası Əmək Məcəlləsinin 186-cı maddəsini rəhbər tutaraq',
+                    'clauses' => [
+                        '[İş yeri] [Vəzifə] [İşçi (yönlük)] [Tənbehin növü] intizam tənbehi verilsin.',
+                        'Əmr əməkdaşa imza etdirilməklə tanış edilsin.',
+                    ],
+                    'basis' => '[Əsas mətni]',
+                ],
+                'manual' => [
+                    'Pozuntunun təsviri' => ['type' => 'text'],
+                    'Tənbehin növü' => ['type' => 'text'],
+                    'Əsas mətni' => ['type' => 'text'],
+                ],
+            ],
+
+            // ──────────────────────── Əvəzetmə (vəzifənin icrası) ────────────────────────
+            'evezetme' => [
+                'label' => 'Əvəzetmə (vəzifənin müvəqqəti icrası)',
+                'effect' => 'none',
+                'spec' => [
+                    'city' => 'Bakı şəhəri',
+                    'subject' => 'Vəzifənin müvəqqəti icrasının həvalə edilməsi haqqında',
+                    'preamble' => '[Əvəz edilən əməkdaş] işdə olmadığı müddətdə işin fasiləsizliyini təmin etmək məqsədilə, Azərbaycan Respublikası Əmək Məcəlləsinin 159-cu maddəsini rəhbər tutaraq',
+                    'clauses' => [
+                        '[İş yeri] [Vəzifə] [İşçi (yönlük)] öz işi ilə yanaşı [Başlama tarixi] tarixindən [Bitmə tarixi] tarixinədək [Əvəz edilən vəzifə] vəzifəsinin icrası həvalə edilsin.',
+                        'Əvəzetmə müddətində [İşçi (yönlük)] [Əlavə ödəniş] məbləğində əlavə ödəniş edilsin.',
+                        'Mühasibatlıq bu əmrdən irəli gələn məsələləri həll etsin.',
+                    ],
+                    'basis' => '[Əsas mətni]',
+                ],
+                'manual' => [
+                    'Əvəz edilən əməkdaş' => ['type' => 'text'],
+                    'Başlama tarixi' => ['type' => 'date', 'role' => 'start_date'],
+                    'Bitmə tarixi' => ['type' => 'date', 'role' => 'end_date'],
+                    'Əvəz edilən vəzifə' => ['type' => 'position'],
+                    'Əlavə ödəniş' => ['type' => 'text'],
+                    'Əsas mətni' => ['type' => 'text'],
+                ],
+            ],
+
+            // ─────────────────────── Əmək haqqının dəyişdirilməsi ───────────────────────
+            'emek_haqqi_deyisme' => [
+                'label' => 'Əmək haqqının dəyişdirilməsi',
+                'effect' => 'none',
+                'spec' => [
+                    'city' => 'Bakı şəhəri',
+                    'subject' => 'Vəzifə maaşının dəyişdirilməsi haqqında',
+                    'preamble' => '[Dəyişikliyin səbəbi] nəzərə alaraq, Azərbaycan Respublikası Əmək Məcəlləsinin 55-ci maddəsini rəhbər tutaraq',
+                    'clauses' => [
+                        '[İş yeri] [Vəzifə] [İşçi (yönlük)] [Qüvvəyə minmə tarixi] tarixindən aylıq vəzifə maaşı [Yeni əmək haqqı] manat məbləğində müəyyən edilsin.',
+                        'Əmək müqaviləsinə müvafiq əlavə edilsin.',
+                        'Mühasibatlıq bu əmrdən irəli gələn məsələləri həll etsin.',
+                    ],
+                    'basis' => '[Əsas mətni]',
+                ],
+                'manual' => [
+                    'Dəyişikliyin səbəbi' => ['type' => 'text'],
+                    'Qüvvəyə minmə tarixi' => ['type' => 'date'],
+                    'Yeni əmək haqqı' => ['type' => 'number'],
                     'Əsas mətni' => ['type' => 'text'],
                 ],
             ],

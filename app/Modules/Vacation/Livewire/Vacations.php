@@ -89,7 +89,10 @@ class Vacations extends Component
     #[Computed]
     public function vacationOrderTemplates(): array
     {
-        return app(OrderDrafter::class)->personnelTemplates('vacation');
+        $drafter = app(OrderDrafter::class);
+
+        // Social leave (maternity) is a vacation too, it just leaves the annual balance alone.
+        return $drafter->personnelTemplates('vacation') + $drafter->personnelTemplates('social_leave');
     }
 
     #[Computed]
