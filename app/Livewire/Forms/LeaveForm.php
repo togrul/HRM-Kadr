@@ -5,6 +5,7 @@ namespace App\Livewire\Forms;
 use App\Enums\OrderStatusEnum;
 use App\Models\Leave;
 use App\Models\Personnel;
+use App\Support\Uploads\MatchesFileSignature;
 use Illuminate\Validation\Rule;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\Form;
@@ -75,7 +76,7 @@ class LeaveForm extends Form
             // renamed .html/.svg cannot land on the public disk; an already-stored path
             // (edit flow) carries no new file to vet.
             'document_path' => $this->document_path instanceof TemporaryUploadedFile
-                ? [Rule::requiredIf($requiresDocument), 'nullable', 'file', 'max:'.self::MAX_DOCUMENT_KILOBYTES, 'mimes:'.self::ALLOWED_DOCUMENT_EXTENSIONS]
+                ? [Rule::requiredIf($requiresDocument), 'nullable', 'file', 'max:'.self::MAX_DOCUMENT_KILOBYTES, 'mimes:'.self::ALLOWED_DOCUMENT_EXTENSIONS, new MatchesFileSignature]
                 : [Rule::requiredIf($requiresDocument), 'nullable', 'string'],
         ];
     }

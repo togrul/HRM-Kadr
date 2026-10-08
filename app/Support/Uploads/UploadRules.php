@@ -12,13 +12,13 @@ namespace App\Support\Uploads;
 final class UploadRules
 {
     /** Ofis sənədləri və şəkillər (əmr, ərizə, siyasət, arayış). */
-    public const DOCUMENT_MIMES = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'odt', 'ods', 'jpg', 'jpeg', 'png', 'webp'];
+    public const DOCUMENT_MIMES = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'odt', 'ods', 'jpg', 'jpeg', 'png', 'webp', 'heic'];
 
     /** Tədris materialları: sənədlərə əlavə olaraq təqdimat və video. */
     public const LEARNING_MIMES = [...self::DOCUMENT_MIMES, 'ppt', 'pptx', 'odp', 'mp4', 'webm', 'mov'];
 
     /**
-     * @return list<string>
+     * @return list<string|MatchesFileSignature>
      */
     public static function document(bool $required = true, int $maxKb = 10240): array
     {
@@ -27,11 +27,12 @@ final class UploadRules
             'file',
             'max:'.$maxKb,
             'mimes:'.implode(',', self::DOCUMENT_MIMES),
+            new MatchesFileSignature,
         ];
     }
 
     /**
-     * @return list<string>
+     * @return list<string|MatchesFileSignature>
      */
     public static function learningAsset(bool $required = false, int $maxKb = 20480): array
     {
@@ -40,6 +41,7 @@ final class UploadRules
             'file',
             'max:'.$maxKb,
             'mimes:'.implode(',', self::LEARNING_MIMES),
+            new MatchesFileSignature,
         ];
     }
 }
