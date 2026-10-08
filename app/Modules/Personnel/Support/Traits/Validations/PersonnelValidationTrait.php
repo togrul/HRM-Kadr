@@ -216,6 +216,8 @@ trait PersonnelValidationTrait
             'personalForm.personnel.probation_amount' => 'nullable|integer|min:1|max:'.$probationMax.'|required_with:personalForm.personnel.probation_unit',
             'personalForm.personnel.workplace_type' => $in(EmploymentTerms::WORKPLACE_TYPES),
             'personalForm.personnel.working_time_type' => $in(EmploymentTerms::WORKING_TIME_TYPES),
+            // Həftəlik norma ƏM m.89.3-dəki 40 saatdan çox ola bilməz.
+            'personalForm.personnel.weekly_hours_norm' => 'nullable|numeric|min:1|max:'.EmploymentTerms::STANDARD_WEEKLY_HOURS,
             'personalForm.personnel.work_schedule' => $in(EmploymentTerms::WORK_SCHEDULES),
             'personalForm.personnel.work_hours' => 'nullable|array',
             'personalForm.personnel.work_hours.*' => 'nullable|date_format:H:i',
@@ -624,6 +626,7 @@ trait PersonnelValidationTrait
             'personalForm.personnel.contract_end_date' => __('personnel::common.labels.contract_end_date'),
             'personalForm.personnel.probation_unit' => __('personnel::common.labels.probation_period'),
             'personalForm.personnel.probation_amount' => __('personnel::common.labels.probation_amount'),
+            'personalForm.personnel.weekly_hours_norm' => __('personnel::common.labels.weekly_hours_norm'),
             'personalForm.personnel.workplace_type' => __('personnel::common.labels.workplace_type'),
             'personalForm.personnel.working_time_type' => __('personnel::common.labels.working_time_type'),
             'personalForm.personnel.work_schedule' => __('personnel::common.labels.work_schedule'),

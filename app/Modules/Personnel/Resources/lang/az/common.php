@@ -111,6 +111,8 @@ return [
         'probation_amount' => 'Sınaq müddətinin sayı',
         'workplace_type' => 'İş yeri: əsas və ya əlavə',
         'working_time_type' => 'İş vaxtının növü',
+        'weekly_hours_norm' => 'Həftəlik iş vaxtı norması (saat)',
+        'weekly_hours_norm_hint' => 'Boş qalsa həftədə 40 saat (ƏM m.89). Yaş və əlillik əməkdaşın məlumatından avtomatik nəzərə alınır: 16 yaşadək — 24 saat, 16–18 yaş və 61–100% funksiya pozulmasına görə (I–II qrup) əlillik — 36 saat (ƏM m.91). Hamilə və yaşyarımadək uşağı olan qadınlar, 3 yaşadək uşağını təkbaşına böyüdən valideynlər (m.91) və zərərli əmək şəraiti (m.92) üçün — 36 saatdan çox olmayan normanı burada yazın.',
         'work_schedule' => 'İş rejimi',
         'work_start_time' => 'İşin başlama saatı',
         'work_end_time' => 'İşin bitmə saatı',

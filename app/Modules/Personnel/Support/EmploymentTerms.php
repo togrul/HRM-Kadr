@@ -25,6 +25,12 @@ final class EmploymentTerms
 
     public const WORKING_TIME_TYPES = ['full', 'partial', 'reduced'];
 
+    /** Natamam iş vaxtı (ƏM m.94): normanın azaldılması qısaldılmış iş vaxtı deyil. */
+    public const WORKING_TIME_PARTIAL = 'partial';
+
+    /** Həftəlik normal iş vaxtı (ƏM m.89.3). */
+    public const STANDARD_WEEKLY_HOURS = 40;
+
     public const WORK_SCHEDULES = ['five_day', 'six_day', 'shift_1', 'shift_2', 'shift_3', 'shift_4', 'other'];
 
     /** Schedules built on a working week rather than a shift rota. */

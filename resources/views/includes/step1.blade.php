@@ -456,6 +456,17 @@
                 @enderror
             </div>
         </div>
+        {{-- Reduced weekly norm (ƏM m.91–92) the record cannot show by itself; age and disability are applied automatically. --}}
+        <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+            <div class="flex flex-col">
+                <x-label for="personnel.weekly_hours_norm">{{ __('personnel::common.labels.weekly_hours_norm') }}</x-label>
+                <x-ui.input type="number" id="personnel.weekly_hours_norm" name="personnel.weekly_hours_norm" min="1" max="40" step="0.1" placeholder="40" wire:model="personalForm.personnel.weekly_hours_norm" />
+                @error('personalForm.personnel.weekly_hours_norm')
+                <x-validation> {{ $message }} </x-validation>
+                @enderror
+            </div>
+            <p class="text-xs leading-5 text-ink-faint md:col-span-2 md:self-end">{{ __('personnel::common.labels.weekly_hours_norm_hint') }}</p>
+        </div>
         {{-- A working week has fixed daily hours, a lunch break and rest days; a shift rota has neither. --}}
         @if ($isWeeklySchedule)
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">

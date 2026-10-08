@@ -111,6 +111,8 @@ return [
         'probation_amount' => 'Probation length',
         'workplace_type' => 'Workplace: primary or additional',
         'working_time_type' => 'Type of working time',
+        'weekly_hours_norm' => 'Weekly working time norm (hours)',
+        'weekly_hours_norm_hint' => 'Leave empty for the standard 40 hours (Labour Code Art. 89). Age and disability come from the employee record: under 16 — 24 hours, 16–18 and disability for a 61–100% loss of function (group I–II) — 36 hours (Art. 91). For pregnant women, women with a child under 1.5, single parents of a child under 3 (Art. 91) and harmful working conditions (Art. 92) enter a norm of at most 36 hours here.',
         'work_schedule' => 'Work schedule',
         'work_start_time' => 'Work start time',
         'work_end_time' => 'Work end time',

@@ -113,6 +113,11 @@ class AttendancePunchProcessingPipelineService
             ->map(fn ($v) => $v !== null ? (int) $v : null)
             ->all();
 
+        // Qısaldılmış iş vaxtı (ƏM m.91–92) — Personnel contract-ı ilə, tək sorğu.
+        $workingTimeProfiles = app(AttendanceWorkNormService::class)->workingTimeProfiles(
+            collect($baseTabelNos)->map(fn ($tabelNo) => (string) $tabelNo)->all()
+        );
+
         $contextResolver = app(AttendanceDayContextResolverService::class);
         $context = $contextResolver->build(
             from: $from,
@@ -243,6 +248,7 @@ class AttendancePunchProcessingPipelineService
             $overtimeRequestSyncService,
             $opts,
             $structureByTabel,
+            $workingTimeProfiles,
             &$existingLedgerMap,
             &$ledgerUpserts,
             &$processedPunchIds,
@@ -321,7 +327,8 @@ class AttendancePunchProcessingPipelineService
                         calendarDayType: $calendarDayType,
                         override: $override,
                         approvedOvertimeMinutes: $overtimeApprovedMap[$key] ?? null,
-                        isPreHoliday: $calendarDayType === 'workday' && $nextCalendarDayType === 'holiday'
+                        isPreHoliday: $calendarDayType === 'workday' && $nextCalendarDayType === 'holiday',
+                        workingTime: $workingTimeProfiles[(string) $tabelNo] ?? null
                     );
 
                     $ledger = $existingLedgerMap[$key] ?? new AttendanceDailyLedger([
