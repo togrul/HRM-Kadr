@@ -30,6 +30,7 @@ return [
     'types' => [
         'service_card' => 'Xidməti vəsiqə',
         'passport' => 'Pasport',
+        'id_card' => 'Şəxsiyyət vəsiqəsi',
         'contract' => 'Əmək müqaviləsi',
     ],
     'status' => [

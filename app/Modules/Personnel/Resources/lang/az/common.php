@@ -82,6 +82,9 @@ return [
         'height' => 'Boy',
         'document_issued_by' => 'Sənədi verən orqan',
         'document_issue_date' => 'Sənədin verilmə tarixi',
+        'id_card_valid_date' => 'Etibarlılıq tarixi (bitmə)',
+        'id_card_expired' => 'Vəsiqənin etibarlılıq müddəti bitib.',
+        'id_card_expiring' => 'Vəsiqənin etibarlılıq müddəti :days gün sonra bitir.',
         'document_number' => 'Sənəd nömrəsi',
         'document_type' => 'Sənəd növü',
         'card_number' => 'Kart nömrəsi',
@@ -313,6 +316,7 @@ return [
         'minimum_hiring_age' => 'İşə qəbul tarixində əməkdaşın ən azı :age yaşı olmalıdır (ƏM, maddə 42).',
         'contract_end_date_required' => 'Müddətli əmək müqaviləsi üçün müqavilənin bitmə tarixi mütləqdir (ƏM, maddə 47).',
         'probation_too_long' => 'Sınaq müddəti üç aydan çox olmamalıdır (ƏM, maddə 51).',
+        'id_card_valid_after_issue' => 'Şəxsiyyət vəsiqəsinin etibarlılıq tarixi verilmə tarixindən sonra olmalıdır.',
     ],
     'questions' => [
         'changed' => 'dəyişib?',

@@ -134,6 +134,43 @@ class DocumentExpiryReadServiceTest extends TestCase
         $this->assertSame(0, $filtered['typeCounts']['service_card']);
     }
 
+    public function test_id_cards_fall_into_the_expired_and_expiring_buckets_like_passports(): void
+    {
+        Carbon::setTestNow('2026-04-30 10:00:00');
+        DB::table('cities')->insertOrIgnore(['id' => 1, 'country_id' => 1, 'parent_id' => null, 'name' => 'Bakı']);
+
+        $expired = $this->makePersonnel('IDEXP');
+        $expiring = $this->makePersonnel('IDSOON');
+        $openEnded = $this->makePersonnel('IDNONE');
+
+        foreach ([[$expired, 'AA', '0000001', '2026-04-29'], [$expiring, 'AA', '0000002', '2026-05-20'], [$openEnded, 'AZE', '0000003', null]] as [$personnel, $series, $number, $validDate]) {
+            DB::table('personnel_identity_documents')->insert([
+                'tabel_no' => $personnel->tabel_no, 'nationality_id' => 1, 'series' => $series, 'number' => $number,
+                'pin' => $personnel->pin, 'born_country_id' => 1, 'born_city_id' => 1, 'height' => 175,
+                'document_issued_date' => '2016-04-29', 'valid_date' => $validDate,
+            ]);
+        }
+
+        $service = app(DocumentExpiryReadService::class);
+        $idCards = $service->rows(['type' => 'id_card'])->keyBy('tabel_no');
+
+        $this->assertSame('expired', $idCards['IDEXP']['status']);
+        $this->assertSame('AA 0000001', $idCards['IDEXP']['document_number']);
+        $this->assertSame(__('compliance::documents.types.id_card'), $idCards['IDEXP']['document_label']);
+        $this->assertSame('expiring_30', $idCards['IDSOON']['status']);
+        $this->assertSame(20, $idCards['IDSOON']['days_left']);
+        // A card entered before the expiry date existed has none, and is not flagged.
+        $this->assertSame('valid', $idCards['IDNONE']['status']);
+
+        $payload = $service->dashboard(['type' => 'id_card']);
+        $this->assertSame(3, $payload['typeCounts']['id_card']);
+        $this->assertSame(1, $payload['summary']['expired']);
+        $this->assertSame(1, $payload['summary']['expiring_30']);
+
+        $reminders = $service->reminderRows(30)->where('document_type', 'id_card')->pluck('tabel_no')->sort()->values()->all();
+        $this->assertSame(['IDEXP', 'IDSOON'], $reminders);
+    }
+
     private function makePersonnel(?string $prefix = null): Personnel
     {
         $this->seedReferenceData();

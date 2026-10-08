@@ -76,24 +76,24 @@ class DocumentExpiryPaginationTest extends TestCase
         $all = ['total' => 113, 'expired' => 11, 'expiring_30' => 13, 'expiring_60' => 10, 'valid' => 11, 'missing' => 68, 'critical' => 79, 'compliance_score' => 30];
 
         $cases = [
-            [[], $all, ['service_card' => 29, 'passport' => 28, 'contract' => 28], 113],
-            [['status' => 'expiring_30'], $all, ['service_card' => 5, 'passport' => 3, 'contract' => 5], 13],
+            [[], $all, ['service_card' => 29, 'passport' => 28, 'id_card' => 0, 'contract' => 28], 113],
+            [['status' => 'expiring_30'], $all, ['service_card' => 5, 'passport' => 3, 'id_card' => 0, 'contract' => 5], 13],
             [
                 ['type' => 'passport', 'search' => 'twin'],
                 ['total' => 2, 'expired' => 0, 'expiring_30' => 0, 'expiring_60' => 1, 'valid' => 0, 'missing' => 1, 'critical' => 1, 'compliance_score' => 30],
-                ['service_card' => 2, 'passport' => 2, 'contract' => 2],
+                ['service_card' => 2, 'passport' => 2, 'id_card' => 0, 'contract' => 2],
                 2,
             ],
             [
                 ['status' => 'missing', 'type' => 'medical'],
                 ['total' => 28, 'expired' => 0, 'expiring_30' => 0, 'expiring_60' => 0, 'valid' => 0, 'missing' => 28, 'critical' => 28, 'compliance_score' => 30],
-                ['service_card' => 14, 'passport' => 18, 'contract' => 8],
+                ['service_card' => 14, 'passport' => 18, 'id_card' => 0, 'contract' => 8],
                 28,
             ],
             [
                 ['search' => '2026-01-01 tarixindən'],
                 ['total' => 20, 'expired' => 5, 'expiring_30' => 5, 'expiring_60' => 4, 'valid' => 6, 'missing' => 0, 'critical' => 5, 'compliance_score' => 30],
-                ['service_card' => 0, 'passport' => 0, 'contract' => 20],
+                ['service_card' => 0, 'passport' => 0, 'id_card' => 0, 'contract' => 20],
                 20,
             ],
         ];
@@ -150,7 +150,8 @@ class DocumentExpiryPaginationTest extends TestCase
         $windows = ['passport' => [10, 20], 'service_card' => [40, 40], 'contract' => [30, 60]];
 
         $this->assertSame(
-            ['service_card' => ['critical' => 40, 'warning' => 40], 'passport' => ['critical' => 10, 'warning' => 20], 'contract' => ['critical' => 30, 'warning' => 60]],
+            // The ID card has no requirement row of its own and follows the passport's windows.
+            ['service_card' => ['critical' => 40, 'warning' => 40], 'passport' => ['critical' => 10, 'warning' => 20], 'id_card' => ['critical' => 10, 'warning' => 20], 'contract' => ['critical' => 30, 'warning' => 60]],
             $service->dashboard()['typeWindows']
         );
         $this->assertSame('expiring_60', $service->rows(['search' => 'AZE-15'])->sole()['status']);

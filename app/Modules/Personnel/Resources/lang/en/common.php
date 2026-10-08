@@ -82,6 +82,9 @@ return [
         'height' => 'Height',
         'document_issued_by' => 'Document issued by',
         'document_issue_date' => 'Document issue date',
+        'id_card_valid_date' => 'Valid until',
+        'id_card_expired' => 'The ID card has expired.',
+        'id_card_expiring' => 'The ID card expires in :days days.',
         'document_number' => 'Document number',
         'document_type' => 'Document type',
         'card_number' => 'Card number',
@@ -313,6 +316,7 @@ return [
         'minimum_hiring_age' => 'The employee must be at least :age years old on the hiring date (Labour Code, Article 42).',
         'contract_end_date_required' => 'A fixed-term employment contract requires an end date (Labour Code, Article 47).',
         'probation_too_long' => 'The probation period must not exceed three months (Labour Code, Article 51).',
+        'id_card_valid_after_issue' => 'The ID card expiry date must be after its issue date.',
     ],
     'questions' => [
         'changed' => 'changed?',

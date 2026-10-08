@@ -21,11 +21,12 @@ class DocumentExpiryReadService
 
     /**
      * Document type => source table and expiry column. The array order is also the
-     * tie-break order of the rows (cards, passports, contracts, then missing rows).
+     * tie-break order of the rows (cards, passports, ID cards, contracts, then missing rows).
      */
     private const DOCUMENT_SOURCES = [
         'service_card' => ['table' => 'personnel_cards', 'expires' => 'valid_date'],
         'passport' => ['table' => 'personnel_passports', 'expires' => 'valid_date'],
+        'id_card' => ['table' => 'personnel_identity_documents', 'expires' => 'valid_date'],
         'contract' => ['table' => 'personnel_contracts', 'expires' => 'contract_ends_at'],
     ];
 
@@ -47,6 +48,15 @@ class DocumentExpiryReadService
         'passport' => [
             ['table' => 'personnel_identity_documents', 'column' => 'number'],
         ],
+    ];
+
+    /**
+     * A document type that has no requirement row of its own and takes its day windows
+     * from another type's: the ID card (şəxsiyyət vəsiqəsi) is the identity document the
+     * "passport" requirement already accepts, so it expires on the same schedule.
+     */
+    private const WINDOW_FROM = [
+        'id_card' => 'passport',
     ];
 
     /**
@@ -444,6 +454,7 @@ class DocumentExpiryReadService
         return match ($type) {
             'service_card' => ["COALESCE({$table}.card_number, '')", []],
             'passport' => ["COALESCE({$table}.serial_number, '')", []],
+            'id_card' => ['TRIM('.$this->concat("COALESCE({$table}.series, '')", "' '", "COALESCE({$table}.number, '')").')', []],
             'contract' => $this->contractNumberSql($table),
         };
     }
@@ -530,7 +541,8 @@ class DocumentExpiryReadService
      */
     private function window(Collection $requirements, string $type): array
     {
-        $requirement = $requirements->firstWhere('key', $type);
+        $requirement = $requirements->firstWhere('key', $type)
+            ?? (isset(self::WINDOW_FROM[$type]) ? $requirements->firstWhere('key', self::WINDOW_FROM[$type]) : null);
         $critical = $requirement['critical_days'] ?? self::DEFAULT_CRITICAL_DAYS;
 
         // A warning window shorter than the critical one would be empty anyway; show it as such.

@@ -161,6 +161,24 @@
                     </x-slot>
                 </x-pikaday-input>
             </div>
+            @php
+                $idCardValidUntil = filled($document['valid_date'] ?? null)
+                    ? rescue(fn () => \Carbon\Carbon::parse((string) $document['valid_date'])->startOfDay(), null, false)
+                    : null;
+                $idCardDaysLeft = $idCardValidUntil ? (int) today()->diffInDays($idCardValidUntil, false) : null;
+            @endphp
+            <div class="flex flex-col">
+                <x-label for="documentForm.document.valid_date">{{ __('personnel::common.labels.id_card_valid_date') }}</x-label>
+                <x-ui.date-input id="documentForm.document.valid_date" name="documentForm.document.valid_date" wire:model.live="documentForm.document.valid_date" />
+                @error('documentForm.document.valid_date')
+                <x-validation> {{ $message }} </x-validation>
+                @enderror
+                @if ($idCardDaysLeft !== null && $idCardDaysLeft < 0)
+                    <span class="mt-1 text-xs font-medium text-rose-600">{{ __('personnel::common.labels.id_card_expired') }}</span>
+                @elseif ($idCardDaysLeft !== null && $idCardDaysLeft <= 60)
+                    <span class="mt-1 text-xs font-medium text-amber-600">{{ __('personnel::common.labels.id_card_expiring', ['days' => $idCardDaysLeft]) }}</span>
+                @endif
+            </div>
         </div>
     </x-form-card>
 

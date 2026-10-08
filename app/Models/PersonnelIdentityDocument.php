@@ -43,14 +43,17 @@ class PersonnelIdentityDocument extends Model
         'height',
         'document_issued_authority',
         'document_issued_date',
+        'valid_date',
     ];
 
     protected $dates = [
         'document_issued_date',
+        'valid_date',
     ];
 
     protected $casts = [
         'document_issued_date' => self::FORMAT_CAST,
+        'valid_date' => self::FORMAT_CAST,
     ];
 
     protected function serialNumber(): Attribute
