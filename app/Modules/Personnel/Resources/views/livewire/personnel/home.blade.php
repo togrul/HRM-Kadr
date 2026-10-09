@@ -46,6 +46,7 @@
     $canAttendance = $user?->can('show-attendance') === true;
     $canActivity = $user?->can('show-audit-logs') === true;
     $canStructure = $user?->can('show-staff') === true;
+    $canPersonnel = $user?->can('show-personnels') === true;
 @endphp
 
 <div class="flex flex-col">
@@ -275,6 +276,70 @@
             @endif
         @endif
 
+        {{-- ==================== away today ==================== --}}
+        @if ($canPersonnel)
+            @island(name: 'home-absent-today', lazy: true)
+            @placeholder
+                @include('personnel::livewire.personnel.placeholders.home-card', ['rows' => 3, 'chart' => false])
+            @endplaceholder
+            @php
+                $absent = $this->absentToday;
+                $absentListUrl = route('personnel.index', ['presence' => \App\Modules\Personnel\Support\Presence\PersonnelPresenceStatus::absences()]);
+            @endphp
+            <section class="rounded-2xl border border-hairline bg-white p-4 shadow-card" data-home-block="absent-today">
+                <div class="flex flex-wrap items-start justify-between gap-3">
+                    <div class="min-w-0">
+                        <h2 class="text-[13.5px] font-semibold tracking-[-0.02em] text-ink">{{ __('personnel::home.absent.title') }}</h2>
+                        @if ($absent['total'] > 0)
+                            <p class="mt-0.5 text-[11.5px] text-ink-faint">{{ __('personnel::home.absent.subtitle', ['count' => $absent['total']]) }}</p>
+                        @endif
+                    </div>
+                    @if ($absent['counts'] !== [])
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            @foreach ($absent['counts'] as $statusKey => $count)
+                                @php $statusCase = \App\Modules\Personnel\Support\Presence\PersonnelPresenceStatus::from($statusKey); @endphp
+                                <x-small-badge :mode="$statusCase->tone()" dot>
+                                    {{ $statusCase->label() }} · <span class="hrm-num">{{ $count }}</span>
+                                </x-small-badge>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+
+                @if ($absent['rows'] === [])
+                    <p class="mt-3 flex items-center gap-2 text-[12.5px] text-ink-soft">
+                        <svg class="h-4 w-4 shrink-0 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                        {{ __('personnel::home.absent.empty') }}
+                    </p>
+                @else
+                    <ul class="mt-3 divide-y divide-hairline-subtle">
+                        @foreach ($absent['rows'] as $row)
+                            <li wire:key="home-absent-{{ $row['id'] }}" class="flex items-center gap-3 py-2.5">
+                                <x-avatar :name="$row['name']" size="sm" :tone="$row['tone']" />
+                                <div class="min-w-0 flex-1">
+                                    <a href="{{ route('personnel.show', $row['id']) }}" wire:navigate class="block truncate text-[13px] font-medium text-ink hover:underline">{{ $row['name'] }}</a>
+                                    <p class="truncate text-[11.5px] text-ink-faint" @if ($row['period']) title="{{ $row['period'] }}" @endif>{{ $row['reason'] }}</p>
+                                </div>
+                                @if ($row['returns'])
+                                    <span class="hrm-num shrink-0 text-[11.5px] text-ink-muted">{{ __('personnel::home.absent.returns', ['date' => $row['returns']]) }}</span>
+                                @endif
+                            </li>
+                        @endforeach
+                    </ul>
+
+                    <div class="mt-2 flex items-center justify-between gap-3 border-t border-hairline-subtle pt-2.5">
+                        @if ($absent['more'] > 0)
+                            <a href="{{ $absentListUrl }}" wire:navigate class="text-[12px] font-medium text-ink-soft transition hover:text-ink">{{ __('personnel::home.absent.more', ['count' => $absent['more']]) }}</a>
+                        @else
+                            <span></span>
+                        @endif
+                        <a href="{{ $absentListUrl }}" wire:navigate class="text-[11.5px] text-ink-muted transition hover:text-ink">{{ __('personnel::home.absent.view_all') }}</a>
+                    </div>
+                @endif
+            </section>
+            @endisland
+        @endif
+
         <div class="grid items-start gap-4 xl:grid-cols-[1.35fr,1fr]">
 
             {{-- ==================== weekly attendance ==================== --}}
@@ -431,7 +496,7 @@
             @endisland
         @endif
 
-        @if (blank($attention) && ! $canAttendance && ! $canActivity && ! $canStructure)
+        @if (blank($attention) && ! $canAttendance && ! $canActivity && ! $canStructure && ! $canPersonnel)
             <p class="rounded-2xl border border-hairline bg-white px-4 py-10 text-center text-[12.5px] text-ink-faint shadow-card">
                 {{ __('personnel::home.empty') }}
             </p>

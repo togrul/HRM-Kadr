@@ -109,6 +109,14 @@ return [
         ],
     ],
 
+    'absent' => [
+        'title' => 'Bu gün işdə yoxdur',
+        'subtitle' => ':count əməkdaş',
+        'empty' => 'Bu gün hamı işdədir',
+        'more' => '+:count digər',
+        'returns' => 'qayıdış: :date',
+        'view_all' => 'Siyahıda bax',
+    ],
     'structure' => [
         'title' => 'Struktur üzrə doluluq',
         'subtitle' => 'Ştat cədvəlinə görə',
