@@ -32,7 +32,10 @@ use Illuminate\Database\Eloquent\Builder;
  * - business trip: approved or HR-entered, start_date <= D <= end_date;
  * - leave / sick: status APPROVED, duration_unit 'day' (hourly and half-day permissions never
  *   flip the whole day), starts_at <= D <= ends_at; a leave type is "sick" when its
- *   attendance code or name says so (SICK_CODES / SICK_NAME_FRAGMENTS).
+ *   attendance code or name says so (SICK_CODES / SICK_NAME_FRAGMENTS). A leave with no
+ *   end date is an open sick certificate (Leaves' register writes those): it covers every
+ *   day from its start and has no known return date. A cancelled certificate cancels its
+ *   leave, so it drops out with the APPROVED filter.
  *
  * Expected return = the vacation's own return_work_date when HR recorded one, otherwise the
  * first working day after the period ends on the organisation calendar (attendance_calendars,
@@ -138,7 +141,7 @@ class PersonnelPresenceResolver
 
             $resolved[$id] = [$status, $range, $tabelNo];
 
-            if ($range['return'] === null) {
+            if ($range['return'] === null && ! ($range['open'] ?? false)) {
                 $pendingReturn[] = $range['end'];
             }
         }
@@ -151,6 +154,19 @@ class PersonnelPresenceResolver
             }
 
             [$status, $range, $tabelNo] = $entry;
+
+            if ($range['open'] ?? false) {
+                // Still on an open certificate: no end, so no expected return yet.
+                $resolved[$id] = new PersonnelPresence(
+                    personnelId: $id,
+                    tabelNo: $tabelNo,
+                    status: $status,
+                    reason: $range['reason'] ?? $status->label(),
+                    periodStart: $range['start'],
+                );
+
+                continue;
+            }
 
             $resolved[$id] = new PersonnelPresence(
                 personnelId: $id,
@@ -324,7 +340,7 @@ class PersonnelPresenceResolver
             .' AND pl.deleted_at IS NULL'
             .' AND pl.status_id = ?'
             .' AND (pl.duration_unit IS NULL OR pl.duration_unit = ?)'
-            .' AND pl.starts_at <= ? AND pl.ends_at >= ?';
+            .' AND pl.starts_at <= ? AND (pl.ends_at >= ? OR pl.ends_at IS NULL)';
         $leaveBindings = [OrderStatusEnum::APPROVED->value, 'day', $dayEnd, $dayStart];
 
         $sickCodes = implode(', ', array_fill(0, count(self::SICK_CODES), '?'));
@@ -396,7 +412,7 @@ class PersonnelPresenceResolver
             ->where('leaves.status_id', OrderStatusEnum::APPROVED->value)
             ->where(fn ($query) => $query->whereNull('leaves.duration_unit')->orWhere('leaves.duration_unit', 'day'))
             ->where('leaves.starts_at', '<=', $dayEnd)
-            ->where('leaves.ends_at', '>=', $dayStart)
+            ->where(fn ($query) => $query->where('leaves.ends_at', '>=', $dayStart)->orWhereNull('leaves.ends_at'))
             ->toBase()
             ->get(['leaves.tabel_no', 'leaves.starts_at', 'leaves.ends_at', 'leave_types.name as type_name', 'leave_types.attendance_code']);
 
@@ -405,6 +421,7 @@ class PersonnelPresenceResolver
 
         foreach ($rows as $row) {
             $range = $this->range($row->starts_at, $row->ends_at);
+            $range['open'] = blank($row->ends_at);
             $isSick = $this->isSickType($row->attendance_code ?? null, $row->type_name ?? null);
             $range['reason'] = $isSick ? null : (filled($row->type_name ?? null) ? (string) $row->type_name : null);
 
@@ -504,7 +521,14 @@ class PersonnelPresenceResolver
      */
     private function keepLatest(array $ranges, string $tabelNo, array $range): array
     {
-        if (! isset($ranges[$tabelNo]) || $range['end']->greaterThan($ranges[$tabelNo]['end'])) {
+        $current = $ranges[$tabelNo] ?? null;
+
+        // An open-ended period outlasts any dated one.
+        if ($current !== null && ($current['open'] ?? false)) {
+            return $ranges;
+        }
+
+        if ($current === null || ($range['open'] ?? false) || $range['end']->greaterThan($current['end'])) {
             $ranges[$tabelNo] = $range;
         }
 
@@ -512,7 +536,7 @@ class PersonnelPresenceResolver
     }
 
     /**
-     * @return array{start: CarbonImmutable, end: CarbonImmutable, return: CarbonImmutable|null, reason: string|null}
+     * @return array{start: CarbonImmutable, end: CarbonImmutable, return: CarbonImmutable|null, reason: string|null, open: bool}
      */
     private function range(mixed $start, mixed $end): array
     {
@@ -523,6 +547,7 @@ class PersonnelPresenceResolver
             'end' => filled($end) ? $this->date($end) : $startDate,
             'return' => null,
             'reason' => null,
+            'open' => false,
         ];
     }
 

@@ -537,6 +537,7 @@ class PersonnelSeeder extends Seeder
             'delete-leaves',
             'export-leaves',
             'approve-leaves',
+            'view-medical-diagnosis',
             'show-attendance',
             'show-attendance-daily-monitor',
             'show-attendance-puantaj',

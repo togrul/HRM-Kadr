@@ -70,6 +70,11 @@ return [
                 'hint' => 'Expiring within 30 days, or already expired',
                 'action' => 'Open documents',
             ],
+            'stale_sick_certificates' => [
+                'label' => 'Long-open sick-leave certificate',
+                'hint' => 'Open longer than the configured limit',
+                'action' => 'Open certificates',
+            ],
         ],
     ],
 

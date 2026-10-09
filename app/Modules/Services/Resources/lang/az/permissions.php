@@ -29,6 +29,7 @@ return [
         'employee_content_library' => 'Öyrənmə materialları kitabxanası',
         'general' => 'Ümumi',
         'leaves' => 'İcazələr',
+        'medical_diagnosis' => 'Tibbi diaqnoz (xəstəlik vərəqəsi)',
         'learning_library' => 'Tədris kitabxanası',
         'my_hr' => 'Şəxsi kabinet',
         'my_hr_accounts' => 'Şəxsi kabinet hesabları',

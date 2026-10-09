@@ -19,7 +19,8 @@ class LeaveAbsenceSource implements AbsenceSource
             ->where('tabel_no', $tabelNo)
             ->whereIn('status_id', [OrderStatusEnum::PENDING->value, OrderStatusEnum::APPROVED->value])
             ->whereDate('starts_at', '<=', $to->toDateString())
-            ->whereDate('ends_at', '>=', $from->toDateString())
+            // An open sick certificate's leave has no end yet and holds every day from its start.
+            ->where(fn ($query) => $query->whereDate('ends_at', '>=', $from->toDateString())->orWhereNull('ends_at'))
             ->get(['id', 'starts_at', 'ends_at', 'duration_unit', 'partial_day_part', 'starts_time', 'ends_time'])
             ->map(fn (Leave $leave) => $leave->absencePeriod())
             ->filter()

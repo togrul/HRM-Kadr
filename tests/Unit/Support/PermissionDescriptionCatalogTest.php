@@ -19,7 +19,7 @@ class PermissionDescriptionCatalogTest extends TestCase
     {
         $az = PermissionDescriptionCatalog::all('az');
 
-        $this->assertCount(113, $az);
+        $this->assertCount(114, $az);
         $this->assertSame(array_keys($az), array_keys(PermissionDescriptionCatalog::all('en')));
         // Dotted permission names are map keys, not nested lookups.
         $this->assertArrayHasKey('candidate-applications.create', $az);
