@@ -100,7 +100,7 @@ class AttendanceFeedService
     /**
      * @param  Collection<string, list<AttendanceDailyLedger>>  $ledgers
      * @param  Collection<string, AttendanceMonthlySummary>  $summaries
-     * @param  array<string, list<array{date: string, minutes: int, compensation: string}>>  $restDayWork
+     * @param  array<string, list<array{id: int, date: string, minutes: int, compensation: string}>>  $restDayWork
      * @return array<string, mixed>
      */
     private function row(Personnel $person, Collection $ledgers, Collection $summaries, array $restDayWork): array

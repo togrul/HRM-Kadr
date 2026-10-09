@@ -25,11 +25,13 @@ class PayrollCalculator
      * bases are summed; off-cycle runs leave them out so they are paid once. The same holds
      * for what approved orders entitle the employee to in the month (double-paid rest-day
      * work, substitution extra pay), read live from their owning modules so a recalculation
-     * follows the orders.
+     * follows the orders. $orderLines replaces those order-derived lines (retro uses it to
+     * price a locked month with what was actually paid for its orders).
      *
+     * @param  list<array<string,mixed>>|null  $orderLines
      * @return array{gross:float,total_deductions:float,net:float,employer_cost:float,proration_factor:float,currency:string,lines:array<int,array<string,mixed>>}|null
      */
-    public function calculate(string $tabelNo, ?string $onDate = null, ?int $year = null, ?int $month = null, bool $withOneOffs = true): ?array
+    public function calculate(string $tabelNo, ?string $onDate = null, ?int $year = null, ?int $month = null, bool $withOneOffs = true, ?array $orderLines = null): ?array
     {
         $current = $this->compensation->currentCompensation($tabelNo, $onDate);
 
@@ -95,7 +97,7 @@ class PayrollCalculator
         }
 
         if ($withOneOffs && $year && $month) {
-            foreach ($this->orderEarnings->linesFor($tabelNo, (float) $current->base_amount, $year, $month) as $line) {
+            foreach ($orderLines ?? $this->orderEarnings->linesFor($tabelNo, (float) $current->base_amount, $year, $month) as $line) {
                 $lines[] = $line;
             }
         }
@@ -136,6 +138,18 @@ class PayrollCalculator
             'currency' => $current->currency,
             'lines' => $lines,
         ];
+    }
+
+    /**
+     * The order-derived earning lines the employee is entitled to for the month right now.
+     *
+     * @return list<array<string,mixed>>
+     */
+    public function orderEarningLines(string $tabelNo, string $onDate, int $year, int $month): array
+    {
+        $current = $this->compensation->currentCompensation($tabelNo, $onDate);
+
+        return $current ? $this->orderEarnings->linesFor($tabelNo, (float) $current->base_amount, $year, $month) : [];
     }
 
     /**

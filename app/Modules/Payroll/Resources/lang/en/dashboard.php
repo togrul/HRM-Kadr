@@ -69,6 +69,7 @@ return [
         'deductions' => 'Deductions',
         'proration' => 'Proration (attendance)',
         'retro' => 'Pending retro adjustment',
+        'retro_recovery' => 'Recovery of overpaid pay for a revoked order (retro)',
         'loan_type' => 'Type',
         'principal' => 'Principal',
         'monthly_installment' => 'Monthly installment',
@@ -117,8 +118,9 @@ return [
 
     'order_earnings' => [
         'rest_day_work' => 'Work on a non-working day (double rate, :days day(s), :hours h)',
-        'substitution' => 'Substitution extra pay (:days day(s))',
-        'substitution_for' => 'Substitution extra pay — :name (:days day(s))',
+        'rest_day_work_mixed' => 'Work on a non-working day (:days day(s), :hours h; :within h within the norm at single rate, the rest double)',
+        'substitution' => 'Substitution extra pay (:days working day(s))',
+        'substitution_for' => 'Substitution extra pay — :name (:days working day(s))',
     ],
 
     'run_types' => [
@@ -180,5 +182,6 @@ return [
         'lock_requires_approval' => 'The run must be approved before it can be locked',
         'reopen_not_allowed' => 'Only an approved or locked run can be reopened',
         'recalculate_first' => 'One-off earnings changed after this run was calculated — reopen and recalculate it',
+        'order_earnings_changed' => 'Order-based pay (non-working day work, substitution) changed after this run was calculated — reopen and recalculate it',
     ],
 ];

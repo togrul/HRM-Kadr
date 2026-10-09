@@ -69,6 +69,7 @@ return [
         'deductions' => 'Tutulmalar',
         'proration' => 'Proporsiya (davamiyyət)',
         'retro' => 'Gözləyən retro düzəliş',
+        'retro_recovery' => 'Ləğv olunmuş əmr üzrə artıq ödənişin tutulması (retro)',
         'loan_type' => 'Növ',
         'principal' => 'Əsas məbləğ',
         'monthly_installment' => 'Aylıq ödəniş',
@@ -117,8 +118,9 @@ return [
 
     'order_earnings' => [
         'rest_day_work' => 'Qeyri-iş günü işə cəlb (ikiqat, :days gün, :hours saat)',
-        'substitution' => 'Əvəzetməyə görə əlavə ödəniş (:days gün)',
-        'substitution_for' => 'Əvəzetməyə görə əlavə ödəniş — :name (:days gün)',
+        'rest_day_work_mixed' => 'Qeyri-iş günü işə cəlb (:days gün, :hours saat; normadaxili :within saat bir qat, qalanı ikiqat)',
+        'substitution' => 'Əvəzetməyə görə əlavə ödəniş (:days iş günü)',
+        'substitution_for' => 'Əvəzetməyə görə əlavə ödəniş — :name (:days iş günü)',
     ],
 
     'run_types' => [
@@ -180,5 +182,6 @@ return [
         'lock_requires_approval' => 'Kilidləmədən əvvəl hesablama təsdiqlənməlidir',
         'reopen_not_allowed' => 'Yalnız təsdiqlənmiş və ya kilidlənmiş hesablama yenidən açıla bilər',
         'recalculate_first' => 'Hesablama aparılandan sonra birdəfəlik ödənişlər dəyişib — hesablamanı yenidən açıb yenidən hesablayın',
+        'order_earnings_changed' => 'Hesablama aparılandan sonra əmrdən irəli gələn ödənişlər (qeyri-iş gününə cəlb, əvəzetmə) dəyişib — hesablamanı yenidən açıb yenidən hesablayın',
     ],
 ];

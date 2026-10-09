@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property bool $affects_social
  * @property bool $is_statutory
  * @property int $sort
+ * @property list<string>|null $sources
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  */
@@ -36,6 +37,7 @@ class PayslipLine extends Model
         'affects_social',
         'is_statutory',
         'sort',
+        'sources',
     ];
 
     protected $casts = [
@@ -44,6 +46,7 @@ class PayslipLine extends Model
         'affects_social' => 'boolean',
         'is_statutory' => 'boolean',
         'sort' => 'integer',
+        'sources' => 'array',
     ];
 
     /** @return BelongsTo<Payslip, $this> */
