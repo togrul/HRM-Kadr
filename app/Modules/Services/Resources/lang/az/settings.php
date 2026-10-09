@@ -49,6 +49,8 @@ return [
         'organization_name' => 'Təşkilatın adı',
         'disciplinary_sanction_term' => 'İntizam tənbehinin qüvvədə qalma müddəti (ay)',
         'sick_certificate_alert_days' => 'Açıq xəstəlik vərəqəsi üçün xəbərdarlıq həddi (gün)',
+        'vacation_ledger_start_date' => 'Məzuniyyət balansının iş ili üzrə uçot başlanğıcı',
+        'vacation_compensation_without_termination' => 'Xitamsız məzuniyyət kompensasiyasına icazə (ƏM 144 — hüquqşünasla razılaşdırın)',
     ],
     'messages' => [
         'general_description' => 'Sistem üzrə ümumi parametrlər və dəyərlər.',

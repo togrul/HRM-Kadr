@@ -49,6 +49,8 @@ return [
         'organization_name' => 'Organization name',
         'disciplinary_sanction_term' => 'Disciplinary sanction term (months)',
         'sick_certificate_alert_days' => 'Open sick-leave certificate alert threshold (days)',
+        'vacation_ledger_start_date' => 'Vacation ledger start date',
+        'vacation_compensation_without_termination' => 'Allow vacation compensation without termination (LC art. 144 — check with a lawyer)',
     ],
     'messages' => [
         'general_description' => 'System-wide parameters and values.',

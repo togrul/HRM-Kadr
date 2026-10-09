@@ -623,6 +623,8 @@ class SettingsList extends Component
             'Organization name' => __('services::settings.labels.organization_name'),
             'Disciplinary sanction term (months)' => __('services::settings.labels.disciplinary_sanction_term'),
             'Open sick certificate alert (days)' => __('services::settings.labels.sick_certificate_alert_days'),
+            'Vacation ledger start date' => __('services::settings.labels.vacation_ledger_start_date'),
+            'Vacation compensation without termination allowed' => __('services::settings.labels.vacation_compensation_without_termination'),
             default => ModuleTranslation::resolveStoredText($value),
         };
     }
