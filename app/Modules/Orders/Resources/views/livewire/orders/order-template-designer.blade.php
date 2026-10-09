@@ -157,6 +157,29 @@
                 <option value="{{ $opt['kind'] }}">{{ $opt['label'] }}</option>
             @endforeach
         </x-ui.select>
+
+        {{-- multi-participant (çoxşəxsli): one order for several employees --}}
+        <div class="mt-4 border-t border-zinc-100 pt-4">
+            <div class="flex items-start gap-3">
+                <x-ui.toggle wire:model.live="multiParticipant" :disabled="! $this->supportsParticipants" aria-label="{{ __('orders::order_composer.designer.multi_title') }}" />
+                <div class="min-w-0 leading-tight">
+                    <p class="text-[13px] font-semibold text-zinc-900">{{ __('orders::order_composer.designer.multi_title') }}</p>
+                    <p class="mt-0.5 text-[12px] text-zinc-400">
+                        {{ $this->supportsParticipants ? __('orders::order_composer.designer.multi_hint') : __('orders::order_composer.designer.multi_not_supported') }}
+                    </p>
+                </div>
+            </div>
+            @error('multiParticipant') <p class="mt-2 text-[11px] text-red-600">{{ $message }}</p> @enderror
+
+            @if ($multiParticipant)
+                <div class="mt-3 space-y-1.5 rounded-xl bg-blue-50/60 px-4 py-3 text-[12px] leading-relaxed text-zinc-600">
+                    <p class="font-semibold text-zinc-800">{{ __('orders::order_composer.designer.multi_guide_title') }}</p>
+                    <p>{{ __('orders::order_composer.designer.multi_guide_row') }}</p>
+                    <p>{{ __('orders::order_composer.designer.multi_guide_block') }}</p>
+                    <p>{{ __('orders::order_composer.designer.multi_guide_scope') }}</p>
+                </div>
+            @endif
+        </div>
     </div>
 
     {{-- ============ Step 2: map the detected variables ============ --}}
@@ -219,6 +242,17 @@
                             @endif
                             @error("variables.$i.auto_key") <p class="mt-1 text-[11px] text-red-600">{{ $message }}</p> @enderror
                         </div>
+
+                        {{-- multi-participant: shared, per participant, or shared with a per-person override --}}
+                        @if ($multiParticipant && $v['source'] === 'manual')
+                            <div class="w-full sm:w-52 sm:shrink-0">
+                                <x-ui.select wire:model="variables.{{ $i }}.scope" aria-label="{{ __('orders::order_composer.designer.scope_label') }}">
+                                    @foreach ($this->scopeOptions as $scopeOption)
+                                        <option value="{{ $scopeOption['scope'] }}">{{ $scopeOption['label'] }}</option>
+                                    @endforeach
+                                </x-ui.select>
+                            </div>
+                        @endif
 
                         {{-- effect role: only for manual fields when the order has an HR effect --}}
                         @if ($effect !== 'none' && $v['source'] === 'manual' && count($this->effectRoles))

@@ -2,11 +2,14 @@
 
 namespace App\Modules\Orders\Livewire;
 
+use App\Models\OrderWordTemplate;
 use App\Modules\Orders\Application\Document\DocxPlaceholderParser;
 use App\Modules\Orders\Application\Document\DocxTemplateRenderer;
 use App\Modules\Orders\Application\Document\DocxToPdfConverter;
 use App\Modules\Orders\Application\Document\OrderWordTemplateRepository;
+use App\Modules\Orders\Application\Document\ParticipantTemplateProcessor;
 use App\Modules\Orders\Application\Variables\OrderVariableRegistry;
+use App\Modules\Orders\Infrastructure\Document\Effects\OrderEffectCatalog;
 use App\Modules\Orders\Infrastructure\Document\OrderLookupFieldRegistry;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -38,6 +41,21 @@ class OrderTemplateDesigner extends Component
     /** The HR action this order type performs on approval (none|vacation|transfer…). */
     public string $effect = 'none';
 
+    /**
+     * Issued for several employees at once (çoxşəxsli): the composer collects a participant
+     * list, and each manual variable is shared, per participant, or shared with a
+     * per-participant override. Only effects that make sense per person allow it.
+     */
+    public bool $multiParticipant = false;
+
+    /**
+     * Repeating-block markers found in the uploaded file ([İştirakçılar] / [/İştirakçılar]):
+     * not variables — normalized to ${participants} / ${/participants}.
+     *
+     * @var array<string,string> raw label => marker token
+     */
+    public array $blockMarkers = [];
+
     /** A freshly selected .docx (Livewire temporary upload). */
     public $upload = null;
 
@@ -49,7 +67,7 @@ class OrderTemplateDesigner extends Component
     /**
      * The editable mapping rows, one per detected placeholder.
      *
-     * @var array<int,array{token:string,label:string,source:string,auto_key:string,field_type:string}>
+     * @var array<int,array{token:string,label:string,source:string,auto_key:string,field_type:string,effect_role?:string,scope?:string,field_required?:bool,field_default?:string}>
      */
     public array $variables = [];
 
@@ -72,6 +90,7 @@ class OrderTemplateDesigner extends Component
         $this->code = $template->code;
         $this->label = $template->label;
         $this->effect = $template->effect ?? 'none';
+        $this->multiParticipant = $template->isMultiParticipant();
         $this->docxPath = $template->docx_path;
         $this->originalFileName = $code.'.docx';
         $this->isNew = false;
@@ -82,7 +101,7 @@ class OrderTemplateDesigner extends Component
      * Effect options for the order-type selector + the roles of the current effect (for
      * the per-variable role dropdown).
      */
-    public function getEffectOptionsProperty(\App\Modules\Orders\Infrastructure\Document\Effects\OrderEffectCatalog $catalog): array
+    public function getEffectOptionsProperty(OrderEffectCatalog $catalog): array
     {
         return $catalog->options();
     }
@@ -90,14 +109,40 @@ class OrderTemplateDesigner extends Component
     /**
      * @return array<int,array{key:string,label:string,type:string}>
      */
-    public function getEffectRolesProperty(\App\Modules\Orders\Infrastructure\Document\Effects\OrderEffectCatalog $catalog): array
+    public function getEffectRolesProperty(OrderEffectCatalog $catalog): array
     {
         return $catalog->roles($this->effect);
     }
 
-    /** Changing the effect clears any roles that no longer belong to it. */
+    /** Whether the selected effect may run once per participant (multi-participant allowed). */
+    public function getSupportsParticipantsProperty(OrderEffectCatalog $catalog): bool
+    {
+        return $catalog->supportsParticipants($this->effect);
+    }
+
+    /**
+     * The choices for how a manual variable is filled on a multi-participant order.
+     *
+     * @return array<int,array{scope:string,label:string}>
+     */
+    public function getScopeOptionsProperty(): array
+    {
+        return array_map(fn (string $scope): array => [
+            'scope' => $scope,
+            'label' => __('orders::order_composer.designer.scopes.'.$scope),
+        ], [OrderWordTemplate::SCOPE_ORDER, OrderWordTemplate::SCOPE_PARTICIPANT, OrderWordTemplate::SCOPE_OVERRIDE]);
+    }
+
+    /**
+     * Changing the effect clears any roles that no longer belong to it, and the
+     * multi-participant flag when the new effect is one-person only.
+     */
     public function updatedEffect(): void
     {
+        if (! app(OrderEffectCatalog::class)->supportsParticipants($this->effect)) {
+            $this->multiParticipant = false;
+        }
+
         $valid = array_column($this->effectRoles, 'key');
         foreach ($this->variables as $i => $variable) {
             if (! in_array($variable['effect_role'] ?? '', $valid, true)) {
@@ -168,16 +213,30 @@ class OrderTemplateDesigner extends Component
         $labels = app(DocxPlaceholderParser::class)->extract($this->upload->getRealPath());
 
         $this->variables = [];
-        foreach ($labels as $i => $label) {
+        $this->blockMarkers = [];
+        $i = 0;
+        foreach ($labels as $label) {
+            $marker = DocxPlaceholderParser::blockMarkerToken($label);
+            if ($marker !== null) {
+                $this->blockMarkers[$label] = $marker;
+
+                continue;
+            }
+
             $suggestion = $this->suggestAutoKey($label, $registry);
             $this->variables[] = [
-                'token' => 'var_'.($i + 1),
+                'token' => 'var_'.(++$i),
                 'label' => $label,
                 'source' => $suggestion !== null ? 'auto' : 'manual',
                 'auto_key' => $suggestion ?? '',
                 'field_type' => 'text',
                 'effect_role' => '',
+                'scope' => OrderWordTemplate::SCOPE_ORDER,
             ];
+        }
+
+        if ($this->blockMarkers !== [] && app(OrderEffectCatalog::class)->supportsParticipants($this->effect)) {
+            $this->multiParticipant = true;
         }
     }
 
@@ -196,6 +255,12 @@ class OrderTemplateDesigner extends Component
 
         if ($this->variables === []) {
             $this->addError('upload', __('orders::order_composer.designer.no_variables'));
+
+            return;
+        }
+
+        if ($this->multiParticipant && ! app(OrderEffectCatalog::class)->supportsParticipants($this->effect)) {
+            $this->addError('multiParticipant', __('orders::order_composer.designer.multi_not_supported'));
 
             return;
         }
@@ -228,7 +293,7 @@ class OrderTemplateDesigner extends Component
             $this->docxPath = $relative;
         }
 
-        $repository->save($this->code, $this->label, $this->effect, (string) $this->docxPath, $this->toStorage(), auth()->id());
+        $repository->save($this->code, $this->label, $this->effect, (string) $this->docxPath, $this->toStorage(), auth()->id(), $this->multiParticipant);
 
         $this->isNew = false;
         $this->upload = null;
@@ -295,6 +360,8 @@ class OrderTemplateDesigner extends Component
                 $labels[$v['token']] = '['.($v['label'] ?? '').']';
             }
         }
+        $labels[ParticipantTemplateProcessor::BLOCK] = '['.DocxPlaceholderParser::BLOCK_OPEN_LABEL.']';
+        $labels['/'.ParticipantTemplateProcessor::BLOCK] = '['.DocxPlaceholderParser::BLOCK_CLOSE_LABEL.']';
 
         $tmp = $renderer->renderToFile($version->docx_path, $labels);
 
@@ -333,7 +400,7 @@ class OrderTemplateDesigner extends Component
             $map[$variable['label']] = $variable['token'];
         }
 
-        return $map;
+        return $map + $this->blockMarkers;
     }
 
     /**
@@ -349,7 +416,11 @@ class OrderTemplateDesigner extends Component
             $map[$variable['token']] = '['.$variable['label'].']';
         }
 
-        return $map;
+        // The repeating-block markers read back as the author typed them.
+        return $map + [
+            ParticipantTemplateProcessor::BLOCK => '['.DocxPlaceholderParser::BLOCK_OPEN_LABEL.']',
+            '/'.ParticipantTemplateProcessor::BLOCK => '['.DocxPlaceholderParser::BLOCK_CLOSE_LABEL.']',
+        ];
     }
 
     /**
@@ -367,9 +438,14 @@ class OrderTemplateDesigner extends Component
                 'label' => $v['label'],
                 'source' => $auto ? 'auto' : 'manual',
                 'auto_key' => $auto ? $v['auto_key'] : null,
-                'field' => $auto ? null : ['key' => $v['token'], 'type' => $v['field_type']],
+                // A seeded field's optional flag and default survive a re-save in the designer.
+                'field' => $auto ? null : ['key' => $v['token'], 'type' => $v['field_type']]
+                    + (isset($v['field_required']) ? ['required' => (bool) $v['field_required']] : [])
+                    + (isset($v['field_default']) ? ['default' => $v['field_default']] : []),
                 // Which structured input this variable feeds the approval effect (manual only).
                 'effect_role' => (! $auto && ($v['effect_role'] ?? '') !== '') ? $v['effect_role'] : null,
+                // How a manual field is filled on a multi-participant order (ignored otherwise).
+                'scope' => (! $auto && $this->multiParticipant) ? $this->validScope((string) ($v['scope'] ?? '')) : OrderWordTemplate::SCOPE_ORDER,
             ];
         }, $this->variables);
     }
@@ -378,7 +454,7 @@ class OrderTemplateDesigner extends Component
      * Stored mapping shape → editable rows.
      *
      * @param  array<int,array<string,mixed>>  $stored
-     * @return array<int,array{token:string,label:string,source:string,auto_key:string,field_type:string}>
+     * @return array<int,array{token:string,label:string,source:string,auto_key:string,field_type:string,effect_role:string,scope:string,field_required?:bool,field_default?:string}>
      */
     private function toEditable(array $stored): array
     {
@@ -389,7 +465,16 @@ class OrderTemplateDesigner extends Component
             'auto_key' => (string) ($v['auto_key'] ?? ''),
             'field_type' => (string) ($v['field']['type'] ?? 'text'),
             'effect_role' => (string) ($v['effect_role'] ?? ''),
-        ], $stored);
+            'scope' => $this->validScope((string) ($v['scope'] ?? '')),
+        ] + (isset($v['field']['required']) ? ['field_required' => (bool) $v['field']['required']] : [])
+          + (isset($v['field']['default']) ? ['field_default' => (string) $v['field']['default']] : []), $stored);
+    }
+
+    private function validScope(string $scope): string
+    {
+        return in_array($scope, [OrderWordTemplate::SCOPE_PARTICIPANT, OrderWordTemplate::SCOPE_OVERRIDE], true)
+            ? $scope
+            : OrderWordTemplate::SCOPE_ORDER;
     }
 
     /**

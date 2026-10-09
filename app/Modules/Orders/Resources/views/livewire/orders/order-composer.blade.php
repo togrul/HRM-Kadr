@@ -13,6 +13,7 @@
 
     @php
         $isEditing = $this->isEditing();
+        $isMulti = $this->isMulti();
         $inputClass = 'block w-full mt-1 text-sm transition duration-100 ease-in-out border-none rounded-lg shadow-sm bg-neutral-100 focus:ring-zinc-400 focus:border-ink px-3 py-2';
     @endphp
 
@@ -84,7 +85,7 @@
                         <x-orders.lookup-picker wire:model="hirePositionId" :options="$this->lookupOptions['position']" />
                         @error('hirePositionId') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
-                @else
+                @elseif (! $isMulti)
                     @include('orders::livewire.orders.partials.order-composer.subject-picker', [
                         'query' => 'personnelQuery',
                         'selected' => $personnelLabel,
@@ -112,6 +113,13 @@
                 </div>
             </div>
         </section>
+
+        @if ($isMulti)
+            @include('orders::livewire.orders.partials.order-composer.participants', [
+                'participantFieldDefs' => $this->participantFieldDefs,
+                'lookupOptions' => $this->lookupOptions,
+            ])
+        @endif
 
         @if ($this->vacationBalance)
             @include('orders::livewire.orders.partials.order-composer.vacation-balance', ['vb' => $this->vacationBalance])

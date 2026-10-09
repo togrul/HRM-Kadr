@@ -57,6 +57,21 @@ class OrderComposer extends Component
     #[Locked]
     public ?int $editOrderId = null;
 
+    /**
+     * A multi-participant order's employees, in document order (server-set only).
+     *
+     * @var list<int>
+     */
+    #[Locked]
+    public array $participantIds = [];
+
+    /** @var array<int,string> personnel id => display label */
+    #[Locked]
+    public array $participantLabels = [];
+
+    /** @var array<int,array<string,mixed>> personnel id => their own field values */
+    public array $participantFields = [];
+
     /** A corrected .docx the user uploaded to replace the generated document. */
     public $uploadedDocx = null;
 
@@ -88,6 +103,68 @@ class OrderComposer extends Component
         $this->applyFieldDefaults();
         $this->orderDate = now()->format('Y-m-d');
         $this->pickPersonnel($personnelId);
+        $this->seedParticipantFromPersonnel();
+    }
+
+    /** Whether the selected type is issued for a list of employees (çoxşəxsli). */
+    public function isMulti(): bool
+    {
+        return (bool) $this->template()?->isMultiParticipant();
+    }
+
+    /** Add an employee to a multi-participant order's list (each person once). */
+    public function addParticipant(int $id): void
+    {
+        $this->personnelQuery = '';
+        $this->previewPdf = '';
+        $this->previewHtml = '';
+
+        if (in_array($id, $this->participantIds, true)) {
+            $this->addError('participants', __('orders::order_composer.errors.participant_duplicate', [
+                'name' => $this->participantLabels[$id] ?? '#'.$id,
+            ]));
+
+            return;
+        }
+
+        $picked = app(OrderSubjectResolver::class)->participantLabels([$id]);
+        if (! isset($picked[$id])) {
+            return;
+        }
+
+        $this->participantIds[] = $id;
+        $this->participantLabels[$id] = $picked[$id];
+        $this->resetErrorBag('participants');
+    }
+
+    public function removeParticipant(int $id): void
+    {
+        $this->participantIds = array_values(array_filter($this->participantIds, fn (int $existing): bool => $existing !== $id));
+        unset($this->participantLabels[$id], $this->participantFields[$id]);
+        $this->resetErrorBag();
+        $this->previewPdf = '';
+        $this->previewHtml = '';
+    }
+
+    /**
+     * The fields shown per participant: their own ones and the shared ones they may override.
+     *
+     * @return array<int,array{key:string,label:string,type:string,required:bool,default:mixed,scope:string}>
+     */
+    public function getParticipantFieldDefsProperty(): array
+    {
+        return $this->isMulti() ? ($this->template()?->participantFields() ?? []) : [];
+    }
+
+    /**
+     * An employee picked before the type (deep link, or the single picker) becomes the
+     * first participant of a multi-participant type.
+     */
+    private function seedParticipantFromPersonnel(): void
+    {
+        if ($this->isMulti() && $this->personnelId !== null && $this->participantIds === []) {
+            $this->addParticipant($this->personnelId);
+        }
     }
 
     public function isEditing(): bool
@@ -114,11 +191,31 @@ class OrderComposer extends Component
         $this->hasUploadedDocx = ! empty($snapshot['docx_path']);
 
         $this->pickPersonnel(empty($snapshot['personnel_id']) ? null : (int) $snapshot['personnel_id']);
+        $this->loadParticipants($order);
         $this->pickHire(
             empty($snapshot['candidate_id']) ? null : (int) $snapshot['candidate_id'],
             $snapshot['hire_structure_id'] ?? null,
             $snapshot['hire_position_id'] ?? null,
         );
+    }
+
+    /**
+     * Restore a multi-participant order's people and their own field values (an order issued
+     * before its type became multi-participant starts with its one employee).
+     */
+    private function loadParticipants(OrderLog $order): void
+    {
+        $this->participantIds = [];
+        $this->participantFields = [];
+
+        foreach ($order->participants()->get(['personnel_id', 'fields']) as $participant) {
+            $id = (int) $participant->personnel_id;
+            $this->participantIds[] = $id;
+            $this->participantFields[$id] = (array) $participant->fields;
+        }
+
+        $this->participantLabels = app(OrderSubjectResolver::class)->participantLabels($this->participantIds);
+        $this->seedParticipantFromPersonnel();
     }
 
     /**
@@ -167,7 +264,7 @@ class OrderComposer extends Component
      */
     public function getFieldDefsProperty(): array
     {
-        return $this->template()?->manualFields() ?? [];
+        return $this->template()?->orderFields() ?? [];
     }
 
     /**
@@ -205,15 +302,39 @@ class OrderComposer extends Component
         }
     }
 
+    /**
+     * A participant's own value changed (key "<personnel id>.<field key>"): clear its error
+     * and fill the dates that follow from it within that participant's values.
+     */
+    public function updatedParticipantFields(mixed $value, ?string $key = null): void
+    {
+        if (! is_string($key) || ! str_contains($key, '.')) {
+            return;
+        }
+
+        [$id, $field] = explode('.', $key, 2);
+        $index = array_search((int) $id, $this->participantIds, true);
+        if ($index !== false) {
+            $this->resetErrorBag(['participants.'.$index, 'participants.'.$index.'.fields.'.$field]);
+        }
+
+        $template = $this->template();
+        if ($template && is_array($this->participantFields[(int) $id] ?? null)) {
+            $this->participantFields[(int) $id] = app(OrderLeaveDateRules::class)->autofill($template, $this->participantFields[(int) $id], $field);
+        }
+    }
+
     public function updatedPresetCode(): void
     {
         $this->fields = [];
         $this->previewPdf = '';
         $this->previewHtml = '';
         $this->templateLoaded = false;
+        $this->participantFields = [];
         $this->resetHireSubject();
 
         $this->applyFieldDefaults();
+        $this->seedParticipantFromPersonnel();
     }
 
     /** Fields with a usual value start with it (e.g. 126 days of maternity leave). */
@@ -442,7 +563,8 @@ class OrderComposer extends Component
     {
         return new OrderComposition(
             presetCode: $this->presetCode,
-            personnelId: $this->personnelId,
+            // A multi-participant order is about its list; the single picker plays no part.
+            personnelId: $this->isMulti() ? null : $this->personnelId,
             candidateId: $this->candidateId,
             hireStructureId: $this->hireStructureId,
             hirePositionId: $this->hirePositionId,
@@ -451,6 +573,9 @@ class OrderComposer extends Component
             orderDate: $this->documentDate(),
             organizationCity: $this->organizationCity,
             editOrderId: $this->editOrderId,
+            participants: $this->isMulti()
+                ? array_map(fn (int $id): array => ['personnel_id' => $id, 'fields' => (array) ($this->participantFields[$id] ?? [])], $this->participantIds)
+                : [],
         );
     }
 }
