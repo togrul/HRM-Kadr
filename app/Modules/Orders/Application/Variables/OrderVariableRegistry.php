@@ -21,7 +21,7 @@ class OrderVariableRegistry
      */
     public function all(): array
     {
-        return array_merge($this->systemVariables(), $this->employeeVariables());
+        return array_merge($this->systemVariables(), $this->employeeVariables(), $this->participantVariables());
     }
 
     /**
@@ -98,6 +98,30 @@ class OrderVariableRegistry
             $this->def('employee.structure_genitive', 'Struktur – yiyəlik hal', 'İşçi', 'Mərkəzi Qida Məhsulları anbarının'),
             $this->def('employee.structure_dative', 'Struktur – yönlük hal', 'İşçi', 'Mərkəzi Qida Məhsulları anbarına'),
         ];
+    }
+
+    /**
+     * One participant of a multi-participant (çoxşəxsli) order — the same values as the
+     * employee.* namespace plus the row number, resolved per person inside the repeating
+     * table row / block. Outside it they list every participant, comma-separated.
+     *
+     * @return array<int,array{key:string,label:string,group:string,sample:string}>
+     */
+    private function participantVariables(): array
+    {
+        $group = 'İştirakçı (çoxşəxsli əmr)';
+        $variables = [$this->def('participant.n', 'İştirakçının sıra №', $group, '1')];
+
+        foreach ($this->employeeVariables() as $employee) {
+            $variables[] = $this->def(
+                'participant.'.substr($employee['key'], strlen('employee.')),
+                'İştirakçı – '.$employee['label'],
+                $group,
+                $employee['sample'],
+            );
+        }
+
+        return $variables;
     }
 
     /**

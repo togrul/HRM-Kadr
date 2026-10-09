@@ -26,6 +26,31 @@ class DocxPlaceholderParser
     private const PLACEHOLDER = '/\[([^\[\]\r\n]+)\]/u';
 
     /**
+     * The markers of a multi-participant order's repeating block — the paragraphs between
+     * [İştirakçılar] and [/İştirakçılar] are repeated per participant. They are not variables:
+     * normalize() turns them into ${participants} / ${/participants}.
+     */
+    public const BLOCK_OPEN_LABEL = 'İştirakçılar';
+
+    public const BLOCK_CLOSE_LABEL = '/İştirakçılar';
+
+    /**
+     * The block-marker token a label stands for ('participants' / '/participants'), or null
+     * when the label is an ordinary placeholder. Letter case does not matter.
+     */
+    public static function blockMarkerToken(string $label): ?string
+    {
+        $fold = static fn (string $value): string => mb_strtolower(str_replace(['İ', 'I'], ['i', 'ı'], trim($value)), 'UTF-8');
+        $label = $fold($label);
+
+        return match (true) {
+            $label === $fold(self::BLOCK_OPEN_LABEL) || $label === 'participants' => ParticipantTemplateProcessor::BLOCK,
+            $label === $fold(self::BLOCK_CLOSE_LABEL) || $label === '/participants' => '/'.ParticipantTemplateProcessor::BLOCK,
+            default => null,
+        };
+    }
+
+    /**
      * Distinct, trimmed [bracket] labels in first-seen order across the body, headers
      * and footers.
      *
