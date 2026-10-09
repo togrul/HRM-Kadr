@@ -18,6 +18,16 @@ RUN apt update && apt install -y \
     && pecl install redis \
     && docker-php-ext-enable redis
 
+# Headless LibreOffice (Writer only, no GUI) turns order .docx files into PDF: the faithful
+# preview and the immutable final copy stored at approval. The fonts cover Azerbaijani
+# Latin (ə, ğ, ı, ö, ş, ç, ü) and metric-compatible Times/Arial/Calibri substitutes.
+RUN apt update && apt install -y --no-install-recommends \
+    libreoffice-writer-nogui fonts-dejavu fonts-liberation fonts-liberation2 fonts-crosextra-carlito fonts-crosextra-caladea fonts-noto-core \
+    && fc-cache -f \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV ORDERS_SOFFICE_PATH=/usr/bin/soffice
+
 RUN printf '%s\n' \
     "opcache.enable=1" \
     "opcache.jit=tracing" \
