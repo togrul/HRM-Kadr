@@ -499,3 +499,123 @@ it('renders the register page and links it from the leaves page navigation', fun
     sickUser(['add-leaves']);
     $this->get(route('leaves.sick-certificates'))->assertForbidden();
 });
+
+/**
+ * @return array<string, string> date => attendance_status of the person's ledger rows
+ */
+function sickLedger(string $tabelNo = 'SC-1'): array
+{
+    return DB::table('attendance_daily_ledgers')
+        ->where('tabel_no', $tabelNo)
+        ->orderBy('date')
+        ->get(['date', 'attendance_status'])
+        ->mapWithKeys(fn ($row): array => [substr((string) $row->date, 0, 10) => (string) $row->attendance_status])
+        ->all();
+}
+
+function forgetAttendanceLocks(): void
+{
+    (new ReflectionProperty(\App\Modules\Attendance\Application\Services\AttendanceMonthLockService::class, 'periodLockMemo'))->setValue(null, []);
+}
+
+it('puts an open certificate into attendance from its start up to today, and keeps extending it on read', function (): void {
+    forgetAttendanceLocks();
+    sickCertificate(['starts_at' => '2026-10-05']);
+
+    expect(sickLedger())->toBe([
+        '2026-10-05' => 'leave', '2026-10-06' => 'leave', '2026-10-07' => 'leave', '2026-10-08' => 'leave', '2026-10-09' => 'leave',
+    ]);
+
+    // Two days later, with no new ledger rows yet, the puantaj read still sees the sick days up to today.
+    Carbon::setTestNow('2026-10-11 10:00:00');
+    CarbonImmutable::setTestNow('2026-10-11 10:00:00');
+
+    $context = app(\App\Modules\Attendance\Application\Services\AttendanceDayContextResolverService::class)
+        ->build(Carbon::parse('2026-10-09'), Carbon::parse('2026-10-14'), collect(['SC-1']));
+
+    expect(array_keys(array_filter($context['overrides'], fn (array $override): bool => ($override['type'] ?? null) === 'leave')))
+        ->toBe(['SC-1|2026-10-09', 'SC-1|2026-10-10', 'SC-1|2026-10-11']);
+});
+
+it('replaces the open range with the final one on close and removes it on cancel', function (): void {
+    forgetAttendanceLocks();
+    $actor = sickUser(['show-leaves', 'add-leaves', 'edit-leaves']);
+    $certificate = sickCertificate(['starts_at' => '2026-10-05'], $actor);
+
+    app(SickCertificateService::class)->close($certificate, '2026-10-07');
+
+    expect(collect(sickLedger())->filter(fn (string $status): bool => $status === 'leave')->keys()->all())
+        ->toBe(['2026-10-05', '2026-10-06', '2026-10-07']);
+
+    app(SickCertificateService::class)->cancel($certificate, 'Səhv qeydiyyat', $actor);
+
+    expect(collect(sickLedger())->filter(fn (string $status): bool => $status === 'leave')->all())->toBe([]);
+});
+
+it('does not rewrite a locked attendance month', function (): void {
+    forgetAttendanceLocks();
+    AttendanceMonthlySummary::query()->forceCreate(['tabel_no' => 'SC-1', 'year' => 2026, 'month' => 9, 'is_locked' => true]);
+    DB::table('attendance_daily_ledgers')->insert([
+        'tabel_no' => 'SC-1', 'date' => '2026-09-29', 'attendance_status' => 'present', 'is_locked' => true,
+        'created_at' => now(), 'updated_at' => now(),
+    ]);
+
+    sickCertificate(['starts_at' => '2026-09-28']);
+
+    $ledger = sickLedger();
+    expect($ledger['2026-09-29'])->toBe('present')
+        ->and($ledger)->not->toHaveKey('2026-09-28')
+        ->and($ledger['2026-10-01'])->toBe('leave')
+        ->and($ledger['2026-10-09'])->toBe('leave');
+});
+
+it('keeps certificate leaves read-only in the general leaves list and every leave edit path', function (): void {
+    $user = sickUser(['show-leaves', 'add-leaves', 'edit-leaves', 'delete-leaves', 'view-medical-diagnosis']);
+    $certificate = sickCertificate([], $user);
+    $leave = Leave::query()->findOrFail($certificate->leave_id);
+
+    expect($user->can('update', $leave))->toBeFalse()
+        ->and($user->can('delete', $leave))->toBeFalse()
+        ->and($user->can('forceDelete', $leave))->toBeFalse();
+
+    Livewire::test(\App\Modules\Leaves\Livewire\Leaves::class)
+        ->assertSee(__('leaves::common.labels.sick_certificate'))
+        ->assertSee(route('leaves.sick-certificates', ['number' => '100001']), false)
+        ->assertDontSee('openEditLeaveModal('.$leave->id.')', false)
+        ->assertDontSee("setDeleteLeave('".$leave->id."')", false);
+
+    Livewire::test(\App\Modules\Leaves\Livewire\EditLeave::class)->call('loadLeaveForEdit', $leave->id)->assertForbidden();
+    Livewire::test(\App\Modules\Leaves\Livewire\DeleteLeave::class)->call('setDeleteLeave', $leave->id)->assertForbidden();
+    Livewire::test(\App\Modules\Leaves\Livewire\Leaves::class)->call('forceDeleteData', $leave->id)->assertForbidden();
+
+    expect(sickErrors(fn () => app(\App\Modules\Leaves\Application\Services\LeaveRecordService::class)->update($leave, ['status_id' => 20], $user)))
+        ->toHaveKey('starts_at');
+
+    // Self-service: no correction offered, and a forged request is refused.
+    $person = Personnel::query()->where('tabel_no', 'SC-1')->firstOrFail();
+    expect(sickErrors(fn () => app(\App\Modules\Personnel\Application\Services\MyHr\MyHrRequestCorrectionService::class)
+        ->create($person, $user, 'leave', $leave->id, 'Tarix səhvdir', ['ends_at' => '2026-10-03'])))->toHaveKey('correctionForm.reason');
+    expect(sickErrors(fn () => app(\App\Modules\Personnel\Application\Services\MyHr\Review\SelfServiceRequestPatchService::class)
+        ->apply($leave, ['ends_at' => '2026-10-03'])))->toHaveKey('reason');
+
+    expect(Leave::query()->findOrFail($leave->id)->ends_at)->toBeNull()
+        ->and(LeaveSickCertificate::query()->count())->toBe(1);
+
+    // An ordinary leave is still editable.
+    $plain = Leave::query()->create([
+        'tabel_no' => 'SC-2', 'leave_type_id' => LeaveType::query()->create(['name' => 'Ödənişsiz', 'max_days' => 0])->id,
+        'starts_at' => '2026-10-20', 'ends_at' => '2026-10-21', 'status_id' => 10,
+    ]);
+    expect($user->can('update', $plain))->toBeTrue();
+});
+
+it('shows the stale-certificate setting with a translated label', function (): void {
+    sickUser(['access-settings']);
+    app()->setLocale('az');
+
+    $label = Livewire::test(\App\Modules\Services\Livewire\Settings\SettingsList::class, ['section' => 'general'])
+        ->instance()
+        ->resolveSettingLabel(SickCertificateSettings::SETTING);
+
+    expect($label)->toBe('Açıq xəstəlik vərəqəsi üçün xəbərdarlıq həddi (gün)');
+});

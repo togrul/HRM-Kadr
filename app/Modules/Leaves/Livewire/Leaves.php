@@ -270,6 +270,7 @@ class Leaves extends Component
                     ]),
                 'leaveType:id,name',
                 'status:id,name',
+                'sickCertificate:id,leave_id,series,number',
                 'latestLog' => fn ($q) => $q
                     ->select([
                         'leave_status_logs.id',

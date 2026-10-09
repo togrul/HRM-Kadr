@@ -140,6 +140,24 @@ class Leave extends Model
     }
 
     /**
+     * A leave behind a sick-leave certificate is the register's: it is changed, closed or
+     * cancelled there only, never through the general leave edit / delete / correction paths.
+     * Reads the `has_sick_certificate` flag (withExists) or the loaded relation when present.
+     */
+    public function isManagedBySickCertificate(): bool
+    {
+        if (array_key_exists('has_sick_certificate', $this->attributes)) {
+            return (bool) $this->attributes['has_sick_certificate'];
+        }
+
+        if ($this->relationLoaded('sickCertificate')) {
+            return $this->getRelation('sickCertificate') !== null;
+        }
+
+        return $this->exists && LeaveSickCertificate::query()->where('leave_id', $this->getKey())->exists();
+    }
+
+    /**
      * An open-ended leave (an open sick certificate) has no end date yet: it covers every
      * day from its start up to today. Only the certificate register writes one.
      */

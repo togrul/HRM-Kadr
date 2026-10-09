@@ -32,6 +32,7 @@ class SickCertificates extends Component
 
     public string $fullname = '';
 
+    #[Url]
     public string $number = '';
 
     public string $institution = '';

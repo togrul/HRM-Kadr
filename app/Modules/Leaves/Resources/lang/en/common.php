@@ -8,6 +8,8 @@ return [
         'leaves' => 'Leaves',
     ],
     'labels' => [
+        'sick_certificate' => 'Sick-leave certificate',
+        'sick_certificate_hint' => 'This leave belongs to a sick-leave certificate; change it in the certificate register.',
         'approval_route' => 'Approval route',
         'approval_steps' => 'Approval steps',
         'route_details' => 'About this route',
@@ -120,6 +122,7 @@ return [
         'no_hierarchy_chain' => 'No hierarchy chain is available for this employee.',
     ],
     'validation' => [
+        'managed_by_sick_certificate' => 'This leave belongs to a sick-leave certificate; change it in the «Sick-leave certificates» register.',
         'status_not_allowed' => 'You are not allowed to set this status. The leave has to go through its approval route.',
         'self_approver' => 'An employee cannot approve their own leave — choose another approver.',
         'end_before_start' => 'The end date cannot be before the start date.',
