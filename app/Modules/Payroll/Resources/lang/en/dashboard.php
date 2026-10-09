@@ -118,8 +118,9 @@ return [
 
     'order_earnings' => [
         'rest_day_work' => 'Work on a non-working day (double rate, :days day(s), :hours h)',
-        'substitution' => 'Substitution extra pay (:days day(s))',
-        'substitution_for' => 'Substitution extra pay — :name (:days day(s))',
+        'rest_day_work_mixed' => 'Work on a non-working day (:days day(s), :hours h; :within h within the norm at single rate, the rest double)',
+        'substitution' => 'Substitution extra pay (:days working day(s))',
+        'substitution_for' => 'Substitution extra pay — :name (:days working day(s))',
     ],
 
     'run_types' => [

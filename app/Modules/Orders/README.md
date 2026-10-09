@@ -44,17 +44,25 @@ formerly document-only types onto their effect only while they are unedited (edi
 `Attendance\Contracts\PayrollRestDayWork` and `Compensation\Contracts\SubstitutionRegister`, so a recalculation follows
 the orders and a revoked order's pay disappears on the next calculation. Both lines are taxable and social-insurable.
 
-- `rest_day_work`: double_pay days only — base salary × worked minutes × 2 ÷ the employee's month norm minutes
-  (hourly rate = base ÷ norm hours). A day named by several orders is paid once; ordinary (non-order) overtime is not paid
-  by this line. day_off days add no money; the choice stays on the overtime request (`compensation`) and in the feed.
-- `substitution`: percent × the substituting employee's own base salary (per the order text "vəzifə maaşının … faizi"),
-  or the stored fixed monthly amount on older rows, × calendar days of the substitution in the month ÷ days in the month.
+Legal basis (ƏM m.162, m.164, m.175–176, with quotes and what is unverified): `docs/payroll-legal-basis.md`.
+
+- `rest_day_work` (ƏM m.164.1, monthly salary): double_pay days only — on top of salary, the hourly position salary
+  (base ÷ the employee's month norm hours; allowances excluded) × 1 for minutes within the monthly norm (as much norm time
+  as vacation/leave left unworked) and × 2 beyond it. A day named by several orders is paid once; ordinary (non-order)
+  overtime is not paid by this line. day_off days (m.164.2) add no money; the choice stays on the overtime request
+  (`compensation`) and in the feed.
+- `substitution` (ƏM m.162): the salary difference when the substituted colleague (picked from personnel) earns more
+  (m.162.1), otherwise the agreed extra — percent of the substitute's own base or the stored fixed monthly amount
+  (m.162.2); the larger of the two is paid. Prorated by the substitute's norm working days in the period on which they
+  were not on vacation, leave or a business trip (`Attendance\Contracts\PayrollWorkedDays`) ÷ the month's norm working days.
 
 Each order-derived line stores the records it was built from (`payslip_lines.sources`); locking refuses a regular run
 whose order facts changed since its calculation (`order_earnings_changed`: reopen and recalculate), like the one-off guard.
 Locked runs are never changed; an order that lands in an already locked month reaches the employee through
-`RetroService` (net difference on the next regular run). An order revoked after its month was locked is recovered the
-same way as a `retro_recovery` deduction on the next regular run, capped at that payslip's net; only the part caused by
+`RetroService` (net difference on the next regular run). An order revoked after its month was locked is recovered as a
+`retro_recovery` deduction on the next regular run only when `payroll.recover_revoked_order_pay` is on (off by default:
+ƏM m.175.5 forbids withholding such overpayments without the employee's written consent), capped at 20 % of that
+payment (m.176.1), the rest staying pending; only the part caused by
 order records that no longer stand is recovered — other negative differences (e.g. a retroactive pay cut) are still not
 clawed back. When finance owns payroll the run refuses to compute and the
 same facts travel in the `attendance.month` (`rest_day_work`) and `compensation` (`substitutions`) feeds — see

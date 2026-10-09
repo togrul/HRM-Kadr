@@ -4,7 +4,9 @@ namespace Tests\Feature\Payroll;
 
 use App\Models\ApiToken;
 use App\Models\AttendanceOvertimeRequest;
+use App\Models\CompensationComponent;
 use App\Models\CompensationRegime;
+use App\Models\EmployeeCompensation;
 use App\Models\PayrollRun;
 use App\Models\Payslip;
 use App\Models\Personnel;
@@ -114,10 +116,10 @@ class OrderEarningsPayrollTest extends TestCase
         $payslip = $this->calculateNovember($personnel);
         $line = $payslip->lines->firstWhere('code', 'substitution');
 
-        // 3 000 × 30 % = 900 a month; 19 of November's 30 days → 570.
-        $this->assertSame(570.0, (float) $line?->amount);
+        // ƏM m.162.2: 3 000 × 30 % = 900 a month; 15 of November's 21 working days → 642.86.
+        $this->assertSame(642.86, (float) $line?->amount);
         $this->assertStringContainsString('Həsənova Leyla Əli', (string) $line->name);
-        $this->assertSame(3570.0, (float) $payslip->gross);
+        $this->assertSame(3642.86, (float) $payslip->gross);
     }
 
     public function test_a_fixed_amount_substitution_is_a_monthly_amount_prorated_by_days(): void
@@ -126,9 +128,9 @@ class OrderEarningsPayrollTest extends TestCase
 
         $this->substitution($personnel, ['start_date' => '2026-10-20', 'end_date' => null, 'extra_pay_amount' => 310.0]);
 
-        // October: 12 of 31 days → 120; November: the whole month → 310.
+        // October: 9 of its 22 working days → 126.82; November: every working day → 310.
         $october = app(PayrollCalculator::class)->calculate($personnel->tabel_no, '2026-10-31', 2026, 10);
-        $this->assertSame(120.0, (float) collect($october['lines'])->firstWhere('code', 'substitution')['amount']);
+        $this->assertSame(126.82, (float) collect($october['lines'])->firstWhere('code', 'substitution')['amount']);
         $this->assertSame(310.0, (float) $this->calculateNovember($personnel)->lines->firstWhere('code', 'substitution')?->amount);
     }
 
@@ -195,6 +197,7 @@ class OrderEarningsPayrollTest extends TestCase
 
     public function test_order_pay_revoked_after_its_month_was_paid_is_recovered_once_on_the_next_regular_run(): void
     {
+        config(['payroll.recover_revoked_order_pay' => true, 'payroll.recovery_cap_ratio' => 0.20]);
         $personnel = $this->employee(1680);
         $workId = $this->restDayWork($personnel, '2026-11-08', OrderRestDayWork::COMPENSATION_DOUBLE_PAY);
         $runs = app(PayrollRunService::class);
@@ -239,6 +242,90 @@ class OrderEarningsPayrollTest extends TestCase
         $december = $runs->calculate($runs->createRun($periods->createPeriod(2026, 12), $this->regimeId));
 
         $this->assertSame(0, $december->payslips()->sole()->lines()->whereIn('code', ['retro', 'retro_recovery'])->count());
+    }
+
+    public function test_substitution_pay_skips_the_working_days_the_substitute_was_away(): void
+    {
+        $personnel = $this->employee(2100);
+        $this->substitution($personnel, ['start_date' => '2026-11-01', 'end_date' => '2026-11-30', 'extra_pay_percent' => 10.0]);
+        $this->vacation($personnel, '2026-11-09', '2026-11-13');
+
+        $line = $this->calculateNovember($personnel)->lines->firstWhere('code', 'substitution');
+
+        // 210 a month; on vacation 5 of 21 working days → 16 days → 160.
+        $this->assertSame(160.0, (float) $line?->amount);
+        $this->assertStringContainsString('16', (string) $line->name);
+    }
+
+    public function test_a_higher_paid_colleague_s_substitute_gets_the_salary_difference(): void
+    {
+        $colleague = $this->employee(2500);
+        $personnel = $this->employee(1680);
+        $this->substitution($personnel, ['start_date' => '2026-11-01', 'end_date' => '2026-11-30', 'extra_pay_percent' => 10.0, 'substituted_tabel_no' => $colleague->tabel_no]);
+
+        // ƏM m.162.1: 2 500 − 1 680 = 820 (above the agreed 10 % = 168).
+        $this->assertSame(820.0, (float) $this->calculateNovember($personnel)->lines->firstWhere('code', 'substitution')?->amount);
+    }
+
+    public function test_rest_day_work_within_the_monthly_norm_is_paid_once_on_top_of_salary(): void
+    {
+        $personnel = $this->employee(1680);
+        $this->vacation($personnel, '2026-11-10', '2026-11-10');
+        $this->restDayWork($personnel, '2026-11-08', OrderRestDayWork::COMPENSATION_DOUBLE_PAY);
+
+        $line = $this->calculateNovember($personnel)->lines->firstWhere('code', 'rest_day_work');
+
+        // ƏM m.164.1: one norm day unworked → the 8 h fall within the norm → 1 × 10 AZN/h.
+        $this->assertSame(80.0, (float) $line?->amount);
+    }
+
+    public function test_the_rest_day_rate_is_the_position_salary_without_allowances(): void
+    {
+        $personnel = $this->employee(1680);
+        $component = CompensationComponent::query()->create(['code' => 'allow', 'name' => 'Əlavə', 'type' => 'earning', 'taxable' => true, 'affects_social' => true, 'is_statutory' => false]);
+        EmployeeCompensation::query()->where('tabel_no', $personnel->tabel_no)->sole()->lines()->create(['component_id' => $component->id, 'amount' => 840]);
+        $this->restDayWork($personnel, '2026-11-08', OrderRestDayWork::COMPENSATION_DOUBLE_PAY);
+
+        $this->assertSame(160.0, (float) $this->calculateNovember($personnel)->lines->firstWhere('code', 'rest_day_work')?->amount);
+    }
+
+    public function test_revoked_order_pay_is_not_deducted_without_the_employee_s_consent(): void
+    {
+        config(['payroll.recover_revoked_order_pay' => false]);
+        $personnel = $this->employee(1680);
+        $workId = $this->restDayWork($personnel, '2026-11-08', OrderRestDayWork::COMPENSATION_DOUBLE_PAY);
+        $runs = app(PayrollRunService::class);
+        $periods = app(PayrollPeriodService::class);
+        $runs->lock($runs->approve($runs->calculate($runs->createRun($periods->createPeriod(2026, 11), $this->regimeId))));
+
+        app(OrderRestDayWork::class)->remove((int) $workId);
+
+        $december = $runs->calculate($runs->createRun($periods->createPeriod(2026, 12), $this->regimeId));
+        $this->assertSame(0, $december->payslips()->sole()->lines()->where('code', 'retro_recovery')->count());
+    }
+
+    public function test_a_consented_recovery_is_capped_per_payment_and_the_rest_waits(): void
+    {
+        config(['payroll.recover_revoked_order_pay' => true, 'payroll.recovery_cap_ratio' => 0.05]);
+        $personnel = $this->employee(1680);
+        $workId = $this->restDayWork($personnel, '2026-11-08', OrderRestDayWork::COMPENSATION_DOUBLE_PAY);
+        $runs = app(PayrollRunService::class);
+        $periods = app(PayrollPeriodService::class);
+        $november = $runs->lock($runs->approve($runs->calculate($runs->createRun($periods->createPeriod(2026, 11), $this->regimeId))));
+        $owed = (float) $november->payslips()->sole()->net - (float) app(PayrollCalculator::class)->calculate($personnel->tabel_no, '2026-11-30', 2026, 11, true, [])['net'];
+
+        app(OrderRestDayWork::class)->remove((int) $workId);
+
+        $december = $runs->calculate($runs->createRun($periods->createPeriod(2026, 12), $this->regimeId));
+        $payslip = $december->payslips()->sole();
+        $first = (float) $payslip->lines()->where('code', 'retro_recovery')->value('amount');
+        $this->assertEqualsWithDelta(round(((float) $payslip->net + $first) * 0.05, 2), $first, 0.01);
+        $this->assertLessThan($owed, $first);
+
+        $runs->lock($runs->approve($december));
+        $january = $runs->calculate($runs->createRun($periods->createPeriod(2027, 1), $this->regimeId));
+        $second = (float) $january->payslips()->sole()->lines()->where('code', 'retro_recovery')->value('amount');
+        $this->assertEqualsWithDelta($owed - $first, $second, 0.01, 'The remainder is taken on the next run.');
     }
 
     public function test_with_finance_owning_payroll_nothing_is_computed_here_and_the_feeds_carry_the_facts(): void
@@ -286,6 +373,22 @@ class OrderEarningsPayrollTest extends TestCase
         }
 
         $this->assertSame('approved', $run->fresh()->status);
+    }
+
+    private function vacation(Personnel $personnel, string $from, string $to): void
+    {
+        DB::table('personnel_vacations')->insert([
+            'tabel_no' => $personnel->tabel_no,
+            'vacation_places' => 'Bakı',
+            'duration' => 1,
+            'start_date' => $from,
+            'end_date' => $to,
+            'return_work_date' => CarbonImmutable::parse($to)->addDay()->toDateString(),
+            'order_given_by' => 'HR',
+            'added_by' => auth()->id(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 
     private function calculateNovember(Personnel $personnel): Payslip

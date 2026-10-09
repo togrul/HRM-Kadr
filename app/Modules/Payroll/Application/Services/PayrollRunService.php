@@ -163,8 +163,12 @@ class PayrollRunService
                 }
 
                 // Order pay a locked month no longer stands behind (revoked order) is taken
-                // back on the next regular run, never beyond what this payslip pays out.
-                $recovery = $run->run_type === 'regular' ? round(min($pendingRetro['recovery'], max(0.0, $net)), 2) : 0.0;
+                // back on the next regular run — only where the employee's written consent
+                // allows it (ƏM m.175.1/175.5, config payroll.recover_revoked_order_pay) and
+                // never above 20 % of the wage due (m.176.1); the rest stays pending.
+                $recovery = $run->run_type === 'regular' && config('payroll.recover_revoked_order_pay', false)
+                    ? round(min($pendingRetro['recovery'], max(0.0, $net) * (float) config('payroll.recovery_cap_ratio', 0.20)), 2)
+                    : 0.0;
 
                 if ($recovery >= 0.01) {
                     $payslip->lines()->create([

@@ -118,8 +118,9 @@ return [
 
     'order_earnings' => [
         'rest_day_work' => 'Qeyri-iş günü işə cəlb (ikiqat, :days gün, :hours saat)',
-        'substitution' => 'Əvəzetməyə görə əlavə ödəniş (:days gün)',
-        'substitution_for' => 'Əvəzetməyə görə əlavə ödəniş — :name (:days gün)',
+        'rest_day_work_mixed' => 'Qeyri-iş günü işə cəlb (:days gün, :hours saat; normadaxili :within saat bir qat, qalanı ikiqat)',
+        'substitution' => 'Əvəzetməyə görə əlavə ödəniş (:days iş günü)',
+        'substitution_for' => 'Əvəzetməyə görə əlavə ödəniş — :name (:days iş günü)',
     ],
 
     'run_types' => [

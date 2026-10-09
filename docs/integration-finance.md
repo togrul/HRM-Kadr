@@ -223,10 +223,10 @@ günlər, gündə bir dəfə:
 ]
 ```
 
-- `double_pay` — Əmək Məcəlləsinə görə ən azı ikiqat ödənilir; HRM özü hesablayanda
-  saat dərəcəsi = baza maaş ÷ (ayın norma dəqiqələri ÷ 60), məbləğ = 2 × saat dərəcəsi
-  × saat.
-- `day_off` — pul yox, başqa istirahət günü verilir; ödəniş sətri yaranmamalıdır.
+- `double_pay` — ƏM m.164.1 (aylıq maaş): maaşdan əlavə normadaxili iş üçün ən azı 1 ×,
+  normadan artıq iş üçün ən azı 2 × saatlıq vəzifə maaşı. HRM özü hesablayanda saatlıq
+  vəzifə maaşı = vəzifə maaşı ÷ ayın fərdi norma saatları (bax `docs/payroll-legal-basis.md`).
+- `day_off` — m.164.2: pul əvəzinə başqa istirahət günü; ödəniş sətri yaranmamalıdır.
 
 Bu dəqiqələr həmin günün `overtime_minutes`-ində **də** var (həftəsonu/bayram işlənən
 hər dəqiqə əlavə vaxtdır). Oxuyan tərəf onları bu siyahı ilə ödəməli, adi əlavə iş
@@ -313,12 +313,15 @@ və ya ən tezi **əvvəlki ayın 1-i** bitmiş olanlar (bağlanan ay hələ əh
 ]
 ```
 
-Əlavə ödəniş əmrin mətninə görə **əvəz edən işçinin öz vəzifə maaşının** faizidir
+Razılaşdırılmış əlavə əmrin mətninə görə **əvəz edən işçinin öz vəzifə maaşının** faizidir
 (`extra_pay_percent`); köhnə qurulumlarda faiz yerinə aylıq sabit məbləğ
-(`extra_pay_amount`) ola bilər — faiz varsa o götürülür. Ayın günlərinə bölüşdürmə
-maliyyə tərəfinin işidir; HRM özü hesablayanda: aylıq məbləğ × (əvəzetmənin ayda
-düşən təqvim günləri ÷ ayın günləri). `end_date: null` — müddət açıqdır. Əmr ləğv
-olunanda sətir siyahıdan çıxır.
+(`extra_pay_amount`) ola bilər — faiz varsa o götürülür. ƏM m.162.1: əvəz edilənin maaşı
+yüksəkdirsə fərq ödənilir — onu maliyyə tərəfi `substituted_external_no` üzrə öz maaş
+məlumatından tapır. Ayın günlərinə bölüşdürmə maliyyə tərəfinin işidir; HRM özü
+hesablayanda: aylıq məbləğ × (əvəzetmə müddətinə düşən və işçinin məzuniyyətdə, icazədə,
+ezamiyyətdə olmadığı norma iş günləri ÷ ayın norma iş günləri) — bax
+`docs/payroll-legal-basis.md`. `end_date: null` — müddət açıqdır. Əmr ləğv olunanda
+sətir siyahıdan çıxır.
 
 ### Məzuniyyət balansı
 
