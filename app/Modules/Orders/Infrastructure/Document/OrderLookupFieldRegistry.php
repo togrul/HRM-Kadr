@@ -2,9 +2,14 @@
 
 namespace App\Modules\Orders\Infrastructure\Document;
 
+use App\Enums\OrderStatusEnum;
+use App\Models\OrderLog;
+use App\Models\OrderWordTemplate;
+use App\Models\Personnel;
 use App\Models\Position;
 use App\Models\Rank;
 use App\Models\Structure;
+use App\Support\Language\AzerbaijaniDateFormatter;
 use Closure;
 use Illuminate\Support\Collection;
 
@@ -13,9 +18,21 @@ use Illuminate\Support\Collection;
  * template variable as one of these types, the composer shows a dropdown of the
  * corresponding records and the chosen record's name is written into the document as
  * plain text. Add an entry here to expose a new bindable list — nothing else changes.
+ *
+ * Some lists depend on the order being composed (an order revocation lists only the
+ * chosen employee's approved orders): their options closure receives the composer's
+ * context (['personnel_id' => …]).
  */
 class OrderLookupFieldRegistry
 {
+    /** Option ids of the rest-day work compensation list. */
+    public const REST_DAY_COMPENSATION_DOUBLE_PAY = 1;
+
+    public const REST_DAY_COMPENSATION_DAY_OFF = 2;
+
+    /** An order revocation offers at most this many of the employee's latest approved orders. */
+    private const APPROVED_ORDER_LIMIT = 200;
+
     /** @var array<string,array<int,array{id:int,label:string,depth:int}>> per-request option cache */
     private array $optionCache = [];
 
@@ -24,6 +41,11 @@ class OrderLookupFieldRegistry
      */
     private function definitions(): array
     {
+        $restDayCompensation = [
+            self::REST_DAY_COMPENSATION_DOUBLE_PAY => __('orders::order_composer.rest_day_compensation.double_pay'),
+            self::REST_DAY_COMPENSATION_DAY_OFF => __('orders::order_composer.rest_day_compensation.day_off'),
+        ];
+
         return [
             'structure' => [
                 'label' => __('orders::order_composer.field_types.structure'),
@@ -40,6 +62,31 @@ class OrderLookupFieldRegistry
                 'label' => __('orders::order_composer.field_types.rank'),
                 'options' => fn () => $this->flat(Rank::query()->where('is_active', true)->get()->pluck('name', 'id')->all()),
                 'resolve' => fn ($id) => optional(Rank::find((int) $id))->name,
+            ],
+            'personnel' => [
+                'label' => __('orders::order_composer.field_types.personnel'),
+                'options' => fn () => $this->flat(Personnel::query()
+                    ->where('is_pending', false)
+                    ->whereNull('leave_work_date')
+                    ->orderBy('surname')->orderBy('name')
+                    ->get(['id', 'surname', 'name', 'patronymic', 'tabel_no'])
+                    ->mapWithKeys(fn (Personnel $p): array => [$p->id => trim($p->surname.' '.$p->name.' '.$p->patronymic).' ('.$p->tabel_no.')'])
+                    ->all()),
+                'resolve' => function ($id): ?string {
+                    $person = ctype_digit((string) $id) ? Personnel::query()->find((int) $id, ['surname', 'name', 'patronymic']) : null;
+
+                    return $person ? trim($person->surname.' '.$person->name.' '.$person->patronymic) : null;
+                },
+            ],
+            'approved_order' => [
+                'label' => __('orders::order_composer.field_types.approved_order'),
+                'options' => fn (array $context = []) => $this->approvedOrders($context),
+                'resolve' => fn ($id) => $this->orderReference($id),
+            ],
+            'rest_day_compensation' => [
+                'label' => __('orders::order_composer.field_types.rest_day_compensation'),
+                'options' => fn () => $this->flat($restDayCompensation),
+                'resolve' => fn ($id) => $restDayCompensation[(int) $id] ?? null,
             ],
         ];
     }
@@ -68,17 +115,75 @@ class OrderLookupFieldRegistry
      * Options for the searchable picker: each {id, label, depth}. depth indents
      * hierarchical lists (structures); flat lists use depth 0.
      *
+     * @param  array<string,mixed>  $context  the order being composed (e.g. personnel_id)
      * @return array<int,array{id:int,label:string,depth:int}>
      */
-    public function options(string $type): array
+    public function options(string $type, array $context = []): array
     {
-        if (isset($this->optionCache[$type])) {
-            return $this->optionCache[$type];
+        $key = $type.'|'.json_encode($context);
+
+        if (isset($this->optionCache[$key])) {
+            return $this->optionCache[$key];
         }
 
         $def = $this->definitions()[$type] ?? null;
 
-        return $this->optionCache[$type] = $def ? (array) ($def['options'])() : [];
+        return $this->optionCache[$key] = $def ? (array) ($def['options'])($context) : [];
+    }
+
+    /**
+     * The chosen employee's approved Word-engine orders, latest first — the orders an
+     * order revocation may cancel. Revocation orders themselves are left out (no chains).
+     *
+     * @param  array<string,mixed>  $context
+     * @return array<int,array{id:int,label:string,depth:int}>
+     */
+    private function approvedOrders(array $context): array
+    {
+        $personnelId = (int) ($context['personnel_id'] ?? 0);
+
+        if ($personnelId <= 0) {
+            return [];
+        }
+
+        $revocationCodes = OrderWordTemplate::query()->where('effect', 'order_cancellation')->pluck('code')->all();
+
+        return OrderLog::query()
+            ->where('template_render_mode', OrderIssueService::RENDER_MODE_DOCX)
+            ->where('status_id', OrderStatusEnum::APPROVED->value)
+            ->where('template_snapshot->personnel_id', $personnelId)
+            ->when($revocationCodes !== [], fn ($query) => $query->whereNotIn('template_snapshot->template_code', $revocationCodes))
+            ->orderByDesc('id')
+            ->limit(self::APPROVED_ORDER_LIMIT)
+            ->get(['id', 'order_no', 'given_date', 'template_snapshot'])
+            ->map(fn (OrderLog $order): array => [
+                'id' => (int) $order->id,
+                'label' => '№ '.$order->order_no.' · '.(optional($order->given_date)->format('d.m.Y') ?? '—').' · '.data_get($order->template_snapshot, 'label', ''),
+                'depth' => 0,
+            ])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * How the document names a revoked order: "08.10.2026-cı il tarixli 100-M nömrəli
+     * “Ezamiyyət”".
+     */
+    private function orderReference(mixed $id): ?string
+    {
+        $order = ctype_digit((string) $id) ? OrderLog::query()->find((int) $id, ['id', 'order_no', 'given_date', 'template_snapshot']) : null;
+
+        if ($order === null) {
+            return null;
+        }
+
+        $date = $order->given_date ? app(AzerbaijaniDateFormatter::class)->longDate($order->given_date) : '';
+
+        return trim(__('orders::order_composer.lookup.order_reference', [
+            'date' => $date,
+            'number' => (string) $order->order_no,
+            'label' => (string) data_get($order->template_snapshot, 'label', ''),
+        ]));
     }
 
     /**

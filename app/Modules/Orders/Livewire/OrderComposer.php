@@ -363,16 +363,26 @@ class OrderComposer extends Component
     }
 
     /**
-     * Options for every list-bound (structure/position/rank/…) field type, keyed by
-     * type, so the form can render the matching dropdown.
+     * Options for the list-bound field types this form shows, keyed by type, so the form
+     * can render the matching dropdown: structure and position (the hire inputs) always,
+     * any other list only when the selected template has a field of that type. Lists
+     * that depend on the order (an order revocation's approved orders) get the chosen
+     * employee as context.
      *
      * @return array<string,array<int,array{id:int,label:string,depth:int}>>
      */
     public function getLookupOptionsProperty(OrderLookupFieldRegistry $lookups): array
     {
+        $used = ['structure' => true, 'position' => true];
+        foreach ($this->template()?->manualFields() ?? [] as $field) {
+            $used[$field['type']] = true;
+        }
+
         $options = [];
         foreach ($lookups->types() as $type) {
-            $options[$type['type']] = $lookups->options($type['type']);
+            if (isset($used[$type['type']])) {
+                $options[$type['type']] = $lookups->options($type['type'], ['personnel_id' => $this->personnelId]);
+            }
         }
 
         return $options;
