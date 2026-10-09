@@ -20,7 +20,7 @@ namespace App\Modules\Integration\Support;
  */
 final class Contract
 {
-    public const VERSION = '1.0';
+    public const VERSION = '1.1';
 
     public const SYSTEM = 'HRM';
 

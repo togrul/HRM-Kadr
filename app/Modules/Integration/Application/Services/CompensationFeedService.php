@@ -3,8 +3,10 @@
 namespace App\Modules\Integration\Application\Services;
 
 use App\Models\Personnel;
+use App\Modules\Compensation\Contracts\SubstitutionRegister;
 use App\Modules\Compensation\Domain\Contracts\CompensationReadRepository;
 use App\Modules\Integration\Support\Contract;
+use Illuminate\Support\Carbon;
 
 /**
  * What each employee is owed — as **conditions**, not as a calculation.
@@ -26,10 +28,21 @@ use App\Modules\Integration\Support\Contract;
  * systems each holding a rate table for the same tax, and when the law changed
  * one of them would quietly be wrong. The payroll side computes them from its
  * own tables, which is where the legal engine actually is.
+ *
+ * ## Substitutions travel as conditions too
+ *
+ * `substitutions` lists the substitution orders (əvəzetmə) still relevant to a payroll
+ * month: running, upcoming, or ended no earlier than the first day of the previous
+ * month (so the month being closed is still covered). Each carries its period and the
+ * agreed extra pay — a percent of the employee's own base pay, or, on older installs, a
+ * fixed monthly amount. Prorating to the days in a month is the payroll side's job.
  */
 class CompensationFeedService
 {
-    public function __construct(private readonly CompensationReadRepository $compensation) {}
+    public function __construct(
+        private readonly CompensationReadRepository $compensation,
+        private readonly SubstitutionRegister $substitutions,
+    ) {}
 
     /**
      * @return array{items: list<array<string, mixed>>, last_sequence: int, has_more: bool}
@@ -47,10 +60,16 @@ class CompensationFeedService
         $hasMore = $people->count() > $limit;
         $people = $people->take($limit);
 
+        $substitutions = $this->substitutions->overlapping(
+            $people->pluck('tabel_no')->map(fn ($no): string => trim((string) $no))->filter()->values()->all(),
+            Carbon::now()->subMonthNoOverflow()->startOfMonth()->toDateString(),
+            '9999-12-31',
+        );
+
         return [
             // `row()` null qaytara bilir — kompensasiyası olmayan şəxsin
             // göndəriləcək şərti yoxdur. Closure-un dönüş tipi bunu göstərməlidir.
-            'items' => $people->map(fn (Personnel $person): ?array => $this->row($person))
+            'items' => $people->map(fn (Personnel $person): ?array => $this->row($person, $substitutions))
                 ->filter()
                 ->values()
                 ->all(),
@@ -59,8 +78,11 @@ class CompensationFeedService
         ];
     }
 
-    /** @return array<string, mixed>|null */
-    private function row(Personnel $person): ?array
+    /**
+     * @param  array<string, list<array<string, mixed>>>  $substitutions
+     * @return array<string, mixed>|null
+     */
+    private function row(Personnel $person, array $substitutions): ?array
     {
         $tabelNo = trim((string) $person->tabel_no);
 
@@ -83,6 +105,15 @@ class CompensationFeedService
             'effective_from' => $this->date($current->effective_from),
             'effective_to' => $this->date($current->effective_to),
             'components' => $this->components($tabelNo),
+            'substitutions' => array_map(fn (array $row): array => [
+                'substituted_external_no' => $row['substituted_tabel_no'],
+                'substituted_name' => $row['substituted_name'],
+                'start_date' => $row['start_date'],
+                'end_date' => $row['end_date'],
+                'extra_pay_percent' => $row['extra_pay_percent'],
+                'extra_pay_amount' => $row['extra_pay_amount'],
+                'order_no' => $row['order_no'],
+            ], $substitutions[$tabelNo] ?? []),
         ];
     }
 

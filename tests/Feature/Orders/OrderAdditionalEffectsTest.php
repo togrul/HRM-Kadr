@@ -323,6 +323,7 @@ class OrderAdditionalEffectsTest extends TestCase
         $this->assertSame('approved', $request->status);
         $this->assertSame('2026-11-08', $request->date->toDateString());
         $this->assertStringContainsString(__('orders::order_composer.rest_day_compensation.day_off'), (string) $request->reason);
+        $this->assertSame('day_off', $request->compensation);
 
         app(OrderStatusTransitionService::class)->revert($order->fresh(), 'Test üçün geri alınır');
 

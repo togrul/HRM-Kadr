@@ -115,6 +115,12 @@ return [
         'line' => 'Loan/advance repayment',
     ],
 
+    'order_earnings' => [
+        'rest_day_work' => 'Work on a non-working day (double rate, :days day(s), :hours h)',
+        'substitution' => 'Substitution extra pay (:days day(s))',
+        'substitution_for' => 'Substitution extra pay — :name (:days day(s))',
+    ],
+
     'run_types' => [
         'regular' => 'Regular',
         'off_cycle' => 'Off-cycle',

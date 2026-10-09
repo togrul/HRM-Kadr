@@ -14,7 +14,8 @@ use Illuminate\Support\Facades\DB;
  * Puts an order's rest-day / holiday work on record as an approved overtime request
  * (source "order") for the full standard working day. On a weekend or holiday every
  * worked minute is overtime, so the ledger marks the day "weekend/holiday worked" and the
- * approved minutes carry the order's compensation choice in the reason. The day's ledger
+ * approved minutes carry the order's compensation choice (double_pay | day_off) in their own
+ * column, read by payroll through PayrollRestDayWork. The day's ledger
  * is recalculated once the order's transaction commits.
  */
 class AttendanceOrderRestDayWorkService implements OrderRestDayWork
@@ -34,7 +35,7 @@ class AttendanceOrderRestDayWorkService implements OrderRestDayWork
             return null;
         }
 
-        $request = AttendanceOvertimeRequest::query()->create([
+        $attributes = [
             'tabel_no' => $tabelNo,
             'date' => $date->toDateString(),
             'requested_minutes' => self::FULL_DAY_MINUTES,
@@ -45,7 +46,13 @@ class AttendanceOrderRestDayWorkService implements OrderRestDayWork
             'requested_by' => $requestedBy,
             'approved_by' => $requestedBy,
             'approved_at' => now(),
-        ]);
+        ];
+
+        if (InstalledTables::hasColumn('attendance_overtime_requests', 'compensation')) {
+            $attributes['compensation'] = $compensation === self::COMPENSATION_DAY_OFF ? self::COMPENSATION_DAY_OFF : self::COMPENSATION_DOUBLE_PAY;
+        }
+
+        $request = AttendanceOvertimeRequest::query()->create($attributes);
 
         $this->recalculate($tabelNo, $date);
 

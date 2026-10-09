@@ -24,6 +24,7 @@ class AttendanceOvertimeRequest extends Model
         'approved_minutes',
         'status',
         'source',
+        'compensation',
         'reason',
         'rejection_reason',
         'requested_by',

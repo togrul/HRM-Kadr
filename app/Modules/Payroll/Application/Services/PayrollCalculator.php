@@ -13,6 +13,7 @@ class PayrollCalculator
         private readonly StatutoryEngine $statutory,
         private readonly ProrationService $proration,
         private readonly LoanService $loans,
+        private readonly OrderEarningsService $orderEarnings,
     ) {}
 
     /**
@@ -21,7 +22,10 @@ class PayrollCalculator
      * statutory deductions (income tax / DSMF / unemployment / medical) and employer
      * contributions are computed from effective statutory_rates for the regime.
      * One-off earnings handed over for the pay month (bonus, award) join before the tax
-     * bases are summed; off-cycle runs leave them out so they are paid once.
+     * bases are summed; off-cycle runs leave them out so they are paid once. The same holds
+     * for what approved orders entitle the employee to in the month (double-paid rest-day
+     * work, substitution extra pay), read live from their owning modules so a recalculation
+     * follows the orders.
      *
      * @return array{gross:float,total_deductions:float,net:float,employer_cost:float,proration_factor:float,currency:string,lines:array<int,array<string,mixed>>}|null
      */
@@ -87,6 +91,12 @@ class PayrollCalculator
                     'is_statutory' => false,
                     'sort' => 100 + $sort++,
                 ];
+            }
+        }
+
+        if ($withOneOffs && $year && $month) {
+            foreach ($this->orderEarnings->linesFor($tabelNo, (float) $current->base_amount, $year, $month) as $line) {
+                $lines[] = $line;
             }
         }
 
