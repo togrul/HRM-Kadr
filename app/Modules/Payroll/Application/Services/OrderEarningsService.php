@@ -21,13 +21,17 @@ use Carbon\CarbonImmutable;
  *   substitution that fall in the month.
  *
  * Both are taxable and social-insurable earnings and go through the same statutory path
- * as the rest of the payslip.
+ * as the rest of the payslip. Each line names the records it was built from (`sources`),
+ * so locking can tell whether the order facts changed after the calculation.
  */
 class OrderEarningsService
 {
     public const REST_DAY_WORK = 'rest_day_work';
 
     public const SUBSTITUTION = 'substitution';
+
+    /** Line codes this service produces. */
+    public const CODES = [self::REST_DAY_WORK, self::SUBSTITUTION];
 
     /** Labour Code: work on a rest day / holiday is paid at least at double rate. */
     public const REST_DAY_MULTIPLIER = 2;
@@ -55,6 +59,7 @@ class OrderEarningsService
     {
         $paidMinutes = 0;
         $days = 0;
+        $sources = [];
 
         foreach ($this->restDayWork->orderWorkFor([$tabelNo], $year, $month)[$tabelNo] ?? [] as $day) {
             if ($day['compensation'] !== OrderRestDayWork::COMPENSATION_DOUBLE_PAY) {
@@ -63,6 +68,7 @@ class OrderEarningsService
 
             $paidMinutes += $day['minutes'];
             $days++;
+            $sources[] = self::REST_DAY_WORK.':'.$day['id'].':'.$day['date'].':'.$day['minutes'];
         }
 
         if ($paidMinutes <= 0 || $baseAmount <= 0) {
@@ -80,7 +86,7 @@ class OrderEarningsService
         return $this->line(self::REST_DAY_WORK, __('payroll::dashboard.order_earnings.rest_day_work', [
             'days' => $days,
             'hours' => $this->hours($paidMinutes),
-        ]), $amount, 150);
+        ]), $amount, 150, $sources);
     }
 
     /**
@@ -119,16 +125,49 @@ class OrderEarningsService
                 ? __('payroll::dashboard.order_earnings.substitution_for', ['name' => $row['substituted_name'], 'days' => $days])
                 : __('payroll::dashboard.order_earnings.substitution', ['days' => $days]);
 
-            $lines[] = $this->line(self::SUBSTITUTION, $name, $amount, $sort++);
+            $lines[] = $this->line(self::SUBSTITUTION, $name, $amount, $sort++, [implode(':', [
+                self::SUBSTITUTION,
+                $row['id'],
+                $row['start_date'],
+                $row['end_date'] ?? '-',
+                $percent > 0 ? number_format($percent, 2, '.', '') : '-',
+                $percent > 0 ? '-' : number_format((float) ($row['extra_pay_amount'] ?? 0), 2, '.', ''),
+            ])]);
         }
 
         return $lines;
     }
 
     /**
+     * What a set of order-derived lines amounts to — code, amount and the records behind
+     * them, order-independent — so a calculated payslip can be compared with the facts now.
+     *
+     * @param  iterable<array<string,mixed>>  $lines
+     */
+    public static function signature(iterable $lines): string
+    {
+        $parts = [];
+
+        foreach ($lines as $line) {
+            if (! in_array($line['code'] ?? null, self::CODES, true)) {
+                continue;
+            }
+
+            $sources = (array) ($line['sources'] ?? []);
+            sort($sources);
+            $parts[] = $line['code'].'|'.number_format((float) $line['amount'], 2, '.', '').'|'.implode(',', $sources);
+        }
+
+        sort($parts);
+
+        return hash('sha256', implode("\n", $parts));
+    }
+
+    /**
+     * @param  list<string>  $sources
      * @return array<string,mixed>
      */
-    private function line(string $code, string $name, float $amount, int $sort): array
+    private function line(string $code, string $name, float $amount, int $sort, array $sources): array
     {
         return [
             'component_id' => null,
@@ -140,6 +179,7 @@ class OrderEarningsService
             'affects_social' => true,
             'is_statutory' => false,
             'sort' => $sort,
+            'sources' => $sources,
         ];
     }
 

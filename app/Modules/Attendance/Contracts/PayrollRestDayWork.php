@@ -19,7 +19,7 @@ interface PayrollRestDayWork
      * Approved order rest-day work in the month, per staff number, one entry per day.
      *
      * @param  list<string>  $tabelNos
-     * @return array<string,list<array{date:string,minutes:int,compensation:string}>>
+     * @return array<string,list<array{id:int,date:string,minutes:int,compensation:string}>>
      */
     public function orderWorkFor(array $tabelNos, int $year, int $month): array;
 

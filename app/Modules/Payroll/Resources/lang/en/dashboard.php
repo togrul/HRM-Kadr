@@ -69,6 +69,7 @@ return [
         'deductions' => 'Deductions',
         'proration' => 'Proration (attendance)',
         'retro' => 'Pending retro adjustment',
+        'retro_recovery' => 'Recovery of overpaid pay for a revoked order (retro)',
         'loan_type' => 'Type',
         'principal' => 'Principal',
         'monthly_installment' => 'Monthly installment',
@@ -180,5 +181,6 @@ return [
         'lock_requires_approval' => 'The run must be approved before it can be locked',
         'reopen_not_allowed' => 'Only an approved or locked run can be reopened',
         'recalculate_first' => 'One-off earnings changed after this run was calculated — reopen and recalculate it',
+        'order_earnings_changed' => 'Order-based pay (non-working day work, substitution) changed after this run was calculated — reopen and recalculate it',
     ],
 ];

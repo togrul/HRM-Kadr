@@ -138,14 +138,16 @@ class PayrollRunService
                 }
 
                 // Back-pay owed from prior locked periods (net top-up, already net-of-tax).
-                $retroTotal = $this->retro->pendingRetro($tabelNo)['total'];
+                $pendingRetro = $this->retro->pendingRetro($tabelNo);
+                $retroTotal = $pendingRetro['total'];
                 $gross = $calc['gross'];
                 $net = $calc['net'];
+                $deductions = $calc['total_deductions'];
 
                 if ($retroTotal > 0.0) {
                     $payslip->lines()->create([
                         'component_id' => null,
-                        'code' => 'retro',
+                        'code' => RetroService::RETRO,
                         'name' => __('payroll::dashboard.fields.retro'),
                         'kind' => 'earning',
                         'amount' => $retroTotal,
@@ -160,8 +162,30 @@ class PayrollRunService
                     $payslip->update(['gross' => $gross, 'net' => $net]);
                 }
 
+                // Order pay a locked month no longer stands behind (revoked order) is taken
+                // back on the next regular run, never beyond what this payslip pays out.
+                $recovery = $run->run_type === 'regular' ? round(min($pendingRetro['recovery'], max(0.0, $net)), 2) : 0.0;
+
+                if ($recovery >= 0.01) {
+                    $payslip->lines()->create([
+                        'component_id' => null,
+                        'code' => RetroService::RECOVERY,
+                        'name' => __('payroll::dashboard.fields.retro_recovery'),
+                        'kind' => 'deduction',
+                        'amount' => $recovery,
+                        'taxable' => false,
+                        'affects_social' => false,
+                        'is_statutory' => false,
+                        'sort' => 310,
+                    ]);
+
+                    $net = round($net - $recovery, 2);
+                    $deductions = round($deductions + $recovery, 2);
+                    $payslip->update(['total_deductions' => $deductions, 'net' => $net]);
+                }
+
                 $totals['gross'] += $gross;
-                $totals['deductions'] += $calc['total_deductions'];
+                $totals['deductions'] += $deductions;
                 $totals['net'] += $net;
                 $totals['employer'] += $calc['employer_cost'];
                 $totals['count']++;
@@ -221,6 +245,38 @@ class PayrollRunService
         }
     }
 
+    /**
+     * Order-derived lines (rest-day work, substitution) are read live at calculation; an
+     * order approved, changed or revoked afterwards would otherwise be locked in wrong.
+     * Each such line names the records it was built from, so the run is compared with the
+     * order facts now and refused until it is recalculated.
+     *
+     * @throws ValidationException
+     */
+    private function guardOrderEarningsUnchangedSinceCalculation(PayrollRun $run): void
+    {
+        if ($run->run_type !== 'regular') {
+            return;
+        }
+
+        $onDate = $run->period->ends_on->toDateString();
+        $year = (int) $run->period->year;
+        $month = (int) $run->period->month;
+
+        foreach ($run->payslips()->with('lines')->get() as $payslip) {
+            $calculated = OrderEarningsService::signature($payslip->lines->map(fn ($line): array => [
+                'code' => $line->code,
+                'amount' => $line->amount,
+                'sources' => $line->sources,
+            ]));
+            $now = OrderEarningsService::signature($this->calculator->orderEarningLines((string) $payslip->getAttribute('tabel_no'), $onDate, $year, $month));
+
+            if ($calculated !== $now) {
+                throw ValidationException::withMessages(['run' => __('payroll::dashboard.messages.order_earnings_changed')]);
+            }
+        }
+    }
+
     public function lock(PayrollRun $run): PayrollRun
     {
         $this->guardOwnership('locking');
@@ -228,6 +284,8 @@ class PayrollRunService
         $this->guardStatus($run->status === 'approved', 'lock_requires_approval');
 
         $this->guardOneOffsUnchangedSinceCalculation($run);
+
+        $this->guardOrderEarningsUnchangedSinceCalculation($run);
 
         return DB::transaction(function () use ($run): PayrollRun {
             $run->payslips()->with('lines')->get()->each(function (Payslip $payslip): void {

@@ -50,7 +50,12 @@ the orders and a revoked order's pay disappears on the next calculation. Both li
 - `substitution`: percent × the substituting employee's own base salary (per the order text "vəzifə maaşının … faizi"),
   or the stored fixed monthly amount on older rows, × calendar days of the substitution in the month ÷ days in the month.
 
+Each order-derived line stores the records it was built from (`payslip_lines.sources`); locking refuses a regular run
+whose order facts changed since its calculation (`order_earnings_changed`: reopen and recalculate), like the one-off guard.
 Locked runs are never changed; an order that lands in an already locked month reaches the employee through
-`RetroService` (net difference on the next regular run). When finance owns payroll the run refuses to compute and the
+`RetroService` (net difference on the next regular run). An order revoked after its month was locked is recovered the
+same way as a `retro_recovery` deduction on the next regular run, capped at that payslip's net; only the part caused by
+order records that no longer stand is recovered — other negative differences (e.g. a retroactive pay cut) are still not
+clawed back. When finance owns payroll the run refuses to compute and the
 same facts travel in the `attendance.month` (`rest_day_work`) and `compensation` (`substitutions`) feeds — see
 `docs/integration-finance.md`.

@@ -5,8 +5,10 @@ namespace Tests\Feature\Payroll;
 use App\Models\ApiToken;
 use App\Models\AttendanceOvertimeRequest;
 use App\Models\CompensationRegime;
+use App\Models\PayrollRun;
 use App\Models\Payslip;
 use App\Models\Personnel;
+use App\Models\RetroPayment;
 use App\Models\User;
 use App\Modules\Attendance\Contracts\OrderRestDayWork;
 use App\Modules\Compensation\Application\Services\CompensationService;
@@ -20,6 +22,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use RuntimeException;
 use Tests\TestCase;
 
@@ -167,6 +170,77 @@ class OrderEarningsPayrollTest extends TestCase
         $this->assertLessThan(300.0, (float) $retro, 'Retro is net of the statutory deductions on the 300 gross.');
     }
 
+    public function test_a_run_cannot_lock_when_order_pay_changed_after_its_calculation(): void
+    {
+        $personnel = $this->employee(1680);
+        $workId = $this->restDayWork($personnel, '2026-11-08', OrderRestDayWork::COMPENSATION_DOUBLE_PAY);
+        $runs = app(PayrollRunService::class);
+        $run = $runs->approve($runs->calculate($runs->createRun(app(PayrollPeriodService::class)->createPeriod(2026, 11), $this->regimeId)));
+        $this->assertNotEmpty($run->payslips()->sole()->lines()->where('code', 'rest_day_work')->value('sources'));
+
+        // A substitution approved after the calculation …
+        $this->substitution($personnel, ['start_date' => '2026-11-01', 'end_date' => '2026-11-30', 'extra_pay_percent' => 10.0], 'order_substitution:41');
+        $this->assertLockRefused($runs, $run);
+
+        $run = $runs->approve($runs->calculate($runs->reopen($run->fresh())));
+
+        // … and a rest-day order revoked after it are both caught.
+        app(OrderRestDayWork::class)->remove((int) $workId);
+        $this->assertLockRefused($runs, $run);
+
+        $run = $runs->lock($runs->approve($runs->calculate($runs->reopen($run->fresh()))));
+        $this->assertSame('locked', $run->status);
+        $this->assertSame(168.0, (float) $run->payslips()->sole()->lines()->where('code', 'substitution')->value('amount'));
+    }
+
+    public function test_order_pay_revoked_after_its_month_was_paid_is_recovered_once_on_the_next_regular_run(): void
+    {
+        $personnel = $this->employee(1680);
+        $workId = $this->restDayWork($personnel, '2026-11-08', OrderRestDayWork::COMPENSATION_DOUBLE_PAY);
+        $runs = app(PayrollRunService::class);
+        $periods = app(PayrollPeriodService::class);
+        $november = $runs->lock($runs->approve($runs->calculate($runs->createRun($periods->createPeriod(2026, 11), $this->regimeId))));
+        $novemberNet = (float) $november->payslips()->sole()->net;
+        $withoutOrderNet = (float) app(PayrollCalculator::class)->calculate($personnel->tabel_no, '2026-11-30', 2026, 11, true, [])['net'];
+
+        app(OrderRestDayWork::class)->remove((int) $workId);
+
+        $this->assertSame($novemberNet, (float) $november->payslips()->sole()->fresh()->net, 'The locked month itself is not touched.');
+
+        $december = $runs->calculate($runs->createRun($periods->createPeriod(2026, 12), $this->regimeId));
+        $payslip = $december->payslips()->sole();
+        $recovery = $payslip->lines()->where('code', 'retro_recovery')->first();
+
+        // The net the 160 AZN gross added in November (after its statutory deductions) comes back.
+        $this->assertNotNull($recovery);
+        $this->assertSame('deduction', $recovery->kind);
+        $this->assertSame(__('payroll::dashboard.fields.retro_recovery'), $recovery->name);
+        $this->assertEqualsWithDelta($novemberNet - $withoutOrderNet, (float) $recovery->amount, 0.01);
+        $this->assertLessThan(160.0, (float) $recovery->amount);
+        $this->assertEqualsWithDelta((float) $payslip->gross - (float) $payslip->total_deductions, (float) $payslip->net, 0.01);
+
+        $runs->lock($runs->approve($december));
+        $this->assertEqualsWithDelta(-(float) $recovery->amount, (float) RetroPayment::query()->where('source_payroll_run_id', $november->id)->sum('amount'), 0.01);
+
+        $january = $runs->calculate($runs->createRun($periods->createPeriod(2027, 1), $this->regimeId));
+        $this->assertSame(0, $january->payslips()->sole()->lines()->whereIn('code', ['retro', 'retro_recovery'])->count(), 'Recovered once, never again.');
+    }
+
+    public function test_a_retroactive_pay_cut_without_an_order_change_is_not_recovered(): void
+    {
+        $personnel = $this->employee(3000);
+        $this->substitution($personnel, ['start_date' => '2026-11-01', 'end_date' => '2026-11-30', 'extra_pay_percent' => 10.0]);
+        $runs = app(PayrollRunService::class);
+        $periods = app(PayrollPeriodService::class);
+        $runs->lock($runs->approve($runs->calculate($runs->createRun($periods->createPeriod(2026, 11), $this->regimeId))));
+
+        app(CompensationService::class)->assignCompensation($personnel->tabel_no, ['regime_id' => $this->regimeId, 'base_amount' => 2500, 'effective_from' => '2026-11-01']);
+
+        $december = $runs->calculate($runs->createRun($periods->createPeriod(2026, 12), $this->regimeId));
+
+        $this->assertSame(0, $december->payslips()->sole()->lines()->whereIn('code', ['retro', 'retro_recovery'])->count());
+    }
+
     public function test_with_finance_owning_payroll_nothing_is_computed_here_and_the_feeds_carry_the_facts(): void
     {
         config(['integration.payroll_owner' => ConfiguredPayrollOwnership::FINANCE]);
@@ -200,6 +274,18 @@ class OrderEarningsPayrollTest extends TestCase
         $this->assertSame('TB-COL', $compensation['substitutions'][0]['substituted_external_no']);
         $this->assertEquals(25, $compensation['substitutions'][0]['extra_pay_percent']);
         $this->assertNull($compensation['substitutions'][0]['end_date']);
+    }
+
+    private function assertLockRefused(PayrollRunService $runs, PayrollRun $run): void
+    {
+        try {
+            $runs->lock($run->fresh());
+            $this->fail('A run whose order pay changed after the calculation must not lock.');
+        } catch (ValidationException $exception) {
+            $this->assertSame([__('payroll::dashboard.messages.order_earnings_changed')], $exception->errors()['run']);
+        }
+
+        $this->assertSame('approved', $run->fresh()->status);
     }
 
     private function calculateNovember(Personnel $personnel): Payslip

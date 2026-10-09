@@ -55,6 +55,7 @@ class AttendancePayrollRestDayWorkService implements PayrollRestDayWork
             $compensation = $hasCompensation ? (string) $row->getAttribute('compensation') : '';
 
             $days[(string) $row->getAttribute('tabel_no')][$date] = [
+                'id' => (int) $row->getKey(),
                 'date' => $date,
                 'minutes' => (int) $row->getAttribute('approved_minutes'),
                 'compensation' => $compensation === OrderRestDayWork::COMPENSATION_DAY_OFF

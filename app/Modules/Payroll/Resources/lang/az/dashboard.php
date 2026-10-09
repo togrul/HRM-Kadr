@@ -69,6 +69,7 @@ return [
         'deductions' => 'Tutulmalar',
         'proration' => 'Proporsiya (davamiyyət)',
         'retro' => 'Gözləyən retro düzəliş',
+        'retro_recovery' => 'Ləğv olunmuş əmr üzrə artıq ödənişin tutulması (retro)',
         'loan_type' => 'Növ',
         'principal' => 'Əsas məbləğ',
         'monthly_installment' => 'Aylıq ödəniş',
@@ -180,5 +181,6 @@ return [
         'lock_requires_approval' => 'Kilidləmədən əvvəl hesablama təsdiqlənməlidir',
         'reopen_not_allowed' => 'Yalnız təsdiqlənmiş və ya kilidlənmiş hesablama yenidən açıla bilər',
         'recalculate_first' => 'Hesablama aparılandan sonra birdəfəlik ödənişlər dəyişib — hesablamanı yenidən açıb yenidən hesablayın',
+        'order_earnings_changed' => 'Hesablama aparılandan sonra əmrdən irəli gələn ödənişlər (qeyri-iş gününə cəlb, əvəzetmə) dəyişib — hesablamanı yenidən açıb yenidən hesablayın',
     ],
 ];
