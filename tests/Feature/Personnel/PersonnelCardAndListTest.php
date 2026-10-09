@@ -4,6 +4,7 @@ use App\Models\Personnel;
 use App\Models\User;
 use App\Modules\Orders\Infrastructure\Variables\OrderEmployeeVariableResolver;
 use App\Modules\Personnel\Application\Services\PersonnelProfileReadService;
+use App\Modules\Personnel\Contracts\GuardsPersonnelChanges;
 use App\Modules\Personnel\Livewire\AddPersonnel;
 use App\Modules\Personnel\Livewire\AllPersonnel;
 use App\Modules\Personnel\Livewire\DeletePersonnel;
@@ -124,7 +125,8 @@ it('shows the current post on the card even without a labour activity row', func
         ->and($timeline[0]['is_current'])->toBeTrue()
         ->and($timeline[0]['from'])->toBe('2020');
 
-    $personnel->forceFill(['leave_work_date' => '2024-01-01'])->save();
+    // Xitam tarixi yalnız xitam əmri ilə yazılır (dəyişiklik siyasəti).
+    app(GuardsPersonnelChanges::class)->allowForEffect('termination', fn () => $personnel->forceFill(['leave_work_date' => '2024-01-01'])->save());
 
     expect($reader->careerTimeline($reader->load($personnel->refresh())))->toBe([]);
 });

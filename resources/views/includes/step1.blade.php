@@ -18,6 +18,11 @@
     $workSchedule = $personal['work_schedule'] ?? null;
     $isWeeklySchedule = EmploymentTerms::isWeekly($workSchedule);
     $shiftCount = EmploymentTerms::shiftCount($workSchedule);
+
+    // Dəyişiklik siyasəti (yalnız mövcud əməkdaşın redaktəsində): məhdud sahələr nişan alır,
+    // «yalnız əmrlə» sahələri kilidlənir.
+    $fieldPolicies = ! empty($personnelModel) && method_exists($this, 'fieldPolicies') ? $this->fieldPolicies : [];
+    $lockedFields = array_keys(array_filter($fieldPolicies, fn (array $policy): bool => $policy['mode'] === 'order'));
 @endphp
 
 <div class="flex w-full flex-col items-stretch gap-4 md:flex-row md:items-start">
@@ -36,11 +41,13 @@
             </div>
             <div class="flex flex-col">
                 <div class="flex items-center justify-between space-x-2">
-                    <x-label required for="personnel.surname">{{ __('personnel::common.labels.surname') }}</x-label>
+                    <x-label required for="personnel.surname">{{ __('personnel::common.labels.surname') }}<x-personnel.change-policy-badge :policy="$fieldPolicies['surname'] ?? null" /></x-label>
                     <x-checkbox name="addManual" model="personalForm.personnel.has_changed_initials">{{ __('personnel::common.questions.changed') }}</x-checkbox>
                 </div>
 
-                <x-livewire-input mode="gray" aria-required="true" name="personnel.surname" wire:model="personalForm.personnel.surname"></x-livewire-input>
+                <x-livewire-input mode="gray" aria-required="true" name="personnel.surname" :disabled="in_array('surname', $lockedFields, true)" wire:model="personalForm.personnel.surname"></x-livewire-input>
+
+                <x-personnel.change-policy-note :policy="$fieldPolicies['surname'] ?? null" />
                 @error('personalForm.personnel.surname')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
@@ -202,19 +209,22 @@
         @endif
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
             <div class="flex flex-col">
-                <x-label for="personnel.phone">{{ __('personnel::common.labels.phone') }}</x-label>
-                <x-livewire-input mode="gray" name="personnel.phone" wire:model="personalForm.personnel.phone"></x-livewire-input>
+                <x-label for="personnel.phone">{{ __('personnel::common.labels.phone') }}<x-personnel.change-policy-badge :policy="$fieldPolicies['phone'] ?? null" /></x-label>
+                <x-livewire-input mode="gray" name="personnel.phone" :disabled="in_array('phone', $lockedFields, true)" wire:model="personalForm.personnel.phone"></x-livewire-input>
+                <x-personnel.change-policy-note :policy="$fieldPolicies['phone'] ?? null" />
             </div>
             <div class="flex flex-col">
-                <x-label required for="personnel.mobile">{{ __('personnel::common.labels.mobile') }}</x-label>
-                <x-livewire-input mode="gray" aria-required="true" name="personnel.mobile" wire:model="personalForm.personnel.mobile"></x-livewire-input>
+                <x-label required for="personnel.mobile">{{ __('personnel::common.labels.mobile') }}<x-personnel.change-policy-badge :policy="$fieldPolicies['mobile'] ?? null" /></x-label>
+                <x-livewire-input mode="gray" aria-required="true" name="personnel.mobile" :disabled="in_array('mobile', $lockedFields, true)" wire:model="personalForm.personnel.mobile"></x-livewire-input>
+                <x-personnel.change-policy-note :policy="$fieldPolicies['mobile'] ?? null" />
                 @error('personalForm.personnel.mobile')
                     <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="personnel.email">{{ __('personnel::common.labels.email') }}</x-label>
-                <x-livewire-input mode="gray" name="personnel.email" wire:model="personalForm.personnel.email"></x-livewire-input>
+                <x-label for="personnel.email">{{ __('personnel::common.labels.email') }}<x-personnel.change-policy-badge :policy="$fieldPolicies['email'] ?? null" /></x-label>
+                <x-livewire-input mode="gray" name="personnel.email" :disabled="in_array('email', $lockedFields, true)" wire:model="personalForm.personnel.email"></x-livewire-input>
+                <x-personnel.change-policy-note :policy="$fieldPolicies['email'] ?? null" />
             </div>
             <div class="flex flex-col">
                 <x-label required for="personnel.pin">{{ __('personnel::common.labels.pin') }}</x-label>
@@ -227,15 +237,17 @@
 
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div class="flex flex-col">
-                <x-label required for="personnel.residental_address">{{ __('personnel::common.labels.residental_address') }}</x-label>
-                <x-livewire-input mode="gray" aria-required="true" name="personnel.residental_address" wire:model="personalForm.personnel.residental_address"></x-livewire-input>
+                <x-label required for="personnel.residental_address">{{ __('personnel::common.labels.residental_address') }}<x-personnel.change-policy-badge :policy="$fieldPolicies['residental_address'] ?? null" /></x-label>
+                <x-livewire-input mode="gray" aria-required="true" name="personnel.residental_address" :disabled="in_array('residental_address', $lockedFields, true)" wire:model="personalForm.personnel.residental_address"></x-livewire-input>
+                <x-personnel.change-policy-note :policy="$fieldPolicies['residental_address'] ?? null" />
                 @error('personalForm.personnel.residental_address')
                     <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label required for="personnel.registered_address">{{ __('personnel::common.labels.registered_address') }}</x-label>
-                <x-livewire-input mode="gray" aria-required="true" name="personnel.registered_address" wire:model="personalForm.personnel.registered_address"></x-livewire-input>
+                <x-label required for="personnel.registered_address">{{ __('personnel::common.labels.registered_address') }}<x-personnel.change-policy-badge :policy="$fieldPolicies['registered_address'] ?? null" /></x-label>
+                <x-livewire-input mode="gray" aria-required="true" name="personnel.registered_address" :disabled="in_array('registered_address', $lockedFields, true)" wire:model="personalForm.personnel.registered_address"></x-livewire-input>
+                <x-personnel.change-policy-note :policy="$fieldPolicies['registered_address'] ?? null" />
                 @error('personalForm.personnel.registered_address')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
@@ -262,7 +274,7 @@
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label required for="personnel.structure_id">{{ __('personnel::common.labels.structure') }}</x-label>
+                <x-label required for="personnel.structure_id">{{ __('personnel::common.labels.structure') }}<x-personnel.change-policy-badge :policy="$fieldPolicies['structure_id'] ?? null" /></x-label>
                 <x-ui.select-dropdown
                     :aria-label="__('personnel::common.labels.structure')"
                     placeholder="---"
@@ -273,23 +285,16 @@
                     :model="$this->structureOptions"
                     :search-model="data_get($stepSearchModels, 'searchStructure', 'searchStructure')"
                     :search-placeholder="data_get($stepSearchPlaceholders, 'searchStructure', __('personnel::common.placeholders.search'))"
-                    :disabled="!empty($personnelModel)"
+                    :disabled="in_array('structure_id', $lockedFields, true)"
                 >
                 </x-ui.select-dropdown>
                 @error('personalForm.personnel.structure_id')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
-                @if (!empty($personnelModel))
-                    <p class="mt-1 text-[11.5px] leading-4 text-ink-faint">
-                        {{ __('personnel::common.hints.assignment_order_only') }}
-                        @if (method_exists($this, 'transferOrderUrl') && $this->transferOrderUrl)
-                            <a href="{{ $this->transferOrderUrl }}" wire:navigate class="font-medium text-ink-soft underline underline-offset-2 hover:text-ink">{{ __('personnel::common.hints.create_transfer_order') }}</a>
-                        @endif
-                    </p>
-                @endif
+                <x-personnel.change-policy-note :policy="$fieldPolicies['structure_id'] ?? null" :link-label="__('personnel::common.hints.create_transfer_order')" />
             </div>
             <div class="flex flex-col">
-                <x-label required for="personnel.position_id">{{ __('personnel::common.labels.position') }}</x-label>
+                <x-label required for="personnel.position_id">{{ __('personnel::common.labels.position') }}<x-personnel.change-policy-badge :policy="$fieldPolicies['position_id'] ?? null" /></x-label>
                 <x-ui.select-dropdown
                     :aria-label="__('personnel::common.labels.position')"
                     placeholder="---"
@@ -300,7 +305,7 @@
                     :model="$this->positionOptions"
                     :search-model="data_get($stepSearchModels, 'searchPosition', 'searchPosition')"
                     :search-placeholder="data_get($stepSearchPlaceholders, 'searchPosition', __('personnel::common.placeholders.search'))"
-                    :disabled="!empty($personnelModel)"
+                    :disabled="in_array('position_id', $lockedFields, true)"
                 >
                 </x-ui.select-dropdown>
                 @if (empty($personnelModel) && $this->positionListFallsBackToAll)
@@ -364,8 +369,8 @@
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label required for="personnel.join_work_date">{{ __('personnel::common.labels.join_work_date') }}</x-label>
-                <x-pikaday-input mode="gray" aria-required="true" name="personnel.join_work_date" format="Y-MM-DD" wire:model.live="personalForm.personnel.join_work_date">
+                <x-label required for="personnel.join_work_date">{{ __('personnel::common.labels.join_work_date') }}<x-personnel.change-policy-badge :policy="$fieldPolicies['join_work_date'] ?? null" /></x-label>
+                <x-pikaday-input mode="gray" aria-required="true" name="personnel.join_work_date" :disabled="in_array('join_work_date', $lockedFields, true)" format="Y-MM-DD" wire:model.live="personalForm.personnel.join_work_date">
                     <x-slot name="script">
                       $el.onchange = function () {
                       @this.set('personalForm.personnel.join_work_date', $el.value);
@@ -375,6 +380,7 @@
                 @error('personalForm.personnel.join_work_date')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
+                <x-personnel.change-policy-note :policy="$fieldPolicies['join_work_date'] ?? null" />
             </div>
             <div class="flex flex-col">
                 <x-label :required="$isFixedTermContract" for="personnel.contract_end_date">{{ __('personnel::common.labels.contract_end_date') }}</x-label>
@@ -601,11 +607,12 @@
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div class="flex flex-col">
                 <div class="flex items-center justify-between space-x-2">
-                    <x-label for="personnel.extra_important_information">{{ __('personnel::common.labels.extra_information') }}</x-label>
+                    <x-label for="personnel.extra_important_information">{{ __('personnel::common.labels.extra_information') }}<x-personnel.change-policy-badge :policy="$fieldPolicies['extra_important_information'] ?? null" /></x-label>
                     <x-checkbox name="isDisability" model="personalForm.hasDisability">{{ __('personnel::common.questions.has_disability') }}</x-checkbox>
                 </div>
-                <x-textarea mode="gray" name="personnel.extra_important_information" placeholder=""
+                <x-textarea mode="gray" name="personnel.extra_important_information" placeholder="" :disabled="in_array('extra_important_information', $lockedFields, true)"
                   wire:model="personalForm.personnel.extra_important_information"></x-textarea>
+                <x-personnel.change-policy-note :policy="$fieldPolicies['extra_important_information'] ?? null" />
             </div>
             <div class="flex flex-col">
                 <x-label for="personnel.computer_knowledge">{{ __('personnel::common.labels.computer_knowledge') }}</x-label>
@@ -651,7 +658,7 @@
                         <span class="absolute inset-x-2 bottom-2 rounded-lg bg-white/90 py-1 text-[12px] font-medium text-ink-soft opacity-0 shadow-card transition group-hover:opacity-100">{{ __('personnel::common.actions.choose_photo') }}</span>
                     @endif
 
-                    <input type="file" accept="image/*" class="sr-only" wire:model="avatar" />
+                    <input type="file" accept="image/*" class="sr-only" wire:model="avatar" @disabled(in_array('photo', $lockedFields, true)) />
 
                     <span x-cloak x-show="isUploading" class="absolute inset-x-3 bottom-3 h-1 overflow-hidden rounded-full bg-hairline">
                         <span class="block h-full bg-ink transition-all" x-bind:style="`width: ${progress}%`"></span>
@@ -659,6 +666,9 @@
                 </label>
 
                 @error('avatar') <span class="error">{{ $message }}</span> @enderror
+                @if (isset($fieldPolicies['photo']))
+                    <p class="mt-1 text-center text-[11.5px] leading-4 text-ink-faint">{{ __('personnel::change_policy.groups.photo_notes.label') }}<x-personnel.change-policy-badge :policy="$fieldPolicies['photo']" /></p>
+                @endif
             </div>
         </div>
 

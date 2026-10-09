@@ -15,6 +15,7 @@ return [
         'edit-orders' => 'Allows editing existing orders, updating their content and applying changes.',
         'delete-orders' => 'Allows deleting or archiving orders.',
         'revert-orders' => 'Allows reverting or cancelling an approved order (undoing its effects).',
+        'manage-change-policy' => 'Allows changing how employee field groups may change (free / journal / order only) under Admin → Settings → Change policy.',
         'show-compensation' => 'Allows opening the compensation module and viewing salary scales, the component catalogue and employee salaries.',
         'manage-compensation' => 'Allows creating, editing and deleting salary scales, components, employee salaries and bank details.',
         'review-compensation' => 'Allows reviewing and approving compensation assignments.',

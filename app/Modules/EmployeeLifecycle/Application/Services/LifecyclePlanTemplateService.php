@@ -2,7 +2,7 @@
 
 namespace App\Modules\EmployeeLifecycle\Application\Services;
 
-use App\Modules\Personnel\Contracts\GuardsPersonnelAssignment;
+use App\Modules\Personnel\Contracts\GuardsPersonnelChanges;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -362,14 +362,14 @@ class LifecyclePlanTemplateService
             ]);
 
             if ($applyToPersonnel && $movement->personnel_id !== null) {
-                // Struktur/vəzifə əmrlə idarə olunursa (Personnel modulunun qoruyucusu) hərəkət
-                // yalnız plan kimi tamamlanır; faktiki köçürməni köçürmə əmri edir.
-                $assignment = app(GuardsPersonnelAssignment::class);
+                // Struktur/vəzifə dəyişiklik siyasəti ilə məhduddursa (yalnız əmrlə və ya jurnal)
+                // hərəkət yalnız plan kimi tamamlanır; faktiki köçürməni köçürmə əmri edir.
+                $changes = app(GuardsPersonnelChanges::class);
                 $personnelUpdates = array_filter([
                     'structure_id' => $movement->target_structure_id,
                     'position_id' => $movement->target_position_id,
                 ], fn ($value, string $attribute): bool => $value !== null
-                    && ($assignment->isAllowed() || ! $assignment->isGuarded($attribute)), ARRAY_FILTER_USE_BOTH);
+                    && ($changes->isAllowed($changes->groupOf($attribute)) || ! $changes->isGuarded($attribute)), ARRAY_FILTER_USE_BOTH);
 
                 if ($personnelUpdates !== []) {
                     $personnelUpdates['updated_at'] = now();

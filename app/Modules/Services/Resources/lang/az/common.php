@@ -54,6 +54,7 @@ return [
         'general' => 'Ümumi',
         'candidate_preferences' => 'Namizədlər',
         'notifications' => 'Bildirişlər',
+        'change_policy' => 'Dəyişiklik siyasəti',
         'menus' => 'Menyular',
         'roles' => 'Rollar',
         'users' => 'İstifadəçilər',

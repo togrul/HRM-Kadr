@@ -3,6 +3,7 @@
         'general' => __('services::common.labels.general'),
         'candidate' => __('services::common.labels.candidate_preferences'),
         'notifications-settings' => __('services::common.labels.notifications'),
+        'change-policy' => __('services::common.labels.change_policy'),
         'menus' => __('services::common.labels.menus'),
         'roles' => __('services::common.navigation.roles_and_permissions'),
         'users' => __('services::common.labels.users'),
@@ -77,6 +78,12 @@
 
                     @case('notifications-settings')
                         @livewire('notification.settings-hub', key('notifications-settings-hub'))
+                    @break
+
+                    @case('change-policy')
+                        @can('manage-change-policy')
+                            @livewire('services.settings.change-policy', key('settings-change-policy'))
+                        @endcan
                     @break
 
                     @case('menus')
