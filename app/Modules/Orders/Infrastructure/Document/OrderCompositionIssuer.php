@@ -27,6 +27,7 @@ class OrderCompositionIssuer
         private readonly VacationBalanceService $balances,
         private readonly StaffScheduleVacancyService $vacancies,
         private readonly OrderPeriodGuard $periods,
+        private readonly OrderNumbering $numbering,
     ) {}
 
     /**
@@ -34,8 +35,14 @@ class OrderCompositionIssuer
      */
     public function issue(OrderWordTemplate $template, OrderComposition $composition, bool $autoVacancy): OrderIssueOutcome
     {
-        if (trim($composition->orderNumber) === '') {
+        // With automatic numbering the number may be left empty: it is assigned at approval.
+        $number = trim($composition->orderNumber);
+        if ($number === '' && ! $this->numbering->isAutomatic()) {
             return OrderIssueOutcome::rejected(['orderNumber' => __('orders::order_composer.errors.number_required')]);
+        }
+
+        if ($number !== '' && $this->numberTaken($number, $composition->editOrderId)) {
+            return OrderIssueOutcome::rejected(['orderNumber' => __('orders::order_composer.errors.number_taken')]);
         }
 
         $subjectErrors = $this->subjects->subjectErrors($template, $composition);
@@ -204,6 +211,31 @@ class OrderCompositionIssuer
         return $violation === null ? null : OrderIssueOutcome::rejected(message: $violation);
     }
 
+    /** Another order (deleted ones included — order_no is unique) already carries this number. */
+    private function numberTaken(string $number, ?int $exceptOrderId): bool
+    {
+        return OrderLog::withTrashed()
+            ->where('order_no', $number)
+            ->when($exceptOrderId !== null, fn ($query) => $query->whereKeyNot($exceptOrderId))
+            ->exists();
+    }
+
+    /**
+     * The number to store: the one typed, else (automatic numbering) a provisional
+     * placeholder — the one the order already holds when it is being edited.
+     */
+    private function orderNumber(OrderComposition $composition): string
+    {
+        $number = trim($composition->orderNumber);
+        if ($number !== '') {
+            return $number;
+        }
+
+        $current = $composition->isEditing() ? (string) OrderLog::query()->whereKey($composition->editOrderId)->value('order_no') : '';
+
+        return OrderNumbering::isProvisional($current) ? $current : $this->numbering->provisional();
+    }
+
     private function persist(OrderWordTemplate $template, OrderComposition $composition): OrderIssueOutcome
     {
         $isHire = $template->isHire();
@@ -218,7 +250,7 @@ class OrderCompositionIssuer
             'hire_structure_id' => $isHire ? $composition->hireStructureId : null,
             'hire_position_id' => $isHire ? $composition->hirePositionId : null,
             'fields' => $composition->fields,
-            'order_number' => trim($composition->orderNumber),
+            'order_number' => $this->orderNumber($composition),
             'order_date' => $composition->orderDate,
             'signatory' => $signatory,
         ];

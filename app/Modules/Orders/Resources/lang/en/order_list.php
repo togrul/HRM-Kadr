@@ -14,6 +14,7 @@ return [
         'show_all' => 'Show all',
     ],
     'table' => [
+        'no_number_yet' => 'Number assigned on approval',
         'title' => 'Orders',
         'row_no' => '#',
         'order_no' => 'Order #',
@@ -27,12 +28,15 @@ return [
         'unit' => 'orders',
     ],
     'messages' => [
+        'approved_not_deletable' => 'An approved order cannot be deleted — cancel it first.',
+        'pdf_unavailable' => 'The PDF could not be produced (no converter on this server, or the document is missing). Download the Word document instead.',
         'force_delete_confirm' => 'Are you sure you want to remove this data?',
         'delete_order_confirm' => 'Are you sure you want to delete this order?',
         'order_duplicated' => 'A copy of the order was created as a draft.',
         'draft_not_ready' => 'A draft order cannot be approved — finish and save it first.',
     ],
     'actions' => [
+        'download_pdf' => 'Download PDF',
         'open_user_guide' => 'User guide',
         'force_delete' => 'Delete permanently',
         'restore' => 'Restore',

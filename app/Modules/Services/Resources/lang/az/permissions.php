@@ -82,6 +82,7 @@ return [
         'manage' => 'İdarə et',
         'reject' => 'Rədd et',
         'request' => 'Müraciət et',
+        'revert' => 'Geri qaytar',
         'review' => 'Nəzərdən keçir',
         'show' => 'Baxış',
         'submit' => 'Göndər',

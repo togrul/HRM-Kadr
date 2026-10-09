@@ -14,6 +14,7 @@ return [
         'add-orders' => 'Yeni əmr yaratmaq, komponent əlavə etmək və təsdiq axınına göndərmək icazəsi verir.',
         'edit-orders' => 'Mövcud əmrləri redaktə etmək, məzmununu yeniləmək və dəyişiklik tətbiq etmək icazəsi verir.',
         'delete-orders' => 'Əmrləri silmək və ya arxivləşdirmək üçün silinmə əməliyyatı aparmaq icazəsi verir.',
+        'revert-orders' => 'Təsdiqlənmiş əmri geri qaytarmaq və ya ləğv etmək (əmrin nəticələrini geri almaq) icazəsi verir.',
         'show-compensation' => 'Kompensasiya modulunu görmək, maaş şkalalarını, komponent kataloqunu və işçi maaşlarını izləmək icazəsi verir.',
         'manage-compensation' => 'Maaş şkalaları, komponentlər, işçi maaşları və bank rekvizitlərini yaratmaq, redaktə etmək və silmək icazəsi verir.',
         'review-compensation' => 'Kompensasiya təyinatlarını nəzərdən keçirmək və təsdiqləmək icazəsi verir.',

@@ -54,7 +54,8 @@ class OrderDocumentBuilder
     public function systemContext(OrderComposition $composition, array $signatory): array
     {
         return [
-            'system.order_number' => $composition->orderNumber,
+            // A provisional (not yet assigned) number is never printed.
+            'system.order_number' => OrderNumbering::display($composition->orderNumber),
             'system.order_date' => $composition->orderDate,
             'system.organization_city' => $composition->organizationCity,
             'system.organization_name' => app(OrganizationName::class)->current(),
@@ -134,6 +135,45 @@ class OrderDocumentBuilder
     }
 
     /**
+     * Re-render a pending order's generated document so it carries the number assigned at
+     * approval (system.order_number), from the inputs frozen in its snapshot. A document
+     * the author uploaded by hand is theirs and is left as it is (logged).
+     */
+    public function renumber(OrderLog $order, OrderWordTemplate $template): void
+    {
+        $snapshot = (array) $order->template_snapshot;
+
+        if ((string) ($snapshot['docx_path'] ?? '') !== self::generatedPath($order)) {
+            Log::warning('orders.number.uploaded_document_kept', ['order_id' => $order->id, 'order_no' => $order->order_no]);
+
+            return;
+        }
+
+        $composition = new OrderComposition(
+            presetCode: (string) ($snapshot['template_code'] ?? $template->code),
+            personnelId: empty($snapshot['personnel_id']) ? null : (int) $snapshot['personnel_id'],
+            candidateId: empty($snapshot['candidate_id']) ? null : (int) $snapshot['candidate_id'],
+            hireStructureId: empty($snapshot['hire_structure_id']) ? null : (int) $snapshot['hire_structure_id'],
+            hirePositionId: empty($snapshot['hire_position_id']) ? null : (int) $snapshot['hire_position_id'],
+            fields: (array) ($snapshot['fields'] ?? []),
+            orderNumber: (string) $order->order_no,
+            orderDate: (string) ($snapshot['order_date_text'] ?? ''),
+            organizationCity: (string) ($snapshot['organization_city'] ?? OrderDraftService::ORGANIZATION_CITY),
+            editOrderId: (int) $order->id,
+        );
+
+        $signatory = is_array($order->signatory_snapshot) ? $order->signatory_snapshot : null;
+
+        $this->store($order, $template, $this->values($template, $composition, $signatory));
+    }
+
+    /** Where the system stores an order's generated document (an uploaded one gets a timestamped name). */
+    public static function generatedPath(OrderLog $order): string
+    {
+        return 'order-documents/'.$order->id.'.docx';
+    }
+
+    /**
      * Render the order's filled .docx and store it as the order's authoritative
      * document (served on print). Returns the stored path on the local disk.
      *
@@ -143,7 +183,7 @@ class OrderDocumentBuilder
     {
         $tmp = $this->renderDocx($template, $values);
 
-        $stored = 'order-documents/'.$order->id.'.docx';
+        $stored = self::generatedPath($order);
         Storage::disk('local')->put($stored, (string) file_get_contents($tmp));
         @unlink($tmp);
 

@@ -158,7 +158,7 @@ class CandidateHireOrderFlowTest extends TestCase
         $this->assertTrue(DB::table('employee_compensations')->where('tabel_no', $personnel->tabel_no)->where('status', 'draft')->exists());
         $this->assertSame(1, (int) StaffSchedule::query()->where('position_id', $this->position->id)->value('filled'));
 
-        app(OrderStatusTransitionService::class)->revert($order->fresh());
+        app(OrderStatusTransitionService::class)->revert($order->fresh(), 'Səhv tərtib edilib');
 
         $this->assertSame(OrderStatusEnum::PENDING->value, (int) $order->fresh()->status_id);
 
@@ -212,7 +212,7 @@ class CandidateHireOrderFlowTest extends TestCase
 
         foreach (['revert', 'cancel'] as $action) {
             try {
-                app(OrderStatusTransitionService::class)->{$action}($order->fresh());
+                app(OrderStatusTransitionService::class)->{$action}($order->fresh(), 'Səhv tərtib edilib');
                 $this->fail('A hire whose employee has records must not be revocable.');
             } catch (DomainException $exception) {
                 $this->assertSame(__('orders::order_composer.errors.hire_revoke_blocked', [
@@ -234,7 +234,7 @@ class CandidateHireOrderFlowTest extends TestCase
         $candidate = $this->makeCandidate(statusId: 30, withOpening: true);
         $order = $this->issueAndApproveHire($candidate, '81-K');
 
-        app(OrderStatusTransitionService::class)->cancel($order->fresh());
+        app(OrderStatusTransitionService::class)->cancel($order->fresh(), 'Səhv tərtib edilib');
 
         $this->assertSame(OrderStatusEnum::CANCELLED->value, (int) $order->fresh()->status_id);
         $this->assertSame(30, (int) $candidate->fresh()->status_id);
@@ -252,7 +252,7 @@ class CandidateHireOrderFlowTest extends TestCase
             ->set('fields', ['var_2' => '01.10.2026-cı il'])
             ->call('issue');
 
-        app(OrderStatusTransitionService::class)->cancel(OrderLog::query()->where('order_no', '79-K')->firstOrFail());
+        app(OrderStatusTransitionService::class)->cancel(OrderLog::query()->where('order_no', '79-K')->firstOrFail(), 'Səhv tərtib edilib');
 
         $this->assertSame(30, (int) $candidate->fresh()->status_id);
         $this->assertNull($candidate->fresh()->hired_personnel_id);

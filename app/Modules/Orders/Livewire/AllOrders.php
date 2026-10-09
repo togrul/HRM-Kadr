@@ -2,6 +2,7 @@
 
 namespace App\Modules\Orders\Livewire;
 
+use App\Enums\OrderStatusEnum;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\Order;
 use App\Models\OrderLog;
@@ -9,7 +10,10 @@ use App\Modules\Orders\Application\Document\OrderTemplateProvider;
 use App\Modules\Orders\Contracts\OrderDrafter;
 use App\Modules\Orders\Domain\Contracts\OrderTypeStatusLookupReadRepository;
 use App\Modules\Orders\Exports\OrderExport;
+use App\Modules\Orders\Infrastructure\Document\OrderDeletionService;
+use App\Modules\Orders\Infrastructure\Document\OrderFinalPdfService;
 use App\Modules\Orders\Infrastructure\Document\OrderIssueService;
+use App\Modules\Orders\Infrastructure\Document\OrderStatusTransitionService;
 use App\Services\StructureService;
 use Carbon\Carbon;
 use DomainException;
@@ -119,18 +123,33 @@ class AllOrders extends Component
         ];
     }
 
-    /** Soft-delete an order (the row menu's "Sil", confirmed in the global modal). */
+    /**
+     * Soft-delete an order (the row menu's "Sil", confirmed in the global modal). An approved
+     * order is refused with a message: it has to be cancelled first, which reverses its effect.
+     */
     #[Renderless]
-    public function deleteOrder(string $order_no): void
+    public function deleteOrder(string $order_no, OrderDeletionService $deletions): void
     {
         $order = OrderLog::where('order_no', $order_no)->first();
         if (! $order) {
             return;
         }
 
+        if (OrderDeletionService::isProtected($order)) {
+            $this->dispatch('orderError', __('orders::order_list.messages.approved_not_deletable'));
+
+            return;
+        }
+
         $this->authorize('delete', $order);
 
-        $order->delete();
+        try {
+            $deletions->softDelete($order);
+        } catch (DomainException $e) {
+            $this->dispatch('orderError', $e->getMessage());
+
+            return;
+        }
 
         $this->dispatch('orderWasDeleted', __('orders::order_form.messages.order_deleted'));
     }
@@ -192,7 +211,7 @@ class AllOrders extends Component
     }
 
     #[Renderless]
-    public function forceDeleteData($order_no): void
+    public function forceDeleteData($order_no, OrderDeletionService $deletions): void
     {
         $model = OrderLog::withTrashed()->where('order_no', $order_no)->first();
 
@@ -200,9 +219,21 @@ class AllOrders extends Component
             return;
         }
 
+        if (OrderDeletionService::isProtected($model)) {
+            $this->dispatch('orderError', __('orders::order_list.messages.approved_not_deletable'));
+
+            return;
+        }
+
         $this->authorize('forceDelete', $model);
 
-        $model->handleDeletion();
+        try {
+            $deletions->forceDelete($model);
+        } catch (DomainException $e) {
+            $this->dispatch('orderError', $e->getMessage());
+
+            return;
+        }
 
         $this->dispatch('orderWasDeleted', __('orders::order_form.messages.order_deleted'));
     }
@@ -228,6 +259,34 @@ class AllOrders extends Component
         return \Illuminate\Support\Facades\Storage::disk('local')->download($docxPath, $safeName.'.docx');
     }
 
+    /**
+     * Download an approved order as PDF: its immutable final copy, else one rendered now.
+     * Same permission as the Word download.
+     */
+    public function downloadPdf(string $order_no, OrderFinalPdfService $finalPdf): ?BinaryFileResponse
+    {
+        $order = OrderLog::where('order_no', $order_no)->first();
+        if (! $order) {
+            abort(404);
+        }
+
+        abort_unless((string) $order->template_render_mode === OrderIssueService::RENDER_MODE_DOCX, 404);
+        abort_unless((int) $order->status_id === OrderStatusEnum::APPROVED->value, 404);
+        abort_unless((bool) auth()->user()?->can('export-orders'), 403);
+
+        $pdf = $finalPdf->forDownload($order);
+        if ($pdf === null) {
+            $this->dispatch('orderError', __('orders::order_list.messages.pdf_unavailable'));
+
+            return null;
+        }
+
+        $safeName = str_replace(['/', '\\'], '-', (string) $order->order_no).'.pdf';
+
+        return response()->download($pdf['path'], $safeName, ['Content-Type' => 'application/pdf'])
+            ->deleteFileAfterSend($pdf['temporary']);
+    }
+
     public function approveOrder(string $order_no): void
     {
         // A draft has no document yet — it is finished in the composer first.
@@ -240,9 +299,10 @@ class AllOrders extends Component
         $this->changeStatus($order_no, 'approve', 'order_approved');
     }
 
-    public function cancelOrder(string $order_no): void
+    /** Cancel an order; cancelling an approved one needs revert-orders and a reason (from the confirm modal). */
+    public function cancelOrder(string $order_no, string $reason = ''): void
     {
-        $this->changeStatus($order_no, 'cancel', 'order_cancelled');
+        $this->changeStatus($order_no, 'cancel', 'order_cancelled', $reason);
     }
 
     public function reopenOrder(string $order_no): void
@@ -250,26 +310,37 @@ class AllOrders extends Component
         $this->changeStatus($order_no, 'reopen', 'order_reopened');
     }
 
-    public function revertOrder(string $order_no): void
+    /** Revert an approved order to pending: needs revert-orders and a reason (from the confirm modal). */
+    public function revertOrder(string $order_no, string $reason = ''): void
     {
-        $this->changeStatus($order_no, 'revert', 'order_reverted');
+        $this->changeStatus($order_no, 'revert', 'order_reverted', $reason);
     }
 
     /**
      * Run a guarded status transition (approve/cancel/reopen/revert) on a Word-engine
-     * order, surfacing any domain error (illegal jump, a hire whose employee already has records) to the user.
+     * order, surfacing any domain error (illegal jump, a hire whose employee already has
+     * records, a missing reason, a closed pay period) to the user. Taking an order out of
+     * the approved state is authorised by revert-orders; everything else by add-orders.
      */
-    private function changeStatus(string $order_no, string $action, string $successKey): void
+    private function changeStatus(string $order_no, string $action, string $successKey, string $reason = ''): void
     {
         $order = OrderLog::where('order_no', $order_no)->first();
         if (! $order) {
             return;
         }
 
-        abort_unless((bool) auth()->user()?->can('add-orders'), 403);
+        if ((int) $order->status_id === OrderStatusEnum::APPROVED->value && in_array($action, ['cancel', 'revert'], true)) {
+            $this->authorize('revert', $order);
+        } else {
+            abort_unless((bool) auth()->user()?->can('add-orders'), 403);
+        }
+
+        $transitions = app(OrderStatusTransitionService::class);
 
         try {
-            app(\App\Modules\Orders\Infrastructure\Document\OrderStatusTransitionService::class)->{$action}($order);
+            in_array($action, ['cancel', 'revert'], true)
+                ? $transitions->{$action}($order, $reason)
+                : $transitions->{$action}($order);
         } catch (DomainException $e) {
             $this->dispatch('orderError', $e->getMessage());
 

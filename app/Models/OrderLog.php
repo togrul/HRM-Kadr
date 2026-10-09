@@ -29,6 +29,8 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property array<mixed>|null $description
  * @property string|null $status_label
  * @property int|null $status_color_id
+ * @property string|null $final_pdf_path Immutable final PDF of an approved order (local disk)
+ * @property string|null $final_pdf_sha256
  */
 class OrderLog extends Model
 {
@@ -62,6 +64,8 @@ class OrderLog extends Model
         'status_id',
         'creator_id',
         'deleted_by',
+        'final_pdf_path',
+        'final_pdf_sha256',
     ];
 
     protected $dates = [

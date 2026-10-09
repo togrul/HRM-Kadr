@@ -82,6 +82,7 @@ return [
         'manage' => 'Manage',
         'reject' => 'Reject',
         'request' => 'Request',
+        'revert' => 'Revert',
         'review' => 'Review',
         'show' => 'Show',
         'submit' => 'Submit',

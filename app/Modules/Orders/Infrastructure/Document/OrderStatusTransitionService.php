@@ -10,11 +10,16 @@ use App\Modules\Compensation\Contracts\OrderCompensationSync;
 use App\Modules\Integration\Domain\Contracts\IntegrationOutbox;
 use App\Modules\Orders\Application\Document\OrderWordTemplateRepository;
 use App\Modules\Orders\Infrastructure\Document\Effects\OrderEffectCatalog;
+use App\Modules\Payroll\Contracts\ClosedPeriodCheck;
 use App\Services\ImportCandidateToPersonnel;
 use App\Support\Language\AzerbaijaniDateFormatter;
+use Carbon\CarbonInterface;
 use DomainException;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
+use Throwable;
 
 /**
  * The single, guarded entry point for changing a Word-engine order's status.
@@ -32,6 +37,13 @@ use RuntimeException;
  * A hire is reversible only while the new employee has no dependent records
  * ({@see HireOrderRevocation}); otherwise the employment ends by a termination order.
  *   cancelled(30)→ pending(10, reopen)
+ *
+ * Leaving the approved state (revert or cancel) is guarded: it needs a written reason
+ * (kept in the transition's activity entry), and it is refused once the month of the
+ * order's effective date is closed for pay ({@see ClosedPeriodCheck}) — by then payroll
+ * has been computed from it. Approval assigns the automatic number when the order still
+ * holds a provisional one ({@see OrderNumbering}) and, after commit, stores the immutable
+ * final PDF ({@see OrderFinalPdfService}).
  */
 class OrderStatusTransitionService
 {
@@ -45,6 +57,9 @@ class OrderStatusTransitionService
     /** AppealStatus id a candidate moves to once a hire order is approved ("Qəbul olundu"). */
     private const CANDIDATE_HIRED_STATUS = 70;
 
+    /** Shortest reason accepted for taking an order out of the approved state. */
+    public const MIN_REASON_LENGTH = 5;
+
     public function __construct(
         private readonly OrderWordTemplateRepository $templates,
         private readonly OrderEffectCatalog $effects,
@@ -54,6 +69,10 @@ class OrderStatusTransitionService
         private readonly IntegrationOutbox $outbox,
         private readonly OrderPeriodGuard $periods,
         private readonly HireOrderRevocation $hireRevocation,
+        private readonly ClosedPeriodCheck $closedPeriods,
+        private readonly OrderNumbering $numbering,
+        private readonly OrderDocumentBuilder $documents,
+        private readonly OrderFinalPdfService $finalPdf,
     ) {}
 
     /** Approve a pending order (applies its HR side-effect). */
@@ -62,10 +81,13 @@ class OrderStatusTransitionService
         $this->transition($order, OrderStatusEnum::APPROVED);
     }
 
-    /** Cancel an order. Reverses the side-effect if it had been approved. */
-    public function cancel(OrderLog $order): void
+    /**
+     * Cancel an order. Reverses the side-effect if it had been approved — which then needs
+     * a reason and an open pay period.
+     */
+    public function cancel(OrderLog $order, ?string $reason = null): void
     {
-        $this->transition($order, OrderStatusEnum::CANCELLED);
+        $this->transition($order, OrderStatusEnum::CANCELLED, $reason);
     }
 
     /** Re-open a cancelled order back to pending. */
@@ -74,10 +96,10 @@ class OrderStatusTransitionService
         $this->transition($order, OrderStatusEnum::PENDING);
     }
 
-    /** Revoke an approved order back to pending (reverses the side-effect). */
-    public function revert(OrderLog $order): void
+    /** Revoke an approved order back to pending (reverses the side-effect); needs a reason. */
+    public function revert(OrderLog $order, ?string $reason = null): void
     {
-        $this->transition($order, OrderStatusEnum::PENDING);
+        $this->transition($order, OrderStatusEnum::PENDING, $reason);
     }
 
     /**
@@ -90,7 +112,12 @@ class OrderStatusTransitionService
         return self::GRAPH[(int) $order->status_id] ?? [];
     }
 
-    public function transition(OrderLog $order, OrderStatusEnum $to): void
+    /**
+     * @param  string|null  $reason  required (min. MIN_REASON_LENGTH chars) when leaving the approved state
+     *
+     * @throws DomainException when the move is not allowed
+     */
+    public function transition(OrderLog $order, OrderStatusEnum $to, ?string $reason = null): void
     {
         if ((string) $order->template_render_mode !== OrderIssueService::RENDER_MODE_DOCX) {
             throw new RuntimeException('Only Word-engine orders support status transitions here.');
@@ -107,11 +134,18 @@ class OrderStatusTransitionService
             throw new DomainException(__('orders::order_composer.errors.invalid_transition'));
         }
 
-        DB::transaction(function () use ($order, $from, $target) {
+        $reason = trim((string) $reason);
+
+        if ($from === OrderStatusEnum::APPROVED->value) {
+            $this->guardLeavingApproved($order, $reason);
+        }
+
+        DB::transaction(function () use ($order, $from, $target, $reason) {
             // Approving applies the effect; leaving an approved state reverses it.
             // pending↔cancelled carry no side-effect.
             $effectDirection = 'none';
             if ($target === OrderStatusEnum::APPROVED->value) {
+                $this->assignNumber($order);
                 $this->applyEffect($order);
                 $effectDirection = 'applied';
             } elseif ($from === OrderStatusEnum::APPROVED->value) {
@@ -121,9 +155,107 @@ class OrderStatusTransitionService
 
             $order->update(['status_id' => $target]);
 
-            $this->recordTransition($order, $from, $target, $effectDirection);
+            $this->recordTransition($order, $from, $target, $effectDirection, $reason);
             $this->publish($order, $effectDirection);
         });
+
+        if ($target === OrderStatusEnum::APPROVED->value) {
+            $this->captureFinalPdf($order);
+        }
+    }
+
+    /**
+     * Leaving the approved state undoes an effect payroll may already have used: it needs a
+     * stated reason, and the month the order took effect in must still be open.
+     *
+     * @throws DomainException
+     */
+    private function guardLeavingApproved(OrderLog $order, string $reason): void
+    {
+        if (mb_strlen($reason) < self::MIN_REASON_LENGTH) {
+            throw new DomainException(__('orders::order_composer.errors.reason_required', ['min' => self::MIN_REASON_LENGTH]));
+        }
+
+        $date = $this->effectiveDate($order);
+        $closedBy = $this->closedPeriods->closedBy($date);
+
+        if ($closedBy !== null) {
+            throw new DomainException(__('orders::order_composer.errors.period_closed', [
+                'period' => $date->format('m.Y'),
+                'reason' => __('orders::order_composer.errors.period_closed_by.'.$closedBy),
+            ]));
+        }
+    }
+
+    /**
+     * The date the order takes effect: its start date, else its (single) date, else the
+     * day it was given.
+     */
+    public function effectiveDate(OrderLog $order): CarbonInterface
+    {
+        $snapshot = (array) $order->template_snapshot;
+        $template = $this->templates->find((string) ($snapshot['template_code'] ?? ''));
+        $fields = $template ? $this->effectFields($template, (array) ($snapshot['fields'] ?? [])) : [];
+
+        foreach (['start_date', 'date'] as $role) {
+            $date = $this->dates->parse(is_scalar($fields[$role] ?? null) ? (string) $fields[$role] : null);
+            if ($date !== null) {
+                return $date;
+            }
+        }
+
+        $given = $order->getRawOriginal('given_date');
+
+        return filled($given) ? Carbon::parse((string) $given) : Carbon::now();
+    }
+
+    /**
+     * An order approved while it still holds a provisional number takes the next number of
+     * its sequence now, inside the approval transaction, and its generated document is
+     * re-rendered to carry it. A number it already has (typed, or assigned at an earlier
+     * approval) is kept — a number is assigned once.
+     */
+    private function assignNumber(OrderLog $order): void
+    {
+        if (! OrderNumbering::isProvisional($order->order_no)) {
+            return;
+        }
+
+        $snapshot = (array) $order->template_snapshot;
+        $templateCode = (string) ($snapshot['template_code'] ?? '');
+        $date = $this->dates->parse((string) ($snapshot['order_date_text'] ?? ''))
+            ?? (filled($order->getRawOriginal('given_date')) ? Carbon::parse((string) $order->getRawOriginal('given_date')) : Carbon::now());
+
+        $provisional = (string) $order->order_no;
+        $number = $this->numbering->assign($templateCode, $date);
+
+        $order->update(['order_no' => $number]);
+        // The pivot follows order_no by ON UPDATE CASCADE where foreign keys are enforced;
+        // this keeps it right where they are not (and is a no-op where they are).
+        DB::table('order_log_personnels')->where('order_no', $provisional)->update(['order_no' => $number]);
+
+        $template = $this->templates->find($templateCode);
+        if ($template !== null) {
+            $this->documents->renumber($order, $template);
+        }
+    }
+
+    /**
+     * Store the immutable final PDF after the approval committed. Never fails the approval:
+     * without LibreOffice (or on a failed conversion) it is logged and backfilled later by
+     * orders:render-final-pdfs.
+     */
+    private function captureFinalPdf(OrderLog $order): void
+    {
+        if (! OrderFinalPdfService::capturesOnApproval()) {
+            return;
+        }
+
+        try {
+            $this->finalPdf->capture($order);
+        } catch (Throwable $e) {
+            Log::warning('orders.final_pdf.capture_failed', ['order_id' => $order->id, 'error' => $e->getMessage()]);
+        }
     }
 
     /**
@@ -189,19 +321,20 @@ class OrderStatusTransitionService
      * or reversed — which is exactly what an auditor needs to trace a reversed hire
      * or a cancelled transfer.
      */
-    private function recordTransition(OrderLog $order, int $from, int $target, string $effectDirection): void
+    private function recordTransition(OrderLog $order, int $from, int $target, string $effectDirection, string $reason = ''): void
     {
         $verb = $this->transitionVerb($from, $target);
 
         activity('orders')
             ->performedOn($order)
-            ->withProperties([
+            ->withProperties(array_filter([
                 'order_no' => $order->order_no,
                 'order_type_id' => $order->order_type_id,
                 'from_status' => $from,
                 'to_status' => $target,
                 'effect' => $effectDirection,
-            ])
+                'reason' => $reason !== '' ? $reason : null,
+            ], fn (mixed $value, string $key): bool => $key !== 'reason' || $value !== null, ARRAY_FILTER_USE_BOTH))
             ->event($verb)
             ->log("order.{$verb}");
     }

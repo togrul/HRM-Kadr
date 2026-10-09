@@ -150,7 +150,9 @@ class AllOrdersInteractionTest extends TestCase
             ->assertSee("\$wire.approveOrder('READY-1')")
             ->assertSee("printOrder('DONE-1')", false)
             ->assertSee(__('orders::order_list.actions.duplicate'))
-            ->assertSee("\$wire.deleteOrder('DONE-1')")
+            ->assertSee("\$wire.deleteOrder('READY-1')")
+            // an approved order is never offered for deletion — it is cancelled first
+            ->assertDontSee("\$wire.deleteOrder('DONE-1')")
             ->assertSee("openSideMenu('order-preview'", false)
             ->assertDontSee('wire:confirm', false);
     }

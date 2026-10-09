@@ -58,13 +58,28 @@ return [
         'create' => 'Create a slot & continue',
     ],
     'confirm' => [
+        'reason_label' => 'Reason',
+        'reason_placeholder' => 'Why is the approved order being reverted or cancelled?',
+        'reason_hint' => 'Required, at least :min characters. Kept in the audit log.',
         'approve' => 'Approve this order? The linked HR action (leave, transfer, etc.) will run automatically.',
         'cancel_pending' => 'Cancel this order?',
         'cancel_approved' => 'Cancel this approved order? The linked HR action will be reversed.',
         'reopen' => 'Move this cancelled order back to “Pending”?',
         'revert' => 'Revoke approval? The linked HR action will be reversed and the order becomes “Pending”.',
     ],
+    'hints' => [
+        'auto_number' => 'Leave it empty to have the number assigned automatically on approval (format: :format).',
+    ],
     'errors' => [
+        'reason_required' => 'Enter a reason to revert or cancel an approved order (at least :min characters).',
+        'period_closed' => 'The month :period is closed (:reason) — the approved order cannot be reverted or cancelled.',
+        'period_closed_by' => [
+            'payroll' => 'the payroll period is closed',
+            'finance' => 'the finance system has closed the accounting period',
+            'attendance' => 'the attendance month is locked',
+        ],
+        'number_missing' => 'The order has no number and automatic numbering is not configured — edit the order and enter a number.',
+        'number_taken' => 'An order with this number already exists.',
         'employee_inactive' => 'The selected employee is not active — the order can only be issued for a working employee.',
         'dates_invalid' => 'Check the dates: :details',
         'approval_blocked' => 'The order cannot be approved: :reason',

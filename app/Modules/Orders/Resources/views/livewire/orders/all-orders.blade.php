@@ -16,6 +16,17 @@
         "\$dispatch('confirm-action', { title: %s, message: %s, confirmText: %s, tone: '%s', run: () => \$wire.%s(%s) })",
         \Illuminate\Support\Js::from($title), \Illuminate\Support\Js::from($message), \Illuminate\Support\Js::from($confirmText), $tone, $method, \Illuminate\Support\Js::from($orderNo),
     );
+    // Same, but the modal also asks for the mandatory reason and passes it on (leaving the approved state).
+    $reasonPrompt = \Illuminate\Support\Js::from([
+        'label' => __('orders::order_composer.confirm.reason_label'),
+        'placeholder' => __('orders::order_composer.confirm.reason_placeholder'),
+        'hint' => __('orders::order_composer.confirm.reason_hint', ['min' => \App\Modules\Orders\Infrastructure\Document\OrderStatusTransitionService::MIN_REASON_LENGTH]),
+        'min' => \App\Modules\Orders\Infrastructure\Document\OrderStatusTransitionService::MIN_REASON_LENGTH,
+    ]);
+    $confirmWithReason = fn (string $title, string $message, string $confirmText, string $tone, string $method, string $orderNo): string => sprintf(
+        "\$dispatch('confirm-action', { title: %s, message: %s, confirmText: %s, tone: '%s', reason: %s, run: (reason) => \$wire.%s(%s, reason) })",
+        \Illuminate\Support\Js::from($title), \Illuminate\Support\Js::from($message), \Illuminate\Support\Js::from($confirmText), $tone, $reasonPrompt, $method, \Illuminate\Support\Js::from($orderNo),
+    );
 @endphp
 
 <div class="flex flex-col">
@@ -152,6 +163,8 @@
                 $isPending = $isDocx && ! $inTrash && $statusId === 10;
                 $isApproved = $isDocx && ! $inTrash && $statusId === 20;
                 $isCancelled = $isDocx && ! $inTrash && $statusId === 30;
+                // An approved order (any engine, even one already in the trash) is never deletable.
+                $isDeletable = ! \App\Modules\Orders\Infrastructure\Document\OrderDeletionService::isProtected($_order);
             @endphp
             <tr wire:key="order-row-{{ $_order->id }}" wire:click="openSideMenu('order-preview', {{ $_order->id }})" @class([
                 'cursor-pointer transition hover:bg-[#fafafa]',
@@ -159,7 +172,11 @@
                 'bg-[#fff1f2]/60' => $statusId === 30,
             ])>
                 <x-table.td>
-                    <span class="hrm-num text-[13px] font-semibold text-ink">{{ $_order->order_no }}</span>
+                    @if (\App\Modules\Orders\Infrastructure\Document\OrderNumbering::isProvisional($_order->order_no))
+                        <span class="text-[12px] italic text-ink-faint">{{ __('orders::order_list.table.no_number_yet') }}</span>
+                    @else
+                        <span class="hrm-num text-[13px] font-semibold text-ink">{{ $_order->order_no }}</span>
+                    @endif
                 </x-table.td>
 
                 <x-table.td>
@@ -225,14 +242,21 @@
                                 @can('edit-orders')
                                     <x-ui.row-menu.item wire:click="restoreData('{{ $_order->order_no }}')"><x-icons.recover color="text-current" hover="text-current" size="h-4 w-4" />{{ __('orders::order_list.actions.restore') }}</x-ui.row-menu.item>
                                 @endcan
-                                @can('delete-orders')
-                                    <x-ui.row-menu.separator />
-                                    <x-ui.row-menu.item danger x-on:click="{{ $confirm(__('orders::order_list.actions.force_delete'), __('orders::order_list.messages.force_delete_confirm'), __('orders::order_list.actions.force_delete'), 'rose', 'forceDeleteData', $_order->order_no) }}"><x-icons.force-delete color="text-current" hover="text-current" size="h-4 w-4" />{{ __('orders::order_list.actions.force_delete') }}</x-ui.row-menu.item>
-                                @endcan
+                                @if ($isDeletable)
+                                    @can('delete-orders')
+                                        <x-ui.row-menu.separator />
+                                        <x-ui.row-menu.item danger x-on:click="{{ $confirm(__('orders::order_list.actions.force_delete'), __('orders::order_list.messages.force_delete_confirm'), __('orders::order_list.actions.force_delete'), 'rose', 'forceDeleteData', $_order->order_no) }}"><x-icons.force-delete color="text-current" hover="text-current" size="h-4 w-4" />{{ __('orders::order_list.actions.force_delete') }}</x-ui.row-menu.item>
+                                    @endcan
+                                @endif
                             @else
                                 @if ($isDocx && ! $isApproved && ! $isDraft)
                                     @can('export-orders')
                                         <x-ui.row-menu.item wire:click="printOrder('{{ $_order->order_no }}')"><x-icons.print-file color="text-current" hover="text-current" size="h-4 w-4" />{{ __('orders::order_list.actions.download') }}</x-ui.row-menu.item>
+                                    @endcan
+                                @endif
+                                @if ($isApproved)
+                                    @can('export-orders')
+                                        <x-ui.row-menu.item wire:click="downloadPdf('{{ $_order->order_no }}')"><x-icons.print-file color="text-current" hover="text-current" size="h-4 w-4" />{{ __('orders::order_list.actions.download_pdf') }}</x-ui.row-menu.item>
                                     @endcan
                                 @endif
                                 @can('add-orders')
@@ -242,20 +266,26 @@
                                     @if ($isDocx)
                                         <x-ui.row-menu.item wire:click="duplicateOrder('{{ $_order->order_no }}')">{{ __('orders::order_list.actions.duplicate') }}</x-ui.row-menu.item>
                                     @endif
-                                    @if ($isApproved)
-                                        <x-ui.row-menu.item x-on:click="{{ $confirm(__('orders::order_composer.actions.revert'), __('orders::order_composer.confirm.revert'), __('orders::order_composer.actions.revert'), 'amber', 'revertOrder', $_order->order_no) }}">{{ __('orders::order_composer.actions.revert') }}</x-ui.row-menu.item>
-                                    @endif
                                     @if ($isCancelled)
                                         <x-ui.row-menu.item x-on:click="{{ $confirm(__('orders::order_composer.actions.reopen'), __('orders::order_composer.confirm.reopen'), __('orders::order_composer.actions.reopen'), 'teal', 'reopenOrder', $_order->order_no) }}">{{ __('orders::order_composer.actions.reopen') }}</x-ui.row-menu.item>
                                     @endif
-                                    @if ($isPending || $isApproved)
-                                        <x-ui.row-menu.item x-on:click="{{ $confirm(__('orders::order_composer.actions.cancel'), $isApproved ? __('orders::order_composer.confirm.cancel_approved') : __('orders::order_composer.confirm.cancel_pending'), __('orders::order_composer.actions.cancel'), 'rose', 'cancelOrder', $_order->order_no) }}">{{ __('orders::order_composer.actions.cancel') }}</x-ui.row-menu.item>
+                                    @if ($isPending)
+                                        <x-ui.row-menu.item x-on:click="{{ $confirm(__('orders::order_composer.actions.cancel'), __('orders::order_composer.confirm.cancel_pending'), __('orders::order_composer.actions.cancel'), 'rose', 'cancelOrder', $_order->order_no) }}">{{ __('orders::order_composer.actions.cancel') }}</x-ui.row-menu.item>
                                     @endif
                                 @endcan
-                                @can('delete-orders')
-                                    <x-ui.row-menu.separator />
-                                    <x-ui.row-menu.item danger x-on:click="{{ $confirm(__('orders::order_list.actions.delete'), __('orders::order_list.messages.delete_order_confirm'), __('orders::order_list.actions.delete'), 'rose', 'deleteOrder', $_order->order_no) }}"><x-icons.delete-icon color="text-current" hover="text-current" size="h-4 w-4" />{{ __('orders::order_list.actions.delete') }}</x-ui.row-menu.item>
-                                @endcan
+                                {{-- leaving the approved state: own permission, mandatory reason --}}
+                                @if ($isApproved)
+                                    @can('revert-orders')
+                                        <x-ui.row-menu.item x-on:click="{{ $confirmWithReason(__('orders::order_composer.actions.revert'), __('orders::order_composer.confirm.revert'), __('orders::order_composer.actions.revert'), 'amber', 'revertOrder', $_order->order_no) }}">{{ __('orders::order_composer.actions.revert') }}</x-ui.row-menu.item>
+                                        <x-ui.row-menu.item x-on:click="{{ $confirmWithReason(__('orders::order_composer.actions.cancel'), __('orders::order_composer.confirm.cancel_approved'), __('orders::order_composer.actions.cancel'), 'rose', 'cancelOrder', $_order->order_no) }}">{{ __('orders::order_composer.actions.cancel') }}</x-ui.row-menu.item>
+                                    @endcan
+                                @endif
+                                @if ($isDeletable)
+                                    @can('delete-orders')
+                                        <x-ui.row-menu.separator />
+                                        <x-ui.row-menu.item danger x-on:click="{{ $confirm(__('orders::order_list.actions.delete'), __('orders::order_list.messages.delete_order_confirm'), __('orders::order_list.actions.delete'), 'rose', 'deleteOrder', $_order->order_no) }}"><x-icons.delete-icon color="text-current" hover="text-current" size="h-4 w-4" />{{ __('orders::order_list.actions.delete') }}</x-ui.row-menu.item>
+                                    @endcan
+                                @endif
                             @endif
                         </x-ui.row-menu>
                     </div>

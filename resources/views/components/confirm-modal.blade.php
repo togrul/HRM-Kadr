@@ -17,6 +17,10 @@
 
     From PHP (no closure over the wire), pass the component id (`wireId`; `component` is reserved by Livewire) + method instead of `run`:
         $this->dispatch('confirm-action', title: …, wireId: $this->getId(), method: 'delete');
+
+    Ask for a mandatory reason by adding `reason: { label, placeholder, hint, min }`: the modal shows a
+    textarea, keeps the confirm button disabled until the trimmed text has `min` characters, and
+    passes it to `run` — e.g. run: (reason) => $wire.revertOrder('123', reason).
 --}}
 <div
     x-data="{
@@ -28,6 +32,8 @@
         defaultCancelText: @js(__('ui::common.actions.close')),
         tone: 'rose',
         run: null,
+        reason: null,
+        reasonText: '',
         tones: {
             rose:    { btn: 'bg-rose-600 hover:bg-rose-500 focus-visible:ring-rose-300',       chip: 'bg-rose-50 text-rose-600 ring-rose-100' },
             emerald: { btn: 'bg-emerald-600 hover:bg-emerald-500 focus-visible:ring-emerald-300', chip: 'bg-emerald-50 text-emerald-600 ring-emerald-100' },
@@ -42,20 +48,27 @@
             this.confirmText = detail.confirmText || 'OK';
             this.cancelText = detail.cancelText || this.defaultCancelText;
             this.tone = detail.tone || 'rose';
+            this.reason = detail.reason && typeof detail.reason === 'object' ? detail.reason : null;
+            this.reasonText = '';
             this.run = typeof detail.run === 'function'
                 ? detail.run
                 : (detail.wireId && detail.method ? () => Livewire.find(detail.wireId)?.$call(detail.method) : null);
             this.show = true;
             // focus: 'cancel' for prompts whose confirm discards work (e.g. unsaved changes)
-            const focusRef = detail.focus === 'cancel' ? 'cancelBtn' : 'confirmBtn';
+            const focusRef = detail.focus === 'cancel' ? 'cancelBtn' : (this.reason ? 'reasonInput' : 'confirmBtn');
             this.$nextTick(() => this.$refs[focusRef] && this.$refs[focusRef].focus());
         },
-        closeModal() { this.show = false; this.run = null; },
+        closeModal() { this.show = false; this.run = null; this.reason = null; this.reasonText = ''; },
+        reasonValid() { return ! this.reason || this.reasonText.trim().length >= (this.reason.min || 1); },
         accept() {
+            if (! this.reasonValid()) return;
             const fn = this.run;
+            const reason = this.reason ? this.reasonText.trim() : null;
             this.show = false;
             this.run = null;
-            if (typeof fn === 'function') fn();
+            this.reason = null;
+            this.reasonText = '';
+            if (typeof fn === 'function') reason === null ? fn() : fn(reason);
         },
     }"
     @confirm-action.window="openModal($event.detail)"
@@ -101,6 +114,17 @@
                         {{-- Title + message --}}
                         <h3 class="mt-4 text-[17px] font-semibold leading-6 tracking-[-0.01em] text-zinc-900" x-text="title"></h3>
                         <p class="mt-1.5 text-[13.5px] leading-relaxed text-zinc-500" x-text="message"></p>
+
+                        {{-- Optional mandatory reason --}}
+                        <template x-if="reason">
+                            <label class="mt-4 block">
+                                <span class="block pb-1 text-[12px] font-medium text-zinc-600" x-text="reason.label"></span>
+                                <textarea x-ref="reasonInput" x-model="reasonText" rows="3"
+                                          :placeholder="reason.placeholder || ''"
+                                          class="w-full rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 py-2 text-[13px] text-ink placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-0"></textarea>
+                                <span class="mt-1 block text-[11.5px] text-zinc-400" x-show="reason.hint" x-text="reason.hint"></span>
+                            </label>
+                        </template>
                     </div>
 
                     {{-- Footer --}}
@@ -110,8 +134,9 @@
                             <span x-text="cancelText"></span>
                         </button>
                         <button type="button" x-ref="confirmBtn" x-on:click="accept()"
+                                :disabled="! reasonValid()"
                                 :class="tone3().btn"
-                                class="inline-flex h-9 items-center justify-center rounded-full px-4 text-[13px] font-semibold text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
+                                class="inline-flex h-9 items-center justify-center rounded-full px-4 text-[13px] font-semibold text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
                             <span x-text="confirmText"></span>
                         </button>
                     </div>

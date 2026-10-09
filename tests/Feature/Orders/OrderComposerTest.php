@@ -545,7 +545,7 @@ class OrderComposerTest extends TestCase
             ->where('tabel_no', $personnel->tabel_no)->where('year', $year)->value('remaining_days'));
 
         // …and cancelling restores them.
-        $transitions->cancel($order);
+        $transitions->cancel($order, 'Səhv tərtib edilib');
         $this->assertSame(5, (int) \App\Models\Vacation::query()
             ->where('tabel_no', $personnel->tabel_no)->where('year', $year)->value('remaining_days'));
     }
@@ -781,7 +781,7 @@ class OrderComposerTest extends TestCase
     {
         [$order, $personnel] = $this->issueVacationOrder('801-M');
 
-        app(\App\Modules\Orders\Infrastructure\Document\OrderStatusTransitionService::class)->cancel($order);
+        app(\App\Modules\Orders\Infrastructure\Document\OrderStatusTransitionService::class)->cancel($order, 'Səhv tərtib edilib');
 
         $this->assertSame(\App\Enums\OrderStatusEnum::CANCELLED->value, (int) $order->fresh()->status_id);
         $this->assertCount(0, $personnel->vacations()->get());
@@ -795,7 +795,7 @@ class OrderComposerTest extends TestCase
         $transitions->approve($order);
         $this->assertCount(1, $personnel->vacations()->get());
 
-        $transitions->revert($order);
+        $transitions->revert($order, 'Səhv tərtib edilib');
 
         $this->assertSame(\App\Enums\OrderStatusEnum::PENDING->value, (int) $order->fresh()->status_id);
         $this->assertCount(0, $personnel->vacations()->get());
@@ -807,7 +807,7 @@ class OrderComposerTest extends TestCase
         $transitions = app(\App\Modules\Orders\Infrastructure\Document\OrderStatusTransitionService::class);
 
         $transitions->approve($order);
-        $transitions->cancel($order);
+        $transitions->cancel($order, 'Səhv tərtib edilib');
 
         $this->assertSame(\App\Enums\OrderStatusEnum::CANCELLED->value, (int) $order->fresh()->status_id);
         $this->assertCount(0, $personnel->vacations()->get());
@@ -818,7 +818,7 @@ class OrderComposerTest extends TestCase
         [$order] = $this->issueVacationOrder('804-M');
         $transitions = app(\App\Modules\Orders\Infrastructure\Document\OrderStatusTransitionService::class);
 
-        $transitions->cancel($order);
+        $transitions->cancel($order, 'Səhv tərtib edilib');
         $transitions->reopen($order);
 
         $this->assertSame(\App\Enums\OrderStatusEnum::PENDING->value, (int) $order->fresh()->status_id);
@@ -828,7 +828,7 @@ class OrderComposerTest extends TestCase
     {
         [$order] = $this->issueVacationOrder('805-M');
         $transitions = app(\App\Modules\Orders\Infrastructure\Document\OrderStatusTransitionService::class);
-        $transitions->cancel($order);
+        $transitions->cancel($order, 'Səhv tərtib edilib');
 
         // cancelled → approved is not a permitted move.
         $this->expectException(DomainException::class);
