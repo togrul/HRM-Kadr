@@ -3,12 +3,16 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Modules\Attendance\Application\Services\AttendanceMonthLockReader;
+use App\Modules\Attendance\Contracts\AttendanceMonthLock;
 use App\Modules\Compensation\Application\Services\CompensationService;
 use App\Modules\Compensation\Contracts\OrderCompensationSync;
 use App\Modules\Integration\Domain\Contracts\IntegrationOutbox;
 use App\Modules\Integration\Domain\Contracts\PayrollOwnership;
 use App\Modules\Integration\Infrastructure\NullIntegrationOutbox;
 use App\Modules\Integration\Support\ConfiguredPayrollOwnership;
+use App\Modules\Payroll\Application\Services\PayrollClosedPeriodCheck;
+use App\Modules\Payroll\Contracts\ClosedPeriodCheck;
 use App\Services\Features\FeatureState;
 use App\Services\HrPolicies\HrPolicyPackService;
 use App\Services\NumberToWordsService;
@@ -63,6 +67,11 @@ class AppServiceProvider extends ServiceProvider
         // Same reason: order effects (hire/transfer/termination) resolve this whether or
         // not the compensation module's provider is loaded.
         $this->app->bind(OrderCompensationSync::class, CompensationService::class);
+
+        // Same reason: undoing an approved order asks whether its month is closed for pay,
+        // whether or not the payroll / attendance module providers are loaded.
+        $this->app->bind(AttendanceMonthLock::class, AttendanceMonthLockReader::class);
+        $this->app->bind(ClosedPeriodCheck::class, PayrollClosedPeriodCheck::class);
 
         $this->app->singleton(NumberToWordsService::class, fn () => new NumberToWordsService);
         $this->app->singleton(StructureService::class, fn () => new StructureService);
