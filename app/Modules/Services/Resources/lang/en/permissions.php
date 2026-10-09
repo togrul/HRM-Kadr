@@ -8,6 +8,7 @@ return [
     'groups' => [
         'admin' => 'Admin',
         'attendance' => 'Attendance',
+        'change_policy' => 'Change policy',
         'attendance_daily_monitor' => 'Attendance - daily monitor',
         'attendance_manager_summary' => 'Attendance - manager summary',
         'attendance_calendar' => 'Attendance - calendar',

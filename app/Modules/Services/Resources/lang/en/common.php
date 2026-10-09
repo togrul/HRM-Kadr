@@ -54,6 +54,7 @@ return [
         'general' => 'General',
         'candidate_preferences' => 'Candidates',
         'notifications' => 'Notifications',
+        'change_policy' => 'Change policy',
         'menus' => 'Menus',
         'roles' => 'Roles',
         'users' => 'Users',

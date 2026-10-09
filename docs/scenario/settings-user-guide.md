@@ -20,6 +20,7 @@ Açılan səhifənin sol panelində (`Sistem konfiqurasiyası`) bölmələrin si
 - `Ümumi`
 - `Namizədlər`
 - `Bildirişlər`
+- `Dəyişiklik siyasəti` (yalnız bu bölməyə icazəsi olanlara)
 - `Menyular`
 - `Rollar və icazələr`
 - `İstifadəçilər`
@@ -86,6 +87,30 @@ Dəyişiklikdən sonra aşağıdakı `Presetləri yadda saxla` düyməsini bası
 
 ## Bildirişlər
 Bu bölmə bildiriş tənzimləmələrini (qaydalar, şablonlar və s.) açır. Ətraflı izah `Bildirişlər` bələdçisindədir.
+
+## Dəyişiklik siyasəti
+Bu bölmədə qurum hər işçi sahə qrupunun **necə** dəyişəcəyini özü seçir. Bölmə yalnız `Dəyişiklik siyasətini idarə etmək` (`manage-change-policy`) icazəsi olanlara görünür; standart olaraq bu icazə `Admin` və `HR Admin` rollarındadır.
+
+Cədvəldə hər sətir bir sahə qrupudur:
+- `Struktur bölmə və vəzifə`
+- `Əmək haqqı` (yoxlama `Kompensasiya` bölməsində aparılır)
+- `Soyad`
+- `İşə qəbul və xitam tarixləri`
+- `Əlaqə məlumatları` (telefon, mobil, e-poçt, ünvanlar)
+- `Ailə üzvləri`
+- `Sənədlər` (şəxsiyyət vəsiqəsi, xidməti vəsiqə, pasport)
+- `Şəkil və qeydlər`
+
+Hər qrup üçün üç rejimdən birini seçin — seçim dərhal yadda qalır:
+- **Sərbəst** — sahə istənilən vaxt dəyişdirilir.
+- **Jurnal** — dəyişmək olar, amma işçi formasında `Dəyişikliyin səbəbi` sahəsi çıxır (ən azı 5 simvol). Səbəb köhnə və yeni dəyərlərlə birlikdə audit jurnalına yazılır.
+- **Yalnız əmrlə** — sahə işçi formasında kilidlənir, yanında `(əmrlə)` nişanı və mümkün olduqda `Əmr yarat` keçidi görünür. Dəyər yalnız təsdiqlənmiş əmrlə (köçürmə, soyadın dəyişdirilməsi, xitam, işə qəbul, əmək haqqının dəyişdirilməsi) dəyişir.
+
+Standart (ilkin) rejimlər: struktur/vəzifə, əmək haqqı, soyad və tarixlər — `Yalnız əmrlə`; qalan qruplar — `Sərbəst`.
+
+`Mənbə` sütunu rejimin ilkin olduğunu (`İlkin`) və ya qurum tərəfindən dəyişdirildiyini (`Dəyişdirilib`) göstərir; dəyişdirilmiş sətirdə kimin, nə vaxt dəyişdiyi də yazılır. `İlkinə qaytar` düyməsi qrupu ilkin rejiminə qaytarır — sistem təsdiq soruşur. Hər rejim dəyişikliyi audit jurnalına düşür.
+
+Əmrlər siyasətdən asılı deyil: təsdiqlənmiş əmr öz sahəsini həmişə yazır, ləğv olunanda isə geri qaytarır.
 
 ## Menyular
 Cədvəldə hər menyunun `Ad`, `Rəng`, `Sıra`, `URL` və `Aktiv?` sütunları var.
@@ -176,6 +201,12 @@ Müvəqqəti bağlamaq üçün `Aktivdir?` işarəsini götürün. Silinmiş ist
 
 ### Rəhbər həvaləsi bitəndə nə olur?
 Bitmə tarixi keçəndən sonra sənədlərdə yenidən daimi rəhbər imzalayır. Vaxtından əvvəl bitirmək üçün `Dayandır` düyməsini basın.
+
+### İşçi formasında sahə kilidlidir, `(əmrlə)` yazılıb. Necə dəyişim?
+Həmin sahə qrupu `Dəyişiklik siyasəti` bölməsində `Yalnız əmrlə` rejimindədir. Uyğun əmri verin (sahənin altındakı `Əmr yarat` keçidi ilə) və ya, qurumunuz qərar veribsə, administrator rejimi `Jurnal` və ya `Sərbəst` edə bilər.
+
+### Kompensasiyada yeni maaş təyin edə bilmirəm.
+`Əmək haqqı` qrupu `Yalnız əmrlə` rejimindədirsə, aktiv maaşı olan əməkdaşın maaşı yalnız `Əmək haqqının dəyişdirilməsi` əmri ilə dəyişir. İlk təyinat (aktiv maaş yoxdursa) yenə də Kompensasiya ekranından edilir.
 
 ## Yadda saxlayın
 - Buradakı hər dəyişiklik bütün istifadəçilərə təsir edir.

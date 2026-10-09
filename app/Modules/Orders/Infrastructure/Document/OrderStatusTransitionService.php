@@ -11,7 +11,7 @@ use App\Modules\Integration\Domain\Contracts\IntegrationOutbox;
 use App\Modules\Orders\Application\Document\OrderWordTemplateRepository;
 use App\Modules\Orders\Infrastructure\Document\Effects\OrderEffectCatalog;
 use App\Modules\Payroll\Contracts\ClosedPeriodCheck;
-use App\Modules\Personnel\Contracts\GuardsPersonnelAssignment;
+use App\Modules\Personnel\Contracts\GuardsPersonnelChanges;
 use App\Services\ImportCandidateToPersonnel;
 use App\Support\Language\AzerbaijaniDateFormatter;
 use Carbon\CarbonInterface;
@@ -70,7 +70,7 @@ class OrderStatusTransitionService
         private readonly IntegrationOutbox $outbox,
         private readonly OrderPeriodGuard $periods,
         private readonly HireOrderRevocation $hireRevocation,
-        private readonly GuardsPersonnelAssignment $assignment,
+        private readonly GuardsPersonnelChanges $changes,
         private readonly ClosedPeriodCheck $closedPeriods,
         private readonly OrderNumbering $numbering,
         private readonly OrderDocumentBuilder $documents,
@@ -379,8 +379,10 @@ class OrderStatusTransitionService
             throw new DomainException(__('orders::order_composer.errors.approval_blocked', ['reason' => $blocker]));
         }
 
+        // Dəyişiklik siyasəti: effekt yalnız reyestrdə ona aid sahə qruplarını yaza bilər
+        // (qrup «yalnız əmrlə» olsa belə).
         if ($effect && $personnel) {
-            $effect->apply($order, $this->effectFields($template, (array) ($snapshot['fields'] ?? [])), $personnel);
+            $this->changes->allowForEffect((string) $template->effect, fn () => $effect->apply($order, $this->effectFields($template, (array) ($snapshot['fields'] ?? [])), $personnel));
         }
     }
 
@@ -403,7 +405,7 @@ class OrderStatusTransitionService
         $effect = $this->effects->for($template->effect);
         $personnel = $this->personnel($snapshot);
         if ($effect && $personnel) {
-            $effect->reverse($order, $this->effectFields($template, (array) ($snapshot['fields'] ?? [])), $personnel);
+            $this->changes->allowForEffect((string) $template->effect, fn () => $effect->reverse($order, $this->effectFields($template, (array) ($snapshot['fields'] ?? [])), $personnel));
         }
     }
 
@@ -431,8 +433,8 @@ class OrderStatusTransitionService
         $joinDate = $this->dates->parse(($this->effectFields($template, (array) ($snapshot['fields'] ?? [])))['start_date'] ?? null);
         $structureId = $snapshot['hire_structure_id'] ?? null;
 
-        // İşə qəbul əmri təyinatın qanuni mənbəyidir (struktur/vəzifə yalnız əmrlə yazılır).
-        $this->assignment->allow(fn (): array => $this->candidateImport->handle([[
+        // İşə qəbul əmri təyinatın, işə qəbul tarixinin və ilkin əmək haqqının qanuni mənbəyidir.
+        $this->changes->allowForEffect('hire', fn (): array => $this->candidateImport->handle([[
             'personnel_id' => (int) $candidateId,
             'structure_id' => $structureId,
             'position_id' => (int) $positionId,

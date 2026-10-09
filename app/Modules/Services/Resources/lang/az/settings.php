@@ -74,4 +74,32 @@ return [
         'delegation_created' => 'Rəhbər həvaləsi yaradıldı.',
         'delegation_revoked' => 'Rəhbər həvaləsi dayandırıldı.',
     ],
+    'change_policy' => [
+        'title' => 'Dəyişiklik siyasəti',
+        'description' => 'Hər sahə qrupunun necə dəyişəcəyini seçin: sərbəst, jurnal (səbəb + audit) və ya yalnız əmrlə. Əmr effektləri bu siyasətdən asılı olmayaraq yazır.',
+        'columns' => [
+            'group' => 'Sahə qrupu',
+            'mode' => 'Rejim',
+            'source' => 'Mənbə',
+        ],
+        'sources' => [
+            'default' => 'İlkin',
+            'customized' => 'Dəyişdirilib',
+        ],
+        'default_mode' => 'İlkin rejim: :mode',
+        'changed_by' => ':user, :date',
+        'owner_compensation' => 'Kompensasiya bölməsində yoxlanılır',
+        'actions' => [
+            'reset' => 'İlkinə qaytar',
+        ],
+        'confirm' => [
+            'reset_title' => 'İlkin rejimə qaytarılsın?',
+            'reset_message' => '«:group» qrupu ilkin rejimə (:mode) qaytarılacaq.',
+        ],
+        'messages' => [
+            'saved' => 'Dəyişiklik siyasəti yeniləndi.',
+            'reset' => 'Qrup ilkin rejimə qaytarıldı.',
+            'invalid' => 'Seçim yanlışdır.',
+        ],
+    ],
 ];

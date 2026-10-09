@@ -8,6 +8,7 @@ return [
     'groups' => [
         'admin' => 'Admin',
         'attendance' => 'Davamiyyət',
+        'change_policy' => 'Dəyişiklik siyasəti',
         'attendance_daily_monitor' => 'Davamiyyət - günlük monitor',
         'attendance_manager_summary' => 'Davamiyyət - rəhbər xülasəsi',
         'attendance_calendar' => 'Davamiyyət - iş rejimi təqvimi',

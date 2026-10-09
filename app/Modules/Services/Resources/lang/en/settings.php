@@ -74,4 +74,32 @@ return [
         'delegation_created' => 'Chief delegation created.',
         'delegation_revoked' => 'Chief delegation stopped.',
     ],
+    'change_policy' => [
+        'title' => 'Change policy',
+        'description' => 'Choose how each field group may change: free, journal (reason + audit) or order only. Order effects write regardless of this policy.',
+        'columns' => [
+            'group' => 'Field group',
+            'mode' => 'Mode',
+            'source' => 'Source',
+        ],
+        'sources' => [
+            'default' => 'Default',
+            'customized' => 'Customized',
+        ],
+        'default_mode' => 'Default mode: :mode',
+        'changed_by' => ':user, :date',
+        'owner_compensation' => 'Checked in Compensation',
+        'actions' => [
+            'reset' => 'Reset to default',
+        ],
+        'confirm' => [
+            'reset_title' => 'Reset to the default mode?',
+            'reset_message' => 'The «:group» group will go back to its default mode (:mode).',
+        ],
+        'messages' => [
+            'saved' => 'Change policy updated.',
+            'reset' => 'The group was reset to its default mode.',
+            'invalid' => 'Invalid selection.',
+        ],
+    ],
 ];

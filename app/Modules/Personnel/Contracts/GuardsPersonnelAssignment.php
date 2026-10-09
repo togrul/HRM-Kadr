@@ -15,7 +15,11 @@ use Illuminate\Validation\ValidationException;
  *
  *     app(GuardsPersonnelAssignment::class)->allow(fn () => $personnel->forceFill([...])->save());
  *
- * @see \App\Modules\Personnel\Application\Services\PersonnelAssignmentGuard
+ * Dəyişiklik siyasəti ilə ümumiləşdirilib: yeni kod GuardsPersonnelChanges-i işlətsin (bu
+ * interfeys onun valididir və eyni nüsxəyə bağlanır).
+ *
+ * @see GuardsPersonnelChanges
+ * @see \App\Modules\Personnel\Application\Services\PersonnelChangeGuard
  */
 interface GuardsPersonnelAssignment
 {

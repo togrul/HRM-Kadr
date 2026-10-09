@@ -17,7 +17,7 @@ yerlər və onların HRM-də necə bağlanacağıdır.
 | 7 | Çoxşəxsli əmr | `order_participants`, hər iştirakçıya effekt, şablonda cədvəl | W5 | W1+W2-dən sonra |
 | 8 | Status xəstəliyi nəzərə almır; «Bu gün işdə yoxdur» yoxdur | `PersonnelPresenceResolver`, ana səhifə kartı, siyahıda çoxseçimli filtr | W3 | İcrada |
 | 9 | Bölmə/vəzifə yalnız UI-da kilidlidir | Server tərəfdə yoxlama: mövcud işçidə yalnız əmrlə dəyişir | W4 | İcrada |
-| 10 | Dəyişiklik siyasəti (qurum üzrə rejimlər) | Aşağıdakı iş planı | — | Planlanıb |
+| 10 | Dəyişiklik siyasəti (qurum üzrə rejimlər) | Aşağıdakı iş planı | — | İcrada |
 | 11 | Brauzerdə A4 redaktor, autosave | Aşağıya bax | — | Planlanıb |
 | 12 | Xəstəlik vərəqəsi reyestri | Aşağıya bax | — | Planlanıb |
 | 13 | Md. 114–117 məzuniyyət normaları, iş ili | Aşağıya bax | — | Planlanıb |
@@ -89,6 +89,13 @@ Məqsəd: hər qurum hansı işçi sahəsinin necə dəyişəcəyini özü seçs
 6. **Sənəd.** İstifadəçi təlimatına bölmə.
 
 Təxmini həcm: 3–4 iş günü (W4 bitəndən sonra).
+
+**Vəziyyət (10.10.2026, `orunet/change-policy`):** 1–6 icra olunub. `personnel_change_policies` + `manage-change-policy`
+icazəsi (Admin, HR Admin); `PersonnelFieldGroupRegistry`, `PersonnelChangePolicyService`, `PersonnelChangeGuard`
+(`GuardsPersonnelChanges`; köhnə `PersonnelAssignmentGuard` / `GuardsPersonnelAssignment` adları işləyir).
+Əmr effektləri `allowForEffect()` ilə yalnız reyestrdəki öz qruplarını yazır. Əmək haqqı Compensation-da
+(`CompensationService::assignManually`) yoxlanılır; ilk təyinat (aktiv maaş yoxdursa) siyasətə düşmür.
+Sənəd/ailə siyahıları üçün jurnal yalnız sətir saylarını (köhnə → yeni) yazır.
 
 ## Digər planlanan bəndlər
 

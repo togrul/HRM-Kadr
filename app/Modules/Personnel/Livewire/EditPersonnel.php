@@ -12,7 +12,9 @@ use App\Livewire\Forms\Personnel\PersonalInformationForm;
 use App\Livewire\Forms\Personnel\ServiceHistoryForm;
 use App\Models\Personnel;
 use App\Modules\Orders\Contracts\OrderDrafter;
-use App\Modules\Personnel\Application\Services\PersonnelAssignmentGuard;
+use App\Modules\Personnel\Application\Services\PersonnelChangeGuard;
+use App\Modules\Personnel\Application\Services\PersonnelFieldGroupRegistry;
+use App\Modules\Personnel\Contracts\PersonnelChangeMode;
 use App\Modules\Personnel\Services\PersonnelFormAssembler;
 use App\Modules\Personnel\Services\PersonnelPersistenceService;
 use App\Modules\Personnel\Support\Traits\PersonnelCrud;
@@ -20,11 +22,13 @@ use App\Modules\Personnel\Support\Traits\RelationCruds\RelationCrudTrait;
 use App\Services\PersonnelPendingApprovalService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Isolate;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 #[Isolate]
@@ -66,6 +70,18 @@ class EditPersonnel extends Component
 
     /** @var array<string> */
     protected array $relationGroupsLoaded = [];
+
+    /** Jurnal rejimli sahələr dəyişəndə tələb olunan səbəb (dəyişiklik siyasəti). */
+    public string $changeReason = '';
+
+    /**
+     * Sənəd/ailə kimi əlaqə qruplarının yüklənmə anındakı izi: saxlamada müqayisə edilir.
+     * Kilidlidir — klient onu dəyişə bilmir.
+     *
+     * @var array<string, array{hash: string, counts: array<string, int>}>
+     */
+    #[Locked]
+    public array $relationBaselines = [];
 
     public function mount(?int $step = null): void
     {
@@ -112,7 +128,7 @@ class EditPersonnel extends Component
     protected function persistPersonnel(): void
     {
         $personnel = $this->personnelModelDataInstance();
-        $this->rejectAssignmentChanges($personnel);
+        $journal = $this->enforceChangePolicy($personnel);
 
         if (! empty($this->avatar)) {
             $this->personalForm->personnel['photo'] = $this->avatar->store('personnel', 'public');
@@ -140,63 +156,321 @@ class EditPersonnel extends Component
             loadedSteps: $this->loadedSteps
         );
 
-        DB::transaction(function () use ($assembled, $relationPayloads) {
-            $personnel = $this->personnelModelDataInstance();
-            $personnel->update(app(PersonnelAssignmentGuard::class)->withoutGuarded($personnel, $assembled['personnel_data']));
-            $this->updatePersonnelRelations($relationPayloads);
+        $guard = $this->changeGuard();
+        $save = function () use ($assembled, $relationPayloads, $guard, $journal): void {
+            DB::transaction(function () use ($assembled, $relationPayloads, $guard, $journal) {
+                $personnel = $this->personnelModelDataInstance();
+                $personnel->update($guard->withoutGuarded($personnel, $assembled['personnel_data']));
+                $this->updatePersonnelRelations($relationPayloads);
 
-            if (! empty($assembled['personnel_extra'])) {
-                $personnel->update($assembled['personnel_extra']);
-            }
-        });
+                if (! empty($assembled['personnel_extra'])) {
+                    $personnel->update($assembled['personnel_extra']);
+                }
+
+                foreach ($journal['relations'] as $group => $changes) {
+                    $guard->recordJournal($group, (string) $journal['reason'], $changes, $personnel, ['source' => 'personnel_form']);
+                }
+            });
+        };
+
+        $journal['reason'] !== null ? $guard->withReason($journal['reason'], $save) : $save();
+
+        $this->changeReason = '';
+        $this->refreshRelationBaselines();
 
         $this->dispatchPersonnelStored(__('personnel::common.messages.personnel_updated'));
         $this->dispatchModalCloseEvent();
     }
 
     /**
-     * Struktur bölmə və vəzifə mövcud əməkdaşda yalnız əmrlə dəyişir. Sahələr UI-da
-     * bağlıdır; Livewire vəziyyəti əl ilə dəyişdirilsə belə fərqli dəyər sahə xətası ilə
-     * qaytarılır və heç nə yazılmır.
+     * Dəyişiklik siyasəti formun saxlama axınında: `order` rejimli sahələrdə fərqli dəyər
+     * sahə xətası ilə qaytarılır (Livewire vəziyyəti əl ilə dəyişdirilsə belə heç nə
+     * yazılmır), `journal` rejimli dəyişiklik isə ən azı 5 simvolluq səbəb tələb edir.
+     * Model səviyyəsindəki yoxlama (PersonnelObserver) bundan asılı olmayaraq işləyir.
+     *
+     * @return array{reason: string|null, relations: array<string, array<string, array{old: int, new: int}>>}
      *
      * @throws ValidationException
      */
-    protected function rejectAssignmentChanges(Personnel $personnel): void
+    protected function enforceChangePolicy(Personnel $personnel): array
     {
-        if (! in_array(1, $this->loadedSteps, true)) {
-            return;
-        }
-
-        $changed = app(PersonnelAssignmentGuard::class)->changedInPayload($personnel, $this->personalForm->personnel);
-
-        if ($changed === []) {
-            return;
-        }
-
-        $message = __('personnel::common.validation.assignment_order_only');
+        $guard = $this->changeGuard();
+        $registry = app(PersonnelFieldGroupRegistry::class);
         $errors = [];
-        foreach ($changed as $attribute) {
-            $errors['personalForm.personnel.'.$attribute] = $message;
+
+        if (in_array(1, $this->loadedSteps, true)) {
+            foreach ($guard->changedInPayload($personnel, $this->submittedPersonalColumns()) as $attribute) {
+                $errors['personalForm.personnel.'.$attribute] = $registry->orderMessage((string) $guard->groupOf($attribute));
+            }
+
+            if (! empty($this->avatar) && $guard->modeFor(PersonnelFieldGroupRegistry::PHOTO_NOTES) === PersonnelChangeMode::Order) {
+                $errors['avatar'] = $registry->orderMessage(PersonnelFieldGroupRegistry::PHOTO_NOTES);
+            }
         }
 
-        throw ValidationException::withMessages($errors);
+        $relationChanges = $this->changedRelationGroups();
+        foreach ($relationChanges as $group => $counts) {
+            if ($guard->modeFor($group) === PersonnelChangeMode::Order) {
+                $errors['changePolicy.'.$group] = $registry->orderMessage($group);
+            }
+        }
+
+        $journalGroups = $this->pendingJournalGroups($relationChanges);
+        $reason = trim($this->changeReason);
+        if ($journalGroups !== [] && mb_strlen($reason) < PersonnelChangeMode::MIN_REASON_LENGTH) {
+            $errors['changeReason'] = $guard->reasonRequiredMessage();
+        }
+
+        if ($errors !== []) {
+            throw ValidationException::withMessages($errors);
+        }
+
+        $journalRelations = array_filter(
+            $relationChanges,
+            fn (string $group): bool => $guard->modeFor($group) === PersonnelChangeMode::Journal,
+            ARRAY_FILTER_USE_KEY,
+        );
+
+        return [
+            'reason' => $journalGroups !== [] ? $reason : null,
+            'relations' => $journalRelations,
+        ];
     }
 
     /**
-     * Bağlı struktur/vəzifə sahələrinin yanındakı "Köçürmə əmri yarat" keçidi: əmrlər
-     * siyahısını köçürmə şablonu seçilmiş tərtibatçı ilə açır. İcazə, modul və ya şablon
-     * yoxdursa keçid göstərilmir.
+     * Saxlanmamış dəyişikliklər arasında jurnal rejimli qruplar (səbəb sahəsini göstərmək
+     * və saxlamada tələb etmək üçün).
+     *
+     * @param  array<string, array<string, array{old: int, new: int}>>|null  $relationChanges
+     * @return list<string>
+     */
+    protected function pendingJournalGroups(?array $relationChanges = null): array
+    {
+        $guard = $this->changeGuard();
+        $personnel = $this->personnelModelDataInstance();
+        $groups = [];
+
+        if (in_array(1, $this->loadedSteps, true)) {
+            foreach ($guard->changedInPayload($personnel, $this->submittedPersonalColumns(), [PersonnelChangeMode::Journal]) as $attribute) {
+                $groups[] = (string) $guard->groupOf($attribute);
+            }
+
+            if (! empty($this->avatar) && $guard->modeFor(PersonnelFieldGroupRegistry::PHOTO_NOTES) === PersonnelChangeMode::Journal) {
+                $groups[] = PersonnelFieldGroupRegistry::PHOTO_NOTES;
+            }
+        }
+
+        foreach (array_keys($relationChanges ?? $this->changedRelationGroups()) as $group) {
+            if ($guard->modeFor($group) === PersonnelChangeMode::Journal) {
+                $groups[] = $group;
+            }
+        }
+
+        return array_values(array_unique($groups));
+    }
+
+    /**
+     * Formun aşağısındakı səbəb sahəsi: jurnal rejimli sahə dəyişəndə görünür.
+     *
+     * @return list<string> dəyişən jurnal qruplarının adları
+     */
+    #[Computed]
+    public function journalGroupLabels(): array
+    {
+        $registry = app(PersonnelFieldGroupRegistry::class);
+
+        return array_map(fn (string $group): string => $registry->label($group), $this->pendingJournalGroups());
+    }
+
+    /**
+     * Məhdud rejimli `personnels` sütunları: sütun → rejim, qrup və «Əmr yarat» keçidi.
+     * Formada `order` sahələri kilidlənir və «(əmrlə)» nişanı alır.
+     *
+     * @return array<string, array{mode: string, group: string, label: string, hint: string, order_url: string|null}>
+     */
+    #[Computed]
+    public function fieldPolicies(): array
+    {
+        $guard = $this->changeGuard();
+        $registry = app(PersonnelFieldGroupRegistry::class);
+        $policies = [];
+
+        foreach ($registry->columnMap() as $attribute => $group) {
+            $mode = $guard->modeFor($group);
+            if (! $mode->isRestricted()) {
+                continue;
+            }
+
+            $policies[$attribute] = [
+                'mode' => $mode->value,
+                'group' => $group,
+                'label' => $registry->label($group),
+                'hint' => $group === PersonnelFieldGroupRegistry::ASSIGNMENT
+                    ? __('personnel::common.hints.assignment_order_only')
+                    : __('personnel::change_policy.hints.order_only', ['group' => $registry->label($group)]),
+                'order_url' => $mode === PersonnelChangeMode::Order ? $this->orderUrlFor($group) : null,
+            ];
+        }
+
+        return $policies;
+    }
+
+    /**
+     * Bağlı struktur/vəzifə sahələrinin yanındakı "Köçürmə əmri yarat" keçidi.
      */
     #[Computed]
     public function transferOrderUrl(): ?string
     {
-        if (! (auth()->user()?->can('add-orders') ?? false) || ! Route::has('orders') || ! app()->bound(OrderDrafter::class)) {
+        return $this->orderUrlFor(PersonnelFieldGroupRegistry::ASSIGNMENT);
+    }
+
+    /**
+     * Qrupu yaza bilən əmr növü ilə açılan əmrlər siyahısı. İcazə, modul və ya şablon
+     * yoxdursa keçid göstərilmir.
+     */
+    protected function orderUrlFor(string $group): ?string
+    {
+        $effect = app(PersonnelFieldGroupRegistry::class)->orderEffect($group);
+
+        if ($effect === null || ! (auth()->user()?->can('add-orders') ?? false) || ! Route::has('orders') || ! app()->bound(OrderDrafter::class)) {
             return null;
         }
 
-        $preset = array_key_first(app(OrderDrafter::class)->personnelTemplates('transfer'));
+        $preset = array_key_first(app(OrderDrafter::class)->personnelTemplates($effect));
 
         return $preset === null ? null : route('orders', ['create' => 1, 'preset' => (string) $preset]);
+    }
+
+    /**
+     * Yüklənmiş və məhdud rejimli əlaqə qruplarından (sənədlər, ailə) dəyişənlər:
+     * qrup → əlaqə → [köhnə, yeni] sətir sayı.
+     *
+     * @return array<string, array<string, array{old: int, new: int}>>
+     */
+    protected function changedRelationGroups(): array
+    {
+        $guard = $this->changeGuard();
+        $registry = app(PersonnelFieldGroupRegistry::class);
+        $snapshot = null;
+        $changed = [];
+
+        foreach ($this->relationBaselines as $group => $baseline) {
+            if (! $guard->modeFor($group)->isRestricted()) {
+                continue;
+            }
+
+            $snapshot ??= $this->relationPayloadSnapshot();
+            $current = $this->relationFingerprint($registry->relations($group), $snapshot);
+            if ($current['hash'] === $baseline['hash']) {
+                continue;
+            }
+
+            foreach ($current['counts'] as $relation => $count) {
+                $changed[$group][$relation] = ['old' => (int) ($baseline['counts'][$relation] ?? 0), 'new' => $count];
+            }
+        }
+
+        return $changed;
+    }
+
+    /** Addım yüklənəndə həmin addımın əlaqə qruplarının izini saxlayır. */
+    protected function rememberRelationBaselines(int $step): void
+    {
+        $registry = app(PersonnelFieldGroupRegistry::class);
+        $snapshot = null;
+
+        foreach ($registry->keys() as $group) {
+            if ($registry->wizardStep($group) !== $step || $registry->relations($group) === []) {
+                continue;
+            }
+
+            $snapshot ??= $this->relationPayloadSnapshot();
+            $this->relationBaselines[$group] = $this->relationFingerprint($registry->relations($group), $snapshot);
+        }
+    }
+
+    protected function refreshRelationBaselines(): void
+    {
+        $registry = app(PersonnelFieldGroupRegistry::class);
+        $snapshot = null;
+
+        foreach (array_keys($this->relationBaselines) as $group) {
+            $snapshot ??= $this->relationPayloadSnapshot();
+            $this->relationBaselines[$group] = $this->relationFingerprint($registry->relations($group), $snapshot);
+        }
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function relationPayloadSnapshot(): array
+    {
+        return app(PersonnelFormAssembler::class)->buildForStore(
+            personalForm: $this->personalForm,
+            documentForm: $this->documentForm,
+            educationForm: $this->educationForm,
+            laborActivityForm: $this->laborActivityForm,
+            historyForm: $this->historyForm,
+            awardsPunishmentsForm: $this->awardsPunishmentsForm,
+            kinshipForm: $this->kinshipForm,
+            miscForm: $this->miscForm,
+            dateFields: [],
+            dateNormalizer: fn (array $payload): array => $payload,
+        )['relation_payloads'];
+    }
+
+    /**
+     * Əlaqə payload-larının müqayisə izi: boş dəyərlər və tiplər (int / "1") eyniləşdirilir.
+     *
+     * @param  list<string>  $relations
+     * @param  array<string, mixed>  $snapshot
+     * @return array{hash: string, counts: array<string, int>}
+     */
+    protected function relationFingerprint(array $relations, array $snapshot): array
+    {
+        $normalize = function (mixed $value) use (&$normalize): mixed {
+            if (is_array($value)) {
+                $value = array_map($normalize, $value);
+                $value = array_filter($value, static fn (mixed $item): bool => $item !== null && $item !== []);
+                if (! array_is_list($value)) {
+                    ksort($value);
+                }
+
+                return $value;
+            }
+
+            if (is_bool($value)) {
+                return $value ? '1' : '0';
+            }
+
+            return $value === null || $value === '' || ! is_scalar($value) ? null : (string) $value;
+        };
+
+        $data = [];
+        $counts = [];
+        foreach ($relations as $relation) {
+            $payload = $snapshot[$relation] ?? [];
+            $data[$relation] = $normalize($payload);
+            $counts[$relation] = is_array($payload) && array_is_list($payload) ? count($payload) : (int) ($normalize($payload) !== []);
+        }
+
+        return ['hash' => md5((string) json_encode($data)), 'counts' => $counts];
+    }
+
+    /**
+     * Formun yazdığı şəxsi sütunlar: xitam tarixi forma tərəfindən heç vaxt yazılmır
+     * (PersonnelFormAssembler onu atır), ona görə siyasət yoxlamasına da düşmür.
+     *
+     * @return array<string, mixed>
+     */
+    protected function submittedPersonalColumns(): array
+    {
+        return Arr::except((array) $this->personalForm->personnel, PersonnelFormAssembler::TERMINATION_MANAGED_FIELDS);
+    }
+
+    protected function changeGuard(): PersonnelChangeGuard
+    {
+        return app(PersonnelChangeGuard::class);
     }
 
     protected function onStepChanged(int $step): void
@@ -223,6 +497,7 @@ class EditPersonnel extends Component
         };
 
         $this->loadedSteps[] = $step;
+        $this->rememberRelationBaselines($step);
     }
 
     protected function loadPersonalFormData(): void
@@ -390,6 +665,7 @@ class EditPersonnel extends Component
 
         $this->loadedPersonnelId = $personnelId;
         $this->loadedSteps = [];
+        $this->relationBaselines = [];
         $this->relationGroupsLoaded = [];
         $this->resetDropdownLabelCache();
     }

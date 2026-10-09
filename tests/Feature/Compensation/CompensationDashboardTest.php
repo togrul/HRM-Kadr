@@ -13,6 +13,7 @@ use App\Modules\Compensation\Livewire\Tabs\BankTab;
 use App\Modules\Compensation\Livewire\Tabs\ComponentsTab;
 use App\Modules\Compensation\Livewire\Tabs\ScalesTab;
 use App\Modules\Compensation\Livewire\Tabs\StatutoryTab;
+use App\Modules\Personnel\Contracts\ManagesPersonnelChangePolicy;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -84,6 +85,8 @@ class CompensationDashboardTest extends TestCase
     public function test_assigning_new_compensation_ends_the_previous_active_one(): void
     {
         $this->actingAsManager();
+        // Əmək haqqı ilkin olaraq «yalnız əmrlə» dəyişir; əl ilə yenidən təyinat sərbəst rejimdə yoxlanılır.
+        app(ManagesPersonnelChangePolicy::class)->setMode('salary', 'free');
         $personnel = $this->makePersonnel('emp1@example.test');
         $regimeId = CompensationRegime::where('code', 'private')->value('id');
 

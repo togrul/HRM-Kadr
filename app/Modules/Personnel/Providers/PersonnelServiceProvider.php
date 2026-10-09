@@ -7,6 +7,9 @@ use App\Modules\Personnel\Application\Services\MyHr\LearningAssignmentManagerSer
 use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestReviewService;
 use App\Modules\Personnel\Application\Services\MyHr\OnboardingAssignmentManagerService;
 use App\Modules\Personnel\Application\Services\PersonnelAssignmentGuard;
+use App\Modules\Personnel\Application\Services\PersonnelChangeGuard;
+use App\Modules\Personnel\Application\Services\PersonnelChangePolicyService;
+use App\Modules\Personnel\Application\Services\PersonnelFieldGroupRegistry;
 use App\Modules\Personnel\Application\Services\WorkingTimeNormService;
 use App\Modules\Personnel\Console\Commands\LiftExpiredDisciplinarySanctionsCommand;
 use App\Modules\Personnel\Console\Commands\PersonnelCrudQueryBudgetCommand;
@@ -20,7 +23,9 @@ use App\Modules\Personnel\Console\Commands\ProfessionalPortfolioSyncRegistriesCo
 use App\Modules\Personnel\Console\Commands\RepairLegacySelfServiceVacationOrdersCommand;
 use App\Modules\Personnel\Contracts\ApprovalRouteResolver;
 use App\Modules\Personnel\Contracts\GuardsPersonnelAssignment;
+use App\Modules\Personnel\Contracts\GuardsPersonnelChanges;
 use App\Modules\Personnel\Contracts\LearningAssignmentManager;
+use App\Modules\Personnel\Contracts\ManagesPersonnelChangePolicy;
 use App\Modules\Personnel\Contracts\MyHrRequestReview;
 use App\Modules\Personnel\Contracts\OnboardingAssignmentManager;
 use App\Modules\Personnel\Contracts\WorkingTimeNormProvider;
@@ -47,9 +52,18 @@ class PersonnelServiceProvider extends ServiceProvider
         $this->app->bind(MyHrRequestReview::class, MyHrRequestReviewService::class);
         $this->app->bind(WorkingTimeNormProvider::class, WorkingTimeNormService::class);
 
-        // Tək nüsxə: allow() kontekstinin dərinlik sayğacı model observer-i ilə paylaşılır.
-        $this->app->singleton(PersonnelAssignmentGuard::class);
-        $this->app->alias(PersonnelAssignmentGuard::class, GuardsPersonnelAssignment::class);
+        // Dəyişiklik siyasəti: reyestr, siyasət (sorğu başına bir oxunuş) və qoruyucu.
+        $this->app->singleton(PersonnelFieldGroupRegistry::class);
+        $this->app->singleton(PersonnelChangePolicyService::class);
+        $this->app->alias(PersonnelChangePolicyService::class, ManagesPersonnelChangePolicy::class);
+
+        // Tək nüsxə: allow()/withReason() kontekstləri model observer-i ilə paylaşılır. Nüsxə
+        // köhnə adın (PersonnelAssignmentGuard — alt sinif) tipindədir ki, hər iki ad və hər
+        // iki contract eyni obyekti qaytarsın.
+        $this->app->singleton(PersonnelChangeGuard::class, fn ($app): PersonnelChangeGuard => $app->build(PersonnelAssignmentGuard::class));
+        $this->app->alias(PersonnelChangeGuard::class, PersonnelAssignmentGuard::class);
+        $this->app->alias(PersonnelChangeGuard::class, GuardsPersonnelChanges::class);
+        $this->app->alias(PersonnelChangeGuard::class, GuardsPersonnelAssignment::class);
 
         if ($this->app->runningInConsole()) {
             $this->commands([

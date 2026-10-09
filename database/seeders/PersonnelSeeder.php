@@ -509,6 +509,7 @@ class PersonnelSeeder extends Seeder
             'edit-personnels',
             'delete-personnels',
             'access-settings',
+            'manage-change-policy',
             'show-candidates',
             'add-candidates',
             'edit-candidates',

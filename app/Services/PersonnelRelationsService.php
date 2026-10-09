@@ -19,7 +19,7 @@ use App\Models\PersonnelPunishment;
 use App\Models\PersonnelRank;
 use App\Models\PersonnelScientificDegreeAndName;
 use App\Models\PersonnelTakenCaptive;
-use App\Modules\Personnel\Contracts\GuardsPersonnelAssignment;
+use App\Modules\Personnel\Contracts\GuardsPersonnelChanges;
 use App\Traits\NormalizesDropdownPayloads;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
@@ -297,9 +297,10 @@ class PersonnelRelationsService
         if ($currentJoinDate && $personnel->join_work_date !== $currentJoinDate) {
             $personnel->join_work_date = $currentJoinDate;
         }
-        // Mövcud əməkdaşın cari vəzifəsi/bölməsi əmək fəaliyyəti siyahısından dəyişmir —
-        // yalnız əmrlə. Yeni yaradılan əməkdaşda (sihirbazın yaratma axını) sinxron qalır.
-        foreach (app(GuardsPersonnelAssignment::class)->lockedChanges($personnel) as $attribute) {
+        // Mövcud əməkdaşın cari vəzifəsi/bölməsi və işə qəbul tarixi əmək fəaliyyəti
+        // siyahısından dəyişmir, əgər dəyişiklik siyasəti bunu bağlayırsa (yalnız əmrlə və ya
+        // səbəbsiz jurnal). Yeni yaradılan əməkdaşda (sihirbazın yaratma axını) sinxron qalır.
+        foreach (app(GuardsPersonnelChanges::class)->lockedChanges($personnel) as $attribute) {
             $personnel->setAttribute($attribute, $personnel->getOriginal($attribute));
         }
 

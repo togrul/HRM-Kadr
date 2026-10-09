@@ -6,7 +6,7 @@ use App\Models\Personnel;
 use App\Models\PersonRegistry;
 use App\Models\User;
 use App\Modules\Notifications\Support\NotificationCampaignDispatcher;
-use App\Modules\Personnel\Contracts\GuardsPersonnelAssignment;
+use App\Modules\Personnel\Contracts\GuardsPersonnelChanges;
 use App\Notifications\NewPersonnelAdded;
 use App\Notifications\PersonnelWasDeleted;
 
@@ -35,12 +35,13 @@ class PersonnelObserver
     }
 
     /**
-     * Struktur bölmə və vəzifə yalnız əmrlə dəyişir: icazəli kontekstdən kənar hər Eloquent
-     * yazması (Livewire, API, idxal, toplu redaktə) burada dayandırılır.
+     * Dəyişiklik siyasəti: `order` rejimli sahələr icazəli kontekstdən (əmr effekti) kənar,
+     * `journal` rejimli sahələr isə səbəbsiz dəyişə bilməz — hər Eloquent yazması (Livewire,
+     * API, idxal, toplu redaktə) burada yoxlanılır.
      */
     public function updating(Personnel $personnel): void
     {
-        app(GuardsPersonnelAssignment::class)->enforce($personnel);
+        app(GuardsPersonnelChanges::class)->enforce($personnel);
     }
 
     /**
@@ -61,6 +62,9 @@ class PersonnelObserver
      */
     public function updated(Personnel $personnel): void
     {
+        // Jurnal rejimli sahələrin köhnə → yeni dəyərləri səbəblə birlikdə.
+        app(GuardsPersonnelChanges::class)->journal($personnel);
+
         // A renumbering keeps the identity and adds a mapping: the old number
         // still resolves to the same person, which is what keeps historical
         // records readable.

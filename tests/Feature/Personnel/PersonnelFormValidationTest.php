@@ -2,6 +2,7 @@
 
 use App\Models\Personnel;
 use App\Models\User;
+use App\Modules\Personnel\Contracts\GuardsPersonnelChanges;
 use App\Modules\Personnel\Livewire\AddPersonnel;
 use App\Modules\Personnel\Livewire\EditPersonnel;
 use App\Modules\Personnel\Services\PersonnelCrudBenchmarkFixtureService;
@@ -181,8 +182,8 @@ it('keeps FİN unique among working employees but allows re-hire and internal pa
         ->call('store')
         ->assertHasNoErrors();
 
-    Personnel::query()->where('tabel_no', 'CRUD-BENCH-001')->sole()
-        ->forceFill(['leave_work_date' => '2021-01-01'])->save();
+    app(GuardsPersonnelChanges::class)->allowForEffect('termination', fn () => Personnel::query()->where('tabel_no', 'CRUD-BENCH-001')->sole()
+        ->forceFill(['leave_work_date' => '2021-01-01'])->save());
 
     validPersonnelStep('VAL-1007')
         ->set('personalForm.personnel.pin', 'ABC1234')
@@ -247,7 +248,7 @@ it('leaves a dismissal recorded by a termination order untouched when the card i
     personnelFormUser();
 
     $personnel = Personnel::query()->where('tabel_no', 'CRUD-BENCH-001')->sole();
-    $personnel->forceFill(['leave_work_date' => '2024-05-31'])->save();
+    app(GuardsPersonnelChanges::class)->allowForEffect('termination', fn () => $personnel->forceFill(['leave_work_date' => '2024-05-31'])->save());
 
     Livewire::test(EditPersonnel::class, ['personnelModel' => $personnel->getKey()])
         ->assertDontSee('personalForm.personnel.leave_work_date')
