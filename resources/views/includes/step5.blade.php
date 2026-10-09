@@ -151,11 +151,11 @@
                 <div class="flex flex-row">
                     <label class="inline-flex items-center w-full px-2 py-2 bg-zinc-100 rounded shadow-sm">
                         <input type="radio" class="form-radio" name="historyForm.injury.injury_type" wire:model="historyForm.injury.injury_type" value="other">
-                        <span class="ml-2 text-sm font-normal">{{ __('personnel::wizard.options.injury_types.other') }}</span>
+                        <span class="ml-2 text-sm">{{ __('personnel::wizard.options.injury_types.other') }}</span>
                     </label>
                     <label class="inline-flex items-center w-full px-2 py-2 ml-4 bg-zinc-100 rounded shadow-sm">
                         <input type="radio" class="form-radio" name="historyForm.injury.injury_type" wire:model="historyForm.injury.injury_type" value="contusion">
-                        <span class="ml-2 text-sm font-normal">{{ __('personnel::wizard.options.injury_types.contusion') }}</span>
+                        <span class="ml-2 text-sm">{{ __('personnel::wizard.options.injury_types.contusion') }}</span>
                     </label>
                 </div>
                 @error('historyForm.injury.injury_type')

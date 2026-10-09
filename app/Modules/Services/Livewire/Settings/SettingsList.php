@@ -621,6 +621,7 @@ class SettingsList extends Component
             'Work coefficient' => __('services::settings.labels.work_coefficient'),
             'Education coefficient' => __('services::settings.labels.education_coefficient'),
             'Organization name' => __('services::settings.labels.organization_name'),
+            'Disciplinary sanction term (months)' => __('services::settings.labels.disciplinary_sanction_term'),
             default => ModuleTranslation::resolveStoredText($value),
         };
     }

@@ -60,7 +60,13 @@ class OrderNumbering
     {
         $value = Str::lower(trim((string) ($this->settings()[self::SETTING_SCOPE] ?? '')));
 
-        return in_array($value, [self::SCOPE_TYPE, 'növ', 'nov', 'per_type'], true) ? self::SCOPE_TYPE : self::SCOPE_GLOBAL;
+        // Stored as an on/off switch ("1" = a counter per order type); the earlier free-text
+        // values ("type", "növ", …) are still understood.
+        if (in_array($value, [self::SCOPE_TYPE, 'növ', 'nov', 'per_type'], true)) {
+            return self::SCOPE_TYPE;
+        }
+
+        return filter_var($value, FILTER_VALIDATE_BOOLEAN) ? self::SCOPE_TYPE : self::SCOPE_GLOBAL;
     }
 
     public function resetsYearly(): bool

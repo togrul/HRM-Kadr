@@ -47,6 +47,7 @@ return [
         'work_coefficient' => 'Work coefficient',
         'education_coefficient' => 'Education coefficient',
         'organization_name' => 'Organization name',
+        'disciplinary_sanction_term' => 'Disciplinary sanction term (months)',
     ],
     'messages' => [
         'general_description' => 'System-wide parameters and values.',

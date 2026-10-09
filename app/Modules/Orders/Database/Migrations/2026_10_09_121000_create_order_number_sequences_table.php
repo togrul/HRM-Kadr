@@ -30,7 +30,7 @@ return new class extends Migration
 
         $settings = [
             [OrderNumbering::SETTING_FORMAT, '', 'string'],
-            [OrderNumbering::SETTING_SCOPE, OrderNumbering::SCOPE_GLOBAL, 'string'],
+            [OrderNumbering::SETTING_SCOPE, '0', 'bool'],
             [OrderNumbering::SETTING_YEARLY_RESET, '1', 'bool'],
             [OrderNumbering::SETTING_TYPE_CODES, '', 'string'],
         ];

@@ -47,6 +47,7 @@ return [
         'work_coefficient' => 'İş əmsalı',
         'education_coefficient' => 'Təhsil əmsalı',
         'organization_name' => 'Təşkilatın adı',
+        'disciplinary_sanction_term' => 'İntizam tənbehinin qüvvədə qalma müddəti (ay)',
     ],
     'messages' => [
         'general_description' => 'Sistem üzrə ümumi parametrlər və dəyərlər.',

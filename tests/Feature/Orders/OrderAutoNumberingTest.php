@@ -160,6 +160,28 @@ it('counts per order type when the scope is per type', function (): void {
         ->and(numberingApprove(provisionalOrder('trip')))->toBe('G2');
 });
 
+it('reads the counter scope from the on/off switch and from the earlier free-text values', function (): void {
+    foreach (['1' => OrderNumbering::SCOPE_TYPE, '0' => OrderNumbering::SCOPE_GLOBAL, 'type' => OrderNumbering::SCOPE_TYPE, 'global' => OrderNumbering::SCOPE_GLOBAL] as $stored => $expected) {
+        Setting::query()->updateOrCreate(['name' => OrderNumbering::SETTING_SCOPE], ['value' => $stored, 'type' => 'bool']);
+
+        expect((new OrderNumbering)->scope())->toBe($expected);
+    }
+});
+
+it('turns the earlier free-text counter scope into the switch', function (): void {
+    $migration = require base_path('app/Modules/Orders/Database/Migrations/2026_10_09_150000_turn_order_number_scope_into_switch.php');
+
+    foreach (['type' => '1', 'növ' => '1', 'global' => '0', '' => '0'] as $stored => $expected) {
+        Setting::query()->updateOrCreate(['name' => OrderNumbering::SETTING_SCOPE], ['value' => $stored, 'type' => 'string']);
+
+        $migration->up();
+
+        $row = Setting::query()->where('name', OrderNumbering::SETTING_SCOPE)->first();
+        expect((string) $row->getRawOriginal('value'))->toBe($expected)
+            ->and($row->type)->toBe('bool');
+    }
+});
+
 it('keeps a hand-typed number and the assigned one through a revert', function (): void {
     configureNumbering('{N}');
 

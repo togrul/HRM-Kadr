@@ -51,7 +51,7 @@
             @foreach (\App\Enums\GenderEnum::genderOptions() as $value => $label)
                 <label class="inline-flex items-center px-2 py-2 bg-zinc-100 rounded shadow-sm">
                     <input type="radio" class="form-radio" name="candidate.gender" wire:model="candidate.gender" value="{{ $value }}">
-                    <span class="ml-2 text-sm font-normal">{{ $label }}</span>
+                    <span class="ml-2 text-sm">{{ $label }}</span>
                 </label>
             @endforeach
         </div>

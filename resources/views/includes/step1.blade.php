@@ -128,7 +128,7 @@
                         <label @class(['inline-flex items-center px-2 py-2 rounded shadow-sm', 'bg-rose-50' => $genderInvalid, 'bg-zinc-100' => ! $genderInvalid])>
                             {{-- aria-invalid on the first radio lets the wizard focus the group after Next. --}}
                             <input type="radio" class="form-radio" name="personnel.gender" wire:model="personalForm.personnel.gender" value="{{ $value }}" @if ($genderInvalid && $loop->first) aria-invalid="true" @endif>
-                            <span class="ml-2 text-sm font-normal">{{ $label }}</span>
+                            <span class="ml-2 text-sm">{{ $label }}</span>
                         </label>
                     @endforeach
                 </div>

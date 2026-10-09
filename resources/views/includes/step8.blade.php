@@ -35,7 +35,7 @@
                                    name="miscForm.language.knowledge_status"
                                    wire:model="miscForm.language.knowledge_status"
                                    value="{{ $knw }}">
-                            <span class="ml-2 text-sm font-normal">{{ $knowledgeStatusLabels[$knw] ?? $knw }}</span>
+                            <span class="ml-2 text-sm">{{ $knowledgeStatusLabels[$knw] ?? $knw }}</span>
                         </label>
                     @endforeach
                 </div>

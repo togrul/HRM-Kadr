@@ -117,11 +117,11 @@
                 <div class="flex items-center">
                     <label class="inline-flex items-center bg-zinc-100 rounded shadow-sm py-2 px-2">
                         <input type="radio" class="form-radio" name="documentForm.document.is_married" wire:model="documentForm.document.is_married" value="0">
-                        <span class="ml-2 text-sm font-normal">{{ __('personnel::common.labels.single') }}</span>
+                        <span class="ml-2 text-sm">{{ __('personnel::common.labels.single') }}</span>
                     </label>
                     <label class="inline-flex items-center ml-4 bg-zinc-100 rounded shadow-sm py-2 px-2">
                         <input type="radio" class="form-radio" name="documentForm.document.is_married" wire:model="documentForm.document.is_married" value="1">
-                        <span class="ml-2 text-sm font-normal">{{ __('personnel::common.labels.married') }}</span>
+                        <span class="ml-2 text-sm">{{ __('personnel::common.labels.married') }}</span>
                     </label>
                 </div>
                 @error('documentForm.document.is_married')
