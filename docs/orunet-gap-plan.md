@@ -20,7 +20,7 @@ yerlər və onların HRM-də necə bağlanacağıdır.
 | 10 | Dəyişiklik siyasəti (qurum üzrə rejimlər) | Aşağıdakı iş planı | — | Planlanıb |
 | 11 | Brauzerdə A4 redaktor, autosave | Aşağıya bax | — | Planlanıb |
 | 12 | Xəstəlik vərəqəsi reyestri | Aşağıya bax | — | Planlanıb |
-| 13 | Md. 114–117 məzuniyyət normaları, iş ili | Aşağıya bax | — | Planlanıb |
+| 13 | Md. 114–117 məzuniyyət normaları, iş ili | Aşağıya bax; hüquqi əsas: `docs/vacation-legal-basis.md` | — | İcrada |
 
 ## W1 — Əmr həyat dövrü (orders-core)
 
