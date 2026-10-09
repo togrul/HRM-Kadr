@@ -730,7 +730,7 @@ trait PersonnelValidationTrait
     protected function shouldValidateDocumentBlock(): bool
     {
         $document = property_exists($this, 'documentForm') && $this->documentForm
-            ? ($this->documentForm->document ?? [])
+            ? $this->documentForm->document
             : [];
 
         return $this->hasPayloadValues($document);
