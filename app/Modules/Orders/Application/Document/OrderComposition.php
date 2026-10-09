@@ -11,7 +11,7 @@ final readonly class OrderComposition
     /**
      * @param  array<string,mixed>  $fields  manual field key => value (the order-level ones)
      * @param  list<array{personnel_id?:int|string|null,fields?:array<string,mixed>}>  $participants  a multi-participant
-     *                                                                                   order's employees in document order, each with their own field values
+     *                                                                                                order's employees in document order, each with their own field values
      */
     public function __construct(
         public string $presetCode,
