@@ -279,6 +279,14 @@
                 @error('personalForm.personnel.structure_id')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
+                @if (!empty($personnelModel))
+                    <p class="mt-1 text-[11.5px] leading-4 text-ink-faint">
+                        {{ __('personnel::common.hints.assignment_order_only') }}
+                        @if (method_exists($this, 'transferOrderUrl') && $this->transferOrderUrl)
+                            <a href="{{ $this->transferOrderUrl }}" wire:navigate class="font-medium text-ink-soft underline underline-offset-2 hover:text-ink">{{ __('personnel::common.hints.create_transfer_order') }}</a>
+                        @endif
+                    </p>
+                @endif
             </div>
             <div class="flex flex-col">
                 <x-label required for="personnel.position_id">{{ __('personnel::common.labels.position') }}</x-label>

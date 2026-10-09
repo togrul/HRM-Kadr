@@ -270,10 +270,11 @@ class LifecycleDashboardReadServiceTest extends TestCase
             'status' => 'completed',
             'approved_by' => $owner->id,
         ]);
+        // Struktur/vəzifə yalnız əmrlə dəyişir: hərəkətin tamamlanması əməkdaşı köçürmür.
         $this->assertDatabaseHas('personnels', [
             'id' => $personnel->id,
-            'structure_id' => 2,
-            'position_id' => 2,
+            'structure_id' => $personnel->structure_id,
+            'position_id' => $personnel->position_id,
         ]);
 
         $eventId = DB::table('employee_lifecycle_movements')->where('id', $movementId)->value('event_id');
