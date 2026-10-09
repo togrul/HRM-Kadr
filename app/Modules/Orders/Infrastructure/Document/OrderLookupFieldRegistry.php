@@ -30,6 +30,16 @@ class OrderLookupFieldRegistry
 
     public const REST_DAY_COMPENSATION_DAY_OFF = 2;
 
+    /** Option ids of the business-trip kind list, and the codes the trip register stores. */
+    public const TRIP_TYPE_DOMESTIC = 1;
+
+    public const TRIP_TYPE_FOREIGN = 2;
+
+    private const TRIP_TYPE_CODES = [
+        self::TRIP_TYPE_DOMESTIC => 'domestic',
+        self::TRIP_TYPE_FOREIGN => 'foreign',
+    ];
+
     /** An order revocation offers at most this many of the employee's latest approved orders. */
     private const APPROVED_ORDER_LIMIT = 200;
 
@@ -44,6 +54,11 @@ class OrderLookupFieldRegistry
         $restDayCompensation = [
             self::REST_DAY_COMPENSATION_DOUBLE_PAY => __('orders::order_composer.rest_day_compensation.double_pay'),
             self::REST_DAY_COMPENSATION_DAY_OFF => __('orders::order_composer.rest_day_compensation.day_off'),
+        ];
+
+        $tripTypes = [
+            self::TRIP_TYPE_DOMESTIC => __('orders::order_composer.trip_type.domestic'),
+            self::TRIP_TYPE_FOREIGN => __('orders::order_composer.trip_type.foreign'),
         ];
 
         return [
@@ -88,7 +103,27 @@ class OrderLookupFieldRegistry
                 'options' => fn () => $this->flat($restDayCompensation),
                 'resolve' => fn ($id) => $restDayCompensation[(int) $id] ?? null,
             ],
+            'trip_type' => [
+                'label' => __('orders::order_composer.field_types.trip_type'),
+                'options' => fn () => $this->flat($tripTypes),
+                'resolve' => fn ($id) => $tripTypes[array_search(self::tripTypeCode($id), self::TRIP_TYPE_CODES, true) ?: 0] ?? null,
+            ],
         ];
+    }
+
+    /**
+     * The register code ('domestic' / 'foreign') of a trip-kind field value — its option id,
+     * or the code itself; null when it is neither.
+     */
+    public static function tripTypeCode(mixed $value): ?string
+    {
+        $value = is_scalar($value) ? trim((string) $value) : '';
+
+        if (ctype_digit($value)) {
+            return self::TRIP_TYPE_CODES[(int) $value] ?? null;
+        }
+
+        return in_array($value, self::TRIP_TYPE_CODES, true) ? $value : null;
     }
 
     /**

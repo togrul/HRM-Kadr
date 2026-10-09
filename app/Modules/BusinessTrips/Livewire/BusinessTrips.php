@@ -107,6 +107,7 @@ class BusinessTrips extends Component
         $this->filter = [
             'structure_id' => null,
             'order_type_id' => null,
+            'trip_type' => null,
             'business_trip_status' => 'all',
         ];
     }
@@ -418,6 +419,20 @@ class BusinessTrips extends Component
             is_numeric($selected) ? $selected : null,
             50
         )];
+    }
+
+    /**
+     * Domestic / abroad, for the trip-kind filter.
+     *
+     * @return array<int,array{id:string,label:string}>
+     */
+    #[Computed]
+    public function tripTypeOptions(): array
+    {
+        return array_map(fn (string $type): array => [
+            'id' => $type,
+            'label' => __('business_trips::common.trip_types.'.$type),
+        ], PersonnelBusinessTrip::TRIP_TYPES);
     }
 
     /**

@@ -268,7 +268,12 @@ return [
         'restored' => 'bərpa',
         'force_deleted' => 'tam silinmə',
     ],
+    'timeline_trip_types' => [
+        'domestic' => 'ölkədaxili',
+        'foreign' => 'xarici',
+    ],
     'timeline_titles' => [
+        'funding_source' => 'Maliyyələşmə: :source',
         'order' => 'Əmr :number',
         'leave' => 'İcazə sorğusu',
         'vacation' => 'Məzuniyyət',

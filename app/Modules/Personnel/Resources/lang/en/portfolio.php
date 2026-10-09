@@ -268,7 +268,12 @@ return [
         'restored' => 'restore',
         'force_deleted' => 'force deletion',
     ],
+    'timeline_trip_types' => [
+        'domestic' => 'domestic',
+        'foreign' => 'abroad',
+    ],
     'timeline_titles' => [
+        'funding_source' => 'Funding: :source',
         'order' => 'Order :number',
         'leave' => 'Leave request',
         'vacation' => 'Vacation',
