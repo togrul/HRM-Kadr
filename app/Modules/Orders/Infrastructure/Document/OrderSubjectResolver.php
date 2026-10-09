@@ -122,6 +122,10 @@ class OrderSubjectResolver
             return [];
         }
 
+        if ($template->isMultiParticipant()) {
+            return $this->participantErrors($composition);
+        }
+
         $needsEmployee = collect($template->variables ?? [])
             ->contains(fn ($v): bool => ($v['source'] ?? '') === 'auto' && str_starts_with((string) ($v['auto_key'] ?? ''), 'employee.'));
 
@@ -133,12 +137,81 @@ class OrderSubjectResolver
     }
 
     /**
+     * A multi-participant order needs at least one participant and no one twice.
+     *
+     * @return array<string,string>
+     */
+    private function participantErrors(OrderComposition $composition): array
+    {
+        $ids = array_column($composition->participantList(), 'personnel_id');
+
+        if ($ids === []) {
+            return ['participants' => __('orders::order_composer.errors.participants_required')];
+        }
+
+        $duplicates = array_keys(array_filter(array_count_values($ids), fn (int $count): bool => $count > 1));
+        if ($duplicates !== []) {
+            return ['participants' => __('orders::order_composer.errors.participant_duplicate', [
+                'name' => $this->personnelPick((int) $duplicates[0])['label'] ?? '#'.$duplicates[0],
+            ])];
+        }
+
+        return [];
+    }
+
+    /**
+     * The participants of a multi-participant order with the structure/position the
+     * document declines, in the composition's order (unknown ids dropped), loaded at once.
+     *
+     * @param  list<int>  $ids
+     * @return list<Personnel>
+     */
+    public function participants(array $ids): array
+    {
+        if ($ids === []) {
+            return [];
+        }
+
+        $people = Personnel::with(['structure:id,name', 'position:id,name'])->whereKey($ids)->get()->keyBy('id');
+
+        $ordered = [];
+        foreach ($ids as $id) {
+            if ($people->has($id)) {
+                $ordered[] = $people->get($id);
+            }
+        }
+
+        return $ordered;
+    }
+
+    /**
+     * Display labels for the composer's participant list, keyed by id.
+     *
+     * @param  list<int>  $ids
+     * @return array<int,string>
+     */
+    public function participantLabels(array $ids): array
+    {
+        if ($ids === []) {
+            return [];
+        }
+
+        return Personnel::query()->whereKey($ids)->get(['id', 'surname', 'name', 'patronymic', 'tabel_no'])
+            ->mapWithKeys(fn (Personnel $p): array => [(int) $p->id => trim("{$p->surname} {$p->name} {$p->patronymic}")." ({$p->tabel_no})"])
+            ->all();
+    }
+
+    /**
      * The person the document's employee.* variables resolve from: the picked employee,
      * or (for hire) a transient employee built from the candidate + the structure/
      * position they are hired into — so names/structure/position decline correctly.
      */
     public function subject(OrderWordTemplate $template, OrderComposition $composition): ?Personnel
     {
+        if ($template->isMultiParticipant()) {
+            return $this->personnel($composition->leadPersonnelId());
+        }
+
         if (! $template->isHire()) {
             return $this->personnel($composition->personnelId);
         }

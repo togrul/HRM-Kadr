@@ -8,6 +8,7 @@ use App\Models\Position;
 use App\Models\Structure;
 use App\Modules\Orders\Application\Document\OrderComposition;
 use App\Modules\Orders\Application\Document\OrderIssueOutcome;
+use App\Modules\Orders\Application\Document\OrderParticipantFields;
 use App\Modules\Orders\Application\Document\OrderVacationRules;
 use App\Services\Staff\StaffScheduleVacancyService;
 use App\Services\Vacation\VacationBalanceService;
@@ -92,7 +93,7 @@ class OrderCompositionIssuer
      */
     public function vacationBalance(OrderWordTemplate $template, OrderComposition $composition, bool $persist = true): ?array
     {
-        if (! $this->vacationRules->isDayCounted($template)) {
+        if (! $this->vacationRules->isDayCounted($template) || $template->isMultiParticipant()) {
             return null;
         }
 
@@ -158,7 +159,7 @@ class OrderCompositionIssuer
     {
         $errors = [];
         $missing = [];
-        foreach ($template->manualFields() as $field) {
+        foreach ($template->orderFields() as $field) {
             if (! $field['required']) {
                 continue;
             }
@@ -167,6 +168,24 @@ class OrderCompositionIssuer
             if ($value === null || trim((string) $value) === '') {
                 $errors['fields.'.$field['key']] = __('orders::order_composer.errors.field_required');
                 $missing[] = $field['label'];
+            }
+        }
+
+        // A multi-participant order: each person's own fields must be filled for them.
+        if ($template->isMultiParticipant()) {
+            $names = $this->participantNames($composition);
+            foreach ($composition->participantList() as $index => $participant) {
+                foreach ($template->participantFields() as $field) {
+                    if (! $field['required'] || $field['scope'] !== OrderWordTemplate::SCOPE_PARTICIPANT) {
+                        continue;
+                    }
+
+                    $value = $participant['fields'][$field['key']] ?? null;
+                    if ($value === null || is_array($value) || trim((string) $value) === '') {
+                        $errors['participants.'.$index.'.fields.'.$field['key']] = __('orders::order_composer.errors.field_required');
+                        $missing[] = $field['label'].' — '.($names[$participant['personnel_id']] ?? '#'.$participant['personnel_id']);
+                    }
+                }
             }
         }
 
@@ -186,6 +205,10 @@ class OrderCompositionIssuer
             return null;
         }
 
+        if ($template->isMultiParticipant()) {
+            return $this->participantPeriodRejection($template, $composition);
+        }
+
         $personnel = $this->subjects->personnel($composition->personnelId);
 
         $errors = $this->periods->dateErrors($template, $composition->fields, $personnel);
@@ -201,14 +224,106 @@ class OrderCompositionIssuer
     }
 
     /**
+     * The period gate run for every participant with their own effective dates; the first
+     * one who cannot go is named, so the author knows whom to drop or correct.
+     */
+    private function participantPeriodRejection(OrderWordTemplate $template, OrderComposition $composition): ?OrderIssueOutcome
+    {
+        $list = $composition->participantList();
+        $people = $this->peopleById($list);
+
+        foreach ($list as $index => $participant) {
+            $personnel = $people[$participant['personnel_id']] ?? null;
+            $name = $personnel ? (string) $personnel->fullname : '#'.$participant['personnel_id'];
+            $fields = OrderParticipantFields::effective($template, $composition->fields, $participant['fields']);
+
+            $errors = $this->periods->dateErrors($template, $fields, $personnel);
+            if ($errors !== []) {
+                $reason = implode(' ', array_unique(array_values($errors)));
+
+                return OrderIssueOutcome::rejected(
+                    ['participants.'.$index => $reason],
+                    __('orders::order_composer.errors.participant_blocked', ['name' => $name, 'reason' => $reason]),
+                );
+            }
+
+            $blocker = $this->periods->absenceBlocker($template, $fields, $personnel);
+            if ($blocker !== null) {
+                $message = __('orders::order_composer.errors.participant_blocked', ['name' => $name, 'reason' => $blocker]);
+
+                return OrderIssueOutcome::rejected(['participants.'.$index => $blocker, 'participants' => $message], $message);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param  list<array{personnel_id:int,fields:array<string,mixed>}>  $list
+     * @return array<int,\App\Models\Personnel>
+     */
+    private function peopleById(array $list): array
+    {
+        $people = [];
+        foreach ($this->subjects->participants(array_column($list, 'personnel_id')) as $person) {
+            $people[(int) $person->id] = $person;
+        }
+
+        return $people;
+    }
+
+    /**
+     * @return array<int,string>
+     */
+    private function participantNames(OrderComposition $composition): array
+    {
+        return array_map(fn ($person): string => (string) $person->fullname, $this->peopleById($composition->participantList()));
+    }
+
+    /**
      * Vacation gate: at least one day, never more than the remaining annual balance.
      */
     private function vacationRejection(OrderWordTemplate $template, OrderComposition $composition): ?OrderIssueOutcome
     {
+        if ($template->isMultiParticipant()) {
+            return $this->participantVacationRejection($template, $composition);
+        }
+
         $balance = $composition->personnelId ? $this->vacationBalance($template, $composition) : null;
         $violation = $balance ? $this->vacationRules->violation($balance) : null;
 
         return $violation === null ? null : OrderIssueOutcome::rejected(message: $violation);
+    }
+
+    /**
+     * The vacation gate per participant, each against their own balance and dates.
+     */
+    private function participantVacationRejection(OrderWordTemplate $template, OrderComposition $composition): ?OrderIssueOutcome
+    {
+        if (! $this->vacationRules->isDayCounted($template)) {
+            return null;
+        }
+
+        $list = $composition->participantList();
+        $people = $this->peopleById($list);
+
+        foreach ($list as $index => $participant) {
+            $personnel = $people[$participant['personnel_id']] ?? null;
+            if ($personnel === null) {
+                continue;
+            }
+
+            $request = $this->vacationRules->request($template, OrderParticipantFields::effective($template, $composition->fields, $participant['fields']));
+            $violation = $this->vacationRules->violation([...$this->balances->snapshot($personnel, $request['year']), ...$request]);
+
+            if ($violation !== null) {
+                $message = __('orders::order_composer.errors.participant_blocked', ['name' => (string) $personnel->fullname, 'reason' => $violation]);
+
+                return OrderIssueOutcome::rejected(['participants.'.$index => $violation], $message);
+            }
+        }
+
+        return null;
     }
 
     /** Another order (deleted ones included — order_no is unique) already carries this number. */
@@ -242,10 +357,13 @@ class OrderCompositionIssuer
         // Freeze who signed (permanent chief or active delegate) as-of the order date, and
         // print that same person — historical orders keep naming whoever was acting then.
         $signatory = $this->documents->signatory($composition->orderDate);
+        $multi = $template->isMultiParticipant();
         $payload = [
             'template_code' => $composition->presetCode,
             'label' => $template->label,
-            'personnel_id' => $isHire ? null : $composition->personnelId,
+            // A multi-participant order keeps its first participant here, so every reader of
+            // the single-person snapshot (lists, lookups, older reports) still finds someone.
+            'personnel_id' => $isHire ? null : ($multi ? $composition->leadPersonnelId() : $composition->personnelId),
             'candidate_id' => $isHire ? $composition->candidateId : null,
             'hire_structure_id' => $isHire ? $composition->hireStructureId : null,
             'hire_position_id' => $isHire ? $composition->hirePositionId : null,
@@ -253,6 +371,12 @@ class OrderCompositionIssuer
             'order_number' => $this->orderNumber($composition),
             'order_date' => $composition->orderDate,
             'signatory' => $signatory,
+            'participants' => $multi
+                ? array_map(fn (array $participant): array => [
+                    'personnel_id' => $participant['personnel_id'],
+                    'fields' => OrderParticipantFields::clean($template, $participant['fields']),
+                ], $composition->participantList())
+                : null,
         ];
 
         $values = $this->documents->values($template, $composition, $signatory);

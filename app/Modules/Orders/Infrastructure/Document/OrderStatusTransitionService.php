@@ -4,10 +4,12 @@ namespace App\Modules\Orders\Infrastructure\Document;
 
 use App\Enums\OrderStatusEnum;
 use App\Models\OrderLog;
+use App\Models\OrderParticipant;
 use App\Models\OrderWordTemplate;
 use App\Models\Personnel;
 use App\Modules\Compensation\Contracts\OrderCompensationSync;
 use App\Modules\Integration\Domain\Contracts\IntegrationOutbox;
+use App\Modules\Orders\Application\Document\OrderParticipantFields;
 use App\Modules\Orders\Application\Document\OrderWordTemplateRepository;
 use App\Modules\Orders\Infrastructure\Document\Effects\OrderEffectCatalog;
 use App\Modules\Payroll\Contracts\ClosedPeriodCheck;
@@ -17,6 +19,7 @@ use App\Support\Language\AzerbaijaniDateFormatter;
 use Carbon\CarbonInterface;
 use DomainException;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
@@ -45,6 +48,12 @@ use Throwable;
  * has been computed from it. Approval assigns the automatic number when the order still
  * holds a provisional one ({@see OrderNumbering}) and, after commit, stores the immutable
  * final PDF ({@see OrderFinalPdfService}).
+ *
+ * A multi-participant (çoxşəxsli) order runs its effect once per participant, all inside
+ * the same transaction: every participant is checked first and the first one who cannot go
+ * stops the whole approval, naming that person; each one's effect state is kept on their
+ * order_participants row and the reversal undoes them all. One outbox event is published
+ * per participant.
  */
 class OrderStatusTransitionService
 {
@@ -198,12 +207,28 @@ class OrderStatusTransitionService
     {
         $snapshot = (array) $order->template_snapshot;
         $template = $this->templates->find((string) ($snapshot['template_code'] ?? ''));
-        $fields = $template ? $this->effectFields($template, (array) ($snapshot['fields'] ?? [])) : [];
+        $orderFields = (array) ($snapshot['fields'] ?? []);
+
+        // A multi-participant order takes effect on its earliest participant's date.
+        $fieldSets = [$orderFields];
+        if ($template !== null) {
+            foreach ($this->participantsOf($order) as $participant) {
+                $fieldSets[] = OrderParticipantFields::effective($template, $orderFields, (array) $participant->fields);
+            }
+        }
 
         foreach (['start_date', 'date'] as $role) {
-            $date = $this->dates->parse(is_scalar($fields[$role] ?? null) ? (string) $fields[$role] : null);
-            if ($date !== null) {
-                return $date;
+            $earliest = null;
+            foreach ($fieldSets as $raw) {
+                $fields = $template ? $this->effectFields($template, $raw) : [];
+                $date = $this->dates->parse(is_scalar($fields[$role] ?? null) ? (string) $fields[$role] : null);
+                if ($date !== null && ($earliest === null || $date->lt($earliest))) {
+                    $earliest = $date;
+                }
+            }
+
+            if ($earliest !== null) {
+                return $earliest;
             }
         }
 
@@ -285,10 +310,43 @@ class OrderStatusTransitionService
             return;
         }
 
-        $fields = $this->effectFields($template, (array) ($snapshot['fields'] ?? []));
-        $personnel = $this->personnel($snapshot);
+        $orderFields = (array) ($snapshot['fields'] ?? []);
+        $participants = $this->participantsOf($order);
 
-        $this->outbox->record('orders', (string) $order->order_no, [
+        if ($participants->isEmpty()) {
+            $this->outbox->record('orders', (string) $order->order_no, $this->eventPayload(
+                $order, $template, $effectDirection, $this->personnel($snapshot), $this->effectFields($template, $orderFields),
+            ));
+
+            return;
+        }
+
+        // One event per participant, same shape: the counterpart books each person's
+        // trip/leave on its own. external_id is per participant; order_external_id ties
+        // the events of one order together.
+        $people = $this->peopleOf($participants);
+        foreach ($participants as $participant) {
+            $fields = $this->effectFields($template, OrderParticipantFields::effective($template, $orderFields, (array) $participant->fields));
+
+            $this->outbox->record('orders', (string) $order->order_no, [
+                ...$this->eventPayload($order, $template, $effectDirection, $people[(int) $participant->personnel_id] ?? null, $fields),
+                'external_id' => $order->id.'-'.$participant->position,
+                'order_external_id' => (string) $order->id,
+                'participant_index' => (int) $participant->position,
+                'participant_count' => $participants->count(),
+            ]);
+        }
+    }
+
+    /**
+     * The outbox payload for one employee of an order.
+     *
+     * @param  array<string,mixed>  $fields  role => value
+     * @return array<string,mixed>
+     */
+    private function eventPayload(OrderLog $order, OrderWordTemplate $template, string $effectDirection, ?Personnel $personnel, array $fields): array
+    {
+        return [
             'external_id' => (string) $order->id,
             'order_no' => (string) $order->order_no,
             'effect' => (string) $template->effect,
@@ -305,8 +363,7 @@ class OrderStatusTransitionService
             'start_date' => $this->dateField($fields, 'start_date'),
             'end_date' => $this->dateField($fields, 'end_date'),
             'days' => isset($fields['days']) ? (int) $fields['days'] : null,
-        ]);
-
+        ];
     }
 
     /**
@@ -369,6 +426,13 @@ class OrderStatusTransitionService
             return;
         }
 
+        $participants = $this->participantsOf($order);
+        if ($participants->isNotEmpty()) {
+            $this->applyToParticipants($order, $template, $participants);
+
+            return;
+        }
+
         $effect = $this->effects->for($template->effect);
         $personnel = $this->personnel($snapshot);
 
@@ -401,10 +465,131 @@ class OrderStatusTransitionService
         }
 
         $effect = $this->effects->for($template->effect);
+
+        $participants = $this->participantsOf($order);
+        if ($participants->isNotEmpty()) {
+            if ($effect) {
+                $people = $this->peopleOf($participants);
+                foreach ($participants->reverse() as $participant) {
+                    $personnel = $people[(int) $participant->personnel_id] ?? null;
+                    if ($personnel !== null) {
+                        $fields = $this->participantEffectFields($template, $snapshot, $participant);
+                        $this->withParticipantState($order, $participant, fn () => $effect->reverse($order, $fields, $personnel));
+                    }
+                }
+            }
+
+            return;
+        }
+
         $personnel = $this->personnel($snapshot);
         if ($effect && $personnel) {
             $effect->reverse($order, $this->effectFields($template, (array) ($snapshot['fields'] ?? [])), $personnel);
         }
+    }
+
+    /**
+     * Approve a multi-participant order: check every participant first (dates, still
+     * employed, not away on those days) — the first one who cannot go refuses the whole
+     * approval with their name — then apply the effect for each, all in the caller's
+     * transaction, so either everyone's record is written or no one's.
+     *
+     * @param  Collection<int,OrderParticipant>  $participants
+     *
+     * @throws DomainException
+     */
+    private function applyToParticipants(OrderLog $order, OrderWordTemplate $template, Collection $participants): void
+    {
+        $snapshot = (array) $order->template_snapshot;
+        $people = $this->peopleOf($participants);
+
+        foreach ($participants as $participant) {
+            $personnel = $people[(int) $participant->personnel_id] ?? null;
+            $fields = OrderParticipantFields::effective($template, (array) ($snapshot['fields'] ?? []), (array) $participant->fields);
+            $name = $personnel ? (string) $personnel->fullname : '#'.$participant->personnel_id;
+
+            $blocker = $personnel === null
+                ? __('orders::order_composer.errors.participant_missing')
+                : $this->periods->approvalBlocker($template, $fields, $personnel);
+
+            if ($blocker !== null) {
+                throw new DomainException(__('orders::order_composer.errors.approval_blocked', [
+                    'reason' => __('orders::order_composer.errors.participant_blocked', ['name' => $name, 'reason' => $blocker]),
+                ]));
+            }
+        }
+
+        $effect = $this->effects->for($template->effect);
+        if (! $effect) {
+            return;
+        }
+
+        foreach ($participants as $participant) {
+            $personnel = $people[(int) $participant->personnel_id];
+            $fields = $this->participantEffectFields($template, $snapshot, $participant);
+            $this->withParticipantState($order, $participant, fn () => $effect->apply($order, $fields, $personnel));
+        }
+    }
+
+    /**
+     * The effect's role inputs for one participant: their effective fields mapped to roles,
+     * plus their position so an effect can keep per-person keys apart.
+     *
+     * @param  array<string,mixed>  $snapshot
+     * @return array<string,mixed>
+     */
+    private function participantEffectFields(OrderWordTemplate $template, array $snapshot, OrderParticipant $participant): array
+    {
+        $raw = OrderParticipantFields::effective($template, (array) ($snapshot['fields'] ?? []), (array) $participant->fields);
+
+        return $this->effectFields($template, $raw) + [OrderParticipantFields::EFFECT_CONTEXT => (int) $participant->position];
+    }
+
+    /**
+     * Run an effect for one participant with that participant's effect state in the order
+     * snapshot (where every effect keeps it, {@see Effects\RemembersEffectState}), then move
+     * the resulting state onto the participant's row and restore the order's own.
+     */
+    private function withParticipantState(OrderLog $order, OrderParticipant $participant, callable $run): void
+    {
+        $snapshot = (array) $order->template_snapshot;
+        $hadState = array_key_exists('effect_state', $snapshot);
+        $orderState = $snapshot['effect_state'] ?? null;
+
+        $snapshot['effect_state'] = (array) ($participant->effect_state ?? []);
+        $order->forceFill(['template_snapshot' => $snapshot])->save();
+
+        $run();
+
+        $state = (array) data_get($order->template_snapshot, 'effect_state', []);
+        $participant->forceFill(['effect_state' => $state === [] ? null : $state])->save();
+
+        $snapshot = (array) $order->template_snapshot;
+        if ($hadState) {
+            $snapshot['effect_state'] = $orderState;
+        } else {
+            unset($snapshot['effect_state']);
+        }
+        $order->forceFill(['template_snapshot' => $snapshot])->save();
+    }
+
+    /**
+     * A multi-participant order's people in document order (empty for a single-person order).
+     *
+     * @return Collection<int,OrderParticipant>
+     */
+    private function participantsOf(OrderLog $order): Collection
+    {
+        return $order->participants()->get();
+    }
+
+    /**
+     * @param  Collection<int,OrderParticipant>  $participants
+     * @return array<int,Personnel>
+     */
+    private function peopleOf(Collection $participants): array
+    {
+        return Personnel::query()->whereKey($participants->pluck('personnel_id')->all())->get()->keyBy('id')->all();
     }
 
     /**

@@ -6,6 +6,7 @@ use App\Models\Award;
 use App\Models\OrderLog;
 use App\Models\Personnel;
 use App\Models\PersonnelAward;
+use App\Modules\Orders\Application\Document\OrderParticipantFields;
 use App\Modules\Payroll\Domain\Contracts\PayrollOneOffEarnings;
 use DomainException;
 
@@ -49,7 +50,7 @@ class AwardEffect implements OrderEffect
         if ($amount > 0 && app()->bound(PayrollOneOffEarnings::class)) {
             app(PayrollOneOffEarnings::class)->record(
                 (string) $personnel->tabel_no, 'award', __('orders::order_composer.effects.award_payroll_line', ['number' => $order->order_no], config('app.locale')), $amount,
-                (int) now()->year, (int) now()->month, 'order_award:'.$order->id,
+                (int) now()->year, (int) now()->month, $this->payrollKey($order, $fields, $personnel),
             );
         }
     }
@@ -106,7 +107,17 @@ class AwardEffect implements OrderEffect
             ->delete();
 
         if (app()->bound(PayrollOneOffEarnings::class)) {
-            app(PayrollOneOffEarnings::class)->withdraw('order_award:'.$order->id);
+            app(PayrollOneOffEarnings::class)->withdraw($this->payrollKey($order, $fields, $personnel));
         }
+    }
+
+    /**
+     * The payroll line's key: one per order, or one per person on a multi-participant order.
+     *
+     * @param  array<string,mixed>  $fields
+     */
+    private function payrollKey(OrderLog $order, array $fields, Personnel $personnel): string
+    {
+        return 'order_award:'.$order->id.(isset($fields[OrderParticipantFields::EFFECT_CONTEXT]) ? ':'.$personnel->id : '');
     }
 }

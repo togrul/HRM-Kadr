@@ -182,6 +182,35 @@ asılılığı **həll edə bilməzdi** — yəni əmr sistemi ümumiyyətlə i�
 `reversible` işə qəbulda `false`-dur: `hire` bu tərəfdə geri qaytarıla bilmir,
 ona görə qarşı tərəf verə bilmədiyi «geri al» düyməsini təklif etməməlidir.
 
+### Çoxşəxsli əmr — hər iştirakçıya bir hadisə
+
+Bir əmr bir neçə əməkdaşa aid ola bilər (məs. komandanın ezamiyyəti). Belə əmrin
+təsdiqi və ləğvi **hər iştirakçı üçün ayrıca hadisə** yazır — payload-un forması
+eynidir, `employee_external_id`, `person_uid` və tarixlər həmin şəxsindir (şəxsə
+görə dəyişdirilmiş tarixlər daxil). Üç sahə əlavə olunur:
+
+```json
+{
+  "external_id": "1042-2",
+  "order_external_id": "1042",
+  "participant_index": 2,
+  "participant_count": 3,
+  "employee_external_id": "9",
+  "status": "approved",
+  "start_date": "2026-11-02",
+  "end_date": "2026-11-07"
+}
+```
+
+- `external_id` iştirakçıya görə unikaldır (`<əmr id>-<sıra>`), təsdiq və ləğv
+  hadisələri həmin açarla cütlənir;
+- `order_external_id` bir əmrin hadisələrini birləşdirir;
+- `participant_index` sənəddəki sıradır (1-dən), `participant_count` — iştirakçı sayı.
+
+Bütün hadisələr təsdiqlə eyni tranzaksiyadadır: bir iştirakçı keçmirsə əmr
+təsdiqlənmir və heç bir hadisə qalmır. Tək şəxsə aid əmrin payload-u dəyişməyib
+(bu üç sahə orada yoxdur).
+
 ## 5. Davamiyyət feed-i
 
 ### Dəqiqə burada, gün kodu orada
