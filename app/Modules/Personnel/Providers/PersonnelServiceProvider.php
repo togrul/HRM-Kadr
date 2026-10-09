@@ -6,6 +6,7 @@ use App\Modules\Personnel\Application\Services\MyHr\ApprovalRouteResolverService
 use App\Modules\Personnel\Application\Services\MyHr\LearningAssignmentManagerService;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestReviewService;
 use App\Modules\Personnel\Application\Services\MyHr\OnboardingAssignmentManagerService;
+use App\Modules\Personnel\Application\Services\PersonnelAssignmentGuard;
 use App\Modules\Personnel\Application\Services\WorkingTimeNormService;
 use App\Modules\Personnel\Console\Commands\PersonnelCrudQueryBudgetCommand;
 use App\Modules\Personnel\Console\Commands\PersonnelCrudRenderBenchmarkCommand;
@@ -17,6 +18,7 @@ use App\Modules\Personnel\Console\Commands\ProfessionalPortfolioEnforcePoliciesC
 use App\Modules\Personnel\Console\Commands\ProfessionalPortfolioSyncRegistriesCommand;
 use App\Modules\Personnel\Console\Commands\RepairLegacySelfServiceVacationOrdersCommand;
 use App\Modules\Personnel\Contracts\ApprovalRouteResolver;
+use App\Modules\Personnel\Contracts\GuardsPersonnelAssignment;
 use App\Modules\Personnel\Contracts\LearningAssignmentManager;
 use App\Modules\Personnel\Contracts\MyHrRequestReview;
 use App\Modules\Personnel\Contracts\OnboardingAssignmentManager;
@@ -43,6 +45,10 @@ class PersonnelServiceProvider extends ServiceProvider
         $this->app->bind(OnboardingAssignmentManager::class, OnboardingAssignmentManagerService::class);
         $this->app->bind(MyHrRequestReview::class, MyHrRequestReviewService::class);
         $this->app->bind(WorkingTimeNormProvider::class, WorkingTimeNormService::class);
+
+        // Tək nüsxə: allow() kontekstinin dərinlik sayğacı model observer-i ilə paylaşılır.
+        $this->app->singleton(PersonnelAssignmentGuard::class);
+        $this->app->alias(PersonnelAssignmentGuard::class, GuardsPersonnelAssignment::class);
 
         if ($this->app->runningInConsole()) {
             $this->commands([

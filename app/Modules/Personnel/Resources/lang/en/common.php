@@ -303,9 +303,12 @@ return [
         'at_work' => 'At work',
     ],
     'hints' => [
+        'assignment_order_only' => 'The structure and position change through a transfer order.',
+        'create_transfer_order' => 'Create a transfer order',
         'positions_without_staff_schedule' => 'No positions are defined in the staff schedule for this structure — showing all positions.',
     ],
     'validation' => [
+        'assignment_order_only' => 'The structure and position can only be changed by an order.',
         'contract_end_after_start' => 'The contract end date must be after the start date.',
         'contract_date_after_start' => 'The contract cannot be signed after the start date: the signing date must be on or before the start date.',
         'pin_format' => 'The FIN must be exactly 7 characters: Latin letters and digits only.',

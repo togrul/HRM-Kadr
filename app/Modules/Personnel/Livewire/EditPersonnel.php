@@ -11,6 +11,8 @@ use App\Livewire\Forms\Personnel\MiscellaneousForm;
 use App\Livewire\Forms\Personnel\PersonalInformationForm;
 use App\Livewire\Forms\Personnel\ServiceHistoryForm;
 use App\Models\Personnel;
+use App\Modules\Orders\Contracts\OrderDrafter;
+use App\Modules\Personnel\Application\Services\PersonnelAssignmentGuard;
 use App\Modules\Personnel\Services\PersonnelFormAssembler;
 use App\Modules\Personnel\Services\PersonnelPersistenceService;
 use App\Modules\Personnel\Support\Traits\PersonnelCrud;
@@ -19,6 +21,9 @@ use App\Services\PersonnelPendingApprovalService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Isolate;
 use Livewire\Component;
 
@@ -107,6 +112,7 @@ class EditPersonnel extends Component
     protected function persistPersonnel(): void
     {
         $personnel = $this->personnelModelDataInstance();
+        $this->rejectAssignmentChanges($personnel);
 
         if (! empty($this->avatar)) {
             $this->personalForm->personnel['photo'] = $this->avatar->store('personnel', 'public');
@@ -136,7 +142,7 @@ class EditPersonnel extends Component
 
         DB::transaction(function () use ($assembled, $relationPayloads) {
             $personnel = $this->personnelModelDataInstance();
-            $personnel->update($assembled['personnel_data']);
+            $personnel->update(app(PersonnelAssignmentGuard::class)->withoutGuarded($personnel, $assembled['personnel_data']));
             $this->updatePersonnelRelations($relationPayloads);
 
             if (! empty($assembled['personnel_extra'])) {
@@ -146,6 +152,51 @@ class EditPersonnel extends Component
 
         $this->dispatchPersonnelStored(__('personnel::common.messages.personnel_updated'));
         $this->dispatchModalCloseEvent();
+    }
+
+    /**
+     * Struktur bölmə və vəzifə mövcud əməkdaşda yalnız əmrlə dəyişir. Sahələr UI-da
+     * bağlıdır; Livewire vəziyyəti əl ilə dəyişdirilsə belə fərqli dəyər sahə xətası ilə
+     * qaytarılır və heç nə yazılmır.
+     *
+     * @throws ValidationException
+     */
+    protected function rejectAssignmentChanges(Personnel $personnel): void
+    {
+        if (! in_array(1, $this->loadedSteps, true)) {
+            return;
+        }
+
+        $changed = app(PersonnelAssignmentGuard::class)->changedInPayload($personnel, $this->personalForm->personnel);
+
+        if ($changed === []) {
+            return;
+        }
+
+        $message = __('personnel::common.validation.assignment_order_only');
+        $errors = [];
+        foreach ($changed as $attribute) {
+            $errors['personalForm.personnel.'.$attribute] = $message;
+        }
+
+        throw ValidationException::withMessages($errors);
+    }
+
+    /**
+     * Bağlı struktur/vəzifə sahələrinin yanındakı "Köçürmə əmri yarat" keçidi: əmrlər
+     * siyahısını köçürmə şablonu seçilmiş tərtibatçı ilə açır. İcazə, modul və ya şablon
+     * yoxdursa keçid göstərilmir.
+     */
+    #[Computed]
+    public function transferOrderUrl(): ?string
+    {
+        if (! (auth()->user()?->can('add-orders') ?? false) || ! Route::has('orders') || ! app()->bound(OrderDrafter::class)) {
+            return null;
+        }
+
+        $preset = array_key_first(app(OrderDrafter::class)->personnelTemplates('transfer'));
+
+        return $preset === null ? null : route('orders', ['create' => 1, 'preset' => (string) $preset]);
     }
 
     protected function onStepChanged(int $step): void

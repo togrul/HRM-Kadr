@@ -10,6 +10,7 @@ use App\Modules\Compensation\Contracts\OrderCompensationSync;
 use App\Modules\Integration\Domain\Contracts\IntegrationOutbox;
 use App\Modules\Orders\Application\Document\OrderWordTemplateRepository;
 use App\Modules\Orders\Infrastructure\Document\Effects\OrderEffectCatalog;
+use App\Modules\Personnel\Contracts\GuardsPersonnelAssignment;
 use App\Services\ImportCandidateToPersonnel;
 use App\Support\Language\AzerbaijaniDateFormatter;
 use DomainException;
@@ -54,6 +55,7 @@ class OrderStatusTransitionService
         private readonly IntegrationOutbox $outbox,
         private readonly OrderPeriodGuard $periods,
         private readonly HireOrderRevocation $hireRevocation,
+        private readonly GuardsPersonnelAssignment $assignment,
     ) {}
 
     /** Approve a pending order (applies its HR side-effect). */
@@ -295,7 +297,8 @@ class OrderStatusTransitionService
         $joinDate = $this->dates->parse(($this->effectFields($template, (array) ($snapshot['fields'] ?? [])))['start_date'] ?? null);
         $structureId = $snapshot['hire_structure_id'] ?? null;
 
-        $this->candidateImport->handle([[
+        // İşə qəbul əmri təyinatın qanuni mənbəyidir (struktur/vəzifə yalnız əmrlə yazılır).
+        $this->assignment->allow(fn (): array => $this->candidateImport->handle([[
             'personnel_id' => (int) $candidateId,
             'structure_id' => $structureId,
             'position_id' => (int) $positionId,
@@ -303,7 +306,7 @@ class OrderStatusTransitionService
             // Lets the Candidates module link the hired candidate back to this order.
             'order_id' => $order->id,
             'order_no' => $order->order_no,
-        ]], OrderStatusEnum::APPROVED->value);
+        ]], OrderStatusEnum::APPROVED->value));
 
         $this->seedHireCompensation((int) $candidateId, $joinDate, $order->order_no);
 

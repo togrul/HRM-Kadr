@@ -5,6 +5,7 @@ namespace App\Modules\Orders\Infrastructure\Document\Effects;
 use App\Models\OrderLog;
 use App\Models\Personnel;
 use App\Modules\Compensation\Contracts\OrderCompensationSync;
+use App\Modules\Personnel\Contracts\GuardsPersonnelAssignment;
 
 /**
  * Moves the employee: updates structure and/or position to the new ones chosen on the
@@ -12,10 +13,16 @@ use App\Modules\Compensation\Contracts\OrderCompensationSync;
  * current structure/position are recorded in the order snapshot so the move can be
  * rolled back if the order is later cancelled. A pay-grade match for the new position
  * also seeds a draft regrade compensation for HR review.
+ *
+ * Struktur/vəzifə yalnız əmrlə dəyişdiyi üçün yazma GuardsPersonnelAssignment::allow()
+ * daxilində aparılır — həm tətbiq, həm də ləğv zamanı geri qaytarma.
  */
 class TransferEffect implements OrderEffect
 {
-    public function __construct(private readonly OrderCompensationSync $compensation) {}
+    public function __construct(
+        private readonly OrderCompensationSync $compensation,
+        private readonly GuardsPersonnelAssignment $assignment,
+    ) {}
 
     public function apply(OrderLog $order, array $fields, Personnel $personnel): void
     {
@@ -37,7 +44,7 @@ class TransferEffect implements OrderEffect
             'prev_position_id' => $personnel->position_id,
         ]);
 
-        $personnel->forceFill($update)->save();
+        $this->assignment->allow(fn (): bool => $personnel->forceFill($update)->save());
 
         if (! empty($fields['new_position'])) {
             $this->compensation->suggestRegradeFromTransfer($personnel->tabel_no, (int) $fields['new_position'], $order->order_no);
@@ -57,7 +64,7 @@ class TransferEffect implements OrderEffect
         }
 
         if ($restore !== []) {
-            $personnel->forceFill($restore)->save();
+            $this->assignment->allow(fn (): bool => $personnel->forceFill($restore)->save());
         }
 
         $this->compensation->removeTransferSuggestion($order->order_no);

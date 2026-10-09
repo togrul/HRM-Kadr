@@ -6,6 +6,7 @@ use App\Models\Personnel;
 use App\Models\PersonRegistry;
 use App\Models\User;
 use App\Modules\Notifications\Support\NotificationCampaignDispatcher;
+use App\Modules\Personnel\Contracts\GuardsPersonnelAssignment;
 use App\Notifications\NewPersonnelAdded;
 use App\Notifications\PersonnelWasDeleted;
 
@@ -31,6 +32,15 @@ class PersonnelObserver
         }
 
         $personnel->person_uid = PersonRegistry::identityFor($personnel->tabel_no);
+    }
+
+    /**
+     * Struktur bölmə və vəzifə yalnız əmrlə dəyişir: icazəli kontekstdən kənar hər Eloquent
+     * yazması (Livewire, API, idxal, toplu redaktə) burada dayandırılır.
+     */
+    public function updating(Personnel $personnel): void
+    {
+        app(GuardsPersonnelAssignment::class)->enforce($personnel);
     }
 
     /**
