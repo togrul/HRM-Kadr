@@ -204,11 +204,7 @@
                     </div>
                 </x-surface-card>
             @empty
-                <div class="relative flex items-center justify-center px-4 py-2 rounded-lg shadow-sm bg-neutral-100">
-                    <h1 class="text-base font-medium text-zinc-600">
-                        {{ __('personnel::common.labels.no_information_added') }}
-                    </h1>
-                </div>
+                <x-empty-inline />
             @endforelse
         </div>
     </x-form-card>
