@@ -262,13 +262,7 @@
                                 </x-table.td>
                             </tr>
                         @empty
-                            <tr>
-                                <td colspan="5">
-                                    <div class="flex justify-center items-center py-4">
-                                        <span class="font-medium">{{ __('personnel::common.labels.no_information_added') }}</span>
-                                    </div>
-                                </td>
-                            </tr>
+                            <x-empty-inline :rows="5" />
                         @endforelse
                     </x-table.tbl>
                 </div>
@@ -356,13 +350,7 @@
                                 </x-table.td>
                             </tr>
                         @empty
-                            <tr>
-                                <td colspan="5">
-                                    <div class="flex justify-center items-center py-4">
-                                        <span class="font-medium">{{ __('personnel::common.labels.no_information_added') }}</span>
-                                    </div>
-                                </td>
-                            </tr>
+                            <x-empty-inline :rows="5" />
                         @endforelse
                     </x-table.tbl>
                 </div>
