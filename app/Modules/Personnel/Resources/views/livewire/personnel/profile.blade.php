@@ -7,6 +7,7 @@
 
     $counts = $reader->sectionCounts($personnel);
     $tone = $reader->statusTone($personnel);
+    $presence = $reader->presence($personnel);
     $structurePath = $reader->structurePath($personnel);
 
     $steps = PersonnelProfile::SECTION_STEPS;
@@ -90,9 +91,12 @@
                 <div class="min-w-0">
                     <div class="flex flex-wrap items-center gap-2.5">
                         <h1 class="truncate text-[21px] font-semibold tracking-[-0.03em] text-ink">{{ $personnel->fullname }}</h1>
-                        <x-small-badge :mode="$tone === 'neutral' ? 'green' : $tone" dot>
+                        <x-small-badge :mode="$tone === 'neutral' ? 'green' : $tone" dot :title="$presence->periodLabel()">
                             {{ $reader->statusLabel($personnel) }}
                         </x-small-badge>
+                        @if ($presence->expectedReturnLabel())
+                            <span class="hrm-num text-[12px] text-ink-faint">{{ __('personnel::common.presence.returns_on', ['date' => $presence->expectedReturnLabel()]) }}</span>
+                        @endif
                         @if ($reader->contractExpired($personnel))
                             <x-small-badge mode="amber" dot>
                                 {{ __('personnel::common.states.contract_expired') }}

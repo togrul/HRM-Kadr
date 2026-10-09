@@ -35,11 +35,14 @@ class TablePanel extends Component
 
     public string $sort = PersonnelQueryService::SORT_POSITION;
 
+    /** @var list<string> */
+    public array $presence = [];
+
     protected ?array $accessibleStructureCache = null;
 
     protected ?array $rowActionCapabilities = null;
 
-    public function mount(string $status = 'current', array $filters = [], array $structure = [], ?int $selectedPosition = null, string $search = '', string $sort = PersonnelQueryService::SORT_POSITION): void
+    public function mount(string $status = 'current', array $filters = [], array $structure = [], ?int $selectedPosition = null, string $search = '', string $sort = PersonnelQueryService::SORT_POSITION, array $presence = []): void
     {
         $this->authorize('viewAny', Personnel::class);
         $normalizer = app(PersonnelListStateNormalizer::class);
@@ -50,6 +53,7 @@ class TablePanel extends Component
         $this->selectedPosition = $normalizer->normalizePosition($selectedPosition);
         $this->search = trim($search);
         $this->sort = $sort === PersonnelQueryService::SORT_STRUCTURE ? $sort : PersonnelQueryService::SORT_POSITION;
+        $this->presence = $normalizer->normalizePresence($presence);
     }
 
     public function placeholder(): View
@@ -99,6 +103,7 @@ class TablePanel extends Component
             selectedPosition: $this->selectedPosition,
             search: $this->search,
             sort: $this->sort,
+            presence: $this->presence,
         );
     }
 

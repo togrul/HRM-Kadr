@@ -4,6 +4,7 @@ namespace App\Modules\Personnel\Services;
 
 use App\Models\AttendanceShiftAssignment;
 use App\Models\Personnel;
+use App\Modules\Personnel\Application\Services\PersonnelPresenceResolver;
 use App\Services\StructurePathService;
 use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -28,10 +29,10 @@ class PersonnelRowViewModelService
     public function decorateCollection(Collection $collection): Collection
     {
         $activeShiftAssignments = $this->resolveActiveShiftAssignments($collection);
+        $presences = app(PersonnelPresenceResolver::class)->resolveMany($collection);
 
-        return $collection->map(function (Personnel $personnel, int $index) use ($activeShiftAssignments) {
-            $vacation = $personnel->activeVacation;
-            $businessTrip = $personnel->activeBusinessTrip;
+        return $collection->map(function (Personnel $personnel, int $index) use ($activeShiftAssignments, $presences) {
+            $presence = $presences[(int) $personnel->getKey()] ?? null;
             $activeShiftAssignment = $activeShiftAssignments->get((string) $personnel->tabel_no);
 
             $structurePath = app(StructurePathService::class);
@@ -42,12 +43,13 @@ class PersonnelRowViewModelService
             $personnel->setAttribute('deleted_at_fmt', $this->formatDateTime($personnel->deleted_at));
             $personnel->setAttribute('gender_label', (int) $personnel->gender === 1 ? __('personnel::common.labels.man') : __('personnel::common.labels.woman'));
             $personnel->setAttribute('rank_label', (string) optional($personnel->latestRank?->rank)->name);
-            $personnel->setAttribute('active_vacation', $vacation);
-            $personnel->setAttribute('active_business_trip', $businessTrip);
-            $personnel->setAttribute('active_vacation_start', $this->formatDate($vacation?->start_date));
-            $personnel->setAttribute('active_vacation_end', $this->formatDate($vacation?->return_work_date));
-            $personnel->setAttribute('active_business_trip_start', $this->formatDate($businessTrip?->start_date));
-            $personnel->setAttribute('active_business_trip_end', $this->formatDate($businessTrip?->end_date));
+            $personnel->setAttribute('presence', $presence);
+            $personnel->setAttribute('presence_status', $presence?->status->value);
+            $personnel->setAttribute('presence_tone', $presence?->tone());
+            $personnel->setAttribute('presence_label', $presence?->label());
+            $personnel->setAttribute('presence_reason', $presence?->reason);
+            $personnel->setAttribute('presence_period', $presence?->periodLabel());
+            $personnel->setAttribute('presence_return', $presence?->expectedReturnLabel());
             $personnel->setAttribute('photo_url', $this->photoUrl($personnel->photo));
             $personnel->setAttribute('deleted_by_name', (string) optional($personnel->personDidDelete)->name);
             $personnel->setAttribute('active_shift_name', (string) optional($activeShiftAssignment?->shift)->name);

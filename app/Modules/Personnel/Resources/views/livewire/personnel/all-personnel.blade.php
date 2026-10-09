@@ -27,7 +27,7 @@
     {{-- ===================== header ===================== --}}
     <x-page-header
         collapsible-filters
-        :filters-active="$search !== '' || $filters !== [] || $selectedPosition !== null"
+        :filters-active="$search !== '' || $filters !== [] || $selectedPosition !== null || $presence !== []"
         :title="__('personnel::common.titles.personnels')"
         :breadcrumb="__('personnel::common.titles.personnels')"
     >
@@ -71,6 +71,15 @@
                     :model="$statusOptions"
                 />
 
+                <x-personnel.presence-filter
+                    wire:key="personnel-presence-filter"
+                    model="presence"
+                    class="w-full sm:w-56"
+                    :label="__('personnel::common.presence.filter_label')"
+                    :placeholder="__('personnel::common.presence.filter_any')"
+                    :options="$this->getPresenceOptions()"
+                />
+
                 <x-ui.select-dropdown
                     :aria-label="__('personnel::common.labels.position')"
                     wire:key="personnel-position-filter"
@@ -107,6 +116,7 @@
             'selectedPosition' => $this->selectedPosition,
             'search' => $this->search,
             'sort' => $this->sort,
+            'presence' => $this->presence,
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     @endphp
 
@@ -117,6 +127,7 @@
         :selected-position="$this->selectedPosition"
         :search="$this->search"
         :sort="$this->sort"
+        :presence="$this->presence"
         :key="'personnel-table-'.$tableKey"
         lazy
     />

@@ -3,6 +3,8 @@
 namespace App\Modules\Personnel\Services;
 
 use App\Models\Personnel;
+use App\Modules\Personnel\Application\Services\PersonnelPresenceResolver;
+use App\Modules\Personnel\Support\Presence\PersonnelPresenceStatus;
 use App\Support\PositionLevel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -19,6 +21,7 @@ class PersonnelQueryService
      * @param  array<int, int>  $selectedStructureIds
      * @param  array<int, int>  $accessibleStructureIds
      * @param  array<string, mixed>  $filters
+     * @param  array<int, string>  $presence  today's resolved statuses to keep (empty = any)
      */
     public function build(
         ?string $status,
@@ -28,6 +31,7 @@ class PersonnelQueryService
         ?int $selectedPosition = null,
         ?string $search = null,
         string $sort = self::SORT_POSITION,
+        array $presence = [],
     ): Builder {
         $query = Personnel::query()
             ->select([
@@ -59,6 +63,10 @@ class PersonnelQueryService
             selectedPosition: $selectedPosition,
             search: $search,
         );
+
+        if ($presence !== []) {
+            app(PersonnelPresenceResolver::class)->constrainToStatuses($query, $presence);
+        }
 
         // Senior posts first by the hidden positions.level band; unclassified posts last.
         $seniority = fn (Builder $q): Builder => $q
@@ -118,13 +126,12 @@ class PersonnelQueryService
         $settled = "{$live} AND personnels.is_pending = 0";
         $active = "{$settled} AND personnels.leave_work_date IS NULL";
 
-        // Mirrors the hasActiveVacation relation, inlined so the whole panel is one query.
-        $onVacation = 'EXISTS (SELECT 1 FROM personnel_vacations pv'
-            .' WHERE pv.tabel_no = personnels.tabel_no'
-            .' AND pv.deleted_at IS NULL'
-            .' AND pv.start_date <= ? AND pv.return_work_date > ?)';
-
-        $now = now()->toDateTimeString();
+        // Today's presence of the active employees comes from the shared resolver, folded
+        // into this same aggregate so the whole panel stays one query.
+        [$presenceColumns, $presenceBindings] = app(PersonnelPresenceResolver::class)->countColumns(
+            [PersonnelPresenceStatus::AtWork, PersonnelPresenceStatus::Vacation],
+            scopeSql: $active,
+        );
 
         $row = $query->selectRaw(implode(', ', [
             "SUM(CASE WHEN {$live} THEN 1 ELSE 0 END) as all_count",
@@ -132,20 +139,17 @@ class PersonnelQueryService
             "SUM(CASE WHEN {$settled} AND personnels.leave_work_date IS NOT NULL THEN 1 ELSE 0 END) as leaves_count",
             "SUM(CASE WHEN {$live} AND personnels.is_pending = 1 THEN 1 ELSE 0 END) as pending_count",
             'SUM(CASE WHEN personnels.deleted_at IS NOT NULL THEN 1 ELSE 0 END) as deleted_count',
-            "SUM(CASE WHEN {$active} AND {$onVacation} THEN 1 ELSE 0 END) as on_vacation_count",
-        ]), [$now, $now])->toBase()->first();
-
-        $current = (int) ($row->current_count ?? 0);
-        $onVacationCount = (int) ($row->on_vacation_count ?? 0);
+            ...$presenceColumns,
+        ]), $presenceBindings)->toBase()->first();
 
         return [
             'all' => (int) ($row->all_count ?? 0),
-            'current' => $current,
+            'current' => (int) ($row->current_count ?? 0),
             'leaves' => (int) ($row->leaves_count ?? 0),
             'pending' => (int) ($row->pending_count ?? 0),
             'deleted' => (int) ($row->deleted_count ?? 0),
-            'on_vacation' => $onVacationCount,
-            'at_work' => max(0, $current - $onVacationCount),
+            'on_vacation' => (int) ($row->presence_vacation ?? 0),
+            'at_work' => (int) ($row->presence_at_work ?? 0),
         ];
     }
 
@@ -203,10 +207,6 @@ class PersonnelQueryService
         $relations = [
             'latestRank',
             "latestRank.rank:id,name_{$locale}",
-            'latestVacation',
-            'hasActiveVacation',
-            'latestBusinessTrip',
-            'hasActiveBusinessTrip',
             'position:id,name',
             'currentWork',
             'latestDisposal',

@@ -3,6 +3,8 @@
 namespace App\Modules\Personnel\Application\Services;
 
 use App\Models\Personnel;
+use App\Modules\Personnel\Support\Presence\PersonnelPresence;
+use App\Modules\Personnel\Support\Presence\PersonnelPresenceStatus;
 use App\Services\StructurePathService;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
@@ -239,28 +241,29 @@ class PersonnelProfileReadService
         ];
     }
 
+    /** @var array<int, PersonnelPresence> */
+    private array $presence = [];
+
+    /**
+     * Today's presence for the header badge, from the shared resolver; memoised so the
+     * tone and the label of one render cost one lookup.
+     */
+    public function presence(Personnel $personnel): PersonnelPresence
+    {
+        return $this->presence[(int) $personnel->getKey()] ??= app(PersonnelPresenceResolver::class)->resolve($personnel);
+    }
+
+    /** The header keeps the avatar grey for the common at-work case. */
     public function statusTone(Personnel $personnel): string
     {
-        return match (true) {
-            $personnel->trashed() => 'rose',
-            filled($personnel->leave_work_date) => 'rose',
-            (bool) $personnel->getAttribute('is_pending') => 'amber',
-            (bool) $personnel->active_vacation => 'violet',
-            (bool) $personnel->active_business_trip => 'blue',
-            default => 'neutral',
-        };
+        $presence = $this->presence($personnel);
+
+        return $presence->status === PersonnelPresenceStatus::AtWork ? 'neutral' : $presence->tone();
     }
 
     public function statusLabel(Personnel $personnel): string
     {
-        return match (true) {
-            $personnel->trashed() => __('personnel::common.states.deleted'),
-            filled($personnel->leave_work_date) => __('personnel::common.labels.resigned'),
-            (bool) $personnel->getAttribute('is_pending') => __('personnel::common.states.waiting_for_approval'),
-            (bool) $personnel->active_vacation => __('personnel::common.states.in_vacation'),
-            (bool) $personnel->active_business_trip => __('personnel::common.states.in_business_trip'),
-            default => __('personnel::common.states.at_work'),
-        };
+        return $this->presence($personnel)->label();
     }
 
     public function structurePath(Personnel $personnel): string
