@@ -246,7 +246,7 @@ it('moves the employee on an approved transfer order and moves them back when it
     expect((int) $moved->structure_id)->toBe($structure->id)
         ->and((int) $moved->position_id)->toBe($position->id);
 
-    $transitions->cancel($order->fresh());
+    $transitions->cancel($order->fresh(), 'Test üçün geri alınır');
     $restored = $personnel->fresh();
     expect((int) $order->fresh()->status_id)->toBe(OrderStatusEnum::CANCELLED->value)
         ->and((int) $restored->structure_id)->toBe($originalStructure)

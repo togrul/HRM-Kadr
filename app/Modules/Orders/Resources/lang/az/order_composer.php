@@ -58,13 +58,28 @@ return [
         'create' => 'Vakant yer yarat və davam et',
     ],
     'confirm' => [
+        'reason_label' => 'Səbəb',
+        'reason_placeholder' => 'Təsdiqlənmiş əmr niyə geri qaytarılır və ya ləğv edilir?',
+        'reason_hint' => 'Məcburidir, ən azı :min simvol. Audit jurnalında saxlanılır.',
         'approve' => 'Əmr təsdiqlənsin? Bağlı HR əməliyyatı (məzuniyyət, köçürmə və s.) avtomatik icra olunacaq.',
         'cancel_pending' => 'Əmr ləğv edilsin?',
         'cancel_approved' => 'Təsdiqlənmiş əmr ləğv edilsin? Bağlı HR əməliyyatı geri qaytarılacaq.',
         'reopen' => 'Ləğv edilmiş əmr yenidən “Təsdiq gözləyən” statusuna qaytarılsın?',
         'revert' => 'Təsdiq geri alınsın? Bağlı HR əməliyyatı geri qaytarılacaq və əmr “Təsdiq gözləyən” olacaq.',
     ],
+    'hints' => [
+        'auto_number' => 'Boş saxlasanız, nömrə təsdiq zamanı avtomatik veriləcək (format: :format).',
+    ],
     'errors' => [
+        'reason_required' => 'Təsdiqlənmiş əmri geri qaytarmaq və ya ləğv etmək üçün səbəb yazın (ən azı :min simvol).',
+        'period_closed' => ':period ayı bağlanıb (:reason) — təsdiqlənmiş əmr geri qaytarıla və ya ləğv edilə bilməz.',
+        'period_closed_by' => [
+            'payroll' => 'əmək haqqı dövrü bağlanıb',
+            'finance' => 'maliyyə sistemi mühasibat dövrünü bağlayıb',
+            'attendance' => 'davamiyyət (tabel) ayı kilidlənib',
+        ],
+        'number_missing' => 'Əmrin nömrəsi yoxdur və avtomatik nömrələmə qurulmayıb — əmri redaktə edib nömrə daxil edin.',
+        'number_taken' => 'Bu nömrə ilə əmr artıq mövcuddur.',
         'employee_inactive' => 'Seçilmiş əməkdaş aktiv deyil — əmr yalnız işləyən əməkdaş üçün verilə bilər.',
         'dates_invalid' => 'Tarixləri yoxlayın: :details',
         'approval_blocked' => 'Əmr təsdiqlənə bilməz: :reason',
@@ -274,4 +289,5 @@ return [
         'double_pay' => 'əmək haqqı ikiqat məbləğdə ödənilsin',
         'day_off' => 'başqa istirahət günü verilsin',
     ],
+    'cancellation_reason' => '№ :number ləğvedici əmri ilə ləğv edildi',
 ];

@@ -529,7 +529,7 @@ class KpiScorecardTest extends TestCase
 
         app(OrderStatusTransitionService::class)->approve($order);
         $this->assertSame(300.0, PayrollOneOffEarning::query()->where('source_key', 'order_award:'.$order->id)->value('amount'));
-        app(OrderStatusTransitionService::class)->cancel($order->refresh());
+        app(OrderStatusTransitionService::class)->cancel($order->refresh(), 'Səhv tərtib edilib');
         $this->assertDatabaseMissing('payroll_one_off_earnings', ['source_key' => 'order_award:'.$order->id]);
     }
 
@@ -731,7 +731,7 @@ class KpiScorecardTest extends TestCase
         app(OrderStatusTransitionService::class)->approve($order);
         $this->assertDatabaseHas('personnel_awards', ['tabel_no' => $card->personnel->tabel_no, 'award_id' => 2026, 'amount' => 500, 'order_no' => $order->order_no]);
 
-        app(OrderStatusTransitionService::class)->cancel($order->refresh());
+        app(OrderStatusTransitionService::class)->cancel($order->refresh(), 'Səhv tərtib edilib');
         $this->assertDatabaseMissing('personnel_awards', ['order_no' => $order->order_no]);
     }
 

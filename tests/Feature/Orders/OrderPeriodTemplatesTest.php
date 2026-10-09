@@ -156,7 +156,7 @@ class OrderPeriodTemplatesTest extends TestCase
         $options = Livewire::test(BusinessTrips::class)->instance()->orderTypeOptions();
         $this->assertContains(['id' => 'tpl:ezamiyyet', 'label' => 'Ezamiyyət'], $options);
 
-        app(OrderStatusTransitionService::class)->revert($order->fresh());
+        app(OrderStatusTransitionService::class)->revert($order->fresh(), 'Səhv tərtib edilib');
 
         $this->assertSame(0, PersonnelBusinessTrip::withTrashed()->count());
     }

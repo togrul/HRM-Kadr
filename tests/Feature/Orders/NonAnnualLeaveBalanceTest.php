@@ -126,7 +126,7 @@ it('puts the employee on paternity and education leave without deducting the ann
         ->and((int) $balance->fresh()->remaining_days)->toBe(30);
 
     // Revoking does not "give back" days that were never taken.
-    app(OrderStatusTransitionService::class)->revert(OrderLog::query()->where('order_no', '1-A')->sole());
+    app(OrderStatusTransitionService::class)->revert(OrderLog::query()->where('order_no', '1-A')->sole(), 'Səhv tərtib edilib');
 
     expect((int) $balance->fresh()->remaining_days)->toBe(30)
         ->and(PersonnelVacation::query()->count())->toBe(1);
@@ -185,6 +185,6 @@ it('reclassifies old installs and gives back the days approved orders took, once
         ->and(nalbTemplate('odenissiz_mezuniyyet')->effect)->toBe('unpaid_leave');
 
     // Revoking an old paternity order now runs the non-deducting effect: no double refund.
-    app(OrderStatusTransitionService::class)->revert(OrderLog::query()->where('order_no', '5-A')->sole());
+    app(OrderStatusTransitionService::class)->revert(OrderLog::query()->where('order_no', '5-A')->sole(), 'Səhv tərtib edilib');
     expect((int) $balance->fresh()->remaining_days)->toBe(25);
 });

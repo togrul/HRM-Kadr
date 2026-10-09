@@ -22,7 +22,7 @@
             <h2 class="text-lg font-medium text-zinc-600" id="slide-over-title">
                 {{ $isEditing ? __('orders::order_composer.edit_title') : __('orders::order_composer.create_title') }}
             </h2>
-            @if ($isEditing)
+            @if ($isEditing && $orderNumber !== '')
                 <span class="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
                     {{ $orderNumber }}
                 </span>
@@ -101,6 +101,9 @@
                     <x-label for="orderNumber">{{ __('orders::order_composer.labels.number') }}</x-label>
                     <x-livewire-input mode="gray" name="orderNumber" wire:model="orderNumber" />
                     @error('orderNumber') <x-validation>{{ $message }}</x-validation> @enderror
+                    @if (($numberFormat = $this->autoNumberingFormat()) !== '')
+                        <p class="mt-1 text-[11.5px] text-ink-faint">{{ __('orders::order_composer.hints.auto_number', ['format' => $numberFormat]) }}</p>
+                    @endif
                 </div>
                 <div>
                     <x-label for="orderDate">{{ __('orders::order_composer.labels.date') }}</x-label>

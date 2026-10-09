@@ -503,6 +503,7 @@ class PersonnelSeeder extends Seeder
             'add-orders',
             'edit-orders',
             'delete-orders',
+            'revert-orders',
             'show-personnels',
             'add-personnels',
             'edit-personnels',

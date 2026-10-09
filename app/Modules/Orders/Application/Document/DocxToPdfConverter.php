@@ -10,12 +10,13 @@ use Throwable;
 
 /**
  * Converts a .docx to PDF via headless LibreOffice so the composer can show a 100%
- * faithful in-browser preview of the generated order (PhpWord's HTML reader is lossy).
- * Degrades gracefully: if no LibreOffice binary is present (the production image ships
- * none), isAvailable() is false and callers fall back to DocxToHtmlRenderer; a failed
+ * faithful in-browser preview of the generated order (PhpWord's HTML reader is lossy),
+ * and an approved order gets its immutable final PDF. Degrades gracefully: if no
+ * LibreOffice binary is present (the Docker image installs one; a bare host may not),
+ * isAvailable() is false and callers fall back to DocxToHtmlRenderer; a failed
  * conversion is logged with LibreOffice's own error output.
  */
-class DocxToPdfConverter
+class DocxToPdfConverter implements PdfConverter
 {
     public function isAvailable(): bool
     {

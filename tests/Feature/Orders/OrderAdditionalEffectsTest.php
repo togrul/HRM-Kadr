@@ -161,7 +161,7 @@ class OrderAdditionalEffectsTest extends TestCase
         $this->assertSame('HT', $leave->leaveType->attendance_code);
         $this->assertSame('order', $leave->submission_source);
 
-        app(OrderStatusTransitionService::class)->revert($order->fresh());
+        app(OrderStatusTransitionService::class)->revert($order->fresh(), 'Test üçün geri alınır');
 
         $this->assertSame(0, Leave::withTrashed()->count());
         $this->assertArrayNotHasKey('absence_leave_id', (array) data_get($order->fresh()->template_snapshot, 'effect_state'));
@@ -222,7 +222,7 @@ class OrderAdditionalEffectsTest extends TestCase
         $this->artisan('personnel:lift-expired-sanctions', ['--date' => $expires])->assertSuccessful();
         $this->assertSame($expires, substr((string) $record->fresh()->getRawOriginal('lifted_at'), 0, 10));
 
-        app(OrderStatusTransitionService::class)->cancel($order->fresh());
+        app(OrderStatusTransitionService::class)->cancel($order->fresh(), 'Test üçün geri alınır');
         $this->assertSame(0, PersonnelPunishment::query()->count());
     }
 
@@ -246,7 +246,7 @@ class OrderAdditionalEffectsTest extends TestCase
         $this->assertSame('ended', $previous->fresh()->status);
         $this->assertSame('2026-10-31', $previous->fresh()->effective_to->toDateString());
 
-        app(OrderStatusTransitionService::class)->revert($order->fresh());
+        app(OrderStatusTransitionService::class)->revert($order->fresh(), 'Test üçün geri alınır');
 
         $this->assertSame(1, EmployeeCompensation::query()->count());
         $this->assertSame('active', $previous->fresh()->status);
@@ -272,7 +272,7 @@ class OrderAdditionalEffectsTest extends TestCase
         $this->assertSame(5, (int) $vacation->duration);
         $this->assertSame(25, (int) Vacation::query()->sole()->remaining_days);
 
-        app(OrderStatusTransitionService::class)->revert($recall->fresh());
+        app(OrderStatusTransitionService::class)->revert($recall->fresh(), 'Test üçün geri alınır');
 
         $vacation->refresh();
         $this->assertSame('2026-11-11', $vacation->getRawOriginal('end_date'));
@@ -304,7 +304,7 @@ class OrderAdditionalEffectsTest extends TestCase
         $balance = Vacation::query()->where('year', 2026)->sole();
         $this->assertSame(23, (int) $balance->remaining_days);
 
-        app(OrderStatusTransitionService::class)->revert($order->fresh());
+        app(OrderStatusTransitionService::class)->revert($order->fresh(), 'Test üçün geri alınır');
 
         $this->assertSame(30, (int) $balance->fresh()->remaining_days);
     }
@@ -324,7 +324,7 @@ class OrderAdditionalEffectsTest extends TestCase
         $this->assertSame('2026-11-08', $request->date->toDateString());
         $this->assertStringContainsString(__('orders::order_composer.rest_day_compensation.day_off'), (string) $request->reason);
 
-        app(OrderStatusTransitionService::class)->revert($order->fresh());
+        app(OrderStatusTransitionService::class)->revert($order->fresh(), 'Test üçün geri alınır');
 
         $this->assertSame(0, AttendanceOvertimeRequest::withTrashed()->count());
     }
@@ -348,7 +348,7 @@ class OrderAdditionalEffectsTest extends TestCase
         $this->assertSame('30.00', (string) $record->extra_pay_percent);
         $this->assertSame('2026-11-20', $record->end_date->toDateString());
 
-        app(OrderStatusTransitionService::class)->cancel($order->fresh());
+        app(OrderStatusTransitionService::class)->cancel($order->fresh(), 'Test üçün geri alınır');
 
         $this->assertSame(0, EmployeeSubstitution::query()->count());
     }
@@ -367,7 +367,7 @@ class OrderAdditionalEffectsTest extends TestCase
         $this->assertNull($award->amount);
         $this->assertSame('Fəxri fərmanla təltif — uzunmüddətli səmərəli fəaliyyətinə görə', $award->reason);
 
-        app(OrderStatusTransitionService::class)->revert($order->fresh());
+        app(OrderStatusTransitionService::class)->revert($order->fresh(), 'Test üçün geri alınır');
         $this->assertSame(0, PersonnelAward::query()->count());
     }
 
@@ -388,8 +388,12 @@ class OrderAdditionalEffectsTest extends TestCase
         $this->assertSame(OrderStatusEnum::CANCELLED->value, (int) $trip->status_id);
         $this->assertSame($revocation->id, (int) data_get($trip->template_snapshot, 'cancelled_by_order_id'));
         $this->assertSame(0, PersonnelBusinessTrip::withTrashed()->count());
+        $this->assertTrue(\Spatie\Activitylog\Models\Activity::query()
+            ->where('subject_id', $trip->id)->where('event', 'cancelled')
+            ->where('properties->reason', __('orders::order_composer.cancellation_reason', ['number' => $revocation->order_no]))
+            ->exists());
 
-        app(OrderStatusTransitionService::class)->revert($revocation->fresh());
+        app(OrderStatusTransitionService::class)->revert($revocation->fresh(), 'Ləğv əmri səhv verilib');
 
         $trip->refresh();
         $this->assertSame(OrderStatusEnum::APPROVED->value, (int) $trip->status_id);

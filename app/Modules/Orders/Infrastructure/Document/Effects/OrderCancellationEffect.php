@@ -39,7 +39,7 @@ class OrderCancellationEffect implements OrderEffect
         $target = $this->target($order, $fields, $personnel);
 
         try {
-            $this->transitions->cancel($target);
+            $this->transitions->cancel($target, __('orders::order_composer.cancellation_reason', ['number' => $order->order_no]));
         } catch (DomainException $exception) {
             throw new DomainException(__('orders::order_composer.errors.cancellation_failed', [
                 'number' => $target->order_no,

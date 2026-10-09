@@ -12,6 +12,7 @@ use App\Modules\Orders\Infrastructure\Document\OrderDocumentBuilder;
 use App\Modules\Orders\Infrastructure\Document\OrderDraftService;
 use App\Modules\Orders\Infrastructure\Document\OrderIssueService;
 use App\Modules\Orders\Infrastructure\Document\OrderLookupFieldRegistry;
+use App\Modules\Orders\Infrastructure\Document\OrderNumbering;
 use App\Modules\Orders\Infrastructure\Document\OrderSubjectResolver;
 use App\Modules\Orders\Livewire\Concerns\InteractsWithOrderSubjectPicker;
 use App\Support\Language\AzerbaijaniDateFormatter;
@@ -107,7 +108,8 @@ class OrderComposer extends Component
         $this->editOrderId = $order->id;
         $this->presetCode = (string) ($snapshot['template_code'] ?? '');
         $this->fields = (array) ($snapshot['fields'] ?? []);
-        $this->orderNumber = (string) $order->order_no;
+        // A provisional number is a placeholder, not the author's: the field stays empty.
+        $this->orderNumber = OrderNumbering::display((string) $order->order_no);
         $this->orderDate = app(AzerbaijaniDateFormatter::class)->parse((string) ($snapshot['order_date_text'] ?? ''))?->format('Y-m-d') ?? '';
         $this->hasUploadedDocx = ! empty($snapshot['docx_path']);
 
@@ -117,6 +119,15 @@ class OrderComposer extends Component
             $snapshot['hire_structure_id'] ?? null,
             $snapshot['hire_position_id'] ?? null,
         );
+    }
+
+    /**
+     * The configured automatic number format ('' when numbers are typed by hand); with one,
+     * the number field may be left empty and is filled in at approval.
+     */
+    public function autoNumberingFormat(): string
+    {
+        return app(OrderNumbering::class)->format();
     }
 
     public function isHire(): bool
