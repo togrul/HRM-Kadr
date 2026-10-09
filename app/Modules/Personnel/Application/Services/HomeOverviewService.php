@@ -6,10 +6,13 @@ use App\Enums\OrderStatusEnum;
 use App\Models\AttendanceManualEntry;
 use App\Models\AuditActivity;
 use App\Models\OrderLog;
+use App\Models\Personnel;
 use App\Models\PersonnelVacation;
 use App\Models\User;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestReviewReadService;
+use App\Modules\Personnel\Support\Presence\PersonnelPresenceStatus;
 use App\Modules\Staff\Contracts\StaffingLookup;
+use App\Services\StructureService;
 use App\Support\Database\InstalledTables;
 use Carbon\CarbonImmutable;
 use Closure;
@@ -387,6 +390,72 @@ class HomeOverviewService
                 ->whereNull('approval_status')
                 ->orWhereNotIn('approval_status', ['pending', 'rejected']))
             ->count();
+    }
+
+    /**
+     * "Away today": employed people whose resolved status today is an absence (sick,
+     * vacation, business trip, other leave), limited to the structures the viewer may see —
+     * the same scope the employee list applies. Live (no cache): the scope is per viewer.
+     *
+     * Cost: one aggregate for the per-reason counts, one page of rows, then the resolver's
+     * three range reads and one calendar read for the return dates — constant in headcount.
+     *
+     * @return array{total:int,counts:array<string,int>,rows:list<array{id:int,name:string,status:string,label:string,reason:string,tone:string,returns:string|null,period:string|null}>,more:int}
+     */
+    public function absentToday(?Authorizable $viewer, int $limit = 6): array
+    {
+        $empty = ['total' => 0, 'counts' => [], 'rows' => [], 'more' => 0];
+
+        if (! $this->can($viewer, 'show-personnels') || ! $viewer instanceof User || ! InstalledTables::has('personnels')) {
+            return $empty;
+        }
+
+        $structures = app(StructureService::class)->getAccessibleStructures($viewer);
+
+        if ($structures === []) {
+            return $empty;
+        }
+
+        $resolver = app(PersonnelPresenceResolver::class);
+        $absences = PersonnelPresenceStatus::absences();
+
+        $base = Personnel::query()
+            ->whereIn('personnels.structure_id', $structures)
+            ->whereNull('personnels.leave_work_date')
+            ->where('personnels.is_pending', false);
+        $resolver->constrainToStatuses($base, $absences);
+
+        $counts = array_filter($resolver->countByStatus($base, $absences), fn (int $count): bool => $count > 0);
+        $total = array_sum($counts);
+
+        if ($total === 0) {
+            return $empty;
+        }
+
+        $people = (clone $base)
+            ->orderBy('personnels.surname')
+            ->orderBy('personnels.name')
+            ->limit($limit)
+            ->get(['personnels.id', 'personnels.tabel_no', 'personnels.surname', 'personnels.name', 'personnels.patronymic', 'personnels.leave_work_date', 'personnels.is_pending', 'personnels.deleted_at']);
+
+        $presences = $resolver->resolveMany($people);
+
+        $rows = $people->map(function (Personnel $personnel) use ($presences): array {
+            $presence = $presences[(int) $personnel->id];
+
+            return [
+                'id' => (int) $personnel->id,
+                'name' => trim($personnel->surname.' '.$personnel->name),
+                'status' => $presence->status->value,
+                'label' => $presence->label(),
+                'reason' => $presence->reason,
+                'tone' => $presence->tone(),
+                'returns' => $presence->expectedReturnLabel(),
+                'period' => $presence->periodLabel(),
+            ];
+        })->values()->all();
+
+        return ['total' => $total, 'counts' => $counts, 'rows' => $rows, 'more' => max(0, $total - count($rows))];
     }
 
     /**

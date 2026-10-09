@@ -8,6 +8,7 @@ use App\Modules\Personnel\Exports\PersonnelExport;
 use App\Modules\Personnel\Services\PersonnelListStateNormalizer;
 use App\Modules\Personnel\Services\PersonnelLookupService;
 use App\Modules\Personnel\Services\PersonnelQueryService;
+use App\Modules\Personnel\Support\Presence\PersonnelPresenceStatus;
 use App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioPermissionMatrix;
 use App\Services\StructureService;
 use App\Traits\NestedStructureTrait;
@@ -48,6 +49,10 @@ class AllPersonnel extends Component
 
     #[Url(as: 'sort')]
     public string $sort = PersonnelQueryService::SORT_POSITION;
+
+    /** Today's resolved statuses to keep (PersonnelPresenceStatus values); empty = any. */
+    #[Url(as: 'presence')]
+    public array $presence = [];
 
     public bool $filterDetailMounted = false;
 
@@ -251,6 +256,26 @@ class AllPersonnel extends Component
         $this->resetPage();
     }
 
+    public function updatedPresence(): void
+    {
+        $this->presence = app(PersonnelListStateNormalizer::class)->normalizePresence($this->presence);
+        $this->resetPage();
+    }
+
+    /**
+     * Options of the "status today" filter, strongest status first.
+     *
+     * @return list<array{id:string,label:string,tone:string}>
+     */
+    public function getPresenceOptions(): array
+    {
+        return array_map(fn (PersonnelPresenceStatus $status): array => [
+            'id' => $status->value,
+            'label' => $status->label(),
+            'tone' => $status->tone(),
+        ], PersonnelPresenceStatus::filterable());
+    }
+
     public function updatedSelectedPosition(): void
     {
         $this->resetPage();
@@ -283,7 +308,7 @@ class AllPersonnel extends Component
 
     public function resetFilter(): void
     {
-        $this->reset('selectedPosition');
+        $this->reset('selectedPosition', 'presence');
         $this->resetPage();
     }
 
@@ -305,6 +330,7 @@ class AllPersonnel extends Component
         $this->filters = $normalizer->normalizeFilters(is_array($this->filters) ? $this->filters : []);
         $this->structure = $normalizer->normalizeStructure($this->structure);
         $this->selectedPosition = $normalizer->normalizePosition($this->selectedPosition);
+        $this->presence = $normalizer->normalizePresence($this->presence);
     }
 
     protected function getSafeFilterPayload(): array
