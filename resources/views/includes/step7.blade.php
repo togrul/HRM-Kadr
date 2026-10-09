@@ -98,6 +98,11 @@
             </div>
         </div>
 
+        <label class="inline-flex items-center gap-2">
+            <input type="checkbox" wire:model="kinshipForm.kinship.is_disabled" class="rounded border-zinc-300 text-zinc-700 focus:ring-zinc-300">
+            <span class="text-sm text-zinc-700">{{ __('personnel::common.labels.kinship_is_disabled') }}</span>
+        </label>
+
         <div class="flex justify-end gap-2">
             @if($kinshipForm->isEditingKinship())
                 <x-button mode="danger" wire:click="cancelKinshipEdit">{{ __('personnel::common.actions.cancel') }}</x-button>
@@ -192,6 +197,10 @@
                                 <span>{{ data_get($knshModel, 'position') ?? '---' }}</span>
                             </div>
                         </div>
+
+                        @if (data_get($knshModel, 'is_disabled'))
+                            <x-small-badge mode="blue">{{ __('personnel::common.labels.kinship_is_disabled') }}</x-small-badge>
+                        @endif
 
                         @if (data_get($knshModel, 'marriage_certificate_number'))
                             <div

@@ -72,6 +72,7 @@ class KinshipForm extends Form
                         'residental_address',
                         'birth_certificate_number',
                         'marriage_certificate_number',
+                        'is_disabled',
                     ])
                 );
 
@@ -161,6 +162,7 @@ class KinshipForm extends Form
             'residental_address' => null,
             'birth_certificate_number' => null,
             'marriage_certificate_number' => null,
+            'is_disabled' => false,
         ];
     }
 

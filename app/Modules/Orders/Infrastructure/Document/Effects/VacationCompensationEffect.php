@@ -11,8 +11,10 @@ use Carbon\Carbon;
 
 /**
  * Pays out unused annual leave (istifadə olunmamış məzuniyyətə görə kompensasiya): the
- * compensated days leave the yearly balance of the work year the order names (the
- * order date's year when none is given). When the order states the amount and this
+ * compensated days leave the balance — the work year the order names first, then the oldest
+ * open work year. ƏM m.144.2 regulates the pay-out on termination of the employment
+ * contract; during employment it is refused unless the organisation enables it (see
+ * VacationSettings::COMPENSATION_WITHOUT_TERMINATION). When the order states the amount and this
  * install runs payroll, the amount joins the month's payroll as a one-off earning;
  * otherwise the day count travels to payroll with the order's integration event.
  * Reversal gives the days back and withdraws the unpaid earning.
@@ -35,11 +37,12 @@ class VacationCompensationEffect implements OrderEffect
         }
 
         $workYear = $this->dates->parse($fields['work_year'] ?? null);
-        $year = (int) ($workYear !== null
-            ? $workYear->year
-            : ($order->given_date ? Carbon::parse($order->given_date)->year : now()->year));
+        $on = $order->given_date ? Carbon::parse($order->given_date) : now();
+        $year = (int) ($workYear !== null ? $workYear->year : $on->year);
 
-        $this->balance->consume($personnel, $year, $days);
+        // ƏM m.144.2: refused (DomainException) unless the employment has ended or the
+        // organisation allows paying out leave during employment.
+        $this->balance->compensate($personnel, $days, self::sourceKey($order), $on, $workYear);
 
         $amount = AwardEffect::parseAmount((string) ($fields['amount'] ?? ''));
         $paid = false;
@@ -68,7 +71,7 @@ class VacationCompensationEffect implements OrderEffect
         $state = $this->rememberedState($order)['vacation_compensation'] ?? null;
 
         if (is_array($state) && (int) ($state['days'] ?? 0) > 0) {
-            $this->balance->release($personnel, (int) $state['year'], (int) $state['days']);
+            $this->balance->release($personnel, (int) $state['year'], (int) $state['days'], self::sourceKey($order));
         }
 
         if (app()->bound(PayrollOneOffEarnings::class)) {

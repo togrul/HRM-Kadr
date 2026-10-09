@@ -512,6 +512,10 @@ class OrderComposerTest extends TestCase
             'tabel_no' => $personnel->tabel_no, 'year' => $year,
             'vacation_days_total' => 30, 'remaining_days' => 5, 'reserved_date_month' => null,
         ]);
+        // The upgrade moves the calendar-year balance into the work-year ledger.
+        app(\App\Modules\Vacation\Application\Services\LegacyVacationMigrator::class)->migrate();
+        $remaining = fn (): int => app(\App\Services\Vacation\VacationBalanceService::class)
+            ->balanceOn($personnel->fresh(), \Carbon\CarbonImmutable::create($year, 5, 19))['remaining'];
 
         $this->actingAs($this->userWith('add-orders'));
         $start = '19.05.'.$year.'-cı il';
@@ -541,13 +545,11 @@ class OrderComposerTest extends TestCase
 
         // Approval deducts the days from the balance…
         $transitions->approve($order);
-        $this->assertSame(0, (int) \App\Models\Vacation::query()
-            ->where('tabel_no', $personnel->tabel_no)->where('year', $year)->value('remaining_days'));
+        $this->assertSame(0, $remaining());
 
         // …and cancelling restores them.
         $transitions->cancel($order, 'Səhv tərtib edilib');
-        $this->assertSame(5, (int) \App\Models\Vacation::query()
-            ->where('tabel_no', $personnel->tabel_no)->where('year', $year)->value('remaining_days'));
+        $this->assertSame(5, $remaining());
     }
 
     public function test_an_order_with_an_empty_required_field_is_blocked(): void

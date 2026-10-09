@@ -9,7 +9,9 @@ use App\Models\OrderLog;
 use App\Models\OrderType;
 use App\Models\PersonnelVacation;
 use App\Models\User;
+use App\Services\Vacation\VacationBalanceService;
 use App\Support\Database\InstalledTables;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -26,7 +28,6 @@ class SelfServiceVacationOrderBinderService
     {
         $vacation->loadMissing([
             'personnel.latestRank.rank',
-            'personnel.yearlyVacation',
         ]);
 
         $personnel = $vacation->personnel;
@@ -52,19 +53,14 @@ class SelfServiceVacationOrderBinderService
         if ($personnel) {
             $orderLog->personnels()->attach([$personnel->tabel_no => []]);
 
-            $currentYearlyVacation = $personnel->yearlyVacation
-                ->firstWhere('year', (int) $vacation->start_date?->year)
-                ?? $personnel->yearlyVacation->first();
-
-            $vacationDaysTotal = (int) ($currentYearlyVacation?->vacation_days_total ?? $vacation->vacation_days_total ?? 0);
-            $remainingDaysBefore = (int) ($currentYearlyVacation?->remaining_days ?? $vacation->remaining_days ?? 0);
-            $remainingDaysAfter = max(0, $remainingDaysBefore - (int) $vacation->duration);
-
-            if ($currentYearlyVacation) {
-                $currentYearlyVacation->forceFill([
-                    'remaining_days' => $remainingDaysAfter,
-                ])->save();
-            }
+            // The approved self-service leave draws on the work-year balance (oldest open
+            // work year first); the vacation keeps the balance as it stood for the record.
+            $balances = app(VacationBalanceService::class);
+            $start = $vacation->start_date ? Carbon::parse($vacation->start_date) : now();
+            $balances->consume($personnel, (int) $start->year, (int) $vacation->duration, 'personnel_vacation:'.$vacation->id, $start);
+            $after = $balances->balanceOn($personnel, $start);
+            $vacationDaysTotal = (int) $after['total'];
+            $remainingDaysAfter = (int) $after['remaining'];
 
             $vacation->forceFill([
                 'order_no' => $orderNo,

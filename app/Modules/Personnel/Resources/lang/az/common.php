@@ -46,6 +46,7 @@ return [
         'other' => 'Digər',
     ],
     'labels' => [
+        'kinship_is_disabled' => 'Əlilliyi var',
         'action' => 'Əməliyyat',
         'number' => '#',
         'name' => 'Ad',

@@ -185,6 +185,30 @@ class OrderComposer extends Component
     }
 
     /**
+     * Put the picked work year (its start date) into the order's work-year field, so the
+     * leave is issued "for" the work year whose remaining days the author chose.
+     */
+    public function useVacationWorkYear(string $start): void
+    {
+        $template = $this->template();
+
+        if (! $template || preg_match('/^\d{4}-\d{2}-\d{2}$/', $start) !== 1) {
+            return;
+        }
+
+        foreach ($template->variables ?? [] as $variable) {
+            $key = $variable['field']['key'] ?? null;
+
+            if ($key && (($variable['field']['type'] ?? null) === 'work_year' || ($variable['effect_role'] ?? null) === 'work_year')) {
+                $this->fields[$key] = $start;
+                $this->resetErrorBag('fields.'.$key);
+
+                return;
+            }
+        }
+    }
+
+    /**
      * Clear a field's "required" error the moment the author fills it in, and fill the
      * dates that follow from it (day count ↔ end date, end date → return-to-work date).
      */

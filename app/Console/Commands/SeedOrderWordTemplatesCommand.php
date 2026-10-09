@@ -172,7 +172,7 @@ class SeedOrderWordTemplatesCommand extends Command
                     'basis' => '[Əsas mətni]',
                 ],
                 'manual' => [
-                    'İş ili' => ['type' => 'work_year'],
+                    'İş ili' => ['type' => 'work_year', 'role' => 'work_year'],
                     'Gün sayı' => ['type' => 'number', 'role' => 'days'],
                     'Başlama tarixi' => ['type' => 'date', 'role' => 'start_date'],
                     'Bitmə tarixi' => ['type' => 'date', 'role' => 'end_date'],
@@ -757,16 +757,19 @@ class SeedOrderWordTemplatesCommand extends Command
             ],
 
             // ─────────────── İstifadə olunmamış məzuniyyətə görə kompensasiya ───────────────
-            // Approval takes the days off the yearly balance; payroll computes the amount.
+            // ƏM m.144.2: paid when the employment contract ends — issued only with a
+            // termination order on file, approved only after it. Approval takes the days off
+            // the work-year balance (from the named work year, then the oldest); payroll
+            // computes the amount.
             'istifade_olunmamis_mezuniyyet_kompensasiyasi' => [
                 'label' => 'İstifadə olunmamış məzuniyyətə görə kompensasiya',
                 'effect' => 'vacation_compensation',
                 'spec' => [
                     'city' => 'Bakı şəhəri',
                     'subject' => 'İstifadə olunmamış əmək məzuniyyətinə görə kompensasiya ödənilməsi haqqında',
-                    'preamble' => '[İşçi (yiyəlik)] ərizəsini nəzərə alaraq, Azərbaycan Respublikası Əmək Məcəlləsinə uyğun olaraq',
+                    'preamble' => '[İşçi (yiyəlik)] əmək müqaviləsinə xitam verilməsi ilə əlaqədar, Azərbaycan Respublikası Əmək Məcəlləsinin 144-cü maddəsinin 2-ci hissəsini rəhbər tutaraq',
                     'clauses' => [
-                        '[İş yeri] [Vəzifə] [İşçi (yönlük)] [İş ili] iş ilinə görə istifadə olunmamış [Gün sayı] təqvim günü əmək məzuniyyətinə görə pul kompensasiyası ödənilsin.',
+                        '[İş yeri] [Vəzifə] [İşçi (yönlük)] [İş ili] iş ilindən başlayaraq istifadə olunmamış [Gün sayı] təqvim günü əmək məzuniyyətinə görə pul kompensasiyası ödənilsin.',
                         'Mühasibatlıq kompensasiyanın məbləğini orta əmək haqqı əsasında hesablasın və ödənişi təmin etsin.',
                     ],
                     'basis' => '[Əsas mətni]',

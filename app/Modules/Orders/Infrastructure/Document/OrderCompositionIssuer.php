@@ -11,6 +11,7 @@ use App\Modules\Orders\Application\Document\OrderIssueOutcome;
 use App\Modules\Orders\Application\Document\OrderVacationRules;
 use App\Services\Staff\StaffScheduleVacancyService;
 use App\Services\Vacation\VacationBalanceService;
+use Carbon\Carbon;
 
 /**
  * Issues (or re-saves, when editing) a composed Word order: validates the input, gates
@@ -28,6 +29,7 @@ class OrderCompositionIssuer
         private readonly StaffScheduleVacancyService $vacancies,
         private readonly OrderPeriodGuard $periods,
         private readonly OrderNumbering $numbering,
+        private readonly OrderTerminationLookup $terminations,
     ) {}
 
     /**
@@ -52,7 +54,8 @@ class OrderCompositionIssuer
 
         $rejection = $this->missingFields($template, $composition)
             ?? $this->periodRejection($template, $composition)
-            ?? $this->vacationRejection($template, $composition);
+            ?? $this->vacationRejection($template, $composition)
+            ?? $this->compensationRejection($template, $composition);
         if ($rejection !== null) {
             return $rejection;
         }
@@ -88,7 +91,10 @@ class OrderCompositionIssuer
      * The selected employee's vacation balance for the order's year plus the days this
      * order requests — null unless it is a day-counted vacation with an employee chosen.
      *
-     * @return array{year:int,total:int,used:int,remaining:int,requested:int}|null
+     * The balance is read on the leave's start date: the work years open by then, the
+     * first one only after its six months (ƏM m.131.1).
+     *
+     * @return array{year:int,total:int,used:int,remaining:int,requested:int,on:string,work_year:?string,work_years:list<array<string,mixed>>,next_available_from:?string}|null
      */
     public function vacationBalance(OrderWordTemplate $template, OrderComposition $composition, bool $persist = true): ?array
     {
@@ -103,12 +109,34 @@ class OrderCompositionIssuer
 
         $request = $this->vacationRules->request($template, $composition->fields);
 
-        // Displaying the balance must not create the year's row; issuing does (it checks it).
-        $balance = $persist
-            ? $this->balances->snapshot($personnel, $request['year'])
-            : $this->balances->previewSnapshot($personnel, $request['year']);
+        // Displaying the balance must not write the work years; issuing does (it checks it).
+        $balance = $this->balances->balanceOn($personnel, Carbon::parse($request['on']), $persist);
 
         return [...$balance, ...$request];
+    }
+
+    /**
+     * Unused-leave compensation gate: the employment contract ended or a termination order
+     * is on file (unless the organisation allows pay-outs during employment), and no more
+     * days than are unused across all open work years.
+     */
+    private function compensationRejection(OrderWordTemplate $template, OrderComposition $composition): ?OrderIssueOutcome
+    {
+        if (! $this->vacationRules->isCompensation($template) || ! $composition->personnelId) {
+            return null;
+        }
+
+        $personnel = $this->subjects->personnel($composition->personnelId);
+        if (! $personnel) {
+            return null;
+        }
+
+        $allowed = $this->balances->compensationAllowed($personnel) || $this->terminations->hasTerminationOrder($personnel);
+        $unused = collect($this->balances->balanceOn($personnel, now())['work_years'])->sum(fn (array $year): int => max(0, (int) $year['remaining']));
+        $requested = (int) ($this->vacationRules->effectFieldValue($template, $composition->fields, 'days') ?? 0);
+        $violation = $this->vacationRules->compensationViolation($allowed, $requested, (int) $unused);
+
+        return $violation === null ? null : OrderIssueOutcome::rejected(message: $violation);
     }
 
     /**

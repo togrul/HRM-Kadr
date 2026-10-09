@@ -2,6 +2,7 @@
 
 namespace App\Modules\Personnel\Providers;
 
+use App\Modules\Personnel\Application\Services\LeaveEntitlementFactsService;
 use App\Modules\Personnel\Application\Services\MyHr\ApprovalRouteResolverService;
 use App\Modules\Personnel\Application\Services\MyHr\LearningAssignmentManagerService;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestReviewService;
@@ -21,6 +22,7 @@ use App\Modules\Personnel\Console\Commands\RepairLegacySelfServiceVacationOrders
 use App\Modules\Personnel\Contracts\ApprovalRouteResolver;
 use App\Modules\Personnel\Contracts\GuardsPersonnelAssignment;
 use App\Modules\Personnel\Contracts\LearningAssignmentManager;
+use App\Modules\Personnel\Contracts\LeaveEntitlementFactsProvider;
 use App\Modules\Personnel\Contracts\MyHrRequestReview;
 use App\Modules\Personnel\Contracts\OnboardingAssignmentManager;
 use App\Modules\Personnel\Contracts\WorkingTimeNormProvider;
@@ -46,6 +48,7 @@ class PersonnelServiceProvider extends ServiceProvider
         $this->app->bind(OnboardingAssignmentManager::class, OnboardingAssignmentManagerService::class);
         $this->app->bind(MyHrRequestReview::class, MyHrRequestReviewService::class);
         $this->app->bind(WorkingTimeNormProvider::class, WorkingTimeNormService::class);
+        $this->app->bind(LeaveEntitlementFactsProvider::class, LeaveEntitlementFactsService::class);
 
         // Tək nüsxə: allow() kontekstinin dərinlik sayğacı model observer-i ilə paylaşılır.
         $this->app->singleton(PersonnelAssignmentGuard::class);

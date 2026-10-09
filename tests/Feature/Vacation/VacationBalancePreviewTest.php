@@ -5,7 +5,7 @@ namespace Tests\Feature\Vacation;
 use App\Models\Personnel;
 use App\Models\Position;
 use App\Models\Structure;
-use App\Models\Vacation;
+use App\Models\VacationWorkYear;
 use App\Services\Vacation\VacationBalanceService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +15,7 @@ class VacationBalancePreviewTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_preview_shows_the_balance_without_creating_the_years_row(): void
+    public function test_preview_shows_the_balance_without_creating_the_work_year_row(): void
     {
         DB::table('countries')->insertOrIgnore(['id' => 1, 'code' => 'AZ']);
         DB::table('education_degrees')->insertOrIgnore(['id' => 1, 'title_az' => 'Bakalavr']);
@@ -33,8 +33,13 @@ class VacationBalancePreviewTest extends TestCase
 
         $preview = $balances->previewSnapshot($person, $year);
 
-        $this->assertSame(0, Vacation::query()->count(), 'Displaying the balance must not write it.');
-        $this->assertSame($balances->snapshot($person, $year), $preview);
-        $this->assertSame(1, Vacation::query()->count());
+        $this->assertSame(0, VacationWorkYear::query()->count(), 'Displaying the balance must not write it.');
+
+        $snapshot = $balances->snapshot($person, $year);
+        $this->assertSame(1, VacationWorkYear::query()->count());
+
+        // Same numbers; the stored row now carries its id.
+        $strip = fn (array $balance): array => [...$balance, 'work_years' => array_map(fn (array $y): array => [...$y, 'work_year_id' => null], $balance['work_years'])];
+        $this->assertSame($strip($snapshot), $strip($preview));
     }
 }

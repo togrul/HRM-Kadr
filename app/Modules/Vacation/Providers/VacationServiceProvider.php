@@ -4,6 +4,7 @@ namespace App\Modules\Vacation\Providers;
 
 use App\Contracts\AbsenceSource;
 use App\Modules\Vacation\Application\Services\VacationAbsenceSource;
+use App\Modules\Vacation\Console\MigrateLegacyVacationBalancesCommand;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
 use Illuminate\Support\Facades\Gate;
@@ -15,7 +16,11 @@ class VacationServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        //
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                MigrateLegacyVacationBalancesCommand::class,
+            ]);
+        }
     }
 
     public function boot(): void
@@ -41,6 +46,7 @@ class VacationServiceProvider extends ServiceProvider
     {
         return [
             'vacations' => \App\Modules\Vacation\Livewire\Vacations::class,
+            'vacation-norms' => \App\Modules\Vacation\Livewire\VacationNorms::class,
         ];
     }
 

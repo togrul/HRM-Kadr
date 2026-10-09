@@ -7,6 +7,12 @@ use App\Services\Vacation\VacationBalanceService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
+/**
+ * İşləyən işçilər üçün bu günədək başlamış iş illərinin məzuniyyət hüququnu yazır (ƏM m.113.3).
+ * Əvvəllər təqvim ili üzrə `vacations` sətri yaradırdı; indi hüquq iş ili üzrə
+ * (vacation_work_years) saxlanılır, köhnə cədvəl yalnız tarixçə kimi qalır. İstənilən vaxt
+ * təkrar işlədilə bilər — mövcud iş illəri təkrarlanmır.
+ */
 class CreateVacationsListYearly extends Command
 {
     /**
@@ -21,41 +27,22 @@ class CreateVacationsListYearly extends Command
      *
      * @var string
      */
-    protected $description = 'Import a list of personnels yearly vacations';
+    protected $description = 'Write the vacation entitlement of every work year started so far (active employees)';
 
-    /**
-     * Execute the console command.
-     */
-    public function handle(): void
+    public function handle(VacationBalanceService $balances): void
     {
         $now = Carbon::now();
-        $vacationReset = (bool) cache('settings')['Vacation will reset?'];
-        Personnel::with([
-            'latestRank.rank.rankCategory',
-            'yearlyVacation',
-            'military',
-            'laborActivities',
-        ])
+        $count = 0;
+
+        Personnel::with(['latestRank.rank.rankCategory', 'military', 'laborActivities'])
             ->whereNull('leave_work_date')
-            ->get()
-            ->each(fn ($personnel) => $this->processPersonnel($personnel, $now, $vacationReset));
+            ->whereNotNull('join_work_date')
+            ->lazyById(200)
+            ->each(function (Personnel $personnel) use ($balances, $now, &$count): void {
+                $balances->materialize($personnel, $now);
+                $count++;
+            });
 
-        $this->line('Successfully!');
-    }
-
-    private function processPersonnel($personnel, Carbon $now, bool $vacationReset): void
-    {
-        // Entitlement rules live in VacationBalanceService (shared with the order-flow
-        // balance check), so both paths compute the same number of days.
-        $vacationDays = app(VacationBalanceService::class)->entitlementDays($personnel, $now);
-
-        if (! $vacationReset) {
-            $vacationDays += $personnel->yearlyVacation->sum('remaining_days');
-        }
-
-        $personnel->yearlyVacation()->firstOrCreate(
-            ['year' => $now->year],
-            ['reserved_date_month' => null, 'vacation_days_total' => $vacationDays, 'remaining_days' => $vacationDays, 'year' => $now->year]
-        );
+        $this->line("Successfully! ({$count})");
     }
 }
