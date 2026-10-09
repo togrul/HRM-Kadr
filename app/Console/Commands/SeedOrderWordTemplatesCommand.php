@@ -52,6 +52,11 @@ class SeedOrderWordTemplatesCommand extends Command
         // Signatory resolved per order (permanent chief or active delegate, by date).
         'İmzalayan' => 'system.signatory_full_name',
         'İmzalayanın vəzifəsi' => 'system.signatory_title',
+        // One participant of a multi-participant order (the repeated table row).
+        'İştirakçının sıra №' => 'participant.n',
+        'İştirakçı' => 'participant.full_name',
+        'İştirakçının vəzifəsi' => 'participant.position',
+        'İştirakçının iş yeri' => 'participant.structure',
     ];
 
     public function handle(
@@ -94,7 +99,7 @@ class SeedOrderWordTemplatesCommand extends Command
             $parser->normalize($bracketed, $labelToToken, $master);
             @unlink($bracketed);
 
-            $repository->save($code, $template['label'], $template['effect'], $relative, $variables);
+            $repository->save($code, $template['label'], $template['effect'], $relative, $variables, multiParticipant: (bool) ($template['multi'] ?? false));
 
             $this->line(sprintf(
                 '  <info>✓</info> %-24s %s  <comment>(%d dəyişən)</comment>',
@@ -116,7 +121,7 @@ class SeedOrderWordTemplatesCommand extends Command
      * employee/system variable, or a manual field (optionally bound to a lookup list
      * and/or an approval effect role).
      *
-     * @param  array<string,array{type:string,role?:string,required?:bool,default?:string}>  $manual  label => field def
+     * @param  array<string,array{type:string,role?:string,required?:bool,default?:string,scope?:string}>  $manual  label => field def
      * @return array<string,mixed>
      */
     private function variable(string $token, string $label, array $manual): array
@@ -143,7 +148,7 @@ class SeedOrderWordTemplatesCommand extends Command
                 + (isset($def['required']) ? ['required' => $def['required']] : [])
                 + (isset($def['default']) ? ['default' => $def['default']] : []),
             'effect_role' => $def['role'] ?? null,
-        ];
+        ] + (isset($def['scope']) ? ['scope' => $def['scope']] : []);
     }
 
     /**
@@ -151,7 +156,11 @@ class SeedOrderWordTemplatesCommand extends Command
      * (with [bracket] placeholders) and the manual-field definitions for the
      * non-automatic placeholders.
      *
-     * @return array<string,array{label:string,effect:string,spec:array<string,mixed>,manual?:array<string,array{type:string,role?:string,required?:bool,default?:string}>}>
+     * A multi-participant type ('multi' => true) is issued for a list of employees: its
+     * participants table row repeats per person, and manual fields carry a scope (order /
+     * participant / override).
+     *
+     * @return array<string,array{label:string,effect:string,multi?:bool,spec:array<string,mixed>,manual?:array<string,array{type:string,role?:string,required?:bool,default?:string,scope?:string}>}>
      */
     public function catalogue(): array
     {
@@ -424,25 +433,40 @@ class SeedOrderWordTemplatesCommand extends Command
             'ezamiyyet' => [
                 'label' => 'Ezamiyyət',
                 'effect' => 'business_trip',
+                // One order sends a whole team: the table row repeats per participant, the
+                // dates are shared but each person may have their own.
+                'multi' => true,
                 'spec' => [
                     'city' => 'Bakı şəhəri',
-                    'subject' => 'Əməkdaşın ezamiyyətə göndərilməsi haqqında',
+                    'subject' => 'Əməkdaşların ezamiyyətə göndərilməsi haqqında',
                     'preamble' => 'İşin zərurətini nəzərə alaraq, Azərbaycan Respublikası Əmək Məcəlləsinin 179-cu maddəsinin 2-ci hissəsinin “x” bəndini və 181-ci maddəsini rəhbər tutaraq',
                     'clauses' => [
-                        '[İş yeri] [Vəzifə] [İşçi] [Ezamiyyətin məqsədi] məqsədilə [Başlama tarixi] tarixindən [Bitmə tarixi] tarixinədək [Ezamiyyə yeri] ezamiyyətə göndərilsin.',
+                        'Aşağıdakı əməkdaşlar [Ezamiyyətin məqsədi] məqsədilə [Başlama tarixi] tarixindən [Bitmə tarixi] tarixinədək [Ezamiyyə yeri] [Ezamiyyətin növü] ezamiyyətə göndərilsinlər:',
                         'Ezamiyyətə gediş-gəliş [Nəqliyyat] ilə təşkil edilsin, işə başlama tarixi [İşə başlama tarixi] müəyyən edilsin.',
-                        'Ezamiyyə xərcləri qanunvericiliyə uyğun ödənilsin. [Ezamiyyə xərcləri (gündəlik)]',
+                        'Ezamiyyə xərcləri [Maliyyələşmə mənbəyi] qanunvericiliyə uyğun ödənilsin. [Ezamiyyə xərcləri (gündəlik)]',
                         'Mühasibatlıq bu əmrdən irəli gələn məsələləri həll etsin.',
+                    ],
+                    'participants_table' => [
+                        'after_clause' => 0,
+                        'columns' => [
+                            '№' => '[İştirakçının sıra №]',
+                            'Soyadı, adı, atasının adı' => '[İştirakçı]',
+                            'Vəzifəsi' => '[İştirakçının vəzifəsi]',
+                            'Struktur bölmə' => '[İştirakçının iş yeri]',
+                            'Ezamiyyət müddəti' => '[Başlama tarixi] – [Bitmə tarixi]',
+                        ],
                     ],
                     'basis' => '[Əsas mətni]',
                 ],
                 'manual' => [
                     'Ezamiyyətin məqsədi' => ['type' => 'text', 'role' => 'purpose'],
-                    'Başlama tarixi' => ['type' => 'date', 'role' => 'start_date'],
-                    'Bitmə tarixi' => ['type' => 'date', 'role' => 'end_date'],
+                    'Başlama tarixi' => ['type' => 'date', 'role' => 'start_date', 'scope' => 'override'],
+                    'Bitmə tarixi' => ['type' => 'date', 'role' => 'end_date', 'scope' => 'override'],
                     'Ezamiyyə yeri' => ['type' => 'text', 'role' => 'location'],
+                    'Ezamiyyətin növü' => ['type' => 'trip_type', 'role' => 'trip_type', 'required' => false, 'default' => '1'],
                     'Nəqliyyat' => ['type' => 'text', 'role' => 'transport'],
-                    'İşə başlama tarixi' => ['type' => 'date', 'role' => 'return_date'],
+                    'İşə başlama tarixi' => ['type' => 'date', 'role' => 'return_date', 'scope' => 'override'],
+                    'Maliyyələşmə mənbəyi' => ['type' => 'text', 'role' => 'funding_source', 'required' => false, 'default' => 'təşkilatın vəsaiti hesabına'],
                     'Ezamiyyə xərcləri (gündəlik)' => ['type' => 'text', 'role' => 'per_diem', 'required' => false],
                     'Əsas mətni' => ['type' => 'text'],
                 ],

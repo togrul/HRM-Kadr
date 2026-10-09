@@ -46,9 +46,13 @@ class OrderTemplateDocxBuilder
      *     clauses:array<int,string>,
      *     basis:string,
      *     signatory?:array<int,string>,
-     *     signatory_name?:string
+     *     signatory_name?:string,
+     *     participants_table?:array{after_clause:int,columns:array<string,string>}
      * }  $spec  (signatory/signatory_name are legacy — the signatory is now a
-     *           [İmzalayanın vəzifəsi]/[İmzalayan] placeholder resolved per order.)
+     *           [İmzalayanın vəzifəsi]/[İmzalayan] placeholder resolved per order.
+     *           participants_table: a bordered table placed after the given clause —
+     *           a header row with the column titles and ONE row of their placeholders,
+     *           the row a multi-participant order repeats per person.)
      * @return string Path to the generated .docx (caller owns / cleans it up).
      */
     public function build(array $spec): string
@@ -96,6 +100,10 @@ class OrderTemplateDocxBuilder
         foreach ($spec['clauses'] as $i => $clause) {
             $text = $numbered ? ($i + 1).'. '.$clause : $clause;
             $section->addText($text, [], $clauseStyle);
+
+            if (isset($spec['participants_table']) && (int) $spec['participants_table']['after_clause'] === $i) {
+                $this->participantsTable($section, $spec['participants_table']['columns']);
+            }
         }
         $this->blank($section);
 
@@ -119,6 +127,40 @@ class OrderTemplateDocxBuilder
         $word->save($path, 'Word2007');
 
         return $path;
+    }
+
+    /**
+     * A bordered table: a bold header row with the column titles, then one row of
+     * placeholders (each cell one run, so the detector sees it whole).
+     *
+     * @param  \PhpOffice\PhpWord\Element\Section  $section
+     * @param  array<string,string>  $columns  title => placeholder text
+     */
+    private function participantsTable($section, array $columns): void
+    {
+        $this->blank($section);
+
+        $table = $section->addTable([
+            'borderSize' => 6,
+            'borderColor' => '000000',
+            'cellMargin' => 60,
+            'alignment' => Jc::CENTER,
+        ]);
+        $width = (int) floor(self::RIGHT_TAB / max(1, count($columns)));
+        $cell = ['spaceAfter' => 0, 'alignment' => Jc::CENTER];
+        $font = ['size' => 12];
+
+        $table->addRow();
+        foreach (array_keys($columns) as $title) {
+            $table->addCell($width)->addText($title, $font + ['bold' => true], $cell);
+        }
+
+        $table->addRow();
+        foreach ($columns as $placeholder) {
+            $table->addCell($width)->addText($placeholder, $font, $cell);
+        }
+
+        $this->blank($section);
     }
 
     private function blank($section): void

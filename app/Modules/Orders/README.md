@@ -37,3 +37,22 @@ keeping what it needs to undo itself in the order snapshot (`effect_state`).
 Existing installs: `2026_10_09_130000_register_more_order_word_templates` adds the new codes;
 `2026_10_09_140000_attach_effects_to_standard_order_word_templates` (`StandardOrderEffectUpgrader`) moves the four
 formerly document-only types onto their effect only while they are unedited (edited ones are logged and kept).
+
+## Multi-participant orders (çoxşəxsli əmr)
+
+A Word template can be flagged multi-participant in the designer (only for effects that make sense per person:
+`OrderEffectCatalog::supportsParticipants()` — business trip, paid absence, award, the leave effects, disciplinary).
+Each manual variable then has a scope: shared (`order`), per participant (`participant`) or shared with a per-person
+override (`override`). `participant.*` automatic variables (same values as `employee.*` plus `participant.n`) resolve
+per person.
+
+- **Data:** `order_participants` (order, personnel, position, own `fields`, `effect_state`). The snapshot keeps the
+  first participant as `personnel_id`; `order_log_personnels` links every participant (list visibility, employee card).
+- **Document:** every table row holding a participant-only token is repeated per participant; alternatively the
+  paragraphs between `[İştirakçılar]` and `[/İştirakçılar]` are repeated (`ParticipantTemplateProcessor`).
+- **Approval:** all participants are checked first (dates, active, no overlap) — the first who fails refuses the whole
+  approval, named; then the effect runs per participant in one transaction with that person's effect state kept on
+  their row. Reversal undoes all. One outbox event per participant (`docs/integration-finance.md`).
+- The standard `ezamiyyet` is multi-participant (participants table, trip kind, funding source);
+  `2026_10_10_120000_make_standard_business_trip_template_multi_participant` (`StandardBusinessTripTemplateUpgrader`)
+  replaces an installed copy only while it is unedited and re-keys the orders already issued on it.
