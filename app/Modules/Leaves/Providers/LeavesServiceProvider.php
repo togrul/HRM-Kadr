@@ -4,12 +4,16 @@ namespace App\Modules\Leaves\Providers;
 
 use App\Contracts\AbsenceSource;
 use App\Models\Leave;
+use App\Models\LeaveSickCertificate;
 use App\Modules\Leaves\Application\Services\LeaveAbsenceSource;
 use App\Modules\Leaves\Application\Services\LeaveListCacheVersion;
 use App\Modules\Leaves\Application\Services\OrderAbsenceRecorderService;
+use App\Modules\Leaves\Application\Services\SickCertificateAttentionService;
 use App\Modules\Leaves\Console\Commands\LeavesQueryBudgetCommand;
 use App\Modules\Leaves\Console\Commands\LeavesRenderBenchmarkCommand;
 use App\Modules\Leaves\Contracts\OrderAbsenceRecorder;
+use App\Modules\Leaves\Contracts\SickCertificateAttention;
+use App\Modules\Leaves\Policies\LeaveSickCertificatePolicy;
 use App\Observers\LeaveObserver;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
@@ -40,6 +44,8 @@ class LeavesServiceProvider extends ServiceProvider
         $this->app->tag([LeaveAbsenceSource::class], AbsenceSource::TAG);
         // Lets an approved order (military muster, donor day…) file its paid absence here.
         $this->app->bind(OrderAbsenceRecorder::class, OrderAbsenceRecorderService::class);
+        // Long-open sick certificates for the home page's attention panel.
+        $this->app->bind(SickCertificateAttention::class, SickCertificateAttentionService::class);
         $this->loadRoutesFrom(__DIR__.'/../Routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'leaves');
         $this->loadMigrations();
@@ -76,6 +82,8 @@ class LeavesServiceProvider extends ServiceProvider
             \App\Models\Leave::class,
             \App\Modules\Leaves\Policies\LeavePolicy::class
         );
+
+        Gate::policy(LeaveSickCertificate::class, LeaveSickCertificatePolicy::class);
     }
 
     protected function registerLivewireComponents(): void
@@ -90,6 +98,9 @@ class LeavesServiceProvider extends ServiceProvider
             'add-leave' => \App\Modules\Leaves\Livewire\AddLeave::class,
             'edit-leave' => \App\Modules\Leaves\Livewire\EditLeave::class,
             'delete-leave' => \App\Modules\Leaves\Livewire\DeleteLeave::class,
+            'sick-certificates' => \App\Modules\Leaves\Livewire\SickCertificates\SickCertificates::class,
+            'sick-certificate-editor' => \App\Modules\Leaves\Livewire\SickCertificates\SickCertificateEditor::class,
+            'personnel-sick-certificates' => \App\Modules\Leaves\Livewire\SickCertificates\PersonnelSickCertificates::class,
         ];
     }
 }

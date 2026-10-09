@@ -66,6 +66,7 @@ return [
         'delete-leaves' => 'İcazə qeydlərini silmək və ya ləğv etmək icazəsi verir.',
         'export-leaves' => 'İcazə və qeyri-iştirak məlumatlarını ixrac etmək icazəsi verir.',
         'approve-leaves' => 'HR-ın əməkdaş adından daxil etdiyi icazəni təsdiq marşrutundan keçirmədən təsdiqlənmiş kimi qeydə almaq icazəsi verir (təsdiq edən kimi həmin istifadəçi yazılır).',
+        'view-medical-diagnosis' => 'Xəstəlik vərəqəsindəki diaqnozu görmək və dəyişmək icazəsi verir (tibbi sirr; siyahı və ixracda heç vaxt göstərilmir).',
         'show-attendance' => 'Davamiyyət modulunun əsas ekranını açmaq və davamiyyət məlumatlarına ümumi baxış etmək icazəsi verir.',
         'show-attendance-daily-monitor' => 'Günlük monitor bölməsini görmək, bugün üzrə giriş-çıxış, gecikmə və iştirak vəziyyətini izləmək icazəsi verir.',
         'show-attendance-puantaj' => 'Puantaj cədvəlini görmək, aylıq gün-gün işlənən vaxt və statuslara baxmaq icazəsi verir.',

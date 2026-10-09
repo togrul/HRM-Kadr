@@ -322,13 +322,13 @@ it('records whether a context panel has content', function (): void {
 
 it('starts an empty context panel collapsed on the server, remembering the toggle per page', function (): void {
     $user = User::factory()->create();
-    $user->givePermissionTo(Permission::findOrCreate('show-leaves', 'web'));
+    $user->givePermissionTo(Permission::findOrCreate('show-business_trips', 'web'));
 
     $this->actingAs($user)
-        ->get(route('leaves'))
+        ->get(route('business-trips.list'))
         ->assertOk()
         ->assertSee('data-panel-empty', false)
-        ->assertSee("var key = 'hrm.panel.leaves'", false)
+        ->assertSee("var key = 'hrm.panel.business-trips.list'", false)
         ->assertSee('var collapsed = true', false);
 });
 

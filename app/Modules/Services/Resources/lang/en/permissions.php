@@ -29,6 +29,7 @@ return [
         'employee_content_library' => 'Employee content library',
         'general' => 'General',
         'leaves' => 'Leaves',
+        'medical_diagnosis' => 'Medical diagnosis (sick-leave certificate)',
         'learning_library' => 'Learning library',
         'my_hr' => 'My HR',
         'my_hr_accounts' => 'My HR accounts',

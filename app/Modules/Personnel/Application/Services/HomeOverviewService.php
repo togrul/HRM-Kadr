@@ -9,6 +9,7 @@ use App\Models\OrderLog;
 use App\Models\Personnel;
 use App\Models\PersonnelVacation;
 use App\Models\User;
+use App\Modules\Leaves\Contracts\SickCertificateAttention;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestReviewReadService;
 use App\Modules\Personnel\Support\Presence\PersonnelPresenceStatus;
 use App\Modules\Staff\Contracts\StaffingLookup;
@@ -62,7 +63,9 @@ class HomeOverviewService
     private const ACCESS_LOGS = ['auth', 'personnel_access'];
 
     /**
-     * The four "needs attention" tiles, in the order the design lays them out.
+     * The "needs attention" tiles, in the order the design lays them out. The long-open
+     * sick certificates tile comes from the Leaves module (SickCertificateAttention) and
+     * only exists while that module is enabled.
      *
      * Always live: these are the queues the viewer works off, so a count must drop the
      * moment they approve something and come back.
@@ -102,11 +105,23 @@ class HomeOverviewService
             ],
         ];
 
+        if (app()->bound(SickCertificateAttention::class)) {
+            $tiles[] = [
+                'key' => 'stale_sick_certificates',
+                'permission' => 'show-leaves',
+                'route' => SickCertificateAttention::ROUTE,
+                'params' => ['stale' => 1],
+                'accent' => 'rose',
+                'stats' => fn (): array => $this->staleSickCertificates(),
+            ];
+        }
+
         return collect($tiles)
             ->filter(fn (array $tile): bool => $this->can($viewer, $tile['permission']))
             ->map(fn (array $tile): array => [
                 'key' => $tile['key'],
                 'route' => $tile['route'],
+                'params' => $tile['params'] ?? [],
                 'accent' => $tile['accent'],
                 ...($tile['stats'])(),
             ])
@@ -249,6 +264,19 @@ class HomeOverviewService
         }
 
         return $this->queueStats(PersonnelVacation::query()->where('approval_status', 'pending'));
+    }
+
+    /**
+     * Sick certificates open longer than the Leaves alert threshold; the age is that of
+     * the oldest one, counted from its first sick day.
+     *
+     * @return array{count:int,oldest_days:int|null}
+     */
+    private function staleSickCertificates(): array
+    {
+        $stale = app(SickCertificateAttention::class)->staleOpen();
+
+        return ['count' => (int) $stale['count'], 'oldest_days' => $stale['oldest_days']];
     }
 
     /**

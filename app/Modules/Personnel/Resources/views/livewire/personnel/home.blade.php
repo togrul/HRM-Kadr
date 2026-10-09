@@ -23,6 +23,7 @@
         'unsigned_orders' => '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h6M8 17h4"/>',
         'vacation_requests' => '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
         'expiring_documents' => '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+        'stale_sick_certificates' => '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 11v6M9 14h6"/>',
     ];
 
     $user = auth()->user();
@@ -122,7 +123,7 @@
                 {{ __('personnel::home.attention.all_clear') }}
             </p>
         @elseif (filled($attention))
-            <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <div @class(['grid gap-3 sm:grid-cols-2', 'xl:grid-cols-4' => count($attention) <= 4, 'lg:grid-cols-3 2xl:grid-cols-5' => count($attention) > 4])>
                 @foreach ($attention as $card)
                     @php
                         $accent = $accents[$card['accent']];
@@ -145,7 +146,7 @@
                         'border-hairline' => ! $open,
                     ])>
                         {{-- The whole card still opens the module; the buttons sit above this link. --}}
-                        <a href="{{ route($card['route']) }}" wire:navigate class="absolute inset-0 rounded-2xl" aria-label="{{ __('personnel::home.attention.cards.'.$card['key'].'.label') }}"></a>
+                        <a href="{{ route($card['route'], $card['params'] ?? []) }}" wire:navigate class="absolute inset-0 rounded-2xl" aria-label="{{ __('personnel::home.attention.cards.'.$card['key'].'.label') }}"></a>
 
                         <div class="flex items-start justify-between gap-3">
                             <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl {{ $card['count'] > 0 ? $accent['chip'] : $accents['neutral']['chip'] }}">
@@ -178,7 +179,7 @@
                                     <svg @class(['h-3.5 w-3.5 transition', 'rotate-180' => $open]) viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                                 </button>
                             @else
-                                <a href="{{ route($card['route']) }}" wire:navigate class="inline-flex h-8 w-fit items-center rounded-[10px] border border-hairline bg-white px-3 text-[12px] font-semibold text-ink-soft transition hover:border-zinc-300 hover:text-ink">
+                                <a href="{{ route($card['route'], $card['params'] ?? []) }}" wire:navigate class="inline-flex h-8 w-fit items-center rounded-[10px] border border-hairline bg-white px-3 text-[12px] font-semibold text-ink-soft transition hover:border-zinc-300 hover:text-ink">
                                     {{ __('personnel::home.attention.cards.'.$card['key'].'.action') }}
                                 </a>
                             @endif

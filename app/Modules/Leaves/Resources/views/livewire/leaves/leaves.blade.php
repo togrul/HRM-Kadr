@@ -29,7 +29,9 @@
         <x-context-panel
             :title="__('leaves::common.titles.leaves')"
             :subtitle="$num($counts['all']).' '.__('leaves::common.labels.unit')"
-        ></x-context-panel>
+        >
+            @include('leaves::partials.module-nav', ['active' => 'leaves'])
+        </x-context-panel>
     @endteleport
 
     {{-- ===================== header ===================== --}}

@@ -9,6 +9,7 @@ use App\Modules\Orders\Contracts\OrderDrafter;
 use App\Modules\Personnel\Application\Services\Personnel360TimelineService;
 use App\Modules\Personnel\Application\Services\PersonnelProfileReadService;
 use App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioPermissionMatrix;
+use App\Services\Modules\ModuleState;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Computed;
@@ -39,6 +40,9 @@ class PersonnelProfile extends Component
         'other' => 8,
     ];
 
+    /** The «Xəstəlik» section: the Leaves module's sick-certificate list for this person. */
+    public const SICK_SECTION = 'sick';
+
     #[Locked]
     public int $personnelId;
 
@@ -56,6 +60,14 @@ class PersonnelProfile extends Component
 
         $reader = app(PersonnelProfileReadService::class);
 
+        if ($this->section === self::SICK_SECTION) {
+            if (! $this->canViewSickCertificates()) {
+                $this->section = $reader->defaultSection();
+            }
+
+            return;
+        }
+
         if (! in_array($this->section, $reader->sectionKeys(), true)) {
             $this->section = $reader->defaultSection();
         }
@@ -67,6 +79,14 @@ class PersonnelProfile extends Component
 
     public function setSection(string $section): void
     {
+        if ($section === self::SICK_SECTION) {
+            if ($this->canViewSickCertificates()) {
+                $this->section = $section;
+            }
+
+            return;
+        }
+
         if ($section === $this->section || ! in_array($section, app(PersonnelProfileReadService::class)->sectionKeys(), true)) {
             return;
         }
@@ -151,6 +171,14 @@ class PersonnelProfile extends Component
         }
 
         return app(OrderDrafter::class)->personnelTemplates();
+    }
+
+    /** The sick-certificate section needs the Leaves module and the leave list permission. */
+    #[Computed]
+    public function canViewSickCertificates(): bool
+    {
+        return app(ModuleState::class)->enabled('leaves')
+            && (auth()->user()?->can('show-leaves') ?? false);
     }
 
     #[Computed]

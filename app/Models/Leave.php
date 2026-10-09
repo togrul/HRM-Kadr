@@ -32,6 +32,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property int|null $total_minutes
  * @property \Carbon\CarbonInterface|null $approved_at
  * @property string|null $submission_source
+ * @property string|null $reason
  */
 class Leave extends Model
 {
@@ -132,6 +133,21 @@ class Leave extends Model
         return $this->morphMany(EmployeeRequestChangeRequest::class, 'requestable');
     }
 
+    /** @return HasOne<LeaveSickCertificate, $this> */
+    public function sickCertificate(): HasOne
+    {
+        return $this->hasOne(LeaveSickCertificate::class);
+    }
+
+    /**
+     * An open-ended leave (an open sick certificate) has no end date yet: it covers every
+     * day from its start up to today. Only the certificate register writes one.
+     */
+    public function isOpenEnded(): bool
+    {
+        return $this->starts_at !== null && $this->ends_at === null && $this->normalizedDurationUnit() === 'day';
+    }
+
     /* ----------------------------- Accessors / Attrs -------------------------- */
     protected function periodLabel(): Attribute
     {
@@ -140,6 +156,10 @@ class Leave extends Model
             $s = $this->starts_at;
             /** @var CarbonImmutable|null $e */
             $e = $this->ends_at;
+
+            if ($s && ! $e && $this->isOpenEnded()) {
+                return $s->format('d.m.Y').' – …';
+            }
 
             if (! $s || ! $e) {
                 return null;
@@ -305,7 +325,12 @@ class Leave extends Model
             type: AbsencePeriod::TYPE_LEAVE,
             id: $this->exists ? (int) $this->getKey() : null,
             from: $start,
-            to: $unit === 'day' && $this->ends_at ? CarbonImmutable::parse($this->ends_at)->startOfDay() : $start,
+            to: match (true) {
+                $unit === 'day' && $this->ends_at !== null => CarbonImmutable::parse($this->ends_at)->startOfDay(),
+                // Still open: it holds every day up to today (and at least its first day).
+                $this->isOpenEnded() => $start->max(CarbonImmutable::today()),
+                default => $start,
+            },
             unit: $unit,
             dayPart: $unit === 'half_day' ? $this->partial_day_part : null,
             startsTime: $unit === 'hour' && filled($this->starts_time) ? (string) $this->starts_time : null,
@@ -318,6 +343,12 @@ class Leave extends Model
     {
         $s = $this->starts_at;
         $e = $this->ends_at;
+
+        if ($s && ! $e && $this->isOpenEnded()) {
+            // Open sick certificate: the days so far.
+            return max(1, (int) $s->diffInDays(CarbonImmutable::today()) + 1);
+        }
+
         if (! $s || ! $e) {
             return 0;
         }
@@ -388,6 +419,12 @@ class Leave extends Model
             : $this->durationSummary();
     }
 
+    /**
+     * Set by the sick-certificate register when it saves an open certificate's leave: the
+     * missing end date is meant ("still sick"), not a form left blank.
+     */
+    public bool $keepOpenEnd = false;
+
     /** Keep model source-of-truth in sync (or move to an Observer) */
     protected static function booted(): void
     {
@@ -399,9 +436,15 @@ class Leave extends Model
             $durationUnit = $model->normalizedDurationUnit();
             $model->duration_unit = $durationUnit;
 
+            // An open-ended row stays open when it is saved for an unrelated change.
+            $staysOpen = $durationUnit === 'day' && ! $model->ends_at && (
+                $model->keepOpenEnd
+                || ($model->exists && $model->getOriginal('ends_at') === null && ! $model->isDirty('ends_at'))
+            );
+
             if ($durationUnit !== 'day') {
                 $model->ends_at = $model->starts_at;
-            } elseif (! $model->ends_at) {
+            } elseif (! $model->ends_at && ! $staysOpen) {
                 $model->ends_at = $model->starts_at;
             }
 
@@ -428,7 +471,10 @@ class Leave extends Model
                 }
             }
 
-            if ($model->isDirty(['starts_at', 'ends_at', 'duration_unit']) || is_null($model->total_days)) {
+            if ($staysOpen) {
+                // Counted once the certificate is closed.
+                $model->total_days = null;
+            } elseif ($model->isDirty(['starts_at', 'ends_at', 'duration_unit']) || is_null($model->total_days)) {
                 $model->total_days = $durationUnit === 'day'
                     ? $model->durationDays()
                     : 1;
