@@ -48,6 +48,7 @@ return [
         'education_coefficient' => 'Education coefficient',
         'organization_name' => 'Organization name',
         'disciplinary_sanction_term' => 'Disciplinary sanction term (months)',
+        'sick_certificate_alert_days' => 'Open sick-leave certificate alert threshold (days)',
     ],
     'messages' => [
         'general_description' => 'System-wide parameters and values.',

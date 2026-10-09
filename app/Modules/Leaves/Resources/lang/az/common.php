@@ -8,6 +8,8 @@ return [
         'leaves' => 'İcazələr',
     ],
     'labels' => [
+        'sick_certificate' => 'Xəstəlik vərəqəsi',
+        'sick_certificate_hint' => 'Bu icazə xəstəlik vərəqəsinə bağlıdır; dəyişiklik yalnız vərəqələr reyestrində edilir.',
         'approval_route' => 'Təsdiq marşrutu',
         'approval_steps' => 'Təsdiq addımları',
         'route_details' => 'Marşrut haqqında',
@@ -120,6 +122,7 @@ return [
         'no_hierarchy_chain' => 'Bu əməkdaş üçün ierarxik xətt görünmür.',
     ],
     'validation' => [
+        'managed_by_sick_certificate' => 'Bu icazə xəstəlik vərəqəsinə bağlıdır; onu «Xəstəlik vərəqələri» reyestrində dəyişin.',
         'status_not_allowed' => 'Bu statusu seçmək üçün icazəniz yoxdur. İcazə təsdiq marşrutu ilə təsdiqlənməlidir.',
         'self_approver' => 'Əməkdaş öz icazəsini təsdiqləyə bilməz — başqa təsdiqləyici seçin.',
         'end_before_start' => 'Bitmə tarixi başlama tarixindən əvvəl ola bilməz.',

@@ -48,6 +48,7 @@ return [
         'education_coefficient' => 'Təhsil əmsalı',
         'organization_name' => 'Təşkilatın adı',
         'disciplinary_sanction_term' => 'İntizam tənbehinin qüvvədə qalma müddəti (ay)',
+        'sick_certificate_alert_days' => 'Açıq xəstəlik vərəqəsi üçün xəbərdarlıq həddi (gün)',
     ],
     'messages' => [
         'general_description' => 'Sistem üzrə ümumi parametrlər və dəyərlər.',

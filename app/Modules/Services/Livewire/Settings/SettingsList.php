@@ -622,6 +622,7 @@ class SettingsList extends Component
             'Education coefficient' => __('services::settings.labels.education_coefficient'),
             'Organization name' => __('services::settings.labels.organization_name'),
             'Disciplinary sanction term (months)' => __('services::settings.labels.disciplinary_sanction_term'),
+            'Open sick certificate alert (days)' => __('services::settings.labels.sick_certificate_alert_days'),
             default => ModuleTranslation::resolveStoredText($value),
         };
     }

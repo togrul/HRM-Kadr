@@ -6,6 +6,7 @@ use App\Models\Leave;
 use App\Models\PersonnelBusinessTrip;
 use App\Models\PersonnelVacation;
 use Carbon\Carbon;
+use Illuminate\Validation\ValidationException;
 
 class SelfServiceRequestPatchService
 {
@@ -16,6 +17,10 @@ class SelfServiceRequestPatchService
         }
 
         if ($requestable instanceof Leave) {
+            if ($requestable->isManagedBySickCertificate()) {
+                throw ValidationException::withMessages(['reason' => __('personnel::my_hr.requests.messages.sick_certificate_not_correctable')]);
+            }
+
             $requestable->forceFill(array_intersect_key($patch, array_flip([
                 'starts_at', 'ends_at', 'reason', 'duration_unit', 'partial_day_part', 'starts_time', 'ends_time',
             ])))->save();

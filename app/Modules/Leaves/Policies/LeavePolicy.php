@@ -24,26 +24,32 @@ class LeavePolicy
 
     public function update(User $user, ?Leave $leave = null): bool
     {
-        return $user->can('edit-leaves');
+        return $user->can('edit-leaves') && ! $this->isCertificateLeave($leave);
     }
 
     public function delete(User $user, ?Leave $leave = null): bool
     {
-        return $user->can('delete-leaves');
+        return $user->can('delete-leaves') && ! $this->isCertificateLeave($leave);
     }
 
     public function restore(User $user, ?Leave $leave = null): bool
     {
-        return $user->can('delete-leaves');
+        return $user->can('delete-leaves') && ! $this->isCertificateLeave($leave);
     }
 
     public function forceDelete(User $user, ?Leave $leave = null): bool
     {
-        return $user->can('delete-leaves');
+        return $user->can('delete-leaves') && ! $this->isCertificateLeave($leave);
     }
 
     public function export(User $user): bool
     {
         return $user->can('export-leaves');
+    }
+
+    /** Sick-certificate leaves are read-only here; the certificate register owns them. */
+    private function isCertificateLeave(?Leave $leave): bool
+    {
+        return $leave !== null && $leave->isManagedBySickCertificate();
     }
 }

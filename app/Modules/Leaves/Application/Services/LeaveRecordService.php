@@ -83,6 +83,10 @@ class LeaveRecordService
      */
     public function update(Leave $leave, array $payload, User $actor): Leave
     {
+        if ($leave->isManagedBySickCertificate()) {
+            throw ValidationException::withMessages(['starts_at' => __('leaves::common.validation.managed_by_sick_certificate')]);
+        }
+
         $this->assertValid($payload, $actor, $leave);
 
         return DB::transaction(function () use ($leave, $payload, $actor): Leave {

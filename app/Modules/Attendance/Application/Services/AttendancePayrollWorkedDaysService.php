@@ -120,10 +120,14 @@ class AttendancePayrollWorkedDaysService implements PayrollWorkedDays
             ->where('status_id', OrderStatusEnum::APPROVED->value)
             ->where(fn ($query) => $query->whereNull('duration_unit')->orWhere('duration_unit', 'day'))
             ->whereDate('starts_at', '<=', $to)
-            ->whereDate('ends_at', '>=', $from)
+            // An open sick certificate (no end yet) counts up to today.
+            ->where(fn ($query) => $query->whereDate('ends_at', '>=', $from)->orWhereNull('ends_at'))
             ->toBase()
             ->get(['starts_at', 'ends_at'])
-            ->map(fn ($row): array => [substr((string) $row->starts_at, 0, 10), substr((string) $row->ends_at, 0, 10)])
+            ->map(fn ($row): array => [
+                substr((string) $row->starts_at, 0, 10),
+                filled($row->ends_at) ? substr((string) $row->ends_at, 0, 10) : max(substr((string) $row->starts_at, 0, 10), now()->toDateString()),
+            ])
             ->all();
     }
 }
