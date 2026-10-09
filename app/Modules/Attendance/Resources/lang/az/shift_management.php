@@ -33,7 +33,7 @@ return [
         'active_assignment' => 'Aktiv təyinat',
         'current_active_shift' => 'Cari aktiv növbə',
         'no_active_shift_assignment' => 'Aktiv növbə təyinatı yoxdur',
-        'structure_scope' => 'Struktur scope',
+        'structure_scope' => 'Struktur əhatəsi',
         'scope_description' => 'Əməkdaş axtarışı və son təyinatlar seçilmiş struktur ağacı üzrə filtrlənir.',
         'search_personnel_empty' => 'Növbə təyin etmək üçün əməkdaş axtarın',
         'effective_today' => 'Bu gün etibarlıdır',

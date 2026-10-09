@@ -7,12 +7,14 @@ use App\Models\Leave;
 use App\Models\LeaveType;
 use App\Models\OrderStatus;
 use App\Models\Personnel;
+use App\Modules\Leaves\Application\Services\LeaveRecordService;
 use App\Modules\Personnel\Contracts\ApprovalRouteResolver;
 use App\Support\DateInput;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 
 trait InteractsWithLeaveForm
@@ -58,6 +60,13 @@ trait InteractsWithLeaveForm
         }
 
         if ($key === 'assigned_to') {
+            // Nobody approves their own leave.
+            if ($personnelId !== null && $personnelId === $this->selectedApplicantPersonnel()?->id) {
+                $this->addError('leave.assigned_to.id', __('leaves::common.validation.self_approver'));
+
+                return;
+            }
+
             $this->leave->assigned_to = [
                 'id' => $personnelId,
                 'fullname' => $fullname,
@@ -128,10 +137,15 @@ trait InteractsWithLeaveForm
         return $this->searchPersonnelOptions($this->personnelName);
     }
 
+    /** Approver candidates: the employee the leave is for is never offered as their own approver. */
     #[Computed]
     public function assignedPersonnelList(): Collection
     {
-        return $this->searchPersonnelOptions($this->assignedSearch);
+        $applicant = data_get($this->leave->tabel_no, 'tabel_no');
+
+        return $this->searchPersonnelOptions($this->assignedSearch)
+            ->reject(fn (Personnel $personnel): bool => $applicant !== null && $personnel->tabel_no === $applicant)
+            ->values();
     }
 
     #[Computed]
@@ -297,19 +311,31 @@ trait InteractsWithLeaveForm
             : null;
     }
 
-    #[Computed(cache: true)]
+    /**
+     * Statuses the current user may give this leave: "awaiting approval" always, "approved"
+     * only with the approve-leaves permission (LeaveRecordService enforces the same on save),
+     * plus the status an edited leave already has.
+     */
+    #[Computed]
     public function statuses(): array
     {
-        $selected = $this->leave->status_id;
-        $cacheKey = 'leaves:form-statuses:'.app()->getLocale();
+        $locale = app()->getLocale();
+        $allowed = app(LeaveRecordService::class)->allowedStatusIds(auth()->user());
+        $current = $this->editedLeaveStatusId();
+        if ($current !== null) {
+            $allowed[] = $current;
+        }
 
         $options = Cache::remember(
-            $cacheKey,
+            'leaves:form-statuses:'.$locale,
             now()->addMinutes(10),
             fn (): array => OrderStatus::query()
-                ->select('id', DB::raw('name as label'))
+                ->select('id', 'locale', DB::raw('name as label'))
                 ->orderBy('id')
                 ->get()
+                // One row per status, in the UI language when the table has it.
+                ->groupBy('id')
+                ->map(fn (Collection $rows): OrderStatus => $rows->firstWhere('locale', $locale) ?? $rows->first())
                 ->map(fn (OrderStatus $status): array => [
                     'id' => (int) $status->id,
                     'label' => (string) $status->label,
@@ -318,32 +344,39 @@ trait InteractsWithLeaveForm
                 ->all()
         );
 
-        if (! $selected) {
-            return $options;
-        }
-
-        $hasSelected = collect($options)->contains(fn (array $option): bool => (int) $option['id'] === (int) $selected);
-
-        if ($hasSelected) {
-            return $options;
-        }
-
-        $selectedOption = OrderStatus::query()
-            ->select('id', DB::raw('name as label'))
-            ->find($selected);
-
-        if (! $selectedOption) {
-            return $options;
-        }
-
         return collect($options)
-            ->prepend([
-                'id' => (int) $selectedOption->id,
-                'label' => (string) $selectedOption->label,
-            ])
-            ->unique('id')
+            ->filter(fn (array $option): bool => in_array((int) $option['id'], $allowed, true))
             ->values()
             ->all();
+    }
+
+    /** The status the edited leave was loaded with (null while recording a new one). */
+    protected function editedLeaveStatusId(): ?int
+    {
+        return null;
+    }
+
+    /**
+     * Run a LeaveRecordService call and put its rule violations on the form's fields.
+     *
+     * @template T
+     *
+     * @param  callable(): T  $callback
+     * @return T
+     *
+     * @throws ValidationException
+     */
+    protected function withLeaveFormErrors(callable $callback): mixed
+    {
+        try {
+            return $callback();
+        } catch (ValidationException $exception) {
+            throw ValidationException::withMessages(
+                collect($exception->errors())
+                    ->mapWithKeys(fn (array $messages, string $field): array => ['leave.'.$field => $messages])
+                    ->all()
+            );
+        }
     }
 
     protected function recalculateLeaveDuration(): void
@@ -654,7 +687,7 @@ trait InteractsWithLeaveForm
 
     private function buildAssignmentPreview(): array
     {
-        $personnel = $this->selectedApplicantPersonnel;
+        $personnel = $this->selectedApplicantPersonnel();
 
         if (! $personnel) {
             return [

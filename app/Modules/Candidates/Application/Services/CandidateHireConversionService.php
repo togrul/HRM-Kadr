@@ -26,15 +26,19 @@ class CandidateHireConversionService
     public function convertCandidateForOrder(Candidate $candidate, array $component, int|string $status): Personnel
     {
         return DB::transaction(function () use ($candidate, $component, $status): Personnel {
+            $isPending = (int) $status !== OrderStatusEnum::APPROVED->value;
             $linkedPersonnel = $this->linkedApplicationPersonnel($candidate);
 
             if ($linkedPersonnel instanceof Personnel) {
+                if (! $isPending) {
+                    $this->recordOrderHire($candidate, $linkedPersonnel, $component);
+                }
+
                 return $linkedPersonnel;
             }
 
             $structureId = $this->valueAsInt($component, 'structure_id') ?: $candidate->structure_id;
             $positionId = $this->valueAsInt($component, 'position_id');
-            $isPending = (int) $status !== OrderStatusEnum::APPROVED->value;
             $joinDate = Carbon::parse($component['join_date'] ?? today());
             $tabelNo = $isPending
                 ? "NMZD{$candidate->id}"
@@ -91,6 +95,7 @@ class CandidateHireConversionService
                     'join_date' => $joinDate,
                     'actor_id' => $candidate->creator_id ?? auth()->id(),
                 ]);
+                $this->recordOrderHire($candidate, $personnel, $component);
             }
 
             return $personnel;
@@ -190,6 +195,23 @@ class CandidateHireConversionService
 
             return $personnel;
         }, 3);
+    }
+
+    /**
+     * Link the candidate to the employee and the approved hire order that created them.
+     *
+     * @param  array<string, mixed>  $component
+     */
+    private function recordOrderHire(Candidate $candidate, Personnel $personnel, array $component): void
+    {
+        $orderNo = $component['order_no'] ?? null;
+
+        app(CandidateHireOrderService::class)->recordHire(
+            $candidate,
+            $personnel,
+            $this->valueAsInt($component, 'order_id'),
+            is_scalar($orderNo) ? (string) $orderNo : null,
+        );
     }
 
     private function findExistingPersonnel(CandidateApplication $application): ?Personnel

@@ -21,6 +21,7 @@ use App\Traits\NormalizesDropdownPayloads;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Validator;
 use Livewire\Attributes\On;
 use Livewire\WithFileUploads;
 
@@ -138,6 +139,66 @@ trait PersonnelCrud
 
         $this->syncChildStepPayload($step, $payload);
         $this->storeFromChildValidation();
+    }
+
+    /**
+     * Düzəldilmiş sahənin köhnə xəta mesajı ekranda qalmasın: sahədə xəta varsa yalnız
+     * onu (və ondan asılı tarix sahələrini) yenidən yoxlayırıq — dəyər artıq düzgündürsə
+     * mesaj silinir, hələ səhvdirsə yenilənir.
+     */
+    public function updatedPersonalForm(mixed $value, string $key): void
+    {
+        if ($key === 'personnel.structure_id') {
+            $this->dropPositionOutsideStructure();
+        }
+
+        $dependents = [
+            'personnel.join_work_date' => ['personnel.contract_date', 'personnel.contract_end_date', 'personnel.birthdate'],
+            'personnel.contract_type' => ['personnel.contract_end_date'],
+            'personnel.probation_unit' => ['personnel.probation_amount'],
+        ];
+
+        $fields = array_map(
+            fn (string $field): string => 'personalForm.'.$field,
+            [$key, ...($dependents[$key] ?? [])]
+        );
+
+        $withErrors = array_values(array_filter($fields, fn (string $field): bool => $this->getErrorBag()->has($field)));
+
+        if ($withErrors === []) {
+            return;
+        }
+
+        $rules = $this->validationRules()[1] ?? [];
+        $data = ['personalForm' => ['personnel' => $this->personalForm->personnel]];
+
+        foreach ($withErrors as $field) {
+            $this->resetErrorBag($field);
+
+            if (! array_key_exists($field, $rules)) {
+                continue;
+            }
+
+            $validator = Validator::make($data, [$field => $rules[$field]], $this->messages(), $this->validationAttributes());
+
+            if ($validator->fails()) {
+                $this->addError($field, (string) $validator->errors()->first($field));
+            }
+        }
+    }
+
+    /**
+     * Yeni struktur seçiləndə, əvvəl seçilmiş vəzifə həmin strukturun ştat cədvəlində
+     * yoxdursa, seçim sıfırlanır ki, uyğunsuz struktur–vəzifə cütü saxlanmasın.
+     */
+    protected function dropPositionOutsideStructure(): void
+    {
+        $positionId = (int) data_get($this->personalForm->personnel, 'position_id');
+        $allowed = $this->structurePositionIds();
+
+        if ($positionId > 0 && $allowed !== [] && ! in_array($positionId, $allowed, true)) {
+            $this->personalForm->personnel['position_id'] = null;
+        }
     }
 
     public function updatedAvatar(): void
@@ -283,6 +344,7 @@ trait PersonnelCrud
                 'height' => 173,
                 'document_issued_authority' => 'ASAN 2',
                 'document_issued_date' => '2020-05-25',
+                'valid_date' => '2030-05-25',
             ];
         }
 

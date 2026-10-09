@@ -12,6 +12,7 @@
     $workScheduleOptions = EmploymentTerms::options(EmploymentTerms::WORK_SCHEDULES, 'work_schedule');
     $restDayOptions = EmploymentTerms::options(EmploymentTerms::REST_DAYS, 'rest_day');
 
+    $isFixedTermContract = ($personal['contract_type'] ?? null) === EmploymentTerms::CONTRACT_TYPE_FIXED;
     $probationUnit = $personal['probation_unit'] ?? null;
     $probationUnitLabel = $probationUnit ? __('personnel::common.employment.probation_unit.'.$probationUnit) : '';
     $workSchedule = $personal['work_schedule'] ?? null;
@@ -294,9 +295,15 @@
                     :disabled="!empty($personnelModel)"
                 >
                 </x-ui.select-dropdown>
+                @if (empty($personnelModel) && $this->positionListFallsBackToAll)
+                    <p class="mt-1 text-[11.5px] leading-4 text-ink-faint">{{ __('personnel::common.hints.positions_without_staff_schedule') }}</p>
+                @endif
                 @error('personalForm.personnel.position_id')
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
+                @if (empty($personnelModel) && method_exists($this, 'staffSlotCheck') && $this->staffSlotCheck->hasWarning())
+                    <p class="mt-1 rounded-lg bg-amber-50 px-2.5 py-1.5 text-[12px] leading-snug text-amber-800" role="status">{{ $this->staffSlotCheck->message() }}</p>
+                @endif
             </div>
         </div>
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -362,14 +369,17 @@
                 @enderror
             </div>
             <div class="flex flex-col">
-                <x-label for="personnel.leave_work_date">{{ __('personnel::common.labels.leave_work_date') }}</x-label>
-                <x-pikaday-input mode="gray" name="personnel.leave_work_date" format="Y-MM-DD" wire:model.live="personalForm.personnel.leave_work_date">
+                <x-label :required="$isFixedTermContract" for="personnel.contract_end_date">{{ __('personnel::common.labels.contract_end_date') }}</x-label>
+                <x-pikaday-input mode="gray" name="personnel.contract_end_date" format="Y-MM-DD" wire:model.live="personalForm.personnel.contract_end_date">
                     <x-slot name="script">
                       $el.onchange = function () {
-                      @this.set('personalForm.personnel.leave_work_date', $el.value);
+                      @this.set('personalForm.personnel.contract_end_date', $el.value);
                       }
                     </x-slot>
                 </x-pikaday-input>
+                @error('personalForm.personnel.contract_end_date')
+                <x-validation> {{ $message }} </x-validation>
+                @enderror
             </div>
         </div>
         <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
@@ -445,6 +455,17 @@
                 <x-validation> {{ $message }} </x-validation>
                 @enderror
             </div>
+        </div>
+        {{-- Reduced weekly norm (ƏM m.91–92) the record cannot show by itself; age and disability are applied automatically. --}}
+        <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+            <div class="flex flex-col">
+                <x-label for="personnel.weekly_hours_norm">{{ __('personnel::common.labels.weekly_hours_norm') }}</x-label>
+                <x-ui.input type="number" id="personnel.weekly_hours_norm" name="personnel.weekly_hours_norm" min="1" max="40" step="0.1" placeholder="40" wire:model="personalForm.personnel.weekly_hours_norm" />
+                @error('personalForm.personnel.weekly_hours_norm')
+                <x-validation> {{ $message }} </x-validation>
+                @enderror
+            </div>
+            <p class="text-xs leading-5 text-ink-faint md:col-span-2 md:self-end">{{ __('personnel::common.labels.weekly_hours_norm_hint') }}</p>
         </div>
         {{-- A working week has fixed daily hours, a lunch break and rest days; a shift rota has neither. --}}
         @if ($isWeeklySchedule)

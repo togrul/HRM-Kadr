@@ -28,7 +28,7 @@
             <p class="px-4 py-6 text-[12.5px] text-ink-faint">{{ __('payroll::dashboard.loans.select_personnel') }}</p>
         @else
             @if ($canManage)
-                <div class="grid gap-3 border-b border-hairline-subtle px-4 py-4 sm:grid-cols-2 xl:grid-cols-5">
+                <div class="grid gap-3 border-b border-hairline-subtle px-4 py-4 sm:grid-cols-2 xl:grid-cols-6">
                     <div class="min-w-0">
                         <x-ui.select-dropdown
                             :label="__('payroll::dashboard.fields.loan_type')"
@@ -47,6 +47,10 @@
                     <x-ui.input-shell :label="__('payroll::dashboard.fields.monthly_installment')" :error="$errors->first('loanForm.monthly_installment')">
                         <x-ui.input type="number" step="0.01" wire:model="loanForm.monthly_installment" />
                     </x-ui.input-shell>
+                    <div class="min-w-0">
+                        <x-ui.select-dropdown :label="__('payroll::dashboard.fields.currency')" mode="gray" direction="auto" :clearable="false" wire:model.live="loanForm.currency" :model="$this->currencyOptions" />
+                        @error('loanForm.currency') <x-validation>{{ $message }}</x-validation> @enderror
+                    </div>
                     <x-ui.input-shell :label="__('payroll::dashboard.fields.start_on')" :error="$errors->first('loanForm.start_on')">
                         <x-ui.input type="date" wire:model="loanForm.start_on" />
                     </x-ui.input-shell>

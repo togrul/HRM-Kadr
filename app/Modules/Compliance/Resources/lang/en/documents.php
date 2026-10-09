@@ -5,9 +5,11 @@ return [
     'title' => 'Document expiry and compliance center',
     'description' => 'Track expired and soon-expiring employee documents from one operational panel.',
     'summary' => [
+        'critical' => 'Critical',
+        'critical_hint' => 'Expired plus missing mandatory documents',
         'total' => 'Total documents',
         'expired' => 'Expired',
-        'expiring_30' => 'Critical',
+        'expiring_30' => 'Expiring soon',
         'expiring_60' => 'Approaching',
         'valid' => 'Valid',
         'missing' => 'Missing document',
@@ -28,11 +30,12 @@ return [
     'types' => [
         'service_card' => 'Service card',
         'passport' => 'Passport',
+        'id_card' => 'ID card',
         'contract' => 'Employment contract',
     ],
     'status' => [
         'expired' => 'Expired',
-        'expiring_30' => 'Critical',
+        'expiring_30' => 'Expiring soon',
         'expiring_60' => 'Approaching',
         'valid' => 'Valid',
         'missing' => 'Missing document',
@@ -43,7 +46,9 @@ return [
         'export_csv' => 'Export CSV',
     ],
     'labels' => [
-        'type_window' => 'Critical ≤ :critical · Approaching ≤ :warning days',
+        'days_overdue' => ':days days overdue',
+        'days_left' => ':days days left',
+        'type_window' => 'Expiring soon ≤ :critical · Approaching ≤ :warning days',
         'unassigned' => 'Unassigned',
         'result_count' => ':count results',
         'document_count' => ':count documents',

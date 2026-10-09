@@ -12,6 +12,22 @@
     <link rel="stylesheet" href="{{ asset('assets/css/pikaday.min.css') }}">
     <script src="{{ asset('assets/js/moment.min.js') }}"></script>
     <script src="{{ asset('assets/js/pikaday.min.js') }}"></script>
+    @php
+        $dateLocale = app()->getLocale();
+        $hasDateNames = \Illuminate\Support\Facades\Lang::hasForLocale('ui::date.months', $dateLocale);
+    @endphp
+    {{-- every date picker reads its calendar language from here (resources/js/date-picker.js);
+         a locale without its own catalogue gets month/day names from the browser's Intl --}}
+    <script>window.hrmDateLocale = @js([
+        'locale' => $dateLocale,
+        'previousMonth' => __('ui::date.previous_month'),
+        'nextMonth' => __('ui::date.next_month'),
+        'names' => $hasDateNames ? [
+            'months' => __('ui::date.months'),
+            'weekdays' => __('ui::date.weekdays'),
+            'weekdaysShort' => __('ui::date.weekdays_short'),
+        ] : null,
+    ]);</script>
     {{-- read before first paint, so a collapsed context panel never flashes open and shifts the page --}}
     <script>try { if (localStorage.getItem('hrm.panelCollapsed') === '1') document.documentElement.setAttribute('data-panel-collapsed', ''); } catch (e) {}</script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])

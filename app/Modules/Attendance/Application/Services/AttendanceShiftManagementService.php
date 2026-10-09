@@ -151,8 +151,8 @@ class AttendanceShiftManagementService
 
         $assignment->tabel_no = $tabelNo;
         $assignment->shift_id = (int) ($payload['shift_id'] ?? 0);
-        $assignment->effective_from = $effectiveFrom;
-        $assignment->effective_to = $effectiveTo;
+        $assignment->effective_from = Carbon::parse($effectiveFrom);
+        $assignment->effective_to = $effectiveTo !== null ? Carbon::parse($effectiveTo) : null;
         $assignment->assignment_source = (string) ($payload['assignment_source'] ?? 'manual_ui');
         $assignment->is_active = (bool) ($payload['is_active'] ?? true);
         $assignment->updated_by = $userId;
@@ -191,7 +191,7 @@ class AttendanceShiftManagementService
 
         $assignment->is_active = false;
         if ($assignment->effective_to === null || $assignment->effective_to->isFuture()) {
-            $assignment->effective_to = now()->toDateString();
+            $assignment->effective_to = now()->startOfDay();
         }
         $assignment->updated_by = $userId;
         $assignment->save();

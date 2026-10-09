@@ -19,3 +19,4 @@ storage/framework/sessions/*
 storage/framework/views/*
 public/hot
 **/.DS_Store
+public/storage

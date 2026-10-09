@@ -35,10 +35,26 @@ trait CandidateCrud
 
     public function rules(): array
     {
-        return array_merge(
-            app(CandidateProfileFieldSchemaService::class)->coreRules(),
-            app(CandidateProfileFieldSchemaService::class)->packRules($this->candidateWorkflowPack())
+        return app(CandidateProfileFieldSchemaService::class)->formRules(
+            $this->candidateWorkflowPack(),
+            is_array($this->candidate) ? $this->candidate : []
         );
+    }
+
+    /** Whether a core field is mandatory — renders the `*` marker on its label. */
+    public function isCandidateFieldRequired(string $key): bool
+    {
+        return app(CandidateProfileFieldSchemaService::class)->isRequired($key);
+    }
+
+    /**
+     * Normalise free-text input before it is validated and stored (the phone keeps only
+     * digits and a leading "+").
+     */
+    protected function prepareCandidateForSave(): void
+    {
+        $this->candidate['phone'] = app(CandidateProfileFieldSchemaService::class)
+            ->normalizePhone(data_get($this->candidate, 'phone'));
     }
 
     protected function validationAttributes(): array
@@ -114,11 +130,6 @@ trait CandidateCrud
     public function isMilitaryCandidateMode(): bool
     {
         return $this->candidateMode === CandidateModeResolver::MILITARY;
-    }
-
-    public function candidateModeLabel(): string
-    {
-        return app(CandidateModeResolver::class)->label($this->candidateMode);
     }
 
     public function candidateWorkflowPack(): string

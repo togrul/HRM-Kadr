@@ -7,6 +7,7 @@ use App\Models\PayScale;
 use App\Models\Position;
 use App\Models\RankCategory;
 use App\Modules\Compensation\Application\Services\SalaryScaleService;
+use App\Support\Currency;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
@@ -29,7 +30,7 @@ class ScalesTab extends CompensationTab
     public array $scaleForm = [
         'name' => '',
         'regime_id' => null,
-        'currency' => 'AZN',
+        'currency' => Currency::DEFAULT,
         'effective_from' => '',
         'effective_to' => '',
         'is_active' => true,
@@ -164,6 +165,17 @@ class ScalesTab extends CompensationTab
         ];
     }
 
+    /**
+     * @return list<array{id: string, label: string}>
+     */
+    #[Computed]
+    public function currencyOptions(): array
+    {
+        $current = (string) ($this->scaleForm['currency'] ?? '');
+
+        return Currency::options($current, __('compensation::dashboard.fields.currency_legacy', ['code' => $current]));
+    }
+
     public function updatedScaleSearch(): void
     {
         $this->resetPage('scalesPage');
@@ -194,7 +206,7 @@ class ScalesTab extends CompensationTab
         $data = $this->validate([
             'scaleForm.name' => 'required|string|max:255',
             'scaleForm.regime_id' => 'required|exists:compensation_regimes,id',
-            'scaleForm.currency' => 'required|string|size:3',
+            'scaleForm.currency' => Currency::rules(),
             'scaleForm.effective_from' => 'required|date',
             'scaleForm.effective_to' => 'nullable|date|after_or_equal:scaleForm.effective_from',
             'scaleForm.is_active' => 'boolean',
@@ -241,7 +253,7 @@ class ScalesTab extends CompensationTab
     {
         $this->editingScaleId = null;
         $this->scaleForm = [
-            'name' => '', 'regime_id' => null, 'currency' => 'AZN',
+            'name' => '', 'regime_id' => null, 'currency' => Currency::DEFAULT,
             'effective_from' => '', 'effective_to' => '', 'is_active' => true, 'description' => '',
         ];
         $this->panel = '';

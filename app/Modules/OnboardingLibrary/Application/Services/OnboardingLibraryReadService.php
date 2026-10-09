@@ -114,6 +114,32 @@ class OnboardingLibraryReadService extends AbstractLibraryReadService
         return 'onboarding-library';
     }
 
+    /**
+     * Heç kimə təyin edilməmiş və yeni versiyası olmayan sənəd tam silinə bilər;
+     * təyin olunmuş sənəd tanışlıq izini qorumaq üçün yalnız arxivlənir.
+     *
+     * @param  list<int>  $ids
+     * @return list<int>
+     */
+    protected function deletableIds(array $ids): array
+    {
+        if ($ids === []) {
+            return [];
+        }
+
+        return OnboardingDocumentTemplate::query()
+            ->whereKey($ids)
+            ->whereDoesntHave('assignments')
+            ->whereNotExists(function ($query): void {
+                $query->selectRaw('1')
+                    ->from('onboarding_document_templates as next_versions')
+                    ->whereColumn('next_versions.previous_version_id', 'onboarding_document_templates.id');
+            })
+            ->pluck('id')
+            ->map(fn (mixed $id): int => (int) $id)
+            ->all();
+    }
+
     protected function libraryModel(): string
     {
         return OnboardingDocumentTemplate::class;
@@ -144,12 +170,14 @@ class OnboardingLibraryReadService extends AbstractLibraryReadService
      */
     protected function itemMeta(Model $item): ?string
     {
-        return filled($item->version) ? 'v'.$item->version : null;
+        $version = $item->getAttribute('version');
+
+        return filled($version) ? 'v'.$version : null;
     }
 
     protected function itemUrl(Model $item): ?string
     {
-        return $item->fileUrl();
+        return $item instanceof OnboardingDocumentTemplate ? $item->fileUrl() : null;
     }
 
     protected function summaryData(): array

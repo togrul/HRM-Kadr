@@ -4,6 +4,7 @@ namespace App\Models\Concerns;
 
 use App\Models\PersonnelBusinessTrip;
 use App\Models\PersonnelVacation;
+use App\Support\Language\AzerbaijaniPatronymic;
 use Carbon\Carbon;
 
 /**
@@ -20,9 +21,32 @@ trait HasPersonnelAttributes
         return "{$this->surname} {$this->name} {$this->patronymic}";
     }
 
+    /**
+     * Ata adı şəkilçisiz saxlanılır ("Hikmət oğlu" → "Hikmət"); "oğlu/qızı" göstərilərkən
+     * cinsə görə əlavə olunur. Bu, formadan, idxaldan və namizəddən işçiyə keçiddən
+     * gələn bütün yazılara eyni qaydanı tətbiq edir.
+     */
+    public function setPatronymicAttribute(mixed $value): void
+    {
+        $this->attributes['patronymic'] = is_string($value) ? AzerbaijaniPatronymic::strip($value) : $value;
+    }
+
+    /**
+     * The form posts an empty string for a cleared field and may use a decimal comma
+     * ("7,5"); the column takes a number or null.
+     */
+    public function setWeeklyHoursNormAttribute(mixed $value): void
+    {
+        $value = is_string($value) ? str_replace(',', '.', trim($value)) : $value;
+
+        $this->attributes['weekly_hours_norm'] = ($value === null || $value === '' || ! is_numeric($value))
+            ? null
+            : round((float) $value, 1);
+    }
+
     public function getFullnameMaxAttribute(): string
     {
-        return $this->fullname.' '.($this->gender == 2 ? 'qızı' : 'oğlu');
+        return AzerbaijaniPatronymic::appendTo($this->fullname, $this->gender);
     }
 
     public function getActiveVacationAttribute(): ?PersonnelVacation

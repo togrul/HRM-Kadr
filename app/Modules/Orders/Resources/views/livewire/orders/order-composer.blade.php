@@ -42,13 +42,23 @@
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                    <x-label for="presetCode">{{ __('orders::order_composer.labels.type') }}</x-label>
-                    <x-ui.select class="mt-1 {{ $isEditing ? 'opacity-60' : '' }}" wire:model.live="presetCode" id="presetCode" :disabled="$isEditing">
-                        <option value="">—</option>
-                        @foreach ($this->presets as $code => $label)
-                            <option value="{{ $code }}">{{ $label }}</option>
-                        @endforeach
-                    </x-ui.select>
+                    @php
+                        $presetOptions = collect($this->presets)
+                            ->map(fn ($label, $code) => ['id' => (string) $code, 'label' => (string) $label])
+                            ->values()
+                            ->all();
+                    @endphp
+                    <x-ui.select-dropdown
+                        :label="__('orders::order_composer.labels.type')"
+                        placeholder="—"
+                        wire:key="order-composer-preset"
+                        wire:model.live="presetCode"
+                        id="presetCode"
+                        :model="$presetOptions"
+                        :disabled="$isEditing"
+                        :searchable="count($presetOptions) > 6"
+                        mode="gray"
+                    />
                     @error('presetCode') <x-validation>{{ $message }}</x-validation> @enderror
                 </div>
 

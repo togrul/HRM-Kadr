@@ -19,11 +19,11 @@
                 </div>
                 <div>
                     <x-label for="attendance-ot-from">{{ __('attendance::overtime.filters.from') }}</x-label>
-                    <input id="attendance-ot-from" wire:model.live="fromDate" type="date" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
+                    <x-ui.date-input id="attendance-ot-from" wire:model.live="fromDate" />
                 </div>
                 <div>
                     <x-label for="attendance-ot-to">{{ __('attendance::overtime.filters.to') }}</x-label>
-                    <input id="attendance-ot-to" wire:model.live="toDate" type="date" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
+                    <x-ui.date-input id="attendance-ot-to" wire:model.live="toDate" />
                 </div>
             </div>
 
@@ -77,7 +77,7 @@
                 </div>
                 <div>
                     <x-label for="attendance-ot-create-date">{{ __('attendance::overtime.create.date') }}</x-label>
-                    <input id="attendance-ot-create-date" wire:model.live="manualRequest.date" type="date" class="w-full min-w-0 rounded-[10px] border border-hairline bg-[#f4f4f5] text-ink shadow-sm outline-none transition-colors placeholder:text-ink-faint focus:border-ink focus:bg-white focus:ring-[3px] focus:ring-[#e4e4e7] disabled:cursor-not-allowed disabled:opacity-50 h-10 px-3 text-base sm:text-sm" />
+                    <x-ui.date-input id="attendance-ot-create-date" wire:model.live="manualRequest.date" />
                 </div>
                 <div>
                     <x-label for="attendance-ot-create-minutes">{{ __('attendance::overtime.create.requested_minutes') }}</x-label>

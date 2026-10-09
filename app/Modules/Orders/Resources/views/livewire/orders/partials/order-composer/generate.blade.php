@@ -1,5 +1,5 @@
 {{-- Step 3: preview / download / issue actions and the inline PDF preview.
-     Expects: $isEditing, $previewPdf. --}}
+     Expects: $isEditing, $previewPdf, $previewHtml. --}}
 <section class="space-y-4 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
     <div class="flex items-center gap-2 text-sm font-semibold text-zinc-900">
         <span class="flex items-center justify-center w-6 h-6 text-xs text-white rounded-full bg-zinc-900">3</span>
@@ -33,6 +33,14 @@
     @if ($previewPdf !== '')
         <div wire:loading.remove wire:target="preview" class="overflow-hidden rounded-xl border border-zinc-200 shadow-inner">
             <iframe src="data:application/pdf;base64,{{ $previewPdf }}" class="h-[70vh] w-full" title="preview"></iframe>
+        </div>
+    @elseif ($previewHtml !== '')
+        {{-- No LibreOffice on this host: the same document as HTML, in a script-less sandbox. --}}
+        <div wire:loading.remove wire:target="preview" class="space-y-2">
+            <p class="text-xs text-zinc-500">{{ __('orders::order_list.preview.html_fallback') }}</p>
+            <div class="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-inner">
+                <iframe sandbox srcdoc="{{ $previewHtml }}" class="h-[70vh] w-full" title="preview"></iframe>
+            </div>
         </div>
     @endif
 </section>

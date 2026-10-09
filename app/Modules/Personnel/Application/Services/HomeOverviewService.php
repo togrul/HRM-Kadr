@@ -9,6 +9,7 @@ use App\Models\OrderLog;
 use App\Models\PersonnelVacation;
 use App\Models\User;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestReviewReadService;
+use App\Modules\Staff\Contracts\StaffingLookup;
 use App\Support\Database\InstalledTables;
 use Carbon\CarbonImmutable;
 use Closure;
@@ -44,6 +45,7 @@ class HomeOverviewService
     private const EXPIRY_SOURCES = [
         'personnel_cards' => 'valid_date',
         'personnel_passports' => 'valid_date',
+        'personnel_identity_documents' => 'valid_date',
         'personnel_contracts' => 'contract_ends_at',
     ];
 
@@ -523,29 +525,30 @@ class HomeOverviewService
             return [];
         }
 
-        return DB::table('staff_schedules')
-            ->join('structures', 'structures.id', '=', 'staff_schedules.structure_id')
-            ->selectRaw('structures.id, structures.name, SUM(staff_schedules.total) as total, SUM(staff_schedules.filled) as filled')
-            ->groupBy('structures.id', 'structures.name')
-            ->havingRaw('SUM(staff_schedules.total) > 0')
-            ->orderByDesc('total')
-            ->limit($limit)
-            ->get()
-            ->map(function (object $row): array {
-                $total = (int) $row->total;
-                $filled = min((int) $row->filled, $total);
+        // Dolu comes from the live headcount (the stored staff_schedules.filled counter
+        // drifts), credited per ştat row only up to its own total.
+        $fill = array_filter(app(StaffingLookup::class)->structureFill(), fn (array $row): bool => $row['total'] > 0);
+        if ($fill === []) {
+            return [];
+        }
 
-                return [
-                    'id' => (int) $row->id,
-                    'name' => (string) $row->name,
-                    'total' => $total,
-                    'filled' => $filled,
-                    'vacant' => $total - $filled,
-                    'pct' => $total > 0 ? (int) round(($filled / $total) * 100) : 0,
-                ];
-            })
-            ->values()
-            ->all();
+        uasort($fill, fn (array $a, array $b): int => $b['total'] <=> $a['total']);
+        $fill = array_slice($fill, 0, $limit, true);
+        $names = DB::table('structures')->whereIn('id', array_keys($fill))->pluck('name', 'id');
+
+        $result = [];
+        foreach ($fill as $id => $row) {
+            $result[] = [
+                'id' => (int) $id,
+                'name' => (string) ($names[$id] ?? ''),
+                'total' => $row['total'],
+                'filled' => $row['filled'],
+                'vacant' => $row['total'] - $row['filled'],
+                'pct' => (int) round(($row['filled'] / $row['total']) * 100),
+            ];
+        }
+
+        return $result;
     }
 
     /**

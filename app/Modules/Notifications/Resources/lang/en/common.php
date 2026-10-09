@@ -339,6 +339,7 @@ return [
         'message' => 'Short system message',
     ],
     'labels' => [
+        'unread_count' => '{1} :count unread notification|[2,*] :count unread notifications',
         'count' => 'Count',
         'attempts' => 'Attempts',
         'clear_all_confirm' => 'Every notification will be deleted. Continue?',

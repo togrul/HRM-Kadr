@@ -25,7 +25,7 @@ return [
         'up_to' => 'Həddə qədər',
         'rate' => 'Faiz (%)',
         'brackets' => 'Pillələr',
-        'default_regime' => 'Bütün rejimlər (default)',
+        'default_regime' => 'Bütün rejimlər (standart)',
         'bracket_count' => ':count pillə',
         'top_rate' => '(maksimum)',
         'components' => [
@@ -94,6 +94,7 @@ return [
         'name' => 'Ad',
         'regime' => 'Rejim',
         'currency' => 'Valyuta',
+        'currency_legacy' => ':code (dəstəklənməyən kod)',
         'effective_from' => 'Qüvvəyə minmə',
         'effective_to' => 'Bitmə',
         'code' => 'Kod',

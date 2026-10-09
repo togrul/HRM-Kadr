@@ -7,6 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int|null $structure_id
+ * @property int|null $position_id
+ * @property string|null $title
+ * @property string|null $profile_pack
+ * @property int|null $owner_id
+ */
 class JobOpening extends Model
 {
     use HasFactory;

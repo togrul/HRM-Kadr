@@ -25,17 +25,66 @@ function attendanceAdmin(): User
 it('leads the overview with linked work queues and reads durations as hours', function (): void {
     $this->actingAs(attendanceAdmin());
 
-    $html = Livewire::withQueryParams(['year' => 2026, 'month' => 9])->test(Dashboard::class)->html();
+    $component = Livewire::withQueryParams(['year' => 2026, 'month' => 9])->test(Dashboard::class);
+    $html = $component->html();
+    $stats = loadAttendanceIsland($component, 'attendance-overview-stats');
 
     expect($html)
         ->toContain(__('attendance::dashboard.cards.needs_attention'))
         ->toContain(e(route('attendance', ['tab' => 'manual', 'year' => 2026, 'month' => 9])))
         ->toContain(e(route('attendance', ['tab' => 'exceptions', 'year' => 2026, 'month' => 9])))
-        ->toContain('>198<')
+        ->and($stats)
+        ->toContain('>176<')
         ->toContain(__('attendance::dashboard.units.hours'))
-        ->and(strpos($html, __('attendance::dashboard.cards.needs_attention')))
-        ->toBeLessThan(strpos($html, __('attendance::dashboard.cards.attendance_statistics')));
+        ->toContain(__('attendance::dashboard.cards.attendance_statistics'));
 });
+
+it('paints the overview statistics as a skeleton first and reads the month aggregates only on the deferred request', function (): void {
+    $this->actingAs(attendanceAdmin());
+
+    \Illuminate\Support\Facades\DB::enableQueryLog();
+    $component = Livewire::withQueryParams(['year' => 2026, 'month' => 9])->test(Dashboard::class);
+    $firstPaint = collect(\Illuminate\Support\Facades\DB::getQueryLog())->pluck('query')->implode("\n");
+
+    expect($component->html())
+        ->toContain('aria-busy="true"')
+        ->toContain('wire:init="__lazyLoadIsland"')
+        ->not->toContain(__('attendance::dashboard.cards.attendance_statistics'))
+        ->and($firstPaint)->not->toContain('attendance_daily_structure_summaries')
+        ->and($firstPaint)->not->toContain('attendance_daily_ledgers');
+
+    expect(loadAttendanceIsland($component, 'attendance-overview-stats'))
+        ->toContain(__('attendance::dashboard.cards.attendance_statistics'))
+        ->toContain('>176<');
+});
+
+it('re-renders the statistics for the new month when the month stepper moves', function (): void {
+    $this->actingAs(attendanceAdmin());
+
+    $component = Livewire::withQueryParams(['year' => 2026, 'month' => 9])->test(Dashboard::class);
+    loadAttendanceIsland($component, 'attendance-overview-stats');
+
+    $component->call('shiftMonth', 1)->call('shiftMonth', 1);
+
+    // November 2026: 21 workdays × 8 h.
+    expect($component->html())->toContain('>168<')
+        ->and($component->get('month'))->toBe(11);
+});
+
+/**
+ * Replays the request the browser sends for a deferred island.
+ */
+function loadAttendanceIsland(\Livewire\Features\SupportTesting\Testable $component, string $island): string
+{
+    $component->update(calls: [[
+        'method' => '__lazyLoadIsland',
+        'params' => [],
+        'path' => '',
+        'metadata' => ['island' => ['name' => $island, 'mode' => 'morph']],
+    ]]);
+
+    return implode('', $component->effects['islandFragments'] ?? []);
+}
 
 it('groups the sections into work, review and settings in the header, leaving the panel to the tree', function (): void {
     $this->actingAs(attendanceAdmin());

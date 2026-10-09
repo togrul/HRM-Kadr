@@ -3,6 +3,7 @@
     'closeAction',
     'closeLabel',
     'width' => '3xl',
+    'guardUnsaved' => true, // false: close at once even with typed-in changes
 ])
 
 @php
@@ -13,11 +14,18 @@
         '5xl' => 'max-w-5xl',
         default => 'max-w-3xl',
     };
+    $guardTexts = [
+        'title' => __('ui::common.unsaved.title'),
+        'message' => __('ui::common.unsaved.message'),
+        'confirm' => __('ui::common.unsaved.discard'),
+        'cancel' => __('ui::common.unsaved.keep_editing'),
+    ];
 @endphp
 
 @teleport('body')
     <div
         x-data="{
+            ...window.hrmUnsavedGuard({ enabled: @js((bool) $guardUnsaved), texts: @js($guardTexts) }),
             open: false,
             closing: false,
             previousFocus: null,
@@ -57,7 +65,7 @@
                     first.focus();
                 }
             },
-            close() {
+            closeNow() {
                 if (this.closing) {
                     return;
                 }
@@ -77,6 +85,14 @@
             show() {
                 this.open = true;
             },
+            {{-- close() is what callers' × buttons use, so it is the guarded path --}}
+            close() {
+                if (this.closing) {
+                    return;
+                }
+
+                this.guardedClose(() => this.closeNow());
+            },
             destroy() {
                 this.unlockBody();
             }
@@ -86,10 +102,14 @@
             lockBody();
             $nextTick(() => {
                 show();
-                $refs.closeButton?.focus();
+                requestAnimationFrame(() => focusFirstField($el.querySelector('section'), $refs.closeButton));
             });
         "
-        x-on:keydown.escape.window.prevent.stop="close()"
+        x-on:keydown.escape.window="$event.preventDefault(); close()"
+        x-on:input="trackDirty($event)"
+        x-on:change="trackDirty($event)"
+        x-on:ui-select-change="trackDirty($event)"
+        x-on:hrm-form-saved.window="resetDirty()"
         x-on:keydown.tab="handleTab($event)"
         class="fixed inset-0 z-[100] overflow-hidden"
         role="dialog"

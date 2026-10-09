@@ -4,10 +4,10 @@ namespace App\Modules\Leaves\Livewire;
 
 use App\Livewire\Forms\LeaveForm;
 use App\Models\Leave;
+use App\Modules\Leaves\Application\Services\LeaveRecordService;
 use App\Modules\Leaves\Livewire\Concerns\InteractsWithLeaveForm;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -26,6 +26,10 @@ class EditLeave extends Component
     public LeaveForm $leave;
 
     public ?int $leaveModel = null;
+
+    /** The status the leave had when opened — keeping it is always allowed. */
+    #[Locked]
+    public ?int $originalStatusId = null;
 
     public function mount(?int $leaveModel = null): void
     {
@@ -57,15 +61,20 @@ class EditLeave extends Component
         $this->leave->validate();
 
         $payload = $this->leave->toPayload();
+        $records = app(LeaveRecordService::class);
+
+        // Business rules first, so a rejected edit never leaves an orphan upload behind.
+        $this->withLeaveFormErrors(fn () => $records->assertValid($payload, auth()->user(), $record));
 
         $file = $this->leave->document_path;
         if ($file instanceof TemporaryUploadedFile) {
             $payload['document_path'] = $file->store('leaves', 'public');
         }
 
-        DB::transaction(fn () => $record->update($payload));
+        $this->withLeaveFormErrors(fn () => $records->update($record, $payload, auth()->user()));
 
         $record = $record->fresh($this->leaveRelations());
+        $this->originalStatusId = $record->status_id !== null ? (int) $record->status_id : null;
         $this->leave->fillFromModel($record);
         $this->syncSelectedLeaveTypeMeta();
         $this->rehydrateAssignmentModeAfterSave($record, $currentAssignmentPreview);
@@ -93,6 +102,7 @@ class EditLeave extends Component
         }
 
         $this->authorize('update', $record);
+        $this->originalStatusId = $record->status_id !== null ? (int) $record->status_id : null;
         $this->leave->fillFromModel($record);
         $this->resetAssignmentPreviewState();
         $this->syncSelectedLeaveTypeMeta();
@@ -104,11 +114,17 @@ class EditLeave extends Component
     {
         $this->title = __('leaves::common.titles.edit_leave');
         $this->leaveModel = null;
+        $this->originalStatusId = null;
         $this->leave->resetForm();
         $this->resetAssignmentPreviewState();
         $this->syncSelectedLeaveTypeMeta();
         $this->initializeAssignmentMode();
         $this->reset('personnelName', 'assignedSearch');
+    }
+
+    protected function editedLeaveStatusId(): ?int
+    {
+        return $this->originalStatusId;
     }
 
     public function render(): View

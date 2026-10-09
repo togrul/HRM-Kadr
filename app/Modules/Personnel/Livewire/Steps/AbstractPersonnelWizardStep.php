@@ -299,6 +299,7 @@ abstract class AbstractPersonnelWizardStep extends Component
                 'height' => 173,
                 'document_issued_authority' => 'ASAN 2',
                 'document_issued_date' => '2020-05-25',
+                'valid_date' => '2030-05-25',
             ];
         }
 

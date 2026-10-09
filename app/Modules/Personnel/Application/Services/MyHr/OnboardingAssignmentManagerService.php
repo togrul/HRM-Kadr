@@ -8,6 +8,7 @@ use App\Models\Personnel;
 use App\Models\User;
 use App\Modules\Personnel\Contracts\OnboardingAssignmentManager;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class OnboardingAssignmentManagerService implements OnboardingAssignmentManager
@@ -172,6 +173,24 @@ class OnboardingAssignmentManagerService implements OnboardingAssignmentManager
             'archived_at' => $archived ? now() : null,
             'archived_by' => $archived ? $user?->id : null,
         ])->save();
+    }
+
+    public function deleteTemplate(OnboardingDocumentTemplate $template): bool
+    {
+        $isReferenced = $template->assignments()->exists()
+            || OnboardingDocumentTemplate::query()->where('previous_version_id', $template->getKey())->exists();
+
+        if ($isReferenced) {
+            return false;
+        }
+
+        if (filled($template->file_path)) {
+            Storage::disk($template->disk ?: 'public')->delete($template->file_path);
+        }
+
+        $template->delete();
+
+        return true;
     }
 
     public function waive(OnboardingDocumentAssignment $assignment): void

@@ -3,6 +3,11 @@
     includes/header.blade.php): a Livewire round-trip morphs this component and orphans any
     Alpine effect declared on its own root, which used to leave the dropdown stuck.
 --}}
+@php
+    $bellLabel = $unreadTotal > 0
+        ? __('notifications::common.titles.module').' — '.trans_choice('notifications::common.labels.unread_count', $unreadTotal, ['count' => $unreadTotal])
+        : __('notifications::common.titles.module');
+@endphp
 <div class="relative flex items-center">
     <button
         type="button"
@@ -18,16 +23,15 @@
                 }
             }
         "
+        aria-label="{{ $bellLabel }}"
+        title="{{ $bellLabel }}"
+        :aria-expanded="isOpen.toString()"
         class="relative inline-flex items-center justify-center w-10 h-10 text-sm font-medium text-blue-500 transition duration-200 ease-in bg-transparent rounded-md hover:bg-white/80 focus:outline-none"
     >
-        <svg  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 font-normal text-zinc-500">
+        <svg  fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 font-normal text-zinc-500" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0M3.124 7.5A8.969 8.969 0 015.292 3m13.416 0a8.969 8.969 0 012.168 4.5" />
         </svg>
-        @if ($notificationCount)
-            <span class="absolute top-0 right-0 flex items-center justify-center w-4 h-4 font-medium text-rose-500 bg-rose-200 rounded-full border-1 text-[11px]">
-                {{ $notificationCount }}
-            </span>
-        @endif
+        <x-ui.count-badge :count="$unreadTotal" />
     </button>
 
     {{--

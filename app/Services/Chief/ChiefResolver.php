@@ -4,13 +4,20 @@ namespace App\Services\Chief;
 
 use App\Models\ChiefDelegation;
 use App\Models\Personnel;
+use App\Models\Position;
 use App\Models\Setting;
 use App\Support\PositionLevel;
 use Carbon\CarbonInterface;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 
 class ChiefResolver
 {
+    /** Son həll edilmiş daimi rəhbərin mənbəyi: 'manual' | 'automatic' | null. */
+    private ?string $permanentChiefSelection = null;
+
+    private ?int $permanentChiefLevel = null;
+
     public function current(null|string|CarbonInterface $date = null): array
     {
         $effectiveDate = $this->normalizeDate($date);
@@ -25,35 +32,97 @@ class ChiefResolver
         return $this->legacySettingsSnapshot($effectiveDate);
     }
 
+    /**
+     * Daimi rəhbər: əl ilə seçilmiş əməkdaş, yoxdursa təşkilatın başçısı.
+     *
+     * Avtomatik qayda təsdiq sırasına (approval_rank) yox, vəzifə səviyyəsinə baxır:
+     * approval_rank təsdiq marşrutunun ayarıdır və HR onu istənilən vəzifəyə yüksək verə bilər,
+     * "təşkilata kim rəhbərlik edir" sualına isə vəzifə səviyyəsi (1 = direktor) cavab verir.
+     * Eyni səviyyədə kök struktur, sonra approval_rank, sonra staj (işə qəbul tarixi), sonra id.
+     */
     private function resolvePermanentChief(CarbonInterface $date): ?Personnel
     {
+        $this->permanentChiefSelection = null;
+        $this->permanentChiefLevel = null;
+
         $manualId = $this->manualChiefPersonnelId();
         if ($manualId > 0) {
             $manualChief = Personnel::query()
-                ->with(['position:id,name,approval_rank,is_approval_target', 'latestRank.rank'])
+                ->with(['position:id,name,approval_rank,is_approval_target,level', 'latestRank.rank'])
                 ->whereKey($manualId)
                 ->first();
 
             if ($manualChief) {
+                $this->permanentChiefSelection = 'manual';
+                $this->permanentChiefLevel = $this->effectiveLevel($manualChief->position);
+
                 return $manualChief;
             }
         }
 
-        return Personnel::query()
+        $positionIds = $this->activePersonnelQuery($date)
+            ->whereNotNull('personnels.position_id')
+            ->distinct()
+            ->pluck('personnels.position_id')
+            ->map(fn ($id): int => (int) $id)
+            ->all();
+
+        if ($positionIds === []) {
+            return null;
+        }
+
+        // Vəzifə kataloqu kiçikdir; səviyyəsi boş qalan vəzifə adından təxmin edilir (PHP-də, SQL-dən asılı olmadan).
+        $levels = Position::query()
+            ->whereKey($positionIds)
+            ->get(['id', 'name', 'level'])
+            ->mapWithKeys(fn (Position $position): array => [(int) $position->id => $this->effectiveLevel($position)]);
+
+        $topLevel = (int) $levels->min();
+        $topPositionIds = $levels->filter(fn (int $level): bool => $level === $topLevel)->keys()->all();
+
+        $chief = $this->activePersonnelQuery($date)
             ->select('personnels.*')
-            ->with(['position:id,name,approval_rank,is_approval_target', 'latestRank.rank'])
+            ->with(['position:id,name,approval_rank,is_approval_target,level', 'latestRank.rank'])
             ->join('positions', 'positions.id', '=', 'personnels.position_id')
+            ->leftJoin('structures', 'structures.id', '=', 'personnels.structure_id')
+            ->whereIn('personnels.position_id', $topPositionIds)
+            ->orderByRaw('CASE WHEN structures.id IS NOT NULL AND structures.parent_id IS NULL THEN 0 ELSE 1 END')
+            ->orderByDesc('positions.approval_rank')
+            ->orderByRaw('CASE WHEN personnels.join_work_date IS NULL THEN 1 ELSE 0 END')
+            ->orderBy('personnels.join_work_date')
+            ->orderBy('personnels.id')
+            ->first();
+
+        if ($chief) {
+            $this->permanentChiefSelection = 'automatic';
+            $this->permanentChiefLevel = $topLevel;
+        }
+
+        return $chief;
+    }
+
+    /**
+     * İşdən çıxmamış (və ya çıxma tarixi hələ gəlməmiş), silinməmiş əməkdaşlar.
+     *
+     * @return Builder<Personnel>
+     */
+    private function activePersonnelQuery(CarbonInterface $date): Builder
+    {
+        return Personnel::query()
             ->whereNull('personnels.deleted_at')
             ->where(function ($query) use ($date): void {
                 $query->whereNull('personnels.leave_work_date')
                     ->orWhereDate('personnels.leave_work_date', '>=', $date->toDateString());
-            })
-            ->orderByDesc('positions.approval_rank')
-            // Unranked installs (every approval_rank 0) fall back to the seniority band,
-            // so the head of the organisation signs rather than whoever was created first.
-            ->orderByRaw('COALESCE(positions.level, ?)', [PositionLevel::UNKNOWN])
-            ->orderBy('personnels.id')
-            ->first();
+            });
+    }
+
+    private function effectiveLevel(?Position $position): ?int
+    {
+        if (! $position instanceof Position) {
+            return null;
+        }
+
+        return $position->level !== null ? (int) $position->level : PositionLevel::guess((string) $position->name);
     }
 
     private function resolveActiveDelegation(CarbonInterface $date, ?int $chiefPersonnelId): ?ChiefDelegation
@@ -98,6 +167,8 @@ class ChiefResolver
             'rank' => (string) ($signatory->latestRank?->rank?->name ?? ''),
             'permanent_chief_personnel_id' => $permanentChief?->id,
             'permanent_chief_fullname' => $permanentChief ? trim((string) $permanentChief->fullname) : null,
+            'permanent_chief_selection' => $this->permanentChiefSelection,
+            'permanent_chief_level' => $this->permanentChiefLevel,
             'delegation_id' => $delegation?->id,
             'delegation_reason' => $delegation?->reason,
             'delegation_starts_at' => optional($delegation?->starts_at)->format('Y-m-d'),
@@ -125,6 +196,8 @@ class ChiefResolver
             'rank' => (string) ($settings['Chief rank'] ?? ''),
             'permanent_chief_personnel_id' => null,
             'permanent_chief_fullname' => null,
+            'permanent_chief_selection' => null,
+            'permanent_chief_level' => null,
             'delegation_id' => null,
             'delegation_reason' => null,
             'delegation_starts_at' => null,

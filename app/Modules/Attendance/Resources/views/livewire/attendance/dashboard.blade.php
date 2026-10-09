@@ -35,21 +35,15 @@
             $tabGroups
         ));
 
-        // Work waiting in a section, shown as the tab's count (real overview figures only).
+        // Work waiting in a section, shown as the tab's count (one cheap query, not the full overview).
+        $pendingCounts = $this->pendingCounts;
         $tabCounts = array_filter([
-            'manual' => (int) ($overview['manual_pending_count'] ?? 0),
-            'daily-monitor' => (int) ($overview['raw_pending_count'] ?? 0),
-            'exceptions' => (int) ($overview['open_exception_count'] ?? 0),
-            'overtime' => (int) ($overview['pending_overtime_count'] ?? 0),
+            'manual' => (int) ($pendingCounts['manual_pending_count'] ?? 0),
+            'daily-monitor' => (int) ($pendingCounts['raw_pending_count'] ?? 0),
+            'exceptions' => (int) ($pendingCounts['open_exception_count'] ?? 0),
+            'overtime' => (int) ($pendingCounts['pending_overtime_count'] ?? 0),
         ]);
 
-        // Durations read as hours ("198", "7:30"); the unit sits beside the number as a suffix.
-        $asHours = function (int|float|null $minutes): string {
-            $minutes = (int) round((float) $minutes);
-            $rest = $minutes % 60;
-
-            return number_format(intdiv($minutes, 60), 0, ',', ' ').($rest > 0 ? ':'.str_pad((string) $rest, 2, '0', STR_PAD_LEFT) : '');
-        };
     @endphp
 
     {{-- The panel carries ONE thing, the structure tree; the section nav lives in the page
@@ -157,24 +151,14 @@
 
     <div class="space-y-4 px-4 py-4 sm:px-5">
     @if($activeTab === 'overview')
-        @php
-            $kpi = $overview['kpi'] ?? [];
-            $trendDirection = $kpi['overtime_trend_direction'] ?? 'flat';
-            // rising overtime is the bad direction here, so up reads rose and down green
-            $trendTone = match($trendDirection) {
-                'up' => 'rose',
-                'down' => 'green',
-                default => 'ink',
-            };
-        @endphp
 
         {{-- work waiting on someone comes first, and each count opens the list behind it --}}
         @php
             $queueTiles = [
-                ['metric' => 'manual_pending', 'value' => (int) ($overview['manual_pending_count'] ?? 0), 'tone' => 'amber', 'tab' => 'manual'],
-                ['metric' => 'unprocessed_punches', 'value' => (int) ($overview['raw_pending_count'] ?? 0), 'tone' => 'amber', 'tab' => 'daily-monitor'],
-                ['metric' => 'open_exceptions', 'value' => (int) ($overview['open_exception_count'] ?? 0), 'tone' => 'rose', 'tab' => 'exceptions'],
-                ['metric' => 'pending_overtime', 'value' => (int) ($overview['pending_overtime_count'] ?? 0), 'tone' => 'amber', 'tab' => 'overtime'],
+                ['metric' => 'manual_pending', 'value' => (int) ($pendingCounts['manual_pending_count'] ?? 0), 'tone' => 'amber', 'tab' => 'manual'],
+                ['metric' => 'unprocessed_punches', 'value' => (int) ($pendingCounts['raw_pending_count'] ?? 0), 'tone' => 'amber', 'tab' => 'daily-monitor'],
+                ['metric' => 'open_exceptions', 'value' => (int) ($pendingCounts['open_exception_count'] ?? 0), 'tone' => 'rose', 'tab' => 'exceptions'],
+                ['metric' => 'pending_overtime', 'value' => (int) ($pendingCounts['pending_overtime_count'] ?? 0), 'tone' => 'amber', 'tab' => 'overtime'],
             ];
         @endphp
 
@@ -218,6 +202,30 @@
             </div>
         </section>
 
+        {{-- The month's aggregates are the slow read: they load right after first paint, behind a
+             skeleton of the same shape, and re-render with the component when the month changes. --}}
+        @island(name: 'attendance-overview-stats', defer: true, always: true)
+        @placeholder
+            @include('attendance::livewire.attendance.partials.overview-stats-skeleton')
+        @endplaceholder
+        @php
+            $overview = $this->overview;
+            $kpi = $overview['kpi'] ?? [];
+            // Durations read as hours ("176", "7:30"); the unit sits beside the number as a suffix.
+            $asHours = function (int|float|null $minutes): string {
+                $minutes = (int) round((float) $minutes);
+                $rest = $minutes % 60;
+
+                return number_format(intdiv($minutes, 60), 0, ',', ' ').($rest > 0 ? ':'.str_pad((string) $rest, 2, '0', STR_PAD_LEFT) : '');
+            };
+            $trendDirection = $kpi['overtime_trend_direction'] ?? 'flat';
+            // rising overtime is the bad direction here, so up reads rose and down green
+            $trendTone = match($trendDirection) {
+                'up' => 'rose',
+                'down' => 'green',
+                default => 'ink',
+            };
+        @endphp
         <section class="space-y-3">
             <p class="hrm-eyebrow">{{ __('attendance::dashboard.cards.attendance_statistics') }}</p>
             <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
@@ -256,6 +264,7 @@
                 />
             </div>
         </section>
+        @endisland
     @endif
 
     @if($activeTab === 'manual' && in_array('manual', $availableTabs, true))

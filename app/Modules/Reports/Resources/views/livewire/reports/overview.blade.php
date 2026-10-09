@@ -28,12 +28,14 @@
             'label' => __('reports::dashboard.overview.cards.new_hires_year'),
             'value' => $num($kpi['new_hires']),
             'delta' => $kpi['new_hires_delta_pct'] ?? null,
+            'delta_hint' => __('reports::dashboard.overview.cards.delta_vs_last_year', ['value' => $num($kpi['new_hires_previous'] ?? 0)]),
             'suffix' => '%',
         ],
         [
             'label' => __('reports::dashboard.overview.cards.exits_year'),
             'value' => $num($kpi['exits']),
             'delta' => $kpi['exits_delta_pct'] ?? null,
+            'delta_hint' => __('reports::dashboard.overview.cards.delta_vs_last_year', ['value' => $num($kpi['exits_previous'] ?? 0)]),
             'suffix' => '%',
             'invert' => true,
         ],
@@ -99,7 +101,7 @@
                             'hrm-num text-[12px] font-semibold',
                             'text-[#059669]' => $positive,
                             'text-[#e11d48]' => ! $positive,
-                        ])>
+                        ]) @if (! empty($metric['delta_hint'])) title="{{ $metric['delta_hint'] }}" @endif>
                             {{ (float) $metric['delta'] > 0 ? '+' : '−' }}{{ number_format(abs((float) $metric['delta']), $metric['suffix'] === '%' ? 1 : 0, ',', ' ') }}{{ $metric['suffix'] }}
                         </span>
                     @elseif (! empty($metric['caption']))

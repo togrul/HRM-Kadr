@@ -10,6 +10,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * @property string|null $name
+ */
 class PersonnelRank extends Model
 {
     use DateCastTrait,HasFactory, LogsActivity,PersonnelTrait;
@@ -46,6 +49,7 @@ class PersonnelRank extends Model
         'order_date' => self::FORMAT_CAST,
     ];
 
+    /** @return BelongsTo<Rank, $this> */
     public function rank(): BelongsTo
     {
         return $this->belongsTo(Rank::class);

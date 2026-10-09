@@ -10,6 +10,10 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * @property bool|null $is_current
+ * @property mixed $leave_date
+ */
 class PersonnelLaborActivity extends Model
 {
     use DateCastTrait,HasFactory, LogsActivity,PersonnelTrait;

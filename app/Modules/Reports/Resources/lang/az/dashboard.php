@@ -111,7 +111,7 @@ return [
         'period_points' => 'dövr nöqtəsi',
         'open_dynamic' => 'Dinamik aç',
         'open_report' => 'Hesabata keç',
-        'view_action' => 'VIEW',
+        'view_action' => 'Bax',
         'hours_per_month' => 'saat/ay',
     ],
     'actions' => [
@@ -165,6 +165,7 @@ return [
             'avg_worked_hours' => 'Orta iş saatı',
             'overtime_hours' => 'Əlavə iş saatı',
             'movement_chart' => 'İşə qəbul və xitam — :year',
+            'delta_vs_last_year' => 'Keçən ilin eyni dövrü ilə müqayisədə (o zaman: :value)',
         ],
     ],
     'age_buckets' => [

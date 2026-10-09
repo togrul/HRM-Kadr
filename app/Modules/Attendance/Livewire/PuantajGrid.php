@@ -91,7 +91,8 @@ class PuantajGrid extends Component
         $tabelNos = $personnels->getCollection()->pluck('tabel_no')->filter()->values()->all();
 
         $ledgerByTabelAndDate = $readService->loadLedgerMap($tabelNos, $from, $to);
-        $calendarDayTypeByDate = $readService->globalCalendarDayTypeByDate($from, $to);
+        $defaultsByTabelAndDate = $readService->loadScheduleDefaults($personnels->getCollection(), $from, $to, $ledgerByTabelAndDate);
+        $dailyNormMinutes = $readService->defaultDailyMinutes();
         $calendarOverrides = $readService->calendarOverrides($from, $to, $structureIds);
 
         $dateByDay = [];
@@ -102,6 +103,8 @@ class PuantajGrid extends Component
         $rows = $personnels->getCollection()->map(function ($personnel) use (
             $dateByDay,
             $ledgerByTabelAndDate,
+            $defaultsByTabelAndDate,
+            $dailyNormMinutes,
             $structurePathService
         ): array {
             $rowCells = [];
@@ -109,12 +112,14 @@ class PuantajGrid extends Component
             $totalPresentDays = 0;
 
             foreach ($dateByDay as $day => $date) {
-                $ledger = $ledgerByTabelAndDate[$personnel->tabel_no][$date] ?? null;
+                $ledger = $ledgerByTabelAndDate[$personnel->tabel_no][$date]
+                    ?? $defaultsByTabelAndDate[$personnel->tabel_no][$date]
+                    ?? null;
 
-                $rowCells[$day] = $this->buildCellData($ledger);
+                $rowCells[$day] = $this->buildCellData($ledger, $dailyNormMinutes);
 
                 $totalWorkedMinutes += (int) $rowCells[$day]['worked_minutes'];
-                if ((int) $rowCells[$day]['worked_minutes'] > 0 || in_array($rowCells[$day]['status'], ['present', 'manual_present', 'holiday_worked', 'weekend_worked'], true)) {
+                if ((int) $rowCells[$day]['worked_minutes'] > 0 || in_array($rowCells[$day]['status'], ['present', 'manual_present', 'holiday_worked', 'weekend_worked', 'planned'], true)) {
                     $totalPresentDays++;
                 }
             }
@@ -135,9 +140,8 @@ class PuantajGrid extends Component
             'headers' => $this->buildHeaders($days, $from, $calendarOverrides),
             'rows' => $rows,
             'personnels' => $personnels,
-            'calendarDayTypeByDate' => $calendarDayTypeByDate,
             'calendarOverrides' => $this->buildCalendarLegend($calendarOverrides),
-            'statusLegend' => $this->buildStatusLegend(),
+            'statusLegend' => $this->buildStatusLegend($dailyNormMinutes),
             'leaveLegend' => $this->buildLeaveLegend($rows->all()),
             'monthStart' => $from,
             'spriteIcons' => $this->usedSpriteIcons($rows->all()),
@@ -199,7 +203,7 @@ class PuantajGrid extends Component
      * @param  array<string,mixed>|null  $ledger
      * @return array<string,mixed>
      */
-    private function buildCellData(?array $ledger): array
+    private function buildCellData(?array $ledger, int $dailyNormMinutes = 480): array
     {
         $workedMinutes = (int) ($ledger['worked_minutes'] ?? 0);
         $status = (string) ($ledger['attendance_status'] ?? 'none');
@@ -215,6 +219,9 @@ class PuantajGrid extends Component
         $endsTime = $ledger['ends_time'] ?? null;
         $totalMinutes = is_numeric($ledger['total_minutes'] ?? null) ? (int) $ledger['total_minutes'] : null;
         $coveredLeaveMinutes = (int) ($ledger['covered_leave_minutes'] ?? 0);
+        $scheduledMinutes = (int) ($ledger['scheduled_minutes'] ?? 0);
+        $fullDayMinutes = $scheduledMinutes > 0 ? $scheduledMinutes : $dailyNormMinutes;
+        $isDefault = (bool) ($ledger['is_default'] ?? false);
         $isPartialLeave = $leaveTypeName !== '' && in_array($durationUnit, ['half_day', 'hour'], true);
         $durationSummary = $isPartialLeave
             ? $this->buildLeaveDurationSummary($durationUnit, $totalMinutes)
@@ -232,6 +239,29 @@ class PuantajGrid extends Component
             durationWindow: $durationWindow,
             coveredLeaveMinutes: $coveredLeaveMinutes
         );
+
+        if ($isDefault) {
+            $detailLines[] = $status === 'planned'
+                ? __('attendance::puantaj.tooltips.planned', ['hours' => $this->formatHours($workedMinutes)])
+                : __('attendance::puantaj.tooltips.from_documents');
+
+            if ((bool) ($ledger['pre_holiday'] ?? false)) {
+                $detailLines[] = __('attendance::puantaj.tooltips.pre_holiday');
+            }
+        }
+
+        if ($status === 'planned') {
+            return [
+                'display' => $this->formatHours($workedMinutes),
+                'status' => 'planned',
+                'worked_minutes' => $workedMinutes,
+                'title' => $this->joinCellDetailLines($detailLines),
+                'detail_lines' => $detailLines,
+                'cell_classes' => 'text-zinc-400 bg-white italic',
+                'icon' => null,
+                'icon_color' => 'text-zinc-400',
+            ];
+        }
 
         if ($status === 'none') {
             return [
@@ -257,7 +287,7 @@ class PuantajGrid extends Component
                 'worked_minutes' => $workedMinutes,
                 'title' => $this->joinCellDetailLines($detailLines),
                 'detail_lines' => $detailLines,
-                'cell_classes' => $this->resolveWorkedMinuteClasses($workedMinutes, $status, $isPartialLeave),
+                'cell_classes' => $this->resolveWorkedMinuteClasses($workedMinutes, $status, $isPartialLeave, $fullDayMinutes),
                 'icon' => null,
                 'icon_color' => 'text-zinc-500',
                 'legend_key' => $isPartialLeave ? $legendFamilyKey : null,
@@ -373,13 +403,14 @@ class PuantajGrid extends Component
             'weekend' => __('attendance::puantaj.statuses.weekend'),
             'holiday' => __('attendance::puantaj.statuses.holiday'),
             'none' => __('attendance::puantaj.statuses.none'),
+            'planned' => __('attendance::puantaj.statuses.planned'),
         ];
 
-        if ($workedMinutes > 0) {
+        if ($workedMinutes > 0 && $status !== 'planned') {
             $parts[] = __('attendance::puantaj.tooltips.worked', ['hours' => $this->formatHours($workedMinutes)]);
         }
 
-        if ($status !== 'none') {
+        if ($status !== 'none' && $status !== 'planned') {
             $parts[] = __('attendance::puantaj.tooltips.status', ['status' => $statusLabels[$status] ?? $status]);
         }
 
@@ -424,7 +455,7 @@ class PuantajGrid extends Component
         return implode(' | ', $parts);
     }
 
-    private function resolveWorkedMinuteClasses(int $workedMinutes, string $status, bool $isPartialLeave = false): string
+    private function resolveWorkedMinuteClasses(int $workedMinutes, string $status, bool $isPartialLeave, int $fullDayMinutes): string
     {
         if ($isPartialLeave) {
             return 'text-sky-700 bg-sky-50/80 font-semibold';
@@ -433,8 +464,6 @@ class PuantajGrid extends Component
         if (in_array($status, ['holiday_worked', 'weekend_worked'], true)) {
             return 'text-emerald-700 bg-emerald-50/70';
         }
-
-        $fullDayMinutes = 9 * 60;
 
         return match (true) {
             $workedMinutes > $fullDayMinutes => 'text-emerald-600 bg-emerald-50',
@@ -552,14 +581,22 @@ class PuantajGrid extends Component
     /**
      * @return array<int,array<string,mixed>>
      */
-    private function buildStatusLegend(): array
+    private function buildStatusLegend(int $dailyNormMinutes): array
     {
         return [
             [
                 'label' => __('attendance::puantaj.legend.items.full_day'),
                 'mode' => 'green',
                 'icon' => null,
-                'description' => __('attendance::puantaj.legend.descriptions.full_day'),
+                'description' => __('attendance::puantaj.legend.descriptions.full_day', [
+                    'hours' => $this->formatNormHours($dailyNormMinutes),
+                ]),
+            ],
+            [
+                'label' => __('attendance::puantaj.legend.items.planned'),
+                'mode' => 'secondary',
+                'icon' => null,
+                'description' => __('attendance::puantaj.legend.descriptions.planned'),
             ],
             [
                 'label' => __('attendance::puantaj.legend.items.partial_day'),
@@ -624,6 +661,16 @@ class PuantajGrid extends Component
             })
             ->values()
             ->all();
+    }
+
+    /**
+     * Norma saatı: tam ədəd olduqda "8", əks halda "7.5".
+     */
+    private function formatNormHours(int $minutes): string
+    {
+        return $minutes % 60 === 0
+            ? (string) intdiv($minutes, 60)
+            : rtrim(rtrim(number_format($minutes / 60, 2, '.', ''), '0'), '.');
     }
 
     private function formatHours(int $workedMinutes): string

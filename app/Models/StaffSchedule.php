@@ -9,6 +9,20 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * One ştat row: how many slots a (structure, position) has. `filled` / `vacant` are a
+ * legacy cache nudged by the order flows; the live figures (and `over` / `unassigned`,
+ * set at read time) come from {@see \App\Modules\Staff\Application\Services\StaffHeadcountService}.
+ *
+ * @property int $id
+ * @property int $structure_id
+ * @property int|null $position_id
+ * @property float|int $total
+ * @property float|int $filled
+ * @property float|int $vacant
+ * @property-read Structure|null $structure
+ * @property-read Position|null $position
+ */
 class StaffSchedule extends Model
 {
     use HasFactory, LogsActivity;

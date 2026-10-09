@@ -5,9 +5,11 @@ return [
     'title' => 'Sənəd bitmə və uyğunluq mərkəzi',
     'description' => 'Etibarlılıq tarixi bitmiş və yaxın müddətdə bitəcək əməkdaş sənədlərini bir paneldə izləyin.',
     'summary' => [
+        'critical' => 'Kritik',
+        'critical_hint' => 'Vaxtı bitmiş və çatışmayan məcburi sənədlər',
         'total' => 'Ümumi sənəd',
         'expired' => 'Vaxtı bitib',
-        'expiring_30' => 'Kritik',
+        'expiring_30' => 'Tezliklə bitir',
         'expiring_60' => 'Yaxınlaşır',
         'valid' => 'Qüvvədədir',
         'missing' => 'Sənəd yoxdur',
@@ -28,11 +30,12 @@ return [
     'types' => [
         'service_card' => 'Xidməti vəsiqə',
         'passport' => 'Pasport',
+        'id_card' => 'Şəxsiyyət vəsiqəsi',
         'contract' => 'Əmək müqaviləsi',
     ],
     'status' => [
         'expired' => 'Vaxtı bitib',
-        'expiring_30' => 'Kritik',
+        'expiring_30' => 'Tezliklə bitir',
         'expiring_60' => 'Yaxınlaşır',
         'valid' => 'Qüvvədədir',
         'missing' => 'Sənəd yoxdur',
@@ -43,7 +46,9 @@ return [
         'export_csv' => 'CSV-yə ixrac et',
     ],
     'labels' => [
-        'type_window' => 'Kritik ≤ :critical · Yaxınlaşır ≤ :warning gün',
+        'days_overdue' => ':days gün keçib',
+        'days_left' => ':days gün qalıb',
+        'type_window' => 'Tezliklə bitir ≤ :critical · Yaxınlaşır ≤ :warning gün',
         'unassigned' => 'Təyin edilməyib',
         'result_count' => ':count nəticə',
         'document_count' => ':count sənəd',

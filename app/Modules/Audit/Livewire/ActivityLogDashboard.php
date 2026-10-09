@@ -230,14 +230,27 @@ class ActivityLogDashboard extends Component
         return $this->reader()->descriptionLabel($description);
     }
 
+    public function logNameLabel(?string $logName): string
+    {
+        return $this->reader()->logNameLabel($logName);
+    }
+
+    /**
+     * @return list<array{key:string,field:string,old:?string,new:string}>
+     */
+    public function changeRows(?AuditActivity $activity): array
+    {
+        return $activity ? $this->reader()->changeRows($activity) : [];
+    }
+
     public function eventTone(?string $event): string
     {
         return match ($event) {
-            'login', 'created', 'profile_opened' => 'emerald',
+            'login', 'created', 'profile_opened', 'approved' => 'emerald',
             'logout' => 'sky',
             'updated' => 'amber',
-            'deleted', 'force_deleted' => 'rose',
-            'restored' => 'sky',
+            'deleted', 'force_deleted', 'cascade_deleted', 'cancelled' => 'rose',
+            'restored', 'reverted', 'reopened' => 'sky',
             default => 'zinc',
         };
     }
@@ -275,6 +288,8 @@ class ActivityLogDashboard extends Component
         }
 
         return collect($properties)
+            // Model changes are listed field by field by changeRows(), not as raw JSON.
+            ->except(['attributes', 'old'])
             ->when(
                 $activity->event === 'profile_opened',
                 fn (Collection $rows) => $this->normalizeProfileOpenProperties($rows)

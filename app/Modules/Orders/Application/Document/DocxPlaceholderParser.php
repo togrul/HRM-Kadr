@@ -52,6 +52,24 @@ class DocxPlaceholderParser
     }
 
     /**
+     * Plain text of every paragraph (body, headers, footers) in document order, with
+     * run-splitting collapsed — used to compare a stored master with a freshly built one.
+     *
+     * @return list<string>
+     */
+    public function paragraphs(string $docxPath): array
+    {
+        $paragraphs = [];
+        foreach ($this->textParts($docxPath) as $xml) {
+            foreach ($this->paragraphTexts($xml) as $text) {
+                $paragraphs[] = $text;
+            }
+        }
+
+        return $paragraphs;
+    }
+
+    /**
      * Copy the source .docx to $destDocxPath with every recognised [label] rewritten to
      * its ${token}. Tokens must match ${[A-Za-z0-9_]+} for TemplateProcessor.
      *

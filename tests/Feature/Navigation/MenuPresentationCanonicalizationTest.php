@@ -25,3 +25,13 @@ it('hides unknown menus from the module rail', function () {
     expect(MenuPresentation::canonicalKey($menu))->toBeNull();
     expect(MenuPresentation::visibleInRail($menu))->toBeFalse();
 });
+
+it('gates a menu with the permission its config entry names, even when the row has none', function () {
+    // A menu row created before its permission existed has permission_id = null; the
+    // rail must still hide it from users the page itself would answer with a 403.
+    $menu = (object) ['name' => 'ui::menu.items.compensation', 'url' => 'compensation', 'permission' => null];
+
+    expect(MenuPresentation::permissionName($menu))->toBe('show-compensation');
+    expect(MenuPresentation::permissionName((object) ['name' => 'ui::menu.items.payroll', 'url' => 'payroll', 'permission' => null]))
+        ->toBe('show-payroll');
+});

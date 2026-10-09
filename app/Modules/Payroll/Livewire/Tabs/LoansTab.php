@@ -4,6 +4,7 @@ namespace App\Modules\Payroll\Livewire\Tabs;
 
 use App\Models\EmployeeLoan;
 use App\Modules\Payroll\Application\Services\LoanService;
+use App\Support\Currency;
 use App\Support\Livewire\SearchesPersonnel;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
@@ -20,7 +21,7 @@ class LoansTab extends PayrollTab
         'type' => 'loan',
         'principal' => '',
         'monthly_installment' => '',
-        'currency' => 'AZN',
+        'currency' => Currency::DEFAULT,
         'start_on' => '',
         'note' => '',
     ];
@@ -52,6 +53,15 @@ class LoansTab extends PayrollTab
             ->get();
     }
 
+    /**
+     * @return list<array{id: string, label: string}>
+     */
+    #[Computed]
+    public function currencyOptions(): array
+    {
+        return Currency::options();
+    }
+
     public function saveLoan(LoanService $service): void
     {
         abort_unless($this->canManage(), 403);
@@ -61,7 +71,7 @@ class LoansTab extends PayrollTab
             'loanForm.type' => 'required|in:loan,advance',
             'loanForm.principal' => 'required|numeric|min:0.01',
             'loanForm.monthly_installment' => 'required|numeric|min:0.01',
-            'loanForm.currency' => 'required|string|size:3',
+            'loanForm.currency' => Currency::rules(),
             'loanForm.start_on' => 'required|date',
             'loanForm.note' => 'nullable|string|max:2000',
         ], attributes: $this->fieldLabels([
@@ -74,7 +84,7 @@ class LoansTab extends PayrollTab
 
         $service->createLoan($this->selectedTabelNo, $data);
 
-        $this->loanForm = ['type' => 'loan', 'principal' => '', 'monthly_installment' => '', 'currency' => 'AZN', 'start_on' => '', 'note' => ''];
+        $this->loanForm = ['type' => 'loan', 'principal' => '', 'monthly_installment' => '', 'currency' => Currency::DEFAULT, 'start_on' => '', 'note' => ''];
         $this->announce('saved');
     }
 

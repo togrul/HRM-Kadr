@@ -29,13 +29,17 @@
                         <x-ui.input-shell :label="__('compensation::dashboard.fields.base_amount')" :error="$errors->first('assignmentForm.base_amount')">
                             <x-ui.input type="number" step="0.01" wire:model="assignmentForm.base_amount" />
                         </x-ui.input-shell>
+                        <div class="min-w-0">
+                            <x-ui.select-dropdown :label="__('compensation::dashboard.fields.currency')" mode="gray" direction="auto" :clearable="false" wire:model.live="assignmentForm.currency" :model="$this->currencyOptions" />
+                            @error('assignmentForm.currency') <x-validation>{{ $message }}</x-validation> @enderror
+                        </div>
                         <x-ui.input-shell :label="__('compensation::dashboard.fields.effective_from')" :error="$errors->first('assignmentForm.effective_from')">
                             <x-ui.input type="date" wire:model="assignmentForm.effective_from" />
                         </x-ui.input-shell>
                         <x-ui.input-shell :label="__('compensation::dashboard.fields.order_no')">
                             <x-ui.input wire:model="assignmentForm.order_no" />
                         </x-ui.input-shell>
-                        <x-ui.input-shell class="lg:col-span-2" :label="__('compensation::dashboard.fields.note')">
+                        <x-ui.input-shell :label="__('compensation::dashboard.fields.note')">
                             <x-ui.input wire:model="assignmentForm.note" />
                         </x-ui.input-shell>
                     </div>

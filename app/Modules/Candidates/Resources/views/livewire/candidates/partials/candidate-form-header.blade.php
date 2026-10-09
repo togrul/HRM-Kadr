@@ -2,12 +2,36 @@
     <h2 class="text-xl font-semibold text-zinc-500 font-title" id="slide-over-title">
         {!! $title ?? '' !!}
     </h2>
-    <div class="mt-1">
-        <span class="inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-600">
-            {{ __('candidates::common.labels.mode') }}: {{ $this->candidateModeLabel() }}
-        </span>
-    </div>
 </div>
+
+@if (isset($this->candidateModelData) && $this->candidateModelData)
+    @if ($this->candidateModelData->hired_personnel_id)
+        <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3" data-candidate-hire-links>
+            <div class="text-sm text-emerald-800">
+                {{ __('candidates::common.hire.hired_note') }}
+                @if ($this->candidateModelData->hired_at)
+                    <span class="hrm-num ml-1 text-emerald-700">({{ __('candidates::common.labels.hired_on') }}: {{ $this->candidateModelData->hired_at->format('d.m.Y') }})</span>
+                @endif
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <x-pill-button :href="route('personnel.show', $this->candidateModelData->hired_personnel_id)">{{ __('candidates::common.actions.open_hired_employee') }}</x-pill-button>
+                @if ($this->candidateModelData->hire_order_no)
+                    <x-pill-button :href="route('orders', ['search' => ['order_no' => $this->candidateModelData->hire_order_no]])">
+                        {{ __('candidates::common.labels.hire_order_number', ['number' => $this->candidateModelData->hire_order_no]) }}
+                    </x-pill-button>
+                @endif
+            </div>
+        </div>
+    @elseif ($this->canPrepareHireOrder())
+        <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+            <p class="text-sm text-zinc-600">{{ __('candidates::common.hire.hint') }}</p>
+            <x-pill-button variant="emerald" wire:click="requestHireOrder" data-candidate-hire-order>
+                <x-icons.document-icon color="text-current" hover="text-current" />
+                {{ __('candidates::common.actions.prepare_hire_order') }}
+            </x-pill-button>
+        </div>
+    @endif
+@endif
 
 @if (isset($this->candidateModelData) && $this->candidateModelData?->latestApplication)
     <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">

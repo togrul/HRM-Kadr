@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property string|null $start_time
+ * @property string|null $end_time
+ * @property int|null $break_minutes
+ */
 class AttendanceShift extends Model
 {
     use HasFactory;

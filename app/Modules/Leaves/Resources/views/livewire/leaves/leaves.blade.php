@@ -67,7 +67,7 @@
         {{-- toolbar --}}
         <div class="flex flex-col gap-2.5">
             <div class="flex flex-wrap items-end gap-3">
-                <label class="w-full flex-1 sm:max-w-[300px]">
+                <label class="w-full flex-1 sm:min-w-[240px] sm:max-w-[320px]">
                     <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('leaves::common.labels.fullname') }}</span>
                     <x-livewire-input mode="gray" name="filter.fullname" wire:model.live.debounce.400ms="filter.fullname"
                         placeholder="{{ __('leaves::common.labels.search_by_person') }}" />
@@ -76,13 +76,19 @@
                 <div class="shrink-0">
                     <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('leaves::common.labels.dates') }}</span>
                     <div class="flex items-center gap-2">
-                        <input type="date" wire:model.live="filter.starts_at"
-                            aria-label="{{ __('leaves::common.labels.date_start') }}"
-                            class="hrm-num h-10 w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base sm:text-sm text-ink focus:border-ink focus:bg-white focus:ring-0" />
+                        <div class="w-[150px] shrink-0">
+                            <x-ui.date-input
+                                wire:model.live="filter.starts_at"
+                                aria-label="{{ __('leaves::common.labels.date_start') }}"
+                            />
+                        </div>
                         <span class="shrink-0 text-ink-faint">&ndash;</span>
-                        <input type="date" wire:model.live="filter.ends_at"
-                            aria-label="{{ __('leaves::common.labels.date_end') }}"
-                            class="hrm-num h-10 w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base sm:text-sm text-ink focus:border-ink focus:bg-white focus:ring-0" />
+                        <div class="w-[150px] shrink-0">
+                            <x-ui.date-input
+                                wire:model.live="filter.ends_at"
+                                aria-label="{{ __('leaves::common.labels.date_end') }}"
+                            />
+                        </div>
                     </div>
                 </div>
 

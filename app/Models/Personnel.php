@@ -36,11 +36,13 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property int|null $position_id
  * @property int|null $work_norm_id
  * @property mixed $join_work_date
+ * @property mixed $contract_end_date
  * @property mixed $leave_work_date
  * @property string|null $probation_unit
  * @property int|null $probation_amount
  * @property-read Position|null $position
  * @property-read Structure|null $structure
+ * @property bool|null $is_pending
  */
 #[ObservedBy(PersonnelObserver::class)]
 class Personnel extends Model
@@ -91,12 +93,14 @@ class Personnel extends Model
         'work_norm_id',
         'contract_type',
         'contract_date',
+        'contract_end_date',
         'join_work_date',
         'leave_work_date',
         'probation_unit',
         'probation_amount',
         'workplace_type',
         'working_time_type',
+        'weekly_hours_norm',
         'work_schedule',
         'work_hours',
         'rest_days',
@@ -120,6 +124,7 @@ class Personnel extends Model
 
     protected $dates = [
         'contract_date',
+        'contract_end_date',
         'join_work_date',
         'leave_work_date',
         'birthdate',
@@ -130,8 +135,10 @@ class Personnel extends Model
     protected $casts = [
         'birthdate' => self::FORMAT_CAST,
         'contract_date' => self::FORMAT_CAST,
+        'contract_end_date' => self::FORMAT_CAST,
         'work_hours' => 'array',
         'rest_days' => 'array',
+        'weekly_hours_norm' => 'float',
         'join_work_date' => self::FORMAT_CAST,
         'leave_work_date' => self::FORMAT_CAST,
         'special_inspection_date' => self::FORMAT_CAST,

@@ -2,6 +2,7 @@
     'size' => 'large',
     'showHeaderClose' => true,
     'localState' => false,
+    'guardUnsaved' => true, // false: close at once even with typed-in changes (read-only panels)
 ])
 
 @php
@@ -14,11 +15,18 @@
     };
 
     $closeOnEvents = $uiEvents->sideModalCloseEvents();
+    $guardTexts = [
+        'title' => __('ui::common.unsaved.title'),
+        'message' => __('ui::common.unsaved.message'),
+        'confirm' => __('ui::common.unsaved.discard'),
+        'cancel' => __('ui::common.unsaved.keep_editing'),
+    ];
 @endphp
 
 @teleport('body')
     <div
         x-data="{
+            ...window.hrmUnsavedGuard({ enabled: @js((bool) $guardUnsaved), texts: @js($guardTexts) }),
             @if($localState)
             serverOpen: false,
             @else
@@ -80,20 +88,35 @@
                 this.closing = false;
                 this.previousFocus = document.activeElement;
                 this.lockBody();
+                this.resetDirty();
                 this.isOpen = true;
-                this.$nextTick(() => this.$refs.closeBtn?.focus());
+                // a reopened panel starts at the top of its form, with the first field focused
+                this.$nextTick(() => {
+                    this.resetPanelScroll($el);
+                    requestAnimationFrame(() => this.focusFirstField(this.$refs.body, this.$refs.closeBtn));
+                });
             },
+            {{-- close() is guarded (also for close() calls from the panel's own content) --}}
             close() {
+                if (! this.isOpen || this.closing) {
+                    return;
+                }
+
+                this.guardedClose(() => this.closeNow());
+            },
+            closeNow() {
                 if (this.closing) {
                     return;
                 }
 
                 this.closing = true;
                 this.isOpen = false;
+                this.resetDirty();
 
                 window.setTimeout(() => {
                     this.unlockBody();
                     this.activeMenu = '';
+                    this.resetPanelScroll($el);
 
                     if ($wire && typeof $wire.call === 'function') {
                         $wire.call('closeSideMenu');
@@ -113,10 +136,12 @@
 
                 this.closing = true;
                 this.isOpen = false;
+                this.resetDirty();
 
                 window.setTimeout(() => {
                     this.unlockBody();
                     this.activeMenu = '';
+                    this.resetPanelScroll($el);
 
                     if (this.previousFocus && typeof this.previousFocus.focus === 'function') {
                         this.$nextTick(() => this.previousFocus.focus());
@@ -149,6 +174,7 @@
             const registerCloseListener = (eventName) => {
                 const closeHandler = () => {
                     if (isOpen) {
+                        resetDirty();
                         close();
                     }
                 };
@@ -175,6 +201,7 @@
                     closeEvents.forEach((eventName) => {
                         $wire.on(eventName, () => {
                             if (isOpen) {
+                                resetDirty();
                                 close();
                             }
                         });
@@ -190,8 +217,13 @@
         aria-labelledby="slide-over-title"
         role="dialog"
         aria-modal="true"
-        x-on:keydown.escape.window.prevent.stop="if (isOpen) close()"
+        x-on:keydown.escape.window="if (isOpen) { $event.preventDefault(); close(); }"
         x-on:keydown.tab="handleTab($event)"
+        x-on:input="if (isOpen) trackDirty($event)"
+        x-on:change="if (isOpen) trackDirty($event)"
+        x-on:ui-select-change="if (isOpen) trackDirty($event)"
+        x-on:hrm-form-saved.window="resetDirty()"
+        x-bind:data-dirty="dirty ? 'true' : 'false'"
     >
         <div class="absolute inset-0 overflow-hidden">
             <button
@@ -234,7 +266,10 @@
                             </div>
                         @endif
 
-                        <div class="relative flex-1 overflow-y-auto px-4 py-4 pr-14 sm:px-8 sm:py-8 sm:pr-16" wire:loading.remove>
+                        {{-- min-h-0 lets the body scroll inside the flex column; side-modal-body drops the
+                             bottom padding when the form has a sticky action bar, so the bar sits on
+                             the panel's bottom edge instead of floating above scrolled content --}}
+                        <div x-ref="body" data-panel-scroll class="side-modal-body relative min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 pr-14 sm:px-8 sm:py-8 sm:pr-16" wire:loading.remove>
                             {{ $slot }}
                         </div>
 

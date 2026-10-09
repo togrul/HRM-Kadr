@@ -2,6 +2,8 @@
 
 namespace App\Modules\Payroll\Providers;
 
+use App\Contracts\EmployeeRecordSource;
+use App\Modules\Payroll\Application\Services\PayrollEmployeeRecordSource;
 use App\Modules\Payroll\Console\Commands\PayrollQueryBudgetCommand;
 use App\Modules\Payroll\Console\Commands\PayrollRenderBenchmarkCommand;
 use App\Providers\Concerns\RegistersLivewireAliases;
@@ -30,6 +32,8 @@ class PayrollServiceProvider extends ServiceProvider
             \App\Modules\Payroll\Domain\Contracts\PayrollOneOffEarnings::class,
             \App\Modules\Payroll\Infrastructure\Persistence\Eloquent\EloquentPayrollOneOffEarnings::class,
         );
+
+        $this->app->tag([PayrollEmployeeRecordSource::class], EmployeeRecordSource::TAG);
     }
 
     public function boot(): void

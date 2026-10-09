@@ -20,6 +20,7 @@ class AddCandidate extends Component
 
     public function store(): void
     {
+        $this->prepareCandidateForSave();
         $this->validate();
 
         $modelInstance = new Candidate;

@@ -2,6 +2,7 @@
 
 namespace App\Modules\Personnel\Application\Services\MyHr;
 
+use App\Data\AbsencePeriod;
 use App\Enums\OrderStatusEnum;
 use App\Models\EmployeeRequestChangeRequest;
 use App\Models\Leave;
@@ -13,6 +14,8 @@ use App\Modules\Personnel\Application\Services\MyHr\Review\SelfServiceReviewAuth
 use App\Modules\Personnel\Application\Services\MyHr\Review\SelfServiceReviewNotificationService;
 use App\Modules\Personnel\Application\Services\MyHr\Review\SelfServiceVacationOrderBinderService;
 use App\Modules\Personnel\Contracts\MyHrRequestReview;
+use App\Services\Absence\AbsenceOverlapGuard;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -23,6 +26,7 @@ class MyHrRequestReviewService implements MyHrRequestReview
         private readonly SelfServiceReviewNotificationService $notifications,
         private readonly SelfServiceRequestPatchService $requestPatchService,
         private readonly SelfServiceVacationOrderBinderService $vacationOrderBinder,
+        private readonly AbsenceOverlapGuard $absences,
     ) {}
 
     public function canReviewLeave(Leave $leave, User $reviewer): bool
@@ -52,6 +56,11 @@ class MyHrRequestReviewService implements MyHrRequestReview
 
             if (! $this->canReviewLeave($locked, $reviewer)) {
                 throw new RuntimeException('Leave is no longer pending self-service review.');
+            }
+
+            // An approved leave must not overlap another live leave, vacation or business trip.
+            if (($period = $locked->absencePeriod()) !== null) {
+                $this->absences->assertNoOverlap((string) $locked->tabel_no, $period);
             }
 
             $now = now();
@@ -188,6 +197,15 @@ class MyHrRequestReviewService implements MyHrRequestReview
                 }
             }
 
+            if ($status === 'approved') {
+                $this->absences->assertNoOverlap((string) $locked->tabel_no, AbsencePeriod::days(
+                    AbsencePeriod::TYPE_VACATION,
+                    (int) $locked->id,
+                    CarbonImmutable::parse($locked->getRawOriginal('start_date')),
+                    CarbonImmutable::parse($locked->getRawOriginal('end_date')),
+                ));
+            }
+
             $locked->forceFill([
                 'approval_status' => $status,
                 'reviewed_by_user_id' => $reviewer->id,
@@ -217,6 +235,15 @@ class MyHrRequestReviewService implements MyHrRequestReview
                 if (! $this->canReviewBusinessTrip($locked, $reviewer)) {
                     throw new RuntimeException('Business trip is no longer pending self-service review.');
                 }
+            }
+
+            if ($status === 'approved') {
+                $this->absences->assertNoOverlap((string) $locked->tabel_no, AbsencePeriod::days(
+                    AbsencePeriod::TYPE_BUSINESS_TRIP,
+                    (int) $locked->id,
+                    CarbonImmutable::parse($locked->getRawOriginal('start_date')),
+                    CarbonImmutable::parse($locked->getRawOriginal('end_date')),
+                ));
             }
 
             $locked->forceFill([

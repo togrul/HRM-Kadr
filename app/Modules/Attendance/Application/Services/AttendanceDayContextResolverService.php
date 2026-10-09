@@ -28,9 +28,10 @@ class AttendanceDayContextResolverService
         $tabelNos = $tabelNos->filter()->values();
         $structureIds = collect($structureByTabel)->filter()->unique()->values();
 
+        // Bir gün artıq oxunur ki, aralığın son gününün bayramqabağı olub-olmadığı bilinsin.
         $calendars = AttendanceCalendar::query()
             ->whereDate('date', '>=', $from->toDateString())
-            ->whereDate('date', '<=', $to->toDateString())
+            ->whereDate('date', '<=', $to->copy()->addDay()->toDateString())
             ->where(function ($query) use ($structureIds): void {
                 $query->where('scope_type', 'global');
 

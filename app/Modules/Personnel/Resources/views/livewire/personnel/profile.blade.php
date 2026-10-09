@@ -93,6 +93,11 @@
                         <x-small-badge :mode="$tone === 'neutral' ? 'green' : $tone" dot>
                             {{ $reader->statusLabel($personnel) }}
                         </x-small-badge>
+                        @if ($reader->contractExpired($personnel))
+                            <x-small-badge mode="amber" dot>
+                                {{ __('personnel::common.states.contract_expired') }}
+                            </x-small-badge>
+                        @endif
                     </div>
                     <p class="mt-0.5 truncate text-[13.5px] text-ink-muted" title="{{ $structurePath }}">
                         {{ $personnel->position_label }}@if ($structurePath !== '')<span class="px-1.5 text-ink-faint">·</span>{{ $structurePath }}@endif

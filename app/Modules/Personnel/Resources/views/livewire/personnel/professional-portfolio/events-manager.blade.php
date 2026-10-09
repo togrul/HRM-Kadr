@@ -18,10 +18,10 @@
                     </x-ui.select>
                 </x-ui.input-shell>
                 <x-ui.input-shell :label="__('personnel::portfolio.fields.date_from')" labelClass="tracking-tight text-zinc-500">
-                    <input wire:model.live="dateFrom" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-1.5 text-[13px] text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                    <x-ui.date-input wire:model.live="dateFrom" />
                 </x-ui.input-shell>
                 <x-ui.input-shell :label="__('personnel::portfolio.fields.date_to')" labelClass="tracking-tight text-zinc-500">
-                    <input wire:model.live="dateTo" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-2 py-1.5 text-[13px] text-zinc-800 focus:border-zinc-300 focus:outline-none" />
+                    <x-ui.date-input wire:model.live="dateTo" />
                 </x-ui.input-shell>
             </div>
 
@@ -190,10 +190,10 @@
                     </div>
                     <div class="grid gap-3 md:grid-cols-2">
                         <x-ui.input-shell :label="__('personnel::portfolio.fields.start_date')" :error="$errors->first('form.start_date')">
-                            <input wire:model="form.start_date" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" />
+                            <x-ui.date-input wire:model="form.start_date" />
                         </x-ui.input-shell>
                         <x-ui.input-shell :label="__('personnel::portfolio.fields.end_date')" :error="$errors->first('form.end_date')">
-                            <input wire:model="form.end_date" type="date" class="w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm" />
+                            <x-ui.date-input wire:model="form.end_date" />
                         </x-ui.input-shell>
                     </div>
                     <div class="grid gap-3 md:grid-cols-2">

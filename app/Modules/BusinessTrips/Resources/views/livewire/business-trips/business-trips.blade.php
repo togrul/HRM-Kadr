@@ -45,6 +45,14 @@
             @can('review-self-service-requests')
                 <x-ui.self-service-review-link />
             @endcan
+            @if ($this->businessTripOrderPreset !== null)
+                @can('add-orders')
+                    <x-pill-button variant="primary" :href="route('orders', ['create' => 1, 'preset' => $this->businessTripOrderPreset])" wire:navigate>
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                        {{ __('business_trips::common.actions.business_trip_order') }}
+                    </x-pill-button>
+                @endcan
+            @endif
             @can('export-business_trips')
                 <x-pill-button variant="emerald" :icon="true" wire:click.prevent="exportExcel"
                     wire:loading.attr="disabled" wire:target="exportExcel"
@@ -64,13 +72,19 @@
             <div class="shrink-0">
                 <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('business_trips::common.filters.date_range') }}</span>
                 <div class="flex items-center gap-2">
-                    <input type="date" wire:model.live="filter.date.min"
-                        aria-label="{{ __('business_trips::common.filters.date_start') }}"
-                        class="hrm-num h-10 w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base sm:text-sm text-ink focus:border-ink focus:bg-white focus:ring-0" />
+                    <div class="w-[150px] shrink-0">
+                        <x-ui.date-input
+                            wire:model.live="filter.date.min"
+                            aria-label="{{ __('business_trips::common.filters.date_start') }}"
+                        />
+                    </div>
                     <span class="shrink-0 text-ink-faint">&ndash;</span>
-                    <input type="date" wire:model.live="filter.date.max"
-                        aria-label="{{ __('business_trips::common.filters.date_end') }}"
-                        class="hrm-num h-10 w-[150px] rounded-[10px] border border-hairline bg-[#f4f4f5] px-3 text-base sm:text-sm text-ink focus:border-ink focus:bg-white focus:ring-0" />
+                    <div class="w-[150px] shrink-0">
+                        <x-ui.date-input
+                            wire:model.live="filter.date.max"
+                            aria-label="{{ __('business_trips::common.filters.date_end') }}"
+                        />
+                    </div>
                 </div>
             </div>
 

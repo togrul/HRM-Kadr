@@ -2,6 +2,7 @@
 
 namespace App\Modules\Personnel\Livewire\MyHr;
 
+use App\Data\AbsencePeriod;
 use App\Enums\OrderStatusEnum;
 use App\Models\Leave;
 use App\Models\LeaveType;
@@ -12,8 +13,10 @@ use App\Modules\Personnel\Application\Services\MyHr\ApprovalRouteResolverService
 use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestCorrectionService;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestsReadService;
 use App\Modules\Personnel\Support\MyHr\MyHrAccess;
+use App\Services\Absence\AbsenceOverlapGuard;
+use App\Support\Uploads\UploadRules;
 use Carbon\Carbon;
-use Closure;
+use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
@@ -190,6 +193,12 @@ class MyHrRequests extends Component
 
         $payload = $this->normalizeLeavePayload();
 
+        // The employee cannot ask to be away while already away.
+        $period = (new Leave)->forceFill($payload)->absencePeriod();
+        if ($period !== null && $this->absenceOverlap('leaveForm.starts_at', $period)) {
+            return;
+        }
+
         if ($this->leaveDocument instanceof TemporaryUploadedFile) {
             $payload['document_path'] = $this->leaveDocument->store('leaves', 'public');
         }
@@ -213,6 +222,10 @@ class MyHrRequests extends Component
         $start = Carbon::parse((string) data_get($this->vacationForm, 'start_date'))->startOfDay();
         $end = Carbon::parse((string) data_get($this->vacationForm, 'end_date'))->startOfDay();
         $duration = $start->diffInDays($end) + 1;
+
+        if ($this->absenceOverlap('vacationForm.start_date', AbsencePeriod::days(AbsencePeriod::TYPE_VACATION, null, $start->toImmutable(), $end->toImmutable()))) {
+            return;
+        }
 
         PersonnelVacation::query()->create([
             'tabel_no' => $this->personnel()->tabel_no,
@@ -248,6 +261,16 @@ class MyHrRequests extends Component
 
         $this->validate($this->businessTripRules(), [], $this->businessTripValidationAttributes());
 
+        $tripPeriod = AbsencePeriod::days(
+            AbsencePeriod::TYPE_BUSINESS_TRIP,
+            null,
+            CarbonImmutable::parse((string) data_get($this->businessTripForm, 'start_date')),
+            CarbonImmutable::parse((string) data_get($this->businessTripForm, 'end_date')),
+        );
+        if ($this->absenceOverlap('businessTripForm.start_date', $tripPeriod)) {
+            return;
+        }
+
         $route = app(ApprovalRouteResolverService::class)->resolve($this->personnel(), 'business_trip');
 
         PersonnelBusinessTrip::query()->create([
@@ -270,6 +293,20 @@ class MyHrRequests extends Component
 
         $this->dispatch('notify', type: 'success', message: __('personnel::my_hr.requests.messages.business_trip_created'));
         $this->resetCreateForms();
+    }
+
+    /**
+     * Put the cross-module absence clash (leave / vacation / business trip) on $field; true when there is one.
+     */
+    protected function absenceOverlap(string $field, AbsencePeriod $period): bool
+    {
+        $violation = app(AbsenceOverlapGuard::class)->violation((string) $this->personnel()->tabel_no, $period);
+
+        if ($violation !== null) {
+            $this->addError($field, $violation);
+        }
+
+        return $violation !== null;
     }
 
     /** Memoised for the life of the request — every action path reads it two or three times. */
@@ -325,20 +362,11 @@ class MyHrRequests extends Component
             'leaveForm.starts_time' => ['required_if:leaveForm.duration_unit,hour', 'nullable', 'date_format:H:i'],
             'leaveForm.ends_time' => ['required_if:leaveForm.duration_unit,hour', 'nullable', 'date_format:H:i', 'after:leaveForm.starts_time'],
             'leaveForm.reason' => ['nullable', 'string', 'max:2000'],
-            'leaveDocument' => [
-                $requiresDocument ? 'required' : 'nullable',
-                function (string $attribute, mixed $value, Closure $fail): void {
-                    if ($value === null || $value === '') {
-                        return;
-                    }
-
-                    if ($value instanceof TemporaryUploadedFile || is_string($value)) {
-                        return;
-                    }
-
-                    $fail(__('validation.file', ['attribute' => __('personnel::my_hr.requests.fields.supporting_document')]));
-                },
-            ],
+            // Yeni yüklənən fayl məzmununa görə yoxlanılır (mimes adına yox, məzmuna baxır),
+            // ona görə adı dəyişdirilmiş .html/.svg public diskə düşə bilməz.
+            'leaveDocument' => $this->leaveDocument instanceof TemporaryUploadedFile
+                ? UploadRules::document($requiresDocument)
+                : [$requiresDocument ? 'required' : 'nullable', 'string'],
         ];
     }
 

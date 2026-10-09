@@ -22,12 +22,17 @@ window.uiSelectDropdown = (config) => ({
     preferredDirection: config.preferredDirection,
     isDisabled: config.isDisabled,
     loadOnOpen: config.loadOnOpen,
+    native: Boolean(config.native),
+    nativeModel: config.nativeModel ?? null,
+    nativeEmpty: config.nativeEmpty ?? '',
     pendingReopen: false,
     pendingSelectionClose: false,
     selectedCache: { id: null, label: '' },
     initialSelectedLabel: null,
     toId(v){ return (v===null||v===undefined||v==='') ? null : String(v).trim(); },
     toWireValue(v){
+      // Native mode writes into a real <select>: its values are strings, '---' is the empty option.
+      if (this.native) return (v===null || v===undefined || v==='') ? this.nativeEmpty : String(v);
       if (v===null || v===undefined || v==='') return null;
       const s = String(v).trim();
       return /^[0-9]+$/.test(s) ? Number(s) : s;
@@ -106,15 +111,78 @@ window.uiSelectDropdown = (config) => ({
         });
       });
 
+      // Livewire's morph keeps keyed <li>s and only patches their label (attribute +
+      // text), so a counted label like "Hamısı · 3" changes without any child being
+      // added — watch attributes and text too, or the button keeps the stale count.
       observer.observe(target, {
         childList: true,
         subtree: true,
+        characterData: true,
+        attributes: true,
+        attributeFilter: ['data-option-id', 'data-option-label'],
       });
 
       this.$root._uiSelectObserver = observer;
     },
 
+    /** The hidden native <select> that <x-ui.select> keeps for wire:model / wire:change. */
+    nativeSelect(){
+      return this.$root.querySelector('select[data-ui-native-select]');
+    },
+
+    /** Native mode with wire:model: $wire is reactive, so this re-runs whenever the property changes. */
+    syncFromWire(){
+      if (!this.nativeModel || !this.$wire) return;
+      const path = this.nativeModel;
+      const value = path.startsWith('$parent.')
+        ? this.$wire.$parent?.$get(path.slice(8))
+        : this.$wire.$get(path);
+      const next = Array.isArray(value) ? null : value;
+      if (this.toId(next) !== this.toId(this.currentValue)) {
+        this.currentValue = next;
+      }
+    },
+
+    /** Native mode without wire:model: the server marks the choice with the selected attribute. */
+    syncFromNative(){
+      const select = this.nativeSelect();
+      if (!select) return;
+      const options = Array.from(select.options);
+      const marked = options.find((option) => option.hasAttribute('selected'));
+      const picked = marked ?? (select.selectedIndex >= 0 ? options[select.selectedIndex] : options[0]);
+      const next = picked ? picked.value : null;
+      if (this.toId(next) !== this.toId(this.currentValue)) {
+        this.currentValue = next;
+      }
+    },
+
+    observeNative(){
+      const select = this.nativeSelect();
+      if (!select || typeof MutationObserver === 'undefined') return;
+      const observer = new MutationObserver(() => this.syncFromNative());
+      observer.observe(select, { childList: true, subtree: true, attributes: true, attributeFilter: ['selected', 'value'] });
+      this.$root._uiNativeObserver = observer;
+    },
+
+    writeNative(value){
+      const select = this.nativeSelect();
+      if (!select) return;
+      select.value = value ?? '';
+      // wire:model listens for change on a <select>; .blur variants commit on blur.
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+      select.dispatchEvent(new FocusEvent('blur'));
+    },
+
+    destroy(){
+      this.$root._uiSelectObserver?.disconnect();
+      this.$root._uiNativeObserver?.disconnect();
+    },
+
     init(){
+      if (this.native && !this.nativeModel) {
+        this.syncFromNative();
+        this.observeNative();
+      }
       this.initialSelectedLabel = this.$root.dataset.selectedLabel || null;
       this.cachedOptions = this.normalizeOptions(this.cachedOptions);
       this.lastValue = this.toId(this.currentValue);
@@ -148,8 +216,10 @@ window.uiSelectDropdown = (config) => ({
       this.$watch('isOpen', (open) => {
         if (open) {
           this.scheduleReposition();
+          this.focusSearch();
         } else {
           this.positioned = false;
+          this.resetActive();
         }
       });
     },
@@ -239,10 +309,101 @@ window.uiSelectDropdown = (config) => ({
       }
       this.currentValue = wireValue;
       this.initialSelectedLabel = null;
+      if (this.native) this.writeNative(wireValue);
+      // Lets a surrounding side panel count the pick as an edit and a field error clear itself.
+      this.$root.dispatchEvent(new CustomEvent('ui-select-change', { bubbles: true, detail: { uid: this.uid, value: wireValue } }));
       this.isOpen = false;
       queueMicrotask(() => { this.isOpen = false; });
       requestAnimationFrame(() => { this.isOpen = false; });
       setTimeout(() => { this.isOpen = false; }, 0);
+    },
+
+    activeIndex: -1,
+
+    /** Options the user can currently see (the search filter hides the rest). */
+    visibleOptions(){
+      const panel = this.$refs.panel;
+      if (!panel) return [];
+      return Array.from(panel.querySelectorAll('[data-select-option]:not([data-option-disabled])'))
+        .filter((node) => node.style.display !== 'none');
+    },
+
+    resetActive(){
+      this.activeIndex = -1;
+      this.$refs.panel?.querySelectorAll('[data-select-option][data-active]')
+        .forEach((node) => node.removeAttribute('data-active'));
+    },
+
+    moveActive(step){
+      const options = this.visibleOptions();
+      if (options.length === 0) return;
+      const next = this.activeIndex < 0
+        ? (step > 0 ? 0 : options.length - 1)
+        : (this.activeIndex + step + options.length) % options.length;
+      options.forEach((node, index) => node.toggleAttribute('data-active', index === next));
+      this.activeIndex = next;
+      options[next].scrollIntoView({ block: 'nearest' });
+    },
+
+    selectActive(){
+      const option = this.visibleOptions()[this.activeIndex];
+      if (option) option.click();
+    },
+
+    /** Searchable lists take the keyboard at once: typing goes straight into the search box. */
+    focusSearch(){
+      this.$nextTick(() => requestAnimationFrame(() => {
+        if (this.isOpen && this.$refs.search) this.$refs.search.focus({ preventScroll: true });
+      }));
+    },
+
+    closeAndFocusButton(){
+      this.setOpen(false);
+      this.$refs.button?.focus({ preventScroll: true });
+    },
+
+    onSearchKeydown(event){
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        this.setOpen(true);
+        this.moveActive(event.key === 'ArrowDown' ? 1 : -1);
+        return;
+      }
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        if (this.activeIndex < 0) this.moveActive(1);
+        this.selectActive();
+        return;
+      }
+      if (event.key === 'Tab') {
+        this.setOpen(false);
+        return;
+      }
+      if (event.key !== 'Escape') this.setOpen(true);
+    },
+
+    onTriggerKeydown(event){
+      if (this.isDisabled) return;
+      // Enter/Space on a closed list are left to the button's native click.
+      if (!this.isOpen && ['ArrowDown', 'ArrowUp'].includes(event.key)) {
+        event.preventDefault();
+        event.stopPropagation();
+        this.toggle();
+        return;
+      }
+      if (!this.isOpen) return;
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        this.moveActive(event.key === 'ArrowDown' ? 1 : -1);
+      } else if (event.key === 'Enter' || event.key === ' ') {
+        if (this.activeIndex >= 0) {
+          event.preventDefault();
+          event.stopPropagation();
+          this.selectActive();
+        }
+      } else if (event.key === 'Tab') {
+        this.setOpen(false);
+      }
     },
 
     toggle(){

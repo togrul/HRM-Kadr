@@ -94,6 +94,7 @@ return [
         'name' => 'Name',
         'regime' => 'Regime',
         'currency' => 'Currency',
+        'currency_legacy' => ':code (unsupported code)',
         'effective_from' => 'Effective from',
         'effective_to' => 'Effective to',
         'code' => 'Code',

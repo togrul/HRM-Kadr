@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\DB;
 
 class CompensationService implements OrderCompensationSync
 {
+    /** Note stamped on the draft a hire order seeds; the reversal finds the draft by it. */
+    public const HIRE_DRAFT_NOTE = 'auto: hire';
+
     /**
      * Assign a new effective-dated compensation, closing any currently active one.
      *
@@ -83,7 +86,7 @@ class CompensationService implements OrderCompensationSync
             'effective_to' => null,
             'status' => 'draft',
             'order_no' => $orderNo,
-            'note' => 'auto: hire',
+            'note' => self::HIRE_DRAFT_NOTE,
         ]);
     }
 
@@ -121,6 +124,21 @@ class CompensationService implements OrderCompensationSync
             'order_no' => $orderNo,
             'note' => 'auto: transfer',
         ]);
+    }
+
+    /**
+     * Revoking an approved hire removes the draft that hire seeded. Only an untouched draft
+     * goes: once HR activated or edited it into another status it is a real record and the
+     * revocation is refused upstream.
+     */
+    public function discardHireDraft(string $tabelNo, ?string $orderNo): void
+    {
+        EmployeeCompensation::query()
+            ->where('tabel_no', $tabelNo)
+            ->where('note', self::HIRE_DRAFT_NOTE)
+            ->where('status', 'draft')
+            ->when($orderNo, fn ($query) => $query->where('order_no', $orderNo))
+            ->delete();
     }
 
     public function removeTransferSuggestion(?string $orderNo): void

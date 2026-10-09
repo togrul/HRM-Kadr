@@ -33,7 +33,7 @@ class OrderTemplatePersistenceTest extends TestCase
         $this->assertCount(2, $loaded->variables);
         $this->assertSame('employee.full_name_dative', $loaded->variables[0]['auto_key']);
         // manualFields() exposes only the per-order inputs.
-        $this->assertSame([['key' => 'var_2', 'label' => 'Başlama tarixi', 'type' => 'date']], $loaded->manualFields());
+        $this->assertSame([['key' => 'var_2', 'label' => 'Başlama tarixi', 'type' => 'date', 'required' => true, 'default' => null]], $loaded->manualFields());
     }
 
     public function test_provider_lists_active_word_templates(): void

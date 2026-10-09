@@ -8,6 +8,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
 
 /**
  * Document compliance rows, built as ONE SQL union so the database filters, sorts and
@@ -21,19 +22,50 @@ class DocumentExpiryReadService
 
     /**
      * Document type => source table and expiry column. The array order is also the
-     * tie-break order of the rows (cards, passports, contracts, then missing rows).
+     * tie-break order of the rows (cards, passports, ID cards, contracts, then missing rows).
      */
     private const DOCUMENT_SOURCES = [
         'service_card' => ['table' => 'personnel_cards', 'expires' => 'valid_date'],
         'passport' => ['table' => 'personnel_passports', 'expires' => 'valid_date'],
+        // The ID card's expiry column arrived later than its table; until that migration
+        // has run the branch is left out rather than failing the whole union.
+        'id_card' => ['table' => 'personnel_identity_documents', 'expires' => 'valid_date', 'column_added_later' => true],
         'contract' => ['table' => 'personnel_contracts', 'expires' => 'contract_ends_at'],
     ];
 
     private const STATUSES = ['expired', 'expiring_30', 'expiring_60', 'valid', 'missing'];
 
     /**
+     * Statuses that make a row critical: a document past its expiry date or a mandatory
+     * document that was never entered. Both leave the employee without a valid document
+     * today, unlike the expiring windows, which are warnings with time left to act.
+     */
+    public const CRITICAL_STATUSES = ['expired', 'missing'];
+
+    /**
+     * A required document type that another recorded document also satisfies. Azerbaijani
+     * citizens identify with the ID card (şəxsiyyət vəsiqəsi) rather than a passport, so the
+     * "passport" requirement counts as met when an identity document with a number exists.
+     */
+    private const REQUIREMENT_EQUIVALENTS = [
+        'passport' => [
+            ['table' => 'personnel_identity_documents', 'column' => 'number'],
+        ],
+    ];
+
+    /**
+     * A document type that has no requirement row of its own and takes its day windows
+     * from another type's: the ID card (şəxsiyyət vəsiqəsi) is the identity document the
+     * "passport" requirement already accepts, so it expires on the same schedule.
+     */
+    private const WINDOW_FROM = [
+        'id_card' => 'passport',
+    ];
+
+    /**
      * Day windows used when a document type has no requirement row or a null column.
-     * `expiring_30` is the critical window, `expiring_60` the warning one — the keys stay
+     * `expiring_30` is the near (renew-now) window, `expiring_60` the early-warning one —
+     * both are warnings; only expired and missing rows are critical. The keys stay
      * fixed for filters, counts and exports while the day bounds come per type.
      */
     private const DEFAULT_CRITICAL_DAYS = 30;
@@ -71,6 +103,7 @@ class DocumentExpiryReadService
                 'expiring_60' => (int) $statusScope->where('status', 'expiring_60')->sum('aggregate'),
                 'valid' => (int) $statusScope->where('status', 'valid')->sum('aggregate'),
                 'missing' => (int) $statusScope->where('status', 'missing')->sum('aggregate'),
+                'critical' => (int) $statusScope->whereIn('status', self::CRITICAL_STATUSES)->sum('aggregate'),
                 'compliance_score' => $requiredTotal > 0 ? (int) round(($healthyTotal / $requiredTotal) * 100) : 100,
             ],
             'typeCounts' => collect(array_keys(self::DOCUMENT_SOURCES))
@@ -242,7 +275,11 @@ class DocumentExpiryReadService
         $branch = 0;
 
         foreach (self::DOCUMENT_SOURCES as $type => $source) {
-            if (InstalledTables::has($source['table'])) {
+            $installed = ($source['column_added_later'] ?? false)
+                ? InstalledTables::hasColumn($source['table'], $source['expires'])
+                : InstalledTables::has($source['table']);
+
+            if ($installed) {
                 $branches[] = $this->documentBranch($branch, $type, $source['table'], $source['expires'], $this->window($requirements, $type));
             }
             $branch++;
@@ -291,8 +328,9 @@ class DocumentExpiryReadService
         $query = DB::table($table)
             ->join('personnels', 'personnels.tabel_no', '=', "{$table}.tabel_no")
             ->leftJoin('structures', 'structures.id', '=', 'personnels.structure_id')
-            ->leftJoin('positions', 'positions.id', '=', 'personnels.position_id')
-            ->whereNull('personnels.deleted_at');
+            ->leftJoin('positions', 'positions.id', '=', 'personnels.position_id');
+
+        $this->onlyActivePersonnel($query);
 
         if ($type === 'contract') {
             $query->leftJoin('ranks', 'ranks.id', '=', "{$table}.rank_id");
@@ -315,8 +353,9 @@ class DocumentExpiryReadService
     {
         $query = DB::table('personnels')
             ->leftJoin('structures', 'structures.id', '=', 'personnels.structure_id')
-            ->leftJoin('positions', 'positions.id', '=', 'personnels.position_id')
-            ->whereNull('personnels.deleted_at');
+            ->leftJoin('positions', 'positions.id', '=', 'personnels.position_id');
+
+        $this->onlyActivePersonnel($query);
 
         $source = self::DOCUMENT_SOURCES[$requirement['key']] ?? null;
 
@@ -325,6 +364,19 @@ class DocumentExpiryReadService
                 ->selectRaw('1')
                 ->from($source['table'])
                 ->whereColumn("{$source['table']}.tabel_no", 'personnels.tabel_no'));
+        }
+
+        foreach (self::REQUIREMENT_EQUIVALENTS[$requirement['key']] ?? [] as $equivalent) {
+            if (! InstalledTables::has($equivalent['table'])) {
+                continue;
+            }
+
+            $query->whereNotExists(fn (Builder $documents) => $documents
+                ->selectRaw('1')
+                ->from($equivalent['table'])
+                ->whereColumn("{$equivalent['table']}.tabel_no", 'personnels.tabel_no')
+                ->whereNotNull("{$equivalent['table']}.{$equivalent['column']}")
+                ->where("{$equivalent['table']}.{$equivalent['column']}", '!=', ''));
         }
 
         return $this->selectColumns($query, [
@@ -338,6 +390,19 @@ class DocumentExpiryReadService
             'status' => ["'missing'", []],
             'sort_key' => ["'0000-00-00'", []],
         ]);
+    }
+
+    /**
+     * Compliance is about the people currently employed: soft-deleted, still-pending and
+     * already dismissed personnel neither owe a document nor make one critical.
+     */
+    private function onlyActivePersonnel(Builder $query): void
+    {
+        $query->whereNull('personnels.deleted_at')
+            ->where('personnels.is_pending', false)
+            ->where(fn (Builder $active) => $active
+                ->whereNull('personnels.leave_work_date')
+                ->orWhere('personnels.leave_work_date', '>=', today()->toDateString()));
     }
 
     /**
@@ -396,7 +461,9 @@ class DocumentExpiryReadService
         return match ($type) {
             'service_card' => ["COALESCE({$table}.card_number, '')", []],
             'passport' => ["COALESCE({$table}.serial_number, '')", []],
+            'id_card' => ['TRIM('.$this->concat("COALESCE({$table}.series, '')", "' '", "COALESCE({$table}.number, '')").')', []],
             'contract' => $this->contractNumberSql($table),
+            default => throw new InvalidArgumentException("Unknown document type [{$type}]."),
         };
     }
 
@@ -482,7 +549,8 @@ class DocumentExpiryReadService
      */
     private function window(Collection $requirements, string $type): array
     {
-        $requirement = $requirements->firstWhere('key', $type);
+        $requirement = $requirements->firstWhere('key', $type)
+            ?? (isset(self::WINDOW_FROM[$type]) ? $requirements->firstWhere('key', self::WINDOW_FROM[$type]) : null);
         $critical = $requirement['critical_days'] ?? self::DEFAULT_CRITICAL_DAYS;
 
         // A warning window shorter than the critical one would be empty anyway; show it as such.

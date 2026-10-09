@@ -620,6 +620,7 @@ class SettingsList extends Component
         return match ($value) {
             'Work coefficient' => __('services::settings.labels.work_coefficient'),
             'Education coefficient' => __('services::settings.labels.education_coefficient'),
+            'Organization name' => __('services::settings.labels.organization_name'),
             default => ModuleTranslation::resolveStoredText($value),
         };
     }

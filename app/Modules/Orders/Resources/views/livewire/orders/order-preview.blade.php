@@ -24,6 +24,12 @@
                 <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10"/><path class="opacity-75" d="M4 12a8 8 0 018-8"/></svg>
                 {{ __('orders::order_list.preview.loading') }}
             </div>
+        @elseif ($pdf === '' && $html !== '')
+            {{-- No LibreOffice on this host: the document as HTML, in a script-less sandbox. --}}
+            <p class="mb-2 text-xs text-ink-faint">{{ __('orders::order_list.preview.html_fallback') }}</p>
+            <div class="overflow-hidden rounded-xl border border-hairline bg-white">
+                <iframe sandbox srcdoc="{{ $html }}" class="h-[75vh] w-full" title="{{ $order->order_no }}"></iframe>
+            </div>
         @elseif ($pdf === '')
             <p class="rounded-xl border border-hairline bg-[#fafafa] px-4 py-10 text-center text-sm text-ink-faint">{{ __('orders::order_list.preview.unavailable') }}</p>
         @else

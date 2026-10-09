@@ -6,6 +6,7 @@ use App\Modules\Personnel\Application\Services\MyHr\ApprovalRouteResolverService
 use App\Modules\Personnel\Application\Services\MyHr\LearningAssignmentManagerService;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestReviewService;
 use App\Modules\Personnel\Application\Services\MyHr\OnboardingAssignmentManagerService;
+use App\Modules\Personnel\Application\Services\WorkingTimeNormService;
 use App\Modules\Personnel\Console\Commands\PersonnelCrudQueryBudgetCommand;
 use App\Modules\Personnel\Console\Commands\PersonnelCrudRenderBenchmarkCommand;
 use App\Modules\Personnel\Console\Commands\PersonnelListQueryBudgetCommand;
@@ -19,6 +20,7 @@ use App\Modules\Personnel\Contracts\ApprovalRouteResolver;
 use App\Modules\Personnel\Contracts\LearningAssignmentManager;
 use App\Modules\Personnel\Contracts\MyHrRequestReview;
 use App\Modules\Personnel\Contracts\OnboardingAssignmentManager;
+use App\Modules\Personnel\Contracts\WorkingTimeNormProvider;
 use App\Modules\Personnel\Support\MyHr\MyHrAccess;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
@@ -40,6 +42,7 @@ class PersonnelServiceProvider extends ServiceProvider
         $this->app->bind(LearningAssignmentManager::class, LearningAssignmentManagerService::class);
         $this->app->bind(OnboardingAssignmentManager::class, OnboardingAssignmentManagerService::class);
         $this->app->bind(MyHrRequestReview::class, MyHrRequestReviewService::class);
+        $this->app->bind(WorkingTimeNormProvider::class, WorkingTimeNormService::class);
 
         if ($this->app->runningInConsole()) {
             $this->commands([

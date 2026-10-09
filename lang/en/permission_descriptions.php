@@ -64,6 +64,7 @@ return [
         'edit-leaves' => 'Allows editing leave records and changing their status or content.',
         'delete-leaves' => 'Allows deleting or cancelling leave records.',
         'export-leaves' => 'Allows exporting leave and absence data.',
+        'approve-leaves' => 'Allows recording a leave entered on an employee\'s behalf as already approved, bypassing the approval route (the user is recorded as the approver).',
         'show-attendance' => 'Allows opening the main attendance screen and getting an overview of attendance data.',
         'show-attendance-daily-monitor' => 'Allows opening the daily monitor and following today\'s check-ins, check-outs, lateness and presence.',
         'show-attendance-puantaj' => 'Allows opening the timesheet and viewing monthly day-by-day worked time and statuses.',

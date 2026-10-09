@@ -179,6 +179,9 @@ class HomeDashboardTest extends TestCase
             'filled' => 1,
             'vacant' => 1,
         ]);
+        // Dolu is the live headcount of each row's (structure, position), not the stored counter.
+        $this->seedActiveStaff($structure->id, 1, 6);
+        $this->seedActiveStaff($structure->id, 2, 1);
 
         $this->actingAsViewer(['show-staff']);
 
@@ -293,6 +296,7 @@ class HomeDashboardTest extends TestCase
     {
         Structure::factory()->create(['id' => 5, 'name' => 'Baş idarə', 'shortname' => 'Bİ']);
         StaffSchedule::query()->create(['structure_id' => 5, 'position_id' => 1, 'total' => 8, 'filled' => 6, 'vacant' => 2]);
+        $this->seedActiveStaff(5, 1, 6);
         AttendanceDailyStructureSummary::query()->create([
             'date' => today()->toDateString(),
             'structure_id' => 5,
@@ -308,6 +312,36 @@ class HomeDashboardTest extends TestCase
             'early_leave_minutes_sum' => 0,
         ]);
         activity()->causedBy(auth()->user())->log('home-probe');
+    }
+
+    private function seedActiveStaff(int $structureId, int $positionId, int $count): void
+    {
+        foreach (range(1, $count) as $i) {
+            $key = $structureId.'-'.$positionId.'-'.$i;
+            DB::table('personnels')->insert([
+                'tabel_no' => 'HS'.$key,
+                'surname' => 'Staff',
+                'name' => 'Person',
+                'patronymic' => 'Test',
+                'has_changed_initials' => false,
+                'birthdate' => '1990-01-01',
+                'gender' => 1,
+                'mobile' => '0501234567',
+                'nationality_id' => 1,
+                'has_changed_nationality' => false,
+                'pin' => 'HS'.$key,
+                'residental_address' => 'Baku',
+                'education_degree_id' => 1,
+                'structure_id' => $structureId,
+                'position_id' => $positionId,
+                'work_norm_id' => 1,
+                'join_work_date' => '2020-01-01',
+                'added_by' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+                'is_pending' => false,
+            ]);
+        }
     }
 
     /**

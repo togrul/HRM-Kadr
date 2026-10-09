@@ -26,6 +26,13 @@ return [
         'woman' => 'Qadın',
         'staff_unit' => 'ştat',
         'vacant_lower' => 'vakant',
+        'position_unassigned' => 'Vəzifə təyin edilməyib',
+        'no_position' => 'Vəzifəsiz',
+        'over' => 'Artıq',
+        'over_count' => 'Artıq: :count',
+        'off_staff' => 'Ştatdankənar',
+        'off_staff_count' => 'Ştatdankənar: :count',
+        'filled_of_total' => 'Dolu / Cəmi',
     ],
     'actions' => [
         'show_all' => 'Hamısını göstər',
@@ -42,6 +49,7 @@ return [
         'add_row' => 'Sətir əlavə et',
         'delete_row' => 'Sətri sil',
         'search_tree' => 'Bölmə/vəzifə axtar',
+        'assign_position' => 'Vəzifə təyin et',
     ],
     'filters' => [
         'all' => 'Hamısı',
@@ -56,11 +64,18 @@ return [
         'staff_updated' => 'Ştat uğurla yeniləndi!',
         'staff_deleted' => 'Ştat silindi!',
         'delete_confirm' => 'Bu məlumatı silmək istədiyinizə əminsiniz?',
+        'position_unassigned_hint' => 'Bu sətirdə vəzifə seçilməyib, ona heç bir əməkdaş uyğunlaşdırıla bilmir. Redaktə edib vəzifəni seçin və ya sətri silin.',
+        'off_staff_hint' => 'ştat cədvəlində sətri olmayan vəzifələrdə işləyənlər',
+        'unassigned_rows' => ':count ştat sətrində vəzifə təyin edilməyib. Redaktə rejimində vəzifəni seçin və ya sətri silin.',
     ],
     'structure_levels' => [
         'enterprise' => 'MÜƏSSİSƏ',
         'department' => 'DEPARTAMENT',
         'division' => 'ŞÖBƏ',
         'unit' => 'VAHİD',
+    ],
+    'slot' => [
+        'full' => 'Bu vəzifə üçün ştatda vakansiya yoxdur (:filled/:total).',
+        'missing' => 'Bu struktur üçün ştatda belə vəzifə yoxdur.',
     ],
 ];

@@ -45,7 +45,9 @@ return [
         'query_budget' => [
             'overview_build' => (int) env('ATTENDANCE_QUERY_BUDGET_OVERVIEW', 15),
             'daily_monitor_load' => (int) env('ATTENDANCE_QUERY_BUDGET_DAILY_MONITOR', 10),
-            'puantaj_grid_load' => (int) env('ATTENDANCE_QUERY_BUDGET_PUANTAJ', 8),
+            // Cədvəl (səhifələmə, ledger, təqvim istisnaları) + qrafik üzrə defolt (növbə təyinatları,
+            // növbələr, təqvim, icazə + növü, məzuniyyət, ezamiyyət) — hamısı toplu, N+1 yoxdur.
+            'puantaj_grid_load' => (int) env('ATTENDANCE_QUERY_BUDGET_PUANTAJ', 14),
             'history_log_load' => (int) env('ATTENDANCE_QUERY_BUDGET_HISTORY', 8),
             'month_close_status_load' => (int) env('ATTENDANCE_QUERY_BUDGET_MONTH_CLOSE', 8),
         ],

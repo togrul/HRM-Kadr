@@ -77,22 +77,24 @@ abstract class AbstractLibraryReadService
             ->selectRaw('SUM(CASE WHEN archived_at IS NULL AND is_required = 1 THEN 1 ELSE 0 END) as required_count')
             ->selectRaw('SUM(CASE WHEN archived_at IS NULL AND auto_assign_new_hires = 1 THEN 1 ELSE 0 END) as auto_assign_count')
             ->selectRaw('SUM(CASE WHEN archived_at IS NOT NULL THEN 1 ELSE 0 END) as archived_count')
+            ->toBase()
             ->first();
 
         $assignments = $this->assignmentModel()::query()
             ->selectRaw('COUNT(*) as total')
             ->selectRaw('SUM(CASE WHEN assigned_at >= ? THEN 1 ELSE 0 END) as this_month', [now()->startOfMonth()])
+            ->toBase()
             ->first();
 
         [$relation, $column] = $this->completionRelation();
         $completed = $this->assignmentModel()::query()
             ->whereHas($relation, fn (Builder $query) => $query->whereNotNull($column))
             ->count();
-        $total = (int) ($assignments?->total ?? 0);
+        $total = (int) ($assignments->total ?? 0);
 
         $statusCounts = [];
         foreach (self::CATALOG_STATUSES as $key) {
-            $statusCounts[$key] = (int) ($counts?->{$key.'_count'} ?? 0);
+            $statusCounts[$key] = (int) ($counts->{$key.'_count'} ?? 0);
         }
 
         $items = $this->libraryModel()::query()
@@ -109,26 +111,41 @@ abstract class AbstractLibraryReadService
             ->latest('created_at')
             ->paginate(12, ['*'], $pageName);
 
-        $items->setCollection($items->getCollection()->map(fn (Model $item): array => [
+        $deletableIds = $this->deletableIds($items->getCollection()->map(fn (Model $item): int => (int) $item->getKey())->all());
+
+        $items = $items->through(fn (Model $item): array => [
             'id' => (int) $item->getKey(),
-            'title' => (string) $item->title,
-            'type' => $this->typeLabel((string) $item->{$this->typeColumn()}),
+            'title' => (string) $item->getAttribute('title'),
+            'type' => $this->typeLabel((string) $item->getAttribute($this->typeColumn())),
             'meta' => $this->itemMeta($item),
             'url' => $this->itemUrl($item),
-            'is_active' => (bool) $item->is_active,
-            'is_archived' => $item->archived_at !== null,
-            'required' => (bool) $item->is_required,
-        ]));
+            'is_active' => (bool) $item->getAttribute('is_active'),
+            'is_archived' => $item->getAttribute('archived_at') !== null,
+            'required' => (bool) $item->getAttribute('is_required'),
+            'can_delete' => in_array((int) $item->getKey(), $deletableIds, true),
+        ]);
 
         return [
             'metrics' => [
                 'active' => $statusCounts['active'],
-                'assigned_this_month' => (int) ($assignments?->this_month ?? 0),
+                'assigned_this_month' => (int) ($assignments->this_month ?? 0),
                 'completion' => $total > 0 ? (int) round($completed * 100 / $total) : 0,
             ],
             'status_counts' => $statusCounts,
             'items' => $items,
         ];
+    }
+
+    /**
+     * Kitabxanadan tam silinə bilən elementlərin id-ləri. Defolt olaraq heç biri —
+     * kitabxana öz silmə qaydasını təyin edəndə bu metodu override edir.
+     *
+     * @param  list<int>  $ids
+     * @return list<int>
+     */
+    protected function deletableIds(array $ids): array
+    {
+        return [];
     }
 
     /**

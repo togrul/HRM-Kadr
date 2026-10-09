@@ -484,3 +484,20 @@ body.side-modal-open .sidebar-collapse-toggle {
 .hrm-badge {
   @apply inline-flex h-5 w-max shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-2 text-[10px] font-semibold uppercase leading-none tracking-[0.06em];
 }
+
+/* keyboard-highlighted option in <x-ui.select-dropdown> (arrow keys) */
+.hrm-select-option[data-active] {
+  @apply bg-[#f4f4f5] text-ink;
+}
+
+/* Side panel forms with a sticky action bar (Save / Next): the scroll body's bottom padding
+   would otherwise become the sticky inset, leaving the bar floating above the edge with
+   form content scrolling visibly underneath it. */
+.side-modal-body:has(.sticky.bottom-0) {
+  padding-bottom: 0;
+}
+.side-modal-body .sticky.bottom-0 {
+  margin-bottom: 0;
+  background-color: #fff;
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}

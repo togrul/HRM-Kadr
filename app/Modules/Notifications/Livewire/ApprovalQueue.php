@@ -75,11 +75,13 @@ class ApprovalQueue extends Component
 
     public function render(): View
     {
+        $campaigns = $this->campaigns();
+
         return view('notification::livewire.notification.approval-queue', [
-            'campaigns' => $this->campaigns,
+            'campaigns' => $campaigns,
             // A short page already is the whole queue; only a full one needs counting.
-            'pendingTotal' => $this->showAll || $this->campaigns->count() < self::PREVIEW_LIMIT
-                ? $this->campaigns->count()
+            'pendingTotal' => $this->showAll || $campaigns->count() < self::PREVIEW_LIMIT
+                ? $campaigns->count()
                 : NotificationCampaign::query()->where('approval_status', 'pending')->count(),
             'canApproveCampaigns' => $this->canApproveCampaigns(),
             'categoryLabels' => NotificationTriggerRegistry::campaignCategoryLabels(),

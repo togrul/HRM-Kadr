@@ -26,6 +26,13 @@ return [
         'woman' => 'Woman',
         'staff_unit' => 'positions',
         'vacant_lower' => 'vacant',
+        'position_unassigned' => 'No position assigned',
+        'no_position' => 'No position',
+        'over' => 'Over',
+        'over_count' => 'Over: :count',
+        'off_staff' => 'Off-schedule',
+        'off_staff_count' => 'Off-schedule: :count',
+        'filled_of_total' => 'Filled / Total',
     ],
     'actions' => [
         'show_all' => 'Show all',
@@ -42,6 +49,7 @@ return [
         'add_row' => 'Add row',
         'delete_row' => 'Delete row',
         'search_tree' => 'Search unit/position',
+        'assign_position' => 'Assign position',
     ],
     'filters' => [
         'all' => 'All',
@@ -56,11 +64,18 @@ return [
         'staff_updated' => 'Staff was updated successfully!',
         'staff_deleted' => 'Staff was deleted!',
         'delete_confirm' => 'Are you sure you want to delete this data?',
+        'position_unassigned_hint' => 'This row has no position, so no employee can be matched to it. Edit it to choose the position, or delete the row.',
+        'off_staff_hint' => 'people in positions the staff schedule has no row for',
+        'unassigned_rows' => ':count staff schedule rows have no position. Choose the position in edit mode, or delete the row.',
     ],
     'structure_levels' => [
         'enterprise' => 'ENTERPRISE',
         'department' => 'DEPARTMENT',
         'division' => 'DIVISION',
         'unit' => 'UNIT',
+    ],
+    'slot' => [
+        'full' => 'No vacancy for this position in the staff schedule (:filled/:total).',
+        'missing' => 'The staff schedule has no such position in this structure.',
     ],
 ];

@@ -13,7 +13,7 @@ return [
         'placeholder' => 'məs. 12345 və ya Əliyev',
     ],
     'scope' => [
-        'badge' => 'Struktur scope',
+        'badge' => 'Struktur əhatəsi',
         'description' => 'Yalnız seçilmiş struktur ağacındakı əməkdaşlar göstərilir.',
     ],
     'tooltips' => [
@@ -25,6 +25,9 @@ return [
         'leave_window' => 'İcazə pəncərəsi: :window',
         'covered_leave' => 'İcazə ilə örtülən vaxt: :hours saat',
         'calendar' => 'İş rejimi: :type',
+        'planned' => 'Qrafik üzrə: :hours saat (faktiki qeyd yoxdur)',
+        'from_documents' => 'Təsdiqlənmiş sənəd üzrə (gün hələ hesablanmayıb)',
+        'pre_holiday' => 'Bayramqabağı gün: iş vaxtı 1 saat qısaldılıb',
     ],
     'statuses' => [
         'present' => 'işdə',
@@ -37,6 +40,7 @@ return [
         'holiday' => 'bayram',
         'workday' => 'iş günü',
         'none' => 'yoxdur',
+        'planned' => 'qrafik üzrə',
     ],
     'short_labels' => [
         'vacation' => 'MZN',
@@ -58,13 +62,15 @@ return [
         ],
         'items' => [
             'full_day' => 'Tam iş günü',
+            'planned' => 'Qrafik üzrə',
             'partial_day' => 'Natamam iş günü',
             'absence' => 'Yoxluq',
             'weekend' => 'Həftəsonu',
             'holiday' => 'Bayram günü',
         ],
         'descriptions' => [
-            'full_day' => '9 saat işlənən günlər ağ fonda qara yazı ilə göstərilir.',
+            'full_day' => 'Norma qədər (:hours saat — növbə müddəti, nahar fasiləsi çıxılmaqla) işlənən günlər ağ fonda qara yazı ilə göstərilir.',
+            'planned' => 'Faktiki qeyd olmayan keçmiş iş günləri qrafikə görə plan saatı ilə açıq boz yazılır; giriş-çıxış və ya əl ilə qeyd daxil edildikdə əvəzlənir.',
             'partial_day' => 'Yarım gün və ya saatlıq icazə ilə birlikdə işlənən günləri göstərir.',
             'absence' => 'İş günü üçün yoxluq və ya əl ilə qeyd edilmiş yoxluqdur.',
             'weekend' => 'Həftəsonu günləri legenddə bir təqvim işarəsi ilə göstərilir.',
@@ -73,7 +79,7 @@ return [
         'calendar_description' => ':type, :scope, :paid',
     ],
     'calendar' => [
-        'global_scope' => 'Ümumi scope',
+        'global_scope' => 'Ümumi əhatə',
         'paid' => 'ödənişli',
         'unpaid' => 'ödənişsiz',
     ],

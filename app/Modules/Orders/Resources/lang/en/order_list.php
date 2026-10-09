@@ -52,6 +52,7 @@ return [
         'loading' => 'Preparing preview…',
         'unavailable' => 'The preview could not be generated. Use “Download” to open the document.',
         'no_document' => 'This order has no document yet.',
+        'html_fallback' => 'Simplified view — download the document for the exact layout.',
     ],
     'hints' => [
         'docx_only' => 'Only DOCX orders can be edited',

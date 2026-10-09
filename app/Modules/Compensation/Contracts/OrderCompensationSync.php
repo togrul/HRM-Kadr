@@ -16,6 +16,8 @@ interface OrderCompensationSync
 {
     public function createDraftForHire(string $tabelNo, float $baseAmount, ?string $currency, ?Carbon $effectiveFrom, ?string $orderNo): ?EmployeeCompensation;
 
+    public function discardHireDraft(string $tabelNo, ?string $orderNo): void;
+
     public function suggestRegradeFromTransfer(string $tabelNo, int $positionId, ?string $orderNo): ?EmployeeCompensation;
 
     public function removeTransferSuggestion(?string $orderNo): void;

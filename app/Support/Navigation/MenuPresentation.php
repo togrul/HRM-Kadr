@@ -56,7 +56,7 @@ class MenuPresentation
      * over is filled in the configured menu order.
      *
      * @param  Collection<int, object{routeBase: string}>  $visibleMenus  already permission-gated
-     * @return array{0: Collection<int, object>, 1: Collection<int, object>}
+     * @return array{0: Collection<int, object{routeBase: string}>, 1: Collection<int, object{routeBase: string}>}
      */
     public static function splitPinned(Collection $visibleMenus, ?Authorizable $user, int $count = 5): array
     {
@@ -238,7 +238,7 @@ class MenuPresentation
                         'url' => (string) ($menu['url'] ?? ''),
                         'icon' => self::normalizeIcon((string) ($menu['icon'] ?? 'document-icon')),
                         'is_active' => (int) ($menu['is_active'] ?? 1),
-                        'permission_name' => self::permissionNameForKey($name),
+                        'permission_name' => $menu['permission_name'] ?? self::permissionNameForKey($name),
                         'aliases' => self::translationAliases($name),
                         'route_aliases' => self::routeAliases($name),
                     ],

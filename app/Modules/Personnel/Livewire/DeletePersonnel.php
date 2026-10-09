@@ -16,12 +16,13 @@ class DeletePersonnel extends Component
     public ?int $personnelId = null;
 
     #[On('setDeletePersonnel')]
-    public function setDeletePersonnel($personnelId): void
+    public function setDeletePersonnel(mixed $personnelId): void
     {
-        $personnel = Personnel::query()
-            ->select('id', 'tabel_no')
-            ->where('tabel_no', $personnelId)
-            ->first();
+        $id = filter_var($personnelId, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+
+        $personnel = $id === false
+            ? null
+            : Personnel::query()->select('id', 'tabel_no')->find($id);
 
         if (! $personnel) {
             $this->personnelId = null;

@@ -3,6 +3,8 @@
 namespace App\Services\Staff;
 
 use App\Models\StaffSchedule;
+use App\Modules\Staff\Contracts\StaffingLookup;
+use App\Modules\Staff\Contracts\StaffSlotCheck;
 
 /**
  * Reads and adjusts the staff schedule (ştat cədvəli) vacancy for a structure+position.
@@ -12,13 +14,25 @@ use App\Models\StaffSchedule;
  * (a brand-new schedule row, or one extra slot on a fully-filled row — e.g. total 4 /
  * filled 4 / vacant 0 becomes total 5 / filled 4 / vacant 1). When the hire is
  * approved the slot is consumed (filled +1, vacant recomputed).
+ *
+ * Vacancy is judged from the live headcount ({@see StaffingLookup}), never from the stored
+ * `filled` / `vacant` columns — those are only a legacy cache that drifts (dismissals and
+ * transfers never touched them).
  */
 class StaffScheduleVacancyService
 {
+    public function __construct(private readonly StaffingLookup $staffing) {}
+
     /** Current number of vacant slots for the structure+position (0 if no row). */
     public function vacancy(?int $structureId, ?int $positionId): int
     {
-        return (int) ($this->row($structureId, $positionId)?->vacant ?? 0);
+        return $this->staffing->vacancy($structureId, $positionId);
+    }
+
+    /** Full ştat check (room / full / no row) for the structure+position. */
+    public function check(?int $structureId, ?int $positionId): StaffSlotCheck
+    {
+        return $this->staffing->check($structureId, $positionId);
     }
 
     /**
@@ -39,10 +53,14 @@ class StaffScheduleVacancyService
             ]);
         }
 
-        if ((int) $row->vacant <= 0) {
+        $check = $this->staffing->check($structureId, $positionId);
+
+        if ($check->status === StaffSlotCheck::FULL) {
+            // Grow this row so the pair's total sits one above the people already in it.
+            $total = (int) $row->total + max(1, $check->filled - $check->total + 1);
             $row->forceFill([
-                'total' => (int) $row->total + 1,
-                'vacant' => (int) $row->vacant + 1,
+                'total' => $total,
+                'vacant' => max(0, $total - $check->filled),
             ])->save();
         }
 
@@ -82,6 +100,48 @@ class StaffScheduleVacancyService
             'total' => $total,
             'vacant' => max(0, $total - $filled),
         ])->save();
+    }
+
+    /**
+     * Give back the slot a revoked hire had consumed (filled -1, vacant recomputed). The live
+     * headcount already frees it once the employee is gone; this keeps the legacy cache in step.
+     */
+    public function releaseForRevokedHire(?int $structureId, ?int $positionId): void
+    {
+        $row = $this->row($structureId, $positionId);
+
+        if (! $row || (int) $row->filled <= 0) {
+            return;
+        }
+
+        $filled = (int) $row->filled - 1;
+
+        $row->forceFill([
+            'filled' => $filled,
+            'vacant' => max(0, (int) $row->total - $filled),
+        ])->save();
+    }
+
+    /**
+     * Ştat cədvəlində strukturun özünə ayrılmış vəzifələr. Struktur üçün ştat
+     * cədvəli qurulmayıbsa boş siyahı qaytarır.
+     *
+     * @return list<int>
+     */
+    public function positionIdsFor(?int $structureId): array
+    {
+        if (! $structureId) {
+            return [];
+        }
+
+        return StaffSchedule::query()
+            ->where('structure_id', $structureId)
+            ->distinct()
+            ->orderBy('position_id')
+            ->pluck('position_id')
+            ->map(fn (mixed $id): int => (int) $id)
+            ->values()
+            ->all();
     }
 
     private function row(?int $structureId, ?int $positionId): ?StaffSchedule

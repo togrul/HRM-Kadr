@@ -14,13 +14,22 @@ namespace App\Modules\Personnel\Support;
  */
 final class EmploymentTerms
 {
-    public const CONTRACT_TYPES = ['fixed', 'indefinite'];
+    /** Müddətli əmək müqaviləsi (ƏM m.47) — bitmə tarixi tələb edir. */
+    public const CONTRACT_TYPE_FIXED = 'fixed';
+
+    public const CONTRACT_TYPES = [self::CONTRACT_TYPE_FIXED, 'indefinite'];
 
     public const PROBATION_UNITS = ['day', 'week', 'month'];
 
     public const WORKPLACE_TYPES = ['primary', 'secondary'];
 
     public const WORKING_TIME_TYPES = ['full', 'partial', 'reduced'];
+
+    /** Natamam iş vaxtı (ƏM m.94): normanın azaldılması qısaldılmış iş vaxtı deyil. */
+    public const WORKING_TIME_PARTIAL = 'partial';
+
+    /** Həftəlik normal iş vaxtı (ƏM m.89.3). */
+    public const STANDARD_WEEKLY_HOURS = 40;
 
     public const WORK_SCHEDULES = ['five_day', 'six_day', 'shift_1', 'shift_2', 'shift_3', 'shift_4', 'other'];
 

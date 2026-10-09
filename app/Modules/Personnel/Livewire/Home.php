@@ -6,6 +6,7 @@ use App\Models\PersonnelVacation;
 use App\Modules\Attendance\Contracts\ManualEntryApprover;
 use App\Modules\Personnel\Application\Services\HomeOverviewService;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestReviewService;
+use App\Services\Absence\AbsenceOverlapException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
@@ -70,6 +71,10 @@ class Home extends Component
             };
         } catch (ValidationException $exception) {
             $this->dispatch('notify', type: 'error', message: (string) collect($exception->errors())->flatten()->first());
+
+            return;
+        } catch (AbsenceOverlapException $exception) {
+            $this->dispatch('notify', type: 'error', message: $exception->getMessage());
 
             return;
         }

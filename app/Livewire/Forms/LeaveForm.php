@@ -2,17 +2,18 @@
 
 namespace App\Livewire\Forms;
 
+use App\Enums\OrderStatusEnum;
 use App\Models\Leave;
 use App\Models\Personnel;
-use Closure;
+use App\Support\Uploads\MatchesFileSignature;
 use Illuminate\Validation\Rule;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\Form;
 
 class LeaveForm extends Form
 {
-    /** @var list<string> Allowed upload extensions for a leave supporting document (svg excluded — stored-XSS vector). */
-    private const ALLOWED_DOCUMENT_EXTENSIONS = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'csv', 'txt', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'];
+    /** Allowed supporting-document types, checked against the file's content (html/svg excluded — stored-XSS vectors). */
+    public const ALLOWED_DOCUMENT_EXTENSIONS = 'pdf,jpg,jpeg,png,webp,heic,doc,docx';
 
     /** Max upload size in kilobytes (10 MB), matching the Personnel files convention. */
     private const MAX_DOCUMENT_KILOBYTES = 10240;
@@ -71,44 +72,12 @@ class LeaveForm extends Form
             'ends_time' => [Rule::requiredIf($this->duration_unit === 'hour'), 'nullable', 'date_format:H:i', 'after:starts_time'],
             'assigned_to.id' => ['nullable', 'integer', Rule::exists('personnels', 'id')],
             'reason' => ['required', 'string', 'min:3', 'max:1000'],
-            'document_path' => [
-                Rule::requiredIf($requiresDocument),
-                function (string $attribute, mixed $value, Closure $fail): void {
-                    if ($value === null || $value === '') {
-                        return;
-                    }
-
-                    // An already-stored path (edit flow) carries no new file to vet.
-                    if (is_string($value)) {
-                        return;
-                    }
-
-                    if (! $value instanceof TemporaryUploadedFile) {
-                        $fail(__('validation.file', ['attribute' => __('leaves::common.labels.file')]));
-
-                        return;
-                    }
-
-                    // New upload: constrain type and size to block arbitrary/oversized files
-                    // landing on the public disk (stored-XSS / malware / disk-exhaustion vectors).
-                    $extension = strtolower((string) $value->getClientOriginalExtension());
-                    if (! in_array($extension, self::ALLOWED_DOCUMENT_EXTENSIONS, true)) {
-                        $fail(__('validation.mimes', [
-                            'attribute' => __('leaves::common.labels.file'),
-                            'values' => implode(', ', self::ALLOWED_DOCUMENT_EXTENSIONS),
-                        ]));
-
-                        return;
-                    }
-
-                    if ($value->getSize() > self::MAX_DOCUMENT_KILOBYTES * 1024) {
-                        $fail(__('validation.max.file', [
-                            'attribute' => __('leaves::common.labels.file'),
-                            'max' => self::MAX_DOCUMENT_KILOBYTES,
-                        ]));
-                    }
-                },
-            ],
+            // A new upload is vetted by content (mimes sniffs the file, not its name), so a
+            // renamed .html/.svg cannot land on the public disk; an already-stored path
+            // (edit flow) carries no new file to vet.
+            'document_path' => $this->document_path instanceof TemporaryUploadedFile
+                ? [Rule::requiredIf($requiresDocument), 'nullable', 'file', 'max:'.self::MAX_DOCUMENT_KILOBYTES, 'mimes:'.self::ALLOWED_DOCUMENT_EXTENSIONS, new MatchesFileSignature]
+                : [Rule::requiredIf($requiresDocument), 'nullable', 'string'],
         ];
     }
 
@@ -235,7 +204,8 @@ class LeaveForm extends Form
         return [
             'tabel_no' => null,
             'leave_type_id' => null,
-            'status_id' => null,
+            // A recorded leave goes through its approval route unless someone allowed to approve says otherwise.
+            'status_id' => OrderStatusEnum::PENDING->value,
             'starts_at' => null,
             'ends_at' => null,
             'duration_unit' => 'day',

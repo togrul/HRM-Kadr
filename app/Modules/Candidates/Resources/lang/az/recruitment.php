@@ -84,7 +84,7 @@ return [
         'score' => 'Bal / nəticə',
         'rejection_reason' => 'Rədd səbəbi',
         'final_decision' => 'Yekun qərar',
-        'transition_note' => 'Mövcud hərbi namizəd modulu saxlanılır. Yeni qəbul nüvəsi vakansiya və müraciət mərkəzli axına keçir.',
+        'transition_note' => 'Namizəd bazası, tələbnamələr, vakansiyalar və müraciətlər bir axında idarə olunur.',
         'headcount_short' => 'ştat',
         'headcount_counted' => ':count ştat',
         'opening' => 'Vakansiya',
