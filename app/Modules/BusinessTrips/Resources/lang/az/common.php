@@ -2,6 +2,7 @@
 
 return [
     'filters' => [
+        'trip_type' => 'Ezamiyyətin növü',
         'structure' => 'Struktur',
         'order_types' => 'Əmr növləri',
         'fullname' => 'Soyad, ad, ata adı',
@@ -43,6 +44,8 @@ return [
         'open_order' => 'Əmrə keç',
     ],
     'fields' => [
+        'trip_type' => 'Ezamiyyətin növü',
+        'funding_source' => 'Maliyyələşmə mənbəyi',
         'structure' => 'Struktur',
         'rank' => 'Rütbə',
         'fullname' => 'Soyad, ad, ata adı',
@@ -57,6 +60,10 @@ return [
         'transportation' => 'Nəqliyyat',
         'weapon' => 'Silah',
         'service_dog' => 'Xidmət iti',
+    ],
+    'trip_types' => [
+        'domestic' => 'Ölkədaxili',
+        'foreign' => 'Xarici',
     ],
     'boolean' => [
         'yes' => 'var',

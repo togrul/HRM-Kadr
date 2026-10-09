@@ -28,6 +28,7 @@ class OrderWordTemplateVersioner
             'effect' => $template->effect ?? 'none',
             'docx_path' => $versionedPath,
             'variables' => $template->variables,
+            'multi_participant' => $template->isMultiParticipant(),
             'created_by' => auth()->id(),
             'created_at' => now(),
         ]);

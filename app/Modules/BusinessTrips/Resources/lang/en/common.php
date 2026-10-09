@@ -2,6 +2,7 @@
 
 return [
     'filters' => [
+        'trip_type' => 'Trip kind',
         'structure' => 'Structure',
         'order_types' => 'Order types',
         'fullname' => 'Fullname',
@@ -43,6 +44,8 @@ return [
         'open_order' => 'Open the order',
     ],
     'fields' => [
+        'trip_type' => 'Trip kind',
+        'funding_source' => 'Funding source',
         'structure' => 'Structure',
         'rank' => 'Rank',
         'fullname' => 'Fullname',
@@ -57,6 +60,10 @@ return [
         'transportation' => 'Transportation',
         'weapon' => 'Weapon',
         'service_dog' => 'Service dog',
+    ],
+    'trip_types' => [
+        'domestic' => 'Domestic',
+        'foreign' => 'Abroad',
     ],
     'boolean' => [
         'yes' => 'yes',

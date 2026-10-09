@@ -24,12 +24,14 @@ class OrderWordTemplateVersion extends Model
         'effect',
         'docx_path',
         'variables',
+        'multi_participant',
         'created_by',
         'created_at',
     ];
 
     protected $casts = [
         'variables' => 'array',
+        'multi_participant' => 'boolean',
         'created_at' => 'datetime',
     ];
 

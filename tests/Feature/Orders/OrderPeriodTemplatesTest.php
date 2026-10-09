@@ -238,8 +238,10 @@ class OrderPeriodTemplatesTest extends TestCase
 
         $outcome = $this->issue($this->template('ezamiyyet'), $personnel, $this->tripFields());
 
+        // The business trip is a multi-participant order: the refusal names the participant.
         $this->assertFalse($outcome->isSaved());
-        $this->assertSame(__('orders::order_composer.errors.employee_inactive'), $outcome->errors['personnelId']);
+        $this->assertSame(__('orders::order_composer.errors.employee_inactive'), $outcome->errors['participants.0']);
+        $this->assertStringContainsString('Bayramov', (string) $outcome->message);
     }
 
     public function test_the_composer_prefills_the_day_count_and_derives_the_dates(): void

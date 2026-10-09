@@ -102,6 +102,17 @@ class OrderLog extends Model
         );
     }
 
+    /**
+     * The employees of a multi-participant (çoxşəxsli) order, in document order. Empty for
+     * single-person orders, whose one employee stays in template_snapshot.personnel_id.
+     *
+     * @return HasMany<OrderParticipant, $this>
+     */
+    public function participants(): HasMany
+    {
+        return $this->hasMany(OrderParticipant::class)->orderBy('position')->orderBy('id');
+    }
+
     /** @return BelongsTo<OrderStatus, $this> */
     public function status(): BelongsTo
     {

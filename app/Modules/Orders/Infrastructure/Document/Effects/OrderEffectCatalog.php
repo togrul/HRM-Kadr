@@ -75,6 +75,8 @@ class OrderEffectCatalog
                     ['key' => 'return_date', 'label' => __('orders::order_composer.effect_roles.business_trip_return_date'), 'type' => 'date'],
                     ['key' => 'transport', 'label' => __('orders::order_composer.effect_roles.business_trip_transport'), 'type' => 'text'],
                     ['key' => 'per_diem', 'label' => __('orders::order_composer.effect_roles.business_trip_per_diem'), 'type' => 'text'],
+                    ['key' => 'trip_type', 'label' => __('orders::order_composer.effect_roles.business_trip_trip_type'), 'type' => 'trip_type'],
+                    ['key' => 'funding_source', 'label' => __('orders::order_composer.effect_roles.business_trip_funding_source'), 'type' => 'text'],
                 ],
                 'handler' => BusinessTripEffect::class,
             ],
@@ -190,6 +192,28 @@ class OrderEffectCatalog
                 'handler' => null,
             ],
         ];
+    }
+
+    /**
+     * Effects that make sense once per person, so a template on them may be issued for several
+     * employees at once (çoxşəxsli): each participant gets their own record, all in one
+     * approval. Effects that move, rename, pay or end one employee's contract stay single.
+     */
+    private const MULTI_PARTICIPANT = [
+        'business_trip',
+        'paid_absence',
+        'award',
+        'vacation',
+        'social_leave',
+        'education_leave',
+        'unpaid_leave',
+        'disciplinary',
+    ];
+
+    /** True when a template on this effect may be marked multi-participant ('none' — document only — may). */
+    public function supportsParticipants(string $kind): bool
+    {
+        return $kind === 'none' || in_array($kind, self::MULTI_PARTICIPANT, true);
     }
 
     /**

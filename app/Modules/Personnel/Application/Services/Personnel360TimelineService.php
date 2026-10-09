@@ -156,7 +156,7 @@ class Personnel360TimelineService
             ->where('tabel_no', $personnel->tabel_no)
             ->latest('start_date')
             ->limit(25)
-            ->get(['id', 'start_date', 'end_date', 'location', 'description', 'approval_status', 'order_no'])
+            ->get(['id', 'start_date', 'end_date', 'location', 'description', 'approval_status', 'order_no', 'trip_type', 'funding_source'])
             ->map(fn ($row): array => $this->item(
                 type: 'business_trip',
                 occurredAt: $row->start_date,
@@ -164,7 +164,9 @@ class Personnel360TimelineService
                 summary: trim(implode(' - ', array_filter([
                     $this->dateRange($row->start_date, $row->end_date),
                     (string) $row->location,
+                    in_array($row->trip_type, ['domestic', 'foreign'], true) ? __('personnel::portfolio.timeline_trip_types.'.$row->trip_type) : null,
                     (string) $row->description,
+                    filled($row->funding_source) ? __('personnel::portfolio.timeline_titles.funding_source', ['source' => $row->funding_source]) : null,
                     $row->order_no ? __('personnel::portfolio.timeline_titles.order', ['number' => $row->order_no]) : null,
                 ]))),
                 status: $row->approval_status,
