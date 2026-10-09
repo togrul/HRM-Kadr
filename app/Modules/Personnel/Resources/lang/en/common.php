@@ -342,4 +342,7 @@ return [
         'quick_search' => 'Name, tabel no, FIN...',
         'search' => 'Search...',
     ],
+    'sanctions' => [
+        'lifted' => 'Expired disciplinary sanctions lifted: :count.',
+    ],
 ];

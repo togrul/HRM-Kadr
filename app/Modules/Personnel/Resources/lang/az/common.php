@@ -342,4 +342,7 @@ return [
         'search' => 'Axtar...',
         'quick_search' => 'Ad, tabel №, FİN...',
     ],
+    'sanctions' => [
+        'lifted' => 'Müddəti bitmiş intizam tənbehləri götürüldü: :count.',
+    ],
 ];

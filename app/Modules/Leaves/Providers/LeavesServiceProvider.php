@@ -6,8 +6,10 @@ use App\Contracts\AbsenceSource;
 use App\Models\Leave;
 use App\Modules\Leaves\Application\Services\LeaveAbsenceSource;
 use App\Modules\Leaves\Application\Services\LeaveListCacheVersion;
+use App\Modules\Leaves\Application\Services\OrderAbsenceRecorderService;
 use App\Modules\Leaves\Console\Commands\LeavesQueryBudgetCommand;
 use App\Modules\Leaves\Console\Commands\LeavesRenderBenchmarkCommand;
+use App\Modules\Leaves\Contracts\OrderAbsenceRecorder;
 use App\Observers\LeaveObserver;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
@@ -36,6 +38,8 @@ class LeavesServiceProvider extends ServiceProvider
 
         // Contributes this module's absences to the cross-module overlap check.
         $this->app->tag([LeaveAbsenceSource::class], AbsenceSource::TAG);
+        // Lets an approved order (military muster, donor day…) file its paid absence here.
+        $this->app->bind(OrderAbsenceRecorder::class, OrderAbsenceRecorderService::class);
         $this->loadRoutesFrom(__DIR__.'/../Routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'leaves');
         $this->loadMigrations();
