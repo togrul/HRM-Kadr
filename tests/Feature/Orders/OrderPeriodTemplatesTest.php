@@ -54,9 +54,9 @@ class OrderPeriodTemplatesTest extends TestCase
         $this->assertSame('social_leave', $maternity->effect);
         $this->assertSame('126', collect($maternity->manualFields())->firstWhere('label', 'Gün sayı')['default']);
 
-        foreach (['intizam_tenbehi', 'evezetme', 'emek_haqqi_deyisme'] as $code) {
-            $this->assertSame('none', $this->template($code)->effect, $code.' is document-only');
-        }
+        $this->assertSame('disciplinary', $this->template('intizam_tenbehi')->effect);
+        $this->assertSame('substitution', $this->template('evezetme')->effect);
+        $this->assertSame('salary_change', $this->template('emek_haqqi_deyisme')->effect);
 
         // The document is company-neutral: no customer name or person baked in.
         foreach (['ezamiyyet', 'analiq_mezuniyyeti', 'intizam_tenbehi', 'evezetme', 'emek_haqqi_deyisme'] as $code) {

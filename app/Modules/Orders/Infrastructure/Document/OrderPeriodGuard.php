@@ -27,6 +27,7 @@ class OrderPeriodGuard
         'education_leave' => AbsencePeriod::TYPE_VACATION,
         'unpaid_leave' => AbsencePeriod::TYPE_VACATION,
         'business_trip' => AbsencePeriod::TYPE_BUSINESS_TRIP,
+        'paid_absence' => AbsencePeriod::TYPE_LEAVE,
     ];
 
     public function __construct(

@@ -8,6 +8,7 @@ use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestReviewService;
 use App\Modules\Personnel\Application\Services\MyHr\OnboardingAssignmentManagerService;
 use App\Modules\Personnel\Application\Services\PersonnelAssignmentGuard;
 use App\Modules\Personnel\Application\Services\WorkingTimeNormService;
+use App\Modules\Personnel\Console\Commands\LiftExpiredDisciplinarySanctionsCommand;
 use App\Modules\Personnel\Console\Commands\PersonnelCrudQueryBudgetCommand;
 use App\Modules\Personnel\Console\Commands\PersonnelCrudRenderBenchmarkCommand;
 use App\Modules\Personnel\Console\Commands\PersonnelListQueryBudgetCommand;
@@ -61,6 +62,7 @@ class PersonnelServiceProvider extends ServiceProvider
                 ProfessionalPortfolioSyncRegistriesCommand::class,
                 ProfessionalPortfolioEnforcePoliciesCommand::class,
                 RepairLegacySelfServiceVacationOrdersCommand::class,
+                LiftExpiredDisciplinarySanctionsCommand::class,
             ]);
         }
     }
