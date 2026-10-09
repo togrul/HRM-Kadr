@@ -22,12 +22,16 @@ use App\Models\Setting;
 use App\Models\Structure;
 use App\Models\User;
 use App\Models\Vacation;
+use App\Models\VacationBalanceEntry;
 use App\Modules\Orders\Application\Document\OrderComposition;
 use App\Modules\Orders\Infrastructure\Document\DisciplinarySanctionTerm;
 use App\Modules\Orders\Infrastructure\Document\OrderCompositionIssuer;
 use App\Modules\Orders\Infrastructure\Document\OrderLookupFieldRegistry;
 use App\Modules\Orders\Infrastructure\Document\OrderStatusTransitionService;
 use App\Modules\Orders\Infrastructure\Document\StandardOrderEffectUpgrader;
+use App\Modules\Vacation\Application\Services\LegacyVacationMigrator;
+use App\Services\Vacation\VacationBalanceService;
+use Carbon\CarbonImmutable;
 use DomainException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
@@ -256,11 +260,12 @@ class OrderAdditionalEffectsTest extends TestCase
     public function test_a_recall_shortens_the_current_leave_returns_the_unused_days_and_revoking_restores_both(): void
     {
         $personnel = $this->makePersonnel();
+        $this->legacyBalance($personnel, 30, 30);
         $this->approve('emek_mezuniyyeti', $personnel, [
             'İş ili' => '2026-01-01', 'Gün sayı' => '10', 'Başlama tarixi' => '2026-11-02',
             'Bitmə tarixi' => '2026-11-11', 'İşə başlama tarixi' => '2026-11-12', 'Əsas mətni' => 'ərizə',
         ]);
-        $this->assertSame(20, (int) Vacation::query()->sole()->remaining_days);
+        $this->assertSame(20, $this->remaining($personnel));
 
         $recall = $this->approve('mezuniyyetden_geri_cagirma', $personnel, [
             'Səbəb' => 'istehsalat zərurəti ilə əlaqədar', 'Geri çağırma tarixi' => '2026-11-07', 'Əsas mətni' => 'razılıq ərizəsi',
@@ -270,7 +275,8 @@ class OrderAdditionalEffectsTest extends TestCase
         $this->assertSame('2026-11-06', $vacation->getRawOriginal('end_date'));
         $this->assertSame('2026-11-07', $vacation->getRawOriginal('return_work_date'));
         $this->assertSame(5, (int) $vacation->duration);
-        $this->assertSame(25, (int) Vacation::query()->sole()->remaining_days);
+        $this->assertSame(25, $this->remaining($personnel));
+        $this->assertSame(5, (int) VacationBalanceEntry::query()->where('kind', VacationBalanceEntry::KIND_RECALL)->sum('days'));
 
         app(OrderStatusTransitionService::class)->revert($recall->fresh(), 'Test üçün geri alınır');
 
@@ -278,7 +284,7 @@ class OrderAdditionalEffectsTest extends TestCase
         $this->assertSame('2026-11-11', $vacation->getRawOriginal('end_date'));
         $this->assertSame('2026-11-12', $vacation->getRawOriginal('return_work_date'));
         $this->assertSame(10, (int) $vacation->duration);
-        $this->assertSame(20, (int) Vacation::query()->sole()->remaining_days);
+        $this->assertSame(20, $this->remaining($personnel));
     }
 
     public function test_a_recall_without_a_leave_on_that_day_is_refused(): void
@@ -295,18 +301,19 @@ class OrderAdditionalEffectsTest extends TestCase
 
     public function test_unused_leave_compensation_takes_the_days_off_the_balance_and_revoking_gives_them_back(): void
     {
-        $personnel = $this->makePersonnel();
+        // ƏM m.144.2: paid out when the employment contract ends.
+        $personnel = $this->makePersonnel(['leave_work_date' => '2026-10-08']);
+        $this->legacyBalance($personnel, 30, 30);
 
         $order = $this->approve('istifade_olunmamis_mezuniyyet_kompensasiyasi', $personnel, [
             'İş ili' => '2026-01-01', 'Gün sayı' => '7', 'Əsas mətni' => 'ərizə',
         ]);
 
-        $balance = Vacation::query()->where('year', 2026)->sole();
-        $this->assertSame(23, (int) $balance->remaining_days);
+        $this->assertSame(23, $this->remaining($personnel));
 
         app(OrderStatusTransitionService::class)->revert($order->fresh(), 'Test üçün geri alınır');
 
-        $this->assertSame(30, (int) $balance->fresh()->remaining_days);
+        $this->assertSame(30, $this->remaining($personnel));
     }
 
     public function test_work_on_a_non_working_day_goes_on_record_in_attendance_and_revoking_removes_it(): void
@@ -491,6 +498,25 @@ class OrderAdditionalEffectsTest extends TestCase
         return app(OrderCompositionIssuer::class)->issue($template, new OrderComposition(
             $code, $personnel->id, null, null, null, $fields, ($this->number++).'-M', '08.10.2026', 'Bakı şəhəri',
         ), false);
+    }
+
+    /**
+     * A calendar-year balance as the previous ledger kept it, moved into the work-year
+     * ledger the way the upgrade migration does.
+     */
+    private function legacyBalance(Personnel $personnel, int $total, int $remaining): void
+    {
+        Vacation::query()->create([
+            'tabel_no' => $personnel->tabel_no, 'year' => 2026, 'reserved_date_month' => null,
+            'vacation_days_total' => $total, 'remaining_days' => $remaining,
+        ]);
+
+        app(LegacyVacationMigrator::class)->migrate();
+    }
+
+    private function remaining(Personnel $personnel): int
+    {
+        return app(VacationBalanceService::class)->balanceOn($personnel->fresh(), CarbonImmutable::parse('2026-12-31'))['remaining'];
     }
 
     private function template(string $code): OrderWordTemplate

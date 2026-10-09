@@ -14603,48 +14603,6 @@ parameters:
 			path: app/Services/StructurePathService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Vacation\:\:\$remaining_days\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Services/Vacation/VacationBalanceService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Vacation\:\:\$vacation_days_total\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Services/Vacation/VacationBalanceService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$end_date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Services/Vacation/VacationBalanceService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$leave_date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Services/Vacation/VacationBalanceService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$rank\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Services/Vacation/VacationBalanceService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$start_date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Services/Vacation/VacationBalanceService.php
-
-		-
-			message: '#^Using nullsafe property access on non\-nullable type Illuminate\\Database\\Eloquent\\Model\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Services/Vacation/VacationBalanceService.php
-
-		-
 			message: '#^Match expression does not handle remaining value\: mixed$#'
 			identifier: match.unhandled
 			count: 3

@@ -15,7 +15,8 @@ use DomainException;
 /**
  * Recalls the employee from leave (məzuniyyətdən geri çağırma): the leave the employee
  * is on at the recall date ends the day before it, they are back at work on the recall
- * date, and the days not taken go back to the yearly balance when it was annual leave.
+ * date, and the days not taken go back to the work years the leave was taken from when it
+ * was annual leave.
  * The leave's original end, return date and length are kept in the order snapshot, so
  * reversal restores the leave and takes the returned days again.
  */
@@ -56,7 +57,8 @@ class VacationRecallEffect implements OrderEffect
 
         $duration = (int) $vacation->duration;
         $unused = min($duration > 0 ? $duration : PHP_INT_MAX, (int) $recall->diffInDays($end) + 1);
-        $annual = $this->isAnnual($vacation);
+        $sourceOrder = $this->sourceOrder($vacation);
+        $annual = $this->isAnnual($vacation, $sourceOrder);
 
         $this->rememberState($order, ['vacation_recall' => [
             'vacation_id' => (int) $vacation->id,
@@ -74,8 +76,21 @@ class VacationRecallEffect implements OrderEffect
         ])->save();
 
         if ($annual) {
-            $this->balance->release($personnel, (int) $start->year, $unused);
+            // Back to the work years the leave's own order drew on, latest part first.
+            $this->balance->returnDays(
+                $personnel,
+                $unused,
+                self::sourceKey($order),
+                $sourceOrder !== null ? VacationEffect::sourceKey($sourceOrder) : null,
+                $start,
+            );
         }
+    }
+
+    /** The balance-ledger source key of the days a recall returns. */
+    public static function sourceKey(OrderLog $order): string
+    {
+        return 'order_recall:'.$order->id;
     }
 
     public function reverse(OrderLog $order, array $fields, Personnel $personnel): void
@@ -94,7 +109,8 @@ class VacationRecallEffect implements OrderEffect
             ])->save()
         );
 
-        if ((int) $state['returned_days'] > 0) {
+        if ((int) $state['returned_days'] > 0 && $this->balance->reverseSource(self::sourceKey($order)) === 0) {
+            // A recall approved before the work-year ledger: take the days again.
             $this->balance->consume($personnel, (int) $state['balance_year'], (int) $state['returned_days']);
         }
 
@@ -119,24 +135,32 @@ class VacationRecallEffect implements OrderEffect
      * is annual when that order's type runs the 'vacation' effect; a leave entered by
      * hand (no order behind it) is taken to be annual.
      */
-    private function isAnnual(PersonnelVacation $vacation): bool
+    private function isAnnual(PersonnelVacation $vacation, ?OrderLog $source): bool
     {
-        $orderNo = $vacation->getAttribute('order_no');
-
-        if (blank($orderNo)) {
+        if (blank($vacation->getAttribute('order_no'))) {
             return true;
         }
-
-        $source = OrderLog::query()
-            ->where('order_no', $orderNo)
-            ->where('status_id', OrderStatusEnum::APPROVED->value)
-            ->whereNotNull('template_snapshot')
-            ->orderByDesc('id')
-            ->first();
 
         $code = (string) data_get($source?->template_snapshot, 'template_code', '');
         $template = $code !== '' ? $this->templates->find($code) : null;
 
         return $template === null || $template->effect === 'vacation';
+    }
+
+    /** The approved order that granted the leave, if it was granted by an order. */
+    private function sourceOrder(PersonnelVacation $vacation): ?OrderLog
+    {
+        $orderNo = $vacation->getAttribute('order_no');
+
+        if (blank($orderNo)) {
+            return null;
+        }
+
+        return OrderLog::query()
+            ->where('order_no', $orderNo)
+            ->where('status_id', OrderStatusEnum::APPROVED->value)
+            ->whereNotNull('template_snapshot')
+            ->orderByDesc('id')
+            ->first();
     }
 }

@@ -26,6 +26,7 @@ class PersonnelKinship extends Model
         'residental_address',
         'birth_certificate_number',
         'marriage_certificate_number',
+        'is_disabled',
     ];
 
     protected $dates = [
@@ -34,6 +35,7 @@ class PersonnelKinship extends Model
 
     protected $casts = [
         'birthdate' => self::FORMAT_CAST,
+        'is_disabled' => 'boolean',
     ];
 
     public function kinship(): BelongsTo

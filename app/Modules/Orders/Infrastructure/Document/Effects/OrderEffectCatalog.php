@@ -32,6 +32,7 @@ class OrderEffectCatalog
                     ['key' => 'return_date', 'label' => __('orders::order_composer.effect_roles.vacation_return_date'), 'type' => 'date'],
                     ['key' => 'days', 'label' => __('orders::order_composer.effect_roles.vacation_days'), 'type' => 'number'],
                     ['key' => 'location', 'label' => __('orders::order_composer.effect_roles.vacation_location'), 'type' => 'text'],
+                    ['key' => 'work_year', 'label' => __('orders::order_composer.effect_roles.vacation_work_year'), 'type' => 'date'],
                 ],
                 'handler' => VacationEffect::class,
             ],

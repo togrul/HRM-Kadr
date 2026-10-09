@@ -1,4 +1,4 @@
-{{-- Vacation balance: entitled / used / remaining for the selected employee. Expects: $vb. --}}
+{{-- Vacation balance: entitled / used / remaining for the selected employee, and per work year. Expects: $vb. --}}
 @php $over = $vb['requested'] > 0 && $vb['requested'] > $vb['remaining']; @endphp
 <section @class([
     'rounded-2xl border p-5 transition-colors',
@@ -42,6 +42,45 @@
             ])>{{ $vb['remaining'] }}</p>
         </div>
     </div>
+
+    @if (! empty($vb['work_years']))
+        <div class="mt-4">
+            <p class="text-[11px] font-medium text-zinc-400">{{ __('orders::order_composer.vacation.by_work_year') }}</p>
+            <ul class="mt-1.5 divide-y divide-zinc-100 overflow-hidden rounded-xl ring-1 ring-inset ring-zinc-200/70">
+                @foreach ($vb['work_years'] as $wy)
+                    @php $picked = ($vb['work_year'] ?? null) !== null && $wy['start'] <= $vb['work_year'] && $vb['work_year'] <= $wy['end']; @endphp
+                    <li wire:key="vb-wy-{{ $wy['sequence'] }}" @class([
+                        'flex items-center justify-between gap-3 px-3 py-2 text-[12px]',
+                        'bg-sky-50/70' => $picked,
+                        'bg-white' => ! $picked,
+                    ])>
+                        <div class="min-w-0">
+                            <p class="font-medium text-zinc-800">{{ $wy['label'] }}</p>
+                            <p class="text-[11px] text-zinc-400">
+                                {{ __('orders::order_composer.vacation.work_year_line', ['total' => $wy['total'], 'used' => $wy['used'] + $wy['compensated']]) }}
+                                @unless ($wy['available'])
+                                    · {{ __('orders::order_composer.vacation.available_from', ['date' => \Carbon\Carbon::parse($wy['available_from'])->format('d.m.Y')]) }}
+                                @endunless
+                            </p>
+                        </div>
+                        <div class="flex shrink-0 items-center gap-2">
+                            <span @class([
+                                'rounded-md px-2 py-0.5 font-semibold',
+                                'bg-emerald-50 text-emerald-700' => $wy['remaining'] > 0 && $wy['available'],
+                                'bg-zinc-100 text-zinc-500' => $wy['remaining'] <= 0 || ! $wy['available'],
+                            ])>{{ $wy['remaining'] }} {{ __('orders::order_composer.vacation.days_suffix') }}</span>
+                            @if ($wy['remaining'] > 0 && $wy['available'] && ! $picked)
+                                <button type="button" wire:click="useVacationWorkYear('{{ $wy['start'] }}')"
+                                    class="rounded-lg px-2 py-1 text-[11px] font-medium text-sky-700 ring-1 ring-inset ring-sky-200 transition hover:bg-sky-50">
+                                    {{ __('orders::order_composer.vacation.use_work_year') }}
+                                </button>
+                            @endif
+                        </div>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
     @if ($over)
         <p class="mt-3 flex items-center gap-1.5 text-[12px] font-medium text-rose-600">

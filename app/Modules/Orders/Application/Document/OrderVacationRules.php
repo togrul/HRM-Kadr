@@ -25,20 +25,51 @@ class OrderVacationRules
     }
 
     /**
-     * The days requested and the year they count against (the start date's year, or
-     * the current year when the start date is missing or unparseable).
+     * The days requested, the date the balance is read on (the start date, or today when it
+     * is missing or unparseable) with its year, and the work year the order names, if any.
      *
      * @param  array<string,mixed>  $fields
-     * @return array{year:int,requested:int}
+     * @return array{year:int,requested:int,on:string,work_year:?string}
      */
     public function request(OrderWordTemplate $template, array $fields): array
     {
         $start = $this->dates->parse($this->effectFieldValue($template, $fields, 'start_date'));
+        $workYear = $this->dates->parse($this->effectFieldValue($template, $fields, 'work_year'));
 
         return [
             'year' => (int) ($start->year ?? now()->year),
             'requested' => (int) ($this->effectFieldValue($template, $fields, 'days') ?? 0),
+            'on' => ($start ?? now())->format('Y-m-d'),
+            'work_year' => $workYear?->format('Y-m-d'),
         ];
+    }
+
+    /** Unused-leave compensation: days paid out of the balance instead of being taken. */
+    public function isCompensation(OrderWordTemplate $template): bool
+    {
+        return $template->effect === 'vacation_compensation';
+    }
+
+    /**
+     * Why a compensation order may not be issued: without an ended (or pending termination of
+     * the) employment contract when only termination allows it (ƏM m.144.2), at least one day,
+     * never more than the unused days of all open work years.
+     */
+    public function compensationViolation(bool $allowed, int $requested, int $unused): ?string
+    {
+        if (! $allowed) {
+            return __('orders::order_composer.vacation.compensation_requires_termination');
+        }
+
+        if ($requested < 1) {
+            return __('orders::order_composer.vacation.min_days');
+        }
+
+        if ($requested > $unused) {
+            return __('orders::order_composer.vacation.compensation_exceeded', ['unused' => $unused, 'requested' => $requested]);
+        }
+
+        return null;
     }
 
     /**

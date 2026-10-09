@@ -46,6 +46,7 @@ return [
         'other' => 'Other',
     ],
     'labels' => [
+        'kinship_is_disabled' => 'Has a disability',
         'action' => 'Action',
         'number' => '#',
         'name' => 'Name',

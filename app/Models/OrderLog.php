@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\NormalizesFilterRanges;
+use App\Services\Vacation\VacationBalanceService;
 use App\Traits\CreateDeleteTrait;
 use App\Traits\DateCastTrait;
 use Carbon\Carbon;
@@ -241,10 +242,11 @@ class OrderLog extends Model
             ? $vacation->start_date->year
             : Carbon::parse($vacation->start_date)->year;
 
-        Vacation::where([
-            'tabel_no' => $vacation->tabel_no,
-            'year' => $year,
-        ])->increment('remaining_days', (int) $vacation->duration);
+        $personnel = Personnel::query()->withTrashed()->where('tabel_no', $vacation->tabel_no)->first();
+
+        if ($personnel) {
+            app(VacationBalanceService::class)->release($personnel, $year, (int) $vacation->duration);
+        }
     }
 
     protected function isEmrOrder(): bool

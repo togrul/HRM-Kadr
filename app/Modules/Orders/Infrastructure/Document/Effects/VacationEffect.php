@@ -10,7 +10,7 @@ use App\Support\Language\AzerbaijaniDateFormatter;
 /**
  * Puts the employee on leave: creates the personnel vacation record from the order's
  * fields (start/end/return dates, day count) and deducts the days from the employee's
- * annual vacation balance. Reversal removes the record and restores the balance.
+ * work-year vacation balance. Reversal removes the record and restores the balance.
  */
 class VacationEffect implements OrderEffect
 {
@@ -46,9 +46,17 @@ class VacationEffect implements OrderEffect
             'order_date' => optional($order->given_date)->format('Y-m-d'),
         ]);
 
-        // Deduct the taken days from the employee's annual balance.
+        // Deduct the taken days from the employee's balance: the work year the order names
+        // first, then the oldest open work year (ƏM m.138.1, 134.5).
         if ($this->countsAgainstAnnualBalance()) {
-            $this->balance->consume($personnel, (int) $start->year, (int) ($fields['days'] ?? 0));
+            $this->balance->consume(
+                $personnel,
+                (int) $start->year,
+                (int) ($fields['days'] ?? 0),
+                self::sourceKey($order),
+                $start,
+                $this->dates->parse($fields['work_year'] ?? null),
+            );
         }
     }
 
@@ -67,8 +75,15 @@ class VacationEffect implements OrderEffect
             return;
         }
 
-        // Give the days back to the annual balance.
+        // Give the days back: the entries this order wrote, or (an order approved before the
+        // work-year ledger) the day count onto the newest work years.
         $start = $this->dates->parse($fields['start_date'] ?? null);
-        $this->balance->release($personnel, (int) ($start?->year ?? now()->year), (int) ($fields['days'] ?? 0));
+        $this->balance->release($personnel, (int) ($start?->year ?? now()->year), (int) ($fields['days'] ?? 0), self::sourceKey($order));
+    }
+
+    /** The balance-ledger source key of the entries an order writes. */
+    public static function sourceKey(OrderLog $order): string
+    {
+        return 'order:'.$order->id;
     }
 }

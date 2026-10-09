@@ -1,0 +1,218 @@
+<?php
+
+use App\Models\Personnel;
+use App\Models\PersonnelKinship;
+use App\Models\PersonnelLaborActivity;
+use App\Models\Position;
+use App\Models\Setting;
+use App\Models\Structure;
+use App\Models\VacationNorm;
+use App\Modules\Vacation\Application\Services\VacationSettings;
+use App\Modules\Vacation\Application\Services\WorkYearCalendar;
+use App\Services\Vacation\VacationBalanceService;
+use Carbon\Carbon;
+use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+
+/*
+ * Əmək məzuniyyəti normaları (ƏM m.114–117, 119, 136) — docs/vacation-legal-basis.md.
+ * Hər qrup iş ilinin başlanğıcına görə qiymətləndirilir.
+ */
+
+beforeEach(function (): void {
+    DB::table('kinships')->insertOrIgnore([
+        ['id' => 23, 'name_az' => 'Oğul', 'is_active' => true],
+        ['id' => 24, 'name_az' => 'Qız', 'is_active' => true],
+        ['id' => 12, 'name_az' => 'Ana', 'is_active' => true],
+    ]);
+    // Hər iş ili hesablanır (uçotun başlama tarixi boş).
+    Setting::query()->where('name', VacationSettings::LEDGER_START)->update(['value' => '']);
+});
+
+/**
+ * @param  array<string, mixed>  $overrides
+ */
+function vnPersonnel(array $overrides = []): Personnel
+{
+    $structure = Structure::query()->create(['name' => 'Keşlə', 'shortname' => 'K']);
+    $position = Position::query()->create(['id' => random_int(1000, 999999), 'name' => 'operator']);
+
+    return Personnel::withoutEvents(fn () => Personnel::query()->create([
+        'tabel_no' => 'VN'.Str::upper(Str::random(6)),
+        'surname' => 'Əliyeva',
+        'name' => 'Leyla',
+        'patronymic' => 'Rauf',
+        'birthdate' => '1990-01-01',
+        'gender' => 2,
+        'email' => Str::lower(Str::random(8)).'@example.com',
+        'mobile' => '994501112233',
+        'nationality_id' => 1,
+        'pin' => 'P'.str_pad((string) random_int(1, 9999999), 7, '0', STR_PAD_LEFT),
+        'residental_address' => 'Main st',
+        'education_degree_id' => 1,
+        'work_norm_id' => 1,
+        'structure_id' => $structure->id,
+        'position_id' => $position->id,
+        'join_work_date' => '2024-03-15',
+        'added_by' => 1,
+        'is_pending' => false,
+        ...$overrides,
+    ]));
+}
+
+function vnChild(Personnel $personnel, string $birthdate, bool $disabled = false, int $kinship = 24): void
+{
+    PersonnelKinship::query()->create([
+        'tabel_no' => $personnel->tabel_no,
+        'kinship_id' => $kinship,
+        'fullname' => 'Uşaq '.Str::random(4),
+        'birthdate' => $birthdate,
+        'registered_address' => 'Bakı',
+        'residental_address' => 'Bakı',
+        'is_disabled' => $disabled,
+    ]);
+}
+
+function vnPrevious(Personnel $personnel, string $from, string $to): void
+{
+    PersonnelLaborActivity::query()->create([
+        'tabel_no' => $personnel->tabel_no,
+        'company_name' => 'Əvvəlki iş',
+        'position' => 'mütəxəssis',
+        'join_date' => $from,
+        'leave_date' => $to,
+        'is_current' => false,
+    ]);
+}
+
+/** The breakdown of the work year in progress on $on. */
+function vnBreakdown(Personnel $personnel, string $on): array
+{
+    return app(VacationBalanceService::class)->entitlementBreakdown($personnel->fresh(), Carbon::parse($on))->toArray();
+}
+
+it('seeds the statutory defaults', function (): void {
+    expect(VacationNorm::query()->where('is_statutory', true)->count())->toBe(10)
+        ->and(VacationNorm::query()->where('group', 'base')->where('scope', 'all')->value('days'))->toBe(21)
+        ->and(VacationNorm::query()->where('group', 'seniority')->orderBy('min_value')->pluck('days')->all())->toBe([2, 4, 6]);
+});
+
+it('gives 21 days base leave by default and the largest applicable base norm', function (): void {
+    $personnel = vnPersonnel();
+
+    expect(vnBreakdown($personnel, '2025-05-01'))->toMatchArray(['base' => 21, 'seniority' => 0, 'total' => 21]);
+
+    // ƏM m.114.3: the position is in the 30-day list.
+    VacationNorm::query()->create(['group' => 'base', 'scope' => 'position', 'position_id' => $personnel->position_id, 'days' => 30, 'legal_basis' => 'ƏM m.114.3']);
+    // An employment contract granting more (m.145) — the largest wins.
+    VacationNorm::query()->create(['group' => 'base', 'scope' => 'personnel', 'tabel_no' => $personnel->tabel_no, 'days' => 33]);
+
+    expect(vnBreakdown($personnel, '2025-05-01')['base'])->toBe(33);
+});
+
+it('gives under-18 and disabled employees their own base leave without additions', function (): void {
+    // 16–18 at the work year start: 35 days (m.119.1).
+    $teen = vnPersonnel(['birthdate' => '2008-01-01', 'join_work_date' => '2025-02-01']);
+    expect(vnBreakdown($teen, '2025-06-01'))->toMatchArray(['base' => 35, 'exclusive' => true, 'total' => 35]);
+
+    // Under 16: 42 days.
+    $young = vnPersonnel(['birthdate' => '2010-06-01', 'join_work_date' => '2025-02-01']);
+    expect(vnBreakdown($young, '2025-06-01')['base'])->toBe(42);
+
+    // Disability: 42 days (m.119.2); no seniority or children leave on top (m.116.3, 117.4).
+    DB::table('disabilities')->insertOrIgnore(['id' => 1, 'name' => 'II qrup']);
+    $disabled = vnPersonnel(['disability_id' => 1, 'join_work_date' => '2010-01-01']);
+    vnChild($disabled, '2015-01-01');
+    vnChild($disabled, '2017-01-01');
+
+    expect(vnBreakdown($disabled, '2025-06-01'))->toMatchArray(['base' => 42, 'seniority' => 0, 'children' => 0, 'total' => 42]);
+});
+
+it('adds seniority leave by total length of service across employers', function (string $join, ?array $previous, int $days): void {
+    $personnel = vnPersonnel(['join_work_date' => $join, 'gender' => 1]);
+
+    if ($previous !== null) {
+        vnPrevious($personnel, ...$previous);
+    }
+
+    // The work year in progress on 2025-06-01.
+    expect(vnBreakdown($personnel, '2025-06-01')['seniority'])->toBe($days);
+})->with([
+    'under 5 years' => ['2021-01-01', null, 0],
+    'exactly 5 years' => ['2020-01-01', null, 2],
+    '9 years' => ['2016-01-01', null, 2],
+    'exactly 10 years' => ['2015-01-01', null, 4],
+    'previous employer counts' => ['2023-01-01', ['2013-01-01', '2022-12-31'], 4],
+    'over 15 years' => ['2009-01-01', null, 6],
+]);
+
+it('adds 2 days to a woman with two children under 14 and 5 with three', function (): void {
+    $mother = vnPersonnel(['join_work_date' => '2024-01-01']);
+    vnChild($mother, '2015-02-01');
+    vnChild($mother, '2018-02-01', kinship: 23);
+
+    expect(vnBreakdown($mother, '2025-06-01')['children'])->toBe(2);
+
+    vnChild($mother, '2020-02-01');
+    expect(vnBreakdown($mother, '2025-06-01')['children'])->toBe(5);
+
+    // A man is not covered by the default rows…
+    $father = vnPersonnel(['gender' => 1, 'join_work_date' => '2024-01-01']);
+    vnChild($father, '2015-02-01');
+    vnChild($father, '2018-02-01');
+    expect(vnBreakdown($father, '2025-06-01')['children'])->toBe(0);
+
+    // …unless he raises the children alone (m.117.2): a row for that employee.
+    VacationNorm::query()->create(['group' => 'children', 'scope' => 'personnel', 'tabel_no' => $father->tabel_no, 'condition' => 'children_under_14', 'min_value' => 2, 'days' => 2]);
+    expect(vnBreakdown($father, '2025-06-01')['children'])->toBe(2);
+});
+
+it('counts a child until the end of the calendar year they turn 14 and a disabled child under 18', function (): void {
+    $mother = vnPersonnel(['join_work_date' => '2024-01-01']);
+    vnChild($mother, '2011-03-01'); // turns 14 on 2025-03-01
+    vnChild($mother, '2016-03-01');
+
+    // Work year 2025-01-01: both under 14. Work year 2026-01-01: the elder turned 14 in 2025.
+    expect(vnBreakdown($mother, '2025-06-01')['children'])->toBe(2)
+        ->and(vnBreakdown($mother, '2026-06-01')['children'])->toBe(0);
+
+    $parent = vnPersonnel(['join_work_date' => '2024-01-01']);
+    vnChild($parent, '2010-01-01', disabled: true);
+    expect(vnBreakdown($parent, '2025-06-01')['children'])->toBe(5);
+});
+
+it('adds working-conditions leave together with seniority leave', function (): void {
+    $personnel = vnPersonnel(['join_work_date' => '2014-01-01', 'gender' => 1]);
+    VacationNorm::query()->create(['group' => 'conditions', 'scope' => 'position', 'position_id' => $personnel->position_id, 'days' => 6, 'legal_basis' => 'ƏM m.115.1']);
+
+    // 2025-01-01: 11 years of service → +4; conditions +6 — both added (m.136.2).
+    expect(vnBreakdown($personnel, '2025-06-01'))->toMatchArray(['base' => 21, 'seniority' => 4, 'conditions' => 6, 'total' => 31]);
+});
+
+it('ignores inactive norms', function (): void {
+    $personnel = vnPersonnel(['join_work_date' => '2014-01-01', 'gender' => 1]);
+    VacationNorm::query()->where('group', 'seniority')->update(['is_active' => false]);
+
+    expect(vnBreakdown($personnel, '2025-06-01')['seniority'])->toBe(0);
+});
+
+it('keeps work years on the hire-date anniversary and shifts them by excluded child-care leave', function (): void {
+    $personnel = vnPersonnel(['join_work_date' => '2024-03-15']);
+    $periods = app(VacationBalanceService::class)->periodsFor($personnel, CarbonImmutable::parse('2026-04-01'));
+
+    expect(array_map(fn ($p) => [$p->start->toDateString(), $p->end->toDateString()], $periods))->toBe([
+        ['2024-03-15', '2025-03-14'],
+        ['2025-03-15', '2026-03-14'],
+        ['2026-03-15', '2027-03-14'],
+    ]);
+
+    // ƏM m.132.2: partially paid child-care leave (m.127) is not part of the work year.
+    $calendar = app(WorkYearCalendar::class);
+    $shifted = $calendar->periods(CarbonImmutable::parse('2024-03-15'), CarbonImmutable::parse('2026-04-01'), [
+        [CarbonImmutable::parse('2024-06-01'), CarbonImmutable::parse('2024-06-30')],
+    ]);
+
+    expect($shifted[0]->end->toDateString())->toBe('2025-04-13')
+        ->and($shifted[1]->start->toDateString())->toBe('2025-04-14');
+});
