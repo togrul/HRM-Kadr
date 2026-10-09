@@ -115,6 +115,12 @@ return [
         'line' => 'Kredit/avans tutulması',
     ],
 
+    'order_earnings' => [
+        'rest_day_work' => 'Qeyri-iş günü işə cəlb (ikiqat, :days gün, :hours saat)',
+        'substitution' => 'Əvəzetməyə görə əlavə ödəniş (:days gün)',
+        'substitution_for' => 'Əvəzetməyə görə əlavə ödəniş — :name (:days gün)',
+    ],
+
     'run_types' => [
         'regular' => 'Adi',
         'off_cycle' => 'Off-cycle',

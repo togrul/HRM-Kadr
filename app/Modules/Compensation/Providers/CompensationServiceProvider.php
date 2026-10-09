@@ -4,8 +4,10 @@ namespace App\Modules\Compensation\Providers;
 
 use App\Contracts\EmployeeRecordSource;
 use App\Modules\Compensation\Application\Services\CompensationEmployeeRecordSource;
+use App\Modules\Compensation\Application\Services\SubstitutionRegisterService;
 use App\Modules\Compensation\Console\Commands\CompensationQueryBudgetCommand;
 use App\Modules\Compensation\Console\Commands\CompensationRenderBenchmarkCommand;
+use App\Modules\Compensation\Contracts\SubstitutionRegister;
 use App\Modules\Compensation\Domain\Contracts\CompensationReadRepository;
 use App\Modules\Compensation\Infrastructure\Persistence\Eloquent\EloquentCompensationReadRepository;
 use App\Providers\Concerns\RegistersLivewireAliases;
@@ -26,6 +28,7 @@ class CompensationServiceProvider extends ServiceProvider
         }
 
         $this->app->bind(CompensationReadRepository::class, EloquentCompensationReadRepository::class);
+        $this->app->bind(SubstitutionRegister::class, SubstitutionRegisterService::class);
 
         $this->app->tag([CompensationEmployeeRecordSource::class], EmployeeRecordSource::TAG);
     }

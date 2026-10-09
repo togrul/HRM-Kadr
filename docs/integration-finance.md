@@ -210,6 +210,29 @@ tərəfə fərqi payslip-də görməzdən əvvəl aşkarlamağa imkan verir.
 Barmaq izi məzmuna bağlıdır, sətir sırasına yox: tarixlər çeşidlənir və yalnız
 normaya təsir edən sahələr daxil edilir.
 
+### Əmrlə qeyri-iş gününə cəlb — `rest_day_work`
+
+Müqavilə 1.1-dən (əlavə sahə, minor). Hər sətirdə `rest_day_work` siyahısı var:
+`qeyri_is_gunu_ise_celb` əmri ilə işçinin istirahət / bayram gününə cəlb edildiyi
+günlər, gündə bir dəfə:
+
+```json
+"rest_day_work": [
+  { "day": 8, "date": "2026-11-08", "minutes": 480, "compensation": "double_pay" },
+  { "day": 15, "date": "2026-11-15", "minutes": 480, "compensation": "day_off" }
+]
+```
+
+- `double_pay` — Əmək Məcəlləsinə görə ən azı ikiqat ödənilir; HRM özü hesablayanda
+  saat dərəcəsi = baza maaş ÷ (ayın norma dəqiqələri ÷ 60), məbləğ = 2 × saat dərəcəsi
+  × saat.
+- `day_off` — pul yox, başqa istirahət günü verilir; ödəniş sətri yaranmamalıdır.
+
+Bu dəqiqələr həmin günün `overtime_minutes`-ində **də** var (həftəsonu/bayram işlənən
+hər dəqiqə əlavə vaxtdır). Oxuyan tərəf onları bu siyahı ilə ödəməli, adi əlavə iş
+vaxtı kimi **ikinci dəfə ödəməməlidir**. Eyni günü iki əmr göstərsə də gün bir dəfə
+gəlir (sonuncu əmrin şərti). Əmr ləğv olunanda gün siyahıdan çıxır.
+
 ## 6. Kilidlənmiş ayın qorunması
 
 `unlockMonth()` ayı yenidən redaktəyə açır. Özlüyündə bu normaldır — düzəlişlər
@@ -274,6 +297,29 @@ saxlayardı və qanun dəyişəndə biri səssizcə yanlış olardı.
 Sətir bu tərəfdə atılır, uzaq tərəfdə yox: heç vaxt çıxmayan məlumat səhv
 oxuna bilməz, istisnanın səbəbi isə istisnanın yanında qalır.
 
+### Əvəzetmə — `substitutions`
+
+Müqavilə 1.1-dən (əlavə sahə, minor). Hər sətirdə `substitutions` siyahısı var —
+`evezetme` əmri ilə qeydə alınmış, hələ aktual olan əvəzetmələr: davam edən, gələcək
+və ya ən tezi **əvvəlki ayın 1-i** bitmiş olanlar (bağlanan ay hələ əhatə olunsun deyə):
+
+```json
+"substitutions": [
+  {
+    "substituted_external_no": "TB-COL", "substituted_name": "Həsənova Leyla Əli",
+    "start_date": "2026-11-02", "end_date": "2026-11-20",
+    "extra_pay_percent": 30.0, "extra_pay_amount": null, "order_no": "EM-118"
+  }
+]
+```
+
+Əlavə ödəniş əmrin mətninə görə **əvəz edən işçinin öz vəzifə maaşının** faizidir
+(`extra_pay_percent`); köhnə qurulumlarda faiz yerinə aylıq sabit məbləğ
+(`extra_pay_amount`) ola bilər — faiz varsa o götürülür. Ayın günlərinə bölüşdürmə
+maliyyə tərəfinin işidir; HRM özü hesablayanda: aylıq məbləğ × (əvəzetmənin ayda
+düşən təqvim günləri ÷ ayın günləri). `end_date: null` — müddət açıqdır. Əmr ləğv
+olunanda sətir siyahıdan çıxır.
+
 ### Məzuniyyət balansı
 
 `leave.balance` hər işçinin illik qalığını verir. Ödənişi maliyyə hesablayır
@@ -322,8 +368,10 @@ istehlakçı (ixrac, inteqrasiya feed-i) hər nəfər üçün ayrıca sorğu ver
 | `leave.balance` feed-i | ✅ |
 | Payslip güzgüsü (maliyyədən geri) | ⏳ növbəti fazalar |
 | Payroll sahibliyi (`payroll_owner`) | ✅ |
+| `rest_day_work` (davamiyyət) və `substitutions` (kompensasiya) — müqavilə 1.1 | ✅ |
 
 Testlər: `tests/Feature/Integration/IntegrationApiTest.php` (14),
 `PersonIdentityTest.php` (6), `OrderOutboxTest.php` (7),
-`PayrollOwnershipTest.php` (5), `MonthUnlockGuardTest.php` (5).
+`PayrollOwnershipTest.php` (5), `MonthUnlockGuardTest.php` (5);
+əmr ödənişləri və onların feed-ləri — `tests/Feature/Payroll/OrderEarningsPayrollTest.php` (8).
 Hamısı saxta server və ya lokal vəziyyətlə işləyir — canlı sistem tələb etmir.

@@ -7,6 +7,7 @@ use App\Models\AttendanceDailyLedger;
 use App\Models\AttendanceExportMark;
 use App\Models\AttendanceMonthlySummary;
 use App\Models\Personnel;
+use App\Modules\Attendance\Contracts\PayrollRestDayWork;
 use App\Modules\Integration\Support\Contract;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -38,9 +39,19 @@ use Illuminate\Support\Collection;
  * about that, every norm and therefore every salary drifts, silently. The hash
  * lets the reader detect the disagreement instead of discovering it in a
  * payslip.
+ *
+ * ## Rest-day work called in by an order
+ *
+ * `rest_day_work` lists the days an order called the employee in on a rest day or
+ * holiday, with the compensation the order chose: `double_pay` (paid at least double)
+ * or `day_off` (another day off instead of money). Those minutes are also inside the
+ * day's `overtime_minutes`; the reader pays them by this list and must not pay them a
+ * second time as ordinary overtime.
  */
 class AttendanceFeedService
 {
+    public function __construct(private readonly PayrollRestDayWork $restDayWork) {}
+
     /**
      * One page of employees for a given month.
      *
@@ -67,6 +78,7 @@ class AttendanceFeedService
 
         $ledgers = $this->ledgers($tabelNos, $year, $month);
         $summaries = $this->summaries($tabelNos, $year, $month);
+        $restDayWork = $this->restDayWork->orderWorkFor($tabelNos, $year, $month);
 
         // A locked month handed over is a month the other side will pay from.
         // Recording that is what lets `unlockMonth()` refuse to change it
@@ -78,7 +90,7 @@ class AttendanceFeedService
         return [
             'period' => ['year' => $year, 'month' => $month],
             'calendar_hash' => $this->calendarHash($year, $month),
-            'items' => $people->map(fn (Personnel $person): array => $this->row($person, $ledgers, $summaries))
+            'items' => $people->map(fn (Personnel $person): array => $this->row($person, $ledgers, $summaries, $restDayWork))
                 ->values()->all(),
             'last_sequence' => (int) ($people->last()->id ?? $after),
             'has_more' => $hasMore,
@@ -88,9 +100,10 @@ class AttendanceFeedService
     /**
      * @param  Collection<string, list<AttendanceDailyLedger>>  $ledgers
      * @param  Collection<string, AttendanceMonthlySummary>  $summaries
+     * @param  array<string, list<array{date: string, minutes: int, compensation: string}>>  $restDayWork
      * @return array<string, mixed>
      */
-    private function row(Personnel $person, Collection $ledgers, Collection $summaries): array
+    private function row(Personnel $person, Collection $ledgers, Collection $summaries, array $restDayWork): array
     {
         $tabelNo = trim((string) $person->tabel_no);
         $days = collect($ledgers->get($tabelNo, []));
@@ -119,6 +132,12 @@ class AttendanceFeedService
                 'absence_days' => (int) $summary->total_absence_days,
             ],
             'is_locked' => $summary !== null && (bool) $summary->is_locked,
+            'rest_day_work' => array_map(fn (array $day): array => [
+                'day' => (int) Carbon::parse($day['date'])->day,
+                'date' => $day['date'],
+                'minutes' => $day['minutes'],
+                'compensation' => $day['compensation'],
+            ], $restDayWork[$tabelNo] ?? []),
         ];
     }
 
