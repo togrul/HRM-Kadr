@@ -87,7 +87,9 @@ class PersonnelFieldGroupRegistry
                 'relations' => [],
                 'wizard_step' => 1,
                 'effects' => ['hire', 'termination'],
-                'default' => PersonnelChangeMode::Order,
+                // No order type corrects a mistyped hire/termination date, so by default it is
+                // editable with a stated reason (audited) rather than locked behind an order.
+                'default' => PersonnelChangeMode::Journal,
                 'owner' => self::OWNER_PERSONNEL,
                 'order_effect' => null,
                 'order_message' => null,

@@ -75,7 +75,7 @@ it('uses the default modes while no policy row exists', function (): void {
     expect($policy->modeFor('assignment'))->toBe(PersonnelChangeMode::Order)
         ->and($policy->modeFor('salary'))->toBe(PersonnelChangeMode::Order)
         ->and($policy->modeFor('surname'))->toBe(PersonnelChangeMode::Order)
-        ->and($policy->modeFor('employment_dates'))->toBe(PersonnelChangeMode::Order)
+        ->and($policy->modeFor('employment_dates'))->toBe(PersonnelChangeMode::Journal)
         ->and($policy->modeFor('contact'))->toBe(PersonnelChangeMode::Free)
         ->and($policy->modeFor('family'))->toBe(PersonnelChangeMode::Free)
         ->and($policy->modeFor('documents'))->toBe(PersonnelChangeMode::Free)
@@ -164,13 +164,25 @@ it('rejects crafted Livewire edits of order-only fields with a field error', fun
     Livewire::test(EditPersonnel::class, ['personnelModel' => $personnel->getKey()])
         ->assertSee(__('personnel::change_policy.badges.order'))
         ->set('personalForm.personnel.surname', 'Saxtayev')
-        ->set('personalForm.personnel.join_work_date', '01.02.2019')
         ->call('store')
-        ->assertHasErrors(['personalForm.personnel.surname', 'personalForm.personnel.join_work_date']);
+        ->assertHasErrors(['personalForm.personnel.surname']);
 
-    $fresh = $personnel->fresh();
-    expect($fresh->surname)->toBe($personnel->surname)
-        ->and($fresh->join_work_date->toDateString())->toBe($personnel->join_work_date->toDateString());
+    expect($personnel->fresh()->surname)->toBe($personnel->surname);
+});
+
+it('lets a mistyped hire date be corrected only with a stated reason by default', function (): void {
+    $user = changePolicyUser();
+    $this->actingAs($user);
+    $personnel = changePolicyPersonnel($user);
+    $guard = app(GuardsPersonnelChanges::class);
+
+    expect(fn () => $personnel->fresh()->update(['join_work_date' => '2019-02-01']))->toThrow(ValidationException::class)
+        ->and($personnel->fresh()->join_work_date->toDateString())->toBe($personnel->join_work_date->toDateString());
+
+    $guard->withReason('Əmrdə tarix səhv köçürülüb', fn () => $personnel->fresh()->update(['join_work_date' => '2019-02-01']));
+
+    expect($personnel->fresh()->join_work_date->toDateString())->toBe('2019-02-01')
+        ->and(changePolicyJournalEntries()->sole()->properties['field_group'])->toBe('employment_dates');
 });
 
 it('unlocks the wizard fields of a group switched to free', function (): void {
