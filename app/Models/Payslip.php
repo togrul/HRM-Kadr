@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @property int $payroll_run_id
  * @property string $tabel_no
+ * @property string $currency
  */
 class Payslip extends Model
 {
