@@ -8,6 +8,8 @@ use Carbon\CarbonInterface;
 /**
  * Bir iş ilinin balansı: hüquq (tərkibi ilə), açılış qalığı, istifadə, geri çağırma ilə qaytarılan,
  * kompensasiya olunan, düzəliş və qalıq. `availableFrom` — günlərdən istifadə oluna biləcəyi ilk tarix.
+ * `kind`: `annual` — ümumi iş ili, `conditions` — əmək şəraitinə görə əlavə məzuniyyətin öz iş ili
+ * (NK 95, b.7).
  */
 final class WorkYearBalance
 {
@@ -24,7 +26,19 @@ final class WorkYearBalance
         public readonly int $adjusted = 0,
         public readonly ?int $workYearId = null,
         public readonly ?int $reservedMonth = null,
+        public readonly string $kind = 'annual',
     ) {}
+
+    public function isConditions(): bool
+    {
+        return $this->kind === 'conditions';
+    }
+
+    /** Balans sətrinin açarı: növ + sıra nömrəsi. */
+    public function key(): string
+    {
+        return $this->kind.':'.$this->period->sequence;
+    }
 
     /** Hüquq + açılış qalığı + düzəlişlər. */
     public function total(): int
@@ -61,6 +75,7 @@ final class WorkYearBalance
     {
         return [
             'work_year_id' => $this->workYearId,
+            'kind' => $this->kind,
             'sequence' => $this->period->sequence,
             'start' => $this->period->start->toDateString(),
             'end' => $this->period->end->toDateString(),

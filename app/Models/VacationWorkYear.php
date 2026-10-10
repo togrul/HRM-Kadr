@@ -7,10 +7,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Bir işçinin bir iş ili üzrə məzuniyyət hüququ (ƏM m.113.3). Qalıq = entitled_days +
- * hərəkətlərin (VacationBalanceEntry) cəmi.
+ * hərəkətlərin (VacationBalanceEntry) cəmi. İki növ: `annual` — ümumi iş ili (işə qəbul günündən;
+ * əsas + staj + uşaq), `conditions` — əmək şəraitinə görə əlavə məzuniyyətin öz iş ili (şəraitdə
+ * işə başlanğıc günündən; NK 95, b.7).
  *
  * @property int $id
  * @property string $tabel_no
+ * @property string $kind annual|conditions
  * @property int $sequence
  * @property \Illuminate\Support\Carbon $starts_on
  * @property \Illuminate\Support\Carbon $ends_on
@@ -22,12 +25,17 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class VacationWorkYear extends Model
 {
+    public const KIND_ANNUAL = 'annual';
+
+    public const KIND_CONDITIONS = 'conditions';
+
     public const STRATEGY_LEGACY = 'legacy';
 
     public const STRATEGY_OPENING = 'opening';
 
     protected $fillable = [
         'tabel_no',
+        'kind',
         'sequence',
         'starts_on',
         'ends_on',
@@ -46,6 +54,10 @@ class VacationWorkYear extends Model
         'breakdown' => 'array',
         'legacy_vacation_id' => 'integer',
         'reserved_month' => 'integer',
+    ];
+
+    protected $attributes = [
+        'kind' => self::KIND_ANNUAL,
     ];
 
     public function entries(): HasMany

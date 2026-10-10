@@ -18,6 +18,10 @@ use Illuminate\Support\Collection;
  * Mülki işçilər: hüquq Admin → «Məzuniyyət normaları» cədvəlindən (ƏM m.114–117, 119) iş ilinin
  * başlanğıcına görə hesablanır. Birinci iş ili üçün məzuniyyət 6 ay işlədikdən sonra (m.131.1);
  * 18 yaşadək və əlilliyi olan işçilər üçün gözləmə yoxdur (m.131.4).
+ *
+ * Əmək şəraitinə görə əlavə məzuniyyət (m.115, 131.6) ümumi iş ilinə daxil deyil: onun öz iş ili
+ * (şərait ili) şəraitdə işə başlanğıc günündən sayılır (NK 95, b.7) — conditionsPeriods() və
+ * conditionsEntitlement().
  */
 class CivilEntitlementStrategy implements EntitlementStrategy
 {
@@ -48,7 +52,35 @@ class CivilEntitlementStrategy implements EntitlementStrategy
             return new EntitlementBreakdown(0);
         }
 
-        return $this->evaluator->evaluate($facts, $period->start, $this->norms(), $period, $asOf);
+        return $this->evaluator->evaluate($facts, $period->start, $this->norms(), $period, $asOf, withConditions: false);
+    }
+
+    /**
+     * $until tarixinədək başlamış şərait illəri (NK 95, b.7).
+     *
+     * @return list<WorkYearPeriod>
+     */
+    public function conditionsPeriods(Personnel $personnel, CarbonImmutable $until): array
+    {
+        $facts = $this->factsFor($personnel);
+
+        if ($facts === null) {
+            return [];
+        }
+
+        return $this->evaluator->conditionsPeriods($facts, $this->norms(), $until, $this->orderFacts->workYearGaps((string) $personnel->tabel_no));
+    }
+
+    /** Bir şərait ili üzrə əlavə məzuniyyət (yalnız `conditions` hissəsi). */
+    public function conditionsEntitlement(Personnel $personnel, WorkYearPeriod $period, CarbonImmutable $asOf): EntitlementBreakdown
+    {
+        $facts = $this->factsFor($personnel);
+
+        if ($facts === null) {
+            return new EntitlementBreakdown(0);
+        }
+
+        return $this->evaluator->conditions($facts, $period, $this->norms(), $asOf);
     }
 
     public function availableFrom(Personnel $personnel, WorkYearPeriod $period): CarbonImmutable

@@ -11,9 +11,12 @@ use App\Models\Position;
 use App\Models\Setting;
 use App\Models\Structure;
 use App\Models\VacationNorm;
+use App\Modules\Orders\Infrastructure\Document\Effects\TransferEffect;
 use App\Modules\Vacation\Application\Services\VacationNormCatalog;
 use App\Modules\Vacation\Application\Services\VacationSettings;
 use App\Modules\Vacation\Application\Services\WorkYearCalendar;
+use App\Services\Vacation\Entitlement\CivilEntitlementStrategy;
+use App\Services\Vacation\OrderLeaveFacts;
 use App\Services\Vacation\VacationBalanceService;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
@@ -288,8 +291,10 @@ it('counts working-conditions time from the transfer into the position', functio
 
     // 2025-07-01 – 2025-12-28: 181 gün < 6 × 30,4 — hüquq hələ yoxdur.
     expect(vnBreakdown($personnel, '2025-12-28')['conditions'])->toBe(0)
-        // İş ilində 184 gün ÷ 30,4 = 6 ay → 12 × 6 ÷ 12 = 6.
-        ->and(vnBreakdown($personnel, '2025-12-31')['conditions'])->toBe(6);
+        // Şərait ili köçürmə günündən sayılır (NK 95 b.7, 3-cü misal): 2025-07-01 – 2026-06-30.
+        // 6 ay tamamdır və işçi hələ şəraitdədir — şərait ili üçün tam 12 gün (avans). Əvvəl
+        // ümumi iş ili (2025-01-01 – 2025-12-31) götürülürdü və 6 ay × 12 ÷ 12 = 6 verilirdi.
+        ->and(vnBreakdown($personnel, '2025-12-31')['conditions'])->toBe(12);
 });
 
 it('adds up the proportional days of each position within a work year (NK 95, b.11)', function (): void {
@@ -346,4 +351,140 @@ it('saves an outside-the-conditions period without days, only for an employee', 
     expect(fn () => $catalog->save('conditions', [
         'scope' => 'position', 'position_id' => $personnel->position_id, 'not_in_conditions' => true, 'days' => 3,
     ]))->toThrow(DomainException::class);
+});
+
+/**
+ * Təsdiqlənmiş köçürmə əmri (TransferEffect-in snapshot-a yazdığı vəziyyətlə).
+ *
+ * @param  array<string, mixed>  $state
+ */
+function vnTransfer(Personnel $personnel, string $orderNo, string $givenDate, array $state): OrderLog
+{
+    return OrderLog::query()->create([
+        'order_no' => $orderNo, 'given_date' => $givenDate, 'given_by' => 'Test', 'given_by_rank' => '',
+        'status_id' => OrderStatusEnum::APPROVED->value, 'template_render_mode' => 'docx',
+        'template_snapshot' => ['template_code' => 'kecirme', 'fields' => [], 'personnel_id' => $personnel->id,
+            'effect_state' => ['prev_structure_id' => null, ...$state]],
+    ]);
+}
+
+/** @return list<array{0: string, 1: string}> */
+function vnConditionsYears(Personnel $personnel, string $until): array
+{
+    app(CivilEntitlementStrategy::class)->forget();
+
+    return array_map(
+        fn ($p): array => [$p->start->toDateString(), $p->end->toDateString()],
+        app(CivilEntitlementStrategy::class)->conditionsPeriods($personnel->fresh(), CarbonImmutable::parse($until)),
+    );
+}
+
+it('stores the transfer date stated in the order and dates the position change by it (ƏM m.59)', function (): void {
+    $personnel = vnPersonnel(['join_work_date' => '2020-01-01', 'gender' => 1]);
+    $previous = $personnel->position_id;
+    $target = Position::query()->create(['id' => random_int(1000, 999999), 'name' => 'qaynaqçı']);
+
+    // Əmr 2025-06-01-də verilib, köçürmə «01.09.2025-ci il tarixdən».
+    $order = OrderLog::query()->create([
+        'order_no' => 'OK-ED', 'given_date' => '2025-06-01', 'given_by' => 'Test', 'given_by_rank' => '',
+        'status_id' => OrderStatusEnum::APPROVED->value, 'template_render_mode' => 'docx',
+        'template_snapshot' => ['template_code' => 'kecirme', 'fields' => [], 'personnel_id' => $personnel->id],
+    ]);
+    app(TransferEffect::class)->apply($order, ['new_position' => $target->id, 'effective_date' => '01.09.2025-ci il'], $personnel);
+
+    expect($order->fresh()->template_snapshot['effect_state'])->toMatchArray(['prev_position_id' => $previous, 'effective_date' => '2025-09-01'])
+        ->and($personnel->fresh()->position_id)->toBe($target->id);
+
+    $changes = app(OrderLeaveFacts::class)->positionChanges($personnel->id, $target->id);
+    expect(array_map(fn (array $c): array => [$c[0]->toDateString(), $c[1]], $changes))->toBe([['2025-09-01', $previous]]);
+
+    // Rolu olmayan əmr (köhnə şablon): əmrin tarixi.
+    $other = vnPersonnel(['join_work_date' => '2020-01-01']);
+    $old = OrderLog::query()->create([
+        'order_no' => 'OK-OLD', 'given_date' => '2025-06-01', 'given_by' => 'Test', 'given_by_rank' => '',
+        'status_id' => OrderStatusEnum::APPROVED->value, 'template_render_mode' => 'docx',
+        'template_snapshot' => ['template_code' => 'kecirme', 'fields' => [], 'personnel_id' => $other->id],
+    ]);
+    app(TransferEffect::class)->apply($old, ['new_position' => $target->id], $other);
+
+    expect($old->fresh()->template_snapshot['effect_state']['effective_date'])->toBe('2025-06-01');
+});
+
+it('splits the conditions leave at the transfer effective date, not the order date (NK 95, b.11)', function (): void {
+    $personnel = vnPersonnel(['join_work_date' => '2020-01-01', 'gender' => 1]);
+    $previous = Position::query()->create(['id' => random_int(1000, 999999), 'name' => 'dehidratlaşdırma aparatçısı']);
+    VacationNorm::query()->create(['group' => 'conditions', 'scope' => 'position', 'position_id' => $previous->id, 'days' => 12]);
+    VacationNorm::query()->create(['group' => 'conditions', 'scope' => 'position', 'position_id' => $personnel->position_id, 'days' => 6]);
+
+    // Əmr 2025-01-15-də, köçürmə 2025-03-01-dən: 59 gün → 2 ay × 12/12 = 2; 306 gün → 10 ay × 6/12 = 5.
+    vnTransfer($personnel, 'OK-S1', '2025-01-15', ['prev_position_id' => $previous->id, 'effective_date' => '2025-03-01']);
+    expect(vnBreakdown($personnel, '2025-12-31')['conditions'])->toBe(7);
+
+    // Eyni əmr tarixi olmadan (köhnə əmr) əmrin tarixindən bölünərdi: 14 gün → 0 ay; 351 gün → 12 ay × 6/12 = 6.
+    OrderLog::query()->where('order_no', 'OK-S1')->delete();
+    vnTransfer($personnel, 'OK-S2', '2025-01-15', ['prev_position_id' => $previous->id]);
+    expect(vnBreakdown($personnel, '2025-12-31')['conditions'])->toBe(6);
+});
+
+it('measures the six months from the transfer effective date into the conditions', function (): void {
+    $personnel = vnPersonnel(['join_work_date' => '2020-01-01', 'gender' => 1]);
+    VacationNorm::query()->create(['group' => 'conditions', 'scope' => 'position', 'position_id' => $personnel->position_id, 'days' => 12]);
+    // Əmr 2025-06-01, şəraitli vəzifəyə 2025-09-01-dən.
+    vnTransfer($personnel, 'OK-6M', '2025-06-01', ['prev_position_id' => 1, 'effective_date' => '2025-09-01']);
+
+    expect(vnConditionsYears($personnel, '2026-03-31'))->toBe([['2025-09-01', '2026-08-31']])
+        // 2025-09-01 – 2026-02-27: 180 gün < 6 ay (əmrin tarixindən sayılsaydı 9 ay olardı).
+        ->and(vnBreakdown($personnel, '2026-02-27')['conditions'])->toBe(0)
+        ->and(vnBreakdown($personnel, '2026-03-31')['conditions'])->toBe(12);
+});
+
+it('keeps a separate work year for the conditions leave from the start in the conditions (NK 95, b.7, example 3)', function (): void {
+    // Misal: təchizat şöbəsinə avqustda qəbul, fevralın 1-dən 12 günlük şəraitli işə keçirilib.
+    $personnel = vnPersonnel(['join_work_date' => '2024-08-01', 'gender' => 1]);
+    VacationNorm::query()->create(['group' => 'conditions', 'scope' => 'position', 'position_id' => $personnel->position_id, 'days' => 12]);
+    vnTransfer($personnel, 'OK-M3', '2025-01-20', ['prev_position_id' => 1, 'effective_date' => '2025-02-01']);
+
+    $years = collect(app(VacationBalanceService::class)->balanceOn($personnel->fresh(), CarbonImmutable::parse('2025-09-15'))['work_years'])
+        ->map(fn (array $y): array => [$y['kind'], $y['start'], $y['end'], $y['entitled'], $y['breakdown']['conditions']])
+        ->all();
+
+    // Əsas məzuniyyət üçün iş ili avqustdan avqustadək, əlavə məzuniyyət üçün fevraldan fevraladək.
+    // Sentyabrda ikinci iş ili üçün məzuniyyətə gedəndə əlavə məzuniyyət tam verilir.
+    expect($years)->toBe([
+        ['annual', '2024-08-01', '2025-07-31', 21, 0],
+        ['conditions', '2025-02-01', '2026-01-31', 12, 12],
+        ['annual', '2025-08-01', '2026-07-31', 21, 0],
+    ]);
+
+    // Ümumi iş ili ilə sayılsaydı birinci iş ilində (2025-02-01 – 2025-07-31, 181 gün) hüquq
+    // yaranmazdı; şərait ilində isə 6 ay 2025-08-03-də tamam olur.
+    expect(vnBreakdown($personnel, '2025-08-01')['conditions'])->toBe(0)
+        ->and(vnBreakdown($personnel, '2025-08-05')['conditions'])->toBe(12);
+
+    // Bir əmrlə birlikdə verilir: ən köhnə sətirdən — birinci iş ili, sonra şərait ili.
+    app(VacationBalanceService::class)->consume($personnel->fresh(), 2025, 33, 'test:1', CarbonImmutable::parse('2025-09-15'));
+    $remaining = collect(app(VacationBalanceService::class)->balanceOn($personnel->fresh(), CarbonImmutable::parse('2025-09-15'))['work_years'])
+        ->mapWithKeys(fn (array $y): array => [$y['kind'].':'.$y['sequence'] => $y['remaining']])
+        ->all();
+
+    expect($remaining)->toBe(['annual:1' => 0, 'conditions:1' => 0, 'annual:2' => 21]);
+});
+
+it('restarts the conditions year on return after a whole conditions year outside the conditions', function (): void {
+    $personnel = vnPersonnel(['join_work_date' => '2020-01-01', 'gender' => 1]);
+    VacationNorm::query()->create(['group' => 'conditions', 'scope' => 'personnel', 'tabel_no' => $personnel->tabel_no, 'days' => 6,
+        'valid_from' => '2020-01-01', 'valid_to' => '2021-06-30']);
+    VacationNorm::query()->create(['group' => 'conditions', 'scope' => 'personnel', 'tabel_no' => $personnel->tabel_no, 'days' => 6,
+        'valid_from' => '2023-03-01']);
+
+    // 2022 şərait ili bütünlüklə şəraitsiz keçib — növbəti şərait ili qayıdış günündən.
+    expect(vnConditionsYears($personnel, '2024-06-01'))->toBe([
+        ['2020-01-01', '2020-12-31'],
+        ['2021-01-01', '2021-12-31'],
+        ['2023-03-01', '2024-02-29'],
+        ['2024-03-01', '2025-02-28'],
+    ]);
+
+    // 6 ay «üst-üstə» (cəmi) sayılır: əvvəlki 18 ay qalır — qayıdışdan bir ay sonra hüquq var.
+    expect(vnBreakdown($personnel, '2023-04-01')['conditions'])->toBe(6);
 });

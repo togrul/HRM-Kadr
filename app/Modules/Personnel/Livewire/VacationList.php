@@ -70,7 +70,7 @@ class VacationList extends Component
     public function updateMonth(int $sequence): void
     {
         $this->reservedSequence = $sequence;
-        $this->reservedMonthId = collect($this->workYears)->firstWhere('sequence', $sequence)['reserved_month'] ?? null;
+        $this->reservedMonthId = collect($this->workYears)->where('kind', 'annual')->firstWhere('sequence', $sequence)['reserved_month'] ?? null;
     }
 
     public function setMonth(VacationBalanceService $balances): void

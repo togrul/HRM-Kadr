@@ -113,7 +113,7 @@ class LegacyVacationMigrator
         $used = max(0, $total - $remaining);
 
         $workYear = VacationWorkYear::query()->updateOrCreate(
-            ['tabel_no' => $personnel->tabel_no, 'sequence' => $period->sequence],
+            ['tabel_no' => $personnel->tabel_no, 'kind' => VacationWorkYear::KIND_ANNUAL, 'sequence' => $period->sequence],
             [
                 'starts_on' => $period->start->toDateString(),
                 'ends_on' => $period->end->toDateString(),

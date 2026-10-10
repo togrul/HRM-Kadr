@@ -150,6 +150,12 @@ Onlar yalnız məzuniyyətləri çıxarmaq icazəsi olanlara görünür. Çap ik
 **Əmri ləğv etsəm, məzuniyyət nə olur?**
 Təsdiqlənmiş əmr ləğv ediləndə və ya təsdiqi geri alınanda məzuniyyət qeydi silinir və günlər işçinin qalığına qaytarılır.
 
+**Balansda `Şərait ili` sətri nədir?**
+Əmək şəraiti zərərli və ağır olan işə görə əlavə məzuniyyətin öz iş ili var: o, işçinin həmin şəraitdə işə başladığı gündən sayılır, ümumi iş ili isə işə qəbul günündən. Məsələn, avqustda işə qəbul olunub fevralda şəraitli vəzifəyə keçən işçinin əsas məzuniyyəti avqustdan avqustadək, əlavə məzuniyyəti fevraldan fevraladək hesablanır. Əlavə məzuniyyət hüququ şəraitdə cəmi 6 ay işlədikdən sonra yaranır. Formadakı `Məzuniyyət balansı`nda bu günlər `Şərait ili` adlı ayrıca sətirdə görünür; əmr təsdiqlənəndə günlər ən köhnə sətirdən başlayaraq çıxılır.
+
+**Köçürmə əmrində tarix niyə vacibdir?**
+Şəraitdə işlənmiş vaxt köçürmə əmrində yazılan `Köçürmə tarixi`ndən (əmrdəki «... tarixdən») sayılır, əmrin verildiyi tarixdən yox. Bu sahə boş qalarsa əmrin tarixi götürülür.
+
 **Niyə bəzi işçiləri görmürəm?**
 Siz yalnız sizə açıq olan strukturların məzuniyyətlərini görürsünüz. Həmçinin sol paneldə status, növ və il seçimini yoxlayın.
 

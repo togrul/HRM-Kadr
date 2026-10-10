@@ -48,14 +48,17 @@
             <p class="text-[11px] font-medium text-zinc-400">{{ __('orders::order_composer.vacation.by_work_year') }}</p>
             <ul class="mt-1.5 divide-y divide-zinc-100 overflow-hidden rounded-xl ring-1 ring-inset ring-zinc-200/70">
                 @foreach ($vb['work_years'] as $wy)
-                    @php $picked = ($vb['work_year'] ?? null) !== null && $wy['start'] <= $vb['work_year'] && $vb['work_year'] <= $wy['end']; @endphp
-                    <li wire:key="vb-wy-{{ $wy['sequence'] }}" @class([
+                    @php
+                        $conditionsYear = ($wy['kind'] ?? 'annual') === 'conditions';
+                        $picked = ! $conditionsYear && ($vb['work_year'] ?? null) !== null && $wy['start'] <= $vb['work_year'] && $vb['work_year'] <= $wy['end'];
+                    @endphp
+                    <li wire:key="vb-wy-{{ $wy['kind'] ?? 'annual' }}-{{ $wy['sequence'] }}" @class([
                         'flex items-center justify-between gap-3 px-3 py-2 text-[12px]',
                         'bg-sky-50/70' => $picked,
                         'bg-white' => ! $picked,
                     ])>
                         <div class="min-w-0">
-                            <p class="font-medium text-zinc-800">{{ $wy['label'] }}</p>
+                            <p class="font-medium text-zinc-800">@if ($conditionsYear){{ __('orders::order_composer.vacation.conditions_year') }} · @endif{{ $wy['label'] }}</p>
                             <p class="text-[11px] text-zinc-400">
                                 {{ __('orders::order_composer.vacation.work_year_line', ['total' => $wy['total'], 'used' => $wy['used'] + $wy['compensated']]) }}
                                 @unless ($wy['available'])
@@ -69,7 +72,7 @@
                                 'bg-emerald-50 text-emerald-700' => $wy['remaining'] > 0 && $wy['available'],
                                 'bg-zinc-100 text-zinc-500' => $wy['remaining'] <= 0 || ! $wy['available'],
                             ])>{{ $wy['remaining'] }} {{ __('orders::order_composer.vacation.days_suffix') }}</span>
-                            @if ($wy['remaining'] > 0 && $wy['available'] && ! $picked)
+                            @if ($wy['remaining'] > 0 && $wy['available'] && ! $picked && ! $conditionsYear)
                                 <button type="button" wire:click="useVacationWorkYear('{{ $wy['start'] }}')"
                                     class="rounded-lg px-2 py-1 text-[11px] font-medium text-sky-700 ring-1 ring-inset ring-sky-200 transition hover:bg-sky-50">
                                     {{ __('orders::order_composer.vacation.use_work_year') }}

@@ -93,6 +93,7 @@ class OrderEffectCatalog
                 'roles' => [
                     ['key' => 'new_structure', 'label' => __('orders::order_composer.effect_roles.transfer_new_structure'), 'type' => 'structure'],
                     ['key' => 'new_position', 'label' => __('orders::order_composer.effect_roles.transfer_new_position'), 'type' => 'position'],
+                    ['key' => 'effective_date', 'label' => __('orders::order_composer.effect_roles.transfer_effective_date'), 'type' => 'date'],
                 ],
                 'handler' => TransferEffect::class,
             ],

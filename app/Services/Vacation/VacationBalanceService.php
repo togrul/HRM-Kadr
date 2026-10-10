@@ -27,6 +27,10 @@ use Illuminate\Support\Facades\DB;
  * iş ilindən başlayaraq bölüşdürülür; istifadə olunmamış qalıq sonrakı illərə keçir və yanmır
  * (m.134–135, 2006-cı ildən il həddi yoxdur).
  *
+ * Əmək şəraitinə görə əlavə məzuniyyət ayrıca sətirlərdədir (VacationWorkYear::KIND_CONDITIONS):
+ * onun iş ili şəraitdə işə başlanğıc günündən sayılır (NK 95, b.7: «iş stajı əsas əmək və əlavə
+ * məzuniyyətlər üzrə ayrı-ayrılıqda hesablanır»), ümumi iş ili isə işə qəbul günündən.
+ *
  * Uçotun başlama tarixindən (VacationSettings::LEDGER_START) əvvəl başlamış iş illəri avtomatik
  * hesablanmır — onların qalığı köhnə təqvim ili balansından (LegacyVacationMigrator) və ya
  * admin tərəfindən daxil edilən açılış qalığı ilə gəlir.
@@ -67,6 +71,8 @@ class VacationBalanceService
 
     /**
      * $asOf tarixində davam edən iş ilinin hüququnun tərkibi (işə qəbul tarixi yoxdursa null).
+     * Mülki işçidə `conditions` — həmin tarixdə davam edən şərait ilinin hüququdur (ayrıca iş ili,
+     * NK 95 b.7); qalan hissələr ümumi iş ilinindir.
      */
     public function entitlementBreakdown(Personnel $personnel, ?CarbonInterface $asOf = null): ?EntitlementBreakdown
     {
@@ -79,7 +85,25 @@ class VacationBalanceService
             return null;
         }
 
-        return $this->strategyFor($personnel)->entitlement($personnel, $period, $asOf);
+        $strategy = $this->strategyFor($personnel);
+        $breakdown = $strategy->entitlement($personnel, $period, $asOf);
+
+        if ($strategy !== $this->civil || $breakdown->exclusive) {
+            return $breakdown;
+        }
+
+        $current = collect($this->civil->conditionsPeriods($personnel, $asOf))
+            ->first(fn (WorkYearPeriod $conditionsYear): bool => $conditionsYear->contains($asOf));
+
+        return new EntitlementBreakdown(
+            $breakdown->base,
+            $breakdown->seniority,
+            $breakdown->children,
+            $current !== null ? $this->civil->conditionsEntitlement($personnel, $current, $asOf)->conditions : 0,
+            $breakdown->seniorityYears,
+            $breakdown->exclusive,
+            $breakdown->strategy,
+        );
     }
 
     /**
@@ -266,8 +290,9 @@ class VacationBalanceService
 
         return DB::transaction(function () use ($personnel, $period, $days, $note, $userId): VacationBalanceEntry {
             $rows = $this->materialize($personnel, Carbon::now());
-            $row = $rows->get($period->sequence) ?? VacationWorkYear::query()->create([
+            $row = $rows->get(self::rowKey(VacationWorkYear::KIND_ANNUAL, $period->sequence)) ?? VacationWorkYear::query()->create([
                 'tabel_no' => $personnel->tabel_no,
+                'kind' => VacationWorkYear::KIND_ANNUAL,
                 'sequence' => $period->sequence,
                 'starts_on' => $period->start->toDateString(),
                 'ends_on' => $period->end->toDateString(),
@@ -330,17 +355,18 @@ class VacationBalanceService
      * $asOf tarixinədək açıq iş illərinin sətirlərini yaradır və davam edən iş illərinin hüququnu
      * yeniləyir (bitmiş iş ilinin hüququ dəyişmir).
      *
-     * @return Collection<int, VacationWorkYear> sequence => sətir
+     * @return Collection<string, VacationWorkYear> «növ:sıra» => sətir (bax rowKey())
      */
     public function materialize(Personnel $personnel, CarbonInterface $asOf): Collection
     {
         $this->civil->forget();
         $balances = $this->buildBalances($personnel, CarbonImmutable::parse($asOf->toDateString()));
-        $rows = VacationWorkYear::query()->where('tabel_no', $personnel->tabel_no)->get()->keyBy('sequence');
+        $rows = VacationWorkYear::query()->where('tabel_no', $personnel->tabel_no)->get()
+            ->keyBy(fn (VacationWorkYear $row): string => self::rowKey((string) $row->kind, (int) $row->sequence));
         $today = Carbon::today()->toDateString();
 
         foreach ($balances as $balance) {
-            $row = $rows->get($balance->period->sequence);
+            $row = $rows->get($balance->key());
             $values = [
                 'starts_on' => $balance->period->start->toDateString(),
                 'ends_on' => $balance->period->end->toDateString(),
@@ -350,8 +376,9 @@ class VacationBalanceService
             ];
 
             if ($row === null) {
-                $rows->put($balance->period->sequence, VacationWorkYear::query()->create([
+                $rows->put($balance->key(), VacationWorkYear::query()->create([
                     'tabel_no' => $personnel->tabel_no,
+                    'kind' => $balance->kind,
                     'sequence' => $balance->period->sequence,
                     ...$values,
                 ]));
@@ -390,7 +417,17 @@ class VacationBalanceService
             }
 
             $period = new WorkYearPeriod($row->sequence, CarbonImmutable::parse($row->starts_on->toDateString()), CarbonImmutable::parse($row->ends_on->toDateString()));
-            $breakdown = $strategy->entitlement($personnel, $period, $today);
+
+            if ($row->kind === VacationWorkYear::KIND_CONDITIONS) {
+                if ($strategy !== $this->civil) {
+                    continue;
+                }
+
+                $breakdown = $this->civil->conditionsEntitlement($personnel, $period, $today);
+            } else {
+                $breakdown = $strategy->entitlement($personnel, $period, $today);
+            }
+
             $row->fill(['entitled_days' => $breakdown->total(), 'breakdown' => $breakdown->toArray(), 'strategy' => $strategy->key()]);
 
             if ($row->isDirty()) {
@@ -406,7 +443,7 @@ class VacationBalanceService
     public function reserveMonth(Personnel $personnel, int $sequence, ?int $month): void
     {
         $rows = $this->materialize($personnel, Carbon::now());
-        $row = $rows->get($sequence);
+        $row = $rows->get(self::rowKey(VacationWorkYear::KIND_ANNUAL, $sequence));
 
         if ($row !== null) {
             $row->forceFill(['reserved_month' => $month ?: null])->save();
@@ -414,6 +451,8 @@ class VacationBalanceService
     }
 
     /**
+     * Ümumi iş illəri və (mülki işçidə) şərait illəri, başlanğıc tarixinə görə artan.
+     *
      * @return list<WorkYearBalance>
      */
     private function buildBalances(Personnel $personnel, CarbonImmutable $asOf): array
@@ -421,14 +460,58 @@ class VacationBalanceService
         $strategy = $this->strategyFor($personnel);
         $ledgerStart = $this->settings->ledgerStart();
         $horizon = $ledgerStart !== null && $ledgerStart->gt($asOf) ? $ledgerStart : $asOf;
-        $periods = collect($this->periodsFor($personnel, $horizon))->keyBy('sequence');
-        $firstComputed = $this->firstComputedSequence($periods->all(), $ledgerStart);
         $rows = VacationWorkYear::query()
             ->with('entries:id,work_year_id,kind,days')
             ->where('tabel_no', $personnel->tabel_no)
             ->orderBy('sequence')
-            ->get()
-            ->keyBy('sequence');
+            ->get();
+
+        $balances = $this->balancesOfKind(
+            VacationWorkYear::KIND_ANNUAL,
+            $this->periodsFor($personnel, $horizon),
+            $rows->where('kind', VacationWorkYear::KIND_ANNUAL)->keyBy('sequence'),
+            $asOf,
+            $ledgerStart,
+            $strategy->key(),
+            fn (WorkYearPeriod $period): EntitlementBreakdown => $strategy->entitlement($personnel, $period, $asOf),
+            fn (WorkYearPeriod $period): CarbonImmutable => $strategy->availableFrom($personnel, $period),
+        );
+
+        if ($strategy === $this->civil) {
+            $balances = [...$balances, ...$this->balancesOfKind(
+                VacationWorkYear::KIND_CONDITIONS,
+                $this->civil->conditionsPeriods($personnel, $horizon),
+                $rows->where('kind', VacationWorkYear::KIND_CONDITIONS)->keyBy('sequence'),
+                $asOf,
+                $ledgerStart,
+                $strategy->key(),
+                fn (WorkYearPeriod $period): EntitlementBreakdown => $this->civil->conditionsEntitlement($personnel, $period, $asOf),
+                // Şərait ilinin hüququ 6 ay şərtindən sonra yaranır (b.7) — o vaxta qədər 0-dır.
+                fn (WorkYearPeriod $period): CarbonImmutable => $period->start,
+                skipEmpty: true,
+            )];
+        }
+
+        usort($balances, fn (WorkYearBalance $a, WorkYearBalance $b): int => [$a->period->start, $a->isConditions()] <=> [$b->period->start, $b->isConditions()]);
+
+        return $balances;
+    }
+
+    /**
+     * Bir növ iş illərinin balansı. Bitmiş və köçürülmüş sətirlərin hüququ saxlanmış dəyərdən,
+     * qalanları hesablanır; uçotdan əvvəlki iş illəri yalnız sətri varsa göstərilir.
+     *
+     * @param  list<WorkYearPeriod>  $computed
+     * @param  Collection<int, VacationWorkYear>  $rows  sıra => sətir
+     * @param  callable(WorkYearPeriod): EntitlementBreakdown  $entitlement
+     * @param  callable(WorkYearPeriod): CarbonImmutable  $availableFrom
+     * @param  bool  $skipEmpty  hüququ və hərəkəti olmayan bitmiş ili göstərmə
+     * @return list<WorkYearBalance>
+     */
+    private function balancesOfKind(string $kind, array $computed, Collection $rows, CarbonImmutable $asOf, ?CarbonImmutable $ledgerStart, string $strategyKey, callable $entitlement, callable $availableFrom, bool $skipEmpty = false): array
+    {
+        $periods = collect($computed)->keyBy('sequence');
+        $firstComputed = $this->firstComputedSequence($periods->all(), $ledgerStart);
         $today = CarbonImmutable::today()->toDateString();
         $balances = [];
 
@@ -460,13 +543,18 @@ class VacationBalanceService
                 $breakdown = new EntitlementBreakdown(0, strategy: VacationWorkYear::STRATEGY_OPENING);
                 $rowStrategy = VacationWorkYear::STRATEGY_OPENING;
             } else {
-                $breakdown = $strategy->entitlement($personnel, $period, $asOf);
+                $breakdown = $entitlement($period);
                 $entitled = $breakdown->total();
-                $rowStrategy = $strategy->key();
+                $rowStrategy = $strategyKey;
             }
 
             $entries = $row !== null ? $row->entries : collect();
-            $sum = fn (string $kind): int => (int) $entries->where('kind', $kind)->sum('days');
+
+            if ($skipEmpty && $entitled === 0 && $entries->isEmpty() && ! $period->contains($asOf)) {
+                continue;
+            }
+
+            $sum = fn (string $entryKind): int => (int) $entries->where('kind', $entryKind)->sum('days');
 
             $balances[] = new WorkYearBalance(
                 period: $period,
@@ -475,7 +563,7 @@ class VacationBalanceService
                 strategy: $rowStrategy,
                 availableFrom: in_array($rowStrategy, [VacationWorkYear::STRATEGY_LEGACY, VacationWorkYear::STRATEGY_OPENING], true)
                     ? $period->start
-                    : $strategy->availableFrom($personnel, $period),
+                    : $availableFrom($period),
                 opening: $sum(VacationBalanceEntry::KIND_OPENING),
                 used: -($sum(VacationBalanceEntry::KIND_USAGE) + $sum(VacationBalanceEntry::KIND_LEGACY_USAGE)),
                 recalled: $sum(VacationBalanceEntry::KIND_RECALL),
@@ -483,10 +571,17 @@ class VacationBalanceService
                 adjusted: $sum(VacationBalanceEntry::KIND_ADJUSTMENT),
                 workYearId: $row?->id,
                 reservedMonth: $row?->reserved_month,
+                kind: $kind,
             );
         }
 
         return $balances;
+    }
+
+    /** materialize() nəticəsinin açarı: «növ:sıra». */
+    private static function rowKey(string $kind, int $sequence): string
+    {
+        return $kind.':'.$sequence;
     }
 
     /**
@@ -545,11 +640,13 @@ class VacationBalanceService
             $candidates = array_values(array_filter($balances, fn (WorkYearBalance $b): bool => ! $requireAvailable || $b->isAvailableOn($on)));
             $preferredDay = $preferred?->toDateString();
 
+            // Əmrdə göstərilən iş ili ümumi iş ilidir; qalanı başlanğıca görə (ən köhnə əvvəl),
+            // eyni gündə ümumi il şərait ilindən əvvəl.
             usort($candidates, function (WorkYearBalance $a, WorkYearBalance $b) use ($preferredDay): int {
-                $aPreferred = $preferredDay !== null && $a->period->contains(CarbonImmutable::parse($preferredDay));
-                $bPreferred = $preferredDay !== null && $b->period->contains(CarbonImmutable::parse($preferredDay));
+                $aPreferred = $preferredDay !== null && ! $a->isConditions() && $a->period->contains(CarbonImmutable::parse($preferredDay));
+                $bPreferred = $preferredDay !== null && ! $b->isConditions() && $b->period->contains(CarbonImmutable::parse($preferredDay));
 
-                return [$bPreferred, $a->period->sequence] <=> [$aPreferred, $b->period->sequence];
+                return [$bPreferred, $a->period->start, $a->isConditions()] <=> [$aPreferred, $b->period->start, $b->isConditions()];
             });
 
             $left = $days;
@@ -561,7 +658,7 @@ class VacationBalanceService
                     continue;
                 }
 
-                $this->entry($rows->get($balance->period->sequence), $personnel, $kind, -$take, $source);
+                $this->entry($rows->get($balance->key()), $personnel, $kind, -$take, $source);
                 $left -= $take;
 
                 if ($left === 0) {
@@ -569,9 +666,10 @@ class VacationBalanceService
                 }
             }
 
-            // Qalıq çatmadı (blok keçilib və ya köhnə məlumat): artıq hissə sonuncu iş ilinə yazılır.
-            $target = end($candidates) ?: end($balances);
-            $this->entry($rows->get($target->period->sequence), $personnel, $kind, -$left, $source);
+            // Qalıq çatmadı (blok keçilib və ya köhnə məlumat): artıq hissə sonuncu ümumi iş ilinə yazılır.
+            $annual = array_values(array_filter($candidates ?: $balances, fn (WorkYearBalance $b): bool => ! $b->isConditions()));
+            $target = end($annual) ?: (end($candidates) ?: end($balances));
+            $this->entry($rows->get($target->key()), $personnel, $kind, -$left, $source);
         });
     }
 
@@ -616,7 +714,7 @@ class VacationBalanceService
                     continue;
                 }
 
-                $this->entry($rows->get($balance->period->sequence), $personnel, $kind, $give, $source);
+                $this->entry($rows->get($balance->key()), $personnel, $kind, $give, $source);
                 $left -= $give;
 
                 if ($left === 0) {
@@ -624,9 +722,10 @@ class VacationBalanceService
                 }
             }
 
-            // Geri çağırmada qalan günlər hər halda işçiyə qaytarılır (ən yeni iş ilinə).
+            // Geri çağırmada qalan günlər hər halda işçiyə qaytarılır (ən yeni ümumi iş ilinə).
             if ($kind === VacationBalanceEntry::KIND_RECALL && $left > 0) {
-                $this->entry($rows->get($balances[0]->period->sequence), $personnel, $kind, $left, $source);
+                $latest = collect($balances)->first(fn (WorkYearBalance $b): bool => ! $b->isConditions()) ?? $balances[0];
+                $this->entry($rows->get($latest->key()), $personnel, $kind, $left, $source);
             }
         });
     }

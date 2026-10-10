@@ -6,6 +6,7 @@ use App\Models\OrderLog;
 use App\Models\Personnel;
 use App\Modules\Compensation\Contracts\OrderCompensationSync;
 use App\Modules\Personnel\Contracts\GuardsPersonnelChanges;
+use App\Support\Language\AzerbaijaniDateFormatter;
 
 /**
  * Moves the employee: updates structure and/or position to the new ones chosen on the
@@ -17,12 +18,17 @@ use App\Modules\Personnel\Contracts\GuardsPersonnelChanges;
  * Struktur/vəzifə dəyişiklik siyasəti ilə qorunduğu üçün yazma
  * GuardsPersonnelChanges::allowForEffect('transfer') daxilində aparılır — həm tətbiq, həm də
  * ləğv zamanı geri qaytarma (effekt birbaşa çağırılsa da).
+ *
+ * Köçürmənin qüvvəyə minmə tarixi (ƏM m.59: əmrdə göstərilən «... tarixdən») `effective_date`
+ * rolundan götürülür, boşdursa əmrin tarixi; o, `effect_state.effective_date`-də saxlanılır və
+ * vəzifə tarixçəsi (məzuniyyət hüququ, NK 95 b.7, b.11) həmin gündən yeni vəzifəni sayır.
  */
 class TransferEffect implements OrderEffect
 {
     public function __construct(
         private readonly OrderCompensationSync $compensation,
         private readonly GuardsPersonnelChanges $changes,
+        private readonly AzerbaijaniDateFormatter $dates,
     ) {}
 
     public function apply(OrderLog $order, array $fields, Personnel $personnel): void
@@ -39,10 +45,14 @@ class TransferEffect implements OrderEffect
             return;
         }
 
+        $effectiveOn = $this->dates->parse(is_scalar($fields['effective_date'] ?? null) ? (string) $fields['effective_date'] : null)
+            ?? ($order->given_date ? $this->dates->parse((string) $order->getRawOriginal('given_date')) : null);
+
         // Remember where the employee was, so reverse() can put them back.
         $this->rememberPreState($order, [
             'prev_structure_id' => $personnel->structure_id,
             'prev_position_id' => $personnel->position_id,
+            'effective_date' => $effectiveOn?->format('Y-m-d'),
         ]);
 
         $this->changes->allowForEffect('transfer', fn (): bool => $personnel->forceFill($update)->save());

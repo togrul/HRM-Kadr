@@ -36,6 +36,18 @@ class WorkYearCalendar
     }
 
     /**
+     * $start günündən başlayan bir iş ili (istisna dövrləri qədər uzanmış).
+     *
+     * @param  list<array{0: CarbonImmutable, 1: CarbonImmutable}>  $excluded
+     */
+    public function period(int $sequence, CarbonInterface $start, array $excluded = []): WorkYearPeriod
+    {
+        $start = CarbonImmutable::parse($start->toDateString());
+
+        return new WorkYearPeriod($sequence, $start, $this->endOf($start, $excluded));
+    }
+
+    /**
      * @param  list<array{0: CarbonImmutable, 1: CarbonImmutable}>  $excluded
      */
     private function endOf(CarbonImmutable $start, array $excluded): CarbonImmutable

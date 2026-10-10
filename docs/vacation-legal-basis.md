@@ -144,6 +144,56 @@ verilir. Bu əlavə məzuniyyətə işçinin hüququ həmin iş yerlərində üs
 
 **Etibarlılıq:** Təsdiqləndi (rəsmi mətn) — minimum 6 gün və siyahını təsdiq edən orqan; siyahının məzmunu Təsdiqlənmədi.
 
+### (c-1) Şərait əlavəsinin ayrıca iş ili — NK 95, b.7 (oxunuş 10.10.2026)
+
+Mənbə: NK-nin 30.05.2005 tarixli 95 nömrəli qərarı ilə təsdiq edilmiş Qaydalar, rəsmi mətn
+(https://e-qanun.az/frameworks/9/f_9900.html, `Referer: https://e-qanun.az/framework/9900`; müraciət
+10.10.2026).
+
+**b.7, 1-ci abzas:** "Əmək şəraiti zərərli və ağır olan işçilərə həmin əmək şəraitinə görə əlavə
+məzuniyyət müvafiq istehsalatda, sexlərdə, sahələrdə, peşə və ya vəzifədə iş ili ərzində faktiki
+işlədiyi vaxta mütənasib olaraq verilir. Bu əlavə məzuniyyətə işçinin hüququ həmin iş yerlərində
+üst-üstə azı altı ay işlədikdə əmələ gəlir."
+
+**b.7, 4-cü abzas:** "... Eyni zamanda gələn iş ilinin hesabına növbəti məzuniyyət hüququ verən iş
+stajı əsas əmək və əlavə məzuniyyətlər üzrə ayrı-ayrılıqda hesablanır."
+
+**b.7, 3-cü misal:** "Fəhlə təchizat şöbəsinə 2002-ci ilin avqustunda qəbul olunmuşdur. 2003-cü ilin
+fevralın 1-dən 12 təqvim günü müddətində əlavə məzuniyyət hüququ verən zərərli iş şəraitli işə
+keçirilmişdir. 2003-cü ilin sentyabrından (ikinci iş ili üçün) məzuniyyətə getdiyi zaman bu fəhləyə
+növbəti əmək məzuniyyəti verilməsi zamanı əlavə məzuniyyət tam müddətə verilir. Bu halda növbəti
+əmək məzuniyyəti üçün iş stajı ayrı-ayrılıqda hesablanacaqdır. Əsas məzuniyyət üçün iş ili üzrə
+2003-cü ilin avqustundan 2004-cü ilin avqustunadək, əlavə məzuniyyət isə 2003-cü ilin fevralından
+2004-cü ilin fevralınadək verilir."
+
+**b.8:** əlavə məzuniyyət stajına faktiki şəraitdə işlənmiş dövr, iş yeri və əmək haqqı saxlanılan
+dövr, məcburi işburaxma, müvəqqəti əmək qabiliyyətsizliyi və bəraət almış şəxsin məcburi
+işburaxma / həbs dövrü daxildir.
+
+Sistemin oxunuşu:
+1. **Ayrıca iş ili («şərait ili»).** Şərait əlavəsinin iş ili ümumi iş ilindən (m.113.3, işə qəbul
+   günündən) asılı deyil: o, işçinin bu işəgötürəndə şəraitdə sayılan **ilk günündən** başlayır
+   (köçürmə əmrinin qüvvəyə minmə tarixi, işçi üzrə dövrlü sətrin başlanğıcı və ya işə qəbul günü —
+   hansı birinci gəlirsə) və hər il həmin gündə yenilənir. Hər şərait ili üçün günlər həmin ildə
+   şəraitdə faktiki işlənmiş vaxta mütənasibdir (b.7, b.10, b.11). Əsas, staj və uşaqlı valideyn
+   hissələri ümumi iş ilində qalır.
+2. **6 ay hüququ** şəraitdə işin başlanğıcından ölçülür. «Üst-üstə» — **cəmi** deməkdir: ara
+   verilmiş dövrlər (şəraitdən kənar, ödənişsiz, uşağa qulluq) saymanı sıfırlamır, sadəcə sayılmır.
+3. **Avans (b.7, 3-cü abzas):** hüququ yaranmış və hazırda şəraitdə daimi işləyən işçiyə şərait ili
+   üçün əlavə məzuniyyət 12 ay bitmədən tam verilə bilər (3-cü misal: sentyabrda tam).
+4. **Fasilə (Təsdiqlənmədi — mətn açıq demir):** bütöv bir şərait ili ərzində şəraitdə heç bir gün
+   sayılmayıbsa, zəncir qırılır və növbəti şərait ili şəraitə **qayıdış günündən** başlayır — b.7-nin
+   «şəraitli işə keçdiyi gündən» məntiqinin tətbiqi. Qırılmadan əvvəlki aylar 6 ay şərti üçün
+   cəmlənməyə davam edir (2-ci bənd). Uşağa qulluq məzuniyyəti (m.132.2) şərait ilini də ümumi iş
+   ili kimi uzadır.
+5. **Balans:** şərait illəri məzuniyyət uçotunda ayrıca sətirlərdir («Şərait ili»); əmrlə
+   istifadə ən köhnə sətirdən başlayır, əsas və əlavə məzuniyyət «bir qayda olaraq, tam və birlikdə»
+   (b.7) bir əmrlə verilə bilər.
+6. **Köçürmə tarixi:** vəzifənin dəyişdiyi gün əmrdə göstərilən «... tarixdən» günüdür (ƏM m.59
+   əsasında verilən köçürmə əmri), əmrin verilmə tarixi deyil; tarix göstərilməyibsə əmrin tarixi.
+
+**Etibarlılıq:** 1–3 və 5 Təsdiqləndi (rəsmi mətn və misal); 4 — şərh, Təsdiqlənmədi.
+
 ---
 
 ## (d) Uşaqlı qadınların (və valideynlərin) əlavə məzuniyyəti — Md. 117
@@ -477,7 +527,7 @@ təsadüf etdikdə üst-üstə düşən günlər bir gün hesabı ilə nəzərə
 | m.116.3, 117.4 istisnası | «Əlavə məzuniyyət verilmir» işarəsi (16 yaşadək, 16–18, əlillik sətirlərində qoşulu) | m.118, 120, 121 vəzifə sətirlərində admin işarələyir |
 | Staj əlavəsi (m.116.1) | `[5,10]→2`, `[10,15]→4`, `>15→6` (hərfi oxunuş, təqvim üzrə dəqiq); ümumi staj = əvvəlki əmək fəaliyyəti + bu işəgötürəndə iş, üst-üstə düşən dövrlər bir dəfə | İş ilinin başlanğıc tarixinə hesablanır; düz 10 il → 4, düz 15 il → 4. Nəticə: yalnız bu işəgötürəndə işləyən işçi 6 günü 17-ci iş ilindən alır. |
 | Uşaqlı valideyn (m.117) | 2 uşaq → 2, 3+ uşaq və ya əlilliyi olan uşaq → 5 (toplanmır); uşaq 14 yaşını tamamladığı təqvim ilinin sonunadək sayılır | Uşaqlar «Ailə üzvləri»ndən (qohumluq «Oğul»/«Qız»), əlillik üçün yeni «Əlilliyi var» qeydi; təkbaşına böyüdən ata / övladlığa götürən — işçi üzrə sətir |
-| Əmək şəraiti (m.115) | Vəzifə / işçi üzrə sətir, minimum 6 gün; staj əlavəsi ilə toplanır (m.136.2). Gün-gün hesablanır (NK 95): günün normu işçinin həmin gündəki vəzifəsi (köçürmə əmrlərindən) və işçi sətirlərindən ən böyüyü (b.14); hüquq şəraitdə üst-üstə 6 aydan sonra (b.7); iş ilində hər norm üzrə tam aylar ayrıca, tam ay = günlər ÷ 30,4 (b.10, b.11), günlər = Σ norma × aylar ÷ 12; hazırda şəraitdə işləyənə cari iş ili üçün tam (avans, b.7); ödənişsiz və uşağa qulluq dövrləri sayılmır (b.8) | Dövrlü işçi sətri — peşəsi siyahıda olmayan işçiyə tapşırılmış siyahı işi (b.13); «Şəraitdən kənar» işçi sətri — iş gününün 90%-dən az şəraitdə keçən dövr (b.12). Gündəlik 90% faktını sistem özü bilmir, HR dövr kimi qeyd edir. Köçürmə tarixi əmrin tarixidir. Əlavə məzuniyyət üçün ayrıca iş ili (b.7, 3-cü misal) aparılmır — əsas iş ili istifadə olunur |
+| Əmək şəraiti (m.115) | Vəzifə / işçi üzrə sətir, minimum 6 gün; staj əlavəsi ilə toplanır (m.136.2). Gün-gün hesablanır (NK 95): günün normu işçinin həmin gündəki vəzifəsi (köçürmə əmrlərindən) və işçi sətirlərindən ən böyüyü (b.14); hüquq şəraitdə üst-üstə 6 aydan sonra (b.7); iş ilində hər norm üzrə tam aylar ayrıca, tam ay = günlər ÷ 30,4 (b.10, b.11), günlər = Σ norma × aylar ÷ 12; hazırda şəraitdə işləyənə cari iş ili üçün tam (avans, b.7); ödənişsiz və uşağa qulluq dövrləri sayılmır (b.8) | Dövrlü işçi sətri — peşəsi siyahıda olmayan işçiyə tapşırılmış siyahı işi (b.13); «Şəraitdən kənar» işçi sətri — iş gününün 90%-dən az şəraitdə keçən dövr (b.12). Gündəlik 90% faktını sistem özü bilmir, HR dövr kimi qeyd edir. Köçürmə tarixi — əmrdəki «Köçürmə tarixi» sahəsi (`effective_date` rolu), boşdursa əmrin tarixi. Şərait əlavəsinin ayrıca iş ili var — «Şərait ili», şəraitdə ilk sayılan gündən (b.7, 3-cü misal; bax (c-1)), balansda ayrıca sətir |
 | İş ili (m.113.3), m.132.2 | İş ili işə qəbul günündən; «Uşağa qulluq məzuniyyəti» əmri ilə verilmiş günlər qədər uzanır | Ödənişsiz məzuniyyət iş ilini sürüşdürmür: m.113.3 iş ilini sabit müəyyən edir, m.132 ödənişsiz məzuniyyəti açıq istisna etmir |
 | Staj (m.116.2) | Ödənişsiz məzuniyyət (effekti `unpaid_leave` olan şablonlar) və uşağa qulluq məzuniyyəti m.116 stajından çıxılır | Yalnız bu işəgötürəndəki əmrlərlə verilmiş məzuniyyətlər; əvvəlki işlərdəki fasilələr əmək fəaliyyəti qeydindən bilinmir |
 | Birinci il, 6 ay (m.131.1, 131.4) | Birinci iş ilinin günləri işə qəbuldan 6 ay sonra açılır; 18 yaşadək və əlilliyi olan işçi üçün dərhal | m.131.4-ün digər halları (hamiləlik, əvəzçilik və s.) avtomatik deyil |

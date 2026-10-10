@@ -46,9 +46,13 @@
                         $current = $year['start'] <= now()->toDateString() && now()->toDateString() <= $year['end'];
                         $b = $year['breakdown'];
                     @endphp
-                    <tr wire:key="work-year-{{ $year['sequence'] }}" @class(['border-l-4 border-ink' => $current])>
+                    @php $conditionsYear = ($year['kind'] ?? 'annual') === 'conditions'; @endphp
+                    <tr wire:key="work-year-{{ $year['kind'] ?? 'annual' }}-{{ $year['sequence'] }}" @class(['border-l-4 border-ink' => $current])>
                         <x-table.td>
                             <div class="flex flex-col leading-tight">
+                                @if ($conditionsYear)
+                                    <span class="text-[11px] font-medium text-ink-faint">{{ __('personnel::vacations.labels.conditions_year') }}</span>
+                                @endif
                                 <span class="hrm-num text-[13px] font-medium text-zinc-800">{{ $year['label'] }}</span>
                                 @unless ($year['available'])
                                     <span class="text-[11px] text-amber-600">{{ __('personnel::vacations.labels.available_from', ['date' => \Illuminate\Support\Carbon::parse($year['available_from'])->format('d.m.Y')]) }}</span>
@@ -63,6 +67,8 @@
                                         <x-small-badge mode="secondary">{{ __('personnel::vacations.strategies.'.$year['strategy']) }}</x-small-badge>
                                     @elseif ($year['strategy'] === 'ranked')
                                         <x-small-badge mode="secondary">{{ __('personnel::vacations.strategies.ranked') }}</x-small-badge>
+                                    @elseif ($conditionsYear)
+                                        <span>{{ __('personnel::vacations.breakdown.conditions_only', ['days' => $b['conditions'] ?? 0]) }}</span>
                                     @else
                                         <span>{{ __('personnel::vacations.breakdown.base', ['days' => $b['base'] ?? 0]) }}</span>
                                         @if (($b['seniority'] ?? 0) > 0)
@@ -93,9 +99,11 @@
                         <x-table.td>
                             <div class="flex items-center gap-2">
                                 <span class="text-sm text-zinc-900">{{ $year['reserved_month'] ? array_search($year['reserved_month'], $months) : '—' }}</span>
-                                <button type="button" wire:click="updateMonth({{ $year['sequence'] }})" title="{{ __('personnel::common.actions.edit') }}">
-                                    <x-icons.edit-icon></x-icons.edit-icon>
-                                </button>
+                                @unless ($conditionsYear)
+                                    <button type="button" wire:click="updateMonth({{ $year['sequence'] }})" title="{{ __('personnel::common.actions.edit') }}">
+                                        <x-icons.edit-icon></x-icons.edit-icon>
+                                    </button>
+                                @endunless
                             </div>
                         </x-table.td>
                         <x-table.td :isButton="true">

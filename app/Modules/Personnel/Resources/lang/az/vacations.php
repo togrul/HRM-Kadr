@@ -12,7 +12,7 @@ return [
         'opening_added' => 'Açılış qalığı əlavə olundu.',
     ],
     'hints' => [
-        'work_year' => 'Məzuniyyət iş ili üzrə uçot olunur (iş ili işə qəbul günündən başlayır). İstifadə ən köhnə iş ilindən çıxılır, istifadə olunmamış günlər növbəti illərə keçir.',
+        'work_year' => 'Məzuniyyət iş ili üzrə uçot olunur (iş ili işə qəbul günündən başlayır). Əmək şəraitinə görə əlavə məzuniyyətin öz iş ili var — «Şərait ili», şəraitdə işə başlanğıc günündən. İstifadə ən köhnə iş ilindən çıxılır, istifadə olunmamış günlər növbəti illərə keçir.',
         'opening' => 'Sistemə keçiddən əvvəlki iş illərinin istifadə olunmamış günləri. Səhv daxil edilmiş qalıq redaktə olunmur — silib yenidən əlavə edin.',
         'legacy' => 'Əvvəlki uçot təqvim ili üzrə idi. Son ilin qalığı keçid günündə davam edən iş ilinə köçürülüb; bu sətirlər yalnız tarixçədir.',
     ],
@@ -26,12 +26,14 @@ return [
         'compensated' => 'o cümlədən kompensasiya: :days',
         'open_vacations' => 'Bu iş ilinin məzuniyyətləri',
         'legacy_row' => 'cəmi :total, qalıq :remaining gün',
+        'conditions_year' => 'Şərait ili',
     ],
     'breakdown' => [
         'base' => 'Əsas :days',
         'seniority' => 'Staj +:days (:years il)',
         'children' => 'Uşaq +:days',
         'conditions' => 'Şərait +:days',
+        'conditions_only' => 'Əmək şəraitinə görə əlavə :days',
         'opening' => 'Açılış +:days',
     ],
     'strategies' => [

@@ -368,7 +368,7 @@ class SeedOrderWordTemplatesCommand extends Command
                     'basis' => '[Əsas mətni]',
                 ],
                 'manual' => [
-                    'Köçürmə tarixi' => ['type' => 'date'],
+                    'Köçürmə tarixi' => ['type' => 'date', 'role' => 'effective_date'],
                     'Yeni iş yeri' => ['type' => 'structure', 'role' => 'new_structure'],
                     'Yeni vəzifə' => ['type' => 'position', 'role' => 'new_position'],
                     'Əsas mətni' => ['type' => 'text'],

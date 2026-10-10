@@ -15,8 +15,8 @@ use Carbon\CarbonImmutable;
  *   - iş ilinə daxil olmayan dövrlər (ƏM m.132.2: uşağa qulluq məzuniyyəti, m.127);
  *   - m.116 stajına daxil olmayan dövrlər: həm də ödənişsiz məzuniyyət (m.128–130), çünki
  *     m.116.2 staja «yalnız» faktiki işi, xəstəliyi və m.179 dövrlərini daxil edir;
- *   - vəzifə tarixçəsi — əmək şəraitinə görə əlavə məzuniyyət hər vəzifədə işlənmiş vaxta
- *     mütənasibdir (m.131.6; NK 95, b.7, b.11).
+ *   - vəzifə tarixçəsi (köçürmənin qüvvəyə minmə tarixi ilə) — əmək şəraitinə görə əlavə
+ *     məzuniyyət hər vəzifədə işlənmiş vaxta mütənasibdir (m.131.6; NK 95, b.7, b.11).
  */
 class OrderLeaveFacts
 {
@@ -43,10 +43,12 @@ class OrderLeaveFacts
     }
 
     /**
-     * İşçinin vəzifə tarixçəsi: vəzifəni dəyişmiş təsdiqlənmiş köçürmə əmrləri, tarixə görə
-     * artan — [əmrin tarixi, əvvəlki vəzifə]. Köçürmə effekti əvvəlki vəzifəni
-     * `effect_state.prev_position_id`-də saxlayır; yalnız struktur dəyişən köçürmədə o, sonrakı
-     * vəzifə ilə eynidir və atılır.
+     * İşçinin vəzifə tarixçəsi: vəzifəni dəyişmiş təsdiqlənmiş köçürmə əmrləri, qüvvəyə minmə
+     * tarixinə görə artan — [köçürmənin qüvvəyə minmə günü, əvvəlki vəzifə]. Köçürmə effekti
+     * əvvəlki vəzifəni `effect_state.prev_position_id`-də, əmrdə göstərilən «... tarixdən»
+     * günü (ƏM m.59) `effect_state.effective_date`-də saxlayır; bu tarix olmayan köhnə
+     * əmrlərdə əmrin tarixi götürülür. Yalnız struktur dəyişən köçürmədə əvvəlki vəzifə sonrakı
+     * ilə eynidir və atılır.
      *
      * @return list<array{0: CarbonImmutable, 1: ?int}>
      */
@@ -56,18 +58,15 @@ class OrderLeaveFacts
             return [];
         }
 
-        $transfers = OrderLog::query()
+        $orders = OrderLog::query()
             ->where('status_id', OrderStatusEnum::APPROVED->value)
             ->where('template_snapshot', 'like', '%prev_position_id%')
             ->whereNotNull('given_date')
-            ->orderByDesc('given_date')
-            ->orderByDesc('id')
             ->get(['id', 'given_date', 'template_snapshot']);
 
-        $changes = [];
-        $after = $positionId;
+        $transfers = [];
 
-        foreach ($transfers as $order) {
+        foreach ($orders as $order) {
             $snapshot = (array) $order->template_snapshot;
             $state = (array) ($snapshot['effect_state'] ?? []);
 
@@ -75,14 +74,27 @@ class OrderLeaveFacts
                 continue;
             }
 
-            $previous = $state['prev_position_id'] !== null ? (int) $state['prev_position_id'] : null;
+            $effective = $state['effective_date'] ?? null;
+            $transfers[] = [
+                'on' => CarbonImmutable::parse(filled($effective) ? (string) $effective : (string) $order->getRawOriginal('given_date'))->startOfDay(),
+                'id' => (int) $order->id,
+                'previous' => $state['prev_position_id'] !== null ? (int) $state['prev_position_id'] : null,
+            ];
+        }
 
-            if ($previous === $after) {
+        // Ən yenidən geriyə: hər köçürmə özündən sonrakı vəziyyəti əvvəlkinə qaytarır.
+        usort($transfers, fn (array $a, array $b): int => [$b['on'], $b['id']] <=> [$a['on'], $a['id']]);
+
+        $changes = [];
+        $after = $positionId;
+
+        foreach ($transfers as $transfer) {
+            if ($transfer['previous'] === $after) {
                 continue;
             }
 
-            $changes[] = [CarbonImmutable::parse((string) $order->getRawOriginal('given_date'))->startOfDay(), $previous];
-            $after = $previous;
+            $changes[] = [$transfer['on'], $transfer['previous']];
+            $after = $transfer['previous'];
         }
 
         return array_reverse($changes);

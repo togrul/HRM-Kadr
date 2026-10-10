@@ -16,7 +16,8 @@ use Illuminate\Support\Collection;
  *   - uşaqlı valideyn: şərtə uyğun sətirlərin ən böyüyü (2 və 5 gün toplanmır); qadınlara, eləcə də
  *     işçi üzrə yazılmış sətirlə (uşaqlarını təkbaşına böyüdən ata, övladlığa götürən) tətbiq olunur;
  *     14 yaşınadək uşaq həmin təqvim ilinin sonunadək sayılır (m.117.3);
- *   - əmək şəraiti: vəzifə / işçi üzrə sətirlərin ən böyüyü.
+ *   - əmək şəraiti: vəzifə / işçi üzrə sətirlərin ən böyüyü, gün-gün; öz iş ili ilə (şərait ili,
+ *     NK 95 b.7) — bax conditionsPeriods() və conditions().
  * Hamısı iş ilinin başlanğıc tarixinə görə qiymətləndirilir. Saf: normalar çağırandan gəlir.
  */
 class VacationNormEvaluator
@@ -27,10 +28,15 @@ class VacationNormEvaluator
     /** NK 95, b.10: tam ay = cəmlənmiş günlər ÷ 30,4. */
     public const DAYS_PER_MONTH = 30.4;
 
+    public function __construct(
+        private readonly WorkYearCalendar $calendar,
+    ) {}
+
     /**
      * @param  Collection<int, VacationNorm>  $norms  aktiv normalar
+     * @param  bool  $withConditions  false — şərait əlavəsi ayrıca şərait ilində hesablanır (conditions())
      */
-    public function evaluate(LeaveEntitlementFacts $facts, CarbonImmutable $on, Collection $norms, ?WorkYearPeriod $period = null, ?CarbonImmutable $asOf = null): EntitlementBreakdown
+    public function evaluate(LeaveEntitlementFacts $facts, CarbonImmutable $on, Collection $norms, ?WorkYearPeriod $period = null, ?CarbonImmutable $asOf = null, bool $withConditions = true): EntitlementBreakdown
     {
         $byGroup = $norms->where('is_active', true)->groupBy('group');
 
@@ -52,9 +58,74 @@ class VacationNormEvaluator
             ->filter(fn (VacationNorm $norm): bool => $this->childrenRuleApplies($norm, $facts, $on))
             ->max('days') ?? 0);
 
-        $conditions = $this->conditionsDays($byGroup->get(VacationNorm::GROUP_CONDITIONS, collect()), $facts, $on, $period, $asOf);
+        $conditions = $withConditions
+            ? $this->conditionsDays($byGroup->get(VacationNorm::GROUP_CONDITIONS, collect()), $facts, $on, $period, $asOf)
+            : 0;
 
         return new EntitlementBreakdown($baseDays, $seniority, $children, $conditions, $seniorityYears);
+    }
+
+    /**
+     * Şərait ili üzrə əmək şəraitinə görə əlavə məzuniyyət (yalnız `conditions` hissəsi dolu).
+     * İşçi şərait ilinin başlanğıcında m.118–121 kateqoriyasındadırsa verilmir (m.116.3).
+     *
+     * @param  Collection<int, VacationNorm>  $norms  aktiv normalar
+     */
+    public function conditions(LeaveEntitlementFacts $facts, WorkYearPeriod $period, Collection $norms, CarbonImmutable $asOf): EntitlementBreakdown
+    {
+        $byGroup = $norms->where('is_active', true)->groupBy('group');
+
+        if ($this->applicable($byGroup->get(VacationNorm::GROUP_BASE, collect()), $facts, $period->start)->contains(fn (VacationNorm $norm): bool => $norm->exclusive)) {
+            return new EntitlementBreakdown(0, exclusive: true);
+        }
+
+        return new EntitlementBreakdown(0, conditions: $this->conditionsDays($byGroup->get(VacationNorm::GROUP_CONDITIONS, collect()), $facts, $period->start, $period, $asOf));
+    }
+
+    /**
+     * Şərait illəri (NK 95, b.7, 3-cü misal: «əsas məzuniyyət üçün iş ili ... avqustundan,
+     * əlavə məzuniyyət isə ... fevralından» — işçinin şəraitli işə keçdiyi gündən) $until-ədək:
+     *   - birinci şərait ili işə qəbuldan sonra şəraitdə sayılan ilk gündən başlayır;
+     *   - hər il bir təqvim ilidir, ümumi iş ili kimi iş ilinə daxil olmayan dövrlər (m.132.2)
+     *     qədər uzanır;
+     *   - bütöv bir şərait ili ərzində şəraitdə heç bir gün sayılmayıbsa zəncir qırılır: növbəti
+     *     şərait ili şəraitə qayıdış günündən başlayır (b.7-nin məntiqi; mətn bu halı açıq demir);
+     *   - hələ heç bir gün sayılmayan davam edən il göstərilmir.
+     *
+     * @param  Collection<int, VacationNorm>  $norms  aktiv normalar
+     * @param  list<array{0: CarbonImmutable, 1: CarbonImmutable}>  $excluded  iş ilinə daxil olmayan dövrlər
+     * @return list<WorkYearPeriod>
+     */
+    public function conditionsPeriods(LeaveEntitlementFacts $facts, Collection $norms, CarbonImmutable $until, array $excluded = [], int $limit = 80): array
+    {
+        $norms = $this->conditionsNormsFor($norms->where('is_active', true)->where('group', VacationNorm::GROUP_CONDITIONS)->values(), $facts);
+
+        if ($norms->isEmpty() || $facts->joinDate === null) {
+            return [];
+        }
+
+        if ($facts->leaveDate !== null && $facts->leaveDate->lt($until)) {
+            $until = $facts->leaveDate;
+        }
+
+        $periods = [];
+        $start = $this->firstConditionsDay($norms, $facts, $facts->joinDate, $until);
+
+        while ($start !== null && count($periods) < $limit) {
+            $period = $this->calendar->period(count($periods) + 1, $start, $excluded);
+
+            if ($this->firstConditionsDay($norms, $facts, $period->start, $period->end->lt($until) ? $period->end : $until) === null) {
+                // Bütöv il şəraitsiz keçib — qayıdış günündən yeni şərait ili.
+                $start = $period->end->lt($until) ? $this->firstConditionsDay($norms, $facts, $period->end->addDay(), $until) : null;
+
+                continue;
+            }
+
+            $periods[] = $period;
+            $start = $period->end->lt($until) ? $period->end->addDay() : null;
+        }
+
+        return $periods;
     }
 
     /**
@@ -76,13 +147,7 @@ class VacationNormEvaluator
      */
     private function conditionsDays(Collection $norms, LeaveEntitlementFacts $facts, CarbonImmutable $on, ?WorkYearPeriod $period, ?CarbonImmutable $asOf): int
     {
-        // Yalnız bu işçiyə aid ola bilən sətirlər: onun özü və tarixçəsindəki vəzifələr.
-        $positions = array_filter([$facts->positionId, ...array_column($facts->positionChanges, 1)], fn ($id): bool => $id !== null);
-        $norms = $norms->filter(fn (VacationNorm $norm): bool => match ($norm->scope) {
-            VacationNorm::SCOPE_POSITION => in_array($norm->position_id, $positions, true),
-            VacationNorm::SCOPE_PERSONNEL => filled($norm->tabel_no) && (string) $norm->tabel_no === $facts->tabelNo,
-            default => false,
-        })->values();
+        $norms = $this->conditionsNormsFor($norms, $facts);
 
         if ($norms->isEmpty()) {
             return 0;
@@ -122,6 +187,39 @@ class VacationNormEvaluator
         }
 
         return (int) round($total, 0, PHP_ROUND_HALF_UP);
+    }
+
+    /**
+     * Yalnız bu işçiyə aid ola bilən şərait sətirləri: onun özü və tarixçəsindəki vəzifələr.
+     *
+     * @param  Collection<int, VacationNorm>  $norms
+     * @return Collection<int, VacationNorm>
+     */
+    private function conditionsNormsFor(Collection $norms, LeaveEntitlementFacts $facts): Collection
+    {
+        $positions = array_filter([$facts->positionId, ...array_column($facts->positionChanges, 1)], fn ($id): bool => $id !== null);
+
+        return $norms->filter(fn (VacationNorm $norm): bool => match ($norm->scope) {
+            VacationNorm::SCOPE_POSITION => in_array($norm->position_id, $positions, true),
+            VacationNorm::SCOPE_PERSONNEL => filled($norm->tabel_no) && (string) $norm->tabel_no === $facts->tabelNo,
+            default => false,
+        })->values();
+    }
+
+    /**
+     * [$from, $until] aralığında şəraitdə sayılan ilk gün (NK 95, b.8, b.12), yoxdursa null.
+     *
+     * @param  Collection<int, VacationNorm>  $norms
+     */
+    private function firstConditionsDay(Collection $norms, LeaveEntitlementFacts $facts, CarbonImmutable $from, CarbonImmutable $until): ?CarbonImmutable
+    {
+        for ($day = $from; $day->lte($until); $day = $day->addDay()) {
+            if ($this->countedNormOn($norms, $facts, $day) !== null) {
+                return $day;
+            }
+        }
+
+        return null;
     }
 
     /**
