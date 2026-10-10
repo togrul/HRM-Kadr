@@ -5,7 +5,8 @@
 .vscode
 .fleet
 graft
-docs
+docs/*
+!docs/scenario
 tests
 node_modules
 vendor

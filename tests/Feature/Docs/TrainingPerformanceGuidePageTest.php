@@ -71,9 +71,9 @@ class TrainingPerformanceGuidePageTest extends TestCase
         $this->actingAs($user)
             ->get(route('docs.guide', ['focus' => 'my-hr']))
             ->assertOk()
-            ->assertSee('Şəxsi kabinet')
-            ->assertSee('öz müraciətlərini')
-            ->assertSee('uyğunlaşma sənədlərini')
+            ->assertSee('Şəxsi kabinet istifadəçi bələdçisi')
+            ->assertSee('Sistemə ilk dəfə daxil olarkən')
+            ->assertSee('Ərizələrim')
             ->assertDontSee('Təlim ehtiyacı istifadəçi bələdçisi');
     }
 
