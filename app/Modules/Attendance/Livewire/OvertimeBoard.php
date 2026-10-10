@@ -9,7 +9,6 @@ use App\Modules\Attendance\Application\Services\AttendanceOvertimeApprovalServic
 use App\Modules\Attendance\Application\Services\AttendanceOvertimeRequestService;
 use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
 use App\Services\StructurePathService;
-use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -17,12 +16,12 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class OvertimeBoard extends Component
 {
-    use NestedStructureTrait;
     use WithPagination;
 
     public string $status = 'pending';
@@ -40,8 +39,10 @@ class OvertimeBoard extends Component
 
     public int $perPage = 20;
 
+    #[Locked]
     public bool $canApprove = false;
 
+    #[Locked]
     public bool $canCreate = false;
 
     public ?int $selectedStructureId = null;
@@ -117,7 +118,7 @@ class OvertimeBoard extends Component
 
     public function approve(int $requestId, AttendanceOvertimeApprovalService $service): void
     {
-        if (! $this->canApprove) {
+        if (! app(AttendanceAuthorizationService::class)->can('attendance.overtime.approve')) {
             abort(403);
         }
 
@@ -125,6 +126,8 @@ class OvertimeBoard extends Component
         if (! $request) {
             return;
         }
+
+        abort_unless(app(AttendanceStructureScopeReadService::class)->allowsTabelNo($request->tabel_no), 403);
 
         try {
             $minutes = $this->approvedMinutes[$requestId] ?? null;
@@ -141,7 +144,7 @@ class OvertimeBoard extends Component
 
     public function reject(int $requestId, AttendanceOvertimeApprovalService $service): void
     {
-        if (! $this->canApprove) {
+        if (! app(AttendanceAuthorizationService::class)->can('attendance.overtime.approve')) {
             abort(403);
         }
 
@@ -155,6 +158,8 @@ class OvertimeBoard extends Component
         if (! $request) {
             return;
         }
+
+        abort_unless(app(AttendanceStructureScopeReadService::class)->allowsTabelNo($request->tabel_no), 403);
 
         try {
             $service->reject($request, (int) Auth::id(), (string) $this->rejectReasons[$requestId]);
@@ -170,9 +175,12 @@ class OvertimeBoard extends Component
 
     public function createManualRequest(AttendanceOvertimeRequestService $service): void
     {
-        if (! $this->canCreate) {
+        if (! (app(AttendanceAuthorizationService::class)->can('attendance.overtime.approve') || app(AttendanceAuthorizationService::class)->can('attendance.manual.write'))) {
             abort(403);
         }
+
+        // Livewire xüsusiyyəti klientdən dəyişdirilə bilər — açar olmasa da yoxlama boş tabellə rədd edir.
+        abort_unless(app(AttendanceStructureScopeReadService::class)->allowsTabelNo((string) data_get($this->manualRequest, 'tabel_no')), 403);
 
         try {
             $service->create($this->manualRequest, (int) Auth::id());
@@ -197,7 +205,7 @@ class OvertimeBoard extends Component
     #[Computed]
     public function personnelResults(): Collection
     {
-        if (! $this->canCreate || mb_strlen(trim($this->personnelSearch)) < 2) {
+        if (! (app(AttendanceAuthorizationService::class)->can('attendance.overtime.approve') || app(AttendanceAuthorizationService::class)->can('attendance.manual.write')) || mb_strlen(trim($this->personnelSearch)) < 2) {
             return collect();
         }
 
@@ -390,8 +398,6 @@ class OvertimeBoard extends Component
      */
     private function currentStructureIds(): array
     {
-        return $this->selectedStructureId
-            ? $this->getNestedStructure($this->selectedStructureId)
-            : [];
+        return app(AttendanceStructureScopeReadService::class)->resolveIds($this->selectedStructureId);
     }
 }

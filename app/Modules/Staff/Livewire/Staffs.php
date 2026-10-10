@@ -195,8 +195,11 @@ class Staffs extends Component
      */
     protected function staffSnapshot(): array
     {
-        $scope = ! empty($this->structure) ? (array) $this->structure : $this->accessibleStructureIds;
-        $scopeIds = array_values(array_unique(array_map('intval', $scope)));
+        // URL-dən gələn struktur filtri görünürlüklə kəsişdirilir — görünməyən struktur heç nə vermir.
+        $accessible = array_map('intval', $this->accessibleStructureIds);
+        $scopeIds = ! empty($this->structure)
+            ? array_values(array_intersect(array_unique(array_map('intval', (array) $this->structure)), $accessible))
+            : array_values(array_unique($accessible));
 
         $rows = StaffSchedule::with([
             'position:id,name',

@@ -4,6 +4,8 @@ namespace App\Modules\Services\Livewire\Users;
 
 use App\Models\User;
 use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
+use App\Modules\Services\Livewire\Concerns\AuthorizesUserManagement;
+use App\Services\UserAdministrationGuard;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Locked;
@@ -14,6 +16,7 @@ class DeleteUser extends Component
 {
     use AuthorizesRequests;
     use AuthorizesSettingsAccess;
+    use AuthorizesUserManagement;
 
     #[Locked]
     public ?int $userId = null;
@@ -31,7 +34,7 @@ class DeleteUser extends Component
             return;
         }
 
-        $this->authorize('access-settings');
+        $this->authorizeTarget($user);
 
         $this->userId = (int) $user->id;
 
@@ -54,12 +57,13 @@ class DeleteUser extends Component
             return;
         }
 
-        $this->authorize('access-settings');
+        $this->authorizeTarget($user);
 
         $user->delete();
 
         activity('users')
             ->performedOn($user)
+            ->causedBy(auth()->user())
             ->event('deleted')
             ->withProperties(['user_id' => $user->id])
             ->log('user.deleted');
@@ -67,6 +71,20 @@ class DeleteUser extends Component
         $this->userId = null;
 
         $this->dispatch('userWasDeleted', __('services::users.messages.deleted'));
+    }
+
+    /**
+     * Özünü, ya da özündə olmayan icazəyə malik istifadəçini silmək olmaz.
+     */
+    private function authorizeTarget(User $user): void
+    {
+        $this->authorize(UserAdministrationGuard::MANAGE_USERS);
+        abort_if((int) $user->id === (int) auth()->id(), 403, __('services::users.messages.cannot_delete_self'));
+        abort_unless(
+            app(UserAdministrationGuard::class)->canManageUser(auth()->user(), User::query()->findOrFail($user->id)),
+            403,
+            __('services::users.messages.target_has_more_permissions')
+        );
     }
 
     public function render(): View

@@ -4,6 +4,7 @@ namespace App\Modules\Compensation\Livewire\Tabs;
 
 use App\Models\CompensationRegime;
 use App\Support\Livewire\LabelsValidationFields;
+use App\Support\Livewire\ScopesPersonnelByStructure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Js;
 use Livewire\Attributes\Computed;
@@ -18,6 +19,7 @@ use Livewire\Component;
 abstract class CompensationTab extends Component
 {
     use LabelsValidationFields;
+    use ScopesPersonnelByStructure;
 
     /** '' or one of panels() — which editor side panel is open. */
     public string $panel = '';
@@ -83,6 +85,17 @@ abstract class CompensationTab extends Component
     protected function guardManage(): void
     {
         abort_unless($this->canManage(), 403);
+    }
+
+    /**
+     * Shell-in seçdiyi işçinin tabel nömrəsi — yalnız istifadəçinin struktur görünürlüyündədirsə.
+     * Tab müstəqil çağırıla bildiyi üçün shell-in yoxlamasına güvənilmir.
+     */
+    protected function visibleTabel(): ?string
+    {
+        $tabelNo = property_exists($this, 'tabelNo') ? $this->tabelNo : null;
+
+        return $this->tabelInScope($tabelNo) ? $tabelNo : null;
     }
 
     protected function fieldLabelPrefix(): string

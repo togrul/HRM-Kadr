@@ -5,6 +5,7 @@ namespace App\Modules\TrainingNeeds\Livewire\Concerns;
 use App\Models\TrainingSession;
 use App\Models\TrainingSessionParticipant;
 use App\Modules\TrainingNeeds\Application\Services\TrainingDeliveryService;
+use App\Modules\TrainingNeeds\Support\TrainingStructureScope;
 
 trait HandlesTrainingCalendarMutations
 {
@@ -22,6 +23,8 @@ trait HandlesTrainingCalendarMutations
             'participantForm.training_need_item_id' => __('training_needs::dashboard.fields.training_need'),
             'participantForm.attendance_status' => __('training_needs::dashboard.fields.attendance_status'),
         ]);
+
+        TrainingStructureScope::ensurePersonnelVisible(data_get($validated, 'participantForm.personnel_id'));
 
         TrainingSessionParticipant::query()->updateOrCreate(
             [
@@ -47,7 +50,7 @@ trait HandlesTrainingCalendarMutations
         $this->authorizeTrainingNeedsManage();
         abort_unless(in_array($status, ['planned', 'confirmed', 'attended', 'absent', 'cancelled'], true), 404);
 
-        $participant = TrainingSessionParticipant::query()->findOrFail($participantId);
+        $participant = TrainingStructureScope::onPersonnelColumn(TrainingSessionParticipant::query(), 'training_session_participants.personnel_id')->findOrFail($participantId);
         $participant->forceFill([
             'attendance_status' => $status,
             'attended_at' => $status === 'attended' ? ($participant->attended_at ?? now()) : null,
@@ -94,7 +97,7 @@ trait HandlesTrainingCalendarMutations
 
         $status = (string) $validated['bulkAttendanceStatus'];
 
-        TrainingSessionParticipant::query()
+        TrainingStructureScope::onPersonnelColumn(TrainingSessionParticipant::query(), 'training_session_participants.personnel_id')
             ->where('training_session_id', (int) $validated['selectedSessionId'])
             ->whereIn('id', $validated['bulkParticipantIds'])
             ->get()
@@ -126,7 +129,7 @@ trait HandlesTrainingCalendarMutations
             'bulkParticipantIds' => __('training_needs::dashboard.fields.selected_participants'),
         ]);
 
-        TrainingSessionParticipant::query()
+        TrainingStructureScope::onPersonnelColumn(TrainingSessionParticipant::query(), 'training_session_participants.personnel_id')
             ->where('training_session_id', (int) $validated['selectedSessionId'])
             ->whereIn('id', $validated['bulkParticipantIds'])
             ->delete();

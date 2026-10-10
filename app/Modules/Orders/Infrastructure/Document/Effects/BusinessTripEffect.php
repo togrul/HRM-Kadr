@@ -5,13 +5,15 @@ namespace App\Modules\Orders\Infrastructure\Document\Effects;
 use App\Models\OrderLog;
 use App\Models\Personnel;
 use App\Models\PersonnelBusinessTrip;
+use App\Modules\Orders\Infrastructure\Document\OrderLookupFieldRegistry;
 use App\Support\Language\AzerbaijaniDateFormatter;
 
 /**
  * Sends the employee on a business trip (ezamiyyət): approving the order creates the
  * trip in the BusinessTrips register (destination, period, purpose; transport and
- * per-diem kept alongside), keyed by the order number. Revoking the approval removes
- * that trip again — it never happened.
+ * per-diem kept alongside), keyed by the order number, with whether it is domestic or
+ * abroad and who funds it. A multi-participant order runs this once per participant.
+ * Revoking the approval removes that trip again — it never happened.
  */
 class BusinessTripEffect implements OrderEffect
 {
@@ -40,6 +42,8 @@ class BusinessTripEffect implements OrderEffect
             ], fn (?string $value): bool => filled($value)),
             'start_date' => $start->format('Y-m-d'),
             'end_date' => $end->format('Y-m-d'),
+            'trip_type' => OrderLookupFieldRegistry::tripTypeCode($fields['trip_type'] ?? null),
+            'funding_source' => filled($fields['funding_source'] ?? null) ? trim((string) $fields['funding_source']) : null,
             'order_no' => $order->order_no,
             'order_given_by' => (string) ($order->given_by ?? ''),
             'order_date' => optional($order->given_date)->format('Y-m-d'),

@@ -25,6 +25,7 @@ class StructureObserver
         'businessTrips:structures',
         'personnel:structures',
         'attendance-calendar-regimes-structures',
+        'structure-ids-all',
     ];
 
     /**

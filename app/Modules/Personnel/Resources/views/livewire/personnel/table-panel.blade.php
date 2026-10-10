@@ -2,32 +2,17 @@
     $personnels = $this->personnels;
     $status = $this->status;
 
-    // One presence state per row drives the chip colour and the avatar tint; the
-    // avatar stays grey for the common at-work state so tinted avatars flag exceptions.
-    $stateOf = function ($personnel): array {
-        // Silinmiş qeyd işdə/işdən çıxmış statusu ilə göstərilməməlidir.
-        if ($personnel->trashed()) {
-            return ['key' => 'deleted', 'tone' => 'rose', 'label' => __('personnel::common.states.deleted')];
-        }
-
-        if (filled($personnel->leave_work_date)) {
-            return ['key' => 'resigned', 'tone' => 'rose', 'label' => __('personnel::common.labels.resigned')];
-        }
-
-        if ($personnel->is_pending) {
-            return ['key' => 'pending', 'tone' => 'amber', 'label' => __('personnel::common.states.waiting_for_approval')];
-        }
-
-        if ($personnel->active_vacation) {
-            return ['key' => 'vacation', 'tone' => 'violet', 'label' => __('personnel::common.states.in_vacation')];
-        }
-
-        if ($personnel->active_business_trip) {
-            return ['key' => 'trip', 'tone' => 'blue', 'label' => __('personnel::common.states.in_business_trip')];
-        }
-
-        return ['key' => 'at_work', 'tone' => 'green', 'label' => __('personnel::common.states.at_work')];
-    };
+    // One presence state per row (PersonnelPresenceResolver) drives the chip colour and the
+    // avatar tint; the avatar stays grey for the common at-work state so tinted avatars flag
+    // exceptions.
+    $stateOf = fn ($personnel): array => [
+        'key' => (string) ($personnel->presence_status ?? 'at_work'),
+        'tone' => (string) ($personnel->presence_tone ?? 'green'),
+        'label' => (string) ($personnel->presence_label ?? __('personnel::common.presence.statuses.at_work')),
+        'reason' => $personnel->presence_reason,
+        'return' => $personnel->presence_return,
+        'period' => $personnel->presence_period,
+    ];
 @endphp
 
 <div class="contents">
@@ -43,8 +28,8 @@
                 @class([
                     'group/row transition',
                     'bg-[#fffbf5]' => $state['key'] === 'pending',
-                    'bg-[#fff7f8]' => in_array($state['key'], ['resigned', 'deleted'], true),
-                    'hover:bg-[#fafafa]' => ! in_array($state['key'], ['pending', 'resigned', 'deleted'], true),
+                    'bg-[#fff7f8]' => in_array($state['key'], ['dismissed', 'deleted'], true),
+                    'hover:bg-[#fafafa]' => ! in_array($state['key'], ['pending', 'dismissed', 'deleted'], true),
                 ])
             >
                 <x-table.td>
@@ -66,9 +51,13 @@
                 </x-table.td>
 
                 <x-table.td wire:click="handleRowAction('quick-view', { type: 'quick-view', value: '{{ $personnel->tabel_no }}' })" class="cursor-pointer">
-                    <x-small-badge :mode="$state['tone']" dot>
+                    <x-small-badge :mode="$state['tone']" dot :title="$state['period'] ?? ($state['reason'] !== $state['label'] ? $state['reason'] : null)">
                         {{ $state['label'] }}
                     </x-small-badge>
+
+                    @if (filled($state['return']))
+                        <p class="hrm-num mt-1 text-[11px] text-ink-faint">{{ __('personnel::common.presence.returns_on', ['date' => $state['return']]) }}</p>
+                    @endif
 
                     @if ($status === 'deleted')
                         <p class="mt-1 text-[11px] text-ink-faint">
@@ -87,7 +76,7 @@
                 <x-personnel.row-actions :actions="$rowActions" :force-up="$loop->last" />
             </tr>
         @empty
-            <x-table.empty :rows="count($this->getTableHeaders())" :filtered="$search !== '' || $filters !== [] || $selectedPosition !== null" :resettable="false" />
+            <x-table.empty :rows="count($this->getTableHeaders())" :filtered="$search !== '' || $filters !== [] || $selectedPosition !== null || $presence !== []" :resettable="false" />
         @endforelse
     </x-table.tbl>
 

@@ -27,7 +27,7 @@ function manualApprover(): User
     $user = User::factory()->create();
     $user->givePermissionTo(Permission::findOrCreate('approve-attendance-manual', 'web'));
 
-    return $user;
+    return grantAllStructures($user);
 }
 
 it('will not reject a manual entry without a reason', function (): void {

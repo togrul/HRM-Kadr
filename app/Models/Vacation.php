@@ -10,6 +10,9 @@ use Illuminate\Database\Eloquent\Model;
  * @property int|null $year
  * @property int|null $vacation_days_total
  * @property int|null $remaining_days
+ * @property int|null $reserved_date_month
+ * @property string|null $tabel_no
+ * @property \Illuminate\Support\Carbon|null $migrated_at
  */
 class Vacation extends Model
 {

@@ -101,7 +101,8 @@ class MyHrOnboardingTest extends TestCase
 
         Livewire::test(MyHrOnboarding::class, ['personnelId' => $personnel->id])
             ->call('openDocument', $assignment->id)
-            ->assertRedirect('/storage/onboarding/policy.pdf');
+            // Fayl özəl diskdədir — icazə yoxlayan route-a yönləndirilir, /storage linkinə yox.
+            ->assertRedirect(route('onboarding.templates.file', $template));
 
         $this->assertNotNull(OnboardingDocumentReceipt::query()->where('assignment_id', $assignment->id)->value('opened_at'));
 
@@ -117,6 +118,11 @@ class MyHrOnboardingTest extends TestCase
     }
 
     private function makePersonnel(string $email): Personnel
+    {
+        return $this->linkFixtureUserByEmail($this->createPersonnelRecord($email));
+    }
+
+    private function createPersonnelRecord(string $email): Personnel
     {
         return Personnel::withoutEvents(fn () => Personnel::query()->create([
             'tabel_no' => 'TB'.Str::upper(Str::random(6)),

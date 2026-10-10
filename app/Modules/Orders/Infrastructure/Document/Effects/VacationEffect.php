@@ -6,11 +6,13 @@ use App\Models\OrderLog;
 use App\Models\Personnel;
 use App\Services\Vacation\VacationBalanceService;
 use App\Support\Language\AzerbaijaniDateFormatter;
+use Carbon\CarbonInterface;
+use DomainException;
 
 /**
  * Puts the employee on leave: creates the personnel vacation record from the order's
  * fields (start/end/return dates, day count) and deducts the days from the employee's
- * annual vacation balance. Reversal removes the record and restores the balance.
+ * work-year vacation balance. Reversal removes the record and restores the balance.
  */
 class VacationEffect implements OrderEffect
 {
@@ -27,6 +29,12 @@ class VacationEffect implements OrderEffect
         // Fail safe: without a valid period we do not create a partial record.
         if (! $start || ! $end) {
             return;
+        }
+
+        // Two pending orders may each fit the balance alone: re-check it at approval with
+        // the employee's row locked, so concurrent approvals are counted one after the other.
+        if ($this->countsAgainstAnnualBalance() && (int) ($fields['days'] ?? 0) > 0) {
+            $this->guardBalance($personnel, $start, (int) $fields['days']);
         }
 
         $return = $this->dates->parse($fields['return_date'] ?? null) ?? $end->copy()->addDay();
@@ -46,9 +54,39 @@ class VacationEffect implements OrderEffect
             'order_date' => optional($order->given_date)->format('Y-m-d'),
         ]);
 
-        // Deduct the taken days from the employee's annual balance.
+        // Deduct the taken days from the employee's balance: the work year the order names
+        // first, then the oldest open work year (ƏM m.138.1, 134.5).
         if ($this->countsAgainstAnnualBalance()) {
-            $this->balance->consume($personnel, (int) $start->year, (int) ($fields['days'] ?? 0));
+            $this->balance->consume(
+                $personnel,
+                (int) $start->year,
+                (int) ($fields['days'] ?? 0),
+                self::sourceKey($order),
+                $start,
+                $this->dates->parse($fields['work_year'] ?? null),
+            );
+        }
+    }
+
+    /**
+     * @throws DomainException when the days exceed what is available on the start date
+     */
+    private function guardBalance(Personnel $personnel, CarbonInterface $start, int $days): void
+    {
+        Personnel::query()->whereKey($personnel->getKey())->lockForUpdate()->first();
+
+        $balance = $this->balance->balanceOn($personnel, $start, true);
+
+        if ($days > (int) $balance['remaining']) {
+            throw new DomainException(__('orders::order_composer.errors.approval_blocked', [
+                'reason' => __('orders::order_composer.vacation.exceeded', [
+                    'year' => (int) $start->year,
+                    'total' => $balance['total'],
+                    'used' => $balance['used'],
+                    'remaining' => $balance['remaining'],
+                    'requested' => $days,
+                ]),
+            ]));
         }
     }
 
@@ -67,8 +105,15 @@ class VacationEffect implements OrderEffect
             return;
         }
 
-        // Give the days back to the annual balance.
+        // Give the days back: the entries this order wrote, or (an order approved before the
+        // work-year ledger) the day count onto the newest work years.
         $start = $this->dates->parse($fields['start_date'] ?? null);
-        $this->balance->release($personnel, (int) ($start?->year ?? now()->year), (int) ($fields['days'] ?? 0));
+        $this->balance->release($personnel, (int) ($start?->year ?? now()->year), (int) ($fields['days'] ?? 0), self::sourceKey($order));
+    }
+
+    /** The balance-ledger source key of the entries an order writes. */
+    public static function sourceKey(OrderLog $order): string
+    {
+        return 'order:'.$order->id;
     }
 }

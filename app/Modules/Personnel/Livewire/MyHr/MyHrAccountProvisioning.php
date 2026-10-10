@@ -4,6 +4,7 @@ namespace App\Modules\Personnel\Livewire\MyHr;
 
 use App\Models\Personnel;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrAccountProvisioningService;
+use App\Services\StructureService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Validation\ValidationException;
@@ -28,6 +29,7 @@ class MyHrAccountProvisioning extends Component
     public function mount(int $personnelModel): void
     {
         $this->authorize('manage-my-hr-accounts');
+        abort_unless(app(StructureService::class)->allowsPersonnelId(auth()->user(), $personnelModel), 403);
         $this->personnel = Personnel::query()->with(['position', 'structure'])->findOrFail($personnelModel);
         $this->syncManualLinkSelection();
     }

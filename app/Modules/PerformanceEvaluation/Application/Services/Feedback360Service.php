@@ -6,6 +6,10 @@ use App\Models\PerformanceFeedbackRater;
 use App\Models\PerformanceFeedbackRequest;
 use App\Models\PerformanceFeedbackScore;
 use App\Models\PerformanceFormTemplate;
+use App\Models\Personnel;
+use App\Models\User;
+use App\Services\StructureService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -21,9 +25,9 @@ class Feedback360Service
     /**
      * @return array{requests:int,collecting:int,calibrating:int,closed:int}
      */
-    public function summary(): array
+    public function summary(?User $viewer = null): array
     {
-        $byStatus = PerformanceFeedbackRequest::query()
+        $byStatus = $this->baseQuery($viewer)
             ->selectRaw('status, COUNT(*) as aggregate')
             ->groupBy('status')
             ->pluck('aggregate', 'status');
@@ -39,9 +43,9 @@ class Feedback360Service
     /**
      * Requests for the list view, newest first, with rater progress counters.
      */
-    public function requests(?int $cycleId = null): Collection
+    public function requests(?int $cycleId = null, ?User $viewer = null): Collection
     {
-        return PerformanceFeedbackRequest::query()
+        return $this->baseQuery($viewer)
             ->with(['subject:id,surname,name,patronymic', 'cycle:id,name', 'template:id,name'])
             ->withCount([
                 'raters',
@@ -52,9 +56,9 @@ class Feedback360Service
             ->get();
     }
 
-    public function find(int $requestId): ?PerformanceFeedbackRequest
+    public function find(int $requestId, ?User $viewer = null): ?PerformanceFeedbackRequest
     {
-        return PerformanceFeedbackRequest::query()
+        return $this->baseQuery($viewer)
             ->with([
                 'subject:id,surname,name,patronymic',
                 'cycle:id,name',
@@ -64,6 +68,47 @@ class Feedback360Service
                 'raters.scores',
             ])
             ->find($requestId);
+    }
+
+    /**
+     * 360° sorğuları qiymətləndirilən işçinin strukturu ilə məhdudlaşır: istifadəçi yalnız
+     * görünürlüyündəki işçilərin sorğularını görür və idarə edir (fail closed).
+     *
+     * @return Builder<PerformanceFeedbackRequest>
+     */
+    public function visibleQuery(User $viewer): Builder
+    {
+        return app(StructureService::class)->scopeFor($viewer)
+            ->constrainThrough(PerformanceFeedbackRequest::query(), 'subject');
+    }
+
+    public function isRequestVisible(User $viewer, int $requestId): bool
+    {
+        return $this->visibleQuery($viewer)->whereKey($requestId)->exists();
+    }
+
+    public function isRaterVisible(User $viewer, int $raterId): bool
+    {
+        return PerformanceFeedbackRater::query()
+            ->whereKey($raterId)
+            ->whereIn('performance_feedback_request_id', $this->visibleQuery($viewer)->select('id'))
+            ->exists();
+    }
+
+    public function isPersonnelVisible(User $viewer, int $personnelId): bool
+    {
+        return app(StructureService::class)->allowsPersonnel($viewer, Personnel::query()->find($personnelId, ['id', 'structure_id']));
+    }
+
+    /**
+     * Baxan istifadəçi verilibsə görünürlüklə məhdudlaşdırılmış sorğu, yoxdursa (daxili
+     * hesablama, konsol) məhdudiyyətsiz.
+     *
+     * @return Builder<PerformanceFeedbackRequest>
+     */
+    private function baseQuery(?User $viewer): Builder
+    {
+        return $viewer ? $this->visibleQuery($viewer) : PerformanceFeedbackRequest::query();
     }
 
     /**

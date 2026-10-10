@@ -70,6 +70,11 @@ return [
                 'hint' => 'Expiring within 30 days, or already expired',
                 'action' => 'Open documents',
             ],
+            'stale_sick_certificates' => [
+                'label' => 'Long-open sick-leave certificate',
+                'hint' => 'Open longer than the configured limit',
+                'action' => 'Open certificates',
+            ],
         ],
     ],
 
@@ -109,6 +114,14 @@ return [
         ],
     ],
 
+    'absent' => [
+        'title' => 'Away today',
+        'subtitle' => ':count employees',
+        'empty' => 'Everyone is at work today',
+        'more' => '+:count more',
+        'returns' => 'returns: :date',
+        'view_all' => 'Open in list',
+    ],
     'structure' => [
         'title' => 'Coverage by structure',
         'subtitle' => 'Against the staff schedule',

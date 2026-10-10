@@ -60,37 +60,14 @@ trait InteractsWithTestWorkspaceSessions
             ]);
     }
 
+    /**
+     * Test iştirakçısının əməkdaş kartı hər sorğuda serverdə, yalnız açıq bağdan
+     * (user_personnel_links) müəyyən olunur — nə kliyent xassəsinə, nə də sessiyaya güvənilir.
+     */
     protected function currentPersonnelId(): ?int
     {
         return $this->rememberRuntime('performanceEvaluation.testWorkspace.currentPersonnelId', function (): ?int {
-            if ($this->resolvedPersonnelLoaded) {
-                return $this->resolvedPersonnelId;
-            }
-
-            $user = auth()->user();
-
-            if (! $user) {
-                $this->resolvedPersonnelLoaded = true;
-
-                return $this->resolvedPersonnelId = null;
-            }
-
-            $sessionKey = 'performanceEvaluation.testWorkspace.personnelId.'.(int) $user->id;
-            if (session()->has($sessionKey)) {
-                $this->resolvedPersonnelLoaded = true;
-
-                return $this->resolvedPersonnelId = (int) session()->get($sessionKey);
-            }
-
-            $personnelId = app(UserPersonnelLinkResolver::class)->resolve($user);
-            $this->resolvedPersonnelLoaded = true;
-            $this->resolvedPersonnelId = $personnelId;
-
-            if ($personnelId !== null) {
-                session()->put($sessionKey, $personnelId);
-            }
-
-            return $personnelId;
+            return app(UserPersonnelLinkResolver::class)->resolve(auth()->user());
         });
     }
 

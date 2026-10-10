@@ -9,11 +9,14 @@ use App\Modules\Personnel\Application\Services\ProfessionalPortfolioRegistrySync
 use App\Modules\Personnel\Application\Services\ProfessionalPortfolioWorkflowPolicyService;
 use App\Modules\Personnel\Exports\ProfessionalPortfolioMediaExport;
 use App\Modules\Personnel\Support\ProfessionalPortfolio\HandlesPortfolioAttachments;
+use App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioOptions;
 use App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioPermissionMatrix;
+use App\Services\StructureService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Maatwebsite\Excel\Excel as ExcelWriter;
@@ -25,6 +28,7 @@ class MediaManager extends Component
     use HandlesPortfolioAttachments;
     use WithFileUploads;
 
+    #[Locked]
     public int $personnelId;
 
     public string $search = '';
@@ -62,6 +66,7 @@ class MediaManager extends Component
     public function mount(int $personnelId): void
     {
         abort_unless(auth()->user()?->canAny(ProfessionalPortfolioPermissionMatrix::mediaViewPermissions()), 403);
+        abort_unless(app(StructureService::class)->allowsPersonnelId(auth()->user(), $personnelId), 403);
         $this->personnelId = $personnelId;
         $this->statusFilter = 'all';
     }
@@ -297,14 +302,14 @@ class MediaManager extends Component
         return [
             'form.headline' => 'required|string|max:255',
             'form.publisher_name' => 'required|string|max:255',
-            'form.publisher_type' => ['required', 'string', Rule::in(\App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioOptions::mediaPublisherTypes())],
-            'form.mention_type' => ['required', 'string', Rule::in(\App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioOptions::mediaMentionTypes())],
+            'form.publisher_type' => ['required', 'string', Rule::in(ProfessionalPortfolioOptions::mediaPublisherTypes())],
+            'form.mention_type' => ['required', 'string', Rule::in(ProfessionalPortfolioOptions::mediaMentionTypes())],
             'form.published_at' => 'required|date',
             'form.url' => 'nullable|url',
             'form.summary' => 'required|string|min:10',
-            'form.sentiment' => ['required', 'string', Rule::in(\App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioOptions::mediaSentiments())],
+            'form.sentiment' => ['required', 'string', Rule::in(ProfessionalPortfolioOptions::mediaSentiments())],
             'form.language' => 'nullable|string|max:20',
-            'form.visibility' => ['required', 'string', Rule::in(\App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioOptions::mediaVisibilities())],
+            'form.visibility' => ['required', 'string', Rule::in(ProfessionalPortfolioOptions::mediaVisibilities())],
             'form.notes' => 'nullable|string',
             'archiveUpload' => [$this->editingId ? 'nullable' : 'required', 'file', 'mimes:pdf,jpg,jpeg,png,webp'],
             'screenshotUpload' => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf',

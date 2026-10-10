@@ -8,9 +8,10 @@ use App\Services\CvWordExportService;
 use App\Services\PersonnelServiceBookWordExportService;
 use App\Services\StructurePathService;
 use App\Services\WordSuffixService;
+use App\Support\Uploads\PersonnelPhoto;
+use App\Support\Uploads\SecureFileResponse;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class PrintController extends Controller
@@ -27,9 +28,7 @@ class PrintController extends Controller
         $personnel = $this->loadPersonnelServiceBook($personnelId);
         $path = app(PersonnelServiceBookWordExportService::class)->export($personnel);
 
-        return response()
-            ->download($path, basename($path))
-            ->deleteFileAfterSend(true);
+        return SecureFileResponse::temporaryDownload($path, basename($path));
     }
 
     public function cv($personnelId): View
@@ -45,9 +44,7 @@ class PrintController extends Controller
 
         $path = app(CvWordExportService::class)->export($personnel, $cvData);
 
-        return response()
-            ->download($path, basename($path))
-            ->deleteFileAfterSend(true);
+        return SecureFileResponse::temporaryDownload($path, basename($path));
     }
 
     private function buildCvData($personnelId): array
@@ -156,9 +153,7 @@ class PrintController extends Controller
                 'year' => $birthDateYear ? $birthDateYear.$suffixService->getNumberSuffix($birthDateYear) : '',
                 'city' => optional($personnel->idDocuments?->bornCity)->name,
             ],
-            'photo_url' => $personnel->photo
-                ? Storage::url($personnel->photo)
-                : null,
+            'photo_url' => PersonnelPhoto::url($personnel->id, $personnel->photo),
             'education' => [
                 'degree' => $personnel->educationDegree?->title_az,
                 'institution' => $institution.$suffixService->educationSuffix($institution),

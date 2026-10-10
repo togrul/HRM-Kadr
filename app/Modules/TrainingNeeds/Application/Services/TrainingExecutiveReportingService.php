@@ -5,6 +5,7 @@ namespace App\Modules\TrainingNeeds\Application\Services;
 use App\Models\TrainingAnnualPlan;
 use App\Models\TrainingNeedItem;
 use App\Models\TrainingSession;
+use App\Modules\TrainingNeeds\Support\TrainingStructureScope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -152,6 +153,7 @@ class TrainingExecutiveReportingService
                 ROUND(COALESCE(AVG(training_feedback_responses.overall_score), 0), 2) as average_feedback_score,
                 MAX(training_delivery_records.completed_at) as last_completed_at
             ')
+            ->tap(fn ($query) => TrainingStructureScope::onPersonnelTable($query))
             ->groupBy('personnels.id', 'personnel_fullname', 'personnel_tabel_no')
             ->orderByDesc('attended_hours_total')
             ->orderBy('personnel_fullname')

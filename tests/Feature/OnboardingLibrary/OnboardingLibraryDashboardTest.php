@@ -26,6 +26,7 @@ class OnboardingLibraryDashboardTest extends TestCase
     public function test_authorized_user_can_create_and_assign_template_from_common_module(): void
     {
         Storage::fake('public');
+        Storage::fake('local');
         $this->seedReferenceData();
 
         $user = User::factory()->create(['is_active' => true]);
@@ -56,6 +57,7 @@ class OnboardingLibraryDashboardTest extends TestCase
     public function test_dashboard_can_export_templates_and_assignments(): void
     {
         Storage::fake('public');
+        Storage::fake('local');
         Excel::fake();
         $this->seedReferenceData();
 
@@ -89,6 +91,7 @@ class OnboardingLibraryDashboardTest extends TestCase
     public function test_dashboard_can_export_version_history(): void
     {
         Storage::fake('public');
+        Storage::fake('local');
         Excel::fake();
         $this->seedReferenceData();
 
@@ -120,6 +123,7 @@ class OnboardingLibraryDashboardTest extends TestCase
     public function test_dashboard_can_assign_template_by_structure_targeting(): void
     {
         Storage::fake('public');
+        Storage::fake('local');
         $this->seedReferenceData();
 
         $user = User::factory()->create(['is_active' => true]);
@@ -150,6 +154,7 @@ class OnboardingLibraryDashboardTest extends TestCase
     public function test_dashboard_can_toggle_template_active_state(): void
     {
         Storage::fake('public');
+        Storage::fake('local');
         $this->seedReferenceData();
 
         $user = User::factory()->create(['is_active' => true]);
@@ -186,6 +191,7 @@ class OnboardingLibraryDashboardTest extends TestCase
     public function test_recent_assignments_resolve_acknowledged_status_from_receipt(): void
     {
         Storage::fake('public');
+        Storage::fake('local');
         $this->seedReferenceData();
 
         $user = User::factory()->create(['is_active' => true]);
@@ -229,6 +235,7 @@ class OnboardingLibraryDashboardTest extends TestCase
     public function test_catalog_renders_cards_and_side_panels(): void
     {
         Storage::fake('public');
+        Storage::fake('local');
         $this->seedReferenceData();
 
         $user = User::factory()->create(['is_active' => true]);
@@ -262,6 +269,7 @@ class OnboardingLibraryDashboardTest extends TestCase
     public function test_dashboard_render_stays_within_query_budget(): void
     {
         Storage::fake('public');
+        Storage::fake('local');
         $this->seedReferenceData();
 
         $user = User::factory()->create(['is_active' => true]);
@@ -282,6 +290,7 @@ class OnboardingLibraryDashboardTest extends TestCase
     public function test_template_upload_rejects_disguised_and_browser_executable_files(): void
     {
         Storage::fake('public');
+        Storage::fake('local');
         $this->seedReferenceData();
 
         $user = User::factory()->create(['is_active' => true]);
@@ -313,6 +322,7 @@ class OnboardingLibraryDashboardTest extends TestCase
     public function test_unassigned_template_can_be_deleted_with_its_file_but_assigned_one_only_archived(): void
     {
         Storage::fake('public');
+        Storage::fake('local');
         $this->seedReferenceData();
 
         $user = User::factory()->create(['is_active' => true]);
@@ -342,7 +352,7 @@ class OnboardingLibraryDashboardTest extends TestCase
             'assigned_at' => now(),
             'status' => 'pending',
         ]);
-        Storage::disk('public')->assertExists($unassigned->file_path);
+        Storage::disk('local')->assertExists($unassigned->file_path);
 
         $component = Livewire::test(Dashboard::class);
         $items = collect($component->instance()->catalogPayload['items']->items())->keyBy('id');
@@ -352,7 +362,7 @@ class OnboardingLibraryDashboardTest extends TestCase
         $component->call('deleteTemplate', $unassigned->id)->call('deleteTemplate', $assigned->id);
 
         $this->assertDatabaseMissing('onboarding_document_templates', ['id' => $unassigned->id]);
-        Storage::disk('public')->assertMissing($unassigned->file_path);
+        Storage::disk('local')->assertMissing($unassigned->file_path);
         $this->assertDatabaseHas('onboarding_document_templates', ['id' => $assigned->id]);
     }
 

@@ -4,6 +4,7 @@ namespace App\Modules\TrainingNeeds\Livewire\Concerns;
 
 use App\Models\TrainingFeedbackForm;
 use App\Models\TrainingFeedbackResponse;
+use App\Modules\TrainingNeeds\Support\TrainingStructureScope;
 
 trait HandlesTrainingFeedbackMutations
 {
@@ -116,6 +117,7 @@ trait HandlesTrainingFeedbackMutations
             'feedbackResponseForm.answers_text' => __('training_needs::dashboard.fields.feedback_answers'),
         ]);
 
+        TrainingStructureScope::ensurePersonnelVisible(data_get($validated, 'feedbackResponseForm.personnel_id'));
         $form = TrainingFeedbackForm::query()->findOrFail((int) data_get($validated, 'feedbackResponseForm.training_feedback_form_id'));
 
         $answers = collect(preg_split('/\r\n|\r|\n/', (string) data_get($validated, 'feedbackResponseForm.answers_text')))

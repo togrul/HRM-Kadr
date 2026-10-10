@@ -2,6 +2,8 @@
 
 namespace App\Modules\Personnel\Services;
 
+use App\Modules\Personnel\Support\Presence\PersonnelPresenceStatus;
+
 class PersonnelListStateNormalizer
 {
     /**
@@ -56,5 +58,24 @@ class PersonnelListStateNormalizer
     public function normalizePosition(mixed $value): ?int
     {
         return is_numeric($value) ? (int) $value : null;
+    }
+
+    /**
+     * Keep only known, filterable presence statuses, each once, in precedence order.
+     *
+     * @return list<string>
+     */
+    public function normalizePresence(mixed $value): array
+    {
+        $values = is_array($value) ? $value : (is_string($value) && $value !== '' ? explode(',', $value) : []);
+        $values = array_map(fn ($item): string => is_string($item) ? trim($item) : '', $values);
+
+        return array_values(array_map(
+            fn (PersonnelPresenceStatus $status): string => $status->value,
+            array_filter(
+                PersonnelPresenceStatus::filterable(),
+                fn (PersonnelPresenceStatus $status): bool => in_array($status->value, $values, true),
+            ),
+        ));
     }
 }

@@ -19,7 +19,7 @@ class PersonnelFileDownloadTest extends TestCase
     {
         $document = $this->makeDocumentWithFile();
 
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(grantAllStructures(User::factory()->create()));
 
         $this->get(route('personnel.files.download', $document->id))
             ->assertForbidden();
@@ -101,7 +101,7 @@ class PersonnelFileDownloadTest extends TestCase
 
     private function userWithPermission(string $permission): User
     {
-        $user = User::factory()->create();
+        $user = grantAllStructures(User::factory()->create());
         $user->givePermissionTo(Permission::findOrCreate($permission, 'web'));
 
         return $user;

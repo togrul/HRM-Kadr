@@ -56,7 +56,7 @@ class PersonnelListRegressionTest extends TestCase
         $this->assertNull($query->getQuery()->joins);
     }
 
-    public function test_listing_query_eager_loads_active_travel_and_vacation_relations(): void
+    public function test_listing_query_leaves_presence_to_the_resolver_instead_of_eager_loading_absences(): void
     {
         $query = app(PersonnelQueryService::class)->build(
             status: 'current',
@@ -68,8 +68,10 @@ class PersonnelListRegressionTest extends TestCase
 
         $eagerLoads = array_keys($query->getEagerLoads());
 
-        $this->assertContains('hasActiveVacation', $eagerLoads);
-        $this->assertContains('hasActiveBusinessTrip', $eagerLoads);
+        // PersonnelPresenceResolver reads every row's absences in a fixed number of queries.
+        foreach (['hasActiveVacation', 'hasActiveBusinessTrip', 'latestVacation', 'latestBusinessTrip'] as $relation) {
+            $this->assertNotContains($relation, $eagerLoads);
+        }
     }
 
     public function test_state_normalizer_is_shared_and_stable(): void

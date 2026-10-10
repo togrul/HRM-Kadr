@@ -55,6 +55,11 @@ class PayrollPeriod extends Model
         return $this->status === 'open';
     }
 
+    public function isClosed(): bool
+    {
+        return $this->status === 'closed';
+    }
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()->useLogName('payroll_period')->logFillable()->logOnlyDirty()->dontSubmitEmptyLogs();

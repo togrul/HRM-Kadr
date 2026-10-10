@@ -13,6 +13,7 @@
 
     @php
         $isEditing = $this->isEditing();
+        $isMulti = $this->isMulti();
         $inputClass = 'block w-full mt-1 text-sm transition duration-100 ease-in-out border-none rounded-lg shadow-sm bg-neutral-100 focus:ring-zinc-400 focus:border-ink px-3 py-2';
     @endphp
 
@@ -22,7 +23,7 @@
             <h2 class="text-lg font-medium text-zinc-600" id="slide-over-title">
                 {{ $isEditing ? __('orders::order_composer.edit_title') : __('orders::order_composer.create_title') }}
             </h2>
-            @if ($isEditing)
+            @if ($isEditing && $orderNumber !== '')
                 <span class="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
                     {{ $orderNumber }}
                 </span>
@@ -78,13 +79,14 @@
                     <div>
                         <x-label for="hireStructureId">{{ __('orders::order_composer.labels.hire_structure') }}</x-label>
                         <x-orders.lookup-picker wire:model="hireStructureId" :options="$this->lookupOptions['structure']" />
+                        @error('hireStructureId') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div>
                         <x-label for="hirePositionId">{{ __('orders::order_composer.labels.hire_position') }}</x-label>
                         <x-orders.lookup-picker wire:model="hirePositionId" :options="$this->lookupOptions['position']" />
                         @error('hirePositionId') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
-                @else
+                @elseif (! $isMulti)
                     @include('orders::livewire.orders.partials.order-composer.subject-picker', [
                         'query' => 'personnelQuery',
                         'selected' => $personnelLabel,
@@ -101,6 +103,9 @@
                     <x-label for="orderNumber">{{ __('orders::order_composer.labels.number') }}</x-label>
                     <x-livewire-input mode="gray" name="orderNumber" wire:model="orderNumber" />
                     @error('orderNumber') <x-validation>{{ $message }}</x-validation> @enderror
+                    @if (($numberFormat = $this->autoNumberingFormat()) !== '')
+                        <p class="mt-1 text-[11.5px] text-ink-faint">{{ __('orders::order_composer.hints.auto_number', ['format' => $numberFormat]) }}</p>
+                    @endif
                 </div>
                 <div>
                     <x-label for="orderDate">{{ __('orders::order_composer.labels.date') }}</x-label>
@@ -109,6 +114,13 @@
                 </div>
             </div>
         </section>
+
+        @if ($isMulti)
+            @include('orders::livewire.orders.partials.order-composer.participants', [
+                'participantFieldDefs' => $this->participantFieldDefs,
+                'lookupOptions' => $this->lookupOptions,
+            ])
+        @endif
 
         @if ($this->vacationBalance)
             @include('orders::livewire.orders.partials.order-composer.vacation-balance', ['vb' => $this->vacationBalance])

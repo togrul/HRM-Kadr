@@ -7,6 +7,7 @@ use App\Models\EmployeeContentAssignment;
 use App\Models\Personnel;
 use App\Modules\Personnel\Application\Services\MyHr\LearningAssignmentManagerService;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrLearningReadService;
+use App\Services\StructureService;
 use App\Support\Uploads\UploadRules;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -46,6 +47,7 @@ class LearningAssignmentManager extends Component
     {
         abort_unless($this->canManageLibrary() || $this->canAssignContent(), 403);
 
+        abort_unless(app(StructureService::class)->allowsPersonnelId(auth()->user(), $personnelModel), 403);
         $this->personnel = Personnel::query()->with(['position', 'structure'])->findOrFail($personnelModel);
     }
 

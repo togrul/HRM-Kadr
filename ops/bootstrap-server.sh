@@ -746,11 +746,38 @@ Recommended checks:
 EOF
 }
 
+ensure_order_pdf_renderer() {
+  # Approved orders keep an immutable final PDF, rendered by headless LibreOffice
+  # (config orders.soffice_path). Without it approval still works; PDFs are backfilled
+  # later with: php artisan orders:render-final-pdfs
+  if command_exists soffice; then
+    return
+  fi
+
+  log "Installing LibreOffice (headless) and fonts for order PDFs"
+
+  case "${PACKAGE_MANAGER}" in
+    apt)
+      apt-get install -y --no-install-recommends libreoffice-writer-nogui \
+        fonts-dejavu-core fonts-liberation2 fonts-crosextra-carlito fonts-crosextra-caladea fonts-noto-core \
+        || apt-get install -y --no-install-recommends libreoffice-writer fonts-dejavu-core fonts-liberation fonts-noto-core
+      ;;
+    dnf)
+      dnf install -y libreoffice-writer libreoffice-langpack-az dejavu-sans-fonts liberation-fonts google-noto-sans-fonts \
+        || dnf install -y libreoffice-writer dejavu-sans-fonts liberation-fonts
+      ;;
+    *)
+      log "Unknown package manager — install LibreOffice manually for order PDFs"
+      ;;
+  esac
+}
+
 main() {
   require_root
   detect_platform
   apply_deployment_preset
   install_base_packages
+  ensure_order_pdf_renderer
   ensure_php
   ensure_composer
   ensure_node

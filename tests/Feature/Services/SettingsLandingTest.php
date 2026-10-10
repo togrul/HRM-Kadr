@@ -32,6 +32,27 @@ class SettingsLandingTest extends TestCase
         $this->assertSame('Təşkilatın adı', $label);
     }
 
+    /** Every setting a migration installs must show an Azerbaijani name, not its English storage key. */
+    public function test_every_installed_setting_has_an_azerbaijani_label(): void
+    {
+        $this->actingAsAdmin();
+        app()->setLocale('az');
+
+        $list = Livewire::test(SettingsList::class, ['section' => 'general'])->instance();
+        $names = \App\Models\Setting::query()->pluck('name')
+            ->push('Open sick certificate alert (days)')
+            ->unique();
+
+        $this->assertNotEmpty($names);
+
+        foreach ($names as $name) {
+            $label = $list->resolveSettingLabel((string) $name);
+
+            $this->assertNotSame($name, $label, "«{$name}» tənzimləməsinin Azərbaycan dilində adı yoxdur.");
+            $this->assertStringNotContainsString('::', $label, "«{$name}» tərcümə açarı həll olunmayıb.");
+        }
+    }
+
     private function actingAsAdmin(): void
     {
         $admin = User::factory()->create();

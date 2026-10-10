@@ -79,12 +79,19 @@ sətrində də vardı. Hər ikisi `void` qaytaran closure-a çevrildi.
 | Metod | Ünvan | İcazə |
 |---|---|---|
 | `GET` | `/api/v1/handshake` | istənilən etibarlı token |
-| `GET` | `/api/v1/employees?after=&limit=` | `hr.employees:read` |
+| `GET` | `/api/v1/employees?after=&limit=` | `hr.employees:read` (`base_salary` üçün əlavə olaraq `hr.compensation:read`) |
 | `GET` | `/api/v1/org.units`, `/api/v1/org.positions` | `hr.org:read` |
 | `GET` | `/api/v1/orders?after=&limit=` | `hr.orders:read` |
 | `GET` | `/api/v1/attendance.month?year=&month=&after=&limit=` | `hr.attendance:read` |
 | `GET` | `/api/v1/compensation?after=&limit=` | `hr.compensation:read` |
 | `GET` | `/api/v1/leave.balance?year=&after=&limit=` | `hr.leave:read` |
+
+**`attendance.month`-un yan təsiri (qəsdən).** GET sorğusu bağlanmış (locked) ayı
+oxuyanda `AttendanceExportMark` qeyd olunur: "bu ay maliyyəyə ötürülüb". Bundan sonra
+`AttendanceMonthLockService::unlockMonth()` ayı `--force` olmadan açmır — maliyyə tərəfi
+həmin aydan maaş hesablamış ola bilər. Təkrar sorğu idempotentdir (eyni işarə). Davranış
+fail-closed olduğu üçün ayrıca "ack" endpoint-inə köçürülmədi; yalnız `hr.attendance:read`
+icazəli token bu işarəni qoya bilər.
 
 ### Autentifikasiya
 
@@ -96,6 +103,14 @@ php artisan integration:token "ARBAY maliyyə" --ability=hr.employees:read
 ```
 
 İcazə **feed üzrədir**: struktur ağacı üçün verilmiş token maaş oxuya bilmir.
+`employees` feed-ində `base_salary` sahəsi yalnız tokenin `hr.compensation:read`
+icazəsi də olduqda doldurulur; yoxdursa sahə cavabda qalır, amma `null` gəlir
+(sxem dəyişmir). Maliyyə tərəfi maaşı bu feed-dən götürürsə, onun tokeni hər iki
+icazəni daşımalıdır (və ya icazəsiz — bütün feed-lərə açıq — buraxılmalıdır):
+
+```bash
+php artisan integration:token "ARBAY maliyyə" --ability=hr.employees:read --ability=hr.compensation:read
+```
 Konsol əmri ona görə seçilib ki, açıq mətn brauzer tarixçəsində və Livewire
 paketində qalmasın.
 
@@ -141,8 +156,15 @@ Bu, ən vacib xassədir: effekt sonradan atsa, hadisə də onunla yox olur. Təs
 anında məftilə göndərsək, uğursuz tranzaksiya qarşı tərəfə **baş verməmiş faktı**
 verərdi — və ikinci hadisə olmadığı üçün heç nə onu düzəltməzdi.
 
-Kursor üçün ayrıca `sequence` sütunu yoxdur: `id` onsuz da artandır, `max+1`
-hesablamaq isə iki paralel təsdiqi eyni nömrəyə yarışdırardı.
+Kursor `id` deyil, `sequence` sütunudur. `id` sətir yazılanda verilir, sətir isə
+tranzaksiya commit olanda görünür: MySQL/PostgreSQL-də uzun tranzaksiyanın kiçik
+`id`-si oxucu kursoru onu keçəndən sonra görünə bilər və hadisə həmişəlik itərdi.
+`sequence` commit-dən **sonra** verilir (`OutboxSequencer`): tək sətirli
+`integration_outbox_sequence` sayğacı `lockForUpdate` ilə kilidlənir, növbəti
+nömrələr həmin kilid altında yazılır, ona görə görünən ardıcıllıqda boşluq olmur.
+Nömrəsiz qalan sətirləri (proses commit ilə nömrələmə arasında dayansa) növbəti
+yazı və ya feed oxunuşu nömrələyir. Köhnə sətirlərdə `sequence = id`, ona görə
+əvvəlki kursorlar (`after=<son id>`) dəyişmədən işləyir; API kontrakti eynidir.
 
 ### Ləğv ayrıca hadisədir
 
@@ -182,6 +204,35 @@ asılılığı **həll edə bilməzdi** — yəni əmr sistemi ümumiyyətlə i�
 `reversible` işə qəbulda `false`-dur: `hire` bu tərəfdə geri qaytarıla bilmir,
 ona görə qarşı tərəf verə bilmədiyi «geri al» düyməsini təklif etməməlidir.
 
+### Çoxşəxsli əmr — hər iştirakçıya bir hadisə
+
+Bir əmr bir neçə əməkdaşa aid ola bilər (məs. komandanın ezamiyyəti). Belə əmrin
+təsdiqi və ləğvi **hər iştirakçı üçün ayrıca hadisə** yazır — payload-un forması
+eynidir, `employee_external_id`, `person_uid` və tarixlər həmin şəxsindir (şəxsə
+görə dəyişdirilmiş tarixlər daxil). Üç sahə əlavə olunur:
+
+```json
+{
+  "external_id": "1042-2",
+  "order_external_id": "1042",
+  "participant_index": 2,
+  "participant_count": 3,
+  "employee_external_id": "9",
+  "status": "approved",
+  "start_date": "2026-11-02",
+  "end_date": "2026-11-07"
+}
+```
+
+- `external_id` iştirakçıya görə unikaldır (`<əmr id>-<sıra>`), təsdiq və ləğv
+  hadisələri həmin açarla cütlənir;
+- `order_external_id` bir əmrin hadisələrini birləşdirir;
+- `participant_index` sənəddəki sıradır (1-dən), `participant_count` — iştirakçı sayı.
+
+Bütün hadisələr təsdiqlə eyni tranzaksiyadadır: bir iştirakçı keçmirsə əmr
+təsdiqlənmir və heç bir hadisə qalmır. Tək şəxsə aid əmrin payload-u dəyişməyib
+(bu üç sahə orada yoxdur).
+
 ## 5. Davamiyyət feed-i
 
 ### Dəqiqə burada, gün kodu orada
@@ -209,6 +260,29 @@ tərəfə fərqi payslip-də görməzdən əvvəl aşkarlamağa imkan verir.
 
 Barmaq izi məzmuna bağlıdır, sətir sırasına yox: tarixlər çeşidlənir və yalnız
 normaya təsir edən sahələr daxil edilir.
+
+### Əmrlə qeyri-iş gününə cəlb — `rest_day_work`
+
+Müqavilə 1.1-dən (əlavə sahə, minor). Hər sətirdə `rest_day_work` siyahısı var:
+`qeyri_is_gunu_ise_celb` əmri ilə işçinin istirahət / bayram gününə cəlb edildiyi
+günlər, gündə bir dəfə:
+
+```json
+"rest_day_work": [
+  { "day": 8, "date": "2026-11-08", "minutes": 480, "compensation": "double_pay" },
+  { "day": 15, "date": "2026-11-15", "minutes": 480, "compensation": "day_off" }
+]
+```
+
+- `double_pay` — ƏM m.164.1 (aylıq maaş): maaşdan əlavə normadaxili iş üçün ən azı 1 ×,
+  normadan artıq iş üçün ən azı 2 × saatlıq vəzifə maaşı. HRM özü hesablayanda saatlıq
+  vəzifə maaşı = vəzifə maaşı ÷ ayın fərdi norma saatları (bax `docs/payroll-legal-basis.md`).
+- `day_off` — m.164.2: pul əvəzinə başqa istirahət günü; ödəniş sətri yaranmamalıdır.
+
+Bu dəqiqələr həmin günün `overtime_minutes`-ində **də** var (həftəsonu/bayram işlənən
+hər dəqiqə əlavə vaxtdır). Oxuyan tərəf onları bu siyahı ilə ödəməli, adi əlavə iş
+vaxtı kimi **ikinci dəfə ödəməməlidir**. Eyni günü iki əmr göstərsə də gün bir dəfə
+gəlir (sonuncu əmrin şərti). Əmr ləğv olunanda gün siyahıdan çıxır.
 
 ## 6. Kilidlənmiş ayın qorunması
 
@@ -274,6 +348,32 @@ saxlayardı və qanun dəyişəndə biri səssizcə yanlış olardı.
 Sətir bu tərəfdə atılır, uzaq tərəfdə yox: heç vaxt çıxmayan məlumat səhv
 oxuna bilməz, istisnanın səbəbi isə istisnanın yanında qalır.
 
+### Əvəzetmə — `substitutions`
+
+Müqavilə 1.1-dən (əlavə sahə, minor). Hər sətirdə `substitutions` siyahısı var —
+`evezetme` əmri ilə qeydə alınmış, hələ aktual olan əvəzetmələr: davam edən, gələcək
+və ya ən tezi **əvvəlki ayın 1-i** bitmiş olanlar (bağlanan ay hələ əhatə olunsun deyə):
+
+```json
+"substitutions": [
+  {
+    "substituted_external_no": "TB-COL", "substituted_name": "Həsənova Leyla Əli",
+    "start_date": "2026-11-02", "end_date": "2026-11-20",
+    "extra_pay_percent": 30.0, "extra_pay_amount": null, "order_no": "EM-118"
+  }
+]
+```
+
+Razılaşdırılmış əlavə əmrin mətninə görə **əvəz edən işçinin öz vəzifə maaşının** faizidir
+(`extra_pay_percent`); köhnə qurulumlarda faiz yerinə aylıq sabit məbləğ
+(`extra_pay_amount`) ola bilər — faiz varsa o götürülür. ƏM m.162.1: əvəz edilənin maaşı
+yüksəkdirsə fərq ödənilir — onu maliyyə tərəfi `substituted_external_no` üzrə öz maaş
+məlumatından tapır. Ayın günlərinə bölüşdürmə maliyyə tərəfinin işidir; HRM özü
+hesablayanda: aylıq məbləğ × (əvəzetmə müddətinə düşən və işçinin məzuniyyətdə, icazədə,
+ezamiyyətdə olmadığı norma iş günləri ÷ ayın norma iş günləri) — bax
+`docs/payroll-legal-basis.md`. `end_date: null` — müddət açıqdır. Əmr ləğv olunanda
+sətir siyahıdan çıxır.
+
 ### Məzuniyyət balansı
 
 `leave.balance` hər işçinin illik qalığını verir. Ödənişi maliyyə hesablayır
@@ -322,8 +422,10 @@ istehlakçı (ixrac, inteqrasiya feed-i) hər nəfər üçün ayrıca sorğu ver
 | `leave.balance` feed-i | ✅ |
 | Payslip güzgüsü (maliyyədən geri) | ⏳ növbəti fazalar |
 | Payroll sahibliyi (`payroll_owner`) | ✅ |
+| `rest_day_work` (davamiyyət) və `substitutions` (kompensasiya) — müqavilə 1.1 | ✅ |
 
 Testlər: `tests/Feature/Integration/IntegrationApiTest.php` (14),
 `PersonIdentityTest.php` (6), `OrderOutboxTest.php` (7),
-`PayrollOwnershipTest.php` (5), `MonthUnlockGuardTest.php` (5).
+`PayrollOwnershipTest.php` (5), `MonthUnlockGuardTest.php` (5);
+əmr ödənişləri və onların feed-ləri — `tests/Feature/Payroll/OrderEarningsPayrollTest.php` (8).
 Hamısı saxta server və ya lokal vəziyyətlə işləyir — canlı sistem tələb etmir.

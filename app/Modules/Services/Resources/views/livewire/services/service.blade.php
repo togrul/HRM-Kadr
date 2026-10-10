@@ -3,6 +3,7 @@
         'general' => __('services::common.labels.general'),
         'candidate' => __('services::common.labels.candidate_preferences'),
         'notifications-settings' => __('services::common.labels.notifications'),
+        'change-policy' => __('services::common.labels.change_policy'),
         'menus' => __('services::common.labels.menus'),
         'roles' => __('services::common.navigation.roles_and_permissions'),
         'users' => __('services::common.labels.users'),
@@ -79,11 +80,18 @@
                         @livewire('notification.settings-hub', key('notifications-settings-hub'))
                     @break
 
+                    @case('change-policy')
+                        @can('manage-change-policy')
+                            @livewire('services.settings.change-policy', key('settings-change-policy'))
+                        @endcan
+                    @break
+
                     @case('menus')
                         @livewire('services.menus.all-menus', key('menus'))
                     @break
 
                     @case('roles')
+                        @can('manage-roles')
                         <div class="space-y-4" x-data="{ activeRoleTab: 'roles' }">
                             @php
                                 $roleTab = 'h-[30px] shrink-0 rounded-[9px] border px-2.5 text-[12px] transition';
@@ -107,10 +115,13 @@
                                 @livewire('services.roles.permissions', key('permissions'))
                             </div>
                         </div>
+                        @endcan
                     @break
 
                     @case('users')
-                        @livewire('services.users.all-users', key('users'))
+                        @can('manage-users')
+                            @livewire('services.users.all-users', key('users'))
+                        @endcan
                     @break
 
                     @case('ranks')

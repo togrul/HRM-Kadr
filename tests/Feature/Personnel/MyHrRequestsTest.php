@@ -206,6 +206,11 @@ class MyHrRequestsTest extends TestCase
 
     private function makePersonnel(string $email): Personnel
     {
+        return $this->linkFixtureUserByEmail($this->createPersonnelRecord($email));
+    }
+
+    private function createPersonnelRecord(string $email): Personnel
+    {
         return Personnel::withoutEvents(fn () => Personnel::query()->create([
             'tabel_no' => 'TB'.Str::upper(Str::random(6)),
             'surname' => 'Doe',

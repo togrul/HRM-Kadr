@@ -34,6 +34,7 @@ class TrainingNeedsCalendarDeliveryFeedbackExportTest extends TestCase
     public function test_plan_status_promotes_and_training_delivery_flow_is_persisted(): void
     {
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $this->grantTrainingNeedsPermissions($user);
         Role::findOrCreate('admin', 'web');
         Permission::findOrCreate('get-notification', 'web');
@@ -168,8 +169,10 @@ class TrainingNeedsCalendarDeliveryFeedbackExportTest extends TestCase
     public function test_session_can_auto_fill_participants_and_delivery_certificate_can_be_uploaded(): void
     {
         Storage::fake('public');
+        Storage::fake('local');
 
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $this->grantTrainingNeedsPermissions($user);
         Role::findOrCreate('admin', 'web');
         Permission::findOrCreate('get-notification', 'web');
@@ -271,13 +274,14 @@ class TrainingNeedsCalendarDeliveryFeedbackExportTest extends TestCase
 
         $this->assertNotNull($record->certificate_path);
         $this->assertSame('certificate.jpg', $record->certificate_name);
-        Storage::disk('public')->assertExists($record->certificate_path);
+        Storage::disk('local')->assertExists($record->certificate_path);
         $this->assertSame('certificate.jpg', app(TrainingNeedReportingService::class)->deliveryRows()->first()->certificate_name);
     }
 
     public function test_feedback_form_default_question_type_is_saved_into_question_payload(): void
     {
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $this->grantTrainingNeedsPermissions($user);
         Role::findOrCreate('admin', 'web');
         Permission::findOrCreate('get-notification', 'web');
@@ -314,8 +318,10 @@ class TrainingNeedsCalendarDeliveryFeedbackExportTest extends TestCase
     public function test_selected_session_participants_can_be_bulk_updated_and_certificate_can_be_downloaded(): void
     {
         Storage::fake('public');
+        Storage::fake('local');
 
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $this->grantTrainingNeedsPermissions($user);
         Role::findOrCreate('admin', 'web');
         Permission::findOrCreate('get-notification', 'web');
@@ -383,6 +389,7 @@ class TrainingNeedsCalendarDeliveryFeedbackExportTest extends TestCase
     public function test_approved_plan_item_can_generate_and_create_session_proposal(): void
     {
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $this->grantTrainingNeedsPermissions($user);
         Role::findOrCreate('admin', 'web');
         Permission::findOrCreate('get-notification', 'web');

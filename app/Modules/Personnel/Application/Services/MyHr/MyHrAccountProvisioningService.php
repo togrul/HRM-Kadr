@@ -6,6 +6,8 @@ use App\Models\Personnel;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\UserPersonnelLink;
+use App\Services\UserPersonnelLinkManager;
+use App\Services\UserPersonnelLinkResolver;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
@@ -97,6 +99,12 @@ class MyHrAccountProvisioningService
             $user = $linkedUser ?: $this->resolveExistingUser($personnel);
             $created = false;
 
+            // Mövcud (bağlı) hesab üçün sıfırlama linki yaratmaq onun şifrəsini təyin etmək
+            // deməkdir — özündən geniş icazəli hesabı və öz hesabını bu yolla ələ keçirmək olmaz.
+            if ($user && ($actor = auth()->user()) instanceof User) {
+                app(UserPersonnelLinkManager::class)->assertMayLink($actor, $user, 'provision');
+            }
+
             if (! $user) {
                 $user = User::query()->create([
                     'name' => $personnel->fullname,
@@ -133,6 +141,18 @@ class MyHrAccountProvisioningService
                 ]
             );
 
+            app(UserPersonnelLinkResolver::class)->forget((int) $user->getKey());
+
+            activity('user_personnel_links')
+                ->causedBy(auth()->user())
+                ->event($created ? 'created' : 'updated')
+                ->withProperties([
+                    'user_id' => (int) $user->getKey(),
+                    'personnel_id' => (int) $personnel->getKey(),
+                    'source' => 'self_service_provisioned',
+                ])
+                ->log('user_personnel_link.saved');
+
             $token = Password::broker()->createToken($user);
 
             return [
@@ -152,6 +172,11 @@ class MyHrAccountProvisioningService
 
         return DB::transaction(function () use ($personnel, $userId): User {
             $user = User::query()->whereNull('deleted_at')->findOrFail($userId);
+
+            // Özünü bağlamaq və özündən geniş icazəli hesabı bağlamaq olmaz.
+            if (($actor = auth()->user()) instanceof User) {
+                app(UserPersonnelLinkManager::class)->assertMayLink($actor, $user, 'manualLink.user_id');
+            }
 
             $existingPersonnelId = UserPersonnelLink::query()
                 ->where('user_id', $user->getKey())
@@ -183,6 +208,18 @@ class MyHrAccountProvisioningService
                     'resolved_at' => now(),
                 ]
             );
+
+            app(UserPersonnelLinkResolver::class)->forget((int) $user->getKey());
+
+            activity('user_personnel_links')
+                ->causedBy(auth()->user())
+                ->event('created')
+                ->withProperties([
+                    'user_id' => (int) $user->getKey(),
+                    'personnel_id' => (int) $personnel->getKey(),
+                    'source' => 'manual_self_service_link',
+                ])
+                ->log('user_personnel_link.saved');
 
             return $user->fresh();
         });

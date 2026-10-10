@@ -46,6 +46,7 @@ class CandidateAtsCompletionServiceTest extends TestCase
         $this->assertTrue(Schema::hasColumn('job_requisitions', 'approval_status'));
 
         $actor = User::factory()->create(['name' => 'Recruitment Lead']);
+        grantAllStructures($actor);
         $application = $this->makeApplication($actor);
         $service = app(CandidateAtsCompletionService::class);
 
@@ -131,6 +132,7 @@ class CandidateAtsCompletionServiceTest extends TestCase
         Carbon::setTestNow('2026-05-09 10:00:00');
 
         $actor = User::factory()->create();
+        grantAllStructures($actor);
         $application = $this->makeApplication($actor);
         $application->opening->requisition->forceFill([
             'approval_status' => 'pending',
@@ -296,6 +298,7 @@ class CandidateAtsCompletionServiceTest extends TestCase
 
         Permission::findOrCreate('show-candidates', 'web');
         $viewer = User::factory()->create(['is_active' => true]);
+        grantAllStructures($viewer);
         $viewer->givePermissionTo('show-candidates');
 
         Livewire::actingAs($viewer);
@@ -420,6 +423,7 @@ class CandidateAtsCompletionServiceTest extends TestCase
         }
 
         $user = User::factory()->create(['name' => 'Recruitment Lead', 'is_active' => true]);
+        grantAllStructures($user);
         $user->givePermissionTo(['show-candidates', 'edit-candidates']);
 
         return $user;

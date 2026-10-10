@@ -4,11 +4,14 @@ namespace App\Modules\Services\Livewire\Roles;
 
 use App\Livewire\Traits\SideModalAction;
 use App\Models\Role;
+use App\Modules\Services\Livewire\Concerns\AuthorizesRoleManagement;
 use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
+use App\Services\UserAdministrationGuard;
 use App\Support\Permissions\RoleTranslation;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -16,6 +19,7 @@ use Livewire\Component;
 class ManageRoles extends Component
 {
     use AuthorizesRequests, SideModalAction;
+    use AuthorizesRoleManagement;
     use AuthorizesSettingsAccess;
 
     public $role_name;
@@ -61,11 +65,27 @@ class ManageRoles extends Component
     {
         $this->validate();
 
-        $payload = ['name' => $this->role_name];
+        $guard = app(UserAdministrationGuard::class);
+        $payload = ['name' => trim((string) $this->role_name)];
 
         if ($this->role_id) {
-            Role::findOrFail($this->role_id)->update($payload);
+            $role = Role::findOrFail($this->role_id);
+
+            // Sistem rolları kodda adı ilə axtarılır — adı dəyişsə, icazə məntiqi qırılır.
+            if ($guard->isSystemRole($role->name) && $role->name !== $payload['name']) {
+                throw ValidationException::withMessages(['role_name' => __('services::roles.messages.system_role_protected')]);
+            }
+
+            if (! $guard->isSystemRole($role->name) && $guard->isSystemRole($payload['name'])) {
+                throw ValidationException::withMessages(['role_name' => __('services::roles.messages.system_role_name_reserved')]);
+            }
+
+            $role->update($payload);
         } else {
+            if ($guard->isSystemRole($payload['name'])) {
+                throw ValidationException::withMessages(['role_name' => __('services::roles.messages.system_role_name_reserved')]);
+            }
+
             Role::create($payload);
         }
 

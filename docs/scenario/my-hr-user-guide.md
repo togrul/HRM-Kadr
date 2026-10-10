@@ -29,7 +29,9 @@ Kiçik ekranda (telefonda) sol panel əvəzinə bölmələr başlığın altınd
 
 Əgər kabinet açılır, amma `Kabinetiniz hələ əməkdaş kartınıza bağlanmayıb` yazısı görünürsə, hesabınız hələ əməkdaş kartınızla əlaqələndirilməyib. Kadrlar şöbəsinə müraciət edin — əlaqələndirildikdən sonra kabinet özü açılacaq.
 
-HR üçün qeyd: hesab əməkdaşın kartında `Daha çox → Şəxsi kabinet hesabı` bölməsindən yaradılır və ya bağlanır. Hesab yaratmaq üçün kartda e-poçt olmalıdır.
+Kabinet yalnız hesabınızın əməkdaş kartınıza **açıq bağı** olduqda açılır. Sistem e-poçt və ya ad-soyad eyniliyinə baxmır — e-poçtunuz kartdakı ilə eyni olsa belə, bağ qurulmayıbsa kabinet boş qalır. Bağ silinərsə, açıq kabinet səhifəsi də dərhal bağlanır.
+
+HR üçün qeyd: hesab əməkdaşın kartında `Daha çox → Şəxsi kabinet hesabı` bölməsindən yaradılır (bağ avtomatik qurulur). Mövcud hesabı əməkdaşa bağlamaq üçün `Tənzimləmələr → İstifadəçilər → İstifadəçi ↔ əməkdaş bağları` ekranından istifadə edin (`manage-users` icazəsi lazımdır). Öz hesabınızı əməkdaşa bağlaya bilməzsiniz; özünüzdən geniş hüquqlu hesabı da bu yolla bağlamaq və onun üçün şifrə linki yaratmaq olmaz.
 
 ## Bu modul kimlər üçündür?
 
@@ -147,6 +149,10 @@ Rəhbər tapılmayanda müraciət birbaşa HR-a düşür (`Yalnız HR xətti`).
 Əməkdaşların kabinetdən göndərdiyi müraciətlər ayrıca səhifədə toplanır. Sol dar menyuda `Müraciətlər` ikonunu seçin (tam adı `Şəxsi kabinet müraciətləri`). Eyni səhifəyə `Məzuniyyətlər` və `Ezamiyyətlər` səhifələrinin başlığındakı `Şəxsi kabinet müraciətləri` düyməsi ilə də keçmək olar. Səhifənin başlığı `Şəxsi kabinet müraciətlərinə baxış`-dır.
 
 Bu səhifə yalnız müraciətlərə baxmaq icazəsi olanlara görünür.
+
+- `review-self-service-requests` icazəsi yalnız sizə təsdiqləyən (və ya ehtiyat təsdiqləyən) kimi təyin olunmuş müraciətləri açır.
+- Bütün müraciətlərə baxmaq və qərar vermək yalnız `review-all-self-service-requests` icazəsi ilədir.
+- Heç kim öz müraciətini təsdiqləyə və ya rədd edə bilməz — hətta bütün müraciətlərə baxış icazəsi olsa belə.
 
 ### Ekranda nə var?
 - başlıqda saylar: `Ümumi baxış`, `İcazə`, `Məzuniyyət`, `Ezamiyyət`, `Düzəliş müraciəti`

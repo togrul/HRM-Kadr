@@ -164,6 +164,14 @@
                 </label>
             </div>
 
+            <label for="role_all_structures" class="flex cursor-pointer items-start gap-3 rounded-2xl border border-zinc-300 bg-white px-5 py-4 shadow-sm">
+                <input wire:model="allStructures" id="role_all_structures" type="checkbox" class="mt-1 h-5 w-5 rounded border-hairline text-ink focus:ring-zinc-400" />
+                <span class="min-w-0">
+                    <span class="block text-sm font-bold text-zinc-950">{{ __('services::permissions.structures.all_label') }}</span>
+                    <span class="mt-1 block text-sm font-medium text-zinc-500">{{ __('services::permissions.structures.all_help') }}</span>
+                </span>
+            </label>
+
             <div class="grid grid-cols-1 gap-3 xl:grid-cols-2">
                 @foreach($structures as $structure)
                     <label

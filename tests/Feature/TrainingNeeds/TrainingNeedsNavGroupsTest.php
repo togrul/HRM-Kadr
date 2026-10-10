@@ -7,6 +7,7 @@ use Spatie\Permission\Models\Permission;
 
 it('groups the training tabs into titled sections in the panel and the chip row', function (): void {
     $user = User::factory()->create();
+    grantAllStructures($user);
     $user->givePermissionTo(Permission::findOrCreate('show-training-needs', 'web'));
     $this->actingAs($user);
 

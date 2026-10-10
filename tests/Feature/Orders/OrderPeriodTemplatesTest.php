@@ -54,9 +54,9 @@ class OrderPeriodTemplatesTest extends TestCase
         $this->assertSame('social_leave', $maternity->effect);
         $this->assertSame('126', collect($maternity->manualFields())->firstWhere('label', 'Gün sayı')['default']);
 
-        foreach (['intizam_tenbehi', 'evezetme', 'emek_haqqi_deyisme'] as $code) {
-            $this->assertSame('none', $this->template($code)->effect, $code.' is document-only');
-        }
+        $this->assertSame('disciplinary', $this->template('intizam_tenbehi')->effect);
+        $this->assertSame('substitution', $this->template('evezetme')->effect);
+        $this->assertSame('salary_change', $this->template('emek_haqqi_deyisme')->effect);
 
         // The document is company-neutral: no customer name or person baked in.
         foreach (['ezamiyyet', 'analiq_mezuniyyeti', 'intizam_tenbehi', 'evezetme', 'emek_haqqi_deyisme'] as $code) {
@@ -156,7 +156,7 @@ class OrderPeriodTemplatesTest extends TestCase
         $options = Livewire::test(BusinessTrips::class)->instance()->orderTypeOptions();
         $this->assertContains(['id' => 'tpl:ezamiyyet', 'label' => 'Ezamiyyət'], $options);
 
-        app(OrderStatusTransitionService::class)->revert($order->fresh());
+        app(OrderStatusTransitionService::class)->revert($order->fresh(), 'Səhv tərtib edilib');
 
         $this->assertSame(0, PersonnelBusinessTrip::withTrashed()->count());
     }
@@ -238,8 +238,10 @@ class OrderPeriodTemplatesTest extends TestCase
 
         $outcome = $this->issue($this->template('ezamiyyet'), $personnel, $this->tripFields());
 
+        // The business trip is a multi-participant order: the refusal names the participant.
         $this->assertFalse($outcome->isSaved());
-        $this->assertSame(__('orders::order_composer.errors.employee_inactive'), $outcome->errors['personnelId']);
+        $this->assertSame(__('orders::order_composer.errors.employee_inactive'), $outcome->errors['participants.0']);
+        $this->assertStringContainsString('Bayramov', (string) $outcome->message);
     }
 
     public function test_the_composer_prefills_the_day_count_and_derives_the_dates(): void

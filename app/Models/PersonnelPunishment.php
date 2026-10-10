@@ -23,18 +23,21 @@ class PersonnelPunishment extends Model
         'order_no',
         'order_given_by',
         'order_date',
+        'lifted_at',
     ];
 
     protected $dates = [
         'given_date',
         'expired_date',
         'order_date',
+        'lifted_at',
     ];
 
     protected $casts = [
         'given_date' => self::FORMAT_CAST,
         'expired_date' => self::FORMAT_CAST,
         'order_date' => self::FORMAT_CAST,
+        'lifted_at' => 'date',
     ];
 
     public function punishment(): BelongsTo

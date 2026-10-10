@@ -8,6 +8,7 @@ use App\Models\TrainingNeedItem;
 use App\Models\TrainingPlanItem;
 use App\Models\TrainingSession;
 use App\Modules\TrainingNeeds\Livewire\Concerns\InteractsWithTrainingNeedsAccess;
+use App\Modules\TrainingNeeds\Support\TrainingStructureScope;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -141,13 +142,13 @@ class Lists extends Component
                     ->with(['program:id,title', 'plan:id,title'])
                     ->withCount('participants')
                     ->find($selectedRowId),
-                'deliveries' => TrainingDeliveryRecord::query()
+                'deliveries' => TrainingStructureScope::onPersonnelColumn(TrainingDeliveryRecord::query(), 'training_delivery_records.personnel_id')
                     ->with([
                         'session:id,title,scheduled_start_at',
                         'program:id,title',
                         'personnel:id,surname,name,patronymic,tabel_no',
                     ])->find($selectedRowId),
-                default => TrainingNeedItem::query()
+                default => TrainingStructureScope::onPersonnelColumn(TrainingNeedItem::query(), 'training_need_items.personnel_id')
                     ->with([
                         'personnel:id,surname,name,patronymic,tabel_no',
                         'competency:id,name',
@@ -195,7 +196,7 @@ class Lists extends Component
                     ->withCount('participants')
                     ->latest('scheduled_start_at')
                     ->paginate(12, pageName: $pageName),
-                'deliveries' => TrainingDeliveryRecord::query()
+                'deliveries' => TrainingStructureScope::onPersonnelColumn(TrainingDeliveryRecord::query(), 'training_delivery_records.personnel_id')
                     ->when($search !== '', function ($query) use ($search) {
                         $query->where(function ($inner) use ($search) {
                             $inner->where('certificate_name', 'like', "%{$search}%")
@@ -213,7 +214,7 @@ class Lists extends Component
                     ])
                     ->latest('completed_at')
                     ->paginate(12, pageName: $pageName),
-                default => TrainingNeedItem::query()
+                default => TrainingStructureScope::onPersonnelColumn(TrainingNeedItem::query(), 'training_need_items.personnel_id')
                     ->when($search !== '', function ($query) use ($search) {
                         $query->where(function ($inner) use ($search) {
                             $inner->whereHas('personnel', function ($personnel) use ($search) {

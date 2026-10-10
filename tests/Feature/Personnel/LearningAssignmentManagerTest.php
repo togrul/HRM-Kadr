@@ -22,10 +22,10 @@ class LearningAssignmentManagerTest extends TestCase
 
     public function test_hr_can_create_learning_asset_and_assign_it(): void
     {
-        Storage::fake('employee_content');
+        Storage::fake('local');
         $this->seedReferenceData();
 
-        $hr = User::factory()->create(['is_active' => true]);
+        $hr = grantAllStructures(User::factory()->create(['is_active' => true]));
         $hr->givePermissionTo([
             Permission::findOrCreate('assign-employee-content', 'web'),
             Permission::findOrCreate('manage-employee-content-library', 'web'),
@@ -55,14 +55,14 @@ class LearningAssignmentManagerTest extends TestCase
         $this->assertNotNull($asset);
         $this->assertNotNull($assignment);
         $this->assertSame($personnel->id, $assignment->personnel_id);
-        Storage::disk('employee_content')->assertExists($asset->storage_path);
+        Storage::disk('local')->assertExists($asset->storage_path);
     }
 
     public function test_hr_can_waive_and_remove_learning_assignment(): void
     {
         $this->seedReferenceData();
 
-        $hr = User::factory()->create(['is_active' => true]);
+        $hr = grantAllStructures(User::factory()->create(['is_active' => true]));
         $hr->givePermissionTo(Permission::findOrCreate('assign-employee-content', 'web'));
 
         $personnel = $this->makePersonnel('employee@example.test');

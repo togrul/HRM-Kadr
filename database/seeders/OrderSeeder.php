@@ -27,16 +27,14 @@ class OrderSeeder extends Seeder
                 'id' => 1010,
                 'order_category_id' => 10,
                 'name' => 'İşə qəbuletmə',
-                'content' => '<div>No</div>',
                 'order_model' => '\App\Models\Personnel',
             ],
             [
                 'id' => 1030,
                 'order_category_id' => 10,
                 'name' => 'İşdən çıxarma',
-                'content' => '<div>No</div>',
                 'order_model' => '\App\Models\Personnel',
             ],
-        ], ['id'], ['order_category_id', 'name', 'content', 'order_model']);
+        ], ['id'], ['order_category_id', 'name', 'order_model']);
     }
 }

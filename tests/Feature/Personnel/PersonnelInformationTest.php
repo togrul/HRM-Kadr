@@ -37,7 +37,7 @@ class PersonnelInformationTest extends TestCase
 
     public function test_it_is_forbidden_without_the_right_to_edit_personnel(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(grantAllStructures(User::factory()->create()));
 
         Livewire::test(Information::class, ['personnelModel' => $this->person('T-1')->tabel_no])->assertForbidden();
     }
@@ -95,7 +95,7 @@ class PersonnelInformationTest extends TestCase
 
     private function editor(): User
     {
-        $user = User::factory()->create();
+        $user = grantAllStructures(User::factory()->create());
         $user->givePermissionTo(Permission::findOrCreate('edit-personnels', 'web'));
 
         return $user;

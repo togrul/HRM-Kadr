@@ -32,6 +32,7 @@ class AttendanceShiftManagementIslandTest extends TestCase
 
         $user = User::factory()->create();
         $user->assignRole($role);
+        grantAllStructures($user);
 
         $this->actingAs($user);
 
@@ -81,6 +82,7 @@ class AttendanceShiftManagementIslandTest extends TestCase
 
         $user = User::factory()->create();
         $user->assignRole($role);
+        grantAllStructures($user);
 
         $personnel = $this->makePersonnel($user->id);
 

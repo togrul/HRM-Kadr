@@ -36,6 +36,7 @@ return [
     ],
 
     'periods' => [
+        'closed' => 'bağlı',
         'title' => 'Yeni dövr',
         'list' => 'Dövrlər',
         'empty' => 'Hələ dövr yoxdur',
@@ -59,6 +60,7 @@ return [
     ],
 
     'fields' => [
+        'reopen_reason' => 'Yenidən açma səbəbi',
         'year' => 'İl',
         'month' => 'Ay',
         'period' => 'Dövr',
@@ -69,6 +71,7 @@ return [
         'deductions' => 'Tutulmalar',
         'proration' => 'Proporsiya (davamiyyət)',
         'retro' => 'Gözləyən retro düzəliş',
+        'retro_recovery' => 'Ləğv olunmuş əmr üzrə artıq ödənişin tutulması (retro)',
         'loan_type' => 'Növ',
         'principal' => 'Əsas məbləğ',
         'monthly_installment' => 'Aylıq ödəniş',
@@ -84,6 +87,7 @@ return [
     ],
 
     'actions' => [
+        'reopen_period' => 'Dövrü yenidən aç',
         'create_period' => 'Dövr yarat',
         'create_run' => 'Hesablama yarat',
         'view_payslips' => 'Maaş vərəqələri',
@@ -113,6 +117,13 @@ return [
 
     'loan' => [
         'line' => 'Kredit/avans tutulması',
+    ],
+
+    'order_earnings' => [
+        'rest_day_work' => 'Qeyri-iş günü işə cəlb (ikiqat, :days gün, :hours saat)',
+        'rest_day_work_mixed' => 'Qeyri-iş günü işə cəlb (:days gün, :hours saat; normadaxili :within saat bir qat, qalanı ikiqat)',
+        'substitution' => 'Əvəzetməyə görə əlavə ödəniş (:days iş günü)',
+        'substitution_for' => 'Əvəzetməyə görə əlavə ödəniş — :name (:days iş günü)',
     ],
 
     'run_types' => [
@@ -153,6 +164,7 @@ return [
     ],
 
     'confirm' => [
+        'reopen_period' => 'Bağlanmış əmək haqqı ayı yenidən açılacaq və bu, audit jurnalına yazılacaq. Davam edilsin?',
         'approve' => ':period dövrü üzrə hesablama təsdiqlənəcək — :count işçi, xalis cəmi :total :currency. Davam edilsin?',
         'approve_masked' => ':period dövrü üzrə hesablama təsdiqlənəcək — :count işçi. Davam edilsin?',
         'lock' => 'Hesablama kilidlənəcək və maaş vərəqələri dondurulacaq. Davam edilsin?',
@@ -161,6 +173,13 @@ return [
     ],
 
     'messages' => [
+        'pay_changed' => 'Hesablama aparılandan sonra əmək haqqı məlumatları (əmək haqqı, davamiyyət, tutulmalar, geriyə ödəniş və ya işçi tərkibi) dəyişib — hesablamanı yenidən açıb yenidən hesablayın',
+        'period_closed' => 'Bu əmək haqqı ayı bağlanıb — əvvəlcə dövrü səbəb göstərərək yenidən açın',
+        'regular_run_exists' => 'Bu dövr və rejim üçün müntəzəm hesablama artıq var — əlavə ödəniş üçün qeyri-müntəzəm (off-cycle) hesablama yaradın',
+        'period_delete_blocked' => 'Bağlanmış dövr və ya təsdiqlənmiş/kilidlənmiş hesablaması olan dövr silinə bilməz',
+        'period_reopened' => 'Dövr yenidən açıldı',
+        'reopen_reason_required' => 'Dövrü yenidən açmaq üçün səbəbi ən azı :min simvolla göstərin',
+        'period_not_closed' => 'Yalnız bağlanmış dövr yenidən açıla bilər',
         'period_created' => 'Dövr yaradıldı',
         'run_created' => 'Hesablama yaradıldı',
         'calculated' => 'Hesablandı',
@@ -174,5 +193,6 @@ return [
         'lock_requires_approval' => 'Kilidləmədən əvvəl hesablama təsdiqlənməlidir',
         'reopen_not_allowed' => 'Yalnız təsdiqlənmiş və ya kilidlənmiş hesablama yenidən açıla bilər',
         'recalculate_first' => 'Hesablama aparılandan sonra birdəfəlik ödənişlər dəyişib — hesablamanı yenidən açıb yenidən hesablayın',
+        'order_earnings_changed' => 'Hesablama aparılandan sonra əmrdən irəli gələn ödənişlər (qeyri-iş gününə cəlb, əvəzetmə) dəyişib — hesablamanı yenidən açıb yenidən hesablayın',
     ],
 ];

@@ -344,7 +344,9 @@
                                     <p class="mt-0.5 text-[12px] leading-5 text-ink-muted">{{ __($d.'.labels.test_taking_workspace_hint') }}</p>
                                 </div>
                                 <div class="grid gap-2">
-                                    <a href="{{ $workspaceLinks['personnel_links'] }}" class="{{ $secondary }} text-center">{{ __($d.'.actions.open_user_personnel_links') }}</a>
+                                    @can('manage-users')
+                                        <a href="{{ $workspaceLinks['personnel_links'] }}" class="{{ $secondary }} text-center">{{ __($d.'.actions.open_user_personnel_links') }}</a>
+                                    @endcan
                                     <a href="{{ $workspaceLinks['test_workspace'] }}" target="_blank" class="{{ $primary }} text-center">{{ __($d.'.actions.open_test_workspace') }}</a>
                                 </div>
                             </div>
@@ -380,7 +382,9 @@
                                     <p class="mt-0.5 text-[12px] leading-5 text-ink-muted">{{ __($d.'.labels.test_taking_workspace_hint') }}</p>
                                 </div>
                                 <div class="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
-                                    <a href="{{ $workspaceLinks['personnel_links'] }}" class="{{ $secondary }} text-center">{{ __($d.'.actions.open_user_personnel_links') }}</a>
+                                    @can('manage-users')
+                                        <a href="{{ $workspaceLinks['personnel_links'] }}" class="{{ $secondary }} text-center">{{ __($d.'.actions.open_user_personnel_links') }}</a>
+                                    @endcan
                                     <a href="{{ $workspaceLinks['test_workspace'] }}" target="_blank" class="{{ $primary }} text-center">{{ __($d.'.actions.open_test_workspace') }}</a>
                                 </div>
                             </div>

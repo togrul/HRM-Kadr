@@ -273,6 +273,8 @@ return [
         'test_question_imported' => ':banks new banks created, :questions new questions created, :updated_questions questions updated.',
         'user_personnel_link_saved' => 'User-personnel link saved.',
         'user_personnel_link_deleted' => 'User-personnel link deleted.',
+        'personnel_already_linked' => 'This employee is already linked to another user — remove that link first.',
+        'self_link_forbidden' => 'You cannot link your own account to an employee record — another administrator has to do it.',
         'auto_created_weak_area_note' => 'Auto-created from performance weak area.',
         'auto_created_skill_weak_area_note' => 'Auto-created from skill measurement weak area.',
         'performance_gap_reason' => 'Low performance score detected on form #:form, item #:item: :score',
@@ -283,6 +285,7 @@ return [
         'manual' => 'Manual link',
         'self_service_provisioned' => 'Provisioned by the system for self-service',
         'manual_self_service_link' => 'Manually linked for self-service',
+        'email_backfill' => 'Created once from an unambiguous e-mail match during migration',
         'unknown' => 'Linked',
     ],
     'cycle_types' => [
@@ -461,7 +464,7 @@ return [
     'hints' => [
         'options_text' => 'For multiple-choice questions, enter each line as `Option | 1 | 100`. Second segment marks correct/incorrect, third segment is score.',
         'test_question_import' => 'You can upload `.xlsx`, `.xls`, or `.csv`. Download the template first and keep the same column structure.',
-        'user_personnel_links' => 'Use this screen to manage the explicit `user -> personnel` binding for test workspace and reviewer flows. A wrong link can break visibility and transcript access.',
+        'user_personnel_links' => 'A user account is linked to an employee record only through an explicit link — made here, or when a self-service account is created on the employee card (e-mail and name matches are ignored). The link decides the self-service cabinet, payslips, tests and approval rights — a wrong link exposes someone else\'s data. You cannot link your own account; every change is logged.',
         'test_bank_rules' => 'The bank holds the test rules: the pass score, time limit and number of attempts are set here.',
         'pass_score' => 'The pass threshold decides whether a test counts as passed and also shapes the risk level in analytics reports.',
         'duration_minutes' => 'The duration shows as a countdown in the test workspace, and the attempt is finalised automatically when time runs out.',

@@ -47,6 +47,10 @@ return [
         'work_coefficient' => 'Work coefficient',
         'education_coefficient' => 'Education coefficient',
         'organization_name' => 'Organization name',
+        'disciplinary_sanction_term' => 'Disciplinary sanction term (months)',
+        'sick_certificate_alert_days' => 'Open sick-leave certificate alert threshold (days)',
+        'vacation_ledger_start_date' => 'Vacation ledger start date',
+        'vacation_compensation_without_termination' => 'Allow vacation compensation without termination (LC art. 144 — check with a lawyer)',
     ],
     'messages' => [
         'general_description' => 'System-wide parameters and values.',
@@ -73,5 +77,33 @@ return [
         'permanent_chief_missing' => 'No permanent chief is assigned.',
         'delegation_created' => 'Chief delegation created.',
         'delegation_revoked' => 'Chief delegation stopped.',
+    ],
+    'change_policy' => [
+        'title' => 'Change policy',
+        'description' => 'Choose how each field group may change: free, journal (reason + audit) or order only. Order effects write regardless of this policy.',
+        'columns' => [
+            'group' => 'Field group',
+            'mode' => 'Mode',
+            'source' => 'Source',
+        ],
+        'sources' => [
+            'default' => 'Default',
+            'customized' => 'Customized',
+        ],
+        'default_mode' => 'Default mode: :mode',
+        'changed_by' => ':user, :date',
+        'owner_compensation' => 'Checked in Compensation',
+        'actions' => [
+            'reset' => 'Reset to default',
+        ],
+        'confirm' => [
+            'reset_title' => 'Reset to the default mode?',
+            'reset_message' => 'The «:group» group will go back to its default mode (:mode).',
+        ],
+        'messages' => [
+            'saved' => 'Change policy updated.',
+            'reset' => 'The group was reset to its default mode.',
+            'invalid' => 'Invalid selection.',
+        ],
     ],
 ];

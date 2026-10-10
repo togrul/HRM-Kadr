@@ -1,4 +1,4 @@
-@props(['model', 'data', 'accept' => null])
+@props(['model', 'data', 'accept' => null, 'url' => null])
 
 @php
     $modelParts = explode('.', $model, 2);
@@ -33,16 +33,23 @@
         @php
             $filename = is_string($data) ? basename($data) : $data->getClientOriginalName();
         @endphp
+        {{-- Saxlanmış fayl yalnız icazə yoxlayan route ilə açılır (url prop); birbaşa /storage linki yoxdur. --}}
         <div class="min-w-0 px-2">
-            <a
-                class="inline-flex max-w-full text-sm text-ink underline-offset-2 hover:underline break-all"
-                href="{{ is_string($data) ? \Illuminate\Support\Facades\Storage::url($data) : '#' }}"
-                target="_blank"
-                rel="noreferrer"
-                title="{{ $filename }}"
-            >
-                <span class="inline-block max-w-full truncate">{{ $filename }}</span>
-            </a>
+            @if (is_string($data) && $url)
+                <a
+                    class="inline-flex max-w-full text-sm text-ink underline-offset-2 hover:underline break-all"
+                    href="{{ $url }}"
+                    target="_blank"
+                    rel="noreferrer"
+                    title="{{ $filename }}"
+                >
+                    <span class="inline-block max-w-full truncate">{{ $filename }}</span>
+                </a>
+            @else
+                <span class="inline-flex max-w-full text-sm text-ink break-all" title="{{ $filename }}">
+                    <span class="inline-block max-w-full truncate">{{ $filename }}</span>
+                </span>
+            @endif
         </div>
     @endif
 </div>

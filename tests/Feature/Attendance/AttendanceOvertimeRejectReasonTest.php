@@ -27,7 +27,7 @@ function overtimeApprover(): User
     $user = User::factory()->create();
     $user->givePermissionTo(Permission::findOrCreate('approve-attendance-overtime', 'web'));
 
-    return $user;
+    return grantAllStructures($user);
 }
 
 it('will not reject an overtime request without a reason', function (): void {

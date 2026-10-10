@@ -4,7 +4,11 @@ namespace App\Modules\Services\Livewire\Roles;
 
 use App\Models\Role;
 use App\Models\Structure;
+use App\Models\User;
+use App\Modules\Services\Livewire\Concerns\AuthorizesRoleManagement;
 use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
+use App\Services\StructureService;
+use App\Services\UserAdministrationGuard;
 use App\Support\Permissions\PermissionDescriptionCatalog;
 use App\Support\Permissions\PermissionTranslationKey;
 use App\Support\Permissions\RoleTranslation;
@@ -19,6 +23,7 @@ use Spatie\Permission\PermissionRegistrar;
 
 class SetPermission extends Component
 {
+    use AuthorizesRoleManagement;
     use AuthorizesSettingsAccess;
 
     public $title;
@@ -40,6 +45,9 @@ class SetPermission extends Component
     public array $structureNestedMap = [];
 
     public $selectAllStructure = false;
+
+    /** «Bütün strukturlar» — rol struktur siyahısından asılı olmadan bütün təşkilatı görür. */
+    public bool $allStructures = false;
 
     public $structures;
 
@@ -72,12 +80,64 @@ class SetPermission extends Component
 
     public function store(): void
     {
+        if (! $this->guardPermissionChange()) {
+            return;
+        }
+
         DB::transaction(function () {
             $this->updateRoleData();
         });
 
         $this->clearCacheAndSelections();
         $this->dispatch('permissionSet', __('services::roles.messages.permission_assigned'));
+    }
+
+    /**
+     * Öz rolunu dəyişmək və özündə olmayan icazəni rola vermək (və ya belə icazəsi olan
+     * rolu dəyişmək) qadağandır — `manage-roles` sahibi özünə admin hüququ verə bilməz.
+     */
+    private function guardPermissionChange(): bool
+    {
+        $guard = app(UserAdministrationGuard::class);
+        $actor = auth()->user();
+
+        $reason = match (true) {
+            $guard->holdsRole($actor, $this->role) => __('services::roles.messages.own_role_locked'),
+            ! $guard->canEditRolePermissions(
+                $actor,
+                $this->role,
+                Permission::query()->whereIn('id', $this->normalizeIdList($this->permissionList, $this->permissionIdPool))->pluck('name')
+            ) => __('services::roles.messages.role_exceeds_your_permissions'),
+            $this->exceedsActorStructureScope($actor) => __('services::roles.messages.role_exceeds_your_structures'),
+            default => null,
+        };
+
+        if ($reason === null) {
+            return true;
+        }
+
+        $this->dispatch('notify', type: 'error', message: $reason);
+
+        return false;
+    }
+
+    /**
+     * Rola «bütün strukturlar» və ya aktorun özünün görmədiyi strukturu vermək qadağandır —
+     * əks halda məhdud rol sahibi başqa rol vasitəsilə görünürlüyünü genişləndirə bilər.
+     */
+    private function exceedsActorStructureScope(?User $actor): bool
+    {
+        $scope = app(StructureService::class)->scopeFor($actor);
+
+        if ($scope->isAll()) {
+            return false;
+        }
+
+        if ($this->allStructures) {
+            return true;
+        }
+
+        return ! $scope->allowsAll($this->normalizeIdList($this->permissionStructureList, $this->structureIdPool));
     }
 
     private function updateRoleData(): void
@@ -87,6 +147,7 @@ class SetPermission extends Component
 
         $this->role->structures()->sync($structureIds);
         $this->role->permissions()->sync($permissionIds);
+        $this->role->forceFill(['all_structures' => $this->allStructures])->save();
 
         $this->permissionList = $permissionIds;
         $this->permissionStructureList = $structureIds;
@@ -96,7 +157,9 @@ class SetPermission extends Component
     private function clearCacheAndSelections(): void
     {
         Cache::forget('structures');
-        Cache::forget('structure-accessible-'.auth()->user()->id);
+        // Pivot sync() RoleStructure observerini işə salmır — rolun bütün istifadəçilərinin
+        // görünürlük keşi burada açıq təmizlənir.
+        app(StructureService::class)->forgetRole((int) $this->role->getKey());
         app(PermissionRegistrar::class)->forgetCachedPermissions();
         $this->initializeProperties();
     }
@@ -191,6 +254,8 @@ class SetPermission extends Component
             $this->role->structures()->pluck('structures.id')->all(),
             $this->structureIdPool
         );
+
+        $this->allStructures = (bool) $this->role->all_structures;
 
         $this->syncSelectAllFlags();
     }

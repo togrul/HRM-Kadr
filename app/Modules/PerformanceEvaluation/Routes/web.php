@@ -40,9 +40,12 @@ Route::middleware(['web', 'auth'])->group(function () {
             ->with(['personnel', 'position:id,name', 'manager:id,surname,name,patronymic', 'cycle', 'items.kpi', 'bonus', 'calibrations', 'events.user:id,name'])
             ->findOrFail($scorecard);
 
+        $user = auth()->user();
+
         return response()->view('performance-evaluation::print.scorecard', [
             'card' => $card,
             'competencies' => $review->competencies($card),
+            'canSeeSalary' => $user->can('view-compensation-amounts') || $scorecards->roleFor($user, $card) === 'employee',
         ]);
     })->whereNumber('scorecard')->name('performance-evaluation.scorecard-print');
     Route::get('/performance-evaluation/print-summary', function (PerformanceEvaluationReportingService $reporting) {

@@ -8,7 +8,6 @@ use App\Models\UserPersonnelLink;
 use App\Modules\Personnel\Contracts\ApprovalRouteResolver;
 use App\Support\Database\InstalledTables;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
 
 class NotificationAudienceResolver
 {
@@ -81,12 +80,13 @@ class NotificationAudienceResolver
 
     protected function employeeUser(?Personnel $subject): Collection
     {
-        if (! $subject || blank($subject->email)) {
+        if (! $subject || ! $subject->getKey()) {
             return collect();
         }
 
+        // Əməkdaşın özü yalnız açıq bağ (user_personnel_links) ilə tapılır — e-poçtla yox.
         return User::query()
-            ->where('email', $subject->email)
+            ->whereIn('id', UserPersonnelLink::query()->where('personnel_id', $subject->getKey())->select('user_id'))
             ->where('is_active', true)
             ->get(['id', 'name', 'email', 'is_active']);
     }
@@ -195,50 +195,8 @@ class NotificationAudienceResolver
             })
             ->filter();
 
-        $unresolvedIds = $managerIds
-            ->reject(fn (int $personnelId) => $links->has($personnelId))
-            ->values();
-
-        if ($unresolvedIds->isEmpty()) {
-            return $resolved->unique('id')->values();
-        }
-
-        $fallbackPersonnels = Personnel::query()
-            ->active()
-            ->whereIn('id', $unresolvedIds->all())
-            ->get(['id', 'email']);
-
-        $emailMap = $fallbackPersonnels
-            ->mapWithKeys(function (Personnel $personnel): array {
-                $email = Str::lower(trim((string) $personnel->email));
-
-                return $email !== '' ? [$personnel->id => $email] : [];
-            });
-
-        if ($emailMap->isEmpty()) {
-            return $resolved->unique('id')->values();
-        }
-
-        $fallbackUsers = User::query()
-            ->where('is_active', true)
-            ->where(function ($query) use ($emailMap): void {
-                foreach ($emailMap->unique()->values() as $email) {
-                    $query->orWhereRaw('LOWER(TRIM(email)) = ?', [$email]);
-                }
-            })
-            ->get(['id', 'name', 'email', 'is_active'])
-            ->keyBy(fn (User $user) => Str::lower(trim((string) $user->email)));
-
-        return $resolved
-            ->concat(
-                $unresolvedIds->map(function (int $personnelId) use ($emailMap, $fallbackUsers) {
-                    $email = $emailMap->get($personnelId);
-
-                    return $email ? $fallbackUsers->get($email) : null;
-                })->filter()
-            )
-            ->unique('id')
-            ->values();
+        // Bağı olmayan rəhbər bildiriş almır: e-poçt uyğunluğu eyniləşdirmə sayılmır.
+        return $resolved->unique('id')->values();
     }
 
     protected function departmentUsers(array $audienceConfig, ?Personnel $subject, array $context = []): Collection

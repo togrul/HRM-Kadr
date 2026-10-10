@@ -44,6 +44,11 @@ class LoanService
      */
     public function recordRepaymentsForRun(PayrollRun $run): void
     {
+        // Instalments are deducted only by the regular run (PayrollCalculator), so only it repays.
+        if ($run->run_type !== 'regular') {
+            return;
+        }
+
         $paidOn = $run->period->ends_on->toDateString();
         $tabelNos = $run->payslips()->pluck('tabel_no')->unique();
 

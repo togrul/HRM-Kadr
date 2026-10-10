@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @property string $tabel_no
+ * @property string|null $trip_type domestic|foreign
+ * @property string|null $funding_source
  */
 class PersonnelBusinessTrip extends Model
 {
@@ -27,6 +29,8 @@ class PersonnelBusinessTrip extends Model
         'end_date',
         'description',
         'attributes',
+        'trip_type',
+        'funding_source',
         'approval_status',
         'approver_personnel_id',
         'fallback_approver_personnel_id',
@@ -61,6 +65,13 @@ class PersonnelBusinessTrip extends Model
         'location',
         'order_no',
     ];
+
+    /** trip_type: inside the country / abroad (null on trips recorded before it was kept). */
+    public const TRIP_TYPE_DOMESTIC = 'domestic';
+
+    public const TRIP_TYPE_FOREIGN = 'foreign';
+
+    public const TRIP_TYPES = [self::TRIP_TYPE_DOMESTIC, self::TRIP_TYPE_FOREIGN];
 
     const INTERNAL_BUSINESS_TRIP = 6;
 
@@ -146,6 +157,16 @@ class PersonnelBusinessTrip extends Model
                     } elseif (! empty($value)) {
                         // order_type_id lives on the order itself, not on its type row.
                         $query->whereHas('order', fn ($qq) => $qq->where('order_type_id', (int) $value));
+                    }
+                    break;
+                case 'trip_type':
+                    if (in_array($value, self::TRIP_TYPES, true)) {
+                        $query->where('trip_type', $value);
+                    }
+                    break;
+                case 'funding_source':
+                    if (filled($value)) {
+                        $query->where('funding_source', 'LIKE', '%'.trim((string) $value).'%');
                     }
                     break;
                 case 'date':

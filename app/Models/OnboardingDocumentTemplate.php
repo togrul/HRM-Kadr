@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * @property string|null $file_path
@@ -72,6 +71,7 @@ class OnboardingDocumentTemplate extends Model
             return null;
         }
 
-        return Storage::disk($this->disk ?: 'public')->url($this->file_path);
+        // Fayl özəl diskdədir; icazəni (kitabxana icazəsi və ya təyinat) yoxlayan route ilə verilir.
+        return route('onboarding.templates.file', $this);
     }
 }

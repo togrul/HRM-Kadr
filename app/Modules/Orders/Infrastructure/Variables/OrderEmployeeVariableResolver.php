@@ -75,6 +75,23 @@ class OrderEmployeeVariableResolver
     }
 
     /**
+     * The participant.* values of one participant of a multi-participant order: every
+     * employee.* value under the participant prefix, plus their 1-based row number.
+     *
+     * @return array<string,string>
+     */
+    public function resolveParticipant(?Personnel $personnel, int $position): array
+    {
+        $values = ['participant.n' => (string) $position];
+
+        foreach ($this->resolve($personnel) as $key => $value) {
+            $values['participant.'.substr($key, strlen('employee.'))] = $value;
+        }
+
+        return $values;
+    }
+
+    /**
      * The employee's workplace as [top organization, own unit] (deduped if the unit
      * is itself the top). Middle management levels are skipped — the orders name the
      * organization and the concrete unit, matching the customer's sample.

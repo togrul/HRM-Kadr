@@ -74,7 +74,7 @@ class SuccessionWorkspace extends Component
 
     public function getNineBoxProperty(): array
     {
-        return app(SuccessionService::class)->nineBox($this->cycleId);
+        return app(SuccessionService::class)->nineBox($this->cycleId, auth()->user());
     }
 
     public function getPlansProperty(): \Illuminate\Support\Collection

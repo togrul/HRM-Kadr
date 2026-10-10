@@ -76,6 +76,10 @@ return [
         'current' => 'Cari maaş',
         'title' => 'Yeni təyinat',
         'lines' => 'Əlavə / tutulma sətirləri',
+        'order_only' => 'Dəyişiklik siyasətinə görə əmək haqqı yalnız «Əmək haqqının dəyişdirilməsi» əmri ilə dəyişir. İlk təyinat (aktiv maaş yoxdursa) buradan edilə bilər.',
+        'create_order' => 'Əmr yarat',
+        'reason' => 'Dəyişikliyin səbəbi',
+        'reason_hint' => 'Əmək haqqı jurnal rejimindədir: səbəb audit jurnalına yazılacaq.',
     ],
 
     'bank' => [

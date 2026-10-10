@@ -88,10 +88,11 @@ trait InteractsWithOrderSubjectPicker
      */
     private function pickPersonnel(?int $personnelId): void
     {
-        $this->personnelId = $personnelId;
-        if ($personnelId) {
-            $this->personnelLabel = app(OrderSubjectResolver::class)->personnelPick($personnelId)['label'] ?? null;
-        }
+        $picked = $personnelId ? app(OrderSubjectResolver::class)->personnelPick($personnelId) : null;
+
+        // Struktur xaricindəki işçi (məs. dərin keçiddən gələn id) seçilmir.
+        $this->personnelId = $picked['id'] ?? null;
+        $this->personnelLabel = $picked['label'] ?? null;
     }
 
     /**

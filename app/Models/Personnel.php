@@ -43,6 +43,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property-read Position|null $position
  * @property-read Structure|null $structure
  * @property bool|null $is_pending
+ * @property string|null $photo
  */
 #[ObservedBy(PersonnelObserver::class)]
 class Personnel extends Model

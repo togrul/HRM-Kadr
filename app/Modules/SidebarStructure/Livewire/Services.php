@@ -33,15 +33,31 @@ class Services extends Component
     #[Computed]
     public function sections(): array
     {
-        return [
+        $sections = [
             ['key' => 'general', 'label' => __('services::common.labels.general'), 'count' => null],
             ['key' => 'candidate', 'label' => __('services::common.labels.candidate_preferences'), 'count' => null],
             ['key' => 'notifications-settings', 'label' => __('services::common.labels.notifications'), 'count' => null],
-            ['key' => 'menus', 'label' => __('services::common.labels.menus'), 'count' => (string) Menu::query()->count()],
-            ['key' => 'roles', 'label' => __('services::common.navigation.roles_and_permissions'), 'count' => (string) Role::query()->count()],
-            ['key' => 'users', 'label' => __('services::common.labels.users'), 'count' => (string) User::query()->count()],
-            ['key' => 'ranks', 'label' => __('services::common.labels.ranks'), 'count' => (string) Rank::query()->count()],
         ];
+
+        // Dəyişiklik siyasəti öz icazəsi ilə (manage-change-policy) görünür.
+        if (auth()->user()?->can('manage-change-policy') ?? false) {
+            $sections[] = ['key' => 'change-policy', 'label' => __('services::common.labels.change_policy'), 'count' => null];
+        }
+
+        $sections[] = ['key' => 'menus', 'label' => __('services::common.labels.menus'), 'count' => (string) Menu::query()->count()];
+
+        // Rollar və istifadəçilər ayrıca icazələrlə (manage-roles / manage-users) görünür.
+        if (auth()->user()?->can('manage-roles') ?? false) {
+            $sections[] = ['key' => 'roles', 'label' => __('services::common.navigation.roles_and_permissions'), 'count' => (string) Role::query()->count()];
+        }
+
+        if (auth()->user()?->can('manage-users') ?? false) {
+            $sections[] = ['key' => 'users', 'label' => __('services::common.labels.users'), 'count' => (string) User::query()->count()];
+        }
+
+        $sections[] = ['key' => 'ranks', 'label' => __('services::common.labels.ranks'), 'count' => (string) Rank::query()->count()];
+
+        return $sections;
     }
 
     public function render(): View

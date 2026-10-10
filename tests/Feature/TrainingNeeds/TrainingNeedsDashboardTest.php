@@ -37,6 +37,7 @@ class TrainingNeedsDashboardTest extends TestCase
     public function test_authenticated_user_can_open_training_needs_route(): void
     {
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $this->grantTrainingNeedsPermissions($user);
 
         $this->actingAs($user)
@@ -48,6 +49,7 @@ class TrainingNeedsDashboardTest extends TestCase
     public function test_overview_component_renders_training_summary_cards(): void
     {
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $this->grantTrainingNeedsPermissions($user);
 
         $this->actingAs($user);
@@ -61,6 +63,7 @@ class TrainingNeedsDashboardTest extends TestCase
     public function test_analytics_component_renders_reporting_cards(): void
     {
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $this->grantTrainingNeedsPermissions($user);
 
         $this->actingAs($user);
@@ -74,6 +77,7 @@ class TrainingNeedsDashboardTest extends TestCase
     public function test_results_summary_component_renders_feedback_and_export_cards(): void
     {
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $this->grantTrainingNeedsPermissions($user);
 
         $this->actingAs($user);
@@ -87,6 +91,7 @@ class TrainingNeedsDashboardTest extends TestCase
     public function test_certificate_viewer_can_render_from_snapshot_without_querying_record_model(): void
     {
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $this->grantTrainingNeedsPermissions($user);
 
         $this->actingAs($user);
@@ -112,6 +117,7 @@ class TrainingNeedsDashboardTest extends TestCase
     public function test_reports_component_renders_executive_and_coverage_cards(): void
     {
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $this->grantTrainingNeedsPermissions($user);
 
         $this->actingAs($user);
@@ -125,6 +131,7 @@ class TrainingNeedsDashboardTest extends TestCase
     public function test_reports_component_falls_back_to_default_year_when_year_is_cleared(): void
     {
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $this->grantTrainingNeedsPermissions($user);
 
         $this->actingAs($user);
@@ -138,8 +145,10 @@ class TrainingNeedsDashboardTest extends TestCase
     public function test_dashboard_refreshes_results_summary_after_feedback_and_delivery_mutations(): void
     {
         Storage::fake('public');
+        Storage::fake('local');
 
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $this->grantTrainingNeedsPermissions($user);
         Role::findOrCreate('admin', 'web');
         Permission::findOrCreate('get-notification', 'web');
@@ -198,6 +207,7 @@ class TrainingNeedsDashboardTest extends TestCase
     public function test_training_needs_route_requires_view_permission(): void
     {
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         Permission::findOrCreate('show-training-needs', 'web');
 
         $this->actingAs($user)
@@ -208,6 +218,7 @@ class TrainingNeedsDashboardTest extends TestCase
     public function test_dashboard_can_create_foundation_catalog_records(): void
     {
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $this->grantTrainingNeedsPermissions($user);
         $level = TrainingLevel::query()->where('score', 3)->firstOrFail();
         $advancedLevel = TrainingLevel::query()->where('score', 4)->firstOrFail();
@@ -328,6 +339,7 @@ class TrainingNeedsDashboardTest extends TestCase
         app()->setLocale('az');
 
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $this->grantTrainingNeedsPermissions($user);
         Role::findOrCreate('admin', 'web');
         Permission::findOrCreate('get-notification', 'web');
@@ -388,8 +400,10 @@ class TrainingNeedsDashboardTest extends TestCase
     public function test_delivery_certificate_delete_is_confirmed_via_modal_before_execution(): void
     {
         Storage::fake('public');
+        Storage::fake('local');
 
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $this->grantTrainingNeedsPermissions($user);
         Role::findOrCreate('admin', 'web');
         Permission::findOrCreate('get-notification', 'web');
@@ -448,6 +462,7 @@ class TrainingNeedsDashboardTest extends TestCase
     public function test_dashboard_can_edit_plan_session_and_feedback_form(): void
     {
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $this->grantTrainingNeedsPermissions($user);
 
         $program = TrainingProgram::query()->create([
@@ -540,6 +555,7 @@ class TrainingNeedsDashboardTest extends TestCase
     public function test_plan_session_and_feedback_form_deletions_are_confirmed_via_modal(): void
     {
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $this->grantTrainingNeedsPermissions($user);
 
         $program = TrainingProgram::query()->create([
@@ -609,6 +625,7 @@ class TrainingNeedsDashboardTest extends TestCase
     public function test_catalog_entries_can_be_listed_and_deleted(): void
     {
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $this->grantTrainingNeedsPermissions($user);
         $this->actingAs($user);
 
@@ -640,6 +657,7 @@ class TrainingNeedsDashboardTest extends TestCase
     public function test_catalog_entries_can_be_edited_in_place(): void
     {
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $this->grantTrainingNeedsPermissions($user);
         $this->actingAs($user);
 
@@ -681,6 +699,7 @@ class TrainingNeedsDashboardTest extends TestCase
     public function test_catalog_delete_requires_manage_permission(): void
     {
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $user->givePermissionTo(Permission::findOrCreate('show-training-needs', 'web'));
         $this->actingAs($user);
 
@@ -696,6 +715,7 @@ class TrainingNeedsDashboardTest extends TestCase
     public function test_view_only_users_get_no_forms_they_cannot_save(): void
     {
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $user->givePermissionTo(Permission::findOrCreate('show-training-needs', 'web'));
         $this->actingAs($user);
 

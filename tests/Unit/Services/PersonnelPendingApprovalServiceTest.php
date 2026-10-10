@@ -82,8 +82,8 @@ class PersonnelPendingApprovalServiceTest extends TestCase
             'is_active' => true,
         ]);
 
-        Personnel::withoutEvents(function () use ($structureId, $directManagerPosition, $managerUser): void {
-            Personnel::query()->create([
+        $manager = Personnel::withoutEvents(function () use ($structureId, $directManagerPosition, $managerUser): Personnel {
+            return Personnel::query()->create([
                 'tabel_no' => 'MGRP'.Str::upper(Str::random(4)),
                 'surname' => 'Rəhbər',
                 'name' => 'Bir',
@@ -104,6 +104,9 @@ class PersonnelPendingApprovalServiceTest extends TestCase
                 'is_pending' => false,
             ]);
         });
+
+        // Rəhbərin hesabı karta yalnız açıq bağla bağlanır (e-poçt eyniliyi kifayət deyil).
+        $this->linkUserToPersonnel($managerUser, $manager);
 
         app(PersonnelPendingApprovalService::class)->approve($personnel);
 

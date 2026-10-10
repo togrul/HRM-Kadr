@@ -35,8 +35,6 @@ class TruncateTablesSeeder extends Seeder
             'structures',
             'weapons',
             'notifications',
-            'order_log_component_attributes',
-            'order_log_components',
             'order_log_personnels',
             'order_logs',
             'orders',

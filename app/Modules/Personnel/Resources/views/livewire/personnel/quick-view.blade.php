@@ -16,7 +16,7 @@
             <p class="hrm-num text-[11.5px] text-ink-faint">{{ __('personnel::common.labels.tabel') }} № {{ $personnel->tabel_no }}</p>
         </div>
 
-        <x-small-badge :mode="$tone === 'neutral' ? 'secondary' : $tone" dot>
+        <x-small-badge :mode="$tone === 'neutral' ? 'secondary' : $tone" dot :title="$reader->presence($personnel)->expectedReturnLabel() ? __('personnel::common.presence.returns_on', ['date' => $reader->presence($personnel)->expectedReturnLabel()]) : null">
             {{ $reader->statusLabel($personnel) }}
         </x-small-badge>
     </div>

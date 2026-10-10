@@ -245,6 +245,6 @@ class AttendanceWorkNormAndPuantajDefaultsTest extends TestCase
         $user = User::factory()->create();
         $user->assignRole($role);
 
-        return $user;
+        return grantAllStructures($user);
     }
 }

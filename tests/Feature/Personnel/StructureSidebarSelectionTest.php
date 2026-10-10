@@ -19,7 +19,7 @@ function seedTree(): array
 
 it('selects client-side and hands the host the same payload the server dispatch sent', function (): void {
     seedTree();
-    $this->actingAs(User::factory()->create());
+    $this->actingAs(grantAllStructures(User::factory()->create()));
 
     // No wire:click: the highlight moves in Alpine; hosts still get selectStructure(<id>).
     Livewire::test(Sidebar::class)
@@ -31,7 +31,7 @@ it('selects client-side and hands the host the same payload the server dispatch 
 
 it('clears the highlight on a host filter reset without re-rendering the tree', function (): void {
     seedTree();
-    $this->actingAs(User::factory()->create());
+    $this->actingAs(grantAllStructures(User::factory()->create()));
 
     $component = Livewire::test(Sidebar::class, ['selected' => 2])
         ->dispatch('filterSelected')
@@ -42,7 +42,7 @@ it('clears the highlight on a host filter reset without re-rendering the tree', 
 
 it('opens only the roots plus the path down to the selection', function (): void {
     seedTree();
-    $this->actingAs(User::factory()->create());
+    $this->actingAs(grantAllStructures(User::factory()->create()));
 
     expect((array) Livewire::test(Sidebar::class)->viewData('openIds'))->toBe([1 => true])
         ->and((array) Livewire::test(Sidebar::class, ['selected' => 3])->viewData('openIds'))->toBe([1 => true, 2 => true]);
@@ -50,7 +50,7 @@ it('opens only the roots plus the path down to the selection', function (): void
 
 it('restores the highlight from a nested structure query string', function (): void {
     seedTree();
-    $this->actingAs(User::factory()->create());
+    $this->actingAs(grantAllStructures(User::factory()->create()));
 
     // What AllPersonnel writes to the URL: the clicked node plus every descendant.
     $nested = app(StructurePathService::class)->descendantIds(2);
@@ -62,7 +62,7 @@ it('restores the highlight from a nested structure query string', function (): v
 
 it('renders the selected marker on the clicked node', function (): void {
     seedTree();
-    $this->actingAs(User::factory()->create());
+    $this->actingAs(grantAllStructures(User::factory()->create()));
 
     Livewire::test(Sidebar::class)
         ->set('selectedStructure', 2)
@@ -72,7 +72,7 @@ it('renders the selected marker on the clicked node', function (): void {
 it('keeps the highlight on a real page load carrying the nested structure filter', function (): void {
     seedTree();
 
-    $user = User::factory()->create();
+    $user = grantAllStructures(User::factory()->create());
     foreach (['show-personnels'] as $permission) {
         \Spatie\Permission\Models\Permission::findOrCreate($permission, 'web');
     }
@@ -88,7 +88,7 @@ it('keeps the highlight on a real page load carrying the nested structure filter
 
 it('recovers the highlight when the panel is re-mounted mid-request', function (): void {
     seedTree();
-    $this->actingAs(User::factory()->create());
+    $this->actingAs(grantAllStructures(User::factory()->create()));
 
     // A re-mount (parent re-render / teleported panel) has no page query string to read,
     // which is exactly when the highlight used to vanish.
@@ -99,7 +99,7 @@ it('recovers the highlight when the panel is re-mounted mid-request', function (
 
 it('takes no selection when the host has no structure filter', function (): void {
     seedTree();
-    $this->actingAs(User::factory()->create());
+    $this->actingAs(grantAllStructures(User::factory()->create()));
 
     Livewire::test(Sidebar::class)
         ->assertSet('selectedStructure', null)

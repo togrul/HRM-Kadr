@@ -6,6 +6,8 @@
             <th>{{ __('business_trips::common.fields.rank') }}</th>
             <th>{{ __('business_trips::common.fields.fullname') }}</th>
             <th>{{ __('business_trips::common.fields.location') }}</th>
+            <th>{{ __('business_trips::common.fields.trip_type') }}</th>
+            <th>{{ __('business_trips::common.fields.funding_source') }}</th>
             <th>{{ __('business_trips::common.fields.start_date') }}</th>
             <th>{{ __('business_trips::common.fields.end_date') }}</th>
             <th>{{ __('business_trips::common.fields.order_type') }}</th>
@@ -23,6 +25,8 @@
             <th>{{ $r['attributes']['$rank']['value'] ?? '' }} </th>
             <th>{{ $r['attributes']['$fullname']['value'] ?? '' }} </th>
             <th>{{ $r['location'] ?? '' }}</th>
+            <th>{{ filled($r['trip_type'] ?? null) ? __('business_trips::common.trip_types.'.$r['trip_type']) : '' }}</th>
+            <th>{{ $r['funding_source'] ?? '' }}</th>
             <th>{{ $r['start_date'] }}</th>
             <th>{{ $r['end_date'] }}</th>
             <th>{{ $r['order']['order_type']['name'] ?? '' }} </th>

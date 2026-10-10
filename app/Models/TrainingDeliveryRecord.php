@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Storage;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -72,13 +71,19 @@ class TrainingDeliveryRecord extends Model
         return $name ? strtolower((string) pathinfo($name, PATHINFO_EXTENSION)) : null;
     }
 
-    public function certificateUrl(): ?string
+    /**
+     * Sertifikat icazə yoxlayan route ilə verilir (fayl özəl diskdədir).
+     */
+    public function certificateUrl(bool $inline = true): ?string
     {
         if (! $this->certificate_path) {
             return null;
         }
 
-        return Storage::disk('public')->url($this->certificate_path);
+        return route('training-needs.certificates.show', array_filter([
+            'record' => $this->getKey(),
+            'inline' => $inline ? 1 : null,
+        ]));
     }
 
     public function isPreviewableImage(): bool

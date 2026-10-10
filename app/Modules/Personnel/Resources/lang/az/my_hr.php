@@ -141,6 +141,7 @@ return [
             'description' => 'Təsvir',
         ],
         'messages' => [
+            'sick_certificate_not_correctable' => 'Xəstəlik vərəqəsinə bağlı icazə üçün düzəliş sorğusu göndərilmir; HR vərəqəni reyestrdə dəyişir.',
             'search_placeholder' => 'Ərizə növü, səbəb və ya status ilə axtarın',
             'no_reason' => 'Səbəb göstərilməyib',
             'no_summary' => 'Qısa xülasə göstərilməyib',

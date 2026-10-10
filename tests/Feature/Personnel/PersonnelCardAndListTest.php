@@ -4,13 +4,13 @@ use App\Models\Personnel;
 use App\Models\User;
 use App\Modules\Orders\Infrastructure\Variables\OrderEmployeeVariableResolver;
 use App\Modules\Personnel\Application\Services\PersonnelProfileReadService;
+use App\Modules\Personnel\Contracts\GuardsPersonnelChanges;
 use App\Modules\Personnel\Livewire\AddPersonnel;
 use App\Modules\Personnel\Livewire\AllPersonnel;
 use App\Modules\Personnel\Livewire\DeletePersonnel;
 use App\Modules\Personnel\Livewire\TablePanel;
 use App\Modules\Personnel\Services\PersonnelCrudBenchmarkFixtureService;
 use App\Modules\Personnel\Services\PersonnelRowActionService;
-use App\Services\StructureService;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
@@ -35,7 +35,7 @@ function personnelListUser(array $permissions = ['show-personnels', 'add-personn
     test()->actingAs($user);
 
     // Siyahı istifadəçinin rollarına bağlı strukturları göstərir; testdə hamısı 1-dir.
-    test()->mock(StructureService::class, fn ($mock) => $mock->shouldReceive('getAccessibleStructures')->andReturn([1]));
+    grantStructures($user, [1]);
 
     return $user;
 }
@@ -124,7 +124,8 @@ it('shows the current post on the card even without a labour activity row', func
         ->and($timeline[0]['is_current'])->toBeTrue()
         ->and($timeline[0]['from'])->toBe('2020');
 
-    $personnel->forceFill(['leave_work_date' => '2024-01-01'])->save();
+    // Xitam tarixi yalnız xitam əmri ilə yazılır (dəyişiklik siyasəti).
+    app(GuardsPersonnelChanges::class)->allowForEffect('termination', fn () => $personnel->forceFill(['leave_work_date' => '2024-01-01'])->save());
 
     expect($reader->careerTimeline($reader->load($personnel->refresh())))->toBe([]);
 });

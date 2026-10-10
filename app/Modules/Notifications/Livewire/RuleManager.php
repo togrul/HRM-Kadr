@@ -342,7 +342,7 @@ class RuleManager extends Component
     {
         return User::query()
             ->select('id', 'name', 'email', 'is_active')
-            ->with(['personnel:id,email,surname,name,patronymic,structure_id', 'personnel.structure:id,parent_id,name'])
+            ->with(['personnel:personnels.id,personnels.email,personnels.surname,personnels.name,personnels.patronymic,personnels.structure_id', 'personnel.structure:id,parent_id,name'])
             ->where('is_active', true)
             ->when($this->userSearch !== '', function ($query) {
                 $query->where(function ($inner) {
@@ -379,7 +379,7 @@ class RuleManager extends Component
 
         return User::query()
             ->select('id', 'name', 'email', 'is_active')
-            ->with(['personnel:id,email,surname,name,patronymic'])
+            ->with(['personnel:personnels.id,personnels.email,personnels.surname,personnels.name,personnels.patronymic'])
             ->whereIn('id', $selectedUserIds)
             ->orderBy('name')
             ->get()

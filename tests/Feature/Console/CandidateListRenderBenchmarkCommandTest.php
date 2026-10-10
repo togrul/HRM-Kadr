@@ -11,6 +11,7 @@ use Tests\TestCase;
 class CandidateListRenderBenchmarkCommandTest extends TestCase
 {
     use RefreshDatabase;
+    use UsesDeterministicRenderTiming;
 
     public function test_it_reports_render_metrics_for_candidate_list_flows(): void
     {
@@ -20,15 +21,8 @@ class CandidateListRenderBenchmarkCommandTest extends TestCase
         $user->givePermissionTo('show-candidates');
         $user->givePermissionTo('add-candidates');
 
-        // Render-time (ms) budgets are machine-speed dependent and flake on slow/cold
-        // runners; pass generous render-time ceilings so this test deterministically
-        // asserts render success and payload-size budgets. Absolute render-time gating
-        // is handled by the env-configurable benchmark run in CI.
         $exitCode = Artisan::call('candidates:list-render-benchmark', [
             '--json' => true,
-            '--render-ms-budget' => 5000,
-            '--filter-ms-budget' => 5000,
-            '--modal-ms-budget' => 5000,
         ]);
 
         $payload = json_decode(Artisan::output(), true);

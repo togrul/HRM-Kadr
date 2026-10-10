@@ -32,6 +32,7 @@ class OrderEffectCatalog
                     ['key' => 'return_date', 'label' => __('orders::order_composer.effect_roles.vacation_return_date'), 'type' => 'date'],
                     ['key' => 'days', 'label' => __('orders::order_composer.effect_roles.vacation_days'), 'type' => 'number'],
                     ['key' => 'location', 'label' => __('orders::order_composer.effect_roles.vacation_location'), 'type' => 'text'],
+                    ['key' => 'work_year', 'label' => __('orders::order_composer.effect_roles.vacation_work_year'), 'type' => 'date'],
                 ],
                 'handler' => VacationEffect::class,
             ],
@@ -75,6 +76,8 @@ class OrderEffectCatalog
                     ['key' => 'return_date', 'label' => __('orders::order_composer.effect_roles.business_trip_return_date'), 'type' => 'date'],
                     ['key' => 'transport', 'label' => __('orders::order_composer.effect_roles.business_trip_transport'), 'type' => 'text'],
                     ['key' => 'per_diem', 'label' => __('orders::order_composer.effect_roles.business_trip_per_diem'), 'type' => 'text'],
+                    ['key' => 'trip_type', 'label' => __('orders::order_composer.effect_roles.business_trip_trip_type'), 'type' => 'trip_type'],
+                    ['key' => 'funding_source', 'label' => __('orders::order_composer.effect_roles.business_trip_funding_source'), 'type' => 'text'],
                 ],
                 'handler' => BusinessTripEffect::class,
             ],
@@ -90,6 +93,7 @@ class OrderEffectCatalog
                 'roles' => [
                     ['key' => 'new_structure', 'label' => __('orders::order_composer.effect_roles.transfer_new_structure'), 'type' => 'structure'],
                     ['key' => 'new_position', 'label' => __('orders::order_composer.effect_roles.transfer_new_position'), 'type' => 'position'],
+                    ['key' => 'effective_date', 'label' => __('orders::order_composer.effect_roles.transfer_effective_date'), 'type' => 'date'],
                 ],
                 'handler' => TransferEffect::class,
             ],
@@ -108,6 +112,76 @@ class OrderEffectCatalog
                 ],
                 'handler' => AwardEffect::class,
             ],
+            'paid_absence' => [
+                'label' => __('orders::order_composer.effects.paid_absence'),
+                'roles' => [
+                    ['key' => 'start_date', 'label' => __('orders::order_composer.effect_roles.paid_absence_start_date'), 'type' => 'date'],
+                    ['key' => 'end_date', 'label' => __('orders::order_composer.effect_roles.paid_absence_end_date'), 'type' => 'date'],
+                    ['key' => 'days', 'label' => __('orders::order_composer.effect_roles.vacation_days'), 'type' => 'number'],
+                    ['key' => 'reason', 'label' => __('orders::order_composer.effect_roles.paid_absence_reason'), 'type' => 'text'],
+                ],
+                'handler' => PaidAbsenceEffect::class,
+            ],
+            'disciplinary' => [
+                'label' => __('orders::order_composer.effects.disciplinary'),
+                'roles' => [
+                    ['key' => 'sanction_type', 'label' => __('orders::order_composer.effect_roles.disciplinary_sanction_type'), 'type' => 'text'],
+                    ['key' => 'violation', 'label' => __('orders::order_composer.effect_roles.disciplinary_violation'), 'type' => 'text'],
+                    ['key' => 'date', 'label' => __('orders::order_composer.effect_roles.disciplinary_date'), 'type' => 'date'],
+                ],
+                'handler' => DisciplinaryEffect::class,
+            ],
+            'salary_change' => [
+                'label' => __('orders::order_composer.effects.salary_change'),
+                'roles' => [
+                    ['key' => 'new_salary', 'label' => __('orders::order_composer.effect_roles.salary_change_new_salary'), 'type' => 'number'],
+                    ['key' => 'effective_date', 'label' => __('orders::order_composer.effect_roles.salary_change_effective_date'), 'type' => 'date'],
+                ],
+                'handler' => SalaryChangeEffect::class,
+            ],
+            'vacation_recall' => [
+                'label' => __('orders::order_composer.effects.vacation_recall'),
+                'roles' => [
+                    ['key' => 'recall_date', 'label' => __('orders::order_composer.effect_roles.vacation_recall_date'), 'type' => 'date'],
+                ],
+                'handler' => VacationRecallEffect::class,
+            ],
+            'vacation_compensation' => [
+                'label' => __('orders::order_composer.effects.vacation_compensation'),
+                'roles' => [
+                    ['key' => 'days', 'label' => __('orders::order_composer.effect_roles.vacation_days'), 'type' => 'number'],
+                    ['key' => 'work_year', 'label' => __('orders::order_composer.effect_roles.vacation_compensation_work_year'), 'type' => 'date'],
+                    ['key' => 'amount', 'label' => __('orders::order_composer.effect_roles.award_amount'), 'type' => 'number'],
+                ],
+                'handler' => VacationCompensationEffect::class,
+            ],
+            'non_working_day_work' => [
+                'label' => __('orders::order_composer.effects.non_working_day_work'),
+                'roles' => [
+                    ['key' => 'work_date', 'label' => __('orders::order_composer.effect_roles.non_working_day_work_date'), 'type' => 'date'],
+                    ['key' => 'compensation', 'label' => __('orders::order_composer.effect_roles.non_working_day_work_compensation'), 'type' => 'rest_day_compensation'],
+                ],
+                'handler' => NonWorkingDayWorkEffect::class,
+            ],
+            'substitution' => [
+                'label' => __('orders::order_composer.effects.substitution'),
+                'roles' => [
+                    ['key' => 'substituted_employee', 'label' => __('orders::order_composer.effect_roles.substitution_employee'), 'type' => 'personnel'],
+                    ['key' => 'substituted_position', 'label' => __('orders::order_composer.effect_roles.substitution_position'), 'type' => 'position'],
+                    ['key' => 'start_date', 'label' => __('orders::order_composer.effect_roles.vacation_start_date'), 'type' => 'date'],
+                    ['key' => 'end_date', 'label' => __('orders::order_composer.effect_roles.vacation_end_date'), 'type' => 'date'],
+                    ['key' => 'extra_pay_percent', 'label' => __('orders::order_composer.effect_roles.substitution_extra_pay_percent'), 'type' => 'number'],
+                    ['key' => 'extra_pay_amount', 'label' => __('orders::order_composer.effect_roles.substitution_extra_pay_amount'), 'type' => 'number'],
+                ],
+                'handler' => SubstitutionEffect::class,
+            ],
+            'order_cancellation' => [
+                'label' => __('orders::order_composer.effects.order_cancellation'),
+                'roles' => [
+                    ['key' => 'target_order', 'label' => __('orders::order_composer.effect_roles.order_cancellation_target'), 'type' => 'approved_order'],
+                ],
+                'handler' => OrderCancellationEffect::class,
+            ],
             'hire' => [
                 'label' => __('orders::order_composer.effects.hire'),
                 // Structure & position are dedicated hire inputs (they also drive the
@@ -120,6 +194,28 @@ class OrderEffectCatalog
                 'handler' => null,
             ],
         ];
+    }
+
+    /**
+     * Effects that make sense once per person, so a template on them may be issued for several
+     * employees at once (çoxşəxsli): each participant gets their own record, all in one
+     * approval. Effects that move, rename, pay or end one employee's contract stay single.
+     */
+    private const MULTI_PARTICIPANT = [
+        'business_trip',
+        'paid_absence',
+        'award',
+        'vacation',
+        'social_leave',
+        'education_leave',
+        'unpaid_leave',
+        'disciplinary',
+    ];
+
+    /** True when a template on this effect may be marked multi-participant ('none' — document only — may). */
+    public function supportsParticipants(string $kind): bool
+    {
+        return $kind === 'none' || in_array($kind, self::MULTI_PARTICIPANT, true);
     }
 
     /**

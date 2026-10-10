@@ -5,7 +5,9 @@ namespace App\Modules\Compensation\Livewire\Tabs;
 use App\Models\CompensationComponent;
 use App\Models\EmployeeCompensation;
 use App\Modules\Compensation\Application\Services\CompensationService;
+use App\Modules\Orders\Contracts\OrderDrafter;
 use App\Support\Currency;
+use Illuminate\Support\Facades\Route;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Reactive;
 
@@ -29,6 +31,9 @@ class AssignmentsTab extends CompensationTab
 
     public array $assignmentLines = [];
 
+    /** Əmək haqqı jurnal rejimindədirsə dəyişikliyin səbəbi (dəyişiklik siyasəti). */
+    public string $changeReason = '';
+
     protected function viewName(): string
     {
         return 'assignments';
@@ -48,11 +53,13 @@ class AssignmentsTab extends CompensationTab
     #[Computed]
     public function currentAssignment(): ?EmployeeCompensation
     {
-        if (! $this->tabelNo) {
+        $tabelNo = $this->visibleTabel();
+
+        if (! $tabelNo) {
             return null;
         }
 
-        return app(CompensationService::class)->currentFor($this->tabelNo);
+        return app(CompensationService::class)->currentFor($tabelNo);
     }
 
     /**
@@ -62,6 +69,35 @@ class AssignmentsTab extends CompensationTab
     public function currencyOptions(): array
     {
         return Currency::options();
+    }
+
+    /**
+     * Dəyişiklik siyasətinin bu əməkdaşa tətbiq olunan rejimi: null — ilk təyinat (aktiv
+     * maaş yoxdur), əks halda «salary» qrupunun rejimi.
+     */
+    #[Computed]
+    public function salaryPolicyMode(): ?string
+    {
+        $tabelNo = $this->visibleTabel();
+
+        if (! $tabelNo) {
+            return null;
+        }
+
+        return app(CompensationService::class)->manualSalaryMode($tabelNo)?->value;
+    }
+
+    /** «Əmək haqqının dəyişdirilməsi» əmri ilə açılan əmrlər siyahısı (icazə və şablon varsa). */
+    #[Computed]
+    public function salaryOrderUrl(): ?string
+    {
+        if (! (auth()->user()?->can('add-orders') ?? false) || ! Route::has('orders') || ! app()->bound(OrderDrafter::class)) {
+            return null;
+        }
+
+        $preset = array_key_first(app(OrderDrafter::class)->personnelTemplates('salary_change'));
+
+        return $preset === null ? null : route('orders', ['create' => 1, 'preset' => (string) $preset]);
     }
 
     public function addAssignmentLine(): void
@@ -79,6 +115,7 @@ class AssignmentsTab extends CompensationTab
     {
         $this->guardManage();
         abort_unless($this->tabelNo !== null, 422);
+        abort_unless($this->visibleTabel() !== null, 403);
 
         $validated = $this->validate([
             'assignmentForm.regime_id' => 'required|exists:compensation_regimes,id',
@@ -101,10 +138,12 @@ class AssignmentsTab extends CompensationTab
             'assignmentForm.note' => 'note',
         ]));
 
-        $service->assignCompensation(
+        $service->assignManually(
             $this->tabelNo,
             $validated['assignmentForm'],
             $this->assignmentLines,
+            $this->changeReason,
+            'changeReason',
         );
 
         $this->assignmentForm = [
@@ -112,7 +151,8 @@ class AssignmentsTab extends CompensationTab
             'currency' => Currency::DEFAULT, 'effective_from' => '', 'order_no' => '', 'note' => '',
         ];
         $this->assignmentLines = [];
-        unset($this->currentAssignment);
+        $this->changeReason = '';
+        unset($this->currentAssignment, $this->salaryPolicyMode);
 
         $this->announce('saved');
     }

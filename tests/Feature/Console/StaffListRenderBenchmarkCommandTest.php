@@ -11,6 +11,7 @@ use Tests\TestCase;
 class StaffListRenderBenchmarkCommandTest extends TestCase
 {
     use RefreshDatabase;
+    use UsesDeterministicRenderTiming;
 
     public function test_it_reports_render_metrics_for_staff_list_flows(): void
     {

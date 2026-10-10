@@ -6,7 +6,7 @@
 <div x-data x-init="$wire.loadPdf()">
     <div class="sidemenu-title">
         <div class="flex flex-wrap items-center gap-3">
-            <h2 class="hrm-num text-lg font-semibold text-ink" id="slide-over-title">{{ $order->order_no }}</h2>
+            <h2 class="hrm-num text-lg font-semibold text-ink" id="slide-over-title">{{ \App\Modules\Orders\Infrastructure\Document\OrderNumbering::isProvisional($order->order_no) ? __('orders::order_list.table.no_number_yet') : $order->order_no }}</h2>
             <x-status design="modern" :status-id="$badgeColor" :label="$badgeLabel" />
         </div>
         <p class="mt-1 text-sm text-ink-faint">

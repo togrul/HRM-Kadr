@@ -34,10 +34,6 @@ class TestWorkspace extends Component
 
     public bool $selectedSessionReadOnly = true;
 
-    public bool $resolvedPersonnelLoaded = false;
-
-    public ?int $resolvedPersonnelId = null;
-
     public function mount(): void
     {
         abort_unless(auth()->check(), 403);

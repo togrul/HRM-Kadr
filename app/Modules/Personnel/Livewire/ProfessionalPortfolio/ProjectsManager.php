@@ -10,11 +10,14 @@ use App\Modules\Personnel\Application\Services\ProfessionalPortfolioRegistrySync
 use App\Modules\Personnel\Application\Services\ProfessionalPortfolioWorkflowPolicyService;
 use App\Modules\Personnel\Exports\ProfessionalPortfolioProjectsExport;
 use App\Modules\Personnel\Support\ProfessionalPortfolio\HandlesPortfolioAttachments;
+use App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioOptions;
 use App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioPermissionMatrix;
+use App\Services\StructureService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Maatwebsite\Excel\Excel as ExcelWriter;
@@ -26,6 +29,7 @@ class ProjectsManager extends Component
     use HandlesPortfolioAttachments;
     use WithFileUploads;
 
+    #[Locked]
     public int $personnelId;
 
     public string $search = '';
@@ -65,6 +69,7 @@ class ProjectsManager extends Component
     public function mount(int $personnelId): void
     {
         abort_unless(auth()->user()?->canAny(ProfessionalPortfolioPermissionMatrix::projectViewPermissions()), 403);
+        abort_unless(app(StructureService::class)->allowsPersonnelId(auth()->user(), $personnelId), 403);
         $this->personnelId = $personnelId;
         $this->statusFilter = 'all';
     }
@@ -281,7 +286,7 @@ class ProjectsManager extends Component
         $rules = [
             'form.project_name' => 'required|string|max:255',
             'form.project_code' => 'nullable|string|max:100',
-            'form.project_type' => ['required', 'string', Rule::in(\App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioOptions::projectTypes())],
+            'form.project_type' => ['required', 'string', Rule::in(ProfessionalPortfolioOptions::projectTypes())],
             'form.role_title' => 'required|string|max:255',
             'form.responsibility_summary' => 'required|string|min:10',
             'form.team_name' => 'nullable|string|max:255',

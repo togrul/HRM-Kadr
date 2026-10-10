@@ -15,10 +15,21 @@
         @endif
 
         @if ($canManage)
+            @php $salaryMode = $this->salaryPolicyMode; @endphp
             <section class="overflow-hidden rounded-xl border border-hairline bg-white">
                 <div class="border-b border-hairline-subtle px-4 py-3">
                     <h2 class="text-[13.5px] font-semibold tracking-[-0.02em] text-ink">{{ __('compensation::dashboard.assignments.title') }}</h2>
                 </div>
+
+                {{-- Dəyişiklik siyasəti: «yalnız əmrlə» rejimində əl ilə dəyişiklik bağlıdır. --}}
+                @if ($salaryMode === 'order')
+                    <div class="border-b border-hairline-subtle bg-amber-50 px-4 py-2.5 text-[12.5px] leading-5 text-amber-800" role="status">
+                        {{ __('compensation::dashboard.assignments.order_only') }}
+                        @if ($this->salaryOrderUrl)
+                            <a href="{{ $this->salaryOrderUrl }}" wire:navigate class="font-medium underline underline-offset-2 hover:text-amber-900">{{ __('compensation::dashboard.assignments.create_order') }}</a>
+                        @endif
+                    </div>
+                @endif
 
                 <div class="space-y-4 px-4 py-3.5">
                     <div class="grid gap-3 lg:grid-cols-3">
@@ -70,8 +81,19 @@
                         </div>
                     </div>
 
+                    @if ($salaryMode === 'journal')
+                        <div class="border-t border-hairline-subtle pt-3.5">
+                            <x-ui.input-shell :label="__('compensation::dashboard.assignments.reason')" :error="$errors->first('changeReason')">
+                                <x-ui.input wire:model="changeReason" maxlength="500" />
+                            </x-ui.input-shell>
+                            <p class="mt-1 text-[11.5px] leading-4 text-ink-faint">{{ __('compensation::dashboard.assignments.reason_hint') }}</p>
+                        </div>
+                    @elseif ($errors->has('changeReason'))
+                        <x-validation>{{ $errors->first('changeReason') }}</x-validation>
+                    @endif
+
                     <div class="flex justify-end">
-                        <x-pill-button variant="primary" wire:click="saveAssignment">{{ __('compensation::dashboard.actions.assign') }}</x-pill-button>
+                        <x-pill-button variant="primary" wire:click="saveAssignment" :disabled="$salaryMode === 'order'">{{ __('compensation::dashboard.actions.assign') }}</x-pill-button>
                     </div>
                 </div>
             </section>

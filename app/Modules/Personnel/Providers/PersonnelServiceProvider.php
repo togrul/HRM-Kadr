@@ -2,11 +2,17 @@
 
 namespace App\Modules\Personnel\Providers;
 
+use App\Modules\Personnel\Application\Services\LeaveEntitlementFactsService;
 use App\Modules\Personnel\Application\Services\MyHr\ApprovalRouteResolverService;
 use App\Modules\Personnel\Application\Services\MyHr\LearningAssignmentManagerService;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestReviewService;
 use App\Modules\Personnel\Application\Services\MyHr\OnboardingAssignmentManagerService;
+use App\Modules\Personnel\Application\Services\PersonnelAssignmentGuard;
+use App\Modules\Personnel\Application\Services\PersonnelChangeGuard;
+use App\Modules\Personnel\Application\Services\PersonnelChangePolicyService;
+use App\Modules\Personnel\Application\Services\PersonnelFieldGroupRegistry;
 use App\Modules\Personnel\Application\Services\WorkingTimeNormService;
+use App\Modules\Personnel\Console\Commands\LiftExpiredDisciplinarySanctionsCommand;
 use App\Modules\Personnel\Console\Commands\PersonnelCrudQueryBudgetCommand;
 use App\Modules\Personnel\Console\Commands\PersonnelCrudRenderBenchmarkCommand;
 use App\Modules\Personnel\Console\Commands\PersonnelListQueryBudgetCommand;
@@ -17,7 +23,11 @@ use App\Modules\Personnel\Console\Commands\ProfessionalPortfolioEnforcePoliciesC
 use App\Modules\Personnel\Console\Commands\ProfessionalPortfolioSyncRegistriesCommand;
 use App\Modules\Personnel\Console\Commands\RepairLegacySelfServiceVacationOrdersCommand;
 use App\Modules\Personnel\Contracts\ApprovalRouteResolver;
+use App\Modules\Personnel\Contracts\GuardsPersonnelAssignment;
+use App\Modules\Personnel\Contracts\GuardsPersonnelChanges;
 use App\Modules\Personnel\Contracts\LearningAssignmentManager;
+use App\Modules\Personnel\Contracts\LeaveEntitlementFactsProvider;
+use App\Modules\Personnel\Contracts\ManagesPersonnelChangePolicy;
 use App\Modules\Personnel\Contracts\MyHrRequestReview;
 use App\Modules\Personnel\Contracts\OnboardingAssignmentManager;
 use App\Modules\Personnel\Contracts\WorkingTimeNormProvider;
@@ -43,6 +53,20 @@ class PersonnelServiceProvider extends ServiceProvider
         $this->app->bind(OnboardingAssignmentManager::class, OnboardingAssignmentManagerService::class);
         $this->app->bind(MyHrRequestReview::class, MyHrRequestReviewService::class);
         $this->app->bind(WorkingTimeNormProvider::class, WorkingTimeNormService::class);
+        $this->app->bind(LeaveEntitlementFactsProvider::class, LeaveEntitlementFactsService::class);
+
+        // Dəyişiklik siyasəti: reyestr, siyasət (sorğu başına bir oxunuş) və qoruyucu.
+        $this->app->singleton(PersonnelFieldGroupRegistry::class);
+        $this->app->singleton(PersonnelChangePolicyService::class);
+        $this->app->alias(PersonnelChangePolicyService::class, ManagesPersonnelChangePolicy::class);
+
+        // Tək nüsxə: allow()/withReason() kontekstləri model observer-i ilə paylaşılır. Nüsxə
+        // köhnə adın (PersonnelAssignmentGuard — alt sinif) tipindədir ki, hər iki ad və hər
+        // iki contract eyni obyekti qaytarsın.
+        $this->app->singleton(PersonnelChangeGuard::class, fn ($app): PersonnelChangeGuard => $app->build(PersonnelAssignmentGuard::class));
+        $this->app->alias(PersonnelChangeGuard::class, PersonnelAssignmentGuard::class);
+        $this->app->alias(PersonnelChangeGuard::class, GuardsPersonnelChanges::class);
+        $this->app->alias(PersonnelChangeGuard::class, GuardsPersonnelAssignment::class);
 
         if ($this->app->runningInConsole()) {
             $this->commands([
@@ -55,6 +79,7 @@ class PersonnelServiceProvider extends ServiceProvider
                 ProfessionalPortfolioSyncRegistriesCommand::class,
                 ProfessionalPortfolioEnforcePoliciesCommand::class,
                 RepairLegacySelfServiceVacationOrdersCommand::class,
+                LiftExpiredDisciplinarySanctionsCommand::class,
             ]);
         }
     }

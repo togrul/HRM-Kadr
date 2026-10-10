@@ -7,15 +7,15 @@ use App\Models\OnboardingDocumentTemplate;
 use App\Models\Personnel;
 use App\Models\User;
 use App\Modules\Personnel\Contracts\OnboardingAssignmentManager;
+use App\Support\Uploads\PrivateFiles;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class OnboardingAssignmentManagerService implements OnboardingAssignmentManager
 {
     public function createTemplate(array $payload, UploadedFile $upload, ?User $user, ?OnboardingDocumentTemplate $versionSource = null): OnboardingDocumentTemplate
     {
-        $disk = 'public';
+        $disk = PrivateFiles::DISK;
         $path = $upload->store('onboarding-documents', $disk);
 
         $template = OnboardingDocumentTemplate::query()->create([
@@ -185,7 +185,7 @@ class OnboardingAssignmentManagerService implements OnboardingAssignmentManager
         }
 
         if (filled($template->file_path)) {
-            Storage::disk($template->disk ?: 'public')->delete($template->file_path);
+            PrivateFiles::delete($template->file_path, $template->disk);
         }
 
         $template->delete();

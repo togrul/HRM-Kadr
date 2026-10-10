@@ -73,6 +73,7 @@ class ServicesServiceProvider extends ServiceProvider
             'settings.settings-list' => \App\Modules\Services\Livewire\Settings\SettingsList::class,
             'settings.add-settings' => \App\Modules\Services\Livewire\Settings\AddSettings::class,
             'settings.delete-settings' => \App\Modules\Services\Livewire\Settings\DeleteSettings::class,
+            'settings.change-policy' => \App\Modules\Services\Livewire\Settings\ChangePolicySettings::class,
 
             'menus.all-menus' => \App\Modules\Services\Livewire\Menus\AllMenus::class,
             'menus.add-menu' => \App\Modules\Services\Livewire\Menus\AddMenu::class,

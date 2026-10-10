@@ -25,10 +25,6 @@ class StructureSelect
 
         $rawValue = data_get($component->{$list}[$row] ?? [], $field);
 
-        if (method_exists($component, 'componentFieldValue')) {
-            return $component->componentFieldValue($row, $field);
-        }
-
         return is_array($rawValue) ? ($rawValue['id'] ?? null) : $rawValue;
     }
 }

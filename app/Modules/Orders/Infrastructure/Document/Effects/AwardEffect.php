@@ -6,13 +6,15 @@ use App\Models\Award;
 use App\Models\OrderLog;
 use App\Models\Personnel;
 use App\Models\PersonnelAward;
+use App\Modules\Orders\Application\Document\OrderParticipantFields;
 use App\Modules\Payroll\Domain\Contracts\PayrollOneOffEarnings;
 use DomainException;
 
 /**
- * Records a monetary award (pul mükafatı) in the employee's file, keyed by the order
- * number so reversal removes exactly what this order added, and hands the amount to
- * payroll for the current month when this installation runs payroll.
+ * Records an award in the employee's file, keyed by the order number so reversal
+ * removes exactly what this order added. A monetary award (pul mükafatı) also hands the
+ * amount to payroll for the current month when this installation runs payroll; an
+ * award without an amount (Fəxri fərman) is a record only, named after its order type.
  */
 class AwardEffect implements OrderEffect
 {
@@ -37,7 +39,7 @@ class AwardEffect implements OrderEffect
         PersonnelAward::query()->create([
             'tabel_no' => $personnel->tabel_no,
             'award_id' => $awardId,
-            'reason' => (string) ($fields['reason'] ?? self::DEFAULT_AWARD),
+            'reason' => $this->reason($order, $fields, $amount),
             'amount' => $amount,
             'given_date' => optional($order->given_date)->format('Y-m-d') ?? now()->toDateString(),
             'order_no' => $order->order_no,
@@ -48,9 +50,27 @@ class AwardEffect implements OrderEffect
         if ($amount > 0 && app()->bound(PayrollOneOffEarnings::class)) {
             app(PayrollOneOffEarnings::class)->record(
                 (string) $personnel->tabel_no, 'award', __('orders::order_composer.effects.award_payroll_line', ['number' => $order->order_no], config('app.locale')), $amount,
-                (int) now()->year, (int) now()->month, 'order_award:'.$order->id,
+                (int) now()->year, (int) now()->month, $this->payrollKey($order, $fields, $personnel),
             );
         }
+    }
+
+    /**
+     * The award's wording in the file. Without an amount the order type names the
+     * honour ("Fəxri fərmanla təltif — uzunmüddətli səmərəli fəaliyyətinə görə").
+     *
+     * @param  array<string,mixed>  $fields
+     */
+    private function reason(OrderLog $order, array $fields, ?float $amount): string
+    {
+        $reason = trim((string) ($fields['reason'] ?? ''));
+        $label = trim((string) data_get($order->template_snapshot, 'label', ''));
+
+        if ($amount === null && $label !== '') {
+            return $reason !== '' ? $label.' — '.$reason : $label;
+        }
+
+        return $reason !== '' ? $reason : self::DEFAULT_AWARD;
     }
 
     /**
@@ -87,7 +107,17 @@ class AwardEffect implements OrderEffect
             ->delete();
 
         if (app()->bound(PayrollOneOffEarnings::class)) {
-            app(PayrollOneOffEarnings::class)->withdraw('order_award:'.$order->id);
+            app(PayrollOneOffEarnings::class)->withdraw($this->payrollKey($order, $fields, $personnel));
         }
+    }
+
+    /**
+     * The payroll line's key: one per order, or one per person on a multi-participant order.
+     *
+     * @param  array<string,mixed>  $fields
+     */
+    private function payrollKey(OrderLog $order, array $fields, Personnel $personnel): string
+    {
+        return 'order_award:'.$order->id.(isset($fields[OrderParticipantFields::EFFECT_CONTEXT]) ? ':'.$personnel->id : '');
     }
 }

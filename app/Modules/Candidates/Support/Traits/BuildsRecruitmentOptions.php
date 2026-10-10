@@ -10,6 +10,7 @@ use App\Models\JobRequisition;
 use App\Models\Position;
 use App\Models\Structure;
 use App\Models\User;
+use App\Modules\Candidates\Support\CandidateStructureScope;
 use Illuminate\Support\Facades\DB;
 
 trait BuildsRecruitmentOptions
@@ -89,12 +90,16 @@ trait BuildsRecruitmentOptions
     protected function recruitmentCandidateOptions(?int $selectedId, string $searchProperty = 'searchCandidate'): array
     {
         $search = $this->dropdownSearch($searchProperty);
-        $base = Candidate::query()
+        $scope = CandidateStructureScope::for();
+        $base = CandidateStructureScope::constrainOwn(Candidate::query())
             ->select('id', DB::raw("CONCAT(surname, ' ', name, ' ', patronymic) as label"))
             ->orderByDesc('id');
 
         if ($search === '') {
-            return $this->cachedOptionsWithSelected('candidates:recruitment:candidates', $base, $selectedId, 80);
+            // Keş açarı görünürlüyə bağlıdır — bir istifadəçinin siyahısı digərinə düşməsin.
+            $scopeKey = $scope->isAll() ? 'all' : md5(implode(',', $scope->ids()));
+
+            return $this->cachedOptionsWithSelected('candidates:recruitment:candidates:'.$scopeKey, $base, $selectedId, 80);
         }
 
         return $this->optionsWithSelected($base, 'surname', $search, $selectedId, 50, function ($query) use ($search) {

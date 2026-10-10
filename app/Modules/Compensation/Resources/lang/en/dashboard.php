@@ -76,6 +76,10 @@ return [
         'current' => 'Current pay',
         'title' => 'New assignment',
         'lines' => 'Earning / deduction lines',
+        'order_only' => 'Under the change policy, salary changes only through a salary change order. A first assignment (no active pay yet) can still be made here.',
+        'create_order' => 'Create order',
+        'reason' => 'Reason for the change',
+        'reason_hint' => 'Salary is in journal mode: the reason will be written to the audit log.',
     ],
 
     'bank' => [

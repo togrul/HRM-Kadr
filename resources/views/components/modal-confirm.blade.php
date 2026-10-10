@@ -85,7 +85,7 @@
                         <h3 class="text-xl font-medium leading-6 text-zinc-900" id="modal-title">
                             {{ $modalTitle }}
                         </h3>
-                        <div class="flex flex-col py-2 space-y-2 text-zinc-600" x-html="bodyMessage">
+                        <div class="flex flex-col py-2 space-y-2 text-zinc-600" x-text="bodyMessage">
                             {{ $slot }}
                         </div>
                     </div>

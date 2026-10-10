@@ -4,6 +4,7 @@ namespace App\Modules\Personnel\Livewire\MyHr;
 
 use App\Models\Personnel;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestsReadService;
+use App\Modules\Personnel\Livewire\MyHr\Concerns\ResolvesOwnPersonnel;
 use App\Modules\Personnel\Support\MyHr\MyHrAccess;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -15,16 +16,15 @@ use Livewire\Component;
  */
 class MyHrSummary extends Component
 {
+    use ResolvesOwnPersonnel;
+
     /** Rows shown in the overview's request preview; the requests tab owns the full list. */
     public const RECENT_LIMIT = 4;
 
-    public int $personnelId;
-
-    public function mount(int $personnelId): void
+    public function mount(?int $personnelId = null): void
     {
-        abort_if($personnelId <= 0, 404);
-
-        $this->personnelId = $personnelId;
+        app(MyHrAccess::class)->authorize(Auth::user());
+        $this->bindOwnPersonnel($personnelId);
     }
 
     #[Computed]

@@ -4,6 +4,8 @@ namespace App\Modules\Personnel\Http\Controllers;
 
 use App\Models\Personnel;
 use App\Models\PersonnelDocument;
+use App\Support\Uploads\PrivateFiles;
+use App\Support\Uploads\SecureFileResponse;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -24,7 +26,11 @@ class PersonnelFileDownloadController
             ->where('tabel_no', $document->tabel_no)
             ->firstOrFail();
 
-        Gate::authorize('view', $personnel);
+        // Əməkdaş öz sənədini (MyHR) yalnız ona açılmış və görünmə müddəti daxilində görür.
+        abort_unless(
+            Gate::allows('view', $personnel) || ($this->visibleToEmployee($document) && PrivateFiles::isOwnPersonnel(auth()->user(), $personnel)),
+            403
+        );
 
         $path = (string) $document->file;
         $disk = $this->resolveDisk($path);
@@ -35,7 +41,16 @@ class PersonnelFileDownloadController
             ? trim((string) $document->filename).($extension !== '' ? '.'.$extension : '')
             : basename($path);
 
-        return Storage::disk($disk)->download($path, $downloadName);
+        return SecureFileResponse::fromDisk($disk, $path, $downloadName);
+    }
+
+    private function visibleToEmployee(PersonnelDocument $document): bool
+    {
+        $now = now();
+
+        return $document->getAttribute('employee_visibility') === 'visible'
+            && ($document->getAttribute('visible_from') === null || $document->getAttribute('visible_from') <= $now)
+            && ($document->getAttribute('visible_until') === null || $document->getAttribute('visible_until') >= $now);
     }
 
     /**

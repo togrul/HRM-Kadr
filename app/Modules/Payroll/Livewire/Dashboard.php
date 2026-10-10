@@ -9,12 +9,16 @@ use App\Models\PayrollRun;
 use App\Models\Payslip;
 use App\Modules\Payroll\Application\Services\PayrollExportService;
 use App\Modules\Payroll\Application\Services\PayrollPeriodService;
+use App\Modules\Payroll\Application\Services\PayrollRunReadService;
 use App\Modules\Payroll\Application\Services\PayrollRunService;
+use App\Support\Exports\CsvSafe;
 use App\Support\Livewire\DownloadsReportsTable;
 use App\Support\Livewire\InteractsWithTabbedWorkspace;
 use App\Support\Livewire\LabelsValidationFields;
+use App\Support\Livewire\ScopesPersonnelByStructure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
@@ -35,6 +39,7 @@ class Dashboard extends Component
     use DownloadsReportsTable;
     use InteractsWithTabbedWorkspace;
     use LabelsValidationFields;
+    use ScopesPersonnelByStructure;
 
     public string $activeTab = 'runs';
 
@@ -57,6 +62,9 @@ class Dashboard extends Component
 
     #[Locked]
     public ?int $selectedRunId = null;
+
+    /** Written reason for reopening a closed pay month. */
+    public string $reopenReason = '';
 
     /** Employee the loans tab opens on when reached from the runs overview. */
     #[Locked]
@@ -143,7 +151,7 @@ class Dashboard extends Component
         abort_unless($this->canExportAmounts(), 403);
 
         return $this->downloadReportTable(
-            $service->bankRows(PayrollRun::findOrFail($runId)),
+            $service->bankRows(PayrollRun::findOrFail($runId), $this->personnelScope()),
             [
                 ['key' => 'tabel_no', 'label' => __('payroll::dashboard.export.cols.tabel_no')],
                 ['key' => 'full_name', 'label' => __('payroll::dashboard.export.cols.full_name')],
@@ -160,7 +168,7 @@ class Dashboard extends Component
     {
         abort_unless($this->canExport(), 403);
 
-        $rows = $service->bankRows(PayrollRun::findOrFail($runId));
+        $rows = $service->bankRows(PayrollRun::findOrFail($runId), $this->personnelScope());
         $masked = ! $this->canViewAmounts();
         $headers = ['tabel_no', 'full_name', 'iban', 'bank_name', 'amount', 'currency'];
 
@@ -168,7 +176,7 @@ class Dashboard extends Component
             $out = fopen('php://output', 'w');
             fputcsv($out, $headers);
             foreach ($rows as $row) {
-                fputcsv($out, [$row['tabel_no'], $row['full_name'], $row['iban'], $row['bank_name'], $masked ? '•••' : $row['amount'], $row['currency']]);
+                fputcsv($out, CsvSafe::row([$row['tabel_no'], $row['full_name'], $row['iban'], $row['bank_name'], $masked ? '•••' : $row['amount'], $row['currency']]));
             }
             fclose($out);
         }, 'payroll-bank-file.csv', ['Content-Type' => 'text/csv']);
@@ -179,7 +187,7 @@ class Dashboard extends Component
         abort_unless($this->canExportAmounts(), 403);
 
         return $this->downloadReportTable(
-            $service->glRows(PayrollRun::findOrFail($runId)),
+            $service->glRows(PayrollRun::findOrFail($runId), $this->personnelScope()),
             [
                 ['key' => 'gl_code', 'label' => __('payroll::dashboard.export.cols.gl_code')],
                 ['key' => 'code', 'label' => __('payroll::dashboard.export.cols.code')],
@@ -196,7 +204,7 @@ class Dashboard extends Component
         abort_unless($this->canExportAmounts(), 403);
 
         return $this->downloadReportTable(
-            $service->stateRows(PayrollRun::findOrFail($runId)),
+            $service->stateRows(PayrollRun::findOrFail($runId), $this->personnelScope()),
             [
                 ['key' => 'tabel_no', 'label' => __('payroll::dashboard.export.cols.tabel_no')],
                 ['key' => 'full_name', 'label' => __('payroll::dashboard.export.cols.full_name')],
@@ -224,9 +232,9 @@ class Dashboard extends Component
     {
         return [
             ['key' => 'periods', 'value' => PayrollPeriod::query()->count(), 'accent' => 'bg-sky-500'],
-            ['key' => 'runs', 'value' => PayrollRun::query()->count(), 'accent' => 'bg-violet-500'],
-            ['key' => 'locked', 'value' => PayrollRun::query()->where('status', 'locked')->count(), 'accent' => 'bg-emerald-500'],
-            ['key' => 'payslips', 'value' => Payslip::query()->count(), 'accent' => 'bg-amber-400'],
+            ['key' => 'runs', 'value' => app(PayrollRunReadService::class)->visibleQuery(auth()->user())->count(), 'accent' => 'bg-violet-500'],
+            ['key' => 'locked', 'value' => app(PayrollRunReadService::class)->visibleQuery(auth()->user())->where('status', 'locked')->count(), 'accent' => 'bg-emerald-500'],
+            ['key' => 'payslips', 'value' => $this->scopeByPersonnel(Payslip::query())->count(), 'accent' => 'bg-amber-400'],
         ];
     }
 
@@ -259,7 +267,7 @@ class Dashboard extends Component
     #[Computed]
     public function runIds(): Collection
     {
-        return PayrollRun::query()
+        return app(PayrollRunReadService::class)->visibleQuery(auth()->user())
             ->when($this->periodFilter, fn ($query) => $query->where('payroll_period_id', $this->periodFilter))
             ->when($this->regimeFilter, fn ($query) => $query->where('regime_id', $this->regimeFilter))
             ->orderByDesc('id')
@@ -275,8 +283,8 @@ class Dashboard extends Component
     {
         return [
             'runs' => $this->runIds->count(),
-            'payslips' => Payslip::query()->count(),
-            'loans' => EmployeeLoan::query()->where('status', 'active')->count(),
+            'payslips' => $this->scopeByPersonnel(Payslip::query())->count(),
+            'loans' => $this->scopeByPersonnel(EmployeeLoan::query())->where('status', 'active')->count(),
         ];
     }
 
@@ -343,12 +351,18 @@ class Dashboard extends Component
             'runForm.regime_id' => 'regime',
         ]))['runForm'];
 
-        $run = $service->createRun(
-            PayrollPeriod::findOrFail($data['payroll_period_id']),
-            $data['regime_id'] ? (int) $data['regime_id'] : null,
-            auth()->id(),
-            $data['run_type'],
-        );
+        try {
+            $run = $service->createRun(
+                PayrollPeriod::findOrFail($data['payroll_period_id']),
+                $data['regime_id'] ? (int) $data['regime_id'] : null,
+                auth()->id(),
+                $data['run_type'],
+            );
+        } catch (ValidationException $exception) {
+            $this->dispatch('notify', type: 'error', message: collect($exception->errors())->flatten()->first());
+
+            return;
+        }
 
         $this->selectedRunId = $run->id;
         $this->periodFilter = $run->payroll_period_id;
@@ -356,12 +370,50 @@ class Dashboard extends Component
         $this->dispatch('notify', type: 'success', message: __('payroll::dashboard.messages.run_created'));
     }
 
-    public function deletePeriod(int $periodId): void
+    public function deletePeriod(int $periodId, PayrollPeriodService $service): void
     {
         abort_unless($this->canManage(), 403);
 
-        PayrollPeriod::whereKey($periodId)->delete();
+        $period = PayrollPeriod::find($periodId);
+        if ($period === null) {
+            return;
+        }
+
+        try {
+            $service->delete($period);
+        } catch (ValidationException $exception) {
+            $this->dispatch('notify', type: 'error', message: collect($exception->errors())->flatten()->first());
+
+            return;
+        }
+
         $this->dispatch('notify', type: 'success', message: __('payroll::dashboard.messages.deleted'));
+    }
+
+    public function canReopenPeriod(): bool
+    {
+        return auth()->user()?->can(PayrollPeriodService::REOPEN_PERMISSION) ?? false;
+    }
+
+    /**
+     * Reopen a closed pay month (separate permission, written reason, audit entry).
+     */
+    public function reopenPeriod(int $periodId, PayrollPeriodService $service): void
+    {
+        abort_unless($this->canReopenPeriod(), 403);
+
+        $period = PayrollPeriod::findOrFail($periodId);
+
+        try {
+            $service->reopen($period, $this->reopenReason);
+        } catch (ValidationException $exception) {
+            $this->dispatch('notify', type: 'error', message: collect($exception->errors())->flatten()->first());
+
+            return;
+        }
+
+        $this->reopenReason = '';
+        $this->dispatch('notify', type: 'success', message: __('payroll::dashboard.messages.period_reopened'));
     }
 
     // ----------------------------------------------------------------
@@ -376,6 +428,8 @@ class Dashboard extends Component
 
     public function manageLoans(string $tabelNo, string $label): void
     {
+        abort_unless($this->tabelInScope($tabelNo), 403);
+
         $this->loanTabelNo = $tabelNo;
         $this->loanPersonnelLabel = $label;
         $this->activeTab = 'loans';

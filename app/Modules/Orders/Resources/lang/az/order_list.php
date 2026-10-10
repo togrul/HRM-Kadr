@@ -14,6 +14,7 @@ return [
         'show_all' => 'Hamısını göstər',
     ],
     'table' => [
+        'no_number_yet' => 'Nömrə təsdiqdə veriləcək',
         'title' => 'Əmrlər',
         'row_no' => '#',
         'order_no' => 'Əmr #',
@@ -27,12 +28,15 @@ return [
         'unit' => 'əmr',
     ],
     'messages' => [
+        'approved_not_deletable' => 'Təsdiqlənmiş əmr silinə bilməz — əvvəlcə ləğv edin.',
+        'pdf_unavailable' => 'PDF hazırlana bilmədi (bu serverdə çevirici yoxdur və ya sənəd tapılmadı). Word sənədini “Yüklə” ilə endirin.',
         'force_delete_confirm' => 'Bu məlumatı silmək istədiyinizə əminsiniz?',
         'delete_order_confirm' => 'Bu əmri silmək istədiyinizə əminsiniz?',
         'order_duplicated' => 'Əmrin surəti qaralama kimi yaradıldı.',
         'draft_not_ready' => 'Qaralama əmr təsdiqlənə bilməz — əvvəlcə onu tamamlayıb yadda saxlayın.',
     ],
     'actions' => [
+        'download_pdf' => 'PDF endir',
         'open_user_guide' => 'İstifadəçi bələdçisi',
         'force_delete' => 'Tamamilə sil',
         'restore' => 'Bərpa et',

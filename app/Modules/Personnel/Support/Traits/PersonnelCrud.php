@@ -565,9 +565,7 @@ trait PersonnelCrud
 
         return [
             'personnelIsPending' => (bool) ($personnel->is_pending ?? false),
-            'personnelPhotoUrl' => ! empty($personnel->photo)
-                ? \Illuminate\Support\Facades\Storage::url($personnel->photo)
-                : null,
+            'personnelPhotoUrl' => \App\Support\Uploads\PersonnelPhoto::url($personnel->id, $personnel->photo),
         ];
     }
 

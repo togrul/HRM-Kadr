@@ -270,10 +270,11 @@ class LifecycleDashboardReadServiceTest extends TestCase
             'status' => 'completed',
             'approved_by' => $owner->id,
         ]);
+        // Struktur/vəzifə yalnız əmrlə dəyişir: hərəkətin tamamlanması əməkdaşı köçürmür.
         $this->assertDatabaseHas('personnels', [
             'id' => $personnel->id,
-            'structure_id' => 2,
-            'position_id' => 2,
+            'structure_id' => $personnel->structure_id,
+            'position_id' => $personnel->position_id,
         ]);
 
         $eventId = DB::table('employee_lifecycle_movements')->where('id', $movementId)->value('event_id');
@@ -338,6 +339,7 @@ class LifecycleDashboardReadServiceTest extends TestCase
         }
 
         $user = User::factory()->create(['name' => 'Lifecycle Manager', 'is_active' => true]);
+        grantAllStructures($user);
         $user->givePermissionTo(['show-employee-lifecycle', 'manage-employee-lifecycle']);
 
         $personnel = $this->makePersonnel();
@@ -412,6 +414,7 @@ class LifecycleDashboardReadServiceTest extends TestCase
         }
 
         $user = User::factory()->create(['name' => 'Lifecycle Manager', 'is_active' => true]);
+        grantAllStructures($user);
         $user->givePermissionTo(['show-employee-lifecycle', 'manage-employee-lifecycle']);
 
         $templateId = app(LifecyclePlanTemplateService::class)->createTemplate([
@@ -562,6 +565,7 @@ class LifecycleDashboardReadServiceTest extends TestCase
         Permission::findOrCreate('show-employee-lifecycle', 'web');
 
         $user = User::factory()->create(['is_active' => true]);
+        grantAllStructures($user);
         $user->givePermissionTo('show-employee-lifecycle');
         $personnel = $this->makePersonnel();
 
@@ -664,6 +668,7 @@ class LifecycleDashboardReadServiceTest extends TestCase
         Permission::findOrCreate('show-employee-lifecycle', 'web');
 
         $user = User::factory()->create(['is_active' => true]);
+        grantAllStructures($user);
         $user->givePermissionTo('show-employee-lifecycle');
 
         Livewire::actingAs($user);
@@ -690,6 +695,7 @@ class LifecycleDashboardReadServiceTest extends TestCase
         }
 
         $user = User::factory()->create(['name' => 'Lifecycle Manager', 'is_active' => true]);
+        grantAllStructures($user);
         $user->givePermissionTo(['show-employee-lifecycle', 'manage-employee-lifecycle']);
 
         Livewire::actingAs($user);

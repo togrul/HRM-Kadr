@@ -120,6 +120,11 @@ class MyHrHierarchyTest extends TestCase
 
     private function makePersonnel(string $email, string $surname, string $name, string $patronymic, int $structureId, int $positionId): Personnel
     {
+        return $this->linkFixtureUserByEmail($this->createPersonnelRecord($email, $surname, $name, $patronymic, $structureId, $positionId));
+    }
+
+    private function createPersonnelRecord(string $email, string $surname, string $name, string $patronymic, int $structureId, int $positionId): Personnel
+    {
         return Personnel::withoutEvents(fn () => Personnel::query()->create([
             'tabel_no' => 'TB'.Str::upper(Str::random(6)),
             'surname' => $surname,

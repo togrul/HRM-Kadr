@@ -95,6 +95,7 @@ class DocumentComplianceCriticalTest extends TestCase
     {
         $this->seedPersonnel('UI0001');
         $user = User::factory()->create();
+        grantAllStructures($user);
         $user->givePermissionTo(Permission::findOrCreate('show-document-compliance', 'web'));
 
         $html = Livewire::actingAs($user)->test(DocumentExpiryDashboard::class)

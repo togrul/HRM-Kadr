@@ -33,8 +33,8 @@ class LearningAssignmentManagerService implements LearningAssignmentManager
                 ]);
             }
 
-            $storageDisk = 'employee_content';
-            $storagePath = $upload->store('learning-content', $storageDisk);
+            $storageDisk = 'local';
+            $storagePath = $upload->store('employee-content/learning-content', $storageDisk);
         }
 
         $asset = EmployeeContentAsset::query()->create([

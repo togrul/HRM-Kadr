@@ -17,6 +17,14 @@ class KpiFormula
 {
     private const FUNCTIONS = ['IF', 'MIN', 'MAX', 'ROUND', 'ABS'];
 
+    /** Longest formula accepted (the form's own limit), checked before tokenizing. */
+    public const MAX_LENGTH = 2000;
+
+    /** Deepest nesting of parentheses, function calls and unary minus the parser descends. */
+    public const MAX_DEPTH = 32;
+
+    private int $depth = 0;
+
     /** @var array<int, array{0: string, 1: string}> */
     private array $tokens = [];
 
@@ -56,8 +64,15 @@ class KpiFormula
      */
     private function parse(string $formula, array $values): ?float
     {
+        // Bounded before any work: a crafted request could otherwise send a huge or deeply
+        // nested formula past the form's validation straight into the recursive parser.
+        if (strlen($formula) > self::MAX_LENGTH) {
+            throw new InvalidArgumentException(__('performance_evaluation::kpi.formula.errors.too_long', ['max' => self::MAX_LENGTH]));
+        }
+
         $this->tokens = $this->tokenize($formula);
         $this->pos = 0;
+        $this->depth = 0;
         $this->values = $values;
 
         if ($this->tokens === []) {
@@ -168,7 +183,7 @@ class KpiFormula
     {
         if ($this->peek() === '-') {
             $this->pos++;
-            $value = $this->unary();
+            $value = $this->nested(fn (): ?float => $this->unary());
 
             return $value === null ? null : -$value;
         }
@@ -189,9 +204,25 @@ class KpiFormula
         return match ($token[0]) {
             'num' => (float) $token[1],
             'ref' => $this->reference($token[1]),
-            'fn' => $this->call($token[1]),
-            default => $token[1] === '(' ? $this->group() : throw new InvalidArgumentException(__('performance_evaluation::kpi.formula.errors.unexpected', ['token' => $token[1]])),
+            'fn' => $this->nested(fn (): ?float => $this->call($token[1])),
+            default => $token[1] === '(' ? $this->nested(fn (): ?float => $this->group()) : throw new InvalidArgumentException(__('performance_evaluation::kpi.formula.errors.unexpected', ['token' => $token[1]])),
         };
+    }
+
+    /**
+     * @param  callable(): ?float  $step
+     */
+    private function nested(callable $step): ?float
+    {
+        if (++$this->depth > self::MAX_DEPTH) {
+            throw new InvalidArgumentException(__('performance_evaluation::kpi.formula.errors.too_deep', ['max' => self::MAX_DEPTH]));
+        }
+
+        try {
+            return $step();
+        } finally {
+            $this->depth--;
+        }
     }
 
     private function group(): ?float

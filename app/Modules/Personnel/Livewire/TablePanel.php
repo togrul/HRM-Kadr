@@ -8,6 +8,7 @@ use App\Modules\Personnel\Services\PersonnelQueryService;
 use App\Modules\Personnel\Services\PersonnelRowActionService;
 use App\Modules\Personnel\Services\PersonnelRowViewModelService;
 use App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioPermissionMatrix;
+use App\Services\StructureScope;
 use App\Services\StructureService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -35,11 +36,14 @@ class TablePanel extends Component
 
     public string $sort = PersonnelQueryService::SORT_POSITION;
 
-    protected ?array $accessibleStructureCache = null;
+    /** @var list<string> */
+    public array $presence = [];
+
+    protected ?StructureScope $accessibleStructureCache = null;
 
     protected ?array $rowActionCapabilities = null;
 
-    public function mount(string $status = 'current', array $filters = [], array $structure = [], ?int $selectedPosition = null, string $search = '', string $sort = PersonnelQueryService::SORT_POSITION): void
+    public function mount(string $status = 'current', array $filters = [], array $structure = [], ?int $selectedPosition = null, string $search = '', string $sort = PersonnelQueryService::SORT_POSITION, array $presence = []): void
     {
         $this->authorize('viewAny', Personnel::class);
         $normalizer = app(PersonnelListStateNormalizer::class);
@@ -50,6 +54,7 @@ class TablePanel extends Component
         $this->selectedPosition = $normalizer->normalizePosition($selectedPosition);
         $this->search = trim($search);
         $this->sort = $sort === PersonnelQueryService::SORT_STRUCTURE ? $sort : PersonnelQueryService::SORT_POSITION;
+        $this->presence = $normalizer->normalizePresence($presence);
     }
 
     public function placeholder(): View
@@ -99,16 +104,14 @@ class TablePanel extends Component
             selectedPosition: $this->selectedPosition,
             search: $this->search,
             sort: $this->sort,
+            presence: $this->presence,
         );
     }
 
-    protected function accessibleStructureIds(): array
+    /** Struktur görünürlüyü — müştəri filtri ($structure) PersonnelQueryService-də onunla kəsişdirilir. */
+    protected function accessibleStructureIds(): StructureScope
     {
-        if (! is_null($this->accessibleStructureCache)) {
-            return $this->accessibleStructureCache;
-        }
-
-        return $this->accessibleStructureCache = resolve(StructureService::class)->getAccessibleStructures();
+        return $this->accessibleStructureCache ??= resolve(StructureService::class)->scopeFor();
     }
 
     protected function normalizeStructureState(mixed $value): array

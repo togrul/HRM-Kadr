@@ -73,7 +73,7 @@ class StaffCrudRegressionTest extends TestCase
 
     public function test_deep_tree_branches_render_only_once_opened(): void
     {
-        $user = User::factory()->create();
+        $user = grantAllStructures(User::factory()->create());
         $user->givePermissionTo(Permission::findOrCreate('show-staff', 'web'));
         $this->actingAs($user);
         $this->seedDeepStructureTree();
@@ -99,7 +99,7 @@ class StaffCrudRegressionTest extends TestCase
 
     public function test_search_keeps_only_matching_branches_opened_and_highlighted(): void
     {
-        $user = User::factory()->create();
+        $user = grantAllStructures(User::factory()->create());
         $user->givePermissionTo(Permission::findOrCreate('show-staff', 'web'));
         $this->actingAs($user);
         $this->seedDeepStructureTree();
@@ -182,7 +182,7 @@ class StaffCrudRegressionTest extends TestCase
 
     public function test_only_vacant_chip_hides_fully_staffed_branches(): void
     {
-        $user = User::factory()->create();
+        $user = grantAllStructures(User::factory()->create());
         $user->givePermissionTo(Permission::findOrCreate('show-staff', 'web'));
         $this->actingAs($user);
         $this->seedDeepStructureTree();
@@ -215,7 +215,7 @@ class StaffCrudRegressionTest extends TestCase
 
     public function test_excel_export_needs_the_export_permission(): void
     {
-        $user = User::factory()->create();
+        $user = grantAllStructures(User::factory()->create());
         $user->givePermissionTo(Permission::findOrCreate('show-staff', 'web'));
         $this->actingAs($user);
 
@@ -231,7 +231,7 @@ class StaffCrudRegressionTest extends TestCase
 
     public function test_vacancy_list_includes_top_level_units(): void
     {
-        $user = User::factory()->create();
+        $user = grantAllStructures(User::factory()->create());
         $user->givePermissionTo(Permission::findOrCreate('show-staff', 'web'));
         $this->actingAs($user);
         $this->seedStructuresAndPositions();
@@ -279,7 +279,7 @@ class StaffCrudRegressionTest extends TestCase
 
     private function authorizedUser(): User
     {
-        $user = User::factory()->create();
+        $user = grantAllStructures(User::factory()->create());
         $user->givePermissionTo(Permission::findOrCreate('add-staff', 'web'));
 
         return $user;

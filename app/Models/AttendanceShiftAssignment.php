@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int|null $shift_id
  * @property \Carbon\CarbonInterface|null $effective_from
  * @property \Carbon\CarbonInterface|null $effective_to
+ * @property string $tabel_no
  */
 class AttendanceShiftAssignment extends Model
 {

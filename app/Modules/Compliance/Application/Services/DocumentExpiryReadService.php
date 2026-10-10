@@ -2,6 +2,9 @@
 
 namespace App\Modules\Compliance\Application\Services;
 
+use App\Models\User;
+use App\Services\StructureScope;
+use App\Services\StructureService;
 use App\Support\Database\InstalledTables;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -19,6 +22,21 @@ use InvalidArgumentException;
 class DocumentExpiryReadService
 {
     public const PER_PAGE = 25;
+
+    /**
+     * Baxan istifadəçinin struktur görünürlüyü. Null yalnız sistem axınları (konsol
+     * xatırlatmaları, sorğu büdcəsi) üçündür; ekran və eksport həmişə forViewer() ilə gəlir.
+     */
+    private ?StructureScope $scope = null;
+
+    /** Sətirləri istifadəçinin struktur görünürlüyündəki işçilərlə məhdudlaşdıran nüsxə. */
+    public function forViewer(?User $viewer): static
+    {
+        $clone = clone $this;
+        $clone->scope = app(StructureService::class)->scopeFor($viewer);
+
+        return $clone;
+    }
 
     /**
      * Document type => source table and expiry column. The array order is also the
@@ -398,6 +416,8 @@ class DocumentExpiryReadService
      */
     private function onlyActivePersonnel(Builder $query): void
     {
+        $this->scope?->constrain($query, 'personnels.structure_id');
+
         $query->whereNull('personnels.deleted_at')
             ->where('personnels.is_pending', false)
             ->where(fn (Builder $active) => $active

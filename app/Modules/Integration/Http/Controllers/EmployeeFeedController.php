@@ -3,6 +3,7 @@
 namespace App\Modules\Integration\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\ApiToken;
 use App\Modules\Integration\Application\Services\EmployeeFeedService;
 use App\Modules\Integration\Support\Contract;
 use Illuminate\Http\JsonResponse;
@@ -34,9 +35,13 @@ class EmployeeFeedController extends Controller
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
+        $token = $request->attributes->get('api_token');
+
         $page = $feed->page(
             after: (int) $request->query('after', 0),
             limit: (int) $request->query('limit', (string) Contract::DEFAULT_LIMIT),
+            // Maaş yalnız kompensasiya icazəsi olan tokenə: işçi siyahısı icazəsi maaşı açmamalıdır.
+            includeSalary: $token instanceof ApiToken && $token->allows(Contract::ABILITY_COMPENSATION),
         );
 
         return response()->json(['data' => $page]);

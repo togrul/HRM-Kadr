@@ -65,6 +65,8 @@ class MyHrDashboardTest extends TestCase
             'vacation_days_total' => 30,
             'remaining_days' => 9,
         ]);
+        // The upgrade moves the calendar-year balance into the work-year ledger.
+        app(\App\Modules\Vacation\Application\Services\LegacyVacationMigrator::class)->migrate();
 
         Livewire::test(MyHrDashboard::class)
             // the panel is teleported into the Livewire root, so its items keep working
@@ -151,6 +153,11 @@ class MyHrDashboardTest extends TestCase
     }
 
     private function makePersonnel(string $email, string $surname, string $name, string $patronymic): Personnel
+    {
+        return $this->linkFixtureUserByEmail($this->createPersonnelRecord($email, $surname, $name, $patronymic));
+    }
+
+    private function createPersonnelRecord(string $email, string $surname, string $name, string $patronymic): Personnel
     {
         $this->seedReferenceData();
 

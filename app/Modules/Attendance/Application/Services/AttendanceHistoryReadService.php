@@ -2,6 +2,7 @@
 
 namespace App\Modules\Attendance\Application\Services;
 
+use App\Contracts\VisibleAuditActivities;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
@@ -185,7 +186,7 @@ class AttendanceHistoryReadService
         string $dateTo,
         ?int $subjectId = null
     ): Builder {
-        return Activity::query()
+        return app(VisibleAuditActivities::class)->visibleQuery()
             ->where('log_name', 'attendance')
             ->with('causer:id,name,email')
             ->when($type !== 'all', function ($query) use ($type): void {

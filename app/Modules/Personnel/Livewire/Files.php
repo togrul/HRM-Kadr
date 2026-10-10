@@ -8,6 +8,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -24,6 +25,7 @@ class Files extends Component
 
     public $file_list = [];
 
+    #[Locked]
     public $personnelModel;
 
     public $personnelFiles;

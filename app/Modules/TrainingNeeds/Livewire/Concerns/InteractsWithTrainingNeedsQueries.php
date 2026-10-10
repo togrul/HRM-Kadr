@@ -22,7 +22,9 @@ use App\Modules\TrainingNeeds\Application\Services\TrainingNeedAnalyticsService;
 use App\Modules\TrainingNeeds\Application\Services\TrainingNeedReportingService;
 use App\Modules\TrainingNeeds\Application\Services\TrainingNeedSuggestionService;
 use App\Modules\TrainingNeeds\Application\Services\TrainingSessionProposalService;
+use App\Modules\TrainingNeeds\Support\TrainingStructureScope;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -118,7 +120,7 @@ trait InteractsWithTrainingNeedsQueries
 
     public function personnelOptions(): array
     {
-        $base = Personnel::query()
+        $base = TrainingStructureScope::onPersonnelTable(Personnel::query())
             ->select([
                 'id',
                 DB::raw("CONCAT(surname, ' ', name, ' ', patronymic, ' (#', tabel_no, ')') as label"),
@@ -191,6 +193,7 @@ trait InteractsWithTrainingNeedsQueries
             ->select('training_delivery_records.id', DB::raw("CONCAT(training_sessions.title, ' / ', personnels.surname, ' ', personnels.name) as label"))
             ->leftJoin('training_sessions', 'training_sessions.id', '=', 'training_delivery_records.training_session_id')
             ->leftJoin('personnels', 'personnels.id', '=', 'training_delivery_records.personnel_id')
+            ->tap(fn ($query) => TrainingStructureScope::onPersonnelTable($query))
             ->orderByDesc('training_delivery_records.completed_at')
             ->orderByDesc('training_delivery_records.id');
 
@@ -209,6 +212,7 @@ trait InteractsWithTrainingNeedsQueries
             ->select('training_need_items.id', DB::raw("CONCAT(training_competencies.name, ' / ', personnels.surname, ' ', personnels.name) as label"))
             ->leftJoin('training_competencies', 'training_competencies.id', '=', 'training_need_items.training_competency_id')
             ->leftJoin('personnels', 'personnels.id', '=', 'training_need_items.personnel_id')
+            ->tap(fn ($query) => TrainingStructureScope::onPersonnelTable($query))
             ->whereIn('training_need_items.status', ['approved', 'planned'])
             ->orderByDesc('training_need_items.id');
 
@@ -224,22 +228,7 @@ trait InteractsWithTrainingNeedsQueries
     public function getStatsProperty(): array
     {
         return $this->rememberRuntime('trainingNeeds.stats', function (): array {
-            return (array) DB::selectOne(
-                'select
-                    (select count(*) from training_competency_groups) as `groups`,
-                    (select count(*) from training_levels) as `levels`,
-                    (select count(*) from training_competencies) as `competencies`,
-                    (select count(*) from training_programs) as `programs`,
-                    (select count(*) from training_program_competency_map) as `program_maps`,
-                    (select count(*) from role_competency_requirements) as `requirements`,
-                    (select count(*) from employee_competency_profiles) as `profiles`,
-                    (select count(*) from training_need_items) as `needs`,
-                    (select count(*) from training_annual_plans) as `plans`,
-                    (select count(*) from training_plan_items) as `plan_items`,
-                    (select count(*) from training_sessions) as `sessions`,
-                    (select count(*) from training_delivery_records) as `deliveries`,
-                    (select count(*) from training_feedback_forms) as `feedback_forms`'
-            );
+            return app(TrainingNeedReportingService::class)->foundationStats();
         });
     }
 
@@ -275,7 +264,7 @@ trait InteractsWithTrainingNeedsQueries
 
     public function getRecentProfilesProperty(): Collection
     {
-        return EmployeeCompetencyProfile::query()
+        return TrainingStructureScope::onPersonnelColumn(EmployeeCompetencyProfile::query(), 'employee_competency_profiles.personnel_id')
             ->with([
                 'personnel:id,tabel_no,surname,name,patronymic',
                 'competency:id,name',
@@ -288,7 +277,7 @@ trait InteractsWithTrainingNeedsQueries
 
     public function getRecentNeedsProperty(): Collection
     {
-        return TrainingNeedItem::query()
+        return TrainingStructureScope::onPersonnelColumn(TrainingNeedItem::query(), 'training_need_items.personnel_id')
             ->with([
                 'personnel:id,tabel_no,surname,name,patronymic',
                 'competency:id,name',
@@ -378,9 +367,11 @@ trait InteractsWithTrainingNeedsQueries
                 ->with([
                     'plan:id,title,plan_year,plan_quarter,status',
                     'program:id,title,duration_hours',
+                    'participants' => fn (Relation $query) => TrainingStructureScope::onPersonnelColumn($query->getQuery(), 'training_session_participants.personnel_id'),
                     'participants.personnel:id,tabel_no,surname,name,patronymic',
                     'participants.trainingNeed:id,reason,priority,status',
-                    'deliveryRecords:id,training_session_id,personnel_id,certificate_path,certificate_name,completed_at',
+                    'deliveryRecords' => fn (Relation $query) => TrainingStructureScope::onPersonnelColumn($query->getQuery(), 'training_delivery_records.personnel_id')
+                        ->select(['id', 'training_session_id', 'personnel_id', 'certificate_path', 'certificate_name', 'completed_at']),
                     'deliveryRecords.personnel:id,tabel_no,surname,name,patronymic',
                     'feedbackForms:id,training_session_id,title,status',
                     'feedbackForms.responses:id,training_feedback_form_id,overall_score',
@@ -425,7 +416,7 @@ trait InteractsWithTrainingNeedsQueries
 
     public function getRecentDeliveryRecordsProperty(): Collection
     {
-        return TrainingDeliveryRecord::query()
+        return TrainingStructureScope::onPersonnelColumn(TrainingDeliveryRecord::query(), 'training_delivery_records.personnel_id')
             ->with([
                 'session:id,title,scheduled_start_at',
                 'program:id,title',
@@ -450,7 +441,7 @@ trait InteractsWithTrainingNeedsQueries
             return $recentRecord;
         }
 
-        return TrainingDeliveryRecord::query()
+        return TrainingStructureScope::onPersonnelColumn(TrainingDeliveryRecord::query(), 'training_delivery_records.personnel_id')
             ->with([
                 'session:id,title,scheduled_start_at',
                 'program:id,title',
@@ -471,7 +462,7 @@ trait InteractsWithTrainingNeedsQueries
 
     public function getRecentFeedbackResponsesProperty(): Collection
     {
-        return TrainingFeedbackResponse::query()
+        return TrainingStructureScope::onPersonnelColumn(TrainingFeedbackResponse::query(), 'training_feedback_responses.personnel_id')
             ->with(['form:id,title', 'personnel:id,tabel_no,surname,name,patronymic'])
             ->latest('submitted_at')
             ->limit(8)

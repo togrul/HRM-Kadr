@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\NormalizesFilterRanges;
+use App\Services\Vacation\VacationBalanceService;
 use App\Traits\CreateDeleteTrait;
 use App\Traits\DateCastTrait;
 use Carbon\Carbon;
@@ -29,6 +30,8 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property array<mixed>|null $description
  * @property string|null $status_label
  * @property int|null $status_color_id
+ * @property string|null $final_pdf_path Immutable final PDF of an approved order (local disk)
+ * @property string|null $final_pdf_sha256
  */
 class OrderLog extends Model
 {
@@ -62,6 +65,8 @@ class OrderLog extends Model
         'status_id',
         'creator_id',
         'deleted_by',
+        'final_pdf_path',
+        'final_pdf_sha256',
     ];
 
     protected $dates = [
@@ -96,6 +101,17 @@ class OrderLog extends Model
             'order_no',
             'tabel_no'
         );
+    }
+
+    /**
+     * The employees of a multi-participant (çoxşəxsli) order, in document order. Empty for
+     * single-person orders, whose one employee stays in template_snapshot.personnel_id.
+     *
+     * @return HasMany<OrderParticipant, $this>
+     */
+    public function participants(): HasMany
+    {
+        return $this->hasMany(OrderParticipant::class)->orderBy('position')->orderBy('id');
     }
 
     /** @return BelongsTo<OrderStatus, $this> */
@@ -226,10 +242,11 @@ class OrderLog extends Model
             ? $vacation->start_date->year
             : Carbon::parse($vacation->start_date)->year;
 
-        Vacation::where([
-            'tabel_no' => $vacation->tabel_no,
-            'year' => $year,
-        ])->increment('remaining_days', (int) $vacation->duration);
+        $personnel = Personnel::query()->withTrashed()->where('tabel_no', $vacation->tabel_no)->first();
+
+        if ($personnel) {
+            app(VacationBalanceService::class)->release($personnel, $year, (int) $vacation->duration);
+        }
     }
 
     protected function isEmrOrder(): bool

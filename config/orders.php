@@ -1,6 +1,20 @@
 <?php
 
 return [
+    /*
+     * LibreOffice binary used to convert order documents to PDF. Empty: common install
+     * paths, then the PATH (the Docker image installs it at /usr/bin/soffice).
+     */
+    'soffice_path' => env('ORDERS_SOFFICE_PATH'),
+
+    'final_pdf' => [
+        /*
+         * Store the immutable final PDF of an order right after it is approved. Without
+         * LibreOffice approval still succeeds; `orders:render-final-pdfs` backfills.
+         */
+        'on_approval' => (bool) env('ORDERS_FINAL_PDF_ON_APPROVAL', true),
+    ],
+
     'listing' => [
         /*
          * Order IDs visible globally in orders listing, without structure-based

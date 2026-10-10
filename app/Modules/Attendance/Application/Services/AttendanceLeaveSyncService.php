@@ -57,7 +57,7 @@ class AttendanceLeaveSyncService
 
         $tabelNo = $this->resolveCurrentTabelNo($leave);
         $from = $this->resolveCurrentDateString($leave, 'starts_at');
-        $to = $this->resolveCurrentDateString($leave, 'ends_at');
+        $to = $this->resolveCurrentDateString($leave, 'ends_at') ?? $this->openEnd($from);
 
         if ($tabelNo === '' || $from === null || $to === null) {
             return [];
@@ -87,6 +87,11 @@ class AttendanceLeaveSyncService
         $from = $original['starts_at'] ?? null;
         $to = $original['ends_at'] ?? null;
 
+        if (filled($from) && ! filled($to)) {
+            // Was open-ended: it covered its days up to today, which now need recomputing.
+            $to = $this->openEnd(Carbon::parse((string) $from)->toDateString());
+        }
+
         if ($tabelNo === '' || ! filled($from) || ! filled($to)) {
             return [];
         }
@@ -96,6 +101,19 @@ class AttendanceLeaveSyncService
             'from' => Carbon::parse((string) $from)->toDateString(),
             'to' => Carbon::parse((string) $to)->toDateString(),
         ]];
+    }
+
+    /**
+     * An open sick certificate's leave has no end date; its attendance reaches up to today
+     * (later days are picked up by the daily punch processing as they come).
+     */
+    private function openEnd(?string $from): ?string
+    {
+        if ($from === null) {
+            return null;
+        }
+
+        return max($from, Carbon::today()->toDateString());
     }
 
     private function isAttendanceRelevant(?int $statusId, bool $isApprovedByTimestamp): bool

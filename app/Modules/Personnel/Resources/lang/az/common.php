@@ -46,6 +46,7 @@ return [
         'other' => 'Digər',
     ],
     'labels' => [
+        'kinship_is_disabled' => 'Əlilliyi var',
         'action' => 'Əməliyyat',
         'number' => '#',
         'name' => 'Ad',
@@ -294,6 +295,24 @@ return [
             'sunday' => 'Bazar',
         ],
     ],
+    'presence' => [
+        'statuses' => [
+            'deleted' => 'Silinmiş',
+            'dismissed' => 'İşdən ayrılan',
+            'pending' => 'Təsdiq gözləyir',
+            'sick' => 'Xəstəlikdə',
+            'vacation' => 'Məzuniyyətdə',
+            'business_trip' => 'Ezamiyyətdə',
+            'leave' => 'İcazədə',
+            'at_work' => 'İşdə',
+        ],
+        'returns_on' => 'qayıdış: :date',
+        'period' => ':from – :to',
+        'filter_label' => 'Bu günkü vəziyyət',
+        'filter_any' => 'Bütün vəziyyətlər',
+        'filter_selected' => ':count vəziyyət seçilib',
+        'filter_clear' => 'Seçimi təmizlə',
+    ],
     'states' => [
         'deleted' => 'Silinmiş',
         'contract_expired' => 'Müqavilənin müddəti bitib',
@@ -303,9 +322,12 @@ return [
         'at_work' => 'İşdə',
     ],
     'hints' => [
+        'assignment_order_only' => 'Struktur bölmə və vəzifə köçürmə əmri ilə dəyişir.',
+        'create_transfer_order' => 'Köçürmə əmri yarat',
         'positions_without_staff_schedule' => 'Bu struktur üçün ştat cədvəlində vəzifə müəyyən edilməyib — bütün vəzifələr göstərilir.',
     ],
     'validation' => [
+        'assignment_order_only' => 'Struktur bölmə və vəzifə yalnız əmrlə dəyişdirilir.',
         'contract_end_after_start' => 'Müqavilənin bitmə tarixi işə başlama tarixindən sonra olmalıdır.',
         'contract_date_after_start' => 'Müqavilə işə başlama günündən gec bağlanmamalıdır: bağlanma tarixi işə başlama tarixi ilə eyni və ya ondan əvvəl olmalıdır.',
         'pin_format' => 'FİN yalnız latın hərfləri və rəqəmlərdən ibarət 7 simvol olmalıdır.',
@@ -341,5 +363,8 @@ return [
     'placeholders' => [
         'search' => 'Axtar...',
         'quick_search' => 'Ad, tabel №, FİN...',
+    ],
+    'sanctions' => [
+        'lifted' => 'Müddəti bitmiş intizam tənbehləri götürüldü: :count.',
     ],
 ];

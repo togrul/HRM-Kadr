@@ -68,7 +68,7 @@ class AddPersonnel extends Component
         $modelInstance = new Personnel;
 
         if (! empty($this->avatar)) {
-            $this->personalForm->personnel['photo'] = $this->avatar->store('personnel', 'public');
+            $this->personalForm->personnel['photo'] = $this->avatar->store('personnel', \App\Support\Uploads\PrivateFiles::DISK);
         }
 
         $assembled = app(PersonnelFormAssembler::class)->buildForStore(

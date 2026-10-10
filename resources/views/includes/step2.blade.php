@@ -117,11 +117,11 @@
                 <div class="flex items-center">
                     <label class="inline-flex items-center bg-zinc-100 rounded shadow-sm py-2 px-2">
                         <input type="radio" class="form-radio" name="documentForm.document.is_married" wire:model="documentForm.document.is_married" value="0">
-                        <span class="ml-2 text-sm font-normal">{{ __('personnel::common.labels.single') }}</span>
+                        <span class="ml-2 text-sm">{{ __('personnel::common.labels.single') }}</span>
                     </label>
                     <label class="inline-flex items-center ml-4 bg-zinc-100 rounded shadow-sm py-2 px-2">
                         <input type="radio" class="form-radio" name="documentForm.document.is_married" wire:model="documentForm.document.is_married" value="1">
-                        <span class="ml-2 text-sm font-normal">{{ __('personnel::common.labels.married') }}</span>
+                        <span class="ml-2 text-sm">{{ __('personnel::common.labels.married') }}</span>
                     </label>
                 </div>
                 @error('documentForm.document.is_married')
@@ -262,13 +262,7 @@
                                 </x-table.td>
                             </tr>
                         @empty
-                            <tr>
-                                <td colspan="5">
-                                    <div class="flex justify-center items-center py-4">
-                                        <span class="font-medium">{{ __('personnel::common.labels.no_information_added') }}</span>
-                                    </div>
-                                </td>
-                            </tr>
+                            <x-empty-inline :rows="5" />
                         @endforelse
                     </x-table.tbl>
                 </div>
@@ -356,13 +350,7 @@
                                 </x-table.td>
                             </tr>
                         @empty
-                            <tr>
-                                <td colspan="5">
-                                    <div class="flex justify-center items-center py-4">
-                                        <span class="font-medium">{{ __('personnel::common.labels.no_information_added') }}</span>
-                                    </div>
-                                </td>
-                            </tr>
+                            <x-empty-inline :rows="5" />
                         @endforelse
                     </x-table.tbl>
                 </div>

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Personnel;
+use App\Support\Uploads\PrivateFiles;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpWord\Shared\Converter;
@@ -40,8 +41,10 @@ class CvWordExportService extends BaseWordExportService
 
         $photoWidthCm = 3.51;
         $photoHeightCm = 4.5;
-        if (! empty($personnel->photo) && Storage::disk('public')->exists($personnel->photo)) {
-            $section->addImage(Storage::disk('public')->path($personnel->photo), [
+        $photoPath = (string) $personnel->getAttribute('photo');
+        $photoDisk = PrivateFiles::locate($photoPath);
+        if ($photoDisk !== null) {
+            $section->addImage(Storage::disk($photoDisk)->path($photoPath), [
                 'width' => Converter::cmToPoint($photoWidthCm),
                 'height' => Converter::cmToPoint($photoHeightCm),
                 'ratio' => false,

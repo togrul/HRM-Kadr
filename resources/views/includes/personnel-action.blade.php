@@ -167,6 +167,28 @@
         @endif
     </div>
 
+    {{-- Dəyişiklik siyasəti: jurnal rejimli sahə dəyişəndə səbəb; əlaqə qrupları üzrə rədd mesajları. --}}
+    @if (! empty($personnelModel) && method_exists($this, 'journalGroupLabels'))
+        @php $journalGroups = $this->journalGroupLabels; @endphp
+        @foreach ($errors->get('changePolicy.*') as $policyMessages)
+            @foreach ((array) $policyMessages as $policyMessage)
+                <p class="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-[12.5px] leading-5 text-amber-800" role="alert">{{ $policyMessage }}</p>
+            @endforeach
+        @endforeach
+        @if ($journalGroups !== [] || $errors->has('changeReason'))
+            <div class="mt-4 rounded-xl border border-sky-200 bg-sky-50/60 px-4 py-3" wire:key="personnel-change-reason">
+                <x-label required for="changeReason">{{ __('personnel::change_policy.reason.label') }}</x-label>
+                @if ($journalGroups !== [])
+                    <p class="mt-0.5 text-[11.5px] leading-4 text-ink-faint">{{ __('personnel::change_policy.reason.hint', ['groups' => implode(', ', $journalGroups)]) }}</p>
+                @endif
+                <x-livewire-input mode="gray" name="changeReason" maxlength="500" placeholder="{{ __('personnel::change_policy.reason.placeholder') }}" wire:model="changeReason"></x-livewire-input>
+                @error('changeReason')
+                    <x-validation> {{ $message }} </x-validation>
+                @enderror
+            </div>
+        @endif
+    @endif
+
     {{-- Sticky: the actions stay in reach however long the step is. --}}
     <div class="sticky bottom-0 z-20 -mb-4 flex w-full items-center justify-between gap-3 border-t border-hairline bg-white/95 py-3 backdrop-blur supports-[backdrop-filter]:bg-white/80">
         @if(! auth()->user()->can('edit-personnels') && isset($personnelModel))

@@ -8,6 +8,7 @@ use App\Models\Personnel;
 use App\Models\PersonnelBusinessTrip;
 use App\Models\PersonnelVacation;
 use App\Models\User;
+use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 
 class MyHrRequestCorrectionService
@@ -30,10 +31,7 @@ class MyHrRequestCorrectionService
     private function resolveRequestable(Personnel $personnel, string $requestType, int $recordId): Leave|PersonnelVacation|PersonnelBusinessTrip
     {
         return match ($requestType) {
-            'leave' => Leave::query()
-                ->whereKey($recordId)
-                ->where('tabel_no', $personnel->tabel_no)
-                ->firstOrFail(),
+            'leave' => $this->correctableLeave($personnel, $recordId),
             'vacation' => PersonnelVacation::query()
                 ->whereKey($recordId)
                 ->where('tabel_no', $personnel->tabel_no)
@@ -44,6 +42,23 @@ class MyHrRequestCorrectionService
                 ->firstOrFail(),
             default => throw new InvalidArgumentException("Unsupported request type [{$requestType}]."),
         };
+    }
+
+    /**
+     * @throws ValidationException when the leave belongs to a sick-leave certificate
+     */
+    private function correctableLeave(Personnel $personnel, int $recordId): Leave
+    {
+        $leave = Leave::query()
+            ->whereKey($recordId)
+            ->where('tabel_no', $personnel->tabel_no)
+            ->firstOrFail();
+
+        if ($leave->isManagedBySickCertificate()) {
+            throw ValidationException::withMessages(['correctionForm.reason' => __('personnel::my_hr.requests.messages.sick_certificate_not_correctable')]);
+        }
+
+        return $leave;
     }
 
     private function normalizePatch(Leave|PersonnelVacation|PersonnelBusinessTrip $requestable, array $patch): array

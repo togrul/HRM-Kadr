@@ -3,12 +3,16 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Modules\Attendance\Application\Services\AttendanceMonthLockReader;
+use App\Modules\Attendance\Contracts\AttendanceMonthLock;
 use App\Modules\Compensation\Application\Services\CompensationService;
 use App\Modules\Compensation\Contracts\OrderCompensationSync;
 use App\Modules\Integration\Domain\Contracts\IntegrationOutbox;
 use App\Modules\Integration\Domain\Contracts\PayrollOwnership;
 use App\Modules\Integration\Infrastructure\NullIntegrationOutbox;
 use App\Modules\Integration\Support\ConfiguredPayrollOwnership;
+use App\Modules\Payroll\Application\Services\PayrollClosedPeriodCheck;
+use App\Modules\Payroll\Contracts\ClosedPeriodCheck;
 use App\Services\Features\FeatureState;
 use App\Services\HrPolicies\HrPolicyPackService;
 use App\Services\NumberToWordsService;
@@ -26,6 +30,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Blaze\Blaze;
 use Livewire\Livewire;
+use PhpOffice\PhpWord\Settings as PhpWordSettings;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -65,6 +70,11 @@ class AppServiceProvider extends ServiceProvider
         // not the compensation module's provider is loaded.
         $this->app->bind(OrderCompensationSync::class, CompensationService::class);
 
+        // Same reason: undoing an approved order asks whether its month is closed for pay,
+        // whether or not the payroll / attendance module providers are loaded.
+        $this->app->bind(AttendanceMonthLock::class, AttendanceMonthLockReader::class);
+        $this->app->bind(ClosedPeriodCheck::class, PayrollClosedPeriodCheck::class);
+
         $this->app->singleton(NumberToWordsService::class, fn () => new NumberToWordsService);
         $this->app->singleton(StructureService::class, fn () => new StructureService);
 
@@ -95,6 +105,11 @@ class AppServiceProvider extends ServiceProvider
         $this->configureBlazeOptimization();
         $this->loadLogDatabaseMigrationsInTests();
         Livewire::componentHook(ClearFieldErrorOnUpdate::class);
+
+        // PhpWord: dəyərlər (ad, ünvan, təsvir…) Word XML-ə yazılanda escape olunsun —
+        // yoxsa `<`/`&` sənədi pozur və ya XML yeridilməsinə yol açır. TemplateProcessor::setValue
+        // və Word2007/HTML yazıcıları bu bayrağa baxır; bir dəfə qlobal yandırılır.
+        PhpWordSettings::setOutputEscapingEnabled(true);
     }
 
     /**
@@ -134,10 +149,10 @@ class AppServiceProvider extends ServiceProvider
      */
     private function registerMacros(): void
     {
+        // Struktur görünürlüyü: «bütün strukturlar» bayrağı heç nə əlavə etmir, boş
+        // görünürlük heç bir struktur qaytarmır (fail closed).
         Builder::macro('accessible', function (?User $user = null) {
-            $ids = resolve(StructureService::class)->getAccessibleStructures($user);
-
-            return empty($ids) ? $this : $this->whereIn('id', $ids);
+            return resolve(StructureService::class)->scopeFor($user)->constrain($this, $this->getModel()->qualifyColumn('id'));
         });
     }
 

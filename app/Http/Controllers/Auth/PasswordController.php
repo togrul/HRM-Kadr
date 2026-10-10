@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 
 class PasswordController extends Controller
@@ -25,8 +26,12 @@ class PasswordController extends Controller
 
         $user->forceFill([
             'password' => Hash::make($validated['password']),
+            'remember_token' => Str::random(60),
             'must_reset_password' => false,
         ])->save();
+
+        // Bu sessiya qalır (AuthenticateSession cavabdan sonra yeni heşi yazır), digər
+        // cihazlardakı sessiyalar isə növbəti sorğuda bağlanır.
 
         // A forced reset lands back on a clean profile page (no reset banner), free to go anywhere.
         if ($wasForced) {

@@ -2,16 +2,26 @@
 
 namespace App\Modules\Compensation\Application\Services;
 
+use App\Models\CompensationRegime;
 use App\Models\EmployeeCompensation;
+use App\Models\EmployeeSubstitution;
 use App\Modules\Compensation\Contracts\OrderCompensationSync;
+use App\Modules\Personnel\Contracts\GuardsPersonnelChanges;
+use App\Modules\Personnel\Contracts\PersonnelChangeMode;
+use App\Support\Database\InstalledTables;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class CompensationService implements OrderCompensationSync
 {
     /** Note stamped on the draft a hire order seeds; the reversal finds the draft by it. */
     public const HIRE_DRAFT_NOTE = 'auto: hire';
+
+    /** Note stamped on the compensation a salary-change order assigns. */
+    public const SALARY_CHANGE_NOTE = 'auto: salary change';
 
     /**
      * Assign a new effective-dated compensation, closing any currently active one.
@@ -43,6 +53,53 @@ class CompensationService implements OrderCompensationSync
 
             return $compensation;
         });
+    }
+
+    /**
+     * Kompensasiya ekranından əl ilə təyinat. Əmək haqqı Personnel modulunun dəyişiklik
+     * siyasətində «salary» qrupudur: aktiv maaşı olan əməkdaşda `order` rejimi bu yolu
+     * bağlayır (dəyişiklik yalnız SalaryChangeEffect / işə qəbul ilə), `journal` rejimi isə
+     * səbəb tələb edir və köhnə → yeni dəyərləri audit jurnalına yazır. Aktiv maaş yoxdursa
+     * (yeni əməkdaş, işə qəbul qaralamasının təsdiqi) bu ilk təyinatdır və siyasətə düşmür.
+     *
+     * @param  array<string,mixed>  $data
+     * @param  array<int,array<string,mixed>>  $lines
+     *
+     * @throws ValidationException
+     */
+    public function assignManually(string $tabelNo, array $data, array $lines = [], ?string $reason = null, string $errorKey = 'reason'): EmployeeCompensation
+    {
+        $active = $this->activeFor($tabelNo);
+
+        if ($active !== null) {
+            app(GuardsPersonnelChanges::class)->authorizeExternalChange(
+                'salary',
+                $reason,
+                [
+                    'base_amount' => ['old' => (string) $active->base_amount, 'new' => (string) ($data['base_amount'] ?? '')],
+                    'currency' => ['old' => (string) $active->currency, 'new' => (string) ($data['currency'] ?? 'AZN')],
+                    'regime_id' => ['old' => $active->getAttribute('regime_id'), 'new' => $data['regime_id'] ?? null],
+                    'effective_from' => ['old' => $active->effective_from?->toDateString(), 'new' => (string) ($data['effective_from'] ?? '')],
+                ],
+                ['tabel_no' => $tabelNo, 'source' => 'compensation'],
+                $errorKey,
+                $active,
+            );
+        }
+
+        return $this->assignCompensation($tabelNo, $data, $lines);
+    }
+
+    /**
+     * Əl ilə təyinat ekranının dəyişiklik siyasəti rejimi; aktiv maaş yoxdursa null (ilk təyinat).
+     */
+    public function manualSalaryMode(string $tabelNo): ?PersonnelChangeMode
+    {
+        if ($this->activeFor($tabelNo) === null) {
+            return null;
+        }
+
+        return app(GuardsPersonnelChanges::class)->modeFor('salary');
     }
 
     /**
@@ -188,6 +245,104 @@ class CompensationService implements OrderCompensationSync
         return $compensation;
     }
 
+    public function changeSalaryFromOrder(string $tabelNo, float $baseAmount, Carbon $effectiveFrom, ?string $orderNo): ?array
+    {
+        if (! InstalledTables::has('employee_compensations')) {
+            return null;
+        }
+
+        $current = $this->currentFor($tabelNo, $effectiveFrom)
+            ?? EmployeeCompensation::query()->where('tabel_no', $tabelNo)->where('status', 'active')->orderByDesc('effective_from')->with('lines')->first();
+        $regimeId = $current?->getAttribute('regime_id')
+            ?? CompensationRegime::query()->where('is_active', true)->orderBy('sort')->value('id');
+
+        if (! $regimeId) {
+            return null;
+        }
+
+        $ended = EmployeeCompensation::query()
+            ->where('tabel_no', $tabelNo)
+            ->where('status', 'active')
+            ->get(['id', 'status', 'effective_to'])
+            ->map(fn (EmployeeCompensation $row): array => [
+                'id' => (int) $row->id,
+                'status' => (string) $row->getAttribute('status'),
+                'effective_to' => $row->effective_to?->toDateString(),
+            ])
+            ->values()
+            ->all();
+
+        $lines = $current
+            ? $current->lines->map(fn (Model $line): array => $line->only(['component_id', 'amount', 'percent', 'note']))->all()
+            : [];
+
+        $compensation = $this->assignCompensation($tabelNo, [
+            'regime_id' => $regimeId,
+            'pay_grade_id' => $current?->getAttribute('pay_grade_id'),
+            'base_amount' => round($baseAmount, 2),
+            'currency' => $current->currency ?? 'AZN',
+            'effective_from' => $effectiveFrom->toDateString(),
+            'order_no' => $orderNo,
+            'note' => self::SALARY_CHANGE_NOTE,
+        ], $lines);
+
+        return ['compensation_id' => (int) $compensation->id, 'ended' => $ended];
+    }
+
+    public function revertSalaryChange(array $state): void
+    {
+        if (! InstalledTables::has('employee_compensations')) {
+            return;
+        }
+
+        DB::transaction(function () use ($state): void {
+            $assigned = isset($state['compensation_id']) ? EmployeeCompensation::query()->find((int) $state['compensation_id']) : null;
+            if ($assigned !== null) {
+                $assigned->lines()->delete();
+                $assigned->delete();
+            }
+
+            foreach ($state['ended'] ?? [] as $previous) {
+                EmployeeCompensation::query()->whereKey((int) $previous['id'])->get()->each(
+                    fn (EmployeeCompensation $row) => $row->update([
+                        'status' => $previous['status'],
+                        'effective_to' => $previous['effective_to'],
+                    ])
+                );
+            }
+        });
+    }
+
+    public function recordSubstitution(string $tabelNo, array $terms, string $sourceKey): ?int
+    {
+        if (! InstalledTables::has('employee_substitutions')) {
+            return null;
+        }
+
+        $record = EmployeeSubstitution::query()->updateOrCreate(['source_key' => $sourceKey], [
+            'tabel_no' => $tabelNo,
+            'substituted_tabel_no' => $terms['substituted_tabel_no'] ?? null,
+            'substituted_name' => $terms['substituted_name'] ?? null,
+            'substituted_position_id' => $terms['substituted_position_id'] ?? null,
+            'start_date' => $terms['start_date'],
+            'end_date' => $terms['end_date'] ?? null,
+            'extra_pay_percent' => $terms['extra_pay_percent'] ?? null,
+            'extra_pay_amount' => $terms['extra_pay_amount'] ?? null,
+            'order_no' => $terms['order_no'] ?? null,
+        ]);
+
+        return (int) $record->id;
+    }
+
+    public function removeSubstitution(string $sourceKey): void
+    {
+        if (! InstalledTables::has('employee_substitutions')) {
+            return;
+        }
+
+        EmployeeSubstitution::query()->where('source_key', $sourceKey)->delete();
+    }
+
     public function currentFor(string $tabelNo, ?Carbon $date = null): ?EmployeeCompensation
     {
         $on = ($date ?? now())->toDateString();
@@ -212,6 +367,15 @@ class CompensationService implements OrderCompensationSync
             ->orderByDesc('effective_from')
             ->with(['regime', 'payGrade'])
             ->get();
+    }
+
+    private function activeFor(string $tabelNo): ?EmployeeCompensation
+    {
+        return EmployeeCompensation::query()
+            ->where('tabel_no', $tabelNo)
+            ->where('status', 'active')
+            ->orderByDesc('effective_from')
+            ->first();
     }
 
     private function endActive(string $tabelNo, Carbon $newEffectiveFrom): void

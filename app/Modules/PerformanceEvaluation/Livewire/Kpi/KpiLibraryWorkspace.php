@@ -15,6 +15,9 @@ use App\Modules\PerformanceEvaluation\Application\Services\Kpi\KpiLibraryService
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\KpiNotificationDelivery;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\KpiTemplateService;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\RestKpiConnector;
+use App\Services\StructureService;
+use App\Services\UserAdministrationGuard;
+use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -272,6 +275,8 @@ class KpiLibraryWorkspace extends Component
     public function testFormula(): void
     {
         $this->authorize('manage-performance-evaluation');
+        // Same bound as on save, before anything parses the formula.
+        $this->validate(['kpiForm.formula' => ['required', 'string', 'max:'.KpiFormula::MAX_LENGTH]]);
         $this->checkFormula((string) ($this->kpiForm['code'] ?? ''), (string) ($this->kpiForm['formula'] ?? ''), (string) ($this->kpiForm['type'] ?? 'quantitative'));
 
         $formula = app(KpiFormula::class);
@@ -335,7 +340,9 @@ class KpiLibraryWorkspace extends Component
         $this->authorize('manage-performance-evaluation');
         $this->validate($this->connectorRules(true));
 
-        $personnel = Personnel::query()->whereNotNull('tabel_no')->where('is_pending', false)->orderBy('id')->first();
+        $personnel = app(StructureService::class)->scopeFor(auth()->user())
+            ->constrain(Personnel::query(), 'structure_id')
+            ->whereNotNull('tabel_no')->where('is_pending', false)->orderBy('id')->first();
         if ($personnel === null) {
             $this->dispatch('notify', type: 'error', message: __('performance_evaluation::kpi.connector.errors.no_person'));
 
@@ -467,7 +474,12 @@ class KpiLibraryWorkspace extends Component
         $required = $always ? 'required' : 'required_if:kpiForm.source_metric,rest';
 
         return [
-            'connectorForm.url' => [$required, 'nullable', 'string', 'max:1000', 'regex:#^https?://#i'],
+            'connectorForm.url' => [$required, 'nullable', 'string', 'max:1000', 'regex:#^https?://#i', function (string $attribute, mixed $value, Closure $fail): void {
+                // FİN-i xarici sistemə ötürmək yalnız istifadəçi idarəçisinə açıqdır.
+                if (is_string($value) && RestKpiConnector::usesSensitivePlaceholder($value) && ! auth()->user()?->can(UserAdministrationGuard::MANAGE_USERS)) {
+                    $fail(__('performance_evaluation::kpi.connector.errors.pin_requires_admin'));
+                }
+            }],
             'connectorForm.auth' => [$required, 'nullable', Rule::in(RestKpiConnector::AUTH_TYPES)],
             'connectorForm.username' => ['nullable', 'string', 'max:255'],
             'connectorForm.secret' => ['nullable', 'string', 'max:2000'],
@@ -494,6 +506,8 @@ class KpiLibraryWorkspace extends Component
 
         return [
             'url' => $url,
+            'sensitive_url_sha256' => RestKpiConnector::usesSensitivePlaceholder($url)
+                && auth()->user()?->can(UserAdministrationGuard::MANAGE_USERS) ? hash('sha256', $url) : '',
             'auth' => $auth,
             'username' => trim((string) ($this->connectorForm['username'] ?? '')),
             'token' => $auth === 'bearer' ? ($secret !== '' ? $secret : (string) ($stored['token'] ?? '')) : '',

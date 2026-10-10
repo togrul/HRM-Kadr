@@ -36,6 +36,7 @@ return [
     ],
 
     'periods' => [
+        'closed' => 'closed',
         'title' => 'New period',
         'list' => 'Periods',
         'empty' => 'No periods yet',
@@ -59,6 +60,7 @@ return [
     ],
 
     'fields' => [
+        'reopen_reason' => 'Reason for reopening',
         'year' => 'Year',
         'month' => 'Month',
         'period' => 'Period',
@@ -69,6 +71,7 @@ return [
         'deductions' => 'Deductions',
         'proration' => 'Proration (attendance)',
         'retro' => 'Pending retro adjustment',
+        'retro_recovery' => 'Recovery of overpaid pay for a revoked order (retro)',
         'loan_type' => 'Type',
         'principal' => 'Principal',
         'monthly_installment' => 'Monthly installment',
@@ -84,6 +87,7 @@ return [
     ],
 
     'actions' => [
+        'reopen_period' => 'Reopen period',
         'create_period' => 'Create period',
         'create_run' => 'Create run',
         'view_payslips' => 'Payslips',
@@ -113,6 +117,13 @@ return [
 
     'loan' => [
         'line' => 'Loan/advance repayment',
+    ],
+
+    'order_earnings' => [
+        'rest_day_work' => 'Work on a non-working day (double rate, :days day(s), :hours h)',
+        'rest_day_work_mixed' => 'Work on a non-working day (:days day(s), :hours h; :within h within the norm at single rate, the rest double)',
+        'substitution' => 'Substitution extra pay (:days working day(s))',
+        'substitution_for' => 'Substitution extra pay — :name (:days working day(s))',
     ],
 
     'run_types' => [
@@ -153,6 +164,7 @@ return [
     ],
 
     'confirm' => [
+        'reopen_period' => 'The closed payroll month will be reopened and this is written to the audit log. Continue?',
         'approve' => 'The :period run will be approved — :count employees, net total :total :currency. Continue?',
         'approve_masked' => 'The :period run will be approved — :count employees. Continue?',
         'lock' => 'The run will be locked and payslips frozen. Continue?',
@@ -161,6 +173,13 @@ return [
     ],
 
     'messages' => [
+        'pay_changed' => 'Pay inputs (compensation, attendance, deductions, back pay or headcount) changed after the calculation — reopen and recalculate the run',
+        'period_closed' => 'This payroll month is closed — reopen the period with a reason first',
+        'regular_run_exists' => 'A regular run already exists for this period and regime — use an off-cycle run for extra payments',
+        'period_delete_blocked' => 'A closed period or a period with approved/locked runs cannot be deleted',
+        'period_reopened' => 'Period reopened',
+        'reopen_reason_required' => 'State the reason for reopening the period in at least :min characters',
+        'period_not_closed' => 'Only a closed period can be reopened',
         'period_created' => 'Period created',
         'run_created' => 'Run created',
         'calculated' => 'Calculated',
@@ -174,5 +193,6 @@ return [
         'lock_requires_approval' => 'The run must be approved before it can be locked',
         'reopen_not_allowed' => 'Only an approved or locked run can be reopened',
         'recalculate_first' => 'One-off earnings changed after this run was calculated — reopen and recalculate it',
+        'order_earnings_changed' => 'Order-based pay (non-working day work, substitution) changed after this run was calculated — reopen and recalculate it',
     ],
 ];

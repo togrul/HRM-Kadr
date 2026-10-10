@@ -4,12 +4,16 @@ namespace App\Observers;
 
 use App\Enums\OrderStatusEnum;
 use App\Models\Leave;
+use App\Models\Personnel;
 use App\Models\User;
 use App\Modules\Attendance\Application\Services\AttendanceLeaveSyncService;
 use App\Notifications\LeaveStatusChanged;
 use App\Notifications\NewLeaveRequested;
 use App\Services\Modules\ModuleState;
+use App\Services\StructureService;
+use App\Support\Uploads\PrivateFiles;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Models\Permission;
 
@@ -17,7 +21,7 @@ class LeaveObserver
 {
     public function created(Leave $leave): void
     {
-        Notification::send($this->notificationRecipients(), new NewLeaveRequested($leave));
+        Notification::send($this->notificationRecipients($leave), new NewLeaveRequested($leave));
 
         $this->syncAttendance($leave);
 
@@ -30,6 +34,15 @@ class LeaveObserver
 
     public function updated(Leave $leave): void
     {
+        $oldPath = $leave->getOriginal('document_path');
+        if ($leave->wasChanged('document_path') && filled($oldPath)) {
+            DB::afterCommit(function () use ($oldPath): void {
+                if (! Leave::withTrashed()->where('document_path', $oldPath)->exists()) {
+                    PrivateFiles::delete((string) $oldPath);
+                }
+            });
+        }
+
         $this->syncAttendance($leave, $leave->getOriginal());
 
         if (! $leave->isDirty('status_id')) {
@@ -43,7 +56,7 @@ class LeaveObserver
 
         $notification = new LeaveStatusChanged($leave);
 
-        Notification::send($this->notificationRecipients(), $notification);
+        Notification::send($this->notificationRecipients($leave), $notification);
 
         // Notify requester by email if we have it
         // $requesterEmail = $leave->personnel?->email;
@@ -74,7 +87,11 @@ class LeaveObserver
         app(AttendanceLeaveSyncService::class)->syncLeaveChange($leave, $original);
     }
 
-    private function notificationRecipients(): EloquentCollection
+    /**
+     * get-notification icazəsi olan, struktur görünürlüyü icazənin işçisini əhatə edən
+     * istifadəçilər — başqa strukturun işçisi haqqında bildiriş getməməlidir.
+     */
+    private function notificationRecipients(Leave $leave): EloquentCollection
     {
         $guard = config('auth.defaults.guard', 'web');
 
@@ -87,6 +104,12 @@ class LeaveObserver
             return new EloquentCollection;
         }
 
-        return User::permission('get-notification')->get();
+        $structureId = Personnel::withTrashed()->where('tabel_no', $leave->tabel_no)->value('structure_id');
+        $structures = app(StructureService::class);
+
+        return User::permission('get-notification')
+            ->get()
+            ->filter(fn (User $user): bool => $structures->allows($user, $structureId))
+            ->values();
     }
 }

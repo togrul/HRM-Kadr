@@ -3,6 +3,7 @@
 namespace App\Modules\Orders\Infrastructure\Document;
 
 use App\Models\OrderLog;
+use App\Models\OrderParticipant;
 use App\Models\Personnel;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -28,7 +29,7 @@ class OrderIssueService
      * field inputs + the picked personnel; the filled .docx is attached separately via
      * attachUploadedDocx(). No HTML is stored — the .docx is the document.
      *
-     * @param  array{template_code:string,label?:string,personnel_id?:?int,fields?:array<string,mixed>,order_number:string,order_date?:string,given_by?:string,given_by_rank?:string,signatory?:array<string,mixed>}  $data
+     * @param  array{template_code:string,label?:string,personnel_id?:?int,fields?:array<string,mixed>,order_number:string,order_date?:string,given_by?:string,given_by_rank?:string,signatory?:array<string,mixed>,participants?:list<array{personnel_id:int,fields?:array<string,mixed>}>|null}  $data
      */
     public function issueWord(array $data): OrderLog
     {
@@ -59,7 +60,8 @@ class OrderIssueService
                 ],
             ]);
 
-            $this->syncPersonnel($orderLog, $data['personnel_id'] ?? null, attach: true);
+            $this->syncParticipants($orderLog, $data['participants'] ?? null);
+            $this->syncPersonnel($orderLog, $this->subjectIds($data), attach: true);
 
             return $orderLog;
         });
@@ -69,7 +71,7 @@ class OrderIssueService
      * Re-freeze a still-pending docx order with corrected fields/personnel. The caller
      * regenerates and re-attaches the .docx, so the stale path is dropped here.
      *
-     * @param  array{template_code?:string,label?:string,personnel_id?:?int,fields?:array<string,mixed>,order_number:string,order_date?:string,signatory?:array<string,mixed>}  $data
+     * @param  array{template_code?:string,label?:string,personnel_id?:?int,candidate_id?:?int,hire_structure_id?:?int,hire_position_id?:?int,fields?:array<string,mixed>,order_number:string,order_date?:string,signatory?:array<string,mixed>,participants?:list<array{personnel_id:int,fields?:array<string,mixed>}>|null}  $data
      */
     public function updateWord(OrderLog $orderLog, array $data): OrderLog
     {
@@ -102,7 +104,8 @@ class OrderIssueService
                 ]),
             ]);
 
-            $this->syncPersonnel($orderLog, $data['personnel_id'] ?? null, attach: false);
+            $this->syncParticipants($orderLog, $data['participants'] ?? null);
+            $this->syncPersonnel($orderLog, $this->subjectIds($data), attach: false);
 
             return $orderLog;
         });
@@ -132,6 +135,11 @@ class OrderIssueService
             'order_number' => $this->copyNumber((string) $source->order_no),
             'order_date' => $snapshot['order_date_text'] ?? '',
             'signatory' => $source->signatory_snapshot,
+            'participants' => $source->participants()->exists()
+                ? $source->participants()->get(['personnel_id', 'fields'])
+                    ->map(fn (OrderParticipant $participant): array => ['personnel_id' => (int) $participant->personnel_id, 'fields' => (array) $participant->fields])
+                    ->all()
+                : null,
         ]);
     }
 
@@ -155,10 +163,53 @@ class OrderIssueService
         return $candidate;
     }
 
-    private function syncPersonnel(OrderLog $orderLog, ?int $personnelId, bool $attach): void
+    /**
+     * Who the order is about: every participant of a multi-participant order, else the one
+     * picked employee.
+     *
+     * @param  array<string,mixed>  $data
+     * @return list<int>
+     */
+    private function subjectIds(array $data): array
     {
-        $personnel = ! empty($personnelId) ? Personnel::find($personnelId) : null;
-        $tabel = $personnel && $personnel->tabel_no ? [$personnel->tabel_no] : [];
+        if (is_array($data['participants'] ?? null)) {
+            return array_map('intval', array_column($data['participants'], 'personnel_id'));
+        }
+
+        return empty($data['personnel_id']) ? [] : [(int) $data['personnel_id']];
+    }
+
+    /**
+     * Store a multi-participant order's people in document order with their own field
+     * values (replacing the previous list on edit). Null = a single-person order: nothing
+     * is stored and any earlier rows go.
+     *
+     * @param  list<array{personnel_id:int,fields?:array<string,mixed>}>|null  $participants
+     */
+    private function syncParticipants(OrderLog $orderLog, ?array $participants): void
+    {
+        $orderLog->participants()->delete();
+
+        foreach ($participants ?? [] as $index => $participant) {
+            $orderLog->participants()->create([
+                'personnel_id' => (int) $participant['personnel_id'],
+                'position' => $index + 1,
+                'fields' => (array) ($participant['fields'] ?? []),
+            ]);
+        }
+    }
+
+    /**
+     * Link the order's employees by tabel number (order_log_personnels) — the link the order
+     * list's visibility scope and the employee card's «Əmrlər» feed read.
+     *
+     * @param  list<int>  $personnelIds
+     */
+    private function syncPersonnel(OrderLog $orderLog, array $personnelIds, bool $attach): void
+    {
+        $tabel = $personnelIds === []
+            ? []
+            : Personnel::query()->whereKey($personnelIds)->whereNotNull('tabel_no')->pluck('tabel_no')->unique()->values()->all();
 
         if ($attach) {
             foreach ($tabel as $t) {

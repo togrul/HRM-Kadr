@@ -4,13 +4,16 @@ namespace App\Modules\Personnel\Livewire\ProfessionalPortfolio;
 
 use App\Models\Personnel;
 use App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioPermissionMatrix;
+use App\Services\StructureService;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 class ProfessionalPortfolio extends Component
 {
+    #[Locked]
     public int $personnelId;
 
     public string $activeTab = 'events';
@@ -23,6 +26,7 @@ class ProfessionalPortfolio extends Component
 
         $this->personnelId = (int) $personnelModel;
         abort_if($this->personnelId <= 0, 404);
+        abort_unless(app(StructureService::class)->allowsPersonnelId(auth()->user(), $this->personnelId), 403);
 
         $this->refreshSummary();
     }

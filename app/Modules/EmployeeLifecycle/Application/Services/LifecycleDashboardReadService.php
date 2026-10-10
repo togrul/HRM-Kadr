@@ -2,6 +2,9 @@
 
 namespace App\Modules\EmployeeLifecycle\Application\Services;
 
+use App\Models\User;
+use App\Services\StructureScope;
+use App\Services\StructureService;
 use App\Support\Database\InstalledTables;
 use Illuminate\Contracts\Database\Query\Expression;
 use Illuminate\Database\Query\Builder;
@@ -13,6 +16,20 @@ use Illuminate\Support\Facades\DB;
 class LifecycleDashboardReadService
 {
     public const PER_PAGE = 15;
+
+    /**
+     * Baxan istifadəçinin struktur görünürlüyü; null yalnız sistem axınları üçündür.
+     * Ekran həmişə forViewer() ilə gəlir — işçi sətirləri görünürlüklə məhdudlaşır.
+     */
+    private ?StructureScope $scope = null;
+
+    public function forViewer(?User $viewer): static
+    {
+        $clone = clone $this;
+        $clone->scope = app(StructureService::class)->scopeFor($viewer);
+
+        return $clone;
+    }
 
     /** The overdue-task queue is a scrolling side list; its header shows the full count. */
     private const OVERDUE_TASK_LIMIT = 50;
@@ -297,7 +314,7 @@ class LifecycleDashboardReadService
 
         $query = DB::table('employee_lifecycle_events');
 
-        if ($withContext || $search !== '') {
+        if ($withContext || $search !== '' || $this->restricts()) {
             $this->joinPersonnel($query, 'employee_lifecycle_events')
                 ->leftJoin('structures', 'structures.id', '=', DB::raw('COALESCE(lp.structure_id, lpt.structure_id)'))
                 ->leftJoin('positions', 'positions.id', '=', DB::raw('COALESCE(lp.position_id, lpt.position_id)'))
@@ -351,11 +368,59 @@ class LifecycleDashboardReadService
      */
     private function joinPersonnel(Builder $query, string $table): Builder
     {
-        return $query
+        $query
             ->leftJoin('personnels as lp', 'lp.id', '=', $table.'.personnel_id')
             ->leftJoin('personnels as lpt', function (JoinClause $join) use ($table): void {
                 $join->on('lpt.tabel_no', '=', $table.'.tabel_no')->whereNull('lp.id');
             });
+
+        return $this->scopePersonnel($query);
+    }
+
+    /**
+     * Sınaq/yerdəyişmə/ayrılma qeydinin işçisi görünürlükdədirmi (forViewer() nüsxəsində).
+     *
+     * @param  'employee_lifecycle_probation_reviews'|'employee_lifecycle_movements'|'employee_lifecycle_offboarding_cases'|'employee_lifecycle_events'  $table
+     */
+    public function isRecordVisible(string $table, int $id): bool
+    {
+        if (! InstalledTables::has($table)) {
+            return false;
+        }
+
+        return $this->joinPersonnel(DB::table($table), $table)->where($table.'.id', $id)->exists();
+    }
+
+    public function isPersonnelVisible(int $personnelId): bool
+    {
+        if ($this->scope === null || $this->scope->isAll()) {
+            return true;
+        }
+
+        return $this->scope->allows(DB::table('personnels')->where('id', $personnelId)->value('structure_id'));
+    }
+
+    /** Görünürlük məhdudiyyəti varmı (forViewer() və «bütün strukturlar» deyil). */
+    private function restricts(): bool
+    {
+        return $this->scope !== null && ! $this->scope->isAll();
+    }
+
+    /**
+     * lp/lpt qoşulmuş sorğunu işçinin strukturu ilə məhdudlaşdırır. Struktursuz və ya
+     * işçisi tapılmayan sətir məhdud istifadəçiyə görünmür (fail closed).
+     */
+    private function scopePersonnel(Builder $query): Builder
+    {
+        if (! $this->restricts()) {
+            return $query;
+        }
+
+        $ids = $this->scope->ids();
+
+        return $ids === []
+            ? $query->whereRaw('1 = 0')
+            : $query->whereIn(DB::raw('COALESCE(lp.structure_id, lpt.structure_id)'), $ids);
     }
 
     /**
@@ -566,13 +631,16 @@ class LifecycleDashboardReadService
             ->whereNotIn('employee_lifecycle_tasks.status', self::CLOSED_STATUSES)
             ->where('employee_lifecycle_tasks.due_at', '<', today()->toDateString());
 
+        // Görünürlük məhdudiyyəti varsa, cəm də yalnız görünən işçilərin tapşırıqlarını sayır.
+        $this->joinPersonnel($query, 'employee_lifecycle_events');
+
         $total = (clone $query)->count();
 
         if ($total === 0) {
             return ['total' => 0, 'rows' => collect()];
         }
 
-        $rows = $this->joinPersonnel($query, 'employee_lifecycle_events')
+        $rows = $query
             ->leftJoin('users as owners', 'owners.id', '=', 'employee_lifecycle_tasks.owner_user_id')
             ->select([
                 'employee_lifecycle_tasks.id',

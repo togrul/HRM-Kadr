@@ -7,6 +7,7 @@ use App\Models\PerformanceForm;
 use App\Models\PerformanceFormScore;
 use App\Models\User;
 use App\Modules\PerformanceEvaluation\Application\Services\PerformanceWeakAreaTrainingNeedService;
+use App\Modules\PerformanceEvaluation\Support\PerformanceStructureScope;
 use Illuminate\Validation\ValidationException;
 
 trait HandlesPerformanceEvaluationFlowMutations
@@ -29,10 +30,11 @@ trait HandlesPerformanceEvaluationFlowMutations
         ]);
 
         $this->guardEvaluatorUsersExist($validated);
+        PerformanceStructureScope::ensurePersonnelVisible(data_get($validated, 'evaluationForm.personnel_id'));
         $this->guardCycleOpen(
             'evaluationForm.performance_cycle_id',
             data_get($validated, 'evaluationForm.performance_cycle_id'),
-            $this->editingEvaluationFormId ? PerformanceForm::query()->whereKey($this->editingEvaluationFormId)->value('performance_cycle_id') : null,
+            $this->editingEvaluationFormId ? PerformanceStructureScope::forms()->findOrFail($this->editingEvaluationFormId)->performance_cycle_id : null,
         );
 
         $payload = [
@@ -44,7 +46,7 @@ trait HandlesPerformanceEvaluationFlowMutations
         ];
 
         if ($this->editingEvaluationFormId) {
-            PerformanceForm::query()->findOrFail($this->editingEvaluationFormId)->update($payload);
+            PerformanceStructureScope::forms()->findOrFail($this->editingEvaluationFormId)->update($payload);
         } else {
             PerformanceForm::query()->updateOrCreate(
                 [
@@ -138,7 +140,7 @@ trait HandlesPerformanceEvaluationFlowMutations
 
         $this->guardCycleOpen(
             'scoreForm.score',
-            PerformanceForm::query()->whereKey((int) data_get($validated, 'scoreForm.performance_form_id'))->value('performance_cycle_id'),
+            PerformanceStructureScope::forms()->findOrFail((int) data_get($validated, 'scoreForm.performance_form_id'))->performance_cycle_id,
         );
 
         $score = PerformanceFormScore::query()->updateOrCreate(
@@ -153,7 +155,7 @@ trait HandlesPerformanceEvaluationFlowMutations
             ]
         );
 
-        $form = PerformanceForm::query()->findOrFail((int) data_get($validated, 'scoreForm.performance_form_id'));
+        $form = PerformanceStructureScope::forms()->findOrFail((int) data_get($validated, 'scoreForm.performance_form_id'));
         $this->markEvaluatorStatus($form, (string) data_get($validated, 'scoreForm.evaluator_type'));
 
         $service = app(PerformanceWeakAreaTrainingNeedService::class);
@@ -192,7 +194,7 @@ trait HandlesPerformanceEvaluationFlowMutations
     {
         $this->authorizePerformanceEvaluationManage();
 
-        $form = PerformanceForm::query()->findOrFail($id);
+        $form = PerformanceStructureScope::forms()->findOrFail($id);
         $this->editingEvaluationFormId = $form->id;
         $this->evaluationForm = [
             'performance_cycle_id' => $form->performance_cycle_id,
@@ -207,7 +209,7 @@ trait HandlesPerformanceEvaluationFlowMutations
     public function deleteEvaluationForm(int $id): void
     {
         $this->authorizePerformanceEvaluationManage();
-        $form = PerformanceForm::query()->findOrFail($id);
+        $form = PerformanceStructureScope::forms()->findOrFail($id);
         $this->guardCycleOpen('evaluationForm.performance_cycle_id', $form->performance_cycle_id);
         $form->delete();
         if ($this->editingEvaluationFormId === $id) {

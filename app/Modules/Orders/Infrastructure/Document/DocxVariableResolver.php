@@ -51,6 +51,51 @@ class DocxVariableResolver
     }
 
     /**
+     * A multi-participant order's values: the order-level token map plus one token map per
+     * participant for the repeating row/block. In a row, participant.* variables and the
+     * per-participant fields take that person's values (a shared field their override, if
+     * any); everything else prints as on the order. Outside the row, a participant-only token
+     * lists every participant's value, comma-separated.
+     *
+     * @param  array<string,mixed>  $orderFields  field.key => value (order level)
+     * @param  list<array{personnel:?Personnel,fields:array<string,mixed>}>  $participants  effective fields per person
+     * @param  array<string,string>  $system
+     * @return array{values:array<string,string>,rows:list<array<string,string>>}
+     */
+    public function resolveParticipants(OrderWordTemplate $template, ?Personnel $lead, array $orderFields, array $participants, array $system): array
+    {
+        $values = $this->resolve($template, $lead, $orderFields, $system);
+
+        $rows = [];
+        foreach ($participants as $index => $participant) {
+            $pool = $this->employee->resolveParticipant($participant['personnel'], $index + 1);
+            $row = $values;
+
+            foreach ($template->variables ?? [] as $variable) {
+                $token = $variable['token'] ?? null;
+                if (! $token || $template->scopeOf($variable) === OrderWordTemplate::SCOPE_ORDER) {
+                    continue;
+                }
+
+                $row[$token] = ($variable['source'] ?? 'manual') === 'auto'
+                    ? (string) ($pool[$variable['auto_key'] ?? ''] ?? '')
+                    : $this->manualValue($variable['field'] ?? null, $participant['fields']);
+            }
+
+            $rows[] = $row;
+        }
+
+        foreach ($template->participantRowTokens() as $token) {
+            $values[$token] = implode(', ', array_values(array_unique(array_filter(
+                array_map(fn (array $row): string => (string) ($row[$token] ?? ''), $rows),
+                fn (string $value): bool => $value !== '',
+            ))));
+        }
+
+        return ['values' => $values, 'rows' => $rows];
+    }
+
+    /**
      * @param  array{key:string,type:string}|null  $field
      * @param  array<string,mixed>  $manualInputs
      */

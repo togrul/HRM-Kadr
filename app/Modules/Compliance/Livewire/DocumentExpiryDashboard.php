@@ -3,6 +3,7 @@
 namespace App\Modules\Compliance\Livewire;
 
 use App\Modules\Compliance\Application\Services\DocumentExpiryReadService;
+use App\Support\Exports\CsvSafe;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -53,7 +54,7 @@ class DocumentExpiryDashboard extends Component
 
     public function exportCsv(DocumentExpiryReadService $service): StreamedResponse
     {
-        $rows = $service->exportRows([
+        $rows = $service->forViewer(auth()->user())->exportRows([
             'search' => $this->search,
             'status' => $this->status,
             'type' => $this->type,
@@ -75,7 +76,7 @@ class DocumentExpiryDashboard extends Component
             ]);
 
             foreach ($rows as $row) {
-                fputcsv($handle, [
+                fputcsv($handle, CsvSafe::row([
                     $row['personnel'],
                     $row['tabel_no'],
                     $row['structure'],
@@ -85,7 +86,7 @@ class DocumentExpiryDashboard extends Component
                     $row['expires_at'],
                     $row['days_left'],
                     $row['status'],
-                ]);
+                ]));
             }
 
             fclose($handle);
@@ -96,7 +97,7 @@ class DocumentExpiryDashboard extends Component
 
     public function render(DocumentExpiryReadService $service): View
     {
-        $payload = $service->dashboard([
+        $payload = $service->forViewer(auth()->user())->dashboard([
             'search' => $this->search,
             'status' => $this->status,
             'type' => $this->type,

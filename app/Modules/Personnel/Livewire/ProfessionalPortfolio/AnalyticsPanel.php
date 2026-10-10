@@ -6,8 +6,10 @@ use App\Models\Personnel;
 use App\Modules\Personnel\Application\Services\ProfessionalPortfolioAnalyticsService;
 use App\Modules\Personnel\Exports\ProfessionalPortfolioAnalyticsExport;
 use App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioPermissionMatrix;
+use App\Services\StructureService;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Maatwebsite\Excel\Excel as ExcelWriter;
 use Maatwebsite\Excel\Facades\Excel;
@@ -15,6 +17,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class AnalyticsPanel extends Component
 {
+    #[Locked]
     public int $personnelId;
 
     public string $statusFilter = 'verified';
@@ -27,6 +30,7 @@ class AnalyticsPanel extends Component
     {
         abort_unless(ProfessionalPortfolioPermissionMatrix::canViewAnalytics(auth()->user()), 403);
 
+        abort_unless(app(StructureService::class)->allowsPersonnelId(auth()->user(), $personnelId), 403);
         $this->personnelId = $personnelId;
     }
 

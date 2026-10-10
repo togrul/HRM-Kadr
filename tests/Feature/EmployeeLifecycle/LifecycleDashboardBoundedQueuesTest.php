@@ -177,6 +177,7 @@ class LifecycleDashboardBoundedQueuesTest extends TestCase
         }
 
         $user = User::factory()->create();
+        grantAllStructures($user);
         $user->givePermissionTo(['show-employee-lifecycle', 'manage-employee-lifecycle']);
 
         return $user;

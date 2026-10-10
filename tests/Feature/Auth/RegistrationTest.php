@@ -1,21 +1,28 @@
 <?php
 
-use App\Providers\RouteServiceProvider;
+use App\Models\User;
 
-test('registration screen can be rendered', function () {
-    $response = $this->get('/register');
-
-    $response->assertStatus(200);
+/*
+ * Açıq qeydiyyat ləğv olunub: hesabları yalnız admin yaradır.
+ */
+test('registration screen is not available', function () {
+    $this->get('/register')->assertNotFound();
 });
 
-test('new users can register', function () {
-    $response = $this->post('/register', [
+test('nobody can self-register an account', function () {
+    $this->post('/register', [
         'name' => 'Test User',
         'email' => 'test@example.com',
-        'password' => 'password',
-        'password_confirmation' => 'password',
-    ]);
+        'password' => 'Str0ng-Passw0rd!',
+        'password_confirmation' => 'Str0ng-Passw0rd!',
+    ])->assertStatus(404);
 
-    $this->assertAuthenticated();
-    $response->assertRedirect(RouteServiceProvider::HOME);
+    $this->assertGuest();
+    expect(User::query()->where('email', 'test@example.com')->exists())->toBeFalse();
+});
+
+test('login page has no registration link', function () {
+    $this->get('/login')
+        ->assertOk()
+        ->assertDontSee('/register', false);
 });

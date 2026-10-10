@@ -7,16 +7,15 @@ use App\Modules\Attendance\Application\Services\AttendanceAuditLogger;
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
 use App\Services\StructurePathService;
-use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class ExceptionsInbox extends Component
 {
-    use NestedStructureTrait;
     use WithPagination;
 
     public int $year;
@@ -33,6 +32,7 @@ class ExceptionsInbox extends Component
 
     public int $perPage = 20;
 
+    #[Locked]
     public bool $canResolve = false;
 
     public ?int $selectedStructureId = null;
@@ -80,7 +80,7 @@ class ExceptionsInbox extends Component
 
     public function markResolved(int $exceptionId): void
     {
-        if (! $this->canResolve) {
+        if (! app(AttendanceAuthorizationService::class)->can('attendance.exceptions.resolve')) {
             abort(403);
         }
 
@@ -88,6 +88,8 @@ class ExceptionsInbox extends Component
         if (! $exception) {
             return;
         }
+
+        abort_unless(app(AttendanceStructureScopeReadService::class)->allowsTabelNo($exception->tabel_no), 403);
 
         $before = $exception->only(['status', 'resolution_note', 'resolved_by', 'resolved_at']);
         $exception->update([
@@ -115,7 +117,7 @@ class ExceptionsInbox extends Component
 
     public function reopen(int $exceptionId): void
     {
-        if (! $this->canResolve) {
+        if (! app(AttendanceAuthorizationService::class)->can('attendance.exceptions.resolve')) {
             abort(403);
         }
 
@@ -123,6 +125,8 @@ class ExceptionsInbox extends Component
         if (! $exception) {
             return;
         }
+
+        abort_unless(app(AttendanceStructureScopeReadService::class)->allowsTabelNo($exception->tabel_no), 403);
 
         $before = $exception->only(['status', 'resolution_note', 'resolved_by', 'resolved_at']);
         $exception->update([
@@ -150,9 +154,7 @@ class ExceptionsInbox extends Component
 
     public function render(): View
     {
-        $structureIds = $this->selectedStructureId
-            ? $this->getNestedStructure($this->selectedStructureId)
-            : [];
+        $structureIds = app(AttendanceStructureScopeReadService::class)->resolveIds($this->selectedStructureId);
         /** @var AttendanceStructureScopeReadService $structureScopeRead */
         $structureScopeRead = app(AttendanceStructureScopeReadService::class);
         /** @var StructurePathService $structurePathService */

@@ -11,6 +11,7 @@ use App\Models\Structure;
 use App\Models\User;
 use App\Modules\Orders\Infrastructure\Document\OrderIssueService;
 use App\Modules\Personnel\Livewire\Home;
+use App\Services\StructureService;
 use App\Support\Database\InstalledTables;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -39,7 +40,7 @@ class HomeDashboardTest extends TestCase
 
     public function test_home_renders_without_any_permission_and_exposes_no_blocks(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(grantAllStructures(User::factory()->create()));
 
         $home = Livewire::test(Home::class)->assertOk()->instance();
 
@@ -203,6 +204,8 @@ class HomeDashboardTest extends TestCase
         // so the count below is the home page's own reads.
         auth()->user()->getAllPermissions();
         InstalledTables::has('personnels');
+        // Struktur görünürlüyü də hər səhifədə keşlənir (5 dəq) — onu da isidirik.
+        app(StructureService::class)->scopeFor(auth()->user());
 
         $cold = $this->queriesDuring(fn () => Livewire::test(Home::class)->assertOk());
         $warm = $this->queriesDuring(fn () => Livewire::test(Home::class)->assertOk());
@@ -453,7 +456,7 @@ class HomeDashboardTest extends TestCase
      */
     private function actingAsViewer(array $permissions): User
     {
-        $user = User::factory()->create();
+        $user = grantAllStructures(User::factory()->create());
 
         foreach ($permissions as $permission) {
             Permission::findOrCreate($permission, 'web');

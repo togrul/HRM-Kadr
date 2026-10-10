@@ -623,7 +623,10 @@ return [
         'stale' => 'Data is stale',
         'errors' => [
             'bad_url' => 'The address is not valid; it must start with http:// or https://.',
-            'unreachable' => 'The external system did not answer (:error).',
+            'unreachable' => 'The external system did not answer. Check the address and network connectivity.',
+            'blocked_url' => 'Requests to this address are not allowed (internal network or unsafe address). For an internal system an administrator must add it to OUTBOUND_ALLOWED_HOSTS.',
+            'http_status' => 'The external system answered with an error (HTTP :status).',
+            'pin_requires_admin' => 'Only a user administrator can use the {pin} (FIN) placeholder.',
             'no_number' => 'No number found at ":path" in the answer.',
             'no_person' => 'There is no employee to test with.',
         ],
@@ -662,6 +665,8 @@ return [
     ],
     'formula' => [
         'errors' => [
+            'too_long' => 'The formula is too long (at most :max characters).',
+            'too_deep' => 'The formula is nested too deeply (at most :max levels).',
             'no_manual' => 'This KPI is calculated by formula; its value is not entered by hand.',
             'quantitative_only' => 'Formulas are only for quantitative KPIs.',
             'circular' => 'Circular reference: the formula refers to itself directly or through other KPIs.',

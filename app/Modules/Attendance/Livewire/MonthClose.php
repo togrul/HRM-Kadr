@@ -6,11 +6,13 @@ use App\Modules\Attendance\Application\Contracts\AttendancePayrollExportContract
 use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendanceMonthLockService;
 use App\Modules\Attendance\Application\Services\AttendancePayrollExportService;
+use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
 use App\Modules\Attendance\Exports\AttendancePayrollCsvExport;
 use App\Modules\Attendance\Exports\AttendancePayrollExport;
 use App\Modules\Attendance\Jobs\GenerateAttendanceMonthlySnapshotJob;
 use DomainException;
 use Illuminate\Contracts\View\View;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Maatwebsite\Excel\Excel as ExcelWriter;
 use Maatwebsite\Excel\Facades\Excel;
@@ -24,8 +26,10 @@ class MonthClose extends Component
 
     public array $status = [];
 
+    #[Locked]
     public bool $canManage = false;
 
+    #[Locked]
     public bool $canExport = false;
 
     /**
@@ -59,7 +63,7 @@ class MonthClose extends Component
 
     public function closePeriod(AttendanceMonthLockService $lockService): void
     {
-        if (! $this->canManage) {
+        if (! app(AttendanceAuthorizationService::class)->can('attendance.month.manage')) {
             abort(403);
         }
 
@@ -86,7 +90,7 @@ class MonthClose extends Component
 
     public function unlockPeriod(AttendanceMonthLockService $lockService): void
     {
-        if (! $this->canManage) {
+        if (! app(AttendanceAuthorizationService::class)->can('attendance.month.manage')) {
             abort(403);
         }
 
@@ -115,7 +119,7 @@ class MonthClose extends Component
 
     public function snapshotNow(AttendanceMonthLockService $lockService): void
     {
-        if (! $this->canManage) {
+        if (! app(AttendanceAuthorizationService::class)->can('attendance.month.manage')) {
             abort(403);
         }
 
@@ -133,7 +137,7 @@ class MonthClose extends Component
 
     public function snapshotQueue(): void
     {
-        if (! $this->canManage) {
+        if (! app(AttendanceAuthorizationService::class)->can('attendance.month.manage')) {
             abort(403);
         }
 
@@ -150,7 +154,7 @@ class MonthClose extends Component
         AttendancePayrollExportService $service,
         AttendancePayrollExportContract $contract
     ): ?BinaryFileResponse {
-        if (! $this->canExport) {
+        if (! app(AttendanceAuthorizationService::class)->can('attendance.export')) {
             abort(403);
         }
 
@@ -158,7 +162,7 @@ class MonthClose extends Component
             return null;
         }
 
-        $rows = $service->rows($this->year, $this->month);
+        $rows = $service->rows($this->year, $this->month, app(AttendanceStructureScopeReadService::class)->resolveIds(null));
 
         $filename = sprintf('attendance-payroll-%04d-%02d.xlsx', $this->year, $this->month);
 
@@ -172,7 +176,7 @@ class MonthClose extends Component
         AttendancePayrollExportService $service,
         AttendancePayrollExportContract $contract
     ): ?BinaryFileResponse {
-        if (! $this->canExport) {
+        if (! app(AttendanceAuthorizationService::class)->can('attendance.export')) {
             abort(403);
         }
 
@@ -180,7 +184,7 @@ class MonthClose extends Component
             return null;
         }
 
-        $rows = $service->rows($this->year, $this->month);
+        $rows = $service->rows($this->year, $this->month, app(AttendanceStructureScopeReadService::class)->resolveIds(null));
         $csvSettings = (array) config('attendance.exports.payroll.csv', []);
 
         $filename = sprintf('attendance-payroll-%04d-%02d.csv', $this->year, $this->month);

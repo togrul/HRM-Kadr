@@ -1,7 +1,11 @@
 <?php
 
+use App\Modules\Personnel\Http\Controllers\LearningContentFileController;
+use App\Modules\Personnel\Http\Controllers\OnboardingTemplateFileController;
 use App\Modules\Personnel\Http\Controllers\PersonnelFileDownloadController;
 use App\Modules\Personnel\Http\Controllers\PersonnelPaletteSearchController;
+use App\Modules\Personnel\Http\Controllers\PersonnelPhotoController;
+use App\Modules\Personnel\Http\Controllers\PortfolioAttachmentController;
 use App\Modules\Personnel\Livewire\AllPersonnel;
 use App\Modules\Personnel\Livewire\Home;
 use App\Modules\Personnel\Livewire\MyHr\MyHrDashboard;
@@ -20,4 +24,16 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/self-service-reviews', SelfServiceRequestReviews::class)->name('self-service-reviews');
     Route::get('/personnel/files/{document}/download', PersonnelFileDownloadController::class)
         ->name('personnel.files.download');
+    Route::get('/personnel/photos/{personnel}', PersonnelPhotoController::class)
+        ->whereNumber('personnel')
+        ->name('personnel.photo');
+    Route::get('/personnel/portfolio-attachments/{attachment}', PortfolioAttachmentController::class)
+        ->whereNumber('attachment')
+        ->name('personnel.portfolio-attachments.show');
+    Route::get('/personnel/learning-content/{asset}/file', LearningContentFileController::class)
+        ->whereNumber('asset')
+        ->name('personnel.learning-content.file');
+    Route::get('/onboarding-documents/{template}/file', OnboardingTemplateFileController::class)
+        ->whereNumber('template')
+        ->name('onboarding.templates.file');
 });

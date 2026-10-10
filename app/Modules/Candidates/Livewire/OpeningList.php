@@ -5,9 +5,11 @@ namespace App\Modules\Candidates\Livewire;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\Candidate;
 use App\Models\JobOpening;
+use App\Modules\Candidates\Support\CandidateStructureScope;
 use App\Modules\Candidates\Support\Traits\InteractsWithRecruitmentPresentation;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Computed;
@@ -60,14 +62,14 @@ class OpeningList extends Component
     {
         $effectivePack = $this->effectiveRecruitmentPack($this->pack);
 
-        return JobOpening::query()
+        return CandidateStructureScope::constrainOwn(JobOpening::query())
             ->with([
-                'requisition:id,title,status',
+                'requisition' => fn (Relation $relation) => CandidateStructureScope::constrainOwn($relation->getQuery())->select('id', 'title', 'status'),
                 'structure:id,name',
                 'position:id,name',
                 'owner:id,name,email',
             ])
-            ->withCount('applications')
+            ->withCount(['applications' => fn (Builder $query) => CandidateStructureScope::constrainApplications($query)])
             ->when($this->status !== 'all', fn (Builder $query) => $query->where('status', $this->status))
             ->when($effectivePack !== 'all', fn (Builder $query) => $query->where('profile_pack', $effectivePack))
             ->when($this->search !== '', function (Builder $query): void {
@@ -99,7 +101,7 @@ class OpeningList extends Component
     {
         $effectivePack = $this->effectiveRecruitmentPack($this->pack);
 
-        return (int) \App\Models\CandidateApplication::query()
+        return (int) CandidateStructureScope::constrainApplications(\App\Models\CandidateApplication::query())
             ->when($effectivePack !== 'all', fn (Builder $query) => $query->whereHas('opening', fn (Builder $opening) => $opening->where('profile_pack', $effectivePack)))
             ->where('status', 'active')
             ->count();
@@ -110,7 +112,7 @@ class OpeningList extends Component
     {
         $effectivePack = $this->effectiveRecruitmentPack($this->pack);
 
-        return (int) JobOpening::query()
+        return (int) CandidateStructureScope::constrainOwn(JobOpening::query())
             ->when($effectivePack !== 'all', fn (Builder $query) => $query->where('profile_pack', $effectivePack))
             ->count();
     }
@@ -120,7 +122,7 @@ class OpeningList extends Component
     {
         $effectivePack = $this->effectiveRecruitmentPack($this->pack);
 
-        return (int) JobOpening::query()
+        return (int) CandidateStructureScope::constrainOwn(JobOpening::query())
             ->when($effectivePack !== 'all', fn (Builder $query) => $query->where('profile_pack', $effectivePack))
             ->whereNotNull('published_at')
             ->count();

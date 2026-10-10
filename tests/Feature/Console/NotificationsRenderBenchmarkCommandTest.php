@@ -10,6 +10,7 @@ use Tests\TestCase;
 class NotificationsRenderBenchmarkCommandTest extends TestCase
 {
     use RefreshDatabase;
+    use UsesDeterministicRenderTiming;
 
     public function test_it_reports_render_metrics_for_notification_settings_islands(): void
     {

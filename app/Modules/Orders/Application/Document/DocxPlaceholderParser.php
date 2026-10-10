@@ -26,6 +26,43 @@ class DocxPlaceholderParser
     private const PLACEHOLDER = '/\[([^\[\]\r\n]+)\]/u';
 
     /**
+     * The markers of a multi-participant order's repeating block — the paragraphs between
+     * [İştirakçılar] and [/İştirakçılar] are repeated per participant. They are not variables:
+     * normalize() turns them into ${participants} / ${/participants}.
+     */
+    public const BLOCK_OPEN_LABEL = 'İştirakçılar';
+
+    public const BLOCK_CLOSE_LABEL = '/İştirakçılar';
+
+    /** Arxivdəki fayl sayının yuxarı həddi (adi .docx-də onlarladır). */
+    public const MAX_ENTRIES = 2000;
+
+    /** Bütün arxivin açılmış ölçüsünün yuxarı həddi (bayt). */
+    public const MAX_TOTAL_UNCOMPRESSED = 100 * 1024 * 1024;
+
+    /** Bir mətn hissəsinin (document.xml, header, footer) açılmış ölçüsünün yuxarı həddi. */
+    public const MAX_TEXT_PART = 20 * 1024 * 1024;
+
+    /** 1 MB-dan böyük girişlər üçün sıxılma nisbətinin yuxarı həddi (zip bomb əlaməti). */
+    public const MAX_RATIO = 100;
+
+    /**
+     * The block-marker token a label stands for ('participants' / '/participants'), or null
+     * when the label is an ordinary placeholder. Letter case does not matter.
+     */
+    public static function blockMarkerToken(string $label): ?string
+    {
+        $fold = static fn (string $value): string => mb_strtolower(str_replace(['İ', 'I'], ['i', 'ı'], trim($value)), 'UTF-8');
+        $label = $fold($label);
+
+        return match (true) {
+            $label === $fold(self::BLOCK_OPEN_LABEL) || $label === 'participants' => ParticipantTemplateProcessor::BLOCK,
+            $label === $fold(self::BLOCK_CLOSE_LABEL) || $label === '/participants' => '/'.ParticipantTemplateProcessor::BLOCK,
+            default => null,
+        };
+    }
+
+    /**
      * Distinct, trimmed [bracket] labels in first-seen order across the body, headers
      * and footers.
      *
@@ -86,13 +123,15 @@ class DocxPlaceholderParser
             throw new RuntimeException("Unable to open .docx archive {$destDocxPath}.");
         }
 
+        $this->assertSafeArchive($zip);
+
         $temps = [];
         for ($i = 0; $i < $zip->numFiles; $i++) {
             $name = $zip->getNameIndex($i);
             if (! $this->isTextPart($name)) {
                 continue;
             }
-            $xml = (string) $zip->getFromIndex($i);
+            $xml = $this->readTextPart($zip, $i);
             // replaceFile defers the write until close(), so the temp must outlive it.
             $temps[] = $temp = $this->writeTemp($this->normalizeXml($xml, $labelToToken));
             $zip->replaceFile($temp, $i);
@@ -117,16 +156,80 @@ class DocxPlaceholderParser
             throw new RuntimeException("Unable to open .docx archive {$docxPath}.");
         }
 
+        $this->assertSafeArchive($zip);
+
         $parts = [];
         for ($i = 0; $i < $zip->numFiles; $i++) {
             $name = $zip->getNameIndex($i);
             if ($this->isTextPart($name)) {
-                $parts[] = (string) $zip->getFromIndex($i);
+                $parts[] = $this->readTextPart($zip, $i);
             }
         }
         $zip->close();
 
         return $parts;
+    }
+
+    public function assertSafeFile(string $docxPath): void
+    {
+        $zip = new ZipArchive;
+        if ($zip->open($docxPath) !== true) {
+            throw new UnsafeDocxException('Unable to open .docx archive.');
+        }
+
+        $this->assertSafeArchive($zip);
+        $zip->close();
+    }
+
+    /**
+     * Zip bomb qoruması: heç bir giriş oxunmamışdan əvvəl mərkəzi kataloqdakı ölçülər
+     * yoxlanır (fayl sayı, cəmi açılmış ölçü, mətn hissəsinin ölçüsü, sıxılma nisbəti).
+     *
+     * @throws UnsafeDocxException
+     */
+    private function assertSafeArchive(ZipArchive $zip): void
+    {
+        if ($zip->numFiles > self::MAX_ENTRIES) {
+            $zip->close();
+
+            throw new UnsafeDocxException('Too many entries in .docx archive.');
+        }
+
+        $total = 0;
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $stat = $zip->statIndex($i);
+            if ($stat === false) {
+                continue;
+            }
+
+            $size = (int) $stat['size'];
+            $compressed = max(1, (int) $stat['comp_size']);
+            $total += $size;
+
+            $tooBig = $total > self::MAX_TOTAL_UNCOMPRESSED
+                || ($this->isTextPart((string) $stat['name']) && $size > self::MAX_TEXT_PART)
+                || ($size > 1024 * 1024 && intdiv($size, $compressed) > self::MAX_RATIO);
+
+            if ($tooBig) {
+                $zip->close();
+
+                throw new UnsafeDocxException('The .docx archive expands beyond the allowed size.');
+            }
+        }
+    }
+
+    /** Mətn hissəsini ölçü həddi ilə oxuyur (kataloqdakı ölçü yalan olsa belə). */
+    private function readTextPart(ZipArchive $zip, int $index): string
+    {
+        $xml = (string) $zip->getFromIndex($index, self::MAX_TEXT_PART + 1);
+
+        if (strlen($xml) > self::MAX_TEXT_PART) {
+            $zip->close();
+
+            throw new UnsafeDocxException('A .docx text part is too large.');
+        }
+
+        return $xml;
     }
 
     private function isTextPart(string $name): bool
@@ -191,12 +294,14 @@ class DocxPlaceholderParser
             throw new RuntimeException("Unable to open .docx archive {$destDocxPath}.");
         }
 
+        $this->assertSafeArchive($zip);
+
         $temps = [];
         for ($i = 0; $i < $zip->numFiles; $i++) {
             if (! $this->isTextPart($zip->getNameIndex($i))) {
                 continue;
             }
-            $xml = (string) $zip->getFromIndex($i);
+            $xml = $this->readTextPart($zip, $i);
             $rewritten = (string) preg_replace_callback(
                 '/<w:p\b[^>]*>.*?<\/w:p>/su',
                 fn (array $m) => $this->rewriteParagraph($m[0], fn (string $c) => $this->literalReplacements($c, $literalToReplacement)),

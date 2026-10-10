@@ -23,10 +23,12 @@ class HistoryTab extends CompensationTab
     #[Computed]
     public function history(): Collection
     {
-        if (! $this->tabelNo) {
+        $tabelNo = $this->visibleTabel();
+
+        if (! $tabelNo) {
             return collect();
         }
 
-        return app(CompensationService::class)->historyFor($this->tabelNo);
+        return app(CompensationService::class)->historyFor($tabelNo);
     }
 }

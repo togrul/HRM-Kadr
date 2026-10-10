@@ -23,6 +23,7 @@ class CandidateFilesTest extends TestCase
         Storage::fake('local');
 
         $user = User::factory()->create();
+        grantAllStructures($user);
         $user->givePermissionTo(Permission::findOrCreate('edit-candidates', 'web'));
 
         $candidate = $this->makeCandidate();
@@ -50,6 +51,7 @@ class CandidateFilesTest extends TestCase
     public function test_unauthorized_user_cannot_open_candidate_files_modal(): void
     {
         $user = User::factory()->create();
+        grantAllStructures($user);
         $candidate = $this->makeCandidate();
 
         $this->actingAs($user);
@@ -63,6 +65,7 @@ class CandidateFilesTest extends TestCase
         Storage::fake('local');
 
         $viewer = User::factory()->create();
+        grantAllStructures($viewer);
         $viewer->givePermissionTo(Permission::findOrCreate('show-candidates', 'web'));
 
         $candidate = $this->makeCandidate();
@@ -91,6 +94,7 @@ class CandidateFilesTest extends TestCase
         Storage::fake('local');
 
         $viewer = User::factory()->create();
+        grantAllStructures($viewer);
         $viewer->givePermissionTo(Permission::findOrCreate('show-candidates', 'web'));
 
         $candidate = $this->makeCandidate();
@@ -120,6 +124,7 @@ class CandidateFilesTest extends TestCase
         Storage::fake('local');
 
         $editor = User::factory()->create();
+        grantAllStructures($editor);
         $editor->givePermissionTo(Permission::findOrCreate('edit-candidates', 'web'));
 
         $candidate = $this->makeCandidate();
@@ -156,6 +161,7 @@ class CandidateFilesTest extends TestCase
     public function test_files_can_be_filtered_by_category(): void
     {
         $editor = User::factory()->create();
+        grantAllStructures($editor);
         $editor->givePermissionTo(Permission::findOrCreate('edit-candidates', 'web'));
 
         $candidate = $this->makeCandidate();
@@ -198,6 +204,7 @@ class CandidateFilesTest extends TestCase
     public function test_category_filter_falls_back_to_all_when_placeholder_clears_value(): void
     {
         $editor = User::factory()->create();
+        grantAllStructures($editor);
         $editor->givePermissionTo(Permission::findOrCreate('edit-candidates', 'web'));
 
         $candidate = $this->makeCandidate();
@@ -217,6 +224,7 @@ class CandidateFilesTest extends TestCase
         ]);
 
         $creator = User::factory()->create();
+        grantAllStructures($creator);
 
         return Candidate::query()->create([
             'surname' => 'Aliyev',

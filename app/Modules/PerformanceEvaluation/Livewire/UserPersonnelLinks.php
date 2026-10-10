@@ -7,7 +7,8 @@ use App\Livewire\Concerns\WithRuntimeMemo;
 use App\Models\Personnel;
 use App\Models\User;
 use App\Models\UserPersonnelLink;
-use App\Modules\PerformanceEvaluation\Livewire\Concerns\InteractsWithPerformanceEvaluationAccess;
+use App\Services\UserAdministrationGuard;
+use App\Services\UserPersonnelLinkManager;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Component;
@@ -15,7 +16,6 @@ use Livewire\Component;
 class UserPersonnelLinks extends Component
 {
     use ConfirmsDestructiveActions;
-    use InteractsWithPerformanceEvaluationAccess;
     use WithRuntimeMemo;
 
     public string $searchLinks = '';
@@ -31,9 +31,23 @@ class UserPersonnelLinks extends Component
         'resolution_source' => 'manual',
     ];
 
+    /**
+     * Bağ istifadəçi idarəçiliyinin bir hissəsidir — `manage-users` tələb olunur
+     * (əvvəl performans idarəçiliyi icazəsi kifayət edirdi). Hər sorğuda yoxlanılır.
+     */
+    public function boot(): void
+    {
+        abort_unless(auth()->user()?->can(UserAdministrationGuard::MANAGE_USERS), 403);
+    }
+
     public function mount(): void
     {
-        $this->authorizePerformanceEvaluationManage();
+        $this->authorizeLinkManagement();
+    }
+
+    protected function authorizeLinkManagement(): void
+    {
+        abort_unless(auth()->user()?->can(UserAdministrationGuard::MANAGE_USERS), 403);
     }
 
     public function updated(string $property): void
@@ -197,7 +211,7 @@ class UserPersonnelLinks extends Component
 
     public function saveLink(): void
     {
-        $this->authorizePerformanceEvaluationManage();
+        $this->authorizeLinkManagement();
 
         $validated = $this->validate([
             'linkForm.user_id' => 'required|exists:users,id',
@@ -207,13 +221,10 @@ class UserPersonnelLinks extends Component
             'linkForm.personnel_id' => __('performance_evaluation::dashboard.fields.personnel'),
         ]);
 
-        UserPersonnelLink::query()->updateOrCreate(
-            ['user_id' => (int) data_get($validated, 'linkForm.user_id')],
-            [
-                'personnel_id' => (int) data_get($validated, 'linkForm.personnel_id'),
-                'resolution_source' => 'manual',
-                'resolved_at' => now(),
-            ]
+        app(UserPersonnelLinkManager::class)->link(
+            auth()->user(),
+            User::query()->findOrFail((int) data_get($validated, 'linkForm.user_id')),
+            Personnel::query()->findOrFail((int) data_get($validated, 'linkForm.personnel_id')),
         );
 
         $this->linkForm = [
@@ -229,7 +240,7 @@ class UserPersonnelLinks extends Component
 
     public function editLink(int $linkId): void
     {
-        $this->authorizePerformanceEvaluationManage();
+        $this->authorizeLinkManagement();
 
         $link = UserPersonnelLink::query()->findOrFail($linkId);
 
@@ -243,7 +254,7 @@ class UserPersonnelLinks extends Component
 
     public function requestDeleteLink(int $linkId): void
     {
-        $this->authorizePerformanceEvaluationManage();
+        $this->authorizeLinkManagement();
 
         $this->confirmDeletion(
             'deleteLink',
@@ -257,9 +268,13 @@ class UserPersonnelLinks extends Component
 
     public function deleteLink(int $linkId): void
     {
-        $this->authorizePerformanceEvaluationManage();
+        $this->authorizeLinkManagement();
 
-        UserPersonnelLink::query()->whereKey($linkId)->delete();
+        $link = UserPersonnelLink::query()->find($linkId);
+        if ($link) {
+            app(UserPersonnelLinkManager::class)->unlink(auth()->user(), $link);
+        }
+
         $this->resetRuntimeMemo();
         $this->dispatch('performanceEvaluationSaved', __('performance_evaluation::dashboard.messages.user_personnel_link_deleted'));
     }

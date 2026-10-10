@@ -138,7 +138,8 @@ class AttendanceDayContextResolverService
             ])
             ->whereIn('tabel_no', $tabelNos)
             ->whereDate('starts_at', '<=', $to->toDateString())
-            ->whereDate('ends_at', '>=', $from->toDateString())
+            // An open sick certificate's leave has no end yet: it covers its days up to today.
+            ->where(fn ($query) => $query->whereDate('ends_at', '>=', $from->toDateString())->orWhereNull('ends_at'))
             ->where(function ($query): void {
                 $query->where('status_id', OrderStatusEnum::APPROVED->value)
                     ->orWhere(function ($fallback): void {
@@ -160,7 +161,9 @@ class AttendanceDayContextResolverService
 
         foreach ($rows as $row) {
             $start = Carbon::parse($row->starts_at)->startOfDay();
-            $end = Carbon::parse($row->ends_at)->endOfDay();
+            $end = filled($row->ends_at)
+                ? Carbon::parse($row->ends_at)->endOfDay()
+                : Carbon::today()->max($start)->endOfDay();
 
             $this->walkDateRange(
                 tabelNo: (string) $row->tabel_no,

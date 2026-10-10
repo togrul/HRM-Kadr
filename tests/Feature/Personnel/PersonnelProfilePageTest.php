@@ -23,7 +23,7 @@ class PersonnelProfilePageTest extends TestCase
     public function test_profile_requires_the_view_permission(): void
     {
         $personnel = $this->seedPersonnel();
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(grantAllStructures(User::factory()->create()));
 
         Livewire::test(PersonnelProfile::class, ['personnel' => $personnel])->assertForbidden();
     }
@@ -199,7 +199,7 @@ class PersonnelProfilePageTest extends TestCase
     public function test_quick_view_requires_the_view_permission(): void
     {
         $personnel = $this->seedPersonnel();
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(grantAllStructures(User::factory()->create()));
 
         Livewire::test(PersonnelQuickView::class, ['personnelModel' => $personnel->tabel_no])
             ->assertForbidden();
@@ -283,7 +283,7 @@ class PersonnelProfilePageTest extends TestCase
 
     private function actingAsViewer(): void
     {
-        $user = User::factory()->create();
+        $user = grantAllStructures(User::factory()->create());
         Permission::findOrCreate('show-personnels', 'web');
         $user->givePermissionTo('show-personnels');
         $this->actingAs($user);
@@ -294,7 +294,7 @@ class PersonnelProfilePageTest extends TestCase
      */
     private function actingAsEditor(array $extra = []): void
     {
-        $user = User::factory()->create();
+        $user = grantAllStructures(User::factory()->create());
         $permissions = ['show-personnels', 'edit-personnels', ...$extra];
 
         foreach ($permissions as $permission) {

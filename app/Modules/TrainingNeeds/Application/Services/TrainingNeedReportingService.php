@@ -2,21 +2,47 @@
 
 namespace App\Modules\TrainingNeeds\Application\Services;
 
+use App\Contracts\VisibleAuditActivities;
 use App\Models\TrainingDeliveryRecord;
 use App\Models\TrainingFeedbackResponse;
 use App\Models\TrainingSession;
+use App\Modules\TrainingNeeds\Support\TrainingStructureScope;
 use Illuminate\Database\Eloquent\Collection;
-use Spatie\Activitylog\Models\Activity;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\DB;
 
 class TrainingNeedReportingService
 {
+    /** @return array<string, int> */
+    public function foundationStats(): array
+    {
+        $tables = [
+            'groups' => 'training_competency_groups', 'levels' => 'training_levels',
+            'competencies' => 'training_competencies', 'programs' => 'training_programs',
+            'program_maps' => 'training_program_competency_map', 'requirements' => 'role_competency_requirements',
+            'profiles' => 'employee_competency_profiles', 'needs' => 'training_need_items',
+            'plans' => 'training_annual_plans', 'plan_items' => 'training_plan_items',
+            'sessions' => 'training_sessions', 'deliveries' => 'training_delivery_records', 'feedback_forms' => 'training_feedback_forms',
+        ];
+        $query = DB::query();
+        foreach ($tables as $key => $table) {
+            $count = DB::table($table)->selectRaw('count(*)');
+            if (in_array($key, ['profiles', 'needs', 'deliveries'], true)) {
+                TrainingStructureScope::onPersonnelColumn($count, $table.'.personnel_id');
+            }
+            $query->selectSub($count, $key);
+        }
+
+        return array_map('intval', (array) $query->first());
+    }
+
     public function deliverySummaryRows(): Collection
     {
         return TrainingSession::query()
             ->leftJoin('training_programs', 'training_programs.id', '=', 'training_sessions.training_program_id')
-            ->leftJoin('training_session_participants', 'training_session_participants.training_session_id', '=', 'training_sessions.id')
-            ->leftJoin('training_delivery_records', 'training_delivery_records.training_session_id', '=', 'training_sessions.id')
-            ->leftJoin('training_feedback_responses', 'training_feedback_responses.training_session_id', '=', 'training_sessions.id')
+            ->leftJoinSub(TrainingStructureScope::onPersonnelColumn(DB::table('training_session_participants'), 'training_session_participants.personnel_id'), 'training_session_participants', fn ($join) => $join->on('training_session_participants.training_session_id', '=', 'training_sessions.id'))
+            ->leftJoinSub(TrainingStructureScope::onPersonnelColumn(DB::table('training_delivery_records'), 'training_delivery_records.personnel_id'), 'training_delivery_records', fn ($join) => $join->on('training_delivery_records.training_session_id', '=', 'training_sessions.id'))
+            ->leftJoinSub(TrainingStructureScope::onPersonnelColumn(DB::table('training_feedback_responses'), 'training_feedback_responses.personnel_id'), 'training_feedback_responses', fn ($join) => $join->on('training_feedback_responses.training_session_id', '=', 'training_sessions.id'))
             ->selectRaw('
                 training_sessions.id,
                 training_sessions.title,
@@ -24,7 +50,7 @@ class TrainingNeedReportingService
                 training_sessions.scheduled_start_at,
                 training_programs.title as program_title,
                 COUNT(DISTINCT training_session_participants.id) as participant_count,
-                SUM(CASE WHEN training_session_participants.attendance_status = "attended" THEN 1 ELSE 0 END) as attended_count,
+                COUNT(DISTINCT CASE WHEN training_session_participants.attendance_status = "attended" THEN training_session_participants.id END) as attended_count,
                 COUNT(DISTINCT training_delivery_records.id) as delivery_records_count,
                 ROUND(COALESCE(AVG(training_feedback_responses.overall_score), 0), 2) as average_feedback_score
             ')
@@ -43,16 +69,16 @@ class TrainingNeedReportingService
     {
         return TrainingSession::query()
             ->leftJoin('training_programs', 'training_programs.id', '=', 'training_sessions.training_program_id')
-            ->leftJoin('training_session_participants', 'training_session_participants.training_session_id', '=', 'training_sessions.id')
-            ->leftJoin('training_delivery_records', 'training_delivery_records.training_session_id', '=', 'training_sessions.id')
-            ->leftJoin('training_feedback_responses', 'training_feedback_responses.training_session_id', '=', 'training_sessions.id')
+            ->leftJoinSub(TrainingStructureScope::onPersonnelColumn(DB::table('training_session_participants'), 'training_session_participants.personnel_id'), 'training_session_participants', fn ($join) => $join->on('training_session_participants.training_session_id', '=', 'training_sessions.id'))
+            ->leftJoinSub(TrainingStructureScope::onPersonnelColumn(DB::table('training_delivery_records'), 'training_delivery_records.personnel_id'), 'training_delivery_records', fn ($join) => $join->on('training_delivery_records.training_session_id', '=', 'training_sessions.id'))
+            ->leftJoinSub(TrainingStructureScope::onPersonnelColumn(DB::table('training_feedback_responses'), 'training_feedback_responses.personnel_id'), 'training_feedback_responses', fn ($join) => $join->on('training_feedback_responses.training_session_id', '=', 'training_sessions.id'))
             ->selectRaw('
                 COALESCE(training_programs.title, "-") as program_title,
                 COALESCE(training_programs.delivery_type, "internal") as delivery_type,
                 COUNT(DISTINCT training_sessions.id) as sessions_count,
-                SUM(CASE WHEN training_session_participants.attendance_status = "attended" THEN 1 ELSE 0 END) as attended_count,
+                COUNT(DISTINCT CASE WHEN training_session_participants.attendance_status = "attended" THEN training_session_participants.id END) as attended_count,
                 COUNT(DISTINCT training_delivery_records.id) as delivery_records_count,
-                SUM(CASE WHEN training_delivery_records.certificate_path IS NOT NULL THEN 1 ELSE 0 END) as certificates_uploaded,
+                COUNT(DISTINCT CASE WHEN training_delivery_records.certificate_path IS NOT NULL THEN training_delivery_records.id END) as certificates_uploaded,
                 ROUND(COALESCE(AVG(training_feedback_responses.overall_score), 0), 2) as average_feedback_score
             ')
             ->groupBy('training_programs.title', 'training_programs.delivery_type')
@@ -62,7 +88,8 @@ class TrainingNeedReportingService
 
     public function deliveryRows(): Collection
     {
-        return TrainingDeliveryRecord::query()
+        // Eksport sətirləri baxan istifadəçinin struktur görünürlüyü ilə məhdudlaşır.
+        return TrainingStructureScope::onPersonnelColumn(TrainingDeliveryRecord::query(), 'training_delivery_records.personnel_id')
             ->with([
                 'session:id,title,scheduled_start_at,location',
                 'program:id,title',
@@ -75,7 +102,7 @@ class TrainingNeedReportingService
 
     public function feedbackRows(): Collection
     {
-        return TrainingFeedbackResponse::query()
+        return TrainingStructureScope::onPersonnelColumn(TrainingFeedbackResponse::query(), 'training_feedback_responses.personnel_id')
             ->with([
                 'form:id,title',
                 'session:id,title',
@@ -89,7 +116,7 @@ class TrainingNeedReportingService
     {
         return TrainingSession::query()
             ->leftJoin('training_feedback_forms', 'training_feedback_forms.training_session_id', '=', 'training_sessions.id')
-            ->leftJoin('training_feedback_responses', 'training_feedback_responses.training_session_id', '=', 'training_sessions.id')
+            ->leftJoinSub(TrainingStructureScope::onPersonnelColumn(DB::table('training_feedback_responses'), 'training_feedback_responses.personnel_id'), 'training_feedback_responses', fn ($join) => $join->on('training_feedback_responses.training_session_id', '=', 'training_sessions.id'))
             ->selectRaw('
                 training_sessions.id,
                 training_sessions.title,
@@ -113,7 +140,7 @@ class TrainingNeedReportingService
     public function upcomingSessions(): Collection
     {
         return TrainingSession::query()
-            ->with(['program:id,title', 'participants'])
+            ->with(['program:id,title', 'participants' => fn (Relation $relation) => TrainingStructureScope::onPersonnelColumn($relation->getQuery(), 'training_session_participants.personnel_id')])
             ->whereIn('status', ['draft', 'scheduled', 'in_progress'])
             ->whereNotNull('scheduled_start_at')
             ->orderBy('scheduled_start_at')
@@ -123,7 +150,7 @@ class TrainingNeedReportingService
 
     public function auditRows(): Collection
     {
-        return Activity::query()
+        return app(VisibleAuditActivities::class)->visibleQuery()
             ->whereIn('subject_type', [
                 \App\Models\TrainingAnnualPlan::class,
                 \App\Models\TrainingPlanItem::class,

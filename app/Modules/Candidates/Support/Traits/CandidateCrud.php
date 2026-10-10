@@ -68,7 +68,7 @@ trait CandidateCrud
 
         if (! empty($this->candidateModel)) {
             $this->fillCandidate();
-            $this->title = __('candidates::common.titles.edit_candidate').' - '."<span class='text-teal-500'>{$this->candidateModelData->fullname}</span>";
+            $this->title = __('candidates::common.titles.edit_candidate').' - '."<span class='text-teal-500'>".e($this->candidateModelData->fullname).'</span>';
         } else {
             $this->authorize('create', Candidate::class);
             $this->title = __('candidates::common.titles.add_candidate');

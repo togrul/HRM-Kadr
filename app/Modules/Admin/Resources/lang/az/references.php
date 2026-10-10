@@ -31,6 +31,7 @@ return [
         'locale' => 'Dil',
         'rank_category' => 'Rütbə kateqoriyası',
         'position_level' => 'Vəzifə səviyyəsi (yalnız sıralama üçün)',
+        'vtisk_category' => 'VTİSK kateqoriyası',
         'approval_rank' => 'Təsdiq sırası',
         'is_approval_target' => 'Təsdiqləyən ola bilər?',
         'award_types' => 'Mükafat növləri',
@@ -209,6 +210,7 @@ return [
         'scope_position' => 'Vəzifə',
     ],
     'messages' => [
+        'vtisk_category_help' => 'Vahid Tarif-İxtisas Sorğu Kitabçası üzrə. Rəhbər və mütəxəssis 30 gün əsas məzuniyyət alır (ƏM m.114.3 «b»).',
         'approval_route_help' => 'Burada hər müraciət növü üçün ierarxik təsdiq siyasəti qurulur. Sistem əməkdaşın strukturunu və vəzifəsini götürüb ən yaxın təsdiqləyən rəhbəri, istəsəniz onun da yuxarı xəttini və ayrıca HR izləyicisini avtomatik müəyyən edir.',
         'approval_route_scope_required' => 'Bu ekranda artıq əhatə dairəsi seçimi yoxdur; siyasət müraciət növü səviyyəsində qurulur.',
     ],
@@ -220,5 +222,11 @@ return [
         5 => 'Aparıcı / böyük mütəxəssis',
         6 => 'Mütəxəssis',
         7 => 'Köməkçi heyət',
+    ],
+    'vtisk_categories' => [
+        'rehber' => 'Rəhbər',
+        'mutexessis' => 'Mütəxəssis',
+        'texniki_icraci' => 'Texniki icraçı',
+        'fehle' => 'Fəhlə',
     ],
 ];

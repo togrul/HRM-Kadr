@@ -4,17 +4,26 @@ namespace App\Modules\Orders\Infrastructure\Document;
 
 use App\Enums\OrderStatusEnum;
 use App\Models\OrderLog;
+use App\Models\OrderParticipant;
 use App\Models\OrderWordTemplate;
 use App\Models\Personnel;
 use App\Modules\Compensation\Contracts\OrderCompensationSync;
 use App\Modules\Integration\Domain\Contracts\IntegrationOutbox;
+use App\Modules\Orders\Application\Document\OrderParticipantFields;
 use App\Modules\Orders\Application\Document\OrderWordTemplateRepository;
 use App\Modules\Orders\Infrastructure\Document\Effects\OrderEffectCatalog;
+use App\Modules\Payroll\Contracts\ClosedPeriodCheck;
+use App\Modules\Personnel\Contracts\GuardsPersonnelChanges;
 use App\Services\ImportCandidateToPersonnel;
 use App\Support\Language\AzerbaijaniDateFormatter;
+use Carbon\CarbonInterface;
 use DomainException;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
+use Throwable;
 
 /**
  * The single, guarded entry point for changing a Word-engine order's status.
@@ -32,6 +41,19 @@ use RuntimeException;
  * A hire is reversible only while the new employee has no dependent records
  * ({@see HireOrderRevocation}); otherwise the employment ends by a termination order.
  *   cancelled(30)→ pending(10, reopen)
+ *
+ * Leaving the approved state (revert or cancel) is guarded: it needs a written reason
+ * (kept in the transition's activity entry), and it is refused once the month of the
+ * order's effective date is closed for pay ({@see ClosedPeriodCheck}) — by then payroll
+ * has been computed from it. Approval assigns the automatic number when the order still
+ * holds a provisional one ({@see OrderNumbering}) and, after commit, stores the immutable
+ * final PDF ({@see OrderFinalPdfService}).
+ *
+ * A multi-participant (çoxşəxsli) order runs its effect once per participant, all inside
+ * the same transaction: every participant is checked first and the first one who cannot go
+ * stops the whole approval, naming that person; each one's effect state is kept on their
+ * order_participants row and the reversal undoes them all. One outbox event is published
+ * per participant.
  */
 class OrderStatusTransitionService
 {
@@ -45,6 +67,9 @@ class OrderStatusTransitionService
     /** AppealStatus id a candidate moves to once a hire order is approved ("Qəbul olundu"). */
     private const CANDIDATE_HIRED_STATUS = 70;
 
+    /** Shortest reason accepted for taking an order out of the approved state. */
+    public const MIN_REASON_LENGTH = 5;
+
     public function __construct(
         private readonly OrderWordTemplateRepository $templates,
         private readonly OrderEffectCatalog $effects,
@@ -54,6 +79,11 @@ class OrderStatusTransitionService
         private readonly IntegrationOutbox $outbox,
         private readonly OrderPeriodGuard $periods,
         private readonly HireOrderRevocation $hireRevocation,
+        private readonly GuardsPersonnelChanges $changes,
+        private readonly ClosedPeriodCheck $closedPeriods,
+        private readonly OrderNumbering $numbering,
+        private readonly OrderDocumentBuilder $documents,
+        private readonly OrderFinalPdfService $finalPdf,
     ) {}
 
     /** Approve a pending order (applies its HR side-effect). */
@@ -62,10 +92,13 @@ class OrderStatusTransitionService
         $this->transition($order, OrderStatusEnum::APPROVED);
     }
 
-    /** Cancel an order. Reverses the side-effect if it had been approved. */
-    public function cancel(OrderLog $order): void
+    /**
+     * Cancel an order. Reverses the side-effect if it had been approved — which then needs
+     * a reason and an open pay period.
+     */
+    public function cancel(OrderLog $order, ?string $reason = null): void
     {
-        $this->transition($order, OrderStatusEnum::CANCELLED);
+        $this->transition($order, OrderStatusEnum::CANCELLED, $reason);
     }
 
     /** Re-open a cancelled order back to pending. */
@@ -74,10 +107,10 @@ class OrderStatusTransitionService
         $this->transition($order, OrderStatusEnum::PENDING);
     }
 
-    /** Revoke an approved order back to pending (reverses the side-effect). */
-    public function revert(OrderLog $order): void
+    /** Revoke an approved order back to pending (reverses the side-effect); needs a reason. */
+    public function revert(OrderLog $order, ?string $reason = null): void
     {
-        $this->transition($order, OrderStatusEnum::PENDING);
+        $this->transition($order, OrderStatusEnum::PENDING, $reason);
     }
 
     /**
@@ -90,7 +123,12 @@ class OrderStatusTransitionService
         return self::GRAPH[(int) $order->status_id] ?? [];
     }
 
-    public function transition(OrderLog $order, OrderStatusEnum $to): void
+    /**
+     * @param  string|null  $reason  required (min. MIN_REASON_LENGTH chars) when leaving the approved state
+     *
+     * @throws DomainException when the move is not allowed
+     */
+    public function transition(OrderLog $order, OrderStatusEnum $to, ?string $reason = null): void
     {
         if ((string) $order->template_render_mode !== OrderIssueService::RENDER_MODE_DOCX) {
             throw new RuntimeException('Only Word-engine orders support status transitions here.');
@@ -107,23 +145,245 @@ class OrderStatusTransitionService
             throw new DomainException(__('orders::order_composer.errors.invalid_transition'));
         }
 
-        DB::transaction(function () use ($order, $from, $target) {
+        $reason = trim((string) $reason);
+
+        if ($from === OrderStatusEnum::APPROVED->value) {
+            $this->guardLeavingApproved($order, $reason);
+        }
+
+        if ($target === OrderStatusEnum::APPROVED->value) {
+            $this->guardMonthsOpen($order, 'period_closed_approve');
+        }
+
+        DB::transaction(function () use ($order, $from, $target, $reason) {
+            // Two requests holding the same pending copy must not both apply the effect:
+            // re-read the row under a lock and continue only if it is still where we left it.
+            $this->lockCurrentStatus($order, $from);
+
             // Approving applies the effect; leaving an approved state reverses it.
             // pending↔cancelled carry no side-effect.
             $effectDirection = 'none';
             if ($target === OrderStatusEnum::APPROVED->value) {
+                $this->assignNumber($order);
                 $this->applyEffect($order);
                 $effectDirection = 'applied';
             } elseif ($from === OrderStatusEnum::APPROVED->value) {
                 $this->reverseEffect($order);
+                $this->finalPdf->release($order);
                 $effectDirection = 'reversed';
             }
 
             $order->update(['status_id' => $target]);
 
-            $this->recordTransition($order, $from, $target, $effectDirection);
+            $this->recordTransition($order, $from, $target, $effectDirection, $reason);
             $this->publish($order, $effectDirection);
         });
+
+        if ($target === OrderStatusEnum::APPROVED->value) {
+            $this->captureFinalPdf($order);
+        }
+    }
+
+    /**
+     * Leaving the approved state undoes an effect payroll may already have used: it needs a
+     * stated reason, and the month the order took effect in must still be open.
+     *
+     * @throws DomainException
+     */
+    private function guardLeavingApproved(OrderLog $order, string $reason): void
+    {
+        if (mb_strlen($reason) < self::MIN_REASON_LENGTH) {
+            throw new DomainException(__('orders::order_composer.errors.reason_required', ['min' => self::MIN_REASON_LENGTH]));
+        }
+
+        $this->guardMonthsOpen($order, 'period_closed');
+    }
+
+    /**
+     * Re-read the order under a row lock inside the transition's transaction and refuse when
+     * another request moved it meanwhile; the caller's copy is refreshed from the locked row.
+     *
+     * @throws DomainException
+     */
+    private function lockCurrentStatus(OrderLog $order, int $from): void
+    {
+        $current = OrderLog::query()->whereKey($order->getKey())->lockForUpdate()->first();
+
+        if ($current === null || (int) $current->status_id !== $from) {
+            throw new DomainException(__('orders::order_composer.errors.status_changed'));
+        }
+
+        $order->setRawAttributes($current->getAttributes(), true);
+    }
+
+    /**
+     * Every month the order's effect touches must be open for pay — when it is approved
+     * (the effect is written into the month) and when it leaves the approved state (the
+     * effect is taken out of it).
+     *
+     * @throws DomainException
+     */
+    private function guardMonthsOpen(OrderLog $order, string $messageKey): void
+    {
+        foreach ($this->effectMonths($order) as $month) {
+            $closedBy = $this->closedPeriods->closedBy($month);
+
+            if ($closedBy !== null) {
+                throw new DomainException(__('orders::order_composer.errors.'.$messageKey, [
+                    'period' => $month->format('m.Y'),
+                    'reason' => __('orders::order_composer.errors.period_closed_by.'.$closedBy),
+                ]));
+            }
+        }
+    }
+
+    /**
+     * The first day of every month the order's effect touches: each date role the effect
+     * declares (start/end, effective date, work date, recall date…) for the order and each
+     * participant, with a start–end span covering every month in between. The work year
+     * (a reference to an entitlement year) and the return-to-work day are not effect days.
+     * Falls back to effectiveDate() when the template declares no dated role.
+     *
+     * @return list<CarbonInterface>
+     */
+    public function effectMonths(OrderLog $order): array
+    {
+        $snapshot = (array) $order->template_snapshot;
+        $template = $this->templates->find((string) ($snapshot['template_code'] ?? ''));
+        $months = [];
+
+        if ($template !== null) {
+            $roles = collect($this->effects->roles((string) $template->effect))
+                ->filter(fn (array $role): bool => $role['type'] === 'date' && ! in_array($role['key'], ['work_year', 'return_date'], true))
+                ->pluck('key')
+                ->all();
+            if ($template->isHire()) {
+                $roles[] = 'start_date';
+            }
+
+            $orderFields = (array) ($snapshot['fields'] ?? []);
+            $fieldSets = [$orderFields];
+            foreach ($this->participantsOf($order) as $participant) {
+                $fieldSets[] = OrderParticipantFields::effective($template, $orderFields, (array) $participant->fields);
+            }
+
+            foreach ($fieldSets as $raw) {
+                $fields = $this->effectFields($template, $raw);
+                $dates = [];
+                foreach (array_unique($roles) as $role) {
+                    $date = $this->dates->parse(is_scalar($fields[$role] ?? null) ? (string) $fields[$role] : null);
+                    if ($date !== null) {
+                        $dates[$role] = Carbon::parse($date->format('Y-m-d'))->startOfMonth();
+                    }
+                }
+
+                if (isset($dates['start_date'], $dates['end_date']) && $dates['end_date']->gte($dates['start_date'])) {
+                    for ($month = $dates['start_date']->copy(); $month->lte($dates['end_date']) && count($months) < 600; $month->addMonth()) {
+                        $months[$month->format('Y-m')] = $month->copy();
+                    }
+                }
+
+                foreach ($dates as $date) {
+                    $months[$date->format('Y-m')] = $date;
+                }
+            }
+        }
+
+        if ($months === []) {
+            $date = Carbon::parse($this->effectiveDate($order)->format('Y-m-d'))->startOfMonth();
+            $months[$date->format('Y-m')] = $date;
+        }
+
+        ksort($months);
+
+        return array_values($months);
+    }
+
+    /**
+     * The date the order takes effect: its start date, else its (single) date, else the
+     * day it was given.
+     */
+    public function effectiveDate(OrderLog $order): CarbonInterface
+    {
+        $snapshot = (array) $order->template_snapshot;
+        $template = $this->templates->find((string) ($snapshot['template_code'] ?? ''));
+        $orderFields = (array) ($snapshot['fields'] ?? []);
+
+        // A multi-participant order takes effect on its earliest participant's date.
+        $fieldSets = [$orderFields];
+        if ($template !== null) {
+            foreach ($this->participantsOf($order) as $participant) {
+                $fieldSets[] = OrderParticipantFields::effective($template, $orderFields, (array) $participant->fields);
+            }
+        }
+
+        foreach (['start_date', 'date'] as $role) {
+            $earliest = null;
+            foreach ($fieldSets as $raw) {
+                $fields = $template ? $this->effectFields($template, $raw) : [];
+                $date = $this->dates->parse(is_scalar($fields[$role] ?? null) ? (string) $fields[$role] : null);
+                if ($date !== null && ($earliest === null || $date->lt($earliest))) {
+                    $earliest = $date;
+                }
+            }
+
+            if ($earliest !== null) {
+                return $earliest;
+            }
+        }
+
+        $given = $order->getRawOriginal('given_date');
+
+        return filled($given) ? Carbon::parse((string) $given) : Carbon::now();
+    }
+
+    /**
+     * An order approved while it still holds a provisional number takes the next number of
+     * its sequence now, inside the approval transaction, and its generated document is
+     * re-rendered to carry it. A number it already has (typed, or assigned at an earlier
+     * approval) is kept — a number is assigned once.
+     */
+    private function assignNumber(OrderLog $order): void
+    {
+        if (! OrderNumbering::isProvisional($order->order_no)) {
+            return;
+        }
+
+        $snapshot = (array) $order->template_snapshot;
+        $templateCode = (string) ($snapshot['template_code'] ?? '');
+        $date = $this->dates->parse((string) ($snapshot['order_date_text'] ?? ''))
+            ?? (filled($order->getRawOriginal('given_date')) ? Carbon::parse((string) $order->getRawOriginal('given_date')) : Carbon::now());
+
+        $provisional = (string) $order->order_no;
+        $number = $this->numbering->assign($templateCode, $date);
+
+        $order->update(['order_no' => $number]);
+        // The pivot follows order_no by ON UPDATE CASCADE where foreign keys are enforced;
+        // this keeps it right where they are not (and is a no-op where they are).
+        DB::table('order_log_personnels')->where('order_no', $provisional)->update(['order_no' => $number]);
+
+        $template = $this->templates->find($templateCode);
+        if ($template !== null) {
+            $this->documents->renumber($order, $template);
+        }
+    }
+
+    /**
+     * Store the immutable final PDF after the approval committed. Never fails the approval:
+     * without LibreOffice (or on a failed conversion) it is logged and backfilled later by
+     * orders:render-final-pdfs.
+     */
+    private function captureFinalPdf(OrderLog $order): void
+    {
+        if (! OrderFinalPdfService::capturesOnApproval()) {
+            return;
+        }
+
+        try {
+            $this->finalPdf->capture($order);
+        } catch (Throwable $e) {
+            Log::warning('orders.final_pdf.capture_failed', ['order_id' => $order->id, 'error' => $e->getMessage()]);
+        }
     }
 
     /**
@@ -150,10 +410,43 @@ class OrderStatusTransitionService
             return;
         }
 
-        $fields = $this->effectFields($template, (array) ($snapshot['fields'] ?? []));
-        $personnel = $this->personnel($snapshot);
+        $orderFields = (array) ($snapshot['fields'] ?? []);
+        $participants = $this->participantsOf($order);
 
-        $this->outbox->record('orders', (string) $order->order_no, [
+        if ($participants->isEmpty()) {
+            $this->outbox->record('orders', (string) $order->order_no, $this->eventPayload(
+                $order, $template, $effectDirection, $this->personnel($snapshot), $this->effectFields($template, $orderFields),
+            ));
+
+            return;
+        }
+
+        // One event per participant, same shape: the counterpart books each person's
+        // trip/leave on its own. external_id is per participant; order_external_id ties
+        // the events of one order together.
+        $people = $this->peopleOf($participants);
+        foreach ($participants as $participant) {
+            $fields = $this->effectFields($template, OrderParticipantFields::effective($template, $orderFields, (array) $participant->fields));
+
+            $this->outbox->record('orders', (string) $order->order_no, [
+                ...$this->eventPayload($order, $template, $effectDirection, $people[(int) $participant->personnel_id] ?? null, $fields),
+                'external_id' => $order->id.'-'.$participant->position,
+                'order_external_id' => (string) $order->id,
+                'participant_index' => (int) $participant->position,
+                'participant_count' => $participants->count(),
+            ]);
+        }
+    }
+
+    /**
+     * The outbox payload for one employee of an order.
+     *
+     * @param  array<string,mixed>  $fields  role => value
+     * @return array<string,mixed>
+     */
+    private function eventPayload(OrderLog $order, OrderWordTemplate $template, string $effectDirection, ?Personnel $personnel, array $fields): array
+    {
+        return [
             'external_id' => (string) $order->id,
             'order_no' => (string) $order->order_no,
             'effect' => (string) $template->effect,
@@ -170,8 +463,7 @@ class OrderStatusTransitionService
             'start_date' => $this->dateField($fields, 'start_date'),
             'end_date' => $this->dateField($fields, 'end_date'),
             'days' => isset($fields['days']) ? (int) $fields['days'] : null,
-        ]);
-
+        ];
     }
 
     /**
@@ -189,19 +481,20 @@ class OrderStatusTransitionService
      * or reversed — which is exactly what an auditor needs to trace a reversed hire
      * or a cancelled transfer.
      */
-    private function recordTransition(OrderLog $order, int $from, int $target, string $effectDirection): void
+    private function recordTransition(OrderLog $order, int $from, int $target, string $effectDirection, string $reason = ''): void
     {
         $verb = $this->transitionVerb($from, $target);
 
         activity('orders')
             ->performedOn($order)
-            ->withProperties([
+            ->withProperties(array_filter([
                 'order_no' => $order->order_no,
                 'order_type_id' => $order->order_type_id,
                 'from_status' => $from,
                 'to_status' => $target,
                 'effect' => $effectDirection,
-            ])
+                'reason' => $reason !== '' ? $reason : null,
+            ], fn (mixed $value, string $key): bool => $key !== 'reason' || $value !== null, ARRAY_FILTER_USE_BOTH))
             ->event($verb)
             ->log("order.{$verb}");
     }
@@ -233,6 +526,13 @@ class OrderStatusTransitionService
             return;
         }
 
+        $participants = $this->participantsOf($order);
+        if ($participants->isNotEmpty()) {
+            $this->applyToParticipants($order, $template, $participants);
+
+            return;
+        }
+
         $effect = $this->effects->for($template->effect);
         $personnel = $this->personnel($snapshot);
 
@@ -243,8 +543,10 @@ class OrderStatusTransitionService
             throw new DomainException(__('orders::order_composer.errors.approval_blocked', ['reason' => $blocker]));
         }
 
+        // Dəyişiklik siyasəti: effekt yalnız reyestrdə ona aid sahə qruplarını yaza bilər
+        // (qrup «yalnız əmrlə» olsa belə).
         if ($effect && $personnel) {
-            $effect->apply($order, $this->effectFields($template, (array) ($snapshot['fields'] ?? [])), $personnel);
+            $this->changes->allowForEffect((string) $template->effect, fn () => $effect->apply($order, $this->effectFields($template, (array) ($snapshot['fields'] ?? [])), $personnel));
         }
     }
 
@@ -265,10 +567,131 @@ class OrderStatusTransitionService
         }
 
         $effect = $this->effects->for($template->effect);
+
+        $participants = $this->participantsOf($order);
+        if ($participants->isNotEmpty()) {
+            if ($effect) {
+                $people = $this->peopleOf($participants);
+                foreach ($participants->reverse() as $participant) {
+                    $personnel = $people[(int) $participant->personnel_id] ?? null;
+                    if ($personnel !== null) {
+                        $fields = $this->participantEffectFields($template, $snapshot, $participant);
+                        $this->withParticipantState($order, $participant, fn () => $effect->reverse($order, $fields, $personnel));
+                    }
+                }
+            }
+
+            return;
+        }
+
         $personnel = $this->personnel($snapshot);
         if ($effect && $personnel) {
-            $effect->reverse($order, $this->effectFields($template, (array) ($snapshot['fields'] ?? [])), $personnel);
+            $this->changes->allowForEffect((string) $template->effect, fn () => $effect->reverse($order, $this->effectFields($template, (array) ($snapshot['fields'] ?? [])), $personnel));
         }
+    }
+
+    /**
+     * Approve a multi-participant order: check every participant first (dates, still
+     * employed, not away on those days) — the first one who cannot go refuses the whole
+     * approval with their name — then apply the effect for each, all in the caller's
+     * transaction, so either everyone's record is written or no one's.
+     *
+     * @param  Collection<int,OrderParticipant>  $participants
+     *
+     * @throws DomainException
+     */
+    private function applyToParticipants(OrderLog $order, OrderWordTemplate $template, Collection $participants): void
+    {
+        $snapshot = (array) $order->template_snapshot;
+        $people = $this->peopleOf($participants);
+
+        foreach ($participants as $participant) {
+            $personnel = $people[(int) $participant->personnel_id] ?? null;
+            $fields = OrderParticipantFields::effective($template, (array) ($snapshot['fields'] ?? []), (array) $participant->fields);
+            $name = $personnel ? (string) $personnel->fullname : '#'.$participant->personnel_id;
+
+            $blocker = $personnel === null
+                ? __('orders::order_composer.errors.participant_missing')
+                : $this->periods->approvalBlocker($template, $fields, $personnel);
+
+            if ($blocker !== null) {
+                throw new DomainException(__('orders::order_composer.errors.approval_blocked', [
+                    'reason' => __('orders::order_composer.errors.participant_blocked', ['name' => $name, 'reason' => $blocker]),
+                ]));
+            }
+        }
+
+        $effect = $this->effects->for($template->effect);
+        if (! $effect) {
+            return;
+        }
+
+        foreach ($participants as $participant) {
+            $personnel = $people[(int) $participant->personnel_id];
+            $fields = $this->participantEffectFields($template, $snapshot, $participant);
+            $this->withParticipantState($order, $participant, fn () => $effect->apply($order, $fields, $personnel));
+        }
+    }
+
+    /**
+     * The effect's role inputs for one participant: their effective fields mapped to roles,
+     * plus their position so an effect can keep per-person keys apart.
+     *
+     * @param  array<string,mixed>  $snapshot
+     * @return array<string,mixed>
+     */
+    private function participantEffectFields(OrderWordTemplate $template, array $snapshot, OrderParticipant $participant): array
+    {
+        $raw = OrderParticipantFields::effective($template, (array) ($snapshot['fields'] ?? []), (array) $participant->fields);
+
+        return $this->effectFields($template, $raw) + [OrderParticipantFields::EFFECT_CONTEXT => (int) $participant->position];
+    }
+
+    /**
+     * Run an effect for one participant with that participant's effect state in the order
+     * snapshot (where every effect keeps it, {@see Effects\RemembersEffectState}), then move
+     * the resulting state onto the participant's row and restore the order's own.
+     */
+    private function withParticipantState(OrderLog $order, OrderParticipant $participant, callable $run): void
+    {
+        $snapshot = (array) $order->template_snapshot;
+        $hadState = array_key_exists('effect_state', $snapshot);
+        $orderState = $snapshot['effect_state'] ?? null;
+
+        $snapshot['effect_state'] = (array) ($participant->effect_state ?? []);
+        $order->forceFill(['template_snapshot' => $snapshot])->save();
+
+        $run();
+
+        $state = (array) data_get($order->template_snapshot, 'effect_state', []);
+        $participant->forceFill(['effect_state' => $state === [] ? null : $state])->save();
+
+        $snapshot = (array) $order->template_snapshot;
+        if ($hadState) {
+            $snapshot['effect_state'] = $orderState;
+        } else {
+            unset($snapshot['effect_state']);
+        }
+        $order->forceFill(['template_snapshot' => $snapshot])->save();
+    }
+
+    /**
+     * A multi-participant order's people in document order (empty for a single-person order).
+     *
+     * @return Collection<int,OrderParticipant>
+     */
+    private function participantsOf(OrderLog $order): Collection
+    {
+        return $order->participants()->get();
+    }
+
+    /**
+     * @param  Collection<int,OrderParticipant>  $participants
+     * @return array<int,Personnel>
+     */
+    private function peopleOf(Collection $participants): array
+    {
+        return Personnel::query()->whereKey($participants->pluck('personnel_id')->all())->get()->keyBy('id')->all();
     }
 
     /**
@@ -295,7 +718,8 @@ class OrderStatusTransitionService
         $joinDate = $this->dates->parse(($this->effectFields($template, (array) ($snapshot['fields'] ?? [])))['start_date'] ?? null);
         $structureId = $snapshot['hire_structure_id'] ?? null;
 
-        $this->candidateImport->handle([[
+        // İşə qəbul əmri təyinatın, işə qəbul tarixinin və ilkin əmək haqqının qanuni mənbəyidir.
+        $this->changes->allowForEffect('hire', fn (): array => $this->candidateImport->handle([[
             'personnel_id' => (int) $candidateId,
             'structure_id' => $structureId,
             'position_id' => (int) $positionId,
@@ -303,7 +727,7 @@ class OrderStatusTransitionService
             // Lets the Candidates module link the hired candidate back to this order.
             'order_id' => $order->id,
             'order_no' => $order->order_no,
-        ]], OrderStatusEnum::APPROVED->value);
+        ]], OrderStatusEnum::APPROVED->value));
 
         $this->seedHireCompensation((int) $candidateId, $joinDate, $order->order_no);
 

@@ -46,6 +46,7 @@ return [
         'other' => 'Other',
     ],
     'labels' => [
+        'kinship_is_disabled' => 'Has a disability',
         'action' => 'Action',
         'number' => '#',
         'name' => 'Name',
@@ -294,6 +295,24 @@ return [
             'sunday' => 'Sunday',
         ],
     ],
+    'presence' => [
+        'statuses' => [
+            'deleted' => 'Deleted',
+            'dismissed' => 'Resigned',
+            'pending' => 'Waiting for approval',
+            'sick' => 'On sick leave',
+            'vacation' => 'On vacation',
+            'business_trip' => 'On business trip',
+            'leave' => 'On leave',
+            'at_work' => 'At work',
+        ],
+        'returns_on' => 'returns: :date',
+        'period' => ':from – :to',
+        'filter_label' => 'Status today',
+        'filter_any' => 'Any status',
+        'filter_selected' => ':count statuses selected',
+        'filter_clear' => 'Clear selection',
+    ],
     'states' => [
         'deleted' => 'Deleted',
         'contract_expired' => 'Contract term has ended',
@@ -303,9 +322,12 @@ return [
         'at_work' => 'At work',
     ],
     'hints' => [
+        'assignment_order_only' => 'The structure and position change through a transfer order.',
+        'create_transfer_order' => 'Create a transfer order',
         'positions_without_staff_schedule' => 'No positions are defined in the staff schedule for this structure — showing all positions.',
     ],
     'validation' => [
+        'assignment_order_only' => 'The structure and position can only be changed by an order.',
         'contract_end_after_start' => 'The contract end date must be after the start date.',
         'contract_date_after_start' => 'The contract cannot be signed after the start date: the signing date must be on or before the start date.',
         'pin_format' => 'The FIN must be exactly 7 characters: Latin letters and digits only.',
@@ -341,5 +363,8 @@ return [
     'placeholders' => [
         'quick_search' => 'Name, tabel no, FIN...',
         'search' => 'Search...',
+    ],
+    'sanctions' => [
+        'lifted' => 'Expired disciplinary sanctions lifted: :count.',
     ],
 ];

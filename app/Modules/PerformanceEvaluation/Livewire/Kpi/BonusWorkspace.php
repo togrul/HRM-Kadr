@@ -9,6 +9,7 @@ use App\Models\Position;
 use App\Models\Structure;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\BonusService;
 use App\Support\Livewire\DownloadsReportsTable;
+use App\Support\Livewire\ScopesPersonnelByStructure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -33,6 +34,7 @@ class BonusWorkspace extends Component
 {
     use AuthorizesRequests;
     use DownloadsReportsTable;
+    use ScopesPersonnelByStructure;
 
     public ?int $cycleId = null;
 
@@ -93,7 +95,7 @@ class BonusWorkspace extends Component
     #[Computed]
     public function scope(): SupportCollection
     {
-        return PerformanceScorecard::query()
+        return $this->scopeByPersonnel(PerformanceScorecard::query())
             ->where('performance_cycle_id', $this->cycleId)
             ->join('personnels', 'personnels.id', '=', 'performance_scorecards.personnel_id')
             ->distinct()

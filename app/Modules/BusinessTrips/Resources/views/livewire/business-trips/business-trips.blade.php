@@ -113,6 +113,19 @@
                 />
             </div>
 
+            <div class="min-w-[150px] flex-1 sm:max-w-[190px]">
+                <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('business_trips::common.filters.trip_type') }}</span>
+                <x-ui.select-dropdown
+                    :aria-label="__('business_trips::common.filters.trip_type')"
+                    wire:key="business-trips-trip-type-filter"
+                    placeholder="---"
+                    mode="gray"
+                    class="w-full"
+                    wire:model.live="filter.trip_type"
+                    :model="$this->tripTypeOptions"
+                />
+            </div>
+
             <x-ui.select-dropdown
                 :aria-label="__('business_trips::common.filters.status')"
                 wire:key="business-trips-status-filter"
@@ -180,9 +193,17 @@
                 </x-table.td>
 
                 <x-table.td standart-width>
-                    <div class="max-w-[220px] leading-tight">
-                        <p class="truncate text-[13px] text-ink">{{ $_bTrip->location ?: '—' }}</p>
+                    <div class="max-w-[240px] leading-tight">
+                        <div class="flex items-center gap-1.5">
+                            <p class="truncate text-[13px] text-ink">{{ $_bTrip->location ?: '—' }}</p>
+                            @if (filled($_bTrip->trip_type))
+                                <x-small-badge :mode="$_bTrip->trip_type === \App\Models\PersonnelBusinessTrip::TRIP_TYPE_FOREIGN ? 'blue' : 'secondary'">{{ __('business_trips::common.trip_types.'.$_bTrip->trip_type) }}</x-small-badge>
+                            @endif
+                        </div>
                         <p class="truncate text-[11px] text-ink-faint">{{ $_bTrip->order?->orderType?->name ?: '—' }}</p>
+                        @if (filled($_bTrip->funding_source))
+                            <p class="truncate text-[11px] text-ink-faint" title="{{ __('business_trips::common.fields.funding_source') }}">{{ __('business_trips::common.fields.funding_source') }}: {{ $_bTrip->funding_source }}</p>
+                        @endif
                     </div>
                 </x-table.td>
 

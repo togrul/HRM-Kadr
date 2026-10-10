@@ -72,13 +72,13 @@ class GoalsWorkspace extends Component
      */
     public function getTreeProperty(): array
     {
-        return $this->cycleId ? app(PerformanceGoalService::class)->tree($this->cycleId) : [];
+        return $this->cycleId ? $this->goalService()->tree($this->cycleId) : [];
     }
 
     public function getSummaryProperty(): array
     {
         return $this->cycleId
-            ? app(PerformanceGoalService::class)->summary($this->cycleId)
+            ? $this->goalService()->summary($this->cycleId)
             : ['total' => 0, 'active' => 0, 'at_risk' => 0, 'done' => 0, 'avg_progress' => 0];
     }
 
@@ -91,8 +91,7 @@ class GoalsWorkspace extends Component
             return [];
         }
 
-        return PerformanceGoal::query()
-            ->where('performance_cycle_id', $this->cycleId)
+        return $this->goalService()->queryForCycle((int) $this->cycleId)
             ->orderBy('title')
             ->get(['id', 'title'])
             ->map(fn (PerformanceGoal $g): array => ['id' => $g->id, 'label' => $g->title])
@@ -180,6 +179,7 @@ class GoalsWorkspace extends Component
     public function startCheckin(int $goalId): void
     {
         $this->authorize('manage-performance-evaluation');
+        $this->goalService()->findForCycle((int) $this->cycleId, $goalId);
         $this->checkinGoalId = $goalId;
         $this->checkinValue = null;
         $this->checkinNote = '';
@@ -195,7 +195,7 @@ class GoalsWorkspace extends Component
             'checkinNote' => ['nullable', 'string', 'max:500'],
         ]);
 
-        $goal = PerformanceGoal::findOrFail($this->checkinGoalId);
+        $goal = $this->goalService()->findForCycle((int) $this->cycleId, (int) $this->checkinGoalId);
         app(PerformanceGoalService::class)->addCheckin($goal, (float) $this->checkinValue, $this->checkinNote ?: null);
 
         $this->cancelCheckin();
@@ -215,13 +215,13 @@ class GoalsWorkspace extends Component
         if (! in_array($status, PerformanceGoal::STATUSES, true)) {
             return;
         }
-        PerformanceGoal::whereKey($goalId)->update(['status' => $status]);
+        $this->goalService()->findForCycle((int) $this->cycleId, $goalId)->update(['status' => $status]);
     }
 
     public function deleteGoal(int $goalId): void
     {
         $this->authorize('manage-performance-evaluation');
-        PerformanceGoal::whereKey($goalId)->delete();
+        $this->goalService()->findForCycle((int) $this->cycleId, $goalId)->delete();
         $this->dispatch('notify', type: 'success', message: __('performance_evaluation::goals.messages.deleted'));
     }
 
@@ -239,6 +239,11 @@ class GoalsWorkspace extends Component
             'due_date' => null,
         ];
         $this->resetValidation();
+    }
+
+    private function goalService(): PerformanceGoalService
+    {
+        return app(PerformanceGoalService::class)->forViewer(auth()->user());
     }
 
     public function render(): View

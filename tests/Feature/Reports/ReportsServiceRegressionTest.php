@@ -18,6 +18,15 @@ class ReportsServiceRegressionTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Hesabatlar istifadəçinin struktur görünürlüyü ilə məhdudlaşır (fail closed):
+        // bu reqressiya testləri bütün təşkilat üzrə rəqəmləri yoxlayır.
+        $this->actingAs(grantAllStructures(User::factory()->create()));
+    }
+
     public function test_standard_training_report_does_not_duplicate_participants_or_hours_when_session_has_multiple_feedback_rows(): void
     {
         $this->seedPersonnelSupportTables();

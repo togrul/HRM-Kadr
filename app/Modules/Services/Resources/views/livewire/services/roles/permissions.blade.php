@@ -39,6 +39,7 @@
                                 type="text"
                                 :value="old('permission_name')"
                                 wire:model="permission_name"
+                                :readonly="(bool) $permission_id"
                                 autofocus
                             />
                             @error('permission_name')

@@ -23,9 +23,10 @@ class OnboardingAssignmentManagerTest extends TestCase
     public function test_hr_can_create_template_and_assign_onboarding_document(): void
     {
         Storage::fake('public');
+        Storage::fake('local');
         $this->seedReferenceData();
 
-        $hr = User::factory()->create(['is_active' => true]);
+        $hr = grantAllStructures(User::factory()->create(['is_active' => true]));
         $hr->givePermissionTo([
             Permission::findOrCreate('assign-onboarding-documents', 'web'),
             Permission::findOrCreate('manage-onboarding-document-templates', 'web'),
@@ -55,15 +56,16 @@ class OnboardingAssignmentManagerTest extends TestCase
         $this->assertNotNull($assignment);
         $this->assertSame($personnel->id, $assignment->personnel_id);
         $this->assertSame('assigned', $assignment->status);
-        Storage::disk('public')->assertExists($template->file_path);
+        Storage::disk('local')->assertExists($template->file_path);
     }
 
     public function test_hr_can_waive_and_remove_onboarding_assignment(): void
     {
         Storage::fake('public');
+        Storage::fake('local');
         $this->seedReferenceData();
 
-        $hr = User::factory()->create(['is_active' => true]);
+        $hr = grantAllStructures(User::factory()->create(['is_active' => true]));
         $hr->givePermissionTo(Permission::findOrCreate('assign-onboarding-documents', 'web'));
 
         $personnel = $this->makePersonnel('employee@example.test');

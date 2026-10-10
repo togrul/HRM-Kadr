@@ -73,6 +73,7 @@ class MyHrRequestsReadService
                 'assigned:id,surname,name,patronymic',
                 'fallbackApprover:id,surname,name,patronymic',
             ])
+            ->withExists('sickCertificate as has_sick_certificate')
             ->where('tabel_no', $personnel->tabel_no)
             ->orderByDesc('starts_at')
             ->get()
@@ -109,7 +110,9 @@ class MyHrRequestsReadService
                     ]))),
                     'effective_from' => optional($leave->starts_at)->format('Y-m-d'),
                     'effective_to' => optional($leave->ends_at)->format('Y-m-d'),
-                    'can_request_correction' => $this->canRequestCorrection(Leave::class, $leave->getKey(), $statusKey),
+                    // A sick-certificate leave is corrected in the certificate register, not by request.
+                    'can_request_correction' => ! $leave->isManagedBySickCertificate()
+                        && $this->canRequestCorrection(Leave::class, $leave->getKey(), $statusKey),
                 ];
             })
             ->filter(fn (?array $row): bool => $row !== null)

@@ -9,6 +9,7 @@ use App\Models\Structure;
 use App\Modules\BusinessTrips\Exports\BusinessTripExport;
 use App\Modules\Orders\Contracts\OrderDrafter;
 use App\Services\StructureService;
+use App\Support\Uploads\SecureFileResponse;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -107,6 +108,7 @@ class BusinessTrips extends Component
         $this->filter = [
             'structure_id' => null,
             'order_type_id' => null,
+            'trip_type' => null,
             'business_trip_status' => 'all',
         ];
     }
@@ -191,10 +193,15 @@ class BusinessTrips extends Component
             $templateProcessor->setValue('bullet', $filteredAttributes->attributes['$bullet']['value'] ?? '---------');
         }
 
-        $filename = "{$model->personnel->fullname}_ezamiyyet_{$model->start_date->format('d.m.Y')}";
-        $templateProcessor->saveAs($filename.'.docx');
+        // Fayl veb kökündə (public/) yox, storage/app/tmp-də təsadüfi adla yaradılır;
+        // istifadəçinin gördüyü ad ayrıca təmizlənir (yol ayırıcıları atılır).
+        $path = SecureFileResponse::temporaryPath('docx');
+        $templateProcessor->saveAs($path);
 
-        return response()->download($filename.'.docx')->deleteFileAfterSend();
+        return SecureFileResponse::temporaryDownload(
+            $path,
+            "{$model->personnel->fullname}_ezamiyyet_{$model->start_date->format('d.m.Y')}.docx",
+        );
     }
 
     /**
@@ -418,6 +425,20 @@ class BusinessTrips extends Component
             is_numeric($selected) ? $selected : null,
             50
         )];
+    }
+
+    /**
+     * Domestic / abroad, for the trip-kind filter.
+     *
+     * @return array<int,array{id:string,label:string}>
+     */
+    #[Computed]
+    public function tripTypeOptions(): array
+    {
+        return array_map(fn (string $type): array => [
+            'id' => $type,
+            'label' => __('business_trips::common.trip_types.'.$type),
+        ], PersonnelBusinessTrip::TRIP_TYPES);
     }
 
     /**

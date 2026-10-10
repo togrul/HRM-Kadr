@@ -4,17 +4,24 @@ namespace App\Support\Livewire;
 
 use App\Models\Personnel;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 
 /**
  * Tabel-no / name typeahead that picks one employee. Shared by the Compensation and
  * Payroll workspaces; the consuming view renders the input and the result list.
+ * Axtarış və seçim istifadəçinin struktur görünürlüyü ilə məhdudlaşır; seçilmiş tabel
+ * nömrəsi kilidlidir — yalnız selectPersonnel() (görünürlük yoxlaması ilə) onu dəyişir.
  */
 trait SearchesPersonnel
 {
+    use ScopesPersonnelByStructure;
+
     public string $personnelSearch = '';
 
+    #[Locked]
     public ?string $selectedTabelNo = null;
 
+    #[Locked]
     public ?string $selectedPersonnelLabel = null;
 
     /**
@@ -29,7 +36,7 @@ trait SearchesPersonnel
             return [];
         }
 
-        return Personnel::query()
+        return $this->personnelScope()->constrain(Personnel::query(), 'personnels.structure_id')
             ->where(fn ($q) => $q
                 ->where('surname', 'like', "%{$term}%")
                 ->orWhere('name', 'like', "%{$term}%")
@@ -46,6 +53,8 @@ trait SearchesPersonnel
 
     public function selectPersonnel(string $tabelNo, string $label): void
     {
+        abort_unless($this->tabelInScope($tabelNo), 403);
+
         $this->selectedTabelNo = $tabelNo;
         $this->selectedPersonnelLabel = $label;
         $this->personnelSearch = '';

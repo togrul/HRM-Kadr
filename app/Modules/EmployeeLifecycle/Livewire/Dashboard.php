@@ -4,6 +4,7 @@ namespace App\Modules\EmployeeLifecycle\Livewire;
 
 use App\Modules\EmployeeLifecycle\Application\Services\LifecycleDashboardReadService;
 use App\Modules\EmployeeLifecycle\Application\Services\LifecyclePlanTemplateService;
+use App\Services\StructureService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -366,6 +367,8 @@ class Dashboard extends Component
             'launchForm.owner_user_id' => ['nullable', 'integer', 'exists:users,id'],
         ])['launchForm'];
 
+        $this->ensurePersonnelVisible((int) $data['personnel_id']);
+
         $service->launchForPersonnel(
             (int) $data['template_id'],
             (int) $data['personnel_id'],
@@ -388,6 +391,8 @@ class Dashboard extends Component
             'probationForm.manager_user_id' => ['nullable', 'integer', 'exists:users,id'],
             'probationForm.hr_reviewer_user_id' => ['nullable', 'integer', 'exists:users,id'],
         ])['probationForm'];
+
+        $this->ensurePersonnelVisible((int) $data['personnel_id']);
 
         $service->scheduleProbationReview(
             (int) $data['personnel_id'],
@@ -415,6 +420,12 @@ class Dashboard extends Component
             'movementForm.owner_user_id' => ['nullable', 'integer', 'exists:users,id'],
         ])['movementForm'];
 
+        $this->ensurePersonnelVisible((int) $data['personnel_id']);
+        abort_if(
+            filled($data['target_structure_id']) && ! app(StructureService::class)->scopeFor(auth()->user())->allows((int) $data['target_structure_id']),
+            403
+        );
+
         $service->scheduleMovement(
             (int) $data['personnel_id'],
             $data['movement_type'],
@@ -441,6 +452,8 @@ class Dashboard extends Component
             'offboardingForm.owner_user_id' => ['nullable', 'integer', 'exists:users,id'],
         ])['offboardingForm'];
 
+        $this->ensurePersonnelVisible((int) $data['personnel_id']);
+
         $service->openOffboardingCase(
             (int) $data['personnel_id'],
             $data['last_working_date'],
@@ -464,6 +477,8 @@ class Dashboard extends Component
             'completionForm.probation_note' => ['nullable', 'string', 'max:2000'],
         ])['completionForm'];
 
+        $this->ensureRecordVisible('employee_lifecycle_probation_reviews', (int) $data['probation_review_id']);
+
         $service->completeProbationReview(
             (int) $data['probation_review_id'],
             $data['probation_decision'],
@@ -486,6 +501,8 @@ class Dashboard extends Component
             'completionForm.movement_id' => ['required', 'integer', 'exists:employee_lifecycle_movements,id'],
         ])['completionForm'];
 
+        $this->ensureRecordVisible('employee_lifecycle_movements', (int) $data['movement_id']);
+
         $service->completeMovement((int) $data['movement_id'], auth()->id());
 
         $this->completionForm['movement_id'] = '';
@@ -501,6 +518,8 @@ class Dashboard extends Component
             'completionForm.exit_summary' => ['nullable', 'string', 'max:2000'],
         ])['completionForm'];
 
+        $this->ensureRecordVisible('employee_lifecycle_offboarding_cases', (int) $data['offboarding_case_id']);
+
         $service->completeOffboardingCase((int) $data['offboarding_case_id'], $data['exit_summary'] ?: null, auth()->id());
 
         $this->completionForm['offboarding_case_id'] = '';
@@ -511,7 +530,7 @@ class Dashboard extends Component
     public function render(LifecycleDashboardReadService $service): View
     {
         return view('employee-lifecycle::livewire.dashboard', [
-            ...$service->dashboard([
+            ...$service->forViewer(auth()->user())->dashboard([
                 'search' => $this->search,
                 'type' => $this->type,
                 'status' => $this->status,
@@ -571,6 +590,22 @@ class Dashboard extends Component
         abort_unless(auth()->user()?->can('manage-employee-lifecycle'), 403);
     }
 
+    /** İşçi istifadəçinin struktur görünürlüyündə deyilsə əməliyyat rədd edilir. */
+    private function ensurePersonnelVisible(int $personnelId): void
+    {
+        abort_unless($this->viewerReadService()->isPersonnelVisible($personnelId), 403);
+    }
+
+    private function ensureRecordVisible(string $table, int $id): void
+    {
+        abort_unless($this->viewerReadService()->isRecordVisible($table, $id), 404);
+    }
+
+    private function viewerReadService(): LifecycleDashboardReadService
+    {
+        return app(LifecycleDashboardReadService::class)->forViewer(auth()->user());
+    }
+
     private function validateLifecycle(array $rules): array
     {
         return $this->validate($rules, [], [
@@ -627,7 +662,7 @@ class Dashboard extends Component
     #[Computed]
     public function probationReviewOptions(): array
     {
-        return app(LifecycleDashboardReadService::class)->probationReviewOptions(
+        return app(LifecycleDashboardReadService::class)->forViewer(auth()->user())->probationReviewOptions(
             $this->probationOptionSearch,
             $this->selectedCompletionId('probation_review_id'),
         );
@@ -639,7 +674,7 @@ class Dashboard extends Component
     #[Computed]
     public function movementOptions(): array
     {
-        return app(LifecycleDashboardReadService::class)->movementOptions(
+        return app(LifecycleDashboardReadService::class)->forViewer(auth()->user())->movementOptions(
             $this->movementOptionSearch,
             $this->selectedCompletionId('movement_id'),
         );
@@ -651,7 +686,7 @@ class Dashboard extends Component
     #[Computed]
     public function offboardingCaseOptions(): array
     {
-        return app(LifecycleDashboardReadService::class)->offboardingCaseOptions(
+        return app(LifecycleDashboardReadService::class)->forViewer(auth()->user())->offboardingCaseOptions(
             $this->offboardingOptionSearch,
             $this->selectedCompletionId('offboarding_case_id'),
         );
@@ -670,9 +705,11 @@ class Dashboard extends Component
     #[Computed(persist: true)]
     public function personnelOptions(): Collection
     {
-        return DB::table('personnels')
+        $query = DB::table('personnels')
             ->leftJoin('structures', 'structures.id', '=', 'personnels.structure_id')
-            ->leftJoin('positions', 'positions.id', '=', 'personnels.position_id')
+            ->leftJoin('positions', 'positions.id', '=', 'personnels.position_id');
+
+        return app(StructureService::class)->scopeFor(auth()->user())->constrain($query, 'personnels.structure_id')
             ->whereNull('personnels.deleted_at')
             ->orderBy('personnels.surname')
             ->limit(120)
@@ -717,7 +754,7 @@ class Dashboard extends Component
     #[Computed(persist: true)]
     public function structureOptions(): Collection
     {
-        return DB::table('structures')
+        return app(StructureService::class)->scopeFor(auth()->user())->constrain(DB::table('structures'), 'structures.id')
             ->orderBy('name')
             ->limit(120)
             ->get(['id', 'name'])

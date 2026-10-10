@@ -4,10 +4,14 @@ namespace App\Modules\Orders\Providers;
 
 use App\Contracts\EmployeeRecordSource;
 use App\Models\OrderType;
+use App\Modules\Orders\Application\Document\DocxToPdfConverter;
+use App\Modules\Orders\Application\Document\PdfConverter;
+use App\Modules\Orders\Console\Commands\AuditDeletedApprovedOrdersCommand;
 use App\Modules\Orders\Console\Commands\NeutralizeOrderWordTemplatesCommand;
 use App\Modules\Orders\Console\Commands\OrdersListQueryBudgetCommand;
 use App\Modules\Orders\Console\Commands\OrdersListRenderBenchmarkCommand;
 use App\Modules\Orders\Console\Commands\ReclassifyNonAnnualLeaveCommand;
+use App\Modules\Orders\Console\Commands\RenderFinalOrderPdfsCommand;
 use App\Modules\Orders\Contracts\HireOrderTemplates;
 use App\Modules\Orders\Domain\Contracts\OrderTypeStatusLookupReadRepository;
 use App\Modules\Orders\Infrastructure\Document\HireOrderTemplateLookup;
@@ -27,15 +31,21 @@ class OrdersServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
+                \App\Modules\Orders\Console\Commands\AuditTransferTimingCommand::class,
+                \App\Modules\Orders\Console\Commands\ApplyDueTransfersCommand::class,
                 OrdersListQueryBudgetCommand::class,
                 OrdersListRenderBenchmarkCommand::class,
                 NeutralizeOrderWordTemplatesCommand::class,
                 ReclassifyNonAnnualLeaveCommand::class,
+                AuditDeletedApprovedOrdersCommand::class,
+                RenderFinalOrderPdfsCommand::class,
             ]);
         }
 
         $this->app->bind(OrderTypeStatusLookupReadRepository::class, EloquentOrderTypeStatusLookupReadRepository::class);
         $this->app->bind(HireOrderTemplates::class, HireOrderTemplateLookup::class);
+        $this->app->bind(PdfConverter::class, DocxToPdfConverter::class);
+        $this->app->bind(\App\Modules\Orders\Contracts\DeferredTransferApplier::class, \App\Modules\Orders\Infrastructure\Document\Effects\TransferEffect::class);
 
         $this->app->tag([OrderEmployeeRecordSource::class], EmployeeRecordSource::TAG);
     }

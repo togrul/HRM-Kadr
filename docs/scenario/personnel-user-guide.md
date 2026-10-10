@@ -122,6 +122,10 @@ Təsdiq icazəniz yoxdursa, yeni qeyd `Təsdiq gözləyir` statusu ilə yaranır
 
 Zolaqda qıfıl ikonu və "Redaktə etmək üçün icazəniz yoxdur." yazısı görünürsə, məlumatı yadda saxlamaq hüququnuz yoxdur.
 
+Bəzi sahələrin etiketində nişan ola bilər — bunu qurumun `Dəyişiklik siyasəti` (Tənzimləmələr) müəyyən edir:
+- `(əmrlə)` — sahə kilidlidir, yalnız əmrlə dəyişir (məsələn struktur/vəzifə köçürmə əmri ilə, soyad soyadın dəyişdirilməsi əmri ilə). Sahənin altındakı `Əmr yarat` keçidi uyğun əmri açır.
+- `(jurnal)` — sahəni dəyişmək olar, amma `Yadda saxla` basanda aşağıda `Dəyişikliyin səbəbi` sahəsi çıxır. Ən azı 5 simvolluq səbəb yazıb yenidən `Yadda saxla` basın; səbəb audit jurnalına düşür.
+
 ### Təsdiq gözləyən əməkdaşı təsdiqləmək
 1. Sol paneldə `Gözləyən` qrupunu seçin və əməkdaşın şəxsi işini açın.
 2. `Redaktə et` basın. Yuxarıda narıncı `Gözləyən qeyd` bloku görünür: "Bu əməkdaş qeydi təsdiq gözləyir."

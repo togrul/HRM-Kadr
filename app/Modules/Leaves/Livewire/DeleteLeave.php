@@ -3,8 +3,10 @@
 namespace App\Modules\Leaves\Livewire;
 
 use App\Models\Leave;
+use App\Modules\Leaves\Application\Services\LeaveRecordService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -19,7 +21,7 @@ class DeleteLeave extends Component
     #[On('setDeleteLeave')]
     public function setDeleteLeave($leaveId): void
     {
-        $leave = Leave::query()->select('id')->find($leaveId);
+        $leave = Leave::query()->select(['id', 'tabel_no'])->find($leaveId);
 
         if (! $leave) {
             $this->leaveId = null;
@@ -40,7 +42,7 @@ class DeleteLeave extends Component
             return;
         }
 
-        $leave = Leave::query()->select('id')->find($this->leaveId);
+        $leave = Leave::query()->find($this->leaveId);
 
         if (! $leave) {
             $this->leaveId = null;
@@ -50,7 +52,15 @@ class DeleteLeave extends Component
 
         $this->authorize('delete', $leave);
 
-        $leave->delete();
+        // Order / certificate leaves and closed pay months are refused by the service.
+        try {
+            app(LeaveRecordService::class)->delete($leave, auth()->user());
+        } catch (ValidationException $exception) {
+            $this->leaveId = null;
+            $this->dispatch('addError', collect($exception->errors())->flatten()->first());
+
+            return;
+        }
 
         $this->leaveId = null;
 

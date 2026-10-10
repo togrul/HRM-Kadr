@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Model;
  * Written inside the transaction that produced it, so it cannot describe
  * something that was rolled back.
  *
+ * @property int $id
+ * @property int|null $sequence feed cursor, assigned after commit (OutboxSequencer)
  * @property string $topic
  * @property string|null $entity_key
  * @property array<string, mixed> $payload

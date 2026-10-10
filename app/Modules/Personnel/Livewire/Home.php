@@ -124,6 +124,15 @@ class Home extends Component
     }
 
     /**
+     * @return array{total:int,counts:array<string,int>,rows:list<array<string,mixed>>,more:int}
+     */
+    #[Computed]
+    public function absentToday(): array
+    {
+        return $this->overview()->absentToday(auth()->user());
+    }
+
+    /**
      * @return list<array{id:int,event:string,subject:string,subject_id:int|null,actor:string,at:\Carbon\Carbon|null}>
      */
     #[Computed]

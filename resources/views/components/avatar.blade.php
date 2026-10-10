@@ -1,7 +1,7 @@
 @props([
     'name' => null,       // full name — initials are derived from its first two words
     'initials' => null,   // or pass them explicitly
-    'tone' => 'neutral',  // neutral | green | blue | amber | rose | violet
+    'tone' => 'neutral',  // neutral | green | blue | amber | rose | violet | teal | indigo
     'size' => 'md',       // sm (28px) | md (34px) | lg (48px) | xl (56px)
 ])
 
@@ -25,6 +25,8 @@
         'amber' => 'bg-[#fef3c7] text-[#b45309]',
         'rose', 'red' => 'bg-[#ffe4e6] text-[#be123c]',
         'violet', 'purple' => 'bg-[#ede9fe] text-[#6d28d9]',
+        'teal' => 'bg-[#ccfbf1] text-[#0f766e]',
+        'indigo' => 'bg-[#e0e7ff] text-[#4338ca]',
         default => 'bg-[#f4f4f5] text-[#52525b]',
     };
 

@@ -169,15 +169,18 @@
                 @php
                     $bonus = $card->bonus;
                     $b = $t.'.bonus';
+                    // Maaş bazası və bonus məbləği yalnız view-compensation-amounts icazəsi ilə (və ya öz kartında) görünür.
+                    $canSeeSalary = (auth()->user()?->can('view-compensation-amounts') ?? false) || $role === 'employee';
+                    $salary = fn ($value) => $canSeeSalary ? $fmt($value).' '.$bonus->currency : '•••';
                     $factors = $bonus->mode === 'order'
                         ? [
-                            'base_salary' => $fmt($bonus->base_salary).' '.$bonus->currency,
+                            'base_salary' => $salary($bonus->base_salary),
                             'reward_months' => $fmt($bonus->period_months),
                             'payout_pct' => $fmt($bonus->payout_pct).'%',
                             'prorata' => $fmt($bonus->prorata * 100).'%',
                         ]
                         : [
-                            'base_salary' => $fmt($bonus->base_salary).' '.$bonus->currency,
+                            'base_salary' => $salary($bonus->base_salary),
                             'period_months' => $fmt($bonus->period_months),
                             'target_pct' => $fmt($bonus->target_pct).'%',
                             'payout_pct' => $fmt($bonus->payout_pct).'%',
@@ -198,7 +201,7 @@
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="rounded-md bg-[#f4f4f5] px-2 py-0.5 text-[11.5px] text-ink-muted">{{ __($b.'.statuses.'.$bonus->status) }}</span>
-                        <span class="hrm-num text-[17px] font-semibold text-ink">{{ $fmt($bonus->amount) }} {{ $bonus->currency }}</span>
+                        <span class="hrm-num text-[17px] font-semibold text-ink">{{ $salary($bonus->amount) }}</span>
                     </div>
                 </div>
             @endif

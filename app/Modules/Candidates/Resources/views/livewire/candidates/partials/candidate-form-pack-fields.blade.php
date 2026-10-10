@@ -48,7 +48,7 @@
                             @foreach ($this->candidateFieldOptions($field) as $option)
                                 <label class="inline-flex items-center rounded bg-zinc-100 px-2 py-2 shadow-sm">
                                     <input type="radio" class="form-radio" name="candidate.{{ $fieldKey }}" wire:model.live="candidate.{{ $fieldKey }}" value="{{ $option }}">
-                                    <span class="ml-2 text-sm font-normal">{{ $option }}</span>
+                                    <span class="ml-2 text-sm">{{ $option }}</span>
                                 </label>
                             @endforeach
                         </div>

@@ -8,6 +8,7 @@ use App\Modules\Orders\Application\Document\DocxTemplateRenderer;
 use App\Modules\Orders\Application\Document\DocxToHtmlRenderer;
 use App\Modules\Orders\Application\Document\DocxToPdfConverter;
 use App\Modules\Orders\Application\Document\OrderComposition;
+use App\Modules\Orders\Application\Document\OrderParticipantFields;
 use App\Services\Chief\ChiefResolver;
 use App\Support\Language\AzerbaijaniDateFormatter;
 use Illuminate\Support\Facades\Log;
@@ -54,7 +55,8 @@ class OrderDocumentBuilder
     public function systemContext(OrderComposition $composition, array $signatory): array
     {
         return [
-            'system.order_number' => $composition->orderNumber,
+            // A provisional (not yet assigned) number is never printed.
+            'system.order_number' => OrderNumbering::display($composition->orderNumber),
             'system.order_date' => $composition->orderDate,
             'system.organization_city' => $composition->organizationCity,
             'system.organization_name' => app(OrganizationName::class)->current(),
@@ -65,25 +67,44 @@ class OrderDocumentBuilder
 
     /**
      * The template's token => value map. Pass the signatory when it is also persisted,
-     * so the document and the order snapshot name the same person.
+     * so the document and the order snapshot name the same person. A multi-participant
+     * template also carries the per-participant rows for the renderer
+     * (DocxTemplateRenderer::PARTICIPANT_ROWS / PARTICIPANT_ANCHORS).
      *
      * @param  array<string,mixed>|null  $signatory
-     * @return array<string,string>
+     * @return array<string,mixed>
      */
     public function values(OrderWordTemplate $template, OrderComposition $composition, ?array $signatory = null): array
     {
-        return $this->resolver->resolve(
-            $template,
-            $this->subjects->subject($template, $composition),
-            $composition->fields,
-            $this->systemContext($composition, $signatory ?? $this->signatory($composition->orderDate)),
-        );
+        $system = $this->systemContext($composition, $signatory ?? $this->signatory($composition->orderDate));
+
+        if (! $template->isMultiParticipant()) {
+            return $this->resolver->resolve($template, $this->subjects->subject($template, $composition), $composition->fields, $system);
+        }
+
+        $list = $composition->participantList();
+        $people = [];
+        foreach ($this->subjects->participants(array_column($list, 'personnel_id')) as $person) {
+            $people[(int) $person->id] = $person;
+        }
+
+        $participants = array_map(fn (array $participant): array => [
+            'personnel' => $people[$participant['personnel_id']] ?? null,
+            'fields' => OrderParticipantFields::effective($template, $composition->fields, $participant['fields']),
+        ], $list);
+
+        $resolved = $this->resolver->resolveParticipants($template, $participants[0]['personnel'] ?? null, $composition->fields, $participants, $system);
+
+        return $resolved['values'] + [
+            DocxTemplateRenderer::PARTICIPANT_ROWS => $resolved['rows'],
+            DocxTemplateRenderer::PARTICIPANT_ANCHORS => $template->participantRowTokens(),
+        ];
     }
 
     /**
      * Render the filled .docx to a temp file the caller owns.
      *
-     * @param  array<string,string>  $values
+     * @param  array<string,mixed>  $values
      */
     public function renderDocx(OrderWordTemplate $template, array $values): string
     {
@@ -94,7 +115,7 @@ class OrderDocumentBuilder
      * The filled document as a base64 PDF (via LibreOffice), or null when this host
      * has no converter.
      *
-     * @param  array<string,string>  $values
+     * @param  array<string,mixed>  $values
      */
     public function renderPdf(OrderWordTemplate $template, array $values): ?string
     {
@@ -116,7 +137,7 @@ class OrderDocumentBuilder
      * The filled document as a standalone HTML page — the preview when this host has no
      * PDF converter. Null (and logged) when even that fails.
      *
-     * @param  array<string,string>  $values
+     * @param  array<string,mixed>  $values
      */
     public function renderHtml(OrderWordTemplate $template, array $values): ?string
     {
@@ -134,16 +155,58 @@ class OrderDocumentBuilder
     }
 
     /**
+     * Re-render a pending order's generated document so it carries the number assigned at
+     * approval (system.order_number), from the inputs frozen in its snapshot. A document
+     * the author uploaded by hand is theirs and is left as it is (logged).
+     */
+    public function renumber(OrderLog $order, OrderWordTemplate $template): void
+    {
+        $snapshot = (array) $order->template_snapshot;
+
+        if ((string) ($snapshot['docx_path'] ?? '') !== self::generatedPath($order)) {
+            Log::warning('orders.number.uploaded_document_kept', ['order_id' => $order->id, 'order_no' => $order->order_no]);
+
+            return;
+        }
+
+        $composition = new OrderComposition(
+            presetCode: (string) ($snapshot['template_code'] ?? $template->code),
+            personnelId: empty($snapshot['personnel_id']) ? null : (int) $snapshot['personnel_id'],
+            candidateId: empty($snapshot['candidate_id']) ? null : (int) $snapshot['candidate_id'],
+            hireStructureId: empty($snapshot['hire_structure_id']) ? null : (int) $snapshot['hire_structure_id'],
+            hirePositionId: empty($snapshot['hire_position_id']) ? null : (int) $snapshot['hire_position_id'],
+            fields: (array) ($snapshot['fields'] ?? []),
+            orderNumber: (string) $order->order_no,
+            orderDate: (string) ($snapshot['order_date_text'] ?? ''),
+            organizationCity: (string) ($snapshot['organization_city'] ?? OrderDraftService::ORGANIZATION_CITY),
+            editOrderId: (int) $order->id,
+            participants: $order->participants()->get(['personnel_id', 'fields'])
+                ->map(fn ($participant): array => ['personnel_id' => (int) $participant->personnel_id, 'fields' => (array) $participant->fields])
+                ->all(),
+        );
+
+        $signatory = is_array($order->signatory_snapshot) ? $order->signatory_snapshot : null;
+
+        $this->store($order, $template, $this->values($template, $composition, $signatory));
+    }
+
+    /** Where the system stores an order's generated document (an uploaded one gets a timestamped name). */
+    public static function generatedPath(OrderLog $order): string
+    {
+        return 'order-documents/'.$order->id.'.docx';
+    }
+
+    /**
      * Render the order's filled .docx and store it as the order's authoritative
      * document (served on print). Returns the stored path on the local disk.
      *
-     * @param  array<string,string>  $values
+     * @param  array<string,mixed>  $values
      */
     public function store(OrderLog $order, OrderWordTemplate $template, array $values): string
     {
         $tmp = $this->renderDocx($template, $values);
 
-        $stored = 'order-documents/'.$order->id.'.docx';
+        $stored = self::generatedPath($order);
         Storage::disk('local')->put($stored, (string) file_get_contents($tmp));
         @unlink($tmp);
 

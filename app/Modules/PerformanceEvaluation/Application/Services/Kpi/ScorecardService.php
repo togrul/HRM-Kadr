@@ -10,9 +10,9 @@ use App\Models\PerformanceScorecard;
 use App\Models\PerformanceScorecardItem;
 use App\Models\Personnel;
 use App\Models\User;
-use App\Models\UserPersonnelLink;
 use App\Modules\PerformanceEvaluation\Application\Services\SuccessionService;
 use App\Modules\Personnel\Contracts\ApprovalRouteResolver;
+use App\Services\StructureService;
 use App\Services\UserPersonnelLinkResolver;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Builder;
@@ -170,7 +170,22 @@ class ScorecardService
         $query = PerformanceScorecard::query();
 
         if ($user->can('manage-performance-evaluation')) {
-            return $query;
+            // HR yalnız öz strukturlarındakı işçilərin kartlarını görür (+ öz/rəhbərlik etdiyi kartlar).
+            $scope = app(StructureService::class)->scopeFor($user);
+
+            if ($scope->isAll()) {
+                return $query;
+            }
+
+            $ownId = $this->links->resolve($user);
+
+            return $query->where(function (Builder $inner) use ($scope, $ownId): void {
+                $inner->where(fn (Builder $scoped) => $scope->constrainThrough($scoped, 'personnel'));
+
+                if ($ownId !== null) {
+                    $inner->orWhere('personnel_id', $ownId)->orWhere('manager_personnel_id', $ownId);
+                }
+            });
         }
 
         $personnelId = $this->links->resolve($user);
@@ -606,7 +621,7 @@ class ScorecardService
     }
 
     /**
-     * The users behind a person: the explicit user link, else a user with the same e-mail.
+     * Əməkdaşın arxasındakı istifadəçilər — yalnız açıq bağ (user_personnel_links) üzrə.
      *
      * @return array<int, int>
      */
@@ -616,16 +631,8 @@ class ScorecardService
             return [];
         }
 
-        $linked = UserPersonnelLink::query()->where('personnel_id', $personnelId)->pluck('user_id');
-        if ($linked->isNotEmpty()) {
-            return $linked->map(fn ($id): int => (int) $id)->all();
-        }
-
-        $email = Personnel::query()->whereKey($personnelId)->value('email');
-
-        return $email
-            ? User::query()->whereRaw('LOWER(TRIM(email)) = ?', [mb_strtolower(trim($email))])->pluck('id')->map(fn ($id): int => (int) $id)->all()
-            : [];
+        // Yalnız açıq bağ — e-poçt uyğunluğu eyniləşdirmə sayılmır.
+        return array_values($this->links->userIdsByPersonnel([$personnelId]));
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Modules\Payroll\Livewire\Tabs;
 
 use App\Models\PayrollPeriod;
 use App\Support\Livewire\LabelsValidationFields;
+use App\Support\Livewire\ScopesPersonnelByStructure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Js;
 use Illuminate\Validation\ValidationException;
@@ -16,6 +17,7 @@ use Livewire\Component;
 abstract class PayrollTab extends Component
 {
     use LabelsValidationFields;
+    use ScopesPersonnelByStructure;
 
     public function mount(): void
     {

@@ -5,6 +5,8 @@ namespace App\Modules\Services\Livewire\Users;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\User;
 use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
+use App\Modules\Services\Livewire\Concerns\AuthorizesUserManagement;
+use App\Services\UserAdministrationGuard;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -18,6 +20,7 @@ class AllUsers extends Component
 {
     use AuthorizesRequests,SideModalAction,WithPagination;
     use AuthorizesSettingsAccess;
+    use AuthorizesUserManagement;
 
     #[Url]
     public $status;
@@ -55,13 +58,13 @@ class AllUsers extends Component
 
     public function forceDeleteData($id): void
     {
-        $this->authorize('access-settings');
-
         $model = User::withTrashed()->findOrFail($id);
+        $this->authorizeTarget($model);
         $model->forceDelete();
 
         activity('users')
             ->performedOn($model)
+            ->causedBy(auth()->user())
             ->event('force_deleted')
             ->withProperties(['user_id' => $model->id, 'email' => $model->email])
             ->log('user.force_deleted');
@@ -72,9 +75,8 @@ class AllUsers extends Component
     #[On('restoreData')]
     public function restoreData($id): void
     {
-        $this->authorize('access-settings');
-
         $user = User::withTrashed()->findOrFail($id);
+        $this->authorizeTarget($user);
         $user->restore();
         $user->update([
             'deleted_by' => null,
@@ -83,6 +85,7 @@ class AllUsers extends Component
 
         activity('users')
             ->performedOn($user)
+            ->causedBy(auth()->user())
             ->event('restored')
             ->withProperties(['user_id' => $user->id, 'email' => $user->email])
             ->log('user.restored');
@@ -92,8 +95,22 @@ class AllUsers extends Component
 
     public function mount(): void
     {
-        $this->authorize('access-settings');
+        $this->authorize(UserAdministrationGuard::MANAGE_USERS);
         $this->fillFilter();
+    }
+
+    /**
+     * Özünü, ya da özündə olmayan icazəyə malik istifadəçini silmək/bərpa etmək olmaz.
+     */
+    private function authorizeTarget(User $user): void
+    {
+        $this->authorize(UserAdministrationGuard::MANAGE_USERS);
+        abort_if((int) $user->id === (int) auth()->id(), 403, __('services::users.messages.cannot_delete_self'));
+        abort_unless(
+            app(UserAdministrationGuard::class)->canManageUser(auth()->user(), $user),
+            403,
+            __('services::users.messages.target_has_more_permissions')
+        );
     }
 
     public function render(): View

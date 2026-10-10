@@ -4,6 +4,7 @@ namespace App\Modules\TrainingNeeds\Livewire;
 
 use App\Models\TrainingDeliveryRecord;
 use App\Modules\TrainingNeeds\Livewire\Concerns\InteractsWithTrainingNeedsAccess;
+use App\Modules\TrainingNeeds\Support\TrainingStructureScope;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Isolate;
 use Livewire\Component;
@@ -72,7 +73,7 @@ class CertificateViewer extends Component
             return null;
         }
 
-        return TrainingDeliveryRecord::query()
+        return TrainingStructureScope::onPersonnelColumn(TrainingDeliveryRecord::query(), 'training_delivery_records.personnel_id')
             ->with([
                 'session:id,title',
                 'personnel:id,surname,name,patronymic,tabel_no',

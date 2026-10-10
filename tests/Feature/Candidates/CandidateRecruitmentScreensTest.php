@@ -339,6 +339,7 @@ class CandidateRecruitmentScreensTest extends TestCase
         ]);
 
         $viewer = User::factory()->create();
+        grantAllStructures($viewer);
         $viewer->givePermissionTo(Permission::findOrCreate('show-candidates', 'web'));
 
         Livewire::actingAs($viewer)
@@ -349,6 +350,7 @@ class CandidateRecruitmentScreensTest extends TestCase
             ->assertForbidden();
 
         $recruiter = User::factory()->create();
+        grantAllStructures($recruiter);
         $recruiter->givePermissionTo([
             Permission::findOrCreate('show-candidates', 'web'),
             Permission::findOrCreate('candidate-applications.transition', 'web'),
@@ -377,6 +379,7 @@ class CandidateRecruitmentScreensTest extends TestCase
         ]);
 
         $recruiter = User::factory()->create();
+        grantAllStructures($recruiter);
         $recruiter->givePermissionTo([
             Permission::findOrCreate('show-candidates', 'web'),
             Permission::findOrCreate('candidate-applications.transition', 'web'),
@@ -391,6 +394,7 @@ class CandidateRecruitmentScreensTest extends TestCase
             ->assertForbidden();
 
         $approver = User::factory()->create();
+        grantAllStructures($approver);
         $approver->givePermissionTo([
             Permission::findOrCreate('show-candidates', 'web'),
             Permission::findOrCreate('candidate-applications.appoint', 'web'),
@@ -420,6 +424,7 @@ class CandidateRecruitmentScreensTest extends TestCase
         ]);
 
         $reviewer = User::factory()->create();
+        grantAllStructures($reviewer);
         $reviewer->givePermissionTo(Permission::findOrCreate('show-candidates', 'web'));
 
         Livewire::actingAs($reviewer)
@@ -432,6 +437,7 @@ class CandidateRecruitmentScreensTest extends TestCase
             ->assertForbidden();
 
         $rejector = User::factory()->create();
+        grantAllStructures($rejector);
         $rejector->givePermissionTo([
             Permission::findOrCreate('show-candidates', 'web'),
             Permission::findOrCreate('candidate-applications.reject', 'web'),
@@ -462,6 +468,7 @@ class CandidateRecruitmentScreensTest extends TestCase
         ]);
 
         $rejector = User::factory()->create();
+        grantAllStructures($rejector);
         $rejector->givePermissionTo([
             Permission::findOrCreate('show-candidates', 'web'),
             Permission::findOrCreate('candidate-applications.reject', 'web'),
@@ -696,6 +703,7 @@ class CandidateRecruitmentScreensTest extends TestCase
         ]);
 
         $user = User::factory()->create();
+        grantAllStructures($user);
         $user->givePermissionTo([
             Permission::findOrCreate('show-candidates', 'web'),
             Permission::findOrCreate('add-candidates', 'web'),

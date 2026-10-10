@@ -53,6 +53,12 @@ Səhv təsdiqlənmiş əmr üçün:
 
 Ləğv edilmiş əmri geri qaytarmaq üçün `⋯` → `Bərpa et` seçin — o, yenidən `Təsdiq gözləyən` olur.
 
+## Bağlanmış ay və digər qoruyucular
+- Əmrin təsir etdiyi hər ay yoxlanılır: başlama və bitmə tarixi arasındakı bütün aylar, qüvvəyə minmə tarixi (əmək haqqı dəyişikliyi, köçürmə), iş günü (qeyri-iş gününə cəlb), geri çağırma tarixi və s. Bu aylardan biri əmək haqqı, maliyyə və ya davamiyyət üçün bağlanıbsa, əmr **təsdiqlənmir**, təsdiqlənmiş əmr isə **geri alınmır və ləğv edilmir**.
+- Eyni əmri iki nəfər eyni vaxtda təsdiqləsə, yalnız biri keçir; digərinə “Əmrin statusu artıq başqa istifadəçi tərəfindən dəyişdirilib” bildirişi çıxır. Bu, effektin (məzuniyyət, köçürmə və s.) iki dəfə yazılmasının qarşısını alır.
+- `Əmrin ləğvi` əmrini təsdiqləmək və ya onun təsdiqini geri almaq hədəf əmri təsdiqdən çıxarır/geri qaytarır, ona görə bunun üçün də təsdiqlənmiş əmri geri qaytarmaq icazəsi tələb olunur.
+- Məzuniyyət əmri verilərkən işçinin hələ təsdiqlənməmiş digər məzuniyyət əmrlərinin günləri də balansdan çıxılmış sayılır; təsdiq anında balans yenidən yoxlanılır və çatmırsa, əmr təsdiqlənmir.
+
 ## Tez-tez verilən suallar
 
 **`Təsdiqlə` düyməsi yoxdur.**

@@ -17,6 +17,7 @@ use App\Models\PerformanceTrainingNeedLink;
 use App\Models\Personnel;
 use App\Models\TrainingCompetency;
 use App\Models\User;
+use App\Modules\PerformanceEvaluation\Support\PerformanceStructureScope;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -90,7 +91,7 @@ trait InteractsWithPerformanceEvaluationQueries
 
     public function personnelOptions(string $searchProperty = 'searchPersonnel', string $selectedProperty = 'personnel_id'): array
     {
-        $base = Personnel::query()
+        $base = PerformanceStructureScope::onPersonnelTable(Personnel::query())
             ->active()
             ->select([
                 'id',
@@ -131,8 +132,8 @@ trait InteractsWithPerformanceEvaluationQueries
 
     public function performanceFormOptions(): array
     {
-        $base = PerformanceForm::query()
-            ->join('personnels', 'personnels.id', '=', 'performance_forms.personnel_id')
+        $base = PerformanceStructureScope::onPersonnelTable(PerformanceForm::query()
+            ->join('personnels', 'personnels.id', '=', 'performance_forms.personnel_id'))
             ->select([
                 'performance_forms.id',
                 DB::raw("CONCAT(performance_forms.id, ' - ', personnels.surname, ' ', personnels.name, ' (#', personnels.tabel_no, ')') as label"),
@@ -218,9 +219,9 @@ trait InteractsWithPerformanceEvaluationQueries
 
     public function testSessionOptions(): array
     {
-        $base = PerformanceTestSession::query()
+        $base = PerformanceStructureScope::onPersonnelTable(PerformanceTestSession::query()
             ->join('performance_test_banks', 'performance_test_banks.id', '=', 'performance_test_sessions.performance_test_bank_id')
-            ->join('personnels', 'personnels.id', '=', 'performance_test_sessions.personnel_id')
+            ->join('personnels', 'personnels.id', '=', 'performance_test_sessions.personnel_id'))
             ->select([
                 'performance_test_sessions.id',
                 DB::raw("CONCAT(performance_test_banks.name, ' - ', personnels.surname, ' ', personnels.name, ' (#', personnels.tabel_no, ')') as label"),
@@ -238,10 +239,10 @@ trait InteractsWithPerformanceEvaluationQueries
 
     public function attemptOptions(): array
     {
-        $base = PerformanceTestAttempt::query()
+        $base = PerformanceStructureScope::onPersonnelTable(PerformanceTestAttempt::query()
             ->join('performance_test_sessions', 'performance_test_sessions.id', '=', 'performance_test_attempts.performance_test_session_id')
             ->join('performance_test_banks', 'performance_test_banks.id', '=', 'performance_test_sessions.performance_test_bank_id')
-            ->join('personnels', 'personnels.id', '=', 'performance_test_sessions.personnel_id')
+            ->join('personnels', 'personnels.id', '=', 'performance_test_sessions.personnel_id'))
             ->select([
                 'performance_test_attempts.id',
                 DB::raw("CONCAT('#', performance_test_attempts.id, ' - ', performance_test_banks.name, ' / ', personnels.surname, ' ', personnels.name) as label"),
@@ -262,12 +263,15 @@ trait InteractsWithPerformanceEvaluationQueries
         $base = PerformanceTestAttemptAnswer::query()
             ->join('performance_test_questions', 'performance_test_questions.id', '=', 'performance_test_attempt_answers.performance_test_question_id')
             ->join('performance_test_attempts', 'performance_test_attempts.id', '=', 'performance_test_attempt_answers.performance_test_attempt_id')
+            ->join('performance_test_sessions', 'performance_test_sessions.id', '=', 'performance_test_attempts.performance_test_session_id')
+            ->join('personnels', 'personnels.id', '=', 'performance_test_sessions.personnel_id')
             ->select([
                 'performance_test_attempt_answers.id',
                 DB::raw("CONCAT('#', performance_test_attempts.id, ' - ', SUBSTR(performance_test_questions.prompt, 1, 80)) as label"),
             ])
             ->where('performance_test_attempt_answers.review_status', 'pending')
             ->orderByDesc('performance_test_attempt_answers.id');
+        PerformanceStructureScope::onPersonnelTable($base);
 
         return $this->optionsWithSelected(
             base: $base,
@@ -280,21 +284,7 @@ trait InteractsWithPerformanceEvaluationQueries
 
     public function getStatsProperty(): array
     {
-        return (array) DB::selectOne(
-            'select
-                (select count(*) from performance_cycles) as `cycles`,
-                (select count(*) from performance_form_templates) as `templates`,
-                (select count(*) from performance_form_template_sections) as `sections`,
-                (select count(*) from performance_form_template_items) as `items`,
-                (select count(*) from performance_forms) as `forms`,
-                (select count(*) from performance_form_scores) as `scores`,
-                (select count(*) from performance_training_need_links) as `links`,
-                (select count(*) from performance_test_banks) as `test_banks`,
-                (select count(*) from performance_test_questions) as `test_questions`,
-                (select count(*) from performance_test_sessions) as `test_sessions`,
-                (select count(*) from performance_test_attempts) as `test_attempts`,
-                (select count(*) from performance_test_training_need_links) as `test_need_links`'
-        );
+        return app(\App\Modules\PerformanceEvaluation\Application\Services\PerformanceEvaluationReportingService::class)->foundationStats();
     }
 
     /**
@@ -306,36 +296,7 @@ trait InteractsWithPerformanceEvaluationQueries
      */
     public function getScoreDistributionProperty(): array
     {
-        $row = DB::selectOne(
-            'select
-                count(final_score) as scored,
-                avg(final_score) as average,
-                sum(final_category = ?) as high,
-                sum(final_category = ?) as medium,
-                sum(final_category = ?) as weak
-             from performance_forms',
-            ['high', 'medium', 'weak']
-        );
-
-        $scored = (int) ($row->scored ?? 0);
-
-        $buckets = collect(['high', 'medium', 'weak'])
-            ->map(function (string $key) use ($row, $scored): array {
-                $count = (int) ($row->{$key} ?? 0);
-
-                return [
-                    'key' => $key,
-                    'count' => $count,
-                    'percent' => $scored > 0 ? (int) round($count / $scored * 100) : 0,
-                ];
-            })
-            ->all();
-
-        return [
-            'total' => $scored,
-            'average' => round((float) ($row->average ?? 0), 1),
-            'buckets' => $buckets,
-        ];
+        return app(\App\Modules\PerformanceEvaluation\Application\Services\PerformanceEvaluationReportingService::class)->scoreDistribution();
     }
 
     public function getRecentCyclesProperty(): Collection
@@ -410,6 +371,7 @@ trait InteractsWithPerformanceEvaluationQueries
                     ->where('personnels.surname', 'like', '%'.$formSearch.'%')
                     ->orWhere('personnels.name', 'like', '%'.$formSearch.'%'))
             )
+            ->tap(fn ($query) => PerformanceStructureScope::onPersonnelTable($query))
             ->latest('performance_forms.id')
             ->limit(50)
             ->get();
@@ -418,6 +380,7 @@ trait InteractsWithPerformanceEvaluationQueries
     public function getRecentWeakLinksProperty(): Collection
     {
         return PerformanceTrainingNeedLink::query()
+            ->whereIn('performance_form_id', PerformanceStructureScope::onPersonnelColumn(PerformanceForm::query()->select('performance_forms.id'), 'performance_forms.personnel_id'))
             ->with([
                 'form.personnel:id,tabel_no,surname,name,patronymic',
                 'trainingNeed:id,priority,status,reason',
@@ -440,6 +403,7 @@ trait InteractsWithPerformanceEvaluationQueries
     public function getRecentTestAttemptsProperty(): Collection
     {
         return PerformanceTestAttempt::query()
+            ->whereIn('performance_test_session_id', PerformanceStructureScope::onPersonnelColumn(PerformanceTestSession::query()->select('performance_test_sessions.id'), 'performance_test_sessions.personnel_id'))
             ->with([
                 'session.bank:id,name',
                 'session.personnel:id,tabel_no,surname,name,patronymic',
@@ -456,6 +420,7 @@ trait InteractsWithPerformanceEvaluationQueries
             ->leftJoin('performance_test_attempts', 'performance_test_attempts.id', '=', 'performance_test_attempt_answers.performance_test_attempt_id')
             ->leftJoin('performance_test_sessions', 'performance_test_sessions.id', '=', 'performance_test_attempts.performance_test_session_id')
             ->leftJoin('personnels', 'personnels.id', '=', 'performance_test_sessions.personnel_id')
+            ->tap(fn ($query) => PerformanceStructureScope::onPersonnelTable($query))
             ->select([
                 'performance_test_attempt_answers.*',
                 DB::raw("CONCAT(personnels.surname, ' ', personnels.name, ' ', personnels.patronymic) as personnel_fullname"),

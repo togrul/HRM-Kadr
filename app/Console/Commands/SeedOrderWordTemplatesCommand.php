@@ -52,6 +52,11 @@ class SeedOrderWordTemplatesCommand extends Command
         // Signatory resolved per order (permanent chief or active delegate, by date).
         'İmzalayan' => 'system.signatory_full_name',
         'İmzalayanın vəzifəsi' => 'system.signatory_title',
+        // One participant of a multi-participant order (the repeated table row).
+        'İştirakçının sıra №' => 'participant.n',
+        'İştirakçı' => 'participant.full_name',
+        'İştirakçının vəzifəsi' => 'participant.position',
+        'İştirakçının iş yeri' => 'participant.structure',
     ];
 
     public function handle(
@@ -94,7 +99,7 @@ class SeedOrderWordTemplatesCommand extends Command
             $parser->normalize($bracketed, $labelToToken, $master);
             @unlink($bracketed);
 
-            $repository->save($code, $template['label'], $template['effect'], $relative, $variables);
+            $repository->save($code, $template['label'], $template['effect'], $relative, $variables, multiParticipant: (bool) ($template['multi'] ?? false));
 
             $this->line(sprintf(
                 '  <info>✓</info> %-24s %s  <comment>(%d dəyişən)</comment>',
@@ -116,7 +121,7 @@ class SeedOrderWordTemplatesCommand extends Command
      * employee/system variable, or a manual field (optionally bound to a lookup list
      * and/or an approval effect role).
      *
-     * @param  array<string,array{type:string,role?:string,required?:bool,default?:string}>  $manual  label => field def
+     * @param  array<string,array{type:string,role?:string,required?:bool,default?:string,scope?:string}>  $manual  label => field def
      * @return array<string,mixed>
      */
     private function variable(string $token, string $label, array $manual): array
@@ -143,7 +148,7 @@ class SeedOrderWordTemplatesCommand extends Command
                 + (isset($def['required']) ? ['required' => $def['required']] : [])
                 + (isset($def['default']) ? ['default' => $def['default']] : []),
             'effect_role' => $def['role'] ?? null,
-        ];
+        ] + (isset($def['scope']) ? ['scope' => $def['scope']] : []);
     }
 
     /**
@@ -151,7 +156,11 @@ class SeedOrderWordTemplatesCommand extends Command
      * (with [bracket] placeholders) and the manual-field definitions for the
      * non-automatic placeholders.
      *
-     * @return array<string,array{label:string,effect:string,spec:array<string,mixed>,manual?:array<string,array{type:string,role?:string,required?:bool,default?:string}>}>
+     * A multi-participant type ('multi' => true) is issued for a list of employees: its
+     * participants table row repeats per person, and manual fields carry a scope (order /
+     * participant / override).
+     *
+     * @return array<string,array{label:string,effect:string,multi?:bool,spec:array<string,mixed>,manual?:array<string,array{type:string,role?:string,required?:bool,default?:string,scope?:string}>}>
      */
     public function catalogue(): array
     {
@@ -172,7 +181,7 @@ class SeedOrderWordTemplatesCommand extends Command
                     'basis' => '[Əsas mətni]',
                 ],
                 'manual' => [
-                    'İş ili' => ['type' => 'work_year'],
+                    'İş ili' => ['type' => 'work_year', 'role' => 'work_year'],
                     'Gün sayı' => ['type' => 'number', 'role' => 'days'],
                     'Başlama tarixi' => ['type' => 'date', 'role' => 'start_date'],
                     'Bitmə tarixi' => ['type' => 'date', 'role' => 'end_date'],
@@ -258,9 +267,10 @@ class SeedOrderWordTemplatesCommand extends Command
             ],
 
             // ───────────────────────────── Hərbi toplantı ──────────────────────────────
+            // Approval files the days as a paid absence (puantaj code HT).
             'herbi_toplanti' => [
                 'label' => 'Hərbi toplantıda iştirak',
-                'effect' => 'none',
+                'effect' => 'paid_absence',
                 'spec' => [
                     'city' => 'Bakı şəhəri',
                     'subject' => 'Hərbi toplantıda iştirak barədə',
@@ -273,9 +283,9 @@ class SeedOrderWordTemplatesCommand extends Command
                 ],
                 'manual' => [
                     'Hərbi idarə' => ['type' => 'text'],
-                    'Başlama tarixi' => ['type' => 'date'],
-                    'Bitmə tarixi' => ['type' => 'date'],
-                    'Gün sayı' => ['type' => 'number'],
+                    'Başlama tarixi' => ['type' => 'date', 'role' => 'start_date'],
+                    'Bitmə tarixi' => ['type' => 'date', 'role' => 'end_date'],
+                    'Gün sayı' => ['type' => 'number', 'role' => 'days'],
                     'Toplantı yeri' => ['type' => 'text'],
                     'Əsas mətni' => ['type' => 'text'],
                 ],
@@ -358,7 +368,7 @@ class SeedOrderWordTemplatesCommand extends Command
                     'basis' => '[Əsas mətni]',
                 ],
                 'manual' => [
-                    'Köçürmə tarixi' => ['type' => 'date'],
+                    'Köçürmə tarixi' => ['type' => 'date', 'role' => 'effective_date'],
                     'Yeni iş yeri' => ['type' => 'structure', 'role' => 'new_structure'],
                     'Yeni vəzifə' => ['type' => 'position', 'role' => 'new_position'],
                     'Əsas mətni' => ['type' => 'text'],
@@ -423,25 +433,40 @@ class SeedOrderWordTemplatesCommand extends Command
             'ezamiyyet' => [
                 'label' => 'Ezamiyyət',
                 'effect' => 'business_trip',
+                // One order sends a whole team: the table row repeats per participant, the
+                // dates are shared but each person may have their own.
+                'multi' => true,
                 'spec' => [
                     'city' => 'Bakı şəhəri',
-                    'subject' => 'Əməkdaşın ezamiyyətə göndərilməsi haqqında',
+                    'subject' => 'Əməkdaşların ezamiyyətə göndərilməsi haqqında',
                     'preamble' => 'İşin zərurətini nəzərə alaraq, Azərbaycan Respublikası Əmək Məcəlləsinin 179-cu maddəsinin 2-ci hissəsinin “x” bəndini və 181-ci maddəsini rəhbər tutaraq',
                     'clauses' => [
-                        '[İş yeri] [Vəzifə] [İşçi] [Ezamiyyətin məqsədi] məqsədilə [Başlama tarixi] tarixindən [Bitmə tarixi] tarixinədək [Ezamiyyə yeri] ezamiyyətə göndərilsin.',
+                        'Aşağıdakı əməkdaşlar [Ezamiyyətin məqsədi] məqsədilə [Başlama tarixi] tarixindən [Bitmə tarixi] tarixinədək [Ezamiyyə yeri] [Ezamiyyətin növü] ezamiyyətə göndərilsinlər:',
                         'Ezamiyyətə gediş-gəliş [Nəqliyyat] ilə təşkil edilsin, işə başlama tarixi [İşə başlama tarixi] müəyyən edilsin.',
-                        'Ezamiyyə xərcləri qanunvericiliyə uyğun ödənilsin. [Ezamiyyə xərcləri (gündəlik)]',
+                        'Ezamiyyə xərcləri [Maliyyələşmə mənbəyi] qanunvericiliyə uyğun ödənilsin. [Ezamiyyə xərcləri (gündəlik)]',
                         'Mühasibatlıq bu əmrdən irəli gələn məsələləri həll etsin.',
+                    ],
+                    'participants_table' => [
+                        'after_clause' => 0,
+                        'columns' => [
+                            '№' => '[İştirakçının sıra №]',
+                            'Soyadı, adı, atasının adı' => '[İştirakçı]',
+                            'Vəzifəsi' => '[İştirakçının vəzifəsi]',
+                            'Struktur bölmə' => '[İştirakçının iş yeri]',
+                            'Ezamiyyət müddəti' => '[Başlama tarixi] – [Bitmə tarixi]',
+                        ],
                     ],
                     'basis' => '[Əsas mətni]',
                 ],
                 'manual' => [
                     'Ezamiyyətin məqsədi' => ['type' => 'text', 'role' => 'purpose'],
-                    'Başlama tarixi' => ['type' => 'date', 'role' => 'start_date'],
-                    'Bitmə tarixi' => ['type' => 'date', 'role' => 'end_date'],
+                    'Başlama tarixi' => ['type' => 'date', 'role' => 'start_date', 'scope' => 'override'],
+                    'Bitmə tarixi' => ['type' => 'date', 'role' => 'end_date', 'scope' => 'override'],
                     'Ezamiyyə yeri' => ['type' => 'text', 'role' => 'location'],
+                    'Ezamiyyətin növü' => ['type' => 'trip_type', 'role' => 'trip_type', 'required' => false, 'default' => '1'],
                     'Nəqliyyat' => ['type' => 'text', 'role' => 'transport'],
-                    'İşə başlama tarixi' => ['type' => 'date', 'role' => 'return_date'],
+                    'İşə başlama tarixi' => ['type' => 'date', 'role' => 'return_date', 'scope' => 'override'],
+                    'Maliyyələşmə mənbəyi' => ['type' => 'text', 'role' => 'funding_source', 'required' => false, 'default' => 'təşkilatın vəsaiti hesabına'],
                     'Ezamiyyə xərcləri (gündəlik)' => ['type' => 'text', 'role' => 'per_diem', 'required' => false],
                     'Əsas mətni' => ['type' => 'text'],
                 ],
@@ -473,9 +498,11 @@ class SeedOrderWordTemplatesCommand extends Command
             ],
 
             // ───────────────────────────── İntizam tənbehi ─────────────────────────────
+            // Approval records the sanction in the personnel file; it lapses after the
+            // configured term (Admin → Settings, 12 months by default).
             'intizam_tenbehi' => [
                 'label' => 'İntizam tənbehi',
-                'effect' => 'none',
+                'effect' => 'disciplinary',
                 'spec' => [
                     'city' => 'Bakı şəhəri',
                     'subject' => 'İntizam tənbehinin verilməsi haqqında',
@@ -487,41 +514,43 @@ class SeedOrderWordTemplatesCommand extends Command
                     'basis' => '[Əsas mətni]',
                 ],
                 'manual' => [
-                    'Pozuntunun təsviri' => ['type' => 'text'],
-                    'Tənbehin növü' => ['type' => 'text'],
+                    'Pozuntunun təsviri' => ['type' => 'text', 'role' => 'violation'],
+                    'Tənbehin növü' => ['type' => 'text', 'role' => 'sanction_type'],
                     'Əsas mətni' => ['type' => 'text'],
                 ],
             ],
 
             // ──────────────────────── Əvəzetmə (vəzifənin icrası) ────────────────────────
+            // Approval records the substitution and its extra pay in the Compensation register.
             'evezetme' => [
                 'label' => 'Əvəzetmə (vəzifənin müvəqqəti icrası)',
-                'effect' => 'none',
+                'effect' => 'substitution',
                 'spec' => [
                     'city' => 'Bakı şəhəri',
                     'subject' => 'Vəzifənin müvəqqəti icrasının həvalə edilməsi haqqında',
                     'preamble' => '[Əvəz edilən əməkdaş] işdə olmadığı müddətdə işin fasiləsizliyini təmin etmək məqsədilə, Azərbaycan Respublikası Əmək Məcəlləsinin 61-ci və 162-ci maddələrini rəhbər tutaraq',
                     'clauses' => [
                         '[İş yeri] [Vəzifə] [İşçi (yönlük)] öz işi ilə yanaşı [Başlama tarixi] tarixindən [Bitmə tarixi] tarixinədək [Əvəz edilən vəzifə] vəzifəsinin icrası həvalə edilsin.',
-                        'Əvəzetmə müddətində [İşçi (yönlük)] [Əlavə ödəniş] məbləğində əlavə ödəniş edilsin.',
+                        'Əvəzetmə müddətində [İşçi (yönlük)] vəzifə maaşının [Əlavə ödəniş faizi] faizi miqdarında əlavə ödəniş edilsin.',
                         'Mühasibatlıq bu əmrdən irəli gələn məsələləri həll etsin.',
                     ],
                     'basis' => '[Əsas mətni]',
                 ],
                 'manual' => [
-                    'Əvəz edilən əməkdaş' => ['type' => 'text'],
+                    'Əvəz edilən əməkdaş' => ['type' => 'personnel', 'role' => 'substituted_employee'],
                     'Başlama tarixi' => ['type' => 'date', 'role' => 'start_date'],
                     'Bitmə tarixi' => ['type' => 'date', 'role' => 'end_date'],
-                    'Əvəz edilən vəzifə' => ['type' => 'position'],
-                    'Əlavə ödəniş' => ['type' => 'text'],
+                    'Əvəz edilən vəzifə' => ['type' => 'position', 'role' => 'substituted_position'],
+                    'Əlavə ödəniş faizi' => ['type' => 'number', 'role' => 'extra_pay_percent'],
                     'Əsas mətni' => ['type' => 'text'],
                 ],
             ],
 
             // ─────────────────────── Əmək haqqının dəyişdirilməsi ───────────────────────
+            // Approval assigns the new salary from the effective date (Compensation).
             'emek_haqqi_deyisme' => [
                 'label' => 'Əmək haqqının dəyişdirilməsi',
-                'effect' => 'none',
+                'effect' => 'salary_change',
                 'spec' => [
                     'city' => 'Bakı şəhəri',
                     'subject' => 'Vəzifə maaşının dəyişdirilməsi haqqında',
@@ -535,8 +564,291 @@ class SeedOrderWordTemplatesCommand extends Command
                 ],
                 'manual' => [
                     'Dəyişikliyin səbəbi' => ['type' => 'text'],
-                    'Qüvvəyə minmə tarixi' => ['type' => 'date'],
-                    'Yeni əmək haqqı' => ['type' => 'number'],
+                    'Qüvvəyə minmə tarixi' => ['type' => 'date', 'role' => 'effective_date'],
+                    'Yeni əmək haqqı' => ['type' => 'number', 'role' => 'new_salary'],
+                    'Əsas mətni' => ['type' => 'text'],
+                ],
+            ],
+
+            // ─────────────── Uşağa qulluq ilə əlaqədar qismən ödənişli sosial məzuniyyət ───────────────
+            // Sosial məzuniyyət: illik əmək məzuniyyəti balansından çıxılmır.
+            'usaga_qulluq_mezuniyyeti' => [
+                'label' => 'Uşağa qulluq ilə əlaqədar qismən ödənişli sosial məzuniyyət',
+                'effect' => 'social_leave',
+                'spec' => [
+                    'city' => 'Bakı şəhəri',
+                    'subject' => 'Uşağa qulluq ilə əlaqədar qismən ödənişli sosial məzuniyyətin verilməsi haqqında',
+                    'preamble' => '[İşçi (yiyəlik)] ərizəsini və uşağın doğum haqqında şəhadətnaməsini nəzərə alaraq, Azərbaycan Respublikası Əmək Məcəlləsinə uyğun olaraq',
+                    'clauses' => [
+                        '[İş yeri] [Vəzifə] [İşçi (yönlük)] [Uşaq haqqında məlumat] uşağı üç yaşına çatanadək ona qulluq etmək üçün [Başlama tarixi] tarixindən [Bitmə tarixi] tarixinədək qismən ödənişli sosial məzuniyyət verilsin.',
+                        'İşə başlama tarixi [İşə başlama tarixi] müəyyən edilsin.',
+                        'Mühasibatlıq bu əmrdən irəli gələn məsələləri qanunvericiliyə uyğun həll etsin.',
+                    ],
+                    'basis' => '[Əsas mətni]',
+                ],
+                'manual' => [
+                    'Uşaq haqqında məlumat' => ['type' => 'text'],
+                    'Başlama tarixi' => ['type' => 'date', 'role' => 'start_date'],
+                    'Bitmə tarixi' => ['type' => 'date', 'role' => 'end_date'],
+                    'İşə başlama tarixi' => ['type' => 'date', 'role' => 'return_date'],
+                    'Əsas mətni' => ['type' => 'text'],
+                ],
+            ],
+
+            // ─────────────────────────────── Fəxri fərman ───────────────────────────────
+            // Pulsuz təltif: şəxsi işə yazılır, əmək haqqına ötürülmür.
+            'fexri_ferman' => [
+                'label' => 'Fəxri fərmanla təltif',
+                'effect' => 'award',
+                'spec' => [
+                    'city' => 'Bakı şəhəri',
+                    'subject' => 'Fəxri fərmanla təltif edilməsi haqqında',
+                    'preamble' => 'Əməkdaşın xidməti fəaliyyətinin nəticələrini nəzərə alaraq, Azərbaycan Respublikası Əmək Məcəlləsinə uyğun olaraq',
+                    'clauses' => [
+                        '[İş yeri] [Vəzifə] [İşçi] [Təltifin səbəbi] Fəxri fərmanla təltif edilsin.',
+                        'Əmrdən çıxarış əməkdaşın şəxsi işinə əlavə edilsin.',
+                    ],
+                    'basis' => '[Əsas mətni]',
+                ],
+                'manual' => [
+                    'Təltifin səbəbi' => ['type' => 'text', 'role' => 'reason'],
+                    'Əsas mətni' => ['type' => 'text'],
+                ],
+            ],
+
+            // ──────────────────── Əmək funksiyasının müvəqqəti həvaləsi ────────────────────
+            'hevale' => [
+                'label' => 'Əmək funksiyasının müvəqqəti həvalə edilməsi',
+                'effect' => 'none',
+                'spec' => [
+                    'city' => 'Bakı şəhəri',
+                    'subject' => 'Əmək funksiyasının müvəqqəti həvalə edilməsi haqqında',
+                    'preamble' => 'İstehsalat zərurətini nəzərə alaraq, [İşçi (yiyəlik)] razılığı ilə, Azərbaycan Respublikası Əmək Məcəlləsinə uyğun olaraq',
+                    'clauses' => [
+                        '[İş yeri] [Vəzifə] [İşçi (yönlük)] [Başlama tarixi] tarixindən [Bitmə tarixi] tarixinədək [Həvalə edilən vəzifə] vəzifəsi üzrə əmək funksiyasının icrası müvəqqəti həvalə edilsin.',
+                        'Həvalə müddətində əməkdaşa görülən işə görə, lakin əvvəlki orta əmək haqqından az olmamaqla əmək haqqı ödənilsin.',
+                        'Mühasibatlıq bu əmrdən irəli gələn məsələləri həll etsin.',
+                    ],
+                    'basis' => '[Əsas mətni]',
+                ],
+                'manual' => [
+                    'Başlama tarixi' => ['type' => 'date', 'role' => 'start_date'],
+                    'Bitmə tarixi' => ['type' => 'date', 'role' => 'end_date'],
+                    'Həvalə edilən vəzifə' => ['type' => 'position'],
+                    'Əsas mətni' => ['type' => 'text'],
+                ],
+            ],
+
+            // ──────────────────── Məzuniyyətin başqa vaxta keçirilməsi ────────────────────
+            'mezuniyyetin_kecirilmesi' => [
+                'label' => 'Məzuniyyətin başqa vaxta keçirilməsi',
+                'effect' => 'none',
+                'spec' => [
+                    'city' => 'Bakı şəhəri',
+                    'subject' => 'Əmək məzuniyyətinin başqa vaxta keçirilməsi haqqında',
+                    'preamble' => '[İşçi (yiyəlik)] ərizəsini nəzərə alaraq, Azərbaycan Respublikası Əmək Məcəlləsinə uyğun olaraq',
+                    'clauses' => [
+                        '[İş yeri] [Vəzifə] [İşçi (yiyəlik)] [İş ili] iş ilinə görə [Əvvəlki başlama tarixi] tarixindən verilməli olan əmək məzuniyyəti, [Səbəb], [Yeni başlama tarixi] tarixindən [Yeni bitmə tarixi] tarixinədək olan müddətə keçirilsin.',
+                        'Məzuniyyətlərin növbəlilik cədvəlinə müvafiq dəyişiklik edilsin.',
+                    ],
+                    'basis' => '[Əsas mətni]',
+                ],
+                'manual' => [
+                    'İş ili' => ['type' => 'work_year'],
+                    'Əvvəlki başlama tarixi' => ['type' => 'date'],
+                    'Səbəb' => ['type' => 'text'],
+                    'Yeni başlama tarixi' => ['type' => 'date', 'role' => 'start_date'],
+                    'Yeni bitmə tarixi' => ['type' => 'date', 'role' => 'end_date'],
+                    'Əsas mətni' => ['type' => 'text'],
+                ],
+            ],
+
+            // ──────────────────── Qısaldılmış iş vaxtı / əlavə fasilə ────────────────────
+            'qisaldilmis_is_vaxti' => [
+                'label' => 'Qısaldılmış iş vaxtı / əlavə fasilə',
+                'effect' => 'none',
+                'spec' => [
+                    'city' => 'Bakı şəhəri',
+                    'subject' => 'Qısaldılmış iş vaxtının (əlavə fasilənin) müəyyən edilməsi haqqında',
+                    'preamble' => '[İşçi (yiyəlik)] ərizəsini və təqdim etdiyi sənədləri nəzərə alaraq, Azərbaycan Respublikası Əmək Məcəlləsinə uyğun olaraq',
+                    'clauses' => [
+                        '[İş yeri] [Vəzifə] [İşçi (yönlük)] [Səbəb] [Başlama tarixi] tarixindən [Güzəştin təsviri] müəyyən edilsin.',
+                        'Mühasibatlıq bu əmrdən irəli gələn məsələləri qanunvericiliyə uyğun həll etsin.',
+                    ],
+                    'basis' => '[Əsas mətni]',
+                ],
+                'manual' => [
+                    'Səbəb' => ['type' => 'text'],
+                    'Başlama tarixi' => ['type' => 'date'],
+                    'Güzəştin təsviri' => ['type' => 'text'],
+                    'Əsas mətni' => ['type' => 'text'],
+                ],
+            ],
+
+            // ─────────────────────────────── Donor günü ───────────────────────────────
+            // Approval files the rest day as a paid absence (puantaj code DG).
+            'donor_gunu' => [
+                'label' => 'Donorluq ilə əlaqədar istirahət günü',
+                'effect' => 'paid_absence',
+                'spec' => [
+                    'city' => 'Bakı şəhəri',
+                    'subject' => 'Donorluq ilə əlaqədar istirahət günü verilməsi haqqında',
+                    'preamble' => '[İşçi (yiyəlik)] ərizəsini və qanvermə haqqında arayışı nəzərə alaraq, Azərbaycan Respublikası Əmək Məcəlləsinə və donorluq haqqında qanunvericiliyə uyğun olaraq',
+                    'clauses' => [
+                        '[İş yeri] [Vəzifə] [İşçi (yönlük)] [Qanvermə tarixi] tarixində qan verməsi ilə əlaqədar [İstirahət günü] tarixində orta əmək haqqı saxlanılmaqla istirahət günü verilsin.',
+                        'Mühasibatlıq bu əmrdən irəli gələn məsələləri həll etsin.',
+                    ],
+                    'basis' => '[Əsas mətni]',
+                ],
+                'manual' => [
+                    'Qanvermə tarixi' => ['type' => 'date'],
+                    'İstirahət günü' => ['type' => 'date', 'role' => 'start_date'],
+                    'Əsas mətni' => ['type' => 'text'],
+                ],
+            ],
+
+            // ──────────────────── Seçki komissiyasının işində iştirak ────────────────────
+            // Approval files the days as a paid absence (puantaj code SK).
+            'secki_komissiyasi' => [
+                'label' => 'Seçki komissiyasının işində iştirak',
+                'effect' => 'paid_absence',
+                'spec' => [
+                    'city' => 'Bakı şəhəri',
+                    'subject' => 'Seçki komissiyasının işində iştirakla əlaqədar əmək funksiyasının icrasından azad edilmə haqqında',
+                    'preamble' => '[Seçki komissiyası] müraciətini nəzərə alaraq, Azərbaycan Respublikasının Seçki Məcəlləsinə və Əmək Məcəlləsinə uyğun olaraq',
+                    'clauses' => [
+                        '[İş yeri] [Vəzifə] [İşçi], seçki komissiyasının üzvü kimi, [Başlama tarixi] tarixindən [Bitmə tarixi] tarixinədək ([Gün sayı] təqvim günü) iş yeri və vəzifəsi saxlanılmaqla əmək funksiyasının icrasından azad edilsin.',
+                        'Mühasibatlıq bu müddət üçün ödənişi qanunvericiliyə uyğun həll etsin.',
+                    ],
+                    'basis' => '[Əsas mətni]',
+                ],
+                'manual' => [
+                    'Seçki komissiyası' => ['type' => 'text'],
+                    'Başlama tarixi' => ['type' => 'date', 'role' => 'start_date'],
+                    'Bitmə tarixi' => ['type' => 'date', 'role' => 'end_date'],
+                    'Gün sayı' => ['type' => 'number', 'role' => 'days'],
+                    'Əsas mətni' => ['type' => 'text'],
+                ],
+            ],
+
+            // ──────────────────────── Mülki müdafiə təlimi ────────────────────────
+            // Approval files the days as a paid absence (puantaj code MM).
+            'mulki_mudafie' => [
+                'label' => 'Mülki müdafiə təlimində iştirak',
+                'effect' => 'paid_absence',
+                'spec' => [
+                    'city' => 'Bakı şəhəri',
+                    'subject' => 'Mülki müdafiə təlimində iştirak barədə',
+                    'preamble' => '[Təlimi təşkil edən qurum] müraciətini nəzərə alaraq, Azərbaycan Respublikasının mülki müdafiə haqqında qanunvericiliyinə və Əmək Məcəlləsinə uyğun olaraq',
+                    'clauses' => [
+                        '[İş yeri] [Vəzifə] [İşçi (yiyəlik)] [Başlama tarixi] tarixindən [Bitmə tarixi] tarixinədək ([Gün sayı] təqvim günü) [Təlimin yeri] keçiriləcək mülki müdafiə təlimində iştirakına orta əmək haqqı saxlanılmaqla icazə verilsin.',
+                        'Mühasibatlıq bu əmrdən irəli gələn məsələləri həll etsin.',
+                    ],
+                    'basis' => '[Əsas mətni]',
+                ],
+                'manual' => [
+                    'Təlimi təşkil edən qurum' => ['type' => 'text'],
+                    'Başlama tarixi' => ['type' => 'date', 'role' => 'start_date'],
+                    'Bitmə tarixi' => ['type' => 'date', 'role' => 'end_date'],
+                    'Gün sayı' => ['type' => 'number', 'role' => 'days'],
+                    'Təlimin yeri' => ['type' => 'text'],
+                    'Əsas mətni' => ['type' => 'text'],
+                ],
+            ],
+
+            // ──────────────────────── Məzuniyyətdən geri çağırma ────────────────────────
+            // Approval ends the current leave the day before the recall date and returns
+            // the unused days to the yearly balance.
+            'mezuniyyetden_geri_cagirma' => [
+                'label' => 'Məzuniyyətdən geri çağırma',
+                'effect' => 'vacation_recall',
+                'spec' => [
+                    'city' => 'Bakı şəhəri',
+                    'subject' => 'Əmək məzuniyyətindən geri çağırılma haqqında',
+                    'preamble' => 'İstehsalat zərurətini nəzərə alaraq, [İşçi (yiyəlik)] razılığı ilə, Azərbaycan Respublikası Əmək Məcəlləsinə uyğun olaraq',
+                    'clauses' => [
+                        'Əmək məzuniyyətində olan [İş yeri] [Vəzifə] [İşçi], [Səbəb], [Geri çağırma tarixi] tarixindən məzuniyyətdən geri çağırılsın.',
+                        'Məzuniyyətin istifadə olunmamış hissəsi əməkdaşın arzusu ilə cari iş ili ərzində və ya növbəti iş ilinin məzuniyyətinə birləşdirilməklə verilsin.',
+                        'Mühasibatlıq bu əmrdən irəli gələn məsələləri həll etsin.',
+                    ],
+                    'basis' => '[Əsas mətni]',
+                ],
+                'manual' => [
+                    'Səbəb' => ['type' => 'text'],
+                    'Geri çağırma tarixi' => ['type' => 'date', 'role' => 'recall_date'],
+                    'Əsas mətni' => ['type' => 'text'],
+                ],
+            ],
+
+            // ─────────────── İstifadə olunmamış məzuniyyətə görə kompensasiya ───────────────
+            // ƏM m.144.2: paid when the employment contract ends — issued only with a
+            // termination order on file, approved only after it. Approval takes the days off
+            // the work-year balance (from the named work year, then the oldest); payroll
+            // computes the amount.
+            'istifade_olunmamis_mezuniyyet_kompensasiyasi' => [
+                'label' => 'İstifadə olunmamış məzuniyyətə görə kompensasiya',
+                'effect' => 'vacation_compensation',
+                'spec' => [
+                    'city' => 'Bakı şəhəri',
+                    'subject' => 'İstifadə olunmamış əmək məzuniyyətinə görə kompensasiya ödənilməsi haqqında',
+                    'preamble' => '[İşçi (yiyəlik)] əmək müqaviləsinə xitam verilməsi ilə əlaqədar, Azərbaycan Respublikası Əmək Məcəlləsinin 144-cü maddəsinin 2-ci hissəsini rəhbər tutaraq',
+                    'clauses' => [
+                        '[İş yeri] [Vəzifə] [İşçi (yönlük)] [İş ili] iş ilindən başlayaraq istifadə olunmamış [Gün sayı] təqvim günü əmək məzuniyyətinə görə pul kompensasiyası ödənilsin.',
+                        'Mühasibatlıq kompensasiyanın məbləğini orta əmək haqqı əsasında hesablasın və ödənişi təmin etsin.',
+                    ],
+                    'basis' => '[Əsas mətni]',
+                ],
+                'manual' => [
+                    'İş ili' => ['type' => 'work_year', 'role' => 'work_year'],
+                    'Gün sayı' => ['type' => 'number', 'role' => 'days'],
+                    'Əsas mətni' => ['type' => 'text'],
+                ],
+            ],
+
+            // ──────────────────────── Qeyri-iş günü işə cəlb etmə ────────────────────────
+            // Approval puts the day on record in Attendance as rest-day work.
+            'qeyri_is_gunu_ise_celb' => [
+                'label' => 'Qeyri-iş günü işə cəlb etmə',
+                'effect' => 'non_working_day_work',
+                'spec' => [
+                    'city' => 'Bakı şəhəri',
+                    'subject' => 'İstirahət (bayram) günü işə cəlb edilmə haqqında',
+                    'preamble' => '[Səbəb] ilə əlaqədar, [İşçi (yiyəlik)] razılığı ilə, Azərbaycan Respublikası Əmək Məcəlləsinə uyğun olaraq',
+                    'clauses' => [
+                        '[İş yeri] [Vəzifə] [İşçi] [İş günü] tarixində (qeyri-iş günü) işə cəlb edilsin.',
+                        'Həmin gün işlədiyinə görə əməkdaşa [Kompensasiya].',
+                        'Mühasibatlıq bu əmrdən irəli gələn məsələləri həll etsin.',
+                    ],
+                    'basis' => '[Əsas mətni]',
+                ],
+                'manual' => [
+                    'Səbəb' => ['type' => 'text'],
+                    'İş günü' => ['type' => 'date', 'role' => 'work_date'],
+                    'Kompensasiya' => ['type' => 'rest_day_compensation', 'role' => 'compensation'],
+                    'Əsas mətni' => ['type' => 'text'],
+                ],
+            ],
+
+            // ──────────────────────────────── Əmrin ləğvi ────────────────────────────────
+            // Approval cancels the chosen approved order (its HR effect is reversed);
+            // revoking this order re-approves it.
+            'emrin_legvi' => [
+                'label' => 'Əmrin ləğvi',
+                'effect' => 'order_cancellation',
+                'spec' => [
+                    'city' => 'Bakı şəhəri',
+                    'subject' => 'Əmrin ləğv edilməsi haqqında',
+                    'preamble' => '[Səbəb] nəzərə alaraq',
+                    'clauses' => [
+                        '[İş yeri] [Vəzifə] [İşçi] barəsində verilmiş [Ləğv edilən əmr] əmri ləğv edilsin.',
+                        'Ləğv edilən əmrin icrası ilə bağlı aparılmış kadr və mühasibat qeydləri müvafiq qaydada geri qaytarılsın.',
+                        'İnsan Resursları və Mühasibatlıq bu əmrdən irəli gələn məsələləri həll etsinlər.',
+                    ],
+                    'basis' => '[Əsas mətni]',
+                ],
+                'manual' => [
+                    'Səbəb' => ['type' => 'text'],
+                    'Ləğv edilən əmr' => ['type' => 'approved_order', 'role' => 'target_order'],
                     'Əsas mətni' => ['type' => 'text'],
                 ],
             ],

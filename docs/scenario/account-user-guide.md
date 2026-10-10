@@ -2,7 +2,7 @@
 
 ## Bu səhifə nə üçündür?
 `Hesab ayarları` səhifəsi sizin şəxsi hesabınızı idarə etmək üçündür. Burada:
-- adınızı və e-poçt ünvanınızı dəyişə bilərsiniz;
+- adınızı dəyişə bilərsiniz (e-poçt ünvanını yalnız administrator dəyişir);
 - şifrənizi yeniləyə bilərsiniz;
 - administrator tələb edəndə məcburi şifrə yenilənməsini edə bilərsiniz;
 - lazım olsa, hesabınızı silə bilərsiniz.
@@ -34,28 +34,25 @@ Səhifədə üç kart var, hər biri sol paneldəki bəndə uyğundur. Məcburi 
 
 ## Əsas əməliyyatlar
 
-### Adı və ya e-poçtu dəyişmək
+### Adı dəyişmək
 1. `Profil məlumatları` kartını tapın.
-2. `Ad` və ya `E-poçt` sahəsini dəyişin.
+2. `Ad` sahəsini dəyişin.
 3. Qara `Yadda saxla` düyməsini basın.
 4. Düymənin yanında qısa müddətə yaşıl `Yadda saxlanıldı.` yazısı görünür.
 
-Diqqət:
-- Hər iki sahə doldurulmalıdır.
-- E-poçt sistemdə başqa istifadəçiyə aid olmamalıdır — əks halda sahənin altında xəta çıxır.
-- Yeni e-poçt ünvanı ilə sistemə daxil olacaqsınız. Onu düzgün yazdığınıza əmin olun.
+`E-poçt` sahəsi yalnız oxunur: e-poçt giriş identifikatorunuzdur və onu yalnız administrator dəyişə bilər. E-poçtunuz dəyişməlidirsə, administratora müraciət edin.
 
 ### Şifrəni dəyişmək
 1. `Şifrəni yenilə` kartına keçin.
 2. `Cari şifrə` sahəsinə indiki şifrənizi yazın.
-3. `Yeni şifrə` sahəsinə yeni şifrəni yazın (ən azı 8 simvol).
+3. `Yeni şifrə` sahəsinə yeni şifrəni yazın (ən azı 12 simvol; böyük və kiçik hərf, rəqəm).
 4. `Şifrəni təsdiq et` sahəsinə yeni şifrəni təkrar yazın.
 5. `Şifrəni yenilə` düyməsini basın.
 6. Uğurlu olarsa, düymənin yanında `Yadda saxlanıldı.` yazısı görünür.
 
 Tez-tez rast gəlinən xətalar:
 - cari şifrə səhv yazılıb;
-- yeni şifrə 8 simvoldan qısadır;
+- yeni şifrə 12 simvoldan qısadır və ya böyük/kiçik hərf, rəqəm yoxdur;
 - `Yeni şifrə` və `Şifrəni təsdiq et` sahələri üst-üstə düşmür.
 
 ### Məcburi şifrə yenilənməsi
@@ -89,20 +86,27 @@ Bu əməliyyat geri qaytarılmır.
 Bu səhifə yalnız istifadəçi hesabını dəyişir. Əməkdaş kartındakı məlumatları kadr bölməsi `Əməkdaşlar` modulunda dəyişir.
 
 **Cari şifrəmi unutmuşam, necə dəyişim?**
-`Çıxış et` edin və giriş səhifəsində `Şifrənizi unutmusunuz?` keçidindən istifadə edin. E-poçtunuza yeni şifrə təyin etmək üçün keçid göndəriləcək.
+`Çıxış et` edin və giriş səhifəsində `Şifrənizi unutmusunuz?` keçidindən istifadə edin. E-poçt aktiv hesaba aiddirsə, ona yeni şifrə təyin etmək üçün keçid göndəriləcək. Təhlükəsizlik üçün sistem hər halda eyni cavabı verir — e-poçtun sistemdə olub-olmadığını bildirmir.
+
+**Şifrəmi dəyişdim, digər kompüterdə sistemdən çıxarıldım.**
+Bu gözlənilən davranışdır: şifrə dəyişəndə hesabınızın digər cihazlardakı açıq sessiyaları bağlanır. Yeni şifrə ilə yenidən daxil olun.
+
+**Daxil ola bilmirəm, şifrə düzdür.**
+Hesabınız deaktiv edilmiş ola bilər — deaktiv hesab daxil ola və şifrə bərpa linki ala bilmir. Administratora müraciət edin. Çoxlu uğursuz cəhddən sonra giriş də bir müddət bloklanır.
 
 **Niyə hər dəfə bu səhifəyə qaytarılıram?**
 Hesabınız üçün məcburi şifrə yenilənməsi aktivdir. Yuxarıdakı `Məcburi şifrə yenilənməsi` hissəsinə baxın.
 
 **`Yadda saxla` basdım, amma heç nə olmadı.**
-Sahələrin altında qırmızı xəta mətni olub-olmadığını yoxlayın. Ən çox səbəb — boş sahə və ya artıq istifadə olunan e-poçtdur.
+Sahələrin altında qırmızı xəta mətni olub-olmadığını yoxlayın. Ən çox səbəb — boş `Ad` sahəsidir.
 
 **Hesabımı silsəm, əməkdaş məlumatlarım da silinəcək?**
 Bu əməliyyat sizin istifadəçi hesabınızı silir və siz sistemə daxil ola bilməyəcəksiniz. Əmin deyilsinizsə, əvvəlcə administratorla danışın.
 
 ## Yadda saxlayın
 - Profilə sol panelin aşağısındakı baş hərflər dairəsindən keçilir.
-- Şifrə ən azı 8 simvol olmalıdır; uzun və təsadüfi şifrə seçin.
+- Şifrə ən azı 12 simvol olmalı, böyük və kiçik hərf, rəqəm daxil etməlidir; uzun və təsadüfi şifrə seçin.
+- E-poçtu yalnız administrator dəyişir.
 - Sarı `Şifrə yenilənməsi tələb olunur` qutusu görünürsə, əvvəlcə şifrəni yeniləyin.
 - `Hesabı sil` geri qaytarılmır və şifrə ilə təsdiq tələb edir.
 - İş məlumatlarınız (vəzifə, struktur, sənədlər) bu səhifədə deyil, əməkdaş kartında dəyişir.

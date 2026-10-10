@@ -512,6 +512,10 @@ class OrderComposerTest extends TestCase
             'tabel_no' => $personnel->tabel_no, 'year' => $year,
             'vacation_days_total' => 30, 'remaining_days' => 5, 'reserved_date_month' => null,
         ]);
+        // The upgrade moves the calendar-year balance into the work-year ledger.
+        app(\App\Modules\Vacation\Application\Services\LegacyVacationMigrator::class)->migrate();
+        $remaining = fn (): int => app(\App\Services\Vacation\VacationBalanceService::class)
+            ->balanceOn($personnel->fresh(), \Carbon\CarbonImmutable::create($year, 5, 19))['remaining'];
 
         $this->actingAs($this->userWith('add-orders'));
         $start = '19.05.'.$year.'-cı il';
@@ -541,13 +545,11 @@ class OrderComposerTest extends TestCase
 
         // Approval deducts the days from the balance…
         $transitions->approve($order);
-        $this->assertSame(0, (int) \App\Models\Vacation::query()
-            ->where('tabel_no', $personnel->tabel_no)->where('year', $year)->value('remaining_days'));
+        $this->assertSame(0, $remaining());
 
         // …and cancelling restores them.
-        $transitions->cancel($order);
-        $this->assertSame(5, (int) \App\Models\Vacation::query()
-            ->where('tabel_no', $personnel->tabel_no)->where('year', $year)->value('remaining_days'));
+        $transitions->cancel($order, 'Səhv tərtib edilib');
+        $this->assertSame(5, $remaining());
     }
 
     public function test_an_order_with_an_empty_required_field_is_blocked(): void
@@ -781,7 +783,7 @@ class OrderComposerTest extends TestCase
     {
         [$order, $personnel] = $this->issueVacationOrder('801-M');
 
-        app(\App\Modules\Orders\Infrastructure\Document\OrderStatusTransitionService::class)->cancel($order);
+        app(\App\Modules\Orders\Infrastructure\Document\OrderStatusTransitionService::class)->cancel($order, 'Səhv tərtib edilib');
 
         $this->assertSame(\App\Enums\OrderStatusEnum::CANCELLED->value, (int) $order->fresh()->status_id);
         $this->assertCount(0, $personnel->vacations()->get());
@@ -795,7 +797,7 @@ class OrderComposerTest extends TestCase
         $transitions->approve($order);
         $this->assertCount(1, $personnel->vacations()->get());
 
-        $transitions->revert($order);
+        $transitions->revert($order, 'Səhv tərtib edilib');
 
         $this->assertSame(\App\Enums\OrderStatusEnum::PENDING->value, (int) $order->fresh()->status_id);
         $this->assertCount(0, $personnel->vacations()->get());
@@ -807,7 +809,7 @@ class OrderComposerTest extends TestCase
         $transitions = app(\App\Modules\Orders\Infrastructure\Document\OrderStatusTransitionService::class);
 
         $transitions->approve($order);
-        $transitions->cancel($order);
+        $transitions->cancel($order, 'Səhv tərtib edilib');
 
         $this->assertSame(\App\Enums\OrderStatusEnum::CANCELLED->value, (int) $order->fresh()->status_id);
         $this->assertCount(0, $personnel->vacations()->get());
@@ -818,7 +820,7 @@ class OrderComposerTest extends TestCase
         [$order] = $this->issueVacationOrder('804-M');
         $transitions = app(\App\Modules\Orders\Infrastructure\Document\OrderStatusTransitionService::class);
 
-        $transitions->cancel($order);
+        $transitions->cancel($order, 'Səhv tərtib edilib');
         $transitions->reopen($order);
 
         $this->assertSame(\App\Enums\OrderStatusEnum::PENDING->value, (int) $order->fresh()->status_id);
@@ -828,7 +830,7 @@ class OrderComposerTest extends TestCase
     {
         [$order] = $this->issueVacationOrder('805-M');
         $transitions = app(\App\Modules\Orders\Infrastructure\Document\OrderStatusTransitionService::class);
-        $transitions->cancel($order);
+        $transitions->cancel($order, 'Səhv tərtib edilib');
 
         // cancelled → approved is not a permitted move.
         $this->expectException(DomainException::class);
@@ -913,7 +915,8 @@ class OrderComposerTest extends TestCase
         $user = User::factory()->create();
         $user->givePermissionTo(Permission::findOrCreate($permission, 'web'));
 
-        return $user;
+        // Struktur görünürlüyü fail closed-dur: bütün təşkilatı görən HR istifadəçisi.
+        return grantAllStructures($user);
     }
 
     private function makePersonnel(): Personnel

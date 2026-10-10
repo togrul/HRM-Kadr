@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Data\AbsencePeriod;
 use App\Data\LeaveFilterData;
 use App\Enums\OrderStatusEnum;
+use App\Services\UserPersonnelLinkResolver;
 use App\Traits\PersonnelTrait;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
@@ -32,6 +33,8 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property int|null $total_minutes
  * @property \Carbon\CarbonInterface|null $approved_at
  * @property string|null $submission_source
+ * @property string|null $reason
+ * @property int|null $assigned_to
  */
 class Leave extends Model
 {
@@ -105,10 +108,10 @@ class Leave extends Model
         return $this->hasOne(LeaveStatusLog::class, 'leave_id')->latestOfMany('changed_at');
     }
 
-    /** @return BelongsTo<Personnel, $this> */
+    /** @return BelongsTo<User, $this> */
     public function approver(): BelongsTo
     {
-        return $this->belongsTo(Personnel::class, 'approved_by', 'id');
+        return $this->belongsTo(User::class, 'approved_by', 'id')->withTrashed();
     }
 
     public function assigned(): BelongsTo
@@ -132,6 +135,52 @@ class Leave extends Model
         return $this->morphMany(EmployeeRequestChangeRequest::class, 'requestable');
     }
 
+    /** @return HasOne<LeaveSickCertificate, $this> */
+    public function sickCertificate(): HasOne
+    {
+        return $this->hasOne(LeaveSickCertificate::class);
+    }
+
+    /**
+     * A leave behind a sick-leave certificate is the register's: it is changed, closed or
+     * cancelled there only, never through the general leave edit / delete / correction paths.
+     * Reads the `has_sick_certificate` flag (withExists) or the loaded relation when present.
+     */
+    public function isManagedBySickCertificate(): bool
+    {
+        if (array_key_exists('has_sick_certificate', $this->attributes)) {
+            return (bool) $this->attributes['has_sick_certificate'];
+        }
+
+        if ($this->relationLoaded('sickCertificate')) {
+            return $this->getRelation('sickCertificate') !== null;
+        }
+
+        return $this->exists && LeaveSickCertificate::query()->where('leave_id', $this->getKey())->exists();
+    }
+
+    /**
+     * A leave written by an order's effect (OrderAbsenceRecorderService) is the order's: it
+     * changes only when the order is revoked, never through the general edit / delete paths.
+     */
+    public function isManagedByOrder(): bool
+    {
+        if (array_key_exists('submission_source', $this->attributes)) {
+            return $this->attributes['submission_source'] === 'order';
+        }
+
+        return $this->exists && static::query()->withTrashed()->whereKey($this->getKey())->value('submission_source') === 'order';
+    }
+
+    /**
+     * An open-ended leave (an open sick certificate) has no end date yet: it covers every
+     * day from its start up to today. Only the certificate register writes one.
+     */
+    public function isOpenEnded(): bool
+    {
+        return $this->starts_at !== null && $this->ends_at === null && $this->normalizedDurationUnit() === 'day';
+    }
+
     /* ----------------------------- Accessors / Attrs -------------------------- */
     protected function periodLabel(): Attribute
     {
@@ -140,6 +189,10 @@ class Leave extends Model
             $s = $this->starts_at;
             /** @var CarbonImmutable|null $e */
             $e = $this->ends_at;
+
+            if ($s && ! $e && $this->isOpenEnded()) {
+                return $s->format('d.m.Y').' – …';
+            }
 
             if (! $s || ! $e) {
                 return null;
@@ -168,35 +221,18 @@ class Leave extends Model
             return false;
         }
 
-        if (is_null($this->assigned_to)) {
-            return true;
-        }
-
         if (! $user) {
             return false;
         }
 
-        $assignedTo = (int) $this->assigned_to;
-        $userId = (int) $user->getKey();
-
-        // Backward compatibility: some old rows may still carry users.id.
-        if ($assignedTo === $userId) {
-            return true;
+        if (is_null($this->assigned_to)) {
+            return $user->can('view', $this) && $user->can('approve-leaves') && $user->can('update', $this);
         }
 
-        static $personnelIdCache = [];
+        // assigned_to həmişə əməkdaş id-sidir; istifadəçi id-si ilə müqayisə edilmir (ayrı id məkanları).
+        $personnelId = app(UserPersonnelLinkResolver::class)->resolve($user);
 
-        if (! array_key_exists($userId, $personnelIdCache)) {
-            $personnelId = $user->relationLoaded('personnel')
-                ? $user->personnel?->id
-                : $user->personnel()->value('id');
-
-            $personnelIdCache[$userId] = $personnelId ? (int) $personnelId : null;
-        }
-
-        $personnelId = $personnelIdCache[$userId];
-
-        return $personnelId !== null && $assignedTo === $personnelId;
+        return $personnelId !== null && (int) $this->assigned_to === $personnelId;
     }
 
     /* --------------------------------- Scopes -------------------------------- */
@@ -305,7 +341,12 @@ class Leave extends Model
             type: AbsencePeriod::TYPE_LEAVE,
             id: $this->exists ? (int) $this->getKey() : null,
             from: $start,
-            to: $unit === 'day' && $this->ends_at ? CarbonImmutable::parse($this->ends_at)->startOfDay() : $start,
+            to: match (true) {
+                $unit === 'day' && $this->ends_at !== null => CarbonImmutable::parse($this->ends_at)->startOfDay(),
+                // Still open: it holds every day up to today (and at least its first day).
+                $this->isOpenEnded() => $start->max(CarbonImmutable::today()),
+                default => $start,
+            },
             unit: $unit,
             dayPart: $unit === 'half_day' ? $this->partial_day_part : null,
             startsTime: $unit === 'hour' && filled($this->starts_time) ? (string) $this->starts_time : null,
@@ -318,6 +359,12 @@ class Leave extends Model
     {
         $s = $this->starts_at;
         $e = $this->ends_at;
+
+        if ($s && ! $e && $this->isOpenEnded()) {
+            // Open sick certificate: the days so far.
+            return max(1, (int) $s->diffInDays(CarbonImmutable::today()) + 1);
+        }
+
         if (! $s || ! $e) {
             return 0;
         }
@@ -388,6 +435,12 @@ class Leave extends Model
             : $this->durationSummary();
     }
 
+    /**
+     * Set by the sick-certificate register when it saves an open certificate's leave: the
+     * missing end date is meant ("still sick"), not a form left blank.
+     */
+    public bool $keepOpenEnd = false;
+
     /** Keep model source-of-truth in sync (or move to an Observer) */
     protected static function booted(): void
     {
@@ -399,9 +452,15 @@ class Leave extends Model
             $durationUnit = $model->normalizedDurationUnit();
             $model->duration_unit = $durationUnit;
 
+            // An open-ended row stays open when it is saved for an unrelated change.
+            $staysOpen = $durationUnit === 'day' && ! $model->ends_at && (
+                $model->keepOpenEnd
+                || ($model->exists && $model->getOriginal('ends_at') === null && ! $model->isDirty('ends_at'))
+            );
+
             if ($durationUnit !== 'day') {
                 $model->ends_at = $model->starts_at;
-            } elseif (! $model->ends_at) {
+            } elseif (! $model->ends_at && ! $staysOpen) {
                 $model->ends_at = $model->starts_at;
             }
 
@@ -428,7 +487,10 @@ class Leave extends Model
                 }
             }
 
-            if ($model->isDirty(['starts_at', 'ends_at', 'duration_unit']) || is_null($model->total_days)) {
+            if ($staysOpen) {
+                // Counted once the certificate is closed.
+                $model->total_days = null;
+            } elseif ($model->isDirty(['starts_at', 'ends_at', 'duration_unit']) || is_null($model->total_days)) {
                 $model->total_days = $durationUnit === 'day'
                     ? $model->durationDays()
                     : 1;

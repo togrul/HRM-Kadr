@@ -7,6 +7,7 @@
 
     $counts = $reader->sectionCounts($personnel);
     $tone = $reader->statusTone($personnel);
+    $presence = $reader->presence($personnel);
     $structurePath = $reader->structurePath($personnel);
 
     $steps = PersonnelProfile::SECTION_STEPS;
@@ -30,6 +31,14 @@
                     wire:target="setSection"
                     :active="$section === 'overview'"
                 >{{ __('personnel::profile.sections.overview') }}</x-context-panel.item>
+                @if ($this->canViewSickCertificates)
+                    <x-context-panel.item
+                        wire:click.prevent="setSection('{{ PersonnelProfile::SICK_SECTION }}')"
+                        wire:loading.attr="disabled"
+                        wire:target="setSection"
+                        :active="$section === PersonnelProfile::SICK_SECTION"
+                    >{{ __('personnel::profile.sections.sick') }}</x-context-panel.item>
+                @endif
             </x-context-panel.section>
 
             <x-context-panel.section :title="__('personnel::profile.groups.file')" :padded="true">
@@ -90,9 +99,12 @@
                 <div class="min-w-0">
                     <div class="flex flex-wrap items-center gap-2.5">
                         <h1 class="truncate text-[21px] font-semibold tracking-[-0.03em] text-ink">{{ $personnel->fullname }}</h1>
-                        <x-small-badge :mode="$tone === 'neutral' ? 'green' : $tone" dot>
+                        <x-small-badge :mode="$tone === 'neutral' ? 'green' : $tone" dot :title="$presence->periodLabel()">
                             {{ $reader->statusLabel($personnel) }}
                         </x-small-badge>
+                        @if ($presence->expectedReturnLabel())
+                            <span class="hrm-num text-[12px] text-ink-faint">{{ __('personnel::common.presence.returns_on', ['date' => $presence->expectedReturnLabel()]) }}</span>
+                        @endif
                         @if ($reader->contractExpired($personnel))
                             <x-small-badge mode="amber" dot>
                                 {{ __('personnel::common.states.contract_expired') }}
@@ -133,6 +145,8 @@
                     :key="'personnel-file-wizard-'.$personnel->id"
                 />
             </div>
+        @elseif ($section === PersonnelProfile::SICK_SECTION && $this->canViewSickCertificates)
+            <livewire:leaves.personnel-sick-certificates :tabel-no="(string) $personnel->tabel_no" :key="'profile-sick-certificates-'.$personnel->id" />
         @else
             @include('personnel::livewire.personnel.profile-sections.overview', [
                 'personnel' => $personnel,

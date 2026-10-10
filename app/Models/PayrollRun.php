@@ -25,6 +25,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property \Illuminate\Support\Carbon|null $locked_at
  * @property int|null $created_by
  * @property string|null $note
+ * @property string|null $regular_slot
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  */
@@ -77,6 +78,28 @@ class PayrollRun extends Model
     public function payslips(): HasMany
     {
         return $this->hasMany(Payslip::class, 'payroll_run_id');
+    }
+
+    /**
+     * The unique key a regular run holds for its period and regime (off-cycle runs hold
+     * none): a second regular run for the same month is refused by the database as well.
+     */
+    public static function regularSlotFor(int $periodId, ?int $regimeId): string
+    {
+        return $periodId.':'.($regimeId ?? 0);
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (PayrollRun $run): void {
+            if (! $run->isDirty(['payroll_period_id', 'regime_id', 'run_type']) && $run->exists) {
+                return;
+            }
+
+            $run->setAttribute('regular_slot', $run->run_type === 'regular'
+                ? self::regularSlotFor((int) $run->payroll_period_id, $run->regime_id !== null ? (int) $run->regime_id : null)
+                : null);
+        });
     }
 
     public function isLocked(): bool

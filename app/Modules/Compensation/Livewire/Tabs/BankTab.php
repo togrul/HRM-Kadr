@@ -46,12 +46,14 @@ class BankTab extends CompensationTab
     #[Computed]
     public function bankAccounts(): Collection
     {
-        if (! $this->tabelNo) {
+        $tabelNo = $this->visibleTabel();
+
+        if (! $tabelNo) {
             return collect();
         }
 
         return EmployeeBankAccount::query()
-            ->where('tabel_no', $this->tabelNo)
+            ->where('tabel_no', $tabelNo)
             ->orderByDesc('is_primary')
             ->orderByDesc('id')
             ->get();
@@ -59,7 +61,7 @@ class BankTab extends CompensationTab
 
     public function editBank(int $id): void
     {
-        $account = EmployeeBankAccount::query()->where('tabel_no', $this->tabelNo)->findOrFail($id);
+        $account = EmployeeBankAccount::query()->where('tabel_no', $this->visibleTabel() ?? abort(403))->findOrFail($id);
         $this->editingBankId = $account->id;
         $this->panel = 'bank';
         $this->bankForm = [
@@ -76,6 +78,7 @@ class BankTab extends CompensationTab
     {
         $this->guardManage();
         abort_unless($this->tabelNo !== null, 422);
+        abort_unless($this->visibleTabel() !== null, 403);
 
         $data = $this->validate([
             'bankForm.iban' => 'required|string|max:34',
@@ -100,7 +103,9 @@ class BankTab extends CompensationTab
     public function deleteBank(int $id, BankAccountService $service): void
     {
         $this->guardManage();
-        $service->delete($id);
+        // Yalnız seçilmiş (və görünən) işçinin hesabı silinə bilər.
+        $account = EmployeeBankAccount::query()->where('tabel_no', $this->visibleTabel() ?? abort(403))->findOrFail($id);
+        $service->delete((int) $account->id);
 
         if ($this->editingBankId === $id) {
             $this->cancelBank();

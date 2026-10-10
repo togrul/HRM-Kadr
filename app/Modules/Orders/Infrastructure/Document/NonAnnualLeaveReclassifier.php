@@ -6,6 +6,7 @@ use App\Enums\OrderStatusEnum;
 use App\Models\OrderLog;
 use App\Models\OrderWordTemplate;
 use App\Models\Personnel;
+use App\Modules\Orders\Infrastructure\Document\Effects\VacationEffect;
 use App\Services\Vacation\VacationBalanceService;
 use App\Support\Language\AzerbaijaniDateFormatter;
 use Illuminate\Support\Facades\DB;
@@ -112,7 +113,9 @@ class NonAnnualLeaveReclassifier
         }
 
         if (! $dryRun) {
-            $this->balance->release($personnel, $year, $days);
+            // The entries the order wrote on approval, or (approved before the work-year
+            // ledger) the day count onto the newest work years.
+            $this->balance->release($personnel, $year, $days, VacationEffect::sourceKey($order));
         }
 
         return $days;

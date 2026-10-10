@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Support;
 
+use App\Models\User;
 use App\Modules\Attendance\Application\Services\AttendanceCalendarSyncService;
 use App\Modules\Attendance\Application\Services\AttendancePunchProcessingPipelineService;
 use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
@@ -30,6 +31,10 @@ class StructureSubtreeCallersTest extends TestCase
         foreach ([[1, null], [2, 1], [3, 1], [4, 2], [5, 3], [6, null]] as [$id, $parent]) {
             DB::table('structures')->insert(['id' => $id, 'name' => "U{$id}", 'shortname' => "U{$id}", 'parent_id' => $parent, 'code' => $id, 'level' => 1]);
         }
+
+        // Davamiyyət və hesabat görünürlüyü fail closed-dur; ağac müqayisəsi bütün
+        // strukturları görən istifadəçi adından aparılır.
+        $this->actingAs(grantAllStructures(User::factory()->create()));
     }
 
     /**

@@ -8,6 +8,7 @@ use App\Models\Personnel;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrOnboardingReadService;
 use App\Modules\Personnel\Application\Services\MyHr\OnboardingAdminReportReadService;
 use App\Modules\Personnel\Application\Services\MyHr\OnboardingAssignmentManagerService;
+use App\Services\StructureService;
 use App\Support\Uploads\UploadRules;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -47,6 +48,7 @@ class OnboardingAssignmentManager extends Component
     {
         abort_unless($this->canManageTemplates() || $this->canAssignDocuments(), 403);
 
+        abort_unless(app(StructureService::class)->allowsPersonnelId(auth()->user(), $personnelModel), 403);
         $this->personnel = Personnel::query()->with(['position', 'structure'])->findOrFail($personnelModel);
     }
 

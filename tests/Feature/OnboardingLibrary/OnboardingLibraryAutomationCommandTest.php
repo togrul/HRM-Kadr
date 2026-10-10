@@ -21,6 +21,7 @@ class OnboardingLibraryAutomationCommandTest extends TestCase
     public function test_automation_command_auto_assigns_active_template_to_recent_hire(): void
     {
         Storage::fake('public');
+        Storage::fake('local');
         $this->seedReferenceData();
 
         $personnel = $this->makePersonnel('employee@example.test');
@@ -49,6 +50,7 @@ class OnboardingLibraryAutomationCommandTest extends TestCase
     {
         Notification::fake();
         Storage::fake('public');
+        Storage::fake('local');
         $this->seedReferenceData();
 
         config()->set('personnel.my_hr.onboarding.automation.reminder_days_ahead', 3);

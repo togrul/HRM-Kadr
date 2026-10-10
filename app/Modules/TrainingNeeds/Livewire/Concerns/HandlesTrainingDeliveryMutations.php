@@ -5,7 +5,9 @@ namespace App\Modules\TrainingNeeds\Livewire\Concerns;
 use App\Models\TrainingDeliveryRecord;
 use App\Modules\TrainingNeeds\Application\Services\TrainingNeedReportingService;
 use App\Modules\TrainingNeeds\Exports\TrainingNeedsReportExport;
-use Illuminate\Support\Facades\Storage;
+use App\Modules\TrainingNeeds\Support\TrainingStructureScope;
+use App\Support\Uploads\PrivateFiles;
+use App\Support\Uploads\SecureFileResponse;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -24,14 +26,14 @@ trait HandlesTrainingDeliveryMutations
             'deliveryDocumentForm.certificate_file' => __('training_needs::dashboard.fields.certificate_file'),
         ]);
 
-        $record = TrainingDeliveryRecord::query()->findOrFail((int) data_get($validated, 'deliveryDocumentForm.training_delivery_record_id'));
+        $record = TrainingStructureScope::onPersonnelColumn(TrainingDeliveryRecord::query(), 'training_delivery_records.personnel_id')->findOrFail((int) data_get($validated, 'deliveryDocumentForm.training_delivery_record_id'));
         $file = data_get($this->deliveryDocumentForm, 'certificate_file');
 
         if ($file instanceof TemporaryUploadedFile) {
-            $storedPath = $file->store('training-certificates', 'public');
+            $storedPath = $file->store('training-certificates', PrivateFiles::DISK);
 
             if ($record->certificate_path) {
-                Storage::disk('public')->delete($record->certificate_path);
+                PrivateFiles::delete($record->certificate_path);
             }
 
             $record->update([
@@ -47,39 +49,35 @@ trait HandlesTrainingDeliveryMutations
         $this->dispatch('trainingNeedsSaved', __('training_needs::dashboard.messages.certificate_saved'));
     }
 
-    public function previewDeliveryCertificate(int $deliveryRecordId): BinaryFileResponse
+    public function previewDeliveryCertificate(int $deliveryRecordId): StreamedResponse
     {
         $this->authorizeTrainingNeedsView();
-        $record = TrainingDeliveryRecord::query()->findOrFail($deliveryRecordId);
-        abort_unless($record->certificate_path, 404);
+        $record = TrainingStructureScope::onPersonnelColumn(TrainingDeliveryRecord::query(), 'training_delivery_records.personnel_id')->findOrFail($deliveryRecordId);
+        $path = (string) $record->getAttribute('certificate_path');
+        $disk = PrivateFiles::locate($path);
+        abort_if($disk === null, 404);
 
-        return response()->file(
-            Storage::disk('public')->path($record->certificate_path),
-            [
-                'Content-Type' => Storage::disk('public')->mimeType($record->certificate_path) ?: 'application/octet-stream',
-            ]
-        );
+        return SecureFileResponse::fromDisk($disk, $path, $record->getAttribute('certificate_name'), inline: true);
     }
 
     public function downloadDeliveryCertificate(int $deliveryRecordId): StreamedResponse
     {
         $this->authorizeTrainingNeedsView();
-        $record = TrainingDeliveryRecord::query()->findOrFail($deliveryRecordId);
-        abort_unless($record->certificate_path, 404);
+        $record = TrainingStructureScope::onPersonnelColumn(TrainingDeliveryRecord::query(), 'training_delivery_records.personnel_id')->findOrFail($deliveryRecordId);
+        $path = (string) $record->getAttribute('certificate_path');
+        $disk = PrivateFiles::locate($path);
+        abort_if($disk === null, 404);
 
-        return Storage::disk('public')->download(
-            $record->certificate_path,
-            $record->certificate_name ?: basename($record->certificate_path)
-        );
+        return SecureFileResponse::fromDisk($disk, $path, $record->getAttribute('certificate_name') ?: basename($path));
     }
 
     public function deleteDeliveryCertificate(int $deliveryRecordId): void
     {
         $this->authorizeTrainingNeedsManage();
-        $record = TrainingDeliveryRecord::query()->findOrFail($deliveryRecordId);
+        $record = TrainingStructureScope::onPersonnelColumn(TrainingDeliveryRecord::query(), 'training_delivery_records.personnel_id')->findOrFail($deliveryRecordId);
 
         if ($record->certificate_path) {
-            Storage::disk('public')->delete($record->certificate_path);
+            PrivateFiles::delete($record->certificate_path);
         }
 
         $record->update([

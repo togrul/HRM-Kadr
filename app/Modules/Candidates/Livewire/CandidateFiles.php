@@ -4,6 +4,7 @@ namespace App\Modules\Candidates\Livewire;
 
 use App\Models\Candidate;
 use App\Models\CandidateDocument;
+use App\Support\Uploads\SecureFileResponse;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\DB;
@@ -342,15 +343,19 @@ class CandidateFiles extends Component
         ];
     }
 
+    /**
+     * Önizləmə (<img>) yalnız brauzerdə inline açılmasına icazə verilən raster şəkillər üçündür.
+     * SVG (`image/svg+xml`) heç vaxt inline göstərilmir — skript daşıya bilər.
+     */
     private function isPreviewable(?string $mimeType, ?string $extension): bool
     {
-        if (filled($mimeType) && Str::startsWith((string) $mimeType, 'image/')) {
-            return true;
-        }
-
         $normalizedExtension = Str::lower((string) $extension);
 
-        // svg intentionally excluded: never render uploaded SVG inline (XSS).
-        return in_array($normalizedExtension, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'], true);
+        if (filled($mimeType) && ! Str::startsWith((string) $mimeType, 'image/')) {
+            return false;
+        }
+
+        return in_array($normalizedExtension, ['jpg', 'jpeg', 'png', 'webp'], true)
+            && SecureFileResponse::canInline('file.'.$normalizedExtension);
     }
 }

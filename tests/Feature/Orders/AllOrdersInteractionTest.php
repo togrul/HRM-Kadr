@@ -87,13 +87,13 @@ class AllOrdersInteractionTest extends TestCase
         }
 
         $category = OrderCategory::query()->create(['id' => 1, 'name_az' => 'Kadr', 'name_en' => 'HR', 'name_ru' => 'HR']);
-        Order::query()->forceCreate(['id' => 1010, 'order_category_id' => $category->id, 'name' => 'İşə qəbul', 'content' => '', 'order_model' => '', 'blade' => Order::BLADE_DEFAULT]);
+        Order::query()->forceCreate(['id' => 1010, 'order_category_id' => $category->id, 'name' => 'İşə qəbul', 'order_model' => '', 'blade' => Order::BLADE_DEFAULT]);
 
         $user = User::factory()->create();
         $user->givePermissionTo(Permission::findOrCreate('show-orders', 'web'));
-        $this->actingAs($user);
-
-        // Order::IG_EMR is globally visible, so this row needs no structure grant.
+        // İşçisi olmayan köhnə Order::IG_EMR əmri artıq qlobal görünmür — yalnız «bütün
+        // strukturlar» bayraqlı istifadəçi onu görür (fail closed).
+        $this->actingAs(grantAllStructures($user));
         OrderLog::query()->create([
             'order_id' => 1010,
             'order_no' => 'LEGACY-1',
@@ -150,7 +150,9 @@ class AllOrdersInteractionTest extends TestCase
             ->assertSee("\$wire.approveOrder('READY-1')")
             ->assertSee("printOrder('DONE-1')", false)
             ->assertSee(__('orders::order_list.actions.duplicate'))
-            ->assertSee("\$wire.deleteOrder('DONE-1')")
+            ->assertSee("\$wire.deleteOrder('READY-1')")
+            // an approved order is never offered for deletion — it is cancelled first
+            ->assertDontSee("\$wire.deleteOrder('DONE-1')")
             ->assertSee("openSideMenu('order-preview'", false)
             ->assertDontSee('wire:confirm', false);
     }
@@ -173,6 +175,27 @@ class AllOrdersInteractionTest extends TestCase
         $exportOnly->givePermissionTo(['show-orders', 'export-orders']);
         $this->actingAs($exportOnly);
         Livewire::test(AllOrders::class)->call('printOrder', 'DL-1')->assertFileDownloaded('DL-1.docx');
+    }
+
+    /**
+     * Designer/Word-first: köhnə render rejimli (pre-designer) əmr üçün print/PDF
+     * fallback yoxdur — yalnız `template_snapshot.docx_path` olan Word əmri yüklənir.
+     */
+    public function test_pre_designer_orders_have_no_print_fallback(): void
+    {
+        $user = $this->actAsOrderManager();
+        $legacy = $this->docxOrder('OLD-1', 20, 'order-documents/old.docx', $user);
+        $legacy->forceFill(['template_render_mode' => 'legacy'])->save();
+        Storage::fake('local')->put('order-documents/old.docx', 'docx');
+
+        Livewire::test(AllOrders::class)
+            ->assertDontSee("printOrder('OLD-1')", false)
+            ->call('printOrder', 'OLD-1')
+            ->assertNotFound();
+
+        Livewire::test(AllOrders::class)
+            ->call('downloadPdf', 'OLD-1')
+            ->assertNotFound();
     }
 
     public function test_a_draft_cannot_be_approved_from_the_list(): void

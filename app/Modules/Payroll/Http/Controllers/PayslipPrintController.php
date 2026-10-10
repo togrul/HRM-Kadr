@@ -3,6 +3,9 @@
 namespace App\Modules\Payroll\Http\Controllers;
 
 use App\Models\Payslip;
+use App\Models\Personnel;
+use App\Services\StructureService;
+use App\Services\UserPersonnelLinkResolver;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 
@@ -15,9 +18,16 @@ class PayslipPrintController
     public function __invoke(Payslip $payslip): View
     {
         $user = Auth::user();
-        $ownsIt = $user?->personnel && $user->personnel->tabel_no === $payslip->tabel_no;
+        $personnelId = app(UserPersonnelLinkResolver::class)->resolve($user);
+        $ownTabelNo = $personnelId ? Personnel::query()->whereKey($personnelId)->value('tabel_no') : null;
+        $ownsIt = $ownTabelNo !== null && (string) $ownTabelNo === (string) $payslip->tabel_no;
 
-        abort_unless($ownsIt || ($user?->can('show-payroll') && $user->can('view-compensation-amounts')), 403);
+        // Admin yolu: icazə + işçinin strukturu istifadəçinin görünürlüyündə olmalıdır.
+        $adminMayView = $user?->can('show-payroll')
+            && $user->can('view-compensation-amounts')
+            && app(StructureService::class)->allowsPersonnel($user, $payslip->personnel()->first(['id', 'tabel_no', 'structure_id']));
+
+        abort_unless($ownsIt || $adminMayView, 403);
         abort_unless($payslip->status === 'locked', 404);
 
         $payslip->load(['lines', 'personnel:tabel_no,surname,name', 'run.period']);

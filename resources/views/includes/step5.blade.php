@@ -136,13 +136,7 @@
                                 </x-table.td>
                             </tr>
                         @empty
-                            <tr>
-                                <td colspan="4">
-                                    <div class="flex items-center justify-center py-4">
-                                        <span class="font-medium">{{ __('personnel::common.labels.no_information_added') }}</span>
-                                    </div>
-                                </td>
-                            </tr>
+                            <x-empty-inline :rows="4" />
                         @endforelse
                     </x-table.tbl>
                 </div>
@@ -157,11 +151,11 @@
                 <div class="flex flex-row">
                     <label class="inline-flex items-center w-full px-2 py-2 bg-zinc-100 rounded shadow-sm">
                         <input type="radio" class="form-radio" name="historyForm.injury.injury_type" wire:model="historyForm.injury.injury_type" value="other">
-                        <span class="ml-2 text-sm font-normal">{{ __('personnel::wizard.options.injury_types.other') }}</span>
+                        <span class="ml-2 text-sm">{{ __('personnel::wizard.options.injury_types.other') }}</span>
                     </label>
                     <label class="inline-flex items-center w-full px-2 py-2 ml-4 bg-zinc-100 rounded shadow-sm">
                         <input type="radio" class="form-radio" name="historyForm.injury.injury_type" wire:model="historyForm.injury.injury_type" value="contusion">
-                        <span class="ml-2 text-sm font-normal">{{ __('personnel::wizard.options.injury_types.contusion') }}</span>
+                        <span class="ml-2 text-sm">{{ __('personnel::wizard.options.injury_types.contusion') }}</span>
                     </label>
                 </div>
                 @error('historyForm.injury.injury_type')
@@ -251,13 +245,7 @@
                                 </x-table.td>
                             </tr>
                         @empty
-                            <tr>
-                                <td colspan="4">
-                                    <div class="flex items-center justify-center py-4">
-                                        <span class="font-medium">{{ __('personnel::common.labels.no_information_added') }}</span>
-                                    </div>
-                                </td>
-                            </tr>
+                            <x-empty-inline :rows="4" />
                         @endforelse
                     </x-table.tbl>
                 </div>
@@ -373,13 +361,7 @@
                                 </x-table.td>
                             </tr>
                         @empty
-                            <tr>
-                                <td colspan="4">
-                                    <div class="flex items-center justify-center py-4">
-                                        <span class="font-medium">{{ __('personnel::common.labels.no_information_added') }}</span>
-                                    </div>
-                                </td>
-                            </tr>
+                            <x-empty-inline :rows="4" />
                         @endforelse
                     </x-table.tbl>
                 </div>
@@ -390,9 +372,7 @@
 
     @unless($hasMilitaryDomains)
         <x-form-card title="{{ __('personnel::wizard.sections.military') }}">
-            <div class="flex items-center justify-center py-6">
-                <span class="font-medium text-zinc-500">{{ __('personnel::common.labels.no_information_added') }}</span>
-            </div>
+            <x-empty-inline />
         </x-form-card>
     @endunless
 </div>

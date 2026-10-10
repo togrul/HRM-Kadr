@@ -51,7 +51,7 @@ class OrderWordTemplateRepository
     /**
      * @param  array<int,array<string,mixed>>  $variables
      */
-    public function save(string $code, string $label, string $effect, string $docxPath, array $variables, ?int $createdBy = null): OrderWordTemplate
+    public function save(string $code, string $label, string $effect, string $docxPath, array $variables, ?int $createdBy = null, bool $multiParticipant = false): OrderWordTemplate
     {
         return OrderWordTemplate::query()->updateOrCreate(
             ['code' => $code],
@@ -60,6 +60,7 @@ class OrderWordTemplateRepository
                 'effect' => $effect,
                 'docx_path' => $docxPath,
                 'variables' => array_values($variables),
+                'multi_participant' => $multiParticipant && $effect !== 'hire',
                 'is_active' => true,
                 'created_by' => $createdBy,
             ],

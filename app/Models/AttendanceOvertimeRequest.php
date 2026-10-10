@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @property \Illuminate\Support\Carbon|null $date
+ * @property string $tabel_no
  */
 class AttendanceOvertimeRequest extends Model
 {
@@ -24,6 +25,7 @@ class AttendanceOvertimeRequest extends Model
         'approved_minutes',
         'status',
         'source',
+        'compensation',
         'reason',
         'rejection_reason',
         'requested_by',

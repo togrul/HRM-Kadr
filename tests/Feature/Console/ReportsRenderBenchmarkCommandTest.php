@@ -13,6 +13,7 @@ use Tests\TestCase;
 class ReportsRenderBenchmarkCommandTest extends TestCase
 {
     use RefreshDatabase;
+    use UsesDeterministicRenderTiming;
 
     public function test_it_reports_render_metrics_for_reports_surfaces(): void
     {

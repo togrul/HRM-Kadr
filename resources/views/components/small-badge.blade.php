@@ -28,6 +28,8 @@
         'purple', 'violet' => 'bg-[#f5f3ff] text-[#6d28d9] [a]:hover:bg-violet-100',
         'red', 'rose', 'danger' => 'bg-[#fff1f2] text-[#e11d48] [a]:hover:bg-rose-100',
         'amber', 'warning' => 'bg-[#fff7ed] text-[#c2410c] [a]:hover:bg-orange-100',
+        'teal' => 'bg-[#f0fdfa] text-[#0f766e] [a]:hover:bg-teal-100',
+        'indigo' => 'bg-[#eef2ff] text-[#4338ca] [a]:hover:bg-indigo-100',
 
         default => 'bg-[#f4f4f5] text-[#3f3f46] [a]:hover:bg-hairline',
     };
@@ -37,6 +39,8 @@
         'purple', 'violet' => 'bg-[#7c3aed]',
         'red', 'rose', 'danger' => 'bg-[#e11d48]',
         'amber', 'warning' => 'bg-[#f97316]',
+        'teal' => 'bg-[#0d9488]',
+        'indigo' => 'bg-[#4f46e5]',
         default => 'bg-[#a1a1aa]',
     };
 @endphp

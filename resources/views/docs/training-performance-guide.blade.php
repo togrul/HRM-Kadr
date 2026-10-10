@@ -1,1073 +1,341 @@
 @php
     // Everything module-specific comes from App\Support\Docs\GuideRegistry via the controller.
-    $allSectionIds = collect($sidebarGroups)->flatMap(fn ($group) => array_column($group['items'], 'id'))->values()->all();
-    $moduleSectionMap = collect($sidebarGroups)
-        ->flatMap(fn (array $group) => collect($group['items'])->mapWithKeys(fn (array $item) => [$item['id'] => $group['key']]))
-        ->all();
-    $initialSection = $focus === 'overview' ? 'overview' : $focus.'-module';
+    $isOverview = $focus === 'overview';
+    $toneDots = [
+        'zinc' => 'bg-zinc-400',
+        'sky' => 'bg-sky-500',
+        'indigo' => 'bg-indigo-500',
+        'amber' => 'bg-amber-500',
+        'emerald' => 'bg-emerald-500',
+        'cyan' => 'bg-cyan-500',
+        'violet' => 'bg-violet-500',
+        'rose' => 'bg-rose-500',
+    ];
+    $groups = collect($sidebarGroups)->keyBy('key');
+    $current = $groups[$focus];
+    $sectionCounts = $groups->map(fn (array $group): int => count($group['items']) - 1)->all();
+    $tocItems = array_slice($current['items'], 1);
+    $moduleRoute = $isOverview ? null : ($modules[$focus]['route'] ?? null);
+    $moduleUrl = $moduleRoute && \Illuminate\Support\Facades\Route::has($moduleRoute) ? route($moduleRoute) : null;
+    $title = $isOverview ? 'HR modullarının ortaq istifadə bələdçisi' : ($page['title'] ?? $focusLabel);
+    $neighbour = fn (?string $key): ?array => $key === null ? null : [
+        'label' => $key === 'overview' ? 'Ümumi baxış' : $modules[$key]['label'],
+        'url' => route('docs.guide', $key === 'overview' ? [] : ['focus' => $key]),
+    ];
+    $previousLink = $neighbour($previous);
+    $nextLink = $neighbour($next);
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>HR Architect Documentation</title>
+    <title>{{ $focusLabel }} · İstifadə təlimatı · HRM</title>
     @vite(['resources/css/app.css'])
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <style>
-        :root {
-            color-scheme: light;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            min-height: 100vh;
-            background: #f7f9fb;
-            color: #2a3439;
-            font-family: 'CircularSpotify', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        h1, h2, h3, h4 {
-            font-family: inherit;
-        }
-
-        a {
-            color: inherit;
-            text-decoration: none;
-        }
-
-        .material-symbols-outlined {
-            font-size: 20px;
-            font-variation-settings: 'FILL' 0, 'wght' 450, 'GRAD' 0, 'opsz' 24;
-        }
-
-        .docs-page {
-            display: grid;
-            grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
-            gap: 1.5rem;
-            width: min(1680px, calc(100vw - 2rem));
-            margin: 1rem auto;
-            align-items: start;
-        }
-
-        .docs-sidebar {
-            position: sticky;
-            top: 1rem;
-            height: calc(100vh - 2rem);
-            overflow-y: auto;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 1.75rem;
-            padding: 1.25rem;
-        }
-
-        .docs-sidebar::-webkit-scrollbar {
-            width: 0;
-            height: 0;
-        }
-
-        .docs-sidebar-intro {
-            padding: 0.25rem 0.5rem 1rem;
-        }
-
-        .docs-sidebar-kicker {
-            font-size: 0.72rem;
-            font-weight: 800;
-            letter-spacing: 0.16em;
-            text-transform: uppercase;
-            color: #94a3b8;
-        }
-
-        .docs-sidebar-version {
-            margin-top: 0.35rem;
-            font-size: 0.74rem;
-            color: #64748b;
-        }
-
-        .docs-search-shell {
-            margin-bottom: 1rem;
-        }
-
-        .docs-search-input {
-            width: 100%;
-            border: 1px solid #d9e4ea;
-            border-radius: 999px;
-            background: #fff;
-            padding: 0.8rem 1rem;
-            font-size: 0.92rem;
-            color: #1e293b;
-        }
-
-        .docs-search-input:focus {
-            outline: none;
-            border-color: #cbd5e1;
-            box-shadow: 0 0 0 3px rgba(84, 95, 115, 0.1);
-        }
-
-        .docs-sidebar-group + .docs-sidebar-group {
-            margin-top: 1.15rem;
-        }
-
-        .docs-sidebar-label {
-            display: flex;
-            align-items: center;
-            gap: 0.65rem;
-            margin-bottom: 0.5rem;
-            padding: 0 0.65rem;
-            font-size: 0.74rem;
-            font-weight: 800;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-            color: #94a3b8;
-        }
-
-        .docs-sidebar-label .material-symbols-outlined {
-            font-size: 1rem;
-        }
-
-        .docs-sidebar-link {
-            display: block;
-            margin-left: 0.15rem;
-            border-radius: 0.95rem;
-            padding: 0.65rem 0.8rem;
-            font-size: 0.9rem;
-            font-weight: 600;
-            line-height: 1.35;
-            color: #64748b;
-            transition: transform 0.15s ease, background-color 0.15s ease, color 0.15s ease;
-        }
-
-        .docs-sidebar-link:hover {
-            background: #f1f5f9;
-            color: #0f172a;
-            transform: translateX(2px);
-        }
-
-        .docs-sidebar-link[data-active="true"] {
-            font-weight: 700;
-        }
-
-        .docs-sidebar-link[data-tone="zinc"][data-active="true"] {
-            background: #e2e8f0;
-            color: #0f172a;
-        }
-
-        .docs-sidebar-link[data-tone="sky"][data-active="true"] {
-            background: #e0f2fe;
-            color: #075985;
-        }
-
-        .docs-sidebar-link[data-tone="emerald"][data-active="true"] {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .docs-sidebar-link[data-tone="indigo"][data-active="true"] {
-            background: #e0e7ff;
-            color: #3730a3;
-        }
-
-        .docs-sidebar-link[data-tone="amber"][data-active="true"] {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .docs-sidebar-link[data-tone="rose"][data-active="true"] {
-            background: #ffe4e6;
-            color: #9f1239;
-        }
-
-        .docs-sidebar-link[data-tone="violet"][data-active="true"] {
-            background: #ede9fe;
-            color: #6d28d9;
-        }
-
-        .docs-sidebar-link[data-tone="cyan"][data-active="true"] {
-            background: #cffafe;
-            color: #155e75;
-        }
-
-        .docs-shell {
-            min-width: 0;
-            border: 1px solid #e2e8f0;
-            border-radius: 1.75rem;
-            background: #ffffff;
-            overflow: hidden;
-        }
-
-        .docs-main {
-            width: 100%;
-            padding: 2rem;
-        }
-
-        .docs-breadcrumbs {
-            display: flex;
-            align-items: center;
-            gap: 0.45rem;
-            margin-bottom: 1.5rem;
-            font-size: 0.78rem;
-            font-weight: 700;
-            color: #94a3b8;
-        }
-
-        .docs-breadcrumbs .material-symbols-outlined {
-            font-size: 0.95rem;
-        }
-
-        .docs-hero {
-            margin-bottom: 2rem;
-        }
-
-        .docs-header-kicker {
-            font-size: 0.74rem;
-            font-weight: 800;
-            letter-spacing: 0.16em;
-            text-transform: uppercase;
-            color: #94a3b8;
-        }
-
-        .docs-page-title {
-            margin-top: 0.85rem;
-            font-size: 3rem;
-            line-height: 1.02;
-            font-weight: 800;
-            letter-spacing: -0.05em;
-            color: #1e293b;
-        }
-
-        .docs-lead {
-            margin-top: 1rem;
-            width: 100%;
-            max-width: none;
-            font-size: 1.16rem;
-            line-height: 1.9;
-            color: #52606d;
-        }
-
-        .docs-section {
-            padding-top: 3rem;
-            border-top: 1px solid #eef2f6;
-            scroll-margin-top: 2rem;
-        }
-
-        .docs-section:first-of-type {
-            padding-top: 0;
-            border-top: 0;
-        }
-
-        .docs-section-title {
-            margin-top: 0.85rem;
-            font-size: 2rem;
-            line-height: 1.06;
-            font-weight: 800;
-            letter-spacing: -0.045em;
-            color: #1e293b;
-        }
-
-        .docs-callout {
-            margin-top: 1.5rem;
-            border-left: 4px solid #545f73;
-            border-radius: 0 1rem 1rem 0;
-            background: rgba(216, 227, 251, 0.22);
-            padding: 1.2rem 1.25rem;
-        }
-
-        .docs-callout-title,
-        .docs-card-title {
-            font-size: 0.74rem;
-            font-weight: 800;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-            color: #7a8491;
-        }
-
-        .docs-callout-text,
-        .docs-card-body {
-            margin-top: 0.65rem;
-            font-size: 0.96rem;
-            line-height: 1.85;
-            color: #5b6773;
-        }
-
-        .docs-grid,
-        .docs-index-grid {
-            margin-top: 1.5rem;
-            display: grid;
-            gap: 1.25rem;
-        }
-
-        .docs-grid-2,
-        .docs-index-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-
-        .docs-grid-3 {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-        }
-
-        .docs-card,
-        .docs-index-card {
-            border: 1px solid #e2e8f0;
-            border-radius: 1.4rem;
-            background: #fff;
-            padding: 1.35rem;
-            box-shadow: 0 8px 24px rgba(148, 163, 184, 0.08);
-        }
-
-        .docs-card-muted {
-            background: #fbfdff;
-        }
-
-        .docs-card-strong {
-            margin-top: 0.65rem;
-            font-size: 1.02rem;
-            line-height: 1.45;
-            font-weight: 800;
-            letter-spacing: -0.03em;
-            color: #0f172a;
-        }
-
-        .docs-index-links {
-            margin-top: 0.9rem;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.55rem;
-        }
-
-        .docs-index-link,
-        .docs-module-link {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid #d9e4ea;
-            border-radius: 999px;
-            background: #fff;
-            padding: 0.62rem 0.95rem;
-            font-size: 0.82rem;
-            font-weight: 700;
-            color: #475569;
-            transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
-        }
-
-        .docs-index-link:hover,
-        .docs-module-link:hover {
-            border-color: #cbd5e1;
-            color: #0f172a;
-            background: #f8fafc;
-        }
-
-        .docs-tone-sky {
-            background: #f0f9ff;
-            border-color: #bae6fd;
-        }
-
-        .docs-tone-emerald {
-            background: #f0fdf4;
-            border-color: #bbf7d0;
-        }
-
-        .docs-tone-indigo {
-            background: #eef2ff;
-            border-color: #c7d2fe;
-        }
-
-        .docs-tone-amber {
-            background: #fffbeb;
-            border-color: #fde68a;
-        }
-
-        .docs-module-head {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid #eef2f6;
-        }
-
-        .docs-workflow-shell {
-            display: grid;
-            gap: 1rem;
-            grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
-            align-items: start;
-        }
-
-        .docs-workflow-lead {
-            min-height: 100%;
-        }
-
-        .docs-workflow-steps {
-            display: grid;
-            gap: 1rem;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-        }
-
-        .docs-content {
-            width: 100%;
-            max-width: none;
-            margin-top: 2rem;
-            color: #475569;
-        }
-
-        .docs-visual-block {
-            margin-top: 1.75rem;
-        }
-
-        .docs-visual-frame {
-            margin-top: 0.9rem;
-            overflow: hidden;
-            border: 1px solid #dbe5ed;
-            border-radius: 1.5rem;
-            background: #fff;
-            box-shadow: 0 10px 28px rgba(148, 163, 184, 0.12);
-        }
-
-        .docs-visual-image {
-            display: block;
-            width: 100%;
-            height: auto;
-            background: #f8fafc;
-        }
-
-        .docs-visual-caption {
-            padding: 0.95rem 1.15rem 1.1rem;
-            border-top: 1px solid #eef2f6;
-            background: #fbfdff;
-            font-size: 0.92rem;
-            line-height: 1.65;
-            color: #64748b;
-        }
-
-        .docs-grid + .docs-content,
-        .docs-index-grid + .docs-content,
-        .docs-callout + .docs-content {
-            margin-top: 2.25rem;
-        }
-
-        .docs-content h1,
-        .docs-content h2,
-        .docs-content h3,
-        .docs-content h4 {
-            color: #0f172a;
-            line-height: 1.15;
-            letter-spacing: -0.03em;
-            overflow-wrap: anywhere;
-        }
-
-        .docs-content h1 {
-            margin: 0 0 1rem;
-            font-size: 1.9rem;
-            font-weight: 800;
-        }
-
-        .docs-content h2 {
-            margin: 1.8rem 0 0.8rem;
-            font-size: 1.32rem;
-            font-weight: 800;
-        }
-
-        .docs-content h3 {
-            margin: 1.2rem 0 0.55rem;
-            font-size: 1.05rem;
-            font-weight: 700;
-        }
-
-        .docs-content h4 {
-            margin: 1rem 0 0.45rem;
-            font-size: 0.95rem;
-            font-weight: 700;
-        }
-
-        .docs-content p,
-        .docs-content li,
-        .docs-content td,
-        .docs-content blockquote {
-            font-size: 0.98rem;
-            line-height: 1.9;
-            overflow-wrap: anywhere;
-        }
-
-        .docs-content ul,
-        .docs-content ol {
-            margin: 0.8rem 0 1.05rem 1.2rem;
-        }
-
-        .docs-content li + li {
-            margin-top: 0.35rem;
-        }
-
-        .docs-content code {
-            border: 1px solid #d9e4ea;
-            background: #f8fafc;
-            border-radius: 0.55rem;
-            color: #0f172a;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-            font-size: 0.82rem;
-            padding: 0.16rem 0.42rem;
-        }
-
-        .docs-content pre {
-            overflow-x: auto;
-            border-radius: 1rem;
-            margin: 1rem 0 1.35rem;
-            padding: 1rem 1.05rem;
-            background: #0f172a;
-            color: #f8fafc;
-            border: 1px solid #1e293b;
-        }
-
-        .docs-content pre code {
-            border: none;
-            background: transparent;
-            color: inherit;
-            padding: 0;
-        }
-
-        .docs-content table {
-            width: 100%;
-            margin: 1rem 0 1.25rem;
-            border-collapse: collapse;
-            border: 1px solid #e2e8f0;
-            border-radius: 1rem;
-            overflow: hidden;
-        }
-
-        .docs-content th,
-        .docs-content td {
-            border-bottom: 1px solid #e2e8f0;
-            padding: 0.78rem 0.84rem;
-            text-align: left;
-            vertical-align: top;
-        }
-
-        .docs-content th {
-            background: #f8fafc;
-            color: #64748b;
-            font-size: 0.68rem;
-            font-weight: 800;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-        }
-
-        .docs-content blockquote {
-            border-left: 3px solid #cbd5e1;
-            background: #f8fafc;
-            border-radius: 0 1rem 1rem 0;
-            margin: 1rem 0 1.25rem;
-            padding: 0.85rem 1rem;
-        }
-
-        .docs-content a {
-            color: #334155;
-            text-decoration: underline;
-            text-underline-offset: 0.2em;
-        }
-
-        .docs-lazy-placeholder {
-            border: 1px dashed #cbd5e1;
-            border-radius: 1.5rem;
-            background: #fff;
-            padding: 1.5rem;
-            margin-top: 2rem;
-        }
-
-        .docs-lazy-placeholder-title {
-            font-size: 1rem;
-            font-weight: 800;
-            color: #0f172a;
-        }
-
-        .docs-lazy-placeholder-text {
-            margin-top: 0.5rem;
-            font-size: 0.94rem;
-            line-height: 1.75;
-            color: #64748b;
-        }
-
-        .docs-mobile-nav {
-            display: none;
-        }
-
-        .docs-mobile-nav summary {
-            list-style: none;
-        }
-
-        .docs-mobile-nav summary::-webkit-details-marker {
-            display: none;
-        }
-
-        @media (max-width: 1120px) {
-            .docs-page {
-                grid-template-columns: 1fr;
-            }
-
-            .docs-sidebar {
-                position: static;
-                height: auto;
-                display: none;
-            }
-
-            .docs-mobile-nav {
-                display: block;
-                margin: 1rem;
-                border: 1px solid #e2e8f0;
-                border-radius: 1.5rem;
-                background: #fff;
-                padding: 1rem;
-            }
-
-            .docs-shell {
-                margin: 0 1rem 1rem;
-            }
-
-            .docs-main {
-                padding: 1.5rem;
-            }
-
-            .docs-grid-2,
-            .docs-grid-3,
-            .docs-workflow-shell,
-            .docs-workflow-steps,
-            .docs-index-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+        /* Markdown output cannot carry utility classes, so the article typography lives here. */
+        .guide-prose { font-size: 15px; line-height: 1.75; color: #3f3f46; overflow-wrap: anywhere; }
+        .guide-prose > :first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+        .guide-prose > p:first-child { font-size: 16.5px; color: #52525b; }
+        .guide-prose h2 { margin: 2.75rem 0 0.75rem; padding-top: 2rem; border-top: 1px solid #e4e4e7; font-size: 20px; line-height: 1.3; font-weight: 700; color: #18181b; }
+        .guide-prose h3 { margin: 1.9rem 0 0.5rem; font-size: 16px; line-height: 1.4; font-weight: 700; color: #18181b; }
+        .guide-prose h4 { margin: 1.4rem 0 0.4rem; font-size: 15px; font-weight: 600; color: #18181b; }
+        .guide-prose :is(h2, h3) { scroll-margin-top: 5.5rem; }
+        .guide-prose p { margin: 0.75rem 0; }
+        .guide-prose :is(ul, ol) { margin: 0.75rem 0; padding-left: 1.3rem; }
+        .guide-prose ul { list-style: disc; }
+        .guide-prose ol { list-style: decimal; }
+        .guide-prose li { margin: 0.35rem 0; padding-left: 0.2rem; }
+        .guide-prose li::marker { color: #a1a1aa; }
+        .guide-prose li > :is(ul, ol) { margin: 0.35rem 0; }
+        .guide-prose strong { font-weight: 650; color: #18181b; }
+        /* Backticks in the guides name on-screen labels (tabs, buttons), not code: a quiet UI chip. */
+        .guide-prose code { padding: 0.08em 0.42em; border: 1px solid #e4e4e7; border-radius: 6px; background: #f4f4f5; font: inherit; font-size: 0.88em; font-weight: 600; color: #18181b; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+        .guide-prose pre { margin: 1rem 0; padding: 1rem 1.1rem; overflow-x: auto; border-radius: 12px; background: #18181b; color: #fafafa; font-size: 13px; line-height: 1.6; }
+        .guide-prose pre code { padding: 0; border: 0; background: none; color: inherit; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 400; }
+        .guide-prose table { width: 100%; margin: 1.25rem 0; border: 1px solid #e4e4e7; border-collapse: separate; border-spacing: 0; border-radius: 12px; overflow: hidden; font-size: 14px; line-height: 1.55; }
+        .guide-prose th { padding: 0.6rem 0.85rem; border-bottom: 1px solid #e4e4e7; background: #fafafa; text-align: left; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #71717a; }
+        .guide-prose td { padding: 0.65rem 0.85rem; vertical-align: top; }
+        .guide-prose tr + tr td { border-top: 1px solid #f4f4f5; }
+        .guide-prose blockquote { margin: 1.25rem 0; padding: 0.8rem 1rem; border-left: 3px solid #d4d4d8; border-radius: 0 10px 10px 0; background: #fafafa; color: #52525b; }
+        .guide-prose blockquote > :is(p, ul):first-child { margin-top: 0; }
+        .guide-prose blockquote > :last-child { margin-bottom: 0; }
+        .guide-prose a { color: #18181b; text-decoration: underline; text-decoration-color: #d4d4d8; text-underline-offset: 3px; }
+        .guide-prose a:hover { text-decoration-color: #18181b; }
+        .guide-prose hr { margin: 2.5rem 0; border-color: #e4e4e7; }
+        @media (max-width: 640px) { .guide-prose table { display: block; overflow-x: auto; } }
+        /* Smooth only for in-page clicks: set after load, so opening a #link lands instantly. */
+        @media (prefers-reduced-motion: no-preference) { html[data-guide-ready] { scroll-behavior: smooth; } }
+        [data-guide-nav-open] [data-guide-nav] { display: block; }
+        [data-guide-search-input]::-webkit-search-cancel-button { display: none; }
     </style>
 </head>
-<body>
-    <div
-        class="docs-page"
-        data-docs-root
-        data-section-ids='@json($allSectionIds)'
-        data-module-map='@json($moduleSectionMap)'
-        data-loaded-modules='@json($initialModules)'
-        data-focus="{{ $focus }}"
-        data-initial-section="{{ $initialSection }}"
-        data-section-endpoint-template="{{ route('docs.section', ['module' => '__MODULE__']) }}"
-    >
-        <script>
-            if ('scrollRestoration' in history) {
-                history.scrollRestoration = 'manual';
-            }
-        </script>
+<body class="min-h-screen bg-white font-sans text-ink">
+    <a href="#guide-article" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-ink focus:px-4 focus:py-2 focus:text-[13px] focus:text-white">Məzmuna keç</a>
 
-        <aside class="docs-sidebar">
-            <div class="docs-sidebar-intro">
-                <p class="docs-sidebar-kicker">Documentation</p>
-                <p class="docs-sidebar-version">v2.4.0-release</p>
+    <header class="sticky top-0 z-30 border-b border-hairline bg-white/90 backdrop-blur">
+        <div class="mx-auto flex h-14 max-w-[1440px] items-center gap-3 px-4 lg:px-6">
+            <button type="button" class="-ml-1 flex h-9 w-9 items-center justify-center rounded-full text-ink-muted hover:bg-[#f4f4f5] hover:text-ink lg:hidden" data-guide-nav-toggle aria-label="Bölmələr menyusu">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+            <a href="{{ route('docs.guide') }}" class="flex shrink-0 items-center gap-2.5">
+                <span class="flex h-8 w-8 items-center justify-center rounded-[10px] bg-ink text-[12px] font-bold tracking-tight text-white">HR</span>
+                <span class="hidden text-[14px] font-semibold text-ink sm:block">İstifadə təlimatı</span>
+            </a>
+
+            <div class="relative mx-auto w-full max-w-[440px]" data-guide-search>
+                <label for="guide-search-input" class="sr-only">Təlimatda axtar</label>
+                <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                <input
+                    id="guide-search-input"
+                    type="search"
+                    autocomplete="off"
+                    placeholder="Təlimatda axtar…"
+                    class="peer h-9 w-full rounded-full border border-hairline bg-[#f4f4f5] pl-9 pr-12 text-[13px] text-ink placeholder:text-ink-faint focus:border-ink focus:bg-white focus:outline-none focus:ring-[3px] focus:ring-zinc-200"
+                    role="combobox"
+                    aria-expanded="false"
+                    aria-controls="guide-search-results"
+                    data-guide-search-input
+                >
+                <kbd class="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 peer-focus:!hidden rounded-md border border-hairline bg-white px-1.5 text-[11px] font-medium text-ink-faint sm:block">⌘K</kbd>
+                <div id="guide-search-results" role="listbox" class="absolute inset-x-0 top-11 hidden max-h-[70vh] overflow-y-auto rounded-2xl border border-hairline bg-white p-1.5 shadow-overlay" data-guide-search-results></div>
             </div>
 
-            <div data-docs-nav-container="desktop">
-                <div class="docs-search-shell">
-                    <input type="search" class="docs-search-input" placeholder="Bölmə axtar..." data-docs-nav-search>
-                </div>
+            <a href="{{ url('/') }}" class="hidden h-9 shrink-0 items-center gap-1.5 rounded-full border border-hairline bg-[#f4f4f5] px-4 text-[13px] font-semibold text-ink-soft transition hover:bg-[#e4e4e7] hover:text-ink md:inline-flex">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+                Sistemə qayıt
+            </a>
+        </div>
+    </header>
 
-                @foreach ($sidebarGroups as $group)
-                    <div class="docs-sidebar-group" data-docs-nav-group>
-                        <p class="docs-sidebar-label">
-                            <span class="material-symbols-outlined">{{ $group['icon'] }}</span>
-                            <span>{{ $group['label'] }}</span>
-                        </p>
-                        <div class="space-y-1">
-                            @foreach ($group['items'] as $item)
-                                <a
-                                    href="#{{ $item['id'] }}"
-                                    class="docs-sidebar-link"
-                                    data-docs-link="{{ $item['id'] }}"
-                                    data-docs-nav-item
-                                    data-docs-nav-text="{{ $group['label'] }} {{ $item['label'] }}"
-                                    data-tone="{{ $group['tone'] }}"
-                                    data-active="{{ $initialSection === $item['id'] ? 'true' : 'false' }}"
-                                >
-                                    {{ $item['label'] }}
-                                </a>
-                            @endforeach
-                        </div>
+    <div class="mx-auto grid max-w-[1440px] lg:grid-cols-[272px_minmax(0,1fr)] xl:grid-cols-[272px_minmax(0,1fr)_232px]">
+        {{-- Module list: every module is one row; only the open one lists its sections. --}}
+        <nav class="fixed inset-x-0 bottom-0 top-14 z-20 hidden overflow-y-auto border-r border-hairline bg-white px-3 py-5 lg:sticky lg:bottom-auto lg:top-14 lg:block lg:h-[calc(100vh-3.5rem)]" aria-label="Təlimat bölmələri" data-guide-nav>
+            <a href="{{ url('/') }}" class="mb-4 flex h-9 items-center gap-1.5 rounded-full border border-hairline bg-[#f4f4f5] px-4 text-[13px] font-semibold text-ink-soft md:hidden">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+                Sistemə qayıt
+            </a>
+            @foreach ($groups as $group)
+                @php
+                    $isCurrent = $group['key'] === $focus;
+                @endphp
+                @if ($loop->index === 1)
+                    <p class="mb-1.5 mt-5 px-2.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink-faint">Modullar</p>
+                @endif
+                <a
+                    href="{{ $group['key'] === 'overview' ? route('docs.guide') : route('docs.guide', ['focus' => $group['key']]) }}"
+                    class="flex h-[31px] items-center gap-2.5 rounded-lg px-2.5 text-[12.5px] transition {{ $isCurrent ? 'bg-[#ececee] font-semibold text-ink' : 'font-medium text-ink-muted hover:bg-[#f4f4f5] hover:text-ink' }}"
+                    data-docs-link="{{ $group['items'][0]['id'] }}"
+                    @if ($isCurrent) aria-current="page" @endif
+                >
+                    <span class="h-1.5 w-1.5 shrink-0 rounded-full {{ $toneDots[$group['tone']] ?? 'bg-zinc-400' }}"></span>
+                    <span class="truncate">{{ $group['label'] }}</span>
+                </a>
+                @if ($isCurrent && $tocItems !== [])
+                    <div class="mb-2 ml-[13px] mt-1 space-y-px border-l border-hairline pl-2.5">
+                        @foreach ($tocItems as $item)
+                            <a href="#{{ $item['id'] }}" class="block rounded-md px-2 py-1 text-[12px] leading-snug text-ink-faint transition hover:text-ink data-[active=true]:font-semibold data-[active=true]:text-ink" data-docs-link="{{ $item['id'] }}" data-guide-spy="{{ $item['id'] }}">{{ $item['label'] }}</a>
+                        @endforeach
                     </div>
-                @endforeach
-            </div>
-        </aside>
+                @endif
+            @endforeach
+        </nav>
 
-        <details class="docs-mobile-nav" data-docs-mobile-nav>
-            <summary class="flex cursor-pointer items-center justify-between gap-3">
-                <div>
-                    <p class="docs-sidebar-kicker">Documentation</p>
-                    <p style="margin-top: 0.35rem; font-size: 0.95rem; font-weight: 800; color: #0f172a;">Bölmələri aç</p>
-                </div>
-                <span style="border: 1px solid #d9e4ea; border-radius: 999px; background: #f8fafc; padding: 0.35rem 0.7rem; font-size: 0.72rem; font-weight: 700; color: #64748b;">Menyu</span>
-            </summary>
+        <main id="guide-article" class="min-w-0 px-5 pb-20 pt-8 sm:px-8 lg:px-12 lg:pt-10">
+            <article class="mx-auto max-w-[760px]">
+                <nav class="flex items-center gap-1.5 text-[12px] text-ink-faint" aria-label="Yol">
+                    <a href="{{ route('docs.guide') }}" class="hover:text-ink">Təlimat</a>
+                    @unless ($isOverview)
+                        <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                        <span class="text-ink-muted">{{ $focusLabel }}</span>
+                    @endunless
+                </nav>
 
-            <div class="mt-4 space-y-4 border-t border-zinc-200 pt-4" data-docs-nav-container="mobile">
-                <div class="docs-search-shell">
-                    <input type="search" class="docs-search-input" placeholder="Bölmə axtar..." data-docs-nav-search>
-                </div>
-
-                @foreach ($sidebarGroups as $group)
-                    <div data-docs-nav-group>
-                        <p class="docs-sidebar-label" style="padding-left: 0;">
-                            <span class="material-symbols-outlined">{{ $group['icon'] }}</span>
-                            <span>{{ $group['label'] }}</span>
-                        </p>
-                        <div class="space-y-1">
-                            @foreach ($group['items'] as $item)
-                                <a
-                                    href="#{{ $item['id'] }}"
-                                    class="docs-sidebar-link"
-                                    style="margin-left: 0;"
-                                    data-docs-link="{{ $item['id'] }}"
-                                    data-docs-nav-item
-                                    data-docs-nav-text="{{ $group['label'] }} {{ $item['label'] }}"
-                                    data-tone="{{ $group['tone'] }}"
-                                    data-active="{{ $initialSection === $item['id'] ? 'true' : 'false' }}"
-                                >
-                                    {{ $item['label'] }}
-                                </a>
-                            @endforeach
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </details>
-
-        <div class="docs-shell">
-            <main class="docs-main">
-                <div class="docs-breadcrumbs">
-                    <span>Docs</span>
-                    <span class="material-symbols-outlined">chevron_right</span>
-                    <span>{{ $focusLabel }}</span>
-                </div>
-
-                <header class="docs-hero">
-                    <p class="docs-header-kicker">{{ $focus === 'overview' ? 'Başlanğıc' : 'İstifadə bələdçisi' }}</p>
-                    <h1 class="docs-page-title">{{ $focus === 'overview' ? 'HR modullarının ortaq istifadə bələdçisi' : $focusLabel }}</h1>
-                    <p class="docs-lead">
-                        Bu səhifədə modulların nə işə yaradığı, hansı bölmənin nə üçün istifadə olunduğu və gündəlik işi hansı ardıcıllıqla görməyin daha rahat olduğu sadə dildə izah olunur.
+                <header @if ($isOverview) id="overview" @endif class="mt-4 scroll-mt-24 border-b border-hairline pb-7">
+                    <p class="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-faint">
+                        <span class="h-1.5 w-1.5 rounded-full {{ $toneDots[$current['tone']] ?? 'bg-zinc-400' }}"></span>
+                        {{ $isOverview ? 'Başlanğıc' : $focusLabel.' modulu' }}
                     </p>
-                </header>
-
-                @include('docs.partials.guide-overview', $initialModulePayloads['overview'] ?? [])
-
-                @foreach ($modules as $module => $entry)
-                    <div
-                        data-docs-module-host="{{ $module }}"
-                        data-loaded="{{ in_array($module, $initialModules, true) ? 'true' : 'false' }}"
-                    >
-                        @if (in_array($module, $initialModules, true))
-                            @include('docs.partials.guide-module', $initialModulePayloads[$module] ?? [])
-                        @else
-                            <section class="docs-lazy-placeholder" aria-live="polite">
-                                <p class="docs-lazy-placeholder-title">{{ $entry['label'] }}</p>
-                                <p class="docs-lazy-placeholder-text">
-                                    Bu modul hissəsi yalnız siz ona keçəndə və ya səhifədə həmin hissəyə yaxınlaşanda yüklənəcək.
-                                </p>
-                            </section>
+                    <h1 class="mt-3 text-[28px] font-bold leading-tight tracking-[-0.02em] text-ink sm:text-[32px]">{{ $title }}</h1>
+                    @if ($isOverview)
+                        <p class="mt-3 text-[16px] leading-relaxed text-ink-muted">Hansı işi harada görəcəyinizi tapın: modulu seçin və ya yuxarıdakı axtarışa yazın — məsələn, <span class="font-semibold text-ink">“ayı bağla”</span> və ya <span class="font-semibold text-ink">“məzuniyyət qalığı”</span>.</p>
+                    @endif
+                    <div class="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-[12.5px] text-ink-faint">
+                        <span>{{ $isOverview ? count($modules).' modul' : count($tocItems).' bölmə' }}</span>
+                        <span class="h-1 w-1 rounded-full bg-zinc-300"></span>
+                        <span>~{{ $readingMinutes }} dəq oxu</span>
+                        @if ($moduleUrl)
+                            <a href="{{ $moduleUrl }}" class="ml-auto inline-flex h-9 items-center gap-1.5 rounded-full bg-ink px-4 text-[13px] font-semibold text-white transition hover:bg-ink-hover">
+                                Modulu aç
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>
+                            </a>
                         @endif
                     </div>
-                @endforeach
-            </main>
-        </div>
+                </header>
+
+                <div class="mt-8">
+                    @if ($isOverview)
+                        @include('docs.partials.guide-overview', ['html' => $page['html']])
+                    @else
+                        @include('docs.partials.guide-module', $page)
+                    @endif
+                </div>
+
+                <div class="mt-14 grid gap-3 border-t border-hairline pt-8 sm:grid-cols-2">
+                    @if ($previousLink)
+                        <a href="{{ $previousLink['url'] }}" class="group rounded-xl border border-hairline px-4 py-3 transition hover:border-zinc-300 hover:bg-[#fafafa]">
+                            <span class="block text-[11.5px] text-ink-faint">← Əvvəlki</span>
+                            <span class="mt-0.5 block text-[14px] font-semibold text-ink">{{ $previousLink['label'] }}</span>
+                        </a>
+                    @else
+                        <span class="hidden sm:block"></span>
+                    @endif
+                    @if ($nextLink)
+                        <a href="{{ $nextLink['url'] }}" class="group rounded-xl border border-hairline px-4 py-3 text-right transition hover:border-zinc-300 hover:bg-[#fafafa]">
+                            <span class="block text-[11.5px] text-ink-faint">Növbəti →</span>
+                            <span class="mt-0.5 block text-[14px] font-semibold text-ink">{{ $nextLink['label'] }}</span>
+                        </a>
+                    @endif
+                </div>
+            </article>
+        </main>
+
+        {{-- "Bu səhifədə": the open guide's sections, highlighted as you scroll. --}}
+        <aside class="sticky top-14 hidden h-[calc(100vh-3.5rem)] overflow-y-auto py-10 pr-6 xl:block" aria-label="Bu səhifədə">
+            @if ($tocItems !== [])
+                <p class="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink-faint">Bu səhifədə</p>
+                <div class="mt-3 space-y-px border-l border-hairline">
+                    @foreach ($tocItems as $item)
+                        <a href="#{{ $item['id'] }}" class="-ml-px block border-l border-transparent py-1 pl-3 text-[12px] leading-snug text-ink-faint transition hover:text-ink data-[active=true]:border-ink data-[active=true]:font-semibold data-[active=true]:text-ink" data-guide-spy="{{ $item['id'] }}">{{ $item['label'] }}</a>
+                    @endforeach
+                </div>
+            @endif
+            <a href="#guide-article" class="mt-6 inline-flex items-center gap-1 text-[12px] text-ink-faint hover:text-ink">
+                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg>
+                Yuxarı qayıt
+            </a>
+        </aside>
     </div>
 
+    <script type="application/json" id="guide-search-index">{!! json_encode($searchIndex, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) !!}</script>
     <script>
         (() => {
-            const setupGuideNavigation = () => {
-                const root = document.querySelector('[data-docs-root]');
+            const body = document.body;
+            window.addEventListener('load', () => document.documentElement.setAttribute('data-guide-ready', ''));
 
-                if (!root) {
-                    return;
+            // Mobile: the module list opens over the page.
+            document.querySelector('[data-guide-nav-toggle]')?.addEventListener('click', () => body.toggleAttribute('data-guide-nav-open'));
+            document.querySelector('[data-guide-nav]')?.addEventListener('click', (event) => {
+                if (event.target.closest('a')) {
+                    body.removeAttribute('data-guide-nav-open');
                 }
+            });
 
-                const sectionIds = JSON.parse(root.dataset.sectionIds || '[]');
-                const focus = root.dataset.focus || 'overview';
-                const initialSection = root.dataset.initialSection || sectionIds[0];
-                const moduleMap = JSON.parse(root.dataset.moduleMap || '{}');
-                const loadedModules = new Set(JSON.parse(root.dataset.loadedModules || '[]'));
-                const endpointTemplate = root.dataset.sectionEndpointTemplate || '';
-                const links = Array.from(document.querySelectorAll('[data-docs-link]'));
-
-                if (sectionIds.length === 0 || links.length === 0) {
-                    return;
-                }
-
-                if (focus !== 'overview' || window.location.hash) {
-                    window.scrollTo({ top: 0, behavior: 'auto' });
-                }
-
-                const setActive = (id) => {
-                    links.forEach((link) => {
-                        const active = link.dataset.docsLink === id;
-                        link.dataset.active = active ? 'true' : 'false';
-                        link.setAttribute('aria-current', active ? 'true' : 'false');
-                    });
-                };
-
-                const bindSearch = (container) => {
-                    if (!container) {
-                        return;
-                    }
-
-                    const input = container.querySelector('[data-docs-nav-search]');
-                    const groups = Array.from(container.querySelectorAll('[data-docs-nav-group]'));
-
-                    if (!(input instanceof HTMLInputElement) || groups.length === 0) {
-                        return;
-                    }
-
-                    const apply = () => {
-                        const query = input.value.trim().toLowerCase();
-
-                        groups.forEach((group) => {
-                            const items = Array.from(group.querySelectorAll('[data-docs-nav-item]'));
-                            let visibleCount = 0;
-
-                            items.forEach((item) => {
-                                const text = (item.dataset.docsNavText || item.textContent || '').toLowerCase();
-                                const visible = query === '' || text.includes(query);
-                                item.hidden = !visible;
-                                if (visible) {
-                                    visibleCount += 1;
-                                }
-                            });
-
-                            group.hidden = visibleCount === 0;
-                        });
-                    };
-
-                    input.removeEventListener('input', input.__docsSearchHandler || (() => {}));
-                    input.__docsSearchHandler = apply;
-                    input.addEventListener('input', input.__docsSearchHandler);
-                    apply();
-                };
-
-                const closeMobileNav = () => {
-                    const mobileNav = document.querySelector('[data-docs-mobile-nav]');
-
-                    if (mobileNav instanceof HTMLDetailsElement) {
-                        mobileNav.open = false;
-                    }
-                };
-
-                const scrollToSection = (id, replaceHash = true, behavior = 'auto') => {
-                    const target = document.getElementById(id);
-
-                    if (!target) {
-                        return;
-                    }
-
-                    const performScroll = () => {
-                        const top = Math.max(window.scrollY + target.getBoundingClientRect().top - 28, 0);
-                        window.scrollTo({ top, behavior });
-                    };
-
-                    window.setTimeout(performScroll, 40);
-
-                    if (replaceHash) {
-                        history.replaceState(null, '', `#${id}`);
-                    }
-                };
-
-                const pinSectionIntoView = (id, replaceHash = true) => {
-                    scrollToSection(id, replaceHash, 'auto');
-
-                    [120, 260, 520].forEach((delay) => {
-                        window.setTimeout(() => {
-                            const target = document.getElementById(id);
-
-                            if (!target) {
-                                return;
-                            }
-
-                            const top = Math.round(target.getBoundingClientRect().top);
-
-                            if (Math.abs(top - 28) > 10) {
-                                scrollToSection(id, replaceHash, 'auto');
-                            }
-                        }, delay);
-                    });
-                };
-
-                const loadSection = async (module) => {
-                    if (!module || module === 'overview' || loadedModules.has(module) || !endpointTemplate) {
-                        return;
-                    }
-
-                    const host = document.querySelector(`[data-docs-module-host="${module}"]`);
-
-                    if (!host || host.dataset.loading === 'true') {
-                        return;
-                    }
-
-                    host.dataset.loading = 'true';
-
-                    try {
-                        const response = await fetch(endpointTemplate.replace('__MODULE__', module), {
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'Accept': 'application/json',
-                            },
-                        });
-
-                        if (!response.ok) {
-                            throw new Error(`Failed to load section: ${module}`);
-                        }
-
-                        const payload = await response.json();
-                        host.innerHTML = payload.html;
-                        host.dataset.loaded = 'true';
-                        loadedModules.add(module);
-                    } finally {
-                        host.dataset.loading = 'false';
-                    }
-                };
-
-                const ensureSectionLoaded = async (sectionId) => {
-                    const module = moduleMap[sectionId] || 'overview';
-
-                    if (module !== 'overview' && !loadedModules.has(module)) {
-                        await loadSection(module);
-                    }
-                };
-
-                const currentFromScroll = () => {
-                    const threshold = 160;
-                    let current = sectionIds[0];
-
-                    for (const id of sectionIds) {
-                        const section = document.getElementById(id);
-
-                        if (!section) {
-                            continue;
-                        }
-
-                        const top = section.getBoundingClientRect().top;
-
-                        if (top <= threshold) {
-                            current = id;
-                        } else {
-                            break;
-                        }
-                    }
-
-                    return current;
-                };
-
-                let ticking = false;
-
-                const syncActiveSection = () => {
-                    setActive(currentFromScroll());
-                    ticking = false;
-                };
-
-                const onScroll = () => {
-                    if (ticking) {
-                        return;
-                    }
-
-                    ticking = true;
-                    window.requestAnimationFrame(syncActiveSection);
-                };
-
-                links.forEach((link) => {
-                    link.addEventListener('click', async (event) => {
-                        event.preventDefault();
-
-                        const sectionId = link.dataset.docsLink;
-
-                        if (!sectionId) {
-                            return;
-                        }
-
-                        await ensureSectionLoaded(sectionId);
-                        setActive(sectionId);
-                        closeMobileNav();
-                        requestAnimationFrame(() => pinSectionIntoView(sectionId));
-                    });
-                });
-
-                window.removeEventListener('scroll', window.__docsGuideScrollHandler || (() => {}));
-                window.removeEventListener('hashchange', window.__docsGuideHashHandler || (() => {}));
-                window.__docsGuideScrollHandler = onScroll;
-                window.__docsGuideHashHandler = syncActiveSection;
-                window.addEventListener('scroll', window.__docsGuideScrollHandler, { passive: true });
-                window.addEventListener('hashchange', window.__docsGuideHashHandler);
-                bindSearch(document.querySelector('[data-docs-nav-container="desktop"]'));
-                bindSearch(document.querySelector('[data-docs-nav-container="mobile"]'));
-
-                const lazyHosts = Array.from(document.querySelectorAll('[data-docs-module-host]'));
+            // Scroll spy: highlight the section being read in both lists.
+            const spyLinks = document.querySelectorAll('[data-guide-spy]');
+            const setActive = (id) => spyLinks.forEach((link) => { link.dataset.active = String(link.dataset.guideSpy === id); });
+            const headings = [...document.querySelectorAll('#overview-modules, #guide-article .guide-prose h2[id]')];
+            if (headings.length && 'IntersectionObserver' in window) {
+                setActive(window.location.hash.slice(1) || headings[0].id);
                 const observer = new IntersectionObserver((entries) => {
-                    entries.forEach((entry) => {
-                        if (!entry.isIntersecting) {
-                            return;
-                        }
-
-                        const module = entry.target.getAttribute('data-docs-module-host');
-
-                        if (module) {
-                            loadSection(module);
-                        }
-                    });
-                }, { rootMargin: '220px 0px' });
-
-                lazyHosts.forEach((host) => {
-                    if (host.dataset.loaded !== 'true') {
-                        observer.observe(host);
+                    const visible = entries.filter((entry) => entry.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+                    if (visible) {
+                        setActive(visible.target.id);
                     }
-                });
+                }, { rootMargin: '-72px 0px -65% 0px' });
+                headings.forEach((heading) => observer.observe(heading));
+            }
 
-                const matchesFocus = (sectionId) => {
-                    if (!sectionId) return false;
-                    if (focus === 'overview') {
-                        return sectionId === 'overview' || sectionId === 'overview-workflow';
-                    }
+            // Search over every module's headings. Folding ə/ı/ş/ç/ğ/ö/ü lets "emr" find "Əmr".
+            const input = document.querySelector('[data-guide-search-input]');
+            const results = document.querySelector('[data-guide-search-results]');
+            const index = JSON.parse(document.getElementById('guide-search-index').textContent);
+            const fold = (text) => (text || '').toLocaleLowerCase('az')
+                .replace(/ə/g, 'e').replace(/ı/g, 'i').replace(/ş/g, 's').replace(/ç/g, 'c')
+                .replace(/ğ/g, 'g').replace(/ö/g, 'o').replace(/ü/g, 'u')
+                .normalize('NFD').replace(/[̀-ͯ]/g, '');
+            const entries = index.flatMap((module) => [
+                { title: module.m, module: module.m, parent: null, url: module.u, isModule: true },
+                ...module.h.map(([title, id, parent]) => ({ title, module: module.m, parent, url: `${module.u}#${id}`, isModule: false })),
+            ]).map((entry) => ({ ...entry, key: fold(entry.title), context: fold(`${entry.module} ${entry.parent || ''}`) }));
+            const escape = (text) => text.replace(/[&<>"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[char]);
+            let matches = [];
+            let cursor = 0;
 
-                    return sectionId.startsWith(`${focus}-`);
-                };
-
-                if (window.location.hash) {
-                    const hashed = window.location.hash.replace('#', '');
-
-                    if (sectionIds.includes(hashed)) {
-                        if (!matchesFocus(hashed) && initialSection) {
-                            setActive(initialSection);
-                            ensureSectionLoaded(initialSection).then(() => {
-                                requestAnimationFrame(() => pinSectionIntoView(initialSection));
-                            });
-
-                            return;
-                        }
-
-                        ensureSectionLoaded(hashed).then(() => {
-                            setActive(hashed);
-                            requestAnimationFrame(() => {
-                                pinSectionIntoView(hashed, false);
-                                syncActiveSection();
-                            });
-                        });
-
-                        return;
-                    }
+            const render = () => {
+                const open = input.value.trim() !== '';
+                results.classList.toggle('hidden', !open);
+                input.setAttribute('aria-expanded', String(open));
+                if (!open) {
+                    return;
                 }
-
-                if (initialSection) {
-                    ensureSectionLoaded(initialSection).then(() => {
-                        setActive(initialSection);
-
-                        if (focus !== 'overview') {
-                            requestAnimationFrame(() => pinSectionIntoView(initialSection));
-                        }
-                    });
-                }
-
-                syncActiveSection();
+                results.innerHTML = matches.length === 0
+                    ? '<p class="px-3 py-6 text-center text-[13px] text-ink-faint">Heç nə tapılmadı. Başqa sözlə yoxlayın.</p>'
+                    : matches.map((entry, position) => `
+                        <a href="${escape(entry.url)}" role="option" aria-selected="${position === cursor}" class="flex items-start gap-3 rounded-xl px-3 py-2 ${position === cursor ? 'bg-[#f4f4f5]' : ''}" data-position="${position}">
+                            <span class="mt-0.5 shrink-0 rounded-md border border-hairline bg-white px-1.5 text-[10.5px] font-semibold uppercase tracking-[0.04em] text-ink-faint">${entry.isModule ? 'Modul' : '§'}</span>
+                            <span class="min-w-0">
+                                <span class="block text-[13px] font-semibold text-ink">${escape(entry.title)}</span>
+                                <span class="block truncate text-[12px] text-ink-faint">${escape(entry.isModule ? 'Bələdçini aç' : [entry.module, entry.parent].filter(Boolean).join(' › '))}</span>
+                            </span>
+                        </a>`).join('');
             };
 
-            document.addEventListener('DOMContentLoaded', setupGuideNavigation, { once: true });
+            const search = () => {
+                const terms = fold(input.value).split(/\s+/).filter(Boolean);
+                const query = terms.join(' ');
+                matches = terms.length === 0 ? [] : entries
+                    .filter((entry) => terms.every((term) => entry.key.includes(term) || entry.context.includes(term)))
+                    .map((entry) => ({ entry, score: (entry.key.startsWith(query) ? 0 : entry.key.includes(query) ? 1 : 2) + (entry.isModule ? -0.5 : 0) }))
+                    .sort((a, b) => a.score - b.score)
+                    .slice(0, 12)
+                    .map(({ entry }) => entry);
+                cursor = 0;
+                render();
+            };
+
+            const go = (entry) => {
+                if (entry) {
+                    window.location.href = entry.url;
+                    input.value = '';
+                    render();
+                }
+            };
+
+            input.addEventListener('input', search);
+            input.addEventListener('keydown', (event) => {
+                if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                    event.preventDefault();
+                    cursor = (cursor + (event.key === 'ArrowDown' ? 1 : -1) + matches.length) % Math.max(matches.length, 1);
+                    render();
+                    results.querySelector(`[data-position="${cursor}"]`)?.scrollIntoView({ block: 'nearest' });
+                } else if (event.key === 'Enter') {
+                    event.preventDefault();
+                    go(matches[cursor]);
+                } else if (event.key === 'Escape') {
+                    input.value = '';
+                    render();
+                    input.blur();
+                }
+            });
+            results.addEventListener('click', () => {
+                input.value = '';
+                render();
+            });
+            document.addEventListener('click', (event) => {
+                if (!event.target.closest('[data-guide-search]')) {
+                    results.classList.add('hidden');
+                }
+            });
+            input.addEventListener('focus', render);
+            document.addEventListener('keydown', (event) => {
+                const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName || '');
+                if ((event.key === 'k' && (event.metaKey || event.ctrlKey)) || (event.key === '/' && !typing)) {
+                    event.preventDefault();
+                    input.focus();
+                    input.select();
+                }
+            });
         })();
     </script>
 </body>

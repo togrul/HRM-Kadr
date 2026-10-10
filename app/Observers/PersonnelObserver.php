@@ -6,8 +6,11 @@ use App\Models\Personnel;
 use App\Models\PersonRegistry;
 use App\Models\User;
 use App\Modules\Notifications\Support\NotificationCampaignDispatcher;
+use App\Modules\Personnel\Contracts\GuardsPersonnelChanges;
 use App\Notifications\NewPersonnelAdded;
 use App\Notifications\PersonnelWasDeleted;
+use App\Support\Uploads\PrivateFiles;
+use Illuminate\Support\Facades\DB;
 
 class PersonnelObserver
 {
@@ -34,6 +37,16 @@ class PersonnelObserver
     }
 
     /**
+     * Dəyişiklik siyasəti: `order` rejimli sahələr icazəli kontekstdən (əmr effekti) kənar,
+     * `journal` rejimli sahələr isə səbəbsiz dəyişə bilməz — hər Eloquent yazması (Livewire,
+     * API, idxal, toplu redaktə) burada yoxlanılır.
+     */
+    public function updating(Personnel $personnel): void
+    {
+        app(GuardsPersonnelChanges::class)->enforce($personnel);
+    }
+
+    /**
      * Handle the Personnel "created" event.
      */
     public function created(Personnel $personnel): void
@@ -51,6 +64,18 @@ class PersonnelObserver
      */
     public function updated(Personnel $personnel): void
     {
+        $oldPath = $personnel->getOriginal('photo');
+        if ($personnel->wasChanged('photo') && filled($oldPath)) {
+            DB::afterCommit(function () use ($oldPath): void {
+                if (! Personnel::withTrashed()->where('photo', $oldPath)->exists()) {
+                    PrivateFiles::delete((string) $oldPath);
+                }
+            });
+        }
+
+        // Jurnal rejimli sahələrin köhnə → yeni dəyərləri səbəblə birlikdə.
+        app(GuardsPersonnelChanges::class)->journal($personnel);
+
         // A renumbering keeps the identity and adds a mapping: the old number
         // still resolves to the same person, which is what keeps historical
         // records readable.

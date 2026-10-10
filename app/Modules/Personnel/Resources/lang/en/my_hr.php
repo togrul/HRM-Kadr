@@ -141,6 +141,7 @@ return [
             'description' => 'Description',
         ],
         'messages' => [
+            'sick_certificate_not_correctable' => 'A leave that belongs to a sick-leave certificate cannot be corrected by request; HR changes the certificate in the register.',
             'search_placeholder' => 'Search by request type, reason, or status',
             'no_reason' => 'No reason provided',
             'no_summary' => 'No short summary provided',

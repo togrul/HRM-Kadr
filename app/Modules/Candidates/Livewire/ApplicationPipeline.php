@@ -7,6 +7,7 @@ use App\Models\Candidate;
 use App\Models\CandidateApplication;
 use App\Models\JobOpening;
 use App\Modules\Candidates\Application\Services\CandidateApplicationStageService;
+use App\Modules\Candidates\Support\CandidateStructureScope;
 use App\Modules\Candidates\Support\Traits\BuildsRecruitmentOptions;
 use App\Modules\Candidates\Support\Traits\InteractsWithRecruitmentPresentation;
 use Illuminate\Contracts\View\View;
@@ -92,7 +93,7 @@ class ApplicationPipeline extends Component
     {
         $effectivePack = $this->effectiveRecruitmentPack($this->pack);
 
-        return CandidateApplication::query()
+        return CandidateStructureScope::constrainApplications(CandidateApplication::query())
             ->when($effectivePack !== 'all', fn (Builder $query) => $query->whereHas('opening', fn (Builder $opening) => $opening->where('profile_pack', $effectivePack)))
             ->when(is_numeric($this->opening), fn (Builder $query) => $query->where('job_opening_id', (int) $this->opening))
             ->when(is_numeric($this->candidate), fn (Builder $query) => $query->where('candidate_id', (int) $this->candidate))
@@ -260,7 +261,7 @@ class ApplicationPipeline extends Component
             return null;
         }
 
-        return Candidate::query()
+        return CandidateStructureScope::constrainOwn(Candidate::query())
             ->select('id', 'surname', 'name', 'patronymic')
             ->find((int) $this->candidate);
     }

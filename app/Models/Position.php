@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $approval_rank
  * @property bool $is_approval_target
  * @property int|null $level
+ * @property string|null $vtisk_category VTİSK kateqoriyası (App\Support\VtiskCategory)
  */
 class Position extends Model
 {
@@ -22,6 +23,7 @@ class Position extends Model
         'approval_rank',
         'is_approval_target',
         'level',
+        'vtisk_category',
         'name',
     ];
 
