@@ -73,6 +73,24 @@ class PayrollExportTest extends TestCase
         $this->assertSame('52.50', $row['medical_er']);
     }
 
+    public function test_gl_exports_never_add_different_currencies_and_preserve_decimal_amounts(): void
+    {
+        $a = $this->makePersonnel('azn@example.test');
+        $b = $this->makePersonnel('usd@example.test');
+        $period = app(PayrollPeriodService::class)->createPeriod(2026, 7);
+        $run = app(PayrollRunService::class)->createRun($period);
+        foreach ([[$a, 'AZN', ['9999999999.99', '0.01']], [$b, 'USD', ['120.10', '0.20']]] as [$personnel, $currency, $amounts]) {
+            $payslip = $run->payslips()->create(['tabel_no' => $personnel->tabel_no, 'currency' => $currency, 'gross' => '0.00', 'net' => '0.00', 'total_deductions' => '0.00', 'employer_cost' => '0.00', 'proration_factor' => '1.0000', 'status' => 'calculated']);
+            foreach ($amounts as $amount) {
+                $payslip->lines()->create(['code' => 'base', 'name' => 'Base', 'kind' => 'earning', 'amount' => $amount, 'taxable' => true, 'affects_social' => true, 'is_statutory' => false, 'sort' => 0]);
+            }
+        }
+        $rows = collect(app(PayrollExportService::class)->glRows($run))->keyBy('currency');
+        $this->assertCount(2, $rows);
+        $this->assertSame('10000000000.00', $rows['AZN']['amount']);
+        $this->assertSame('120.30', $rows['USD']['amount']);
+    }
+
     public function test_amount_bearing_exports_need_the_amounts_permission(): void
     {
         $personnel = $this->makePersonnel('mask@example.test');

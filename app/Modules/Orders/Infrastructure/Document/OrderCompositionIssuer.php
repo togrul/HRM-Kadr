@@ -11,7 +11,9 @@ use App\Modules\Orders\Application\Document\OrderComposition;
 use App\Modules\Orders\Application\Document\OrderIssueOutcome;
 use App\Modules\Orders\Application\Document\OrderParticipantFields;
 use App\Modules\Orders\Application\Document\OrderVacationRules;
+use App\Modules\Staff\Contracts\StaffSlotCheck;
 use App\Services\Staff\StaffScheduleVacancyService;
+use App\Services\StructureService;
 use App\Services\Vacation\VacationBalanceService;
 use Carbon\Carbon;
 
@@ -65,10 +67,15 @@ class OrderCompositionIssuer
         // Staff-schedule (ştat cədvəli) gate for new hire and transfer orders: the target
         // structure+position should have a free slot. By default the author is asked to
         // create one (or go ahead); with `staff.hire_guard.block` the order is refused.
-        $target = $composition->isEditing() ? null : $this->staffTarget($template, $composition);
-        if ($target !== null) {
-            [$structureId, $positionId] = $target;
+        $targets = $composition->isEditing() ? [] : $this->staffTargets($template, $composition);
+        foreach ($targets as [$structureId, $positionId, $required]) {
+            if (! app(StructureService::class)->scopeFor()->allows($structureId)) {
+                return OrderIssueOutcome::rejected([], __('orders::order_composer.errors.subject_out_of_scope'));
+            }
             $check = $this->vacancies->check($structureId, $positionId);
+            if ($check->status === StaffSlotCheck::AVAILABLE && $check->vacant() < $required) {
+                $check = StaffSlotCheck::full($check->total, $check->filled, (bool) config('staff.hire_guard.block', false));
+            }
 
             if ($check->blocks()) {
                 return OrderIssueOutcome::rejected([], $check->message());
@@ -76,7 +83,7 @@ class OrderCompositionIssuer
 
             if ($check->hasWarning()) {
                 if ($autoVacancy) {
-                    $this->vacancies->ensureOneVacancy($structureId, $positionId);
+                    $this->vacancies->ensureOneVacancy($structureId, $positionId, $required);
                 } else {
                     return OrderIssueOutcome::vacancyMissing(__('orders::order_composer.vacancy.confirm', [
                         'structure' => Structure::find($structureId)->name ?? '—',
@@ -148,6 +155,32 @@ class OrderCompositionIssuer
      *
      * @return array{0:int,1:int}|null
      */
+    /** @return list<array{0: int, 1: int, 2: int}> */
+    private function staffTargets(OrderWordTemplate $template, OrderComposition $composition): array
+    {
+        if (! $template->isMultiParticipant() || $template->effect !== 'transfer') {
+            $target = $this->staffTarget($template, $composition);
+
+            return $target !== null ? [[...$target, 1]] : [];
+        }
+
+        $targets = [];
+        foreach ($composition->participantList() as $participant) {
+            $fields = OrderParticipantFields::effective($template, $composition->fields, $participant['fields']);
+            $own = new OrderComposition($composition->presetCode, $participant['personnel_id'], null, null, null, $fields, $composition->orderNumber, $composition->orderDate, $composition->organizationCity);
+            $target = $this->staffTarget($template, $own);
+            $personnel = $this->subjects->personnel($participant['personnel_id']);
+            if ($target === null || ($personnel !== null && $target === [(int) $personnel->structure_id, (int) $personnel->position_id])) {
+                continue;
+            }
+            $key = implode(':', $target);
+            $targets[$key] ??= [...$target, 0];
+            $targets[$key][2]++;
+        }
+
+        return array_values($targets);
+    }
+
     private function staffTarget(OrderWordTemplate $template, OrderComposition $composition): ?array
     {
         if ($template->isHire()) {

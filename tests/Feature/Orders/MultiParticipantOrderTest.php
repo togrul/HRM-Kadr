@@ -34,7 +34,9 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
+use Mockery;
 use PhpOffice\PhpWord\PhpWord;
+use RuntimeException;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 use ZipArchive;
@@ -368,7 +370,7 @@ class MultiParticipantOrderTest extends TestCase
         $this->assertStringContainsString('${participants}', $this->zipPart(Storage::disk('local')->path($template->docx_path), 'word/document.xml'));
 
         // A one-person effect cannot be multi-participant.
-        $component->set('effect', 'transfer')->assertSet('multiParticipant', false)
+        $component->set('effect', 'termination')->assertSet('multiParticipant', false)
             ->set('multiParticipant', true)->call('save')->assertHasErrors('multiParticipant');
     }
 
@@ -616,6 +618,165 @@ class MultiParticipantOrderTest extends TestCase
     private function template(string $code): OrderWordTemplate
     {
         return OrderWordTemplate::query()->where('code', $code)->firstOrFail();
+    }
+
+    public function test_multi_person_transfers_keep_individual_dates_history_and_outbox_identity(): void
+    {
+        \Illuminate\Support\Carbon::setTestNow('2026-10-10 12:00:00');
+        try {
+            [$a, $b] = [$this->makePersonnel('Transfer A'), $this->makePersonnel('Transfer B')];
+            $old = $a->position_id;
+            $target = Position::query()->create(['name' => 'Target']);
+            $order = $this->transferOrder($a, $b, $target->id, ['2026-10-10', '2026-10-12']);
+            app(OrderStatusTransitionService::class)->approve($order);
+            $participants = $order->participants()->get();
+            $this->assertSame($target->id, $a->fresh()->position_id);
+            $this->assertSame($old, $b->fresh()->position_id);
+            $this->assertFalse($participants[0]->effect_state['transfer_pending']);
+            $this->assertTrue($participants[1]->effect_state['transfer_pending']);
+            $this->assertArrayNotHasKey('effect_state', $order->fresh()->template_snapshot);
+            $events = OutboxEvent::query()->where('topic', 'orders')->orderBy('id')->get();
+            $this->assertCount(2, $events);
+            $this->assertSame([$order->id.'-1', $order->id.'-2'], $events->pluck('payload.external_id')->all());
+            $this->assertSame(['2026-10-10', '2026-10-12'], $events->pluck('payload.start_date')->all());
+            $this->assertSame([false, true], $events->pluck('payload.transfer_pending')->all());
+            $changes = app(\App\Services\Vacation\OrderLeaveFacts::class)->positionChanges($b->id, $old);
+            $this->assertCount(1, $changes);
+            $this->assertSame([$old, $target->id], array_slice($changes[0], 1));
+
+            \Illuminate\Support\Carbon::setTestNow('2026-10-12 00:10:00');
+            $service = app(\App\Modules\Orders\Application\Services\DeferredTransferService::class);
+            $this->assertSame(['applied' => 1, 'skipped' => 0, 'failed' => 0], $service->applyDue());
+            $this->assertSame($target->id, $b->fresh()->position_id);
+            $this->assertSame(['applied' => 0, 'skipped' => 0, 'failed' => 0], $service->applyDue());
+            $event = OutboxEvent::query()->where('topic', 'orders')->latest('id')->first();
+            $this->assertSame($order->id.'-2', $event->payload['external_id']);
+            $this->assertSame(2, $event->payload['participant_count']);
+            $this->assertFalse($event->payload['transfer_pending']);
+            $this->assertNotNull($event->payload['transfer_applied_at']);
+            $this->assertSame($old, app(\App\Services\Vacation\OrderLeaveFacts::class)->positionChanges($b->id, $target->id)[0][1]);
+            app(OrderStatusTransitionService::class)->cancel($order->fresh(), 'Wrong transfer');
+            $this->assertSame($old, $a->fresh()->position_id);
+            $this->assertSame($old, $b->fresh()->position_id);
+            $this->assertSame([], app(\App\Services\Vacation\OrderLeaveFacts::class)->positionChanges($b->id, $old));
+        } finally {
+            \Illuminate\Support\Carbon::setTestNow();
+        }
+    }
+
+    public function test_cancelled_pending_participants_never_change_current_cards(): void
+    {
+        [$a, $b] = [$this->makePersonnel('Cancel A'), $this->makePersonnel('Cancel B')];
+        $old = $a->position_id;
+        $target = Position::query()->create(['name' => 'Future']);
+        $order = $this->transferOrder($a, $b, $target->id, ['2099-01-01', '2099-01-02']);
+        app(OrderStatusTransitionService::class)->approve($order);
+        app(OrderStatusTransitionService::class)->cancel($order->fresh(), 'Wrong transfer');
+        $this->assertSame($old, $a->fresh()->position_id);
+        $this->assertSame($old, $b->fresh()->position_id);
+        $this->assertSame([false, false], $order->participants()->get()->pluck('effect_state.transfer_pending')->all());
+    }
+
+    public function test_one_missing_participant_rolls_back_every_transfer_and_outbox_event(): void
+    {
+        [$a, $b] = [$this->makePersonnel('Atomic A'), $this->makePersonnel('Atomic B')];
+        $old = $a->position_id;
+        $target = Position::query()->create(['name' => 'Atomic']);
+        $order = $this->transferOrder($a, $b, $target->id, ['2020-01-01', '2020-01-01']);
+        $order->participants()->where('personnel_id', $b->id)->update(['personnel_id' => 999999]);
+        try {
+            app(OrderStatusTransitionService::class)->approve($order);
+            $this->fail('Approval must reject a missing participant');
+        } catch (DomainException) {
+            $this->assertSame($old, $a->fresh()->position_id);
+            $this->assertSame(10, $order->fresh()->status_id);
+            $this->assertSame(0, OutboxEvent::query()->where('topic', 'orders')->count());
+        }
+    }
+
+    public function test_overdue_participants_are_applied_in_global_date_order(): void
+    {
+        \Illuminate\Support\Carbon::setTestNow('2026-10-10 12:00:00');
+        try {
+            [$a, $b, $c] = [$this->makePersonnel('Chronology A'), $this->makePersonnel('Chronology B'), $this->makePersonnel('Chronology C')];
+            $old = $a->position_id;
+            $firstTarget = Position::query()->create(['name' => 'Later target']);
+            $secondTarget = Position::query()->create(['name' => 'Earlier target']);
+            $first = $this->transferOrder($a, $b, $firstTarget->id, ['2026-10-15', '2026-10-20']);
+            $second = $this->transferOrder($a, $c, $secondTarget->id, ['2026-10-12', '2026-10-13']);
+            app(OrderStatusTransitionService::class)->approve($first);
+            app(OrderStatusTransitionService::class)->approve($second);
+            \Illuminate\Support\Carbon::setTestNow('2026-10-21 12:00:00');
+            $this->assertSame(['applied' => 4, 'skipped' => 0, 'failed' => 0], app(\App\Modules\Orders\Application\Services\DeferredTransferService::class)->applyDue());
+            $this->assertSame($firstTarget->id, $a->fresh()->position_id);
+            $this->assertSame($secondTarget->id, $first->participants()->where('personnel_id', $a->id)->first()->effect_state['prev_position_id']);
+            $history = app(\App\Services\Vacation\OrderLeaveFacts::class)->positionChanges($a->id, $firstTarget->id);
+            $this->assertSame([$old, $secondTarget->id], array_column($history, 1));
+        } finally {
+            \Illuminate\Support\Carbon::setTestNow();
+        }
+    }
+
+    public function test_a_failed_deferred_event_rolls_back_the_participant_and_employee(): void
+    {
+        \Illuminate\Support\Carbon::setTestNow('2026-10-10 12:00:00');
+        try {
+            [$a, $b] = [$this->makePersonnel('Outbox A'), $this->makePersonnel('Outbox B')];
+            $old = $a->position_id;
+            $target = Position::query()->create(['name' => 'Outbox target']);
+            $order = $this->transferOrder($a, $b, $target->id, ['2026-10-12', '2026-10-20']);
+            app(OrderStatusTransitionService::class)->approve($order);
+            $outbox = Mockery::mock(IntegrationOutbox::class);
+            $outbox->shouldReceive('record')->once()->andThrow(new RuntimeException('Outbox unavailable'));
+            $this->app->instance(IntegrationOutbox::class, $outbox);
+            \Illuminate\Support\Carbon::setTestNow('2026-10-12 12:00:00');
+            $this->assertSame(['applied' => 0, 'skipped' => 0, 'failed' => 1], app(\App\Modules\Orders\Application\Services\DeferredTransferService::class)->applyDue());
+            $this->assertSame($old, $a->fresh()->position_id);
+            $this->assertTrue($order->participants()->where('personnel_id', $a->id)->first()->effect_state['transfer_pending']);
+            $this->assertSame(2, OutboxEvent::query()->where('topic', 'orders')->count());
+        } finally {
+            \Illuminate\Support\Carbon::setTestNow();
+        }
+    }
+
+    public function test_multi_transfer_checks_the_number_of_required_target_slots(): void
+    {
+        grantAllStructures(auth()->user());
+        [$a, $b] = [$this->makePersonnel('Capacity A'), $this->makePersonnel('Capacity B')];
+        $target = Position::query()->create(['name' => 'Capacity target']);
+        $order = $this->transferOrder($a, $b, $target->id, ['2026-10-20', '2026-10-20']);
+        \App\Models\StaffSchedule::query()->create(['structure_id' => $a->structure_id, 'position_id' => $target->id, 'total' => 1, 'filled' => 0, 'vacant' => 1]);
+        $template = OrderWordTemplate::query()->where('code', 'multi_transfer_test')->firstOrFail();
+        $composition = new OrderComposition($template->code, null, null, null, null, [], 'MULTI-CAPACITY', '10.10.2026', 'Bakı', participants: [
+            ['personnel_id' => $a->id, 'fields' => ['target' => $target->id, 'on' => '2026-10-20']],
+            ['personnel_id' => $b->id, 'fields' => ['target' => $target->id, 'on' => '2026-10-20']],
+        ]);
+        $outcome = app(OrderCompositionIssuer::class)->issue($template, $composition, false);
+        $this->assertTrue($outcome->isVacancyMissing(), (string) $outcome->message);
+        config(['staff.hire_guard.block' => true]);
+        $this->assertFalse(app(OrderCompositionIssuer::class)->issue($template, $composition, false)->isSaved());
+        app(\App\Services\Staff\StaffScheduleVacancyService::class)->ensureOneVacancy($a->structure_id, $target->id, 2);
+        $this->assertSame(2, app(\App\Services\Staff\StaffScheduleVacancyService::class)->vacancy($a->structure_id, $target->id));
+    }
+
+    private function transferOrder(Personnel $a, Personnel $b, int $target, array $dates): OrderLog
+    {
+        OrderWordTemplate::query()->firstOrCreate(['code' => 'multi_transfer_test'], [
+            'label' => 'Transfer', 'docx_path' => 'test-transfer.docx', 'effect' => 'transfer', 'multi_participant' => true,
+            'variables' => [
+                ['token' => 'target', 'source' => 'manual', 'label' => 'Target', 'scope' => 'participant', 'field' => ['key' => 'target', 'type' => 'position', 'required' => true], 'effect_role' => 'new_position'],
+                ['token' => 'on', 'source' => 'manual', 'label' => 'Effective', 'scope' => 'participant', 'field' => ['key' => 'on', 'type' => 'date', 'required' => true], 'effect_role' => 'effective_date'],
+            ],
+        ]);
+        $order = OrderLog::query()->create([
+            'order_no' => 'MT-'.OrderLog::query()->count(), 'given_date' => '2026-10-10', 'given_by' => 'Test', 'given_by_rank' => '', 'status_id' => 10,
+            'template_render_mode' => 'docx_v1', 'template_snapshot' => ['template_code' => 'multi_transfer_test', 'personnel_id' => $a->id, 'fields' => []],
+        ]);
+        foreach ([$a, $b] as $index => $personnel) {
+            $order->participants()->create(['personnel_id' => $personnel->id, 'position' => $index + 1, 'fields' => ['target' => $target, 'on' => $dates[$index]]]);
+        }
+
+        return $order;
     }
 
     private function makePersonnel(string $surname, int $gender = 1): Personnel

@@ -4,12 +4,15 @@ namespace App\Modules\Orders\Infrastructure\Document\Effects;
 
 use App\Enums\OrderStatusEnum;
 use App\Models\OrderLog;
+use App\Models\OrderParticipant;
 use App\Models\Personnel;
 use App\Modules\Compensation\Contracts\OrderCompensationSync;
 use App\Modules\Orders\Contracts\DeferredTransferApplier;
+use App\Modules\Orders\Infrastructure\Document\OrderIntegrationPublisher;
 use App\Modules\Personnel\Contracts\GuardsPersonnelChanges;
 use App\Support\Language\AzerbaijaniDateFormatter;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
 
 /**
  * Moves the employee: updates structure and/or position to the new ones chosen on the
@@ -32,6 +35,7 @@ class TransferEffect implements DeferredTransferApplier, OrderEffect
         private readonly OrderCompensationSync $compensation,
         private readonly GuardsPersonnelChanges $changes,
         private readonly AzerbaijaniDateFormatter $dates,
+        private readonly OrderIntegrationPublisher $publisher,
     ) {}
 
     public function apply(OrderLog $order, array $fields, Personnel $personnel): void
@@ -67,36 +71,45 @@ class TransferEffect implements DeferredTransferApplier, OrderEffect
         }
     }
 
-    public function applyDue(OrderLog $order): bool
+    public function applyDue(OrderLog $order, ?int $participantId = null): bool
     {
-        return DB::transaction(function () use ($order): bool {
+        return DB::transaction(function () use ($order, $participantId): bool {
             $locked = OrderLog::query()->lockForUpdate()->find($order->getKey());
-            $state = (array) data_get($locked?->template_snapshot, 'effect_state', []);
+            $participant = $participantId !== null && $locked !== null ? $locked->participants()->lockForUpdate()->find($participantId) : null;
+            if ($participantId !== null && $participant === null) {
+                return false;
+            }
+            $state = $participant !== null ? (array) $participant->effect_state : (array) data_get($locked?->template_snapshot, 'effect_state', []);
             if ($locked === null || (int) $locked->status_id !== OrderStatusEnum::APPROVED->value
                 || empty($state['transfer_pending']) || empty($state['effective_date'])
                 || (string) $state['effective_date'] > today()->toDateString()) {
                 return false;
             }
 
-            $personnel = Personnel::query()->lockForUpdate()->findOrFail($state['transfer_personnel_id']);
+            $personnelId = $participant !== null ? $participant->personnel_id : $state['transfer_personnel_id'];
+            if ($participant !== null && (int) ($state['transfer_personnel_id'] ?? 0) !== (int) $personnelId) {
+                throw new RuntimeException('Transfer participant state does not match its employee.');
+            }
+            $personnel = Personnel::query()->lockForUpdate()->findOrFail($personnelId);
             $this->rememberPreState($locked, [
                 'prev_structure_id' => $personnel->structure_id,
                 'prev_position_id' => $personnel->position_id,
-            ]);
-            $this->applyUpdate($locked, $personnel, (array) $state['transfer_target']);
+            ], $participant);
+            $this->applyUpdate($locked, $personnel, (array) $state['transfer_target'], $participant);
+            $this->publisher->publish($locked, 'applied', $participantId);
 
             return true;
         });
     }
 
     /** @param array<string, int> $update */
-    private function applyUpdate(OrderLog $order, Personnel $personnel, array $update): void
+    private function applyUpdate(OrderLog $order, Personnel $personnel, array $update, ?OrderParticipant $participant = null): void
     {
         $this->changes->allowForEffect('transfer', fn (): bool => $personnel->forceFill($update)->save());
         if (! empty($update['position_id'])) {
             $this->compensation->suggestRegradeFromTransfer($personnel->tabel_no, (int) $update['position_id'], $order->order_no);
         }
-        $this->rememberPreState($order, ['transfer_pending' => false, 'transfer_applied_at' => now()->toIso8601String()]);
+        $this->rememberPreState($order, ['transfer_pending' => false, 'transfer_applied_at' => now()->toIso8601String()], $participant);
     }
 
     public function reverse(OrderLog $order, array $fields, Personnel $personnel): void
@@ -128,8 +141,13 @@ class TransferEffect implements DeferredTransferApplier, OrderEffect
      *
      * @param  array<string,mixed>  $state
      */
-    private function rememberPreState(OrderLog $order, array $state): void
+    private function rememberPreState(OrderLog $order, array $state, ?OrderParticipant $participant = null): void
     {
+        if ($participant !== null) {
+            $participant->forceFill(['effect_state' => array_merge((array) $participant->effect_state, $state)])->save();
+
+            return;
+        }
         $snapshot = (array) $order->template_snapshot;
         $snapshot['effect_state'] = array_merge((array) ($snapshot['effect_state'] ?? []), $state);
         $order->forceFill(['template_snapshot' => $snapshot])->save();

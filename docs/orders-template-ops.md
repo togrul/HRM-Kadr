@@ -125,3 +125,15 @@ dəyəri və render xətasının uğursuz çıxış kodu yaratmasını ayrıca y
 Real vaxt ölçmək üçün `orders:list-render-benchmark --json` kimi Artisan
 komandalarını test runner-dən kənar, nəzarət olunan yük altında icra etmək lazımdır.
 İstehsalat komandaları və onların vaxt/payload hədləri dəyişdirilməyib.
+
+## 11.10.2026 — çoxşəxsli köçürmə
+
+Transfer effekti artıq çoxiştirakçılı template-də seçilə bilir. Mövcud təkşəxsli master-lar avtomatik dəyişdirilmir; administrator template-ni ayrıca multi-participant kimi qurur, yeni struktur/vəzifə və qüvvəyə minmə sahələrinin participant/override scope-unu seçir. Hər iştirakçının əvvəlki və hədəf vəziyyəti `order_participants.effect_state`-də saxlanır; başqa iştirakçının tarixçəsi götürülmür.
+
+Gələcək iştirakçılar kartı vaxtından əvvəl dəyişmir. Scheduler single və multi qeydləri birlikdə qüvvəyə minmə tarixi, order ID və participant ID üzrə sıralayır. Hər icra order → participant → personnel kilidləri ilə transaction daxilindədir; pending vəziyyəti və outbox hadisəsi kartla birlikdə commit olur. Hadisə yazıla bilməsə həmin iştirakçı tətbiqi rollback olur, digər namizədlər işlənir. Komanda sayları çoxşəxsli əmrdə ayrı tətbiq olunan iştirakçıları sayır. Bu sonrakı tarixlərdə bütün əmrin bir dəfəyə dəyişməsi demək deyil.
+
+İştirakçının təsdiqi və reversal-i ARBAY-a əvvəlki `orderId-position` kimliyi ilə gedir. Transfer payload-ında `start_date` qüvvəyə minmə günüdür; `transfer_pending`, `transfer_applied_at`, `transfer_target` əlavə metadata-dır. Faktiki deferred icra eyni xarici kimliklə yenilənmiş hadisə verir; ikinci ARBAY əmri yaratmaq üçün yeni kimlik düzəldilmir. Mövcud polling feed qalır, webhook quraşdırılmır.
+
+Məzuniyyətin vəzifə faktları həm tətbiq edilmiş, həm pending participant vəziyyətini oxuyur. Bu dəyişiklik VTİSK 30 günlük əsas məzuniyyətin hüquqi bölünmə qaydasını seçmir. Audit komandası multi iştirakçıların state-lərini də yoxlayır. İstehsalatda köhnə məlumat avtomatik düzəldilmir.
+
+Tərtib zamanı eyni hədəf ştatına gedən iştirakçılar birlikdə sayılır. Bir boş yer iki yeni işçi üçün kifayət sayılmır. Auto-vacancy seçimi lazım olan qədər yeri yaradır/artırır; blok siyasəti aktivdirsə əvvəlcə rədd edilir. Bu yoxlama gələcək əmrlər üçün ayrıca ştat rezervasiya sistemi deyil.

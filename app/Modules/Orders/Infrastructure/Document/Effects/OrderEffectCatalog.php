@@ -199,9 +199,10 @@ class OrderEffectCatalog
     /**
      * Effects that make sense once per person, so a template on them may be issued for several
      * employees at once (çoxşəxsli): each participant gets their own record, all in one
-     * approval. Effects that move, rename, pay or end one employee's contract stay single.
+     * approval. Effects that rename, pay or end one employee's contract stay single.
      */
     private const MULTI_PARTICIPANT = [
+        'transfer',
         'business_trip',
         'paid_absence',
         'award',

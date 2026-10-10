@@ -194,6 +194,7 @@ class Dashboard extends Component
                 ['key' => 'name', 'label' => __('payroll::dashboard.export.cols.name')],
                 ['key' => 'kind', 'label' => __('payroll::dashboard.export.cols.kind')],
                 ['key' => 'amount', 'label' => __('payroll::dashboard.export.cols.amount')],
+                ['key' => 'currency', 'label' => __('payroll::dashboard.export.cols.currency')],
             ],
             'payroll-gl.xlsx',
         );
