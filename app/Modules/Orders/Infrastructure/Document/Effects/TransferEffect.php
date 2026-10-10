@@ -2,11 +2,14 @@
 
 namespace App\Modules\Orders\Infrastructure\Document\Effects;
 
+use App\Enums\OrderStatusEnum;
 use App\Models\OrderLog;
 use App\Models\Personnel;
 use App\Modules\Compensation\Contracts\OrderCompensationSync;
+use App\Modules\Orders\Contracts\DeferredTransferApplier;
 use App\Modules\Personnel\Contracts\GuardsPersonnelChanges;
 use App\Support\Language\AzerbaijaniDateFormatter;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Moves the employee: updates structure and/or position to the new ones chosen on the
@@ -23,7 +26,7 @@ use App\Support\Language\AzerbaijaniDateFormatter;
  * rolundan götürülür, boşdursa əmrin tarixi; o, `effect_state.effective_date`-də saxlanılır və
  * vəzifə tarixçəsi (məzuniyyət hüququ, NK 95 b.7, b.11) həmin gündən yeni vəzifəni sayır.
  */
-class TransferEffect implements OrderEffect
+class TransferEffect implements DeferredTransferApplier, OrderEffect
 {
     public function __construct(
         private readonly OrderCompensationSync $compensation,
@@ -48,23 +51,62 @@ class TransferEffect implements OrderEffect
         $effectiveOn = $this->dates->parse(is_scalar($fields['effective_date'] ?? null) ? (string) $fields['effective_date'] : null)
             ?? ($order->given_date ? $this->dates->parse((string) $order->getRawOriginal('given_date')) : null);
 
-        // Remember where the employee was, so reverse() can put them back.
+        $pending = $effectiveOn !== null && $effectiveOn->toDateString() > today()->toDateString();
         $this->rememberPreState($order, [
             'prev_structure_id' => $personnel->structure_id,
             'prev_position_id' => $personnel->position_id,
             'effective_date' => $effectiveOn?->format('Y-m-d'),
+            'transfer_pending' => $pending,
+            'transfer_target' => $update,
+            'transfer_personnel_id' => (int) $personnel->getKey(),
+            'transfer_applied_at' => null,
         ]);
 
-        $this->changes->allowForEffect('transfer', fn (): bool => $personnel->forceFill($update)->save());
-
-        if (! empty($fields['new_position'])) {
-            $this->compensation->suggestRegradeFromTransfer($personnel->tabel_no, (int) $fields['new_position'], $order->order_no);
+        if (! $pending) {
+            $this->applyUpdate($order, $personnel, $update);
         }
+    }
+
+    public function applyDue(OrderLog $order): bool
+    {
+        return DB::transaction(function () use ($order): bool {
+            $locked = OrderLog::query()->lockForUpdate()->find($order->getKey());
+            $state = (array) data_get($locked?->template_snapshot, 'effect_state', []);
+            if ($locked === null || (int) $locked->status_id !== OrderStatusEnum::APPROVED->value
+                || empty($state['transfer_pending']) || empty($state['effective_date'])
+                || (string) $state['effective_date'] > today()->toDateString()) {
+                return false;
+            }
+
+            $personnel = Personnel::query()->lockForUpdate()->findOrFail($state['transfer_personnel_id']);
+            $this->rememberPreState($locked, [
+                'prev_structure_id' => $personnel->structure_id,
+                'prev_position_id' => $personnel->position_id,
+            ]);
+            $this->applyUpdate($locked, $personnel, (array) $state['transfer_target']);
+
+            return true;
+        });
+    }
+
+    /** @param array<string, int> $update */
+    private function applyUpdate(OrderLog $order, Personnel $personnel, array $update): void
+    {
+        $this->changes->allowForEffect('transfer', fn (): bool => $personnel->forceFill($update)->save());
+        if (! empty($update['position_id'])) {
+            $this->compensation->suggestRegradeFromTransfer($personnel->tabel_no, (int) $update['position_id'], $order->order_no);
+        }
+        $this->rememberPreState($order, ['transfer_pending' => false, 'transfer_applied_at' => now()->toIso8601String()]);
     }
 
     public function reverse(OrderLog $order, array $fields, Personnel $personnel): void
     {
         $state = (array) data_get($order->template_snapshot, 'effect_state', []);
+        if (! empty($state['transfer_pending'])) {
+            $this->rememberPreState($order, ['transfer_pending' => false]);
+
+            return;
+        }
 
         $restore = [];
         if (array_key_exists('prev_structure_id', $state) && ! empty($fields['new_structure'])) {

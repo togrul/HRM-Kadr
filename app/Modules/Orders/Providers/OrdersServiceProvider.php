@@ -31,6 +31,7 @@ class OrdersServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
+                \App\Modules\Orders\Console\Commands\ApplyDueTransfersCommand::class,
                 OrdersListQueryBudgetCommand::class,
                 OrdersListRenderBenchmarkCommand::class,
                 NeutralizeOrderWordTemplatesCommand::class,
@@ -43,6 +44,7 @@ class OrdersServiceProvider extends ServiceProvider
         $this->app->bind(OrderTypeStatusLookupReadRepository::class, EloquentOrderTypeStatusLookupReadRepository::class);
         $this->app->bind(HireOrderTemplates::class, HireOrderTemplateLookup::class);
         $this->app->bind(PdfConverter::class, DocxToPdfConverter::class);
+        $this->app->bind(\App\Modules\Orders\Contracts\DeferredTransferApplier::class, \App\Modules\Orders\Infrastructure\Document\Effects\TransferEffect::class);
 
         $this->app->tag([OrderEmployeeRecordSource::class], EmployeeRecordSource::TAG);
     }

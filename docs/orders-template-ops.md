@@ -55,3 +55,34 @@ Tracks:
 - legacy footprint counters (`orders.content`, `components.dynamic_fields`, legacy snapshot usage)
 
 Use this before any destructive schema cleanup.
+
+
+## Gələcək tarixli köçürmələr
+
+Yeni təsdiqlənən köçürmə əmri gələcək qüvvəyə minmə tarixi göstərirsə cari struktur
+və vəzifə həmin günə qədər dəyişmir. Hədəf sahələr əmrin snapshot-unda saxlanır.
+Maaş üzrə regrade təklifi də yalnız faktiki tətbiq zamanı yaranır.
+
+`orders:apply-due-transfers` planlaşdırılmış və vaxtı çatmış köçürmələri tarix, sonra
+əmr ID-si ardıcıllığında tətbiq edir. Kernel onu beş dəqiqədən bir,
+`withoutOverlapping()` ilə çağırır; Orders modulu bağlıdırsa iş planlaşdırılmır.
+Hər əmrin və işçinin sətri DB kilidi ilə oxunur. Tətbiq tamamlandıqdan sonra pending
+bayrağı götürülür, buna görə təkrar icra ikinci dəyişiklik yaratmır. Bir əmr xətalıdırsa
+digərləri işlənir, əmr ID-si server jurnalına yazılır və komanda uğursuz çıxış kodu verir.
+
+```bash
+php artisan orders:apply-due-transfers
+```
+
+Əmr JSON sayları qaytarır: `applied`, `skipped`, `failed`. İstehsalatda adi Laravel
+`schedule:run` mexanizmi işləməlidir; kod və testlər onun real serverdə işlədiyini
+təsdiqləmir. Server dayanıbsa növbəti icra vaxtı keçmiş gözləyən əmrləri də tətbiq edir.
+
+Tətbiqdən əvvəl ləğv cari işçi kartına toxunmur. Tətbiqdən sonra geri çevirmə faktiki
+icra zamanı saxlanmış əvvəlki struktur/vəzifədən istifadə edir. Gələcək tarix üçün
+məzuniyyət hesabının vəzifə faktları gözləyən köçürməni də nəzərə alır.
+
+Əvvəlki kodla artıq vaxtından əvvəl tətbiq edilmiş köçürmələr pending bayrağı daşımır.
+Onlar avtomatik geri çevrilmir: cari vəziyyət, sonrakı dəyişikliklər və əmrin tarixçəsi
+istehsalat backup-u ilə birlikdə ayrıca yoxlanmalıdır. Çoxşəxsli köçürmə bu paketdə
+aktivləşdirilməyib; həmin effekt əvvəlki kimi tək işçi üçündür.

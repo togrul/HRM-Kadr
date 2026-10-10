@@ -284,21 +284,7 @@ trait InteractsWithPerformanceEvaluationQueries
 
     public function getStatsProperty(): array
     {
-        return (array) DB::selectOne(
-            'select
-                (select count(*) from performance_cycles) as `cycles`,
-                (select count(*) from performance_form_templates) as `templates`,
-                (select count(*) from performance_form_template_sections) as `sections`,
-                (select count(*) from performance_form_template_items) as `items`,
-                (select count(*) from performance_forms) as `forms`,
-                (select count(*) from performance_form_scores) as `scores`,
-                (select count(*) from performance_training_need_links) as `links`,
-                (select count(*) from performance_test_banks) as `test_banks`,
-                (select count(*) from performance_test_questions) as `test_questions`,
-                (select count(*) from performance_test_sessions) as `test_sessions`,
-                (select count(*) from performance_test_attempts) as `test_attempts`,
-                (select count(*) from performance_test_training_need_links) as `test_need_links`'
-        );
+        return app(\App\Modules\PerformanceEvaluation\Application\Services\PerformanceEvaluationReportingService::class)->foundationStats();
     }
 
     /**
@@ -310,36 +296,7 @@ trait InteractsWithPerformanceEvaluationQueries
      */
     public function getScoreDistributionProperty(): array
     {
-        $row = DB::selectOne(
-            'select
-                count(final_score) as scored,
-                avg(final_score) as average,
-                sum(final_category = ?) as high,
-                sum(final_category = ?) as medium,
-                sum(final_category = ?) as weak
-             from performance_forms',
-            ['high', 'medium', 'weak']
-        );
-
-        $scored = (int) ($row->scored ?? 0);
-
-        $buckets = collect(['high', 'medium', 'weak'])
-            ->map(function (string $key) use ($row, $scored): array {
-                $count = (int) ($row->{$key} ?? 0);
-
-                return [
-                    'key' => $key,
-                    'count' => $count,
-                    'percent' => $scored > 0 ? (int) round($count / $scored * 100) : 0,
-                ];
-            })
-            ->all();
-
-        return [
-            'total' => $scored,
-            'average' => round((float) ($row->average ?? 0), 1),
-            'buckets' => $buckets,
-        ];
+        return app(\App\Modules\PerformanceEvaluation\Application\Services\PerformanceEvaluationReportingService::class)->scoreDistribution();
     }
 
     public function getRecentCyclesProperty(): Collection

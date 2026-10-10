@@ -14,6 +14,9 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('notify:birthdays')->dailyAt('08:00');
         $schedule->command('notify:holidays --days-ahead=1')->dailyAt('09:00');
+        if (app(\App\Services\Modules\ModuleState::class)->enabled('orders')) {
+            $schedule->command('orders:apply-due-transfers')->everyFiveMinutes()->withoutOverlapping();
+        }
         $schedule->command('performance:kpi-daily')->dailyAt('07:30')->withoutOverlapping();
         // Disciplinary sanctions stop counting once their term (default 12 months) has run out.
         $schedule->command('personnel:lift-expired-sanctions')->dailyAt('00:20')->withoutOverlapping();

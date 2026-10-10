@@ -50,7 +50,7 @@ class OrderLeaveFacts
      * əmrlərdə əmrin tarixi götürülür. Yalnız struktur dəyişən köçürmədə əvvəlki vəzifə sonrakı
      * ilə eynidir və atılır.
      *
-     * @return list<array{0: CarbonImmutable, 1: ?int}>
+     * @return list<array{0: CarbonImmutable, 1: ?int, 2?: ?int}>
      */
     public function positionChanges(int $personnelId, ?int $positionId): array
     {
@@ -65,6 +65,7 @@ class OrderLeaveFacts
             ->get(['id', 'given_date', 'template_snapshot']);
 
         $transfers = [];
+        $pending = [];
 
         foreach ($orders as $order) {
             $snapshot = (array) $order->template_snapshot;
@@ -75,6 +76,14 @@ class OrderLeaveFacts
             }
 
             $effective = $state['effective_date'] ?? null;
+            if (! empty($state['transfer_pending'])) {
+                $target = data_get($state, 'transfer_target.position_id');
+                if ($target !== null) {
+                    $pending[] = ['on' => CarbonImmutable::parse((string) $effective)->startOfDay(), 'id' => (int) $order->id, 'target' => (int) $target];
+                }
+
+                continue;
+            }
             $transfers[] = [
                 'on' => CarbonImmutable::parse(filled($effective) ? (string) $effective : (string) $order->getRawOriginal('given_date'))->startOfDay(),
                 'id' => (int) $order->id,
@@ -97,7 +106,17 @@ class OrderLeaveFacts
             $after = $transfer['previous'];
         }
 
-        return array_reverse($changes);
+        $changes = array_reverse($changes);
+        usort($pending, fn (array $a, array $b): int => [$a['on'], $a['id']] <=> [$b['on'], $b['id']]);
+        $projected = $positionId;
+        foreach ($pending as $transfer) {
+            if ($projected !== $transfer['target']) {
+                $changes[] = [$transfer['on'], $projected, $transfer['target']];
+                $projected = $transfer['target'];
+            }
+        }
+
+        return $changes;
     }
 
     /**

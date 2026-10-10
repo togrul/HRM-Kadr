@@ -187,3 +187,17 @@ it('does not delete a loan of an employee other than the picked one', function (
 
     expect(EmployeeLoan::query()->whereKey($loan->id)->exists())->toBeTrue();
 });
+
+it('hides mixed-structure payroll run totals from a limited viewer', function (): void {
+    $run = scopeCompPayRun();
+    $user = scopeCompPayUser(['show-payroll', 'view-compensation-amounts']);
+    $this->actingAs($user);
+    $reads = app(\App\Modules\Payroll\Application\Services\PayrollRunReadService::class);
+    expect($reads->visibleQuery($user)->count())->toBe(0);
+    $component = Livewire::test(\App\Modules\Payroll\Livewire\Tabs\RunsTab::class);
+    expect($component->instance()->runs())->toHaveCount(0);
+    $run->payslips()->where('tabel_no', 'OUT-001')->delete();
+    expect($reads->visibleQuery($user)->pluck('id')->all())->toBe([$run->id]);
+    $this->actingAs(grantAllStructures($user));
+    expect($reads->visibleQuery($user)->count())->toBe(1);
+});

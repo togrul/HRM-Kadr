@@ -7,6 +7,7 @@ use App\Models\CandidateStageEvent;
 use App\Models\JobOpening;
 use App\Models\JobRequisition;
 use App\Modules\Candidates\Application\Services\CandidateApplicationStageService;
+use App\Modules\Candidates\Support\CandidateStructureScope;
 use App\Modules\Candidates\Support\Traits\InteractsWithRecruitmentPresentation;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -33,7 +34,7 @@ class RecruitmentAnalytics extends Component
     #[Computed]
     public function summary(): array
     {
-        $row = CandidateApplication::query()
+        $row = CandidateStructureScope::constrainApplications(CandidateApplication::query())
             ->join('job_openings', 'job_openings.id', '=', 'candidate_applications.job_opening_id')
             ->where('job_openings.profile_pack', $this->currentPack)
             ->selectRaw('COUNT(*) as total_applications')
@@ -43,8 +44,8 @@ class RecruitmentAnalytics extends Component
             ->first();
 
         return [
-            'requisitions' => JobRequisition::query()->where('profile_pack', $this->currentPack)->count(),
-            'openings' => JobOpening::query()->where('profile_pack', $this->currentPack)->count(),
+            'requisitions' => CandidateStructureScope::constrainOwn(JobRequisition::query())->where('profile_pack', $this->currentPack)->count(),
+            'openings' => CandidateStructureScope::constrainOwn(JobOpening::query())->where('profile_pack', $this->currentPack)->count(),
             'applications' => (int) ($row?->total_applications ?? 0),
             'active_applications' => (int) ($row?->active_applications ?? 0),
             'rejected_applications' => (int) ($row?->rejected_applications ?? 0),
@@ -110,7 +111,7 @@ class RecruitmentAnalytics extends Component
     #[Computed]
     public function stageSummary(): array
     {
-        $counts = CandidateApplication::query()
+        $counts = CandidateStructureScope::constrainApplications(CandidateApplication::query())
             ->join('job_openings', 'job_openings.id', '=', 'candidate_applications.job_opening_id')
             ->where('job_openings.profile_pack', $this->currentPack)
             ->groupBy('candidate_applications.current_stage')
@@ -129,7 +130,7 @@ class RecruitmentAnalytics extends Component
     #[Computed]
     public function sourceSummary(): array
     {
-        return CandidateApplication::query()
+        return CandidateStructureScope::constrainApplications(CandidateApplication::query())
             ->join('job_openings', 'job_openings.id', '=', 'candidate_applications.job_opening_id')
             ->leftJoin('candidate_sources', 'candidate_sources.id', '=', 'candidate_applications.candidate_source_id')
             ->where('job_openings.profile_pack', $this->currentPack)
@@ -147,7 +148,7 @@ class RecruitmentAnalytics extends Component
     #[Computed]
     public function sourceEffectivenessSummary(): array
     {
-        return CandidateApplication::query()
+        return CandidateStructureScope::constrainApplications(CandidateApplication::query())
             ->join('job_openings', 'job_openings.id', '=', 'candidate_applications.job_opening_id')
             ->leftJoin('candidate_sources', 'candidate_sources.id', '=', 'candidate_applications.candidate_source_id')
             ->where('job_openings.profile_pack', $this->currentPack)
@@ -178,7 +179,7 @@ class RecruitmentAnalytics extends Component
     #[Computed]
     public function timeToStageSummary(): array
     {
-        $rows = CandidateApplication::query()
+        $rows = CandidateStructureScope::constrainApplications(CandidateApplication::query())
             ->join('job_openings', 'job_openings.id', '=', 'candidate_applications.job_opening_id')
             ->where('job_openings.profile_pack', $this->currentPack)
             ->whereNotNull('candidate_applications.applied_at')
@@ -233,7 +234,7 @@ class RecruitmentAnalytics extends Component
     #[Computed]
     public function rejectionReasonSummary(): array
     {
-        return CandidateApplication::query()
+        return CandidateStructureScope::constrainApplications(CandidateApplication::query())
             ->join('job_openings', 'job_openings.id', '=', 'candidate_applications.job_opening_id')
             ->leftJoin('candidate_rejection_reasons', 'candidate_rejection_reasons.id', '=', 'candidate_applications.rejection_reason_id')
             ->where('job_openings.profile_pack', $this->currentPack)
@@ -256,6 +257,7 @@ class RecruitmentAnalytics extends Component
     public function recentMoves(): array
     {
         return CandidateStageEvent::query()
+            ->whereIn('candidate_stage_events.candidate_application_id', CandidateStructureScope::constrainApplications(CandidateApplication::query())->select('candidate_applications.id'))
             ->with([
                 'application:id,candidate_id,job_opening_id,current_stage,status',
                 'application.candidate:id,name,surname,patronymic',

@@ -228,22 +228,7 @@ trait InteractsWithTrainingNeedsQueries
     public function getStatsProperty(): array
     {
         return $this->rememberRuntime('trainingNeeds.stats', function (): array {
-            return (array) DB::selectOne(
-                'select
-                    (select count(*) from training_competency_groups) as `groups`,
-                    (select count(*) from training_levels) as `levels`,
-                    (select count(*) from training_competencies) as `competencies`,
-                    (select count(*) from training_programs) as `programs`,
-                    (select count(*) from training_program_competency_map) as `program_maps`,
-                    (select count(*) from role_competency_requirements) as `requirements`,
-                    (select count(*) from employee_competency_profiles) as `profiles`,
-                    (select count(*) from training_need_items) as `needs`,
-                    (select count(*) from training_annual_plans) as `plans`,
-                    (select count(*) from training_plan_items) as `plan_items`,
-                    (select count(*) from training_sessions) as `sessions`,
-                    (select count(*) from training_delivery_records) as `deliveries`,
-                    (select count(*) from training_feedback_forms) as `feedback_forms`'
-            );
+            return app(TrainingNeedReportingService::class)->foundationStats();
         });
     }
 

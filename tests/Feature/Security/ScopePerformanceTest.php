@@ -159,12 +159,16 @@ it('hides out-of-scope assignments from the evaluator workspace even when assign
             'personnel_id' => $person->id,
             'manager_id' => $this->viewer->id,
             'manager_status' => 'draft',
+            'final_score' => $person->id === $this->ownPerson->id ? 50 : 90,
+            'final_category' => $person->id === $this->ownPerson->id ? 'weak' : 'high',
         ]);
         \App\Models\AuditActivity::query()->create(['log_name' => 'performance', 'description' => $person->surname, 'subject_type' => PerformanceForm::class, 'subject_id' => PerformanceForm::query()->latest('id')->value('id')]);
     }
     $this->actingAs($this->viewer);
     Livewire::test(\App\Modules\PerformanceEvaluation\Livewire\EvaluatorWorkspace::class)
         ->assertSee('Görünənov')->assertDontSee('Gizliyev');
+    expect(app(PerformanceEvaluationReportingService::class)->foundationStats()['forms'])->toBe(1)
+        ->and(app(PerformanceEvaluationReportingService::class)->scoreDistribution()['average'])->toBe(50.0);
     $audit = app(PerformanceEvaluationReportingService::class)->auditRows();
     expect($audit->pluck('description')->all())->toContain('Görünənov')->not->toContain('Gizliyev');
 });

@@ -63,8 +63,6 @@ class StructureScopeCoverageTest extends TestCase
      * @var array<string, string>
      */
     private const ALLOWED_UNSCOPED = [
-        'app/Modules/Candidates/Livewire/OpeningList.php' => 'vakansiya üzrə müraciət SAYI — ad/qeyd qaytarmır',
-        'app/Modules/Candidates/Livewire/RecruitmentAnalytics.php' => 'işə qəbul analitikası — yalnız aqreqat saylar',
         'app/Modules/PerformanceEvaluation/Livewire/Kpi/AnalyticsWorkspace.php' => 'baxanın rəhbər olub-olmadığını yoxlayır (exists), sətir qaytarmır',
         'app/Modules/PerformanceEvaluation/Livewire/UserPersonnelLinks.php' => 'istifadəçi↔işçi bağlantısının idarəsi (admin ekranı, identity sahəsi)',
         'app/Modules/Personnel/Livewire/Home.php' => 'oxumalar HomeOverviewService-dədir (görünürlüklə); qərar MyHrRequestReviewService::canReviewVacation ilə yoxlanır',

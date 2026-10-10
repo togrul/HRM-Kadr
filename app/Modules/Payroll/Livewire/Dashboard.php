@@ -9,6 +9,7 @@ use App\Models\PayrollRun;
 use App\Models\Payslip;
 use App\Modules\Payroll\Application\Services\PayrollExportService;
 use App\Modules\Payroll\Application\Services\PayrollPeriodService;
+use App\Modules\Payroll\Application\Services\PayrollRunReadService;
 use App\Modules\Payroll\Application\Services\PayrollRunService;
 use App\Support\Exports\CsvSafe;
 use App\Support\Livewire\DownloadsReportsTable;
@@ -231,8 +232,8 @@ class Dashboard extends Component
     {
         return [
             ['key' => 'periods', 'value' => PayrollPeriod::query()->count(), 'accent' => 'bg-sky-500'],
-            ['key' => 'runs', 'value' => PayrollRun::query()->count(), 'accent' => 'bg-violet-500'],
-            ['key' => 'locked', 'value' => PayrollRun::query()->where('status', 'locked')->count(), 'accent' => 'bg-emerald-500'],
+            ['key' => 'runs', 'value' => app(PayrollRunReadService::class)->visibleQuery(auth()->user())->count(), 'accent' => 'bg-violet-500'],
+            ['key' => 'locked', 'value' => app(PayrollRunReadService::class)->visibleQuery(auth()->user())->where('status', 'locked')->count(), 'accent' => 'bg-emerald-500'],
             ['key' => 'payslips', 'value' => $this->scopeByPersonnel(Payslip::query())->count(), 'accent' => 'bg-amber-400'],
         ];
     }
@@ -266,7 +267,7 @@ class Dashboard extends Component
     #[Computed]
     public function runIds(): Collection
     {
-        return PayrollRun::query()
+        return app(PayrollRunReadService::class)->visibleQuery(auth()->user())
             ->when($this->periodFilter, fn ($query) => $query->where('payroll_period_id', $this->periodFilter))
             ->when($this->regimeFilter, fn ($query) => $query->where('regime_id', $this->regimeFilter))
             ->orderByDesc('id')

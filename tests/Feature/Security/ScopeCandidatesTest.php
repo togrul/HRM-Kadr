@@ -150,3 +150,31 @@ it('refuses to download a document of an out-of-scope candidate', function (): v
         ->get(route('candidates.documents.download', $makeDocument($this->foreignCandidate)))
         ->assertForbidden();
 });
+
+it('scopes opening requisition lists and recruitment totals to visible records', function (): void {
+    config(['candidates.workflow_pack' => 'private', 'candidates.workflow_visible_packs' => 'auto']);
+    foreach ([$this->own, $this->foreign] as $structure) {
+        $requisition = \App\Models\JobRequisition::query()->create([
+            'title' => 'Request '.$structure->id, 'structure_id' => $structure->id, 'profile_pack' => 'private',
+            'headcount' => 3, 'status' => 'open', 'requested_by' => $this->creator->id,
+        ]);
+        $opening = scopeCandidatesMakeOpening($structure->id, $this->creator);
+        $opening->update(['job_requisition_id' => $requisition->id, 'published_at' => now()]);
+        CandidateApplication::query()->create([
+            'candidate_id' => $structure->id === $this->own->id ? $this->ownCandidate->id : $this->foreignCandidate->id,
+            'job_opening_id' => $opening->id, 'status' => 'active', 'current_stage' => 'screening',
+        ]);
+    }
+    $this->actingAs($this->viewer);
+    $openings = Livewire::test(\App\Modules\Candidates\Livewire\OpeningList::class)->set('pack', 'private');
+    expect($openings->instance()->totalOpenings())->toBe(1)
+        ->and($openings->instance()->totalPublished())->toBe(1)
+        ->and($openings->instance()->activeApplications())->toBe(1);
+    $openings->assertSee('Vakansiya '.$this->own->id)->assertDontSee('Vakansiya '.$this->foreign->id);
+    $requests = Livewire::test(\App\Modules\Candidates\Livewire\RequisitionList::class)->set('pack', 'private');
+    expect($requests->instance()->openCount())->toBe(1)
+        ->and($requests->instance()->totalHeadcount())->toBe(3);
+    $requests->assertSee('Request '.$this->own->id)->assertDontSee('Request '.$this->foreign->id);
+    $analytics = Livewire::test(\App\Modules\Candidates\Livewire\RecruitmentAnalytics::class)->instance()->summary();
+    expect($analytics['openings'])->toBe(1)->and($analytics['requisitions'])->toBe(1)->and($analytics['applications'])->toBe(1);
+});

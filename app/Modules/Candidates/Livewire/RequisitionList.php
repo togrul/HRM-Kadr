@@ -5,6 +5,7 @@ namespace App\Modules\Candidates\Livewire;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\Candidate;
 use App\Models\JobRequisition;
+use App\Modules\Candidates\Support\CandidateStructureScope;
 use App\Modules\Candidates\Support\Traits\InteractsWithRecruitmentPresentation;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -60,14 +61,14 @@ class RequisitionList extends Component
     {
         $effectivePack = $this->effectiveRecruitmentPack($this->pack);
 
-        return JobRequisition::query()
+        return CandidateStructureScope::constrainOwn(JobRequisition::query())
             ->with([
                 'structure:id,name',
                 'position:id,name',
                 'requester:id,name,email',
                 'owner:id,name,email',
             ])
-            ->withCount('openings')
+            ->withCount(['openings' => fn (Builder $query) => CandidateStructureScope::constrainOwn($query)])
             ->when($this->status !== 'all', fn (Builder $query) => $query->where('status', $this->status))
             ->when($effectivePack !== 'all', fn (Builder $query) => $query->where('profile_pack', $effectivePack))
             ->when($this->search !== '', function (Builder $query): void {
@@ -103,7 +104,7 @@ class RequisitionList extends Component
     {
         $effectivePack = $this->effectiveRecruitmentPack($this->pack);
 
-        return (int) JobRequisition::query()
+        return (int) CandidateStructureScope::constrainOwn(JobRequisition::query())
             ->when($effectivePack !== 'all', fn (Builder $query) => $query->where('profile_pack', $effectivePack))
             ->where('status', 'draft')
             ->count();
@@ -114,7 +115,7 @@ class RequisitionList extends Component
     {
         $effectivePack = $this->effectiveRecruitmentPack($this->pack);
 
-        return (int) JobRequisition::query()
+        return (int) CandidateStructureScope::constrainOwn(JobRequisition::query())
             ->when($effectivePack !== 'all', fn (Builder $query) => $query->where('profile_pack', $effectivePack))
             ->where('status', 'open')
             ->count();
@@ -125,7 +126,7 @@ class RequisitionList extends Component
     {
         $effectivePack = $this->effectiveRecruitmentPack($this->pack);
 
-        return (int) JobRequisition::query()
+        return (int) CandidateStructureScope::constrainOwn(JobRequisition::query())
             ->when($effectivePack !== 'all', fn (Builder $query) => $query->where('profile_pack', $effectivePack))
             ->sum('headcount');
     }

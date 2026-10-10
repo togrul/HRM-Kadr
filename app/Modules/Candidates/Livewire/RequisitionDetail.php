@@ -5,8 +5,11 @@ namespace App\Modules\Candidates\Livewire;
 use App\Models\Candidate;
 use App\Models\JobRequisition;
 use App\Modules\Candidates\Application\Services\CandidateAtsCompletionService;
+use App\Modules\Candidates\Support\CandidateStructureScope;
 use App\Modules\Candidates\Support\Traits\InteractsWithRecruitmentPresentation;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -79,13 +82,13 @@ class RequisitionDetail extends Component
             'owner:id,name,email',
             'approver:id,name,email',
             'rejecter:id,name,email',
-            'openings' => fn ($query) => $query
+            'openings' => fn (Relation $relation) => CandidateStructureScope::constrainOwn($relation->getQuery())
                 ->with([
                     'structure:id,name',
                     'position:id,name',
                     'owner:id,name,email',
                 ])
-                ->withCount('applications')
+                ->withCount(['applications' => fn (Builder $query) => CandidateStructureScope::constrainApplications($query)])
                 ->orderByDesc('id'),
         ])->findOrFail($this->requisition->id);
     }

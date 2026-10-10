@@ -115,6 +115,8 @@ it('limits training need lists to visible employees', function (): void {
     $rows = Livewire::actingAs($this->viewer)->test(TrainingLists::class)->instance()->rows;
 
     expect($rows->getCollection()->pluck('id')->all())->toBe([$own->id]);
+    $stats = app(\App\Modules\TrainingNeeds\Application\Services\TrainingNeedReportingService::class)->foundationStats();
+    expect($stats['needs'])->toBe(1);
 });
 
 it('keeps training audit exports within employee structure access', function (): void {
@@ -127,4 +129,19 @@ it('keeps training audit exports within employee structure access', function ():
     $this->actingAs($this->viewer);
     $rows = app(\App\Modules\TrainingNeeds\Application\Services\TrainingNeedReportingService::class)->auditRows();
     expect($rows->pluck('description')->all())->toContain('Görünənov')->not->toContain('Gizliyev');
+});
+
+it('counts and loads only visible participants in a shared training session', function (): void {
+    $session = \App\Models\TrainingSession::query()->create(['title' => 'Shared', 'status' => 'scheduled', 'scheduled_start_at' => now()->addDay()]);
+    foreach ([$this->ownPerson, $this->foreignPerson] as $person) {
+        \App\Models\TrainingSessionParticipant::query()->create([
+            'training_session_id' => $session->id, 'personnel_id' => $person->id, 'attendance_status' => 'attended',
+        ]);
+    }
+    $this->actingAs($this->viewer);
+    $reporting = app(\App\Modules\TrainingNeeds\Application\Services\TrainingNeedReportingService::class);
+    $summary = $reporting->deliverySummaryRows()->first();
+    expect((int) $summary->participant_count)->toBe(1)
+        ->and((int) $summary->attended_count)->toBe(1)
+        ->and($reporting->upcomingSessions()->first()->participants)->toHaveCount(1);
 });

@@ -7,6 +7,7 @@ use App\Models\EmployeeLoan;
 use App\Models\PayrollRun;
 use App\Models\Payslip;
 use App\Models\PayslipLine;
+use App\Modules\Payroll\Application\Services\PayrollRunReadService;
 use App\Modules\Payroll\Application\Services\PayrollRunService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -49,7 +50,7 @@ class RunsTab extends PayrollTab
     #[Computed]
     public function runs(): Collection
     {
-        return PayrollRun::query()
+        return app(PayrollRunReadService::class)->visibleQuery(auth()->user())
             ->with(['period', 'regime'])
             ->when($this->periodFilter, fn ($query) => $query->where('payroll_period_id', $this->periodFilter))
             ->when($this->regimeFilter, fn ($query) => $query->where('regime_id', $this->regimeFilter))

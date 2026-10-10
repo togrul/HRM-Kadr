@@ -10,6 +10,7 @@ use App\Models\PerformanceTrainingNeedLink;
 use App\Modules\PerformanceEvaluation\Support\PerformanceStructureScope;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Hesabat sətirləri işçinin strukturu üzrə istifadəçinin görünürlüyü ilə məhdudlaşır
@@ -17,6 +18,64 @@ use Illuminate\Support\Collection;
  */
 class PerformanceEvaluationReportingService
 {
+    /** @return array<string, int> */
+    public function foundationStats(): array
+    {
+        $tables = [
+            'cycles' => 'performance_cycles', 'templates' => 'performance_form_templates',
+            'sections' => 'performance_form_template_sections', 'items' => 'performance_form_template_items',
+            'forms' => 'performance_forms', 'scores' => 'performance_form_scores', 'links' => 'performance_training_need_links',
+            'test_banks' => 'performance_test_banks', 'test_questions' => 'performance_test_questions',
+            'test_sessions' => 'performance_test_sessions', 'test_attempts' => 'performance_test_attempts',
+            'test_need_links' => 'performance_test_training_need_links',
+        ];
+        $query = DB::query();
+        foreach ($tables as $key => $table) {
+            $count = match ($key) {
+                'forms' => PerformanceStructureScope::forms(),
+                'scores', 'links' => DB::table($table)->whereIn('performance_form_id', PerformanceStructureScope::forms()->select('performance_forms.id')),
+                'test_sessions' => PerformanceStructureScope::sessions(),
+                'test_attempts' => PerformanceStructureScope::attempts(),
+                'test_need_links' => DB::table($table)->whereIn('performance_test_attempt_id', PerformanceStructureScope::attempts()->select('performance_test_attempts.id')),
+                default => DB::table($table),
+            };
+            $query->selectSub($count->selectRaw('count(*)'), $key);
+        }
+
+        return array_map('intval', (array) $query->first());
+    }
+
+    /** @return array<string, mixed> */
+    public function scoreDistribution(): array
+    {
+        $row = PerformanceStructureScope::forms()
+            ->selectRaw('count(final_score) as scored, avg(final_score) as average,
+                sum(case when final_category = ? then 1 else 0 end) as high,
+                sum(case when final_category = ? then 1 else 0 end) as medium,
+                sum(case when final_category = ? then 1 else 0 end) as weak', ['high', 'medium', 'weak'])
+            ->first();
+
+        $scored = (int) ($row?->getAttribute('scored') ?? 0);
+
+        $buckets = collect(['high', 'medium', 'weak'])
+            ->map(function (string $key) use ($row, $scored): array {
+                $count = (int) ($row?->getAttribute($key) ?? 0);
+
+                return [
+                    'key' => $key,
+                    'count' => $count,
+                    'percent' => $scored > 0 ? (int) round($count / $scored * 100) : 0,
+                ];
+            })
+            ->all();
+
+        return [
+            'total' => $scored,
+            'average' => round((float) ($row?->getAttribute('average') ?? 0), 1),
+            'buckets' => $buckets,
+        ];
+    }
+
     public function formSummaryRows(): EloquentCollection
     {
         return PerformanceStructureScope::forms()

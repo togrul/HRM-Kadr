@@ -488,3 +488,90 @@ it('restarts the conditions year on return after a whole conditions year outside
     // 6 ay «üst-üstə» (cəmi) sayılır: əvvəlki 18 ay qalır — qayıdışdan bir ay sonra hüquq var.
     expect(vnBreakdown($personnel, '2023-04-01')['conditions'])->toBe(6);
 });
+
+it('defers a future transfer until its date and applies it exactly once', function (): void {
+    \Illuminate\Support\Carbon::setTestNow('2026-10-10 12:00:00');
+    try {
+        $person = vnPersonnel(['join_work_date' => '2020-01-01']);
+        $previous = $person->position_id;
+        $target = Position::query()->create(['name' => 'Future position']);
+        $order = OrderLog::query()->create([
+            'order_no' => 'FUT-1', 'given_date' => '2026-10-10', 'given_by' => 'Test', 'given_by_rank' => '', 'status_id' => OrderStatusEnum::APPROVED->value,
+            'template_render_mode' => 'docx', 'template_snapshot' => ['template_code' => 'kecirme', 'personnel_id' => $person->id],
+        ]);
+        $effect = app(TransferEffect::class);
+        $effect->apply($order, ['new_position' => $target->id, 'effective_date' => '2026-10-12'], $person);
+        expect($person->fresh()->position_id)->toBe($previous)
+            ->and($effect->applyDue($order))->toBeFalse();
+        $changes = app(OrderLeaveFacts::class)->positionChanges($person->id, $previous);
+        $facts = new \App\Modules\Personnel\Contracts\LeaveEntitlementFacts(tabelNo: $person->tabel_no, positionId: $previous, positionChanges: $changes);
+        expect($facts->positionOn(CarbonImmutable::parse('2026-10-11')))->toBe($previous)
+            ->and($facts->positionOn(CarbonImmutable::parse('2026-10-12')))->toBe($target->id);
+        \Illuminate\Support\Carbon::setTestNow('2026-10-12 00:10:00');
+        $result = app(\App\Modules\Orders\Application\Services\DeferredTransferService::class)->applyDue();
+        expect($result)->toBe(['applied' => 1, 'skipped' => 0, 'failed' => 0])
+            ->and($person->fresh()->position_id)->toBe($target->id)
+            ->and($effect->applyDue($order))->toBeFalse();
+        $effect->reverse($order->fresh(), ['new_position' => $target->id], $person->fresh());
+        expect($person->fresh()->position_id)->toBe($previous);
+    } finally {
+        \Illuminate\Support\Carbon::setTestNow();
+    }
+});
+
+it('cancels an unapplied transfer without undoing a different current position', function (): void {
+    \Illuminate\Support\Carbon::setTestNow('2026-10-10 12:00:00');
+    try {
+        $person = vnPersonnel();
+        $target = Position::query()->create(['name' => 'Future']);
+        $other = Position::query()->create(['name' => 'Intervening']);
+        $order = OrderLog::query()->create([
+            'order_no' => 'FUT-2', 'given_date' => '2026-10-10', 'given_by' => 'Test', 'given_by_rank' => '', 'status_id' => OrderStatusEnum::APPROVED->value,
+            'template_render_mode' => 'docx', 'template_snapshot' => ['personnel_id' => $person->id],
+        ]);
+        $effect = app(TransferEffect::class);
+        $effect->apply($order, ['new_position' => $target->id, 'effective_date' => '2026-10-20'], $person);
+        app(\App\Modules\Personnel\Contracts\GuardsPersonnelChanges::class)->allowForEffect('transfer', fn () => $person->forceFill(['position_id' => $other->id])->save());
+        $effect->reverse($order->fresh(), ['new_position' => $target->id], $person->fresh());
+        expect($person->fresh()->position_id)->toBe($other->id)
+            ->and($order->fresh()->template_snapshot['effect_state']['transfer_pending'])->toBeFalse();
+    } finally {
+        \Illuminate\Support\Carbon::setTestNow();
+    }
+});
+
+it('registers the deferred transfer command every five minutes with overlap protection', function (): void {
+    $events = app(\Illuminate\Console\Scheduling\Schedule::class)->events();
+    $event = collect($events)->first(fn ($event): bool => str_contains((string) $event->command, 'orders:apply-due-transfers'));
+    expect($event)->not->toBeNull()
+        ->and($event->expression)->toBe('*/5 * * * *')
+        ->and($event->withoutOverlapping)->toBeTrue();
+    $this->artisan('orders:apply-due-transfers')->assertSuccessful();
+});
+
+it('applies overdue transfers by effective date rather than approval sequence', function (): void {
+    \Illuminate\Support\Carbon::setTestNow('2026-10-10 12:00:00');
+    try {
+        $person = vnPersonnel();
+        $later = Position::query()->create(['name' => 'Later']);
+        $earlier = Position::query()->create(['name' => 'Earlier']);
+        $orders = [];
+        foreach ([['2026-10-17', $later], ['2026-10-15', $earlier]] as $index => [$date, $target]) {
+            $order = OrderLog::query()->create([
+                'order_no' => 'SEQ-'.$index, 'given_date' => '2026-10-10', 'given_by' => 'Test', 'given_by_rank' => '',
+                'status_id' => OrderStatusEnum::APPROVED->value, 'template_render_mode' => 'docx',
+                'template_snapshot' => ['personnel_id' => $person->id],
+            ]);
+            app(TransferEffect::class)->apply($order, ['new_position' => $target->id, 'effective_date' => $date], $person->fresh());
+            $orders[] = $order;
+        }
+        \Illuminate\Support\Carbon::setTestNow('2026-10-20 12:00:00');
+        $service = app(\App\Modules\Orders\Application\Services\DeferredTransferService::class);
+        expect($service->applyDue()['applied'])->toBe(2)
+            ->and($person->fresh()->position_id)->toBe($later->id)
+            ->and($orders[0]->fresh()->template_snapshot['effect_state']['prev_position_id'])->toBe($earlier->id)
+            ->and($service->applyDue()['applied'])->toBe(0);
+    } finally {
+        \Illuminate\Support\Carbon::setTestNow();
+    }
+});

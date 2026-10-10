@@ -44,7 +44,7 @@ final class LeaveEntitlementFacts
          * Vəzifəni dəyişmiş köçürmələr, tarixə görə artan: [köçürmə günü, əvvəlki vəzifə].
          * Boşdursa işçi işə qəbuldan hazırkı vəzifədədir.
          *
-         * @var list<array{0: CarbonImmutable, 1: ?int}>
+         * @var list<array{0: CarbonImmutable, 1: ?int, 2?: ?int}>
          */
         public readonly array $positionChanges = [],
     ) {}
@@ -54,13 +54,18 @@ final class LeaveEntitlementFacts
     {
         $day = $date->toDateString();
 
-        foreach ($this->positionChanges as [$changedOn, $previous]) {
+        $position = $this->positionId;
+        foreach ($this->positionChanges as $change) {
+            [$changedOn, $previous] = $change;
             if ($day < $changedOn->toDateString()) {
                 return $previous;
             }
+            if (array_key_exists(2, $change)) {
+                $position = $change[2];
+            }
         }
 
-        return $this->positionId;
+        return $position;
     }
 
     /** Gün m.116 / NK 95 b.8 stajına daxil olmayan dövrə düşürmü (ödənişsiz, uşağa qulluq). */
@@ -81,7 +86,7 @@ final class LeaveEntitlementFacts
      * Başqa moduldan gələn faktlarla (əmrlər) tamamlanmış nüsxə.
      *
      * @param  list<array{0: CarbonImmutable, 1: CarbonImmutable}>  $seniorityGaps
-     * @param  list<array{0: CarbonImmutable, 1: ?int}>  $positionChanges
+     * @param  list<array{0: CarbonImmutable, 1: ?int, 2?: ?int}>  $positionChanges
      */
     public function withOrderFacts(array $seniorityGaps, array $positionChanges): self
     {

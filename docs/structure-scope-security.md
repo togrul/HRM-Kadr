@@ -105,3 +105,20 @@ rəhbər isə əvvəlki kimi ayrıca `personnels.id` (`assigned_to`) ilə göst�
 Deploydan əvvəl backup alınmalı, sonra miqrasiyadan sonra tarixi legacy sütunlar
 köhnə audit/backup sübutları ilə tutuşdurulmalıdır. Sadəcə eyni rəqəmin və ya cari
 istifadəçi–işçi bağının mövcudluğu tarixi aktorun sübutu deyil.
+
+
+## Vakansiyalar və panel göstəriciləri
+
+Vakansiya/tələbnamə siyahıları və bağlı müraciət sayları eyni struktur görünürlüyündən
+keçir. Tələbnamə detalında digər strukturun bağlı vakansiyası da gizlədilir. İşə qəbul
+analitikasının mərhələ, mənbə, səbəb və müddət hesabları yalnız görünən müraciətlərdir.
+
+Payroll run-un məbləğləri bütöv run-a aiddir: içində bir görünməyən işçinin vərəqəsi
+varsa məhdud istifadəçi həmin run-u və onun ümumi məbləğini görmür. Boş run-lardan
+yalnız özünün yaratdığı açılır; «bütün strukturlar» istifadəçisi bütün run-ları görür.
+Fərdi payslip və eksport görünürlüyü əvvəlki kimi ayrıca tətbiq edilir.
+
+Performansın forma/ballar/test cəhdləri sayları və nəticə paylanması, təlimin işçi
+profili/ehtiyac/keçirilmə sayları, iştirakçıları və rəy hesabları struktur üzrə süzülür.
+Normativ və soraqça sayları təşkilatın ümumi məlumatıdır. Təlim hesabatında qoşulan
+cədvəllər iştirakçıları təkrar saya bilməz: saylar ayrı ID-lər üzrə hesablanır.
