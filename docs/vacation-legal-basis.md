@@ -534,3 +534,13 @@ təsadüf etdikdə üst-üstə düşən günlər bir gün hesabı ilə nəzərə
 | Keçirmə (m.134–135) | Qalıq yanmır, sonrakı iş illərinə keçir; istifadə ən köhnə iş ilindən (əmrdə iş ili göstərilibsə əvvəlcə ondan) | — |
 | Kompensasiya (m.144.2) | «İstifadə olunmamış məzuniyyətə görə kompensasiya» əmri: xitam əmri olmadan tərtib edilmir, xitam təsdiqlənmədən təsdiqlənmir; günlər bütün iş illərinin qalığından çox ola bilməz | İşləmə dövründə kompensasiya «Vacation compensation without termination allowed» ayarı ilə açılır (standart: bağlı) |
 | Rütbəli heyət | Əvvəlki qayda dəyişmədən (rütbə kateqoriyası) | 6 ay qaydası tətbiq olunmur |
+
+## 11.10.2026 — köçürmə və əsas məzuniyyət üzrə hüquqi yoxlama
+
+Rəsmi konsolidasiya mətnində Md.114.1–3 əsas məzuniyyəti əmək müqaviləsindəki peşə/vəzifə və müvafiq kateqoriya ilə bağlayır: ümumi minimum 21, rəhbər/mütəxəssis və sadalanmış digər kateqoriyalar üçün 30 gün. Md.131.6 faktiki işlənmiş vaxta mütənasib hesablamanı əmək şəraitinə görə **əlavə** məzuniyyət üçün müəyyən edir. NK 95 b.7 və b.11 həmin əlavənin fərqli iş dövrlərinin ayrıca hesablanmasını dəqiqləşdirir. [Əmək Məcəlləsi](https://frameworks.e-qanun.az/46/f_46943.html), [NK 95](https://frameworks.e-qanun.az/9/f_9900.html).
+
+**Bu araşdırmanın nəticəsi:** həmin müddəalardan 21/30 günlük əsas məzuniyyəti köçürmə günündə avtomatik proporsional bölmək tələbi çıxarmıram. Əlavə məzuniyyətin qaydasını əsasa köçürmək düzgün əsaslandırılmayıb. Hazır əsas norma həmin hüquqi səbəblə yeni çəkili orta düsturuna keçirilmədi. Bu, bütün qarışıq vəzifəli iş ili hallarının hüquqi interpretasiyasının tamamlanması iddiası deyil.
+
+Texniki sərhəd: təsdiqlənmiş köçürmənin gerçək qüvvəyə minmə günü, single/multi iştirakçı vəzifə tarixçəsi və əlavə şərait dövrləri qorunur. Tarixi qazanılmış/saxlanmış hüquq cari vəzifə ilə səssiz azaldılmamalıdır. Cari və gələcək tarixə kateqoriya, keçmiş iş ili hüququ və valid-from normanın tətbiqi ayrıca hallardır; konkret 21→30 və 30→21 nümunələri üzrə qayda təsdiqlənmədən onları bir “proporsiya” düsturuna yığmırıq.
+
+Yoxlama zamanı e-qanun portal səhifəsi mətn vermədiyindən rəsmi `frameworks.e-qanun.az` HTML mətnindən Md.114/131 oxundu; silinmiş/üstündən xətt çəkilmiş redaksiyalar çıxarıldı. Standart web aləti böyük faylı oxumadı, birbaşa rəsmi HTML texniki olaraq oxundu. Mətnin alınması qanunu bütün maddələr üzrə təhlil etdiyimizi göstərmir.

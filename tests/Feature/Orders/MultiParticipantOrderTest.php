@@ -759,6 +759,15 @@ class MultiParticipantOrderTest extends TestCase
         $this->assertSame(2, app(\App\Services\Staff\StaffScheduleVacancyService::class)->vacancy($a->structure_id, $target->id));
     }
 
+    public function test_auto_vacancies_count_existing_staff_even_when_no_schedule_row_exists(): void
+    {
+        $personnel = $this->makePersonnel('Existing occupant');
+        $service = app(\App\Services\Staff\StaffScheduleVacancyService::class);
+        $row = $service->ensureOneVacancy($personnel->structure_id, $personnel->position_id, 2);
+        $this->assertSame(3, $row->total);
+        $this->assertSame(2, $service->vacancy($personnel->structure_id, $personnel->position_id));
+    }
+
     private function transferOrder(Personnel $a, Personnel $b, int $target, array $dates): OrderLog
     {
         OrderWordTemplate::query()->firstOrCreate(['code' => 'multi_transfer_test'], [

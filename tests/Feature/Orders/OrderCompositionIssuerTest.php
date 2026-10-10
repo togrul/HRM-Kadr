@@ -8,6 +8,7 @@ use App\Models\OrderWordTemplate;
 use App\Models\Personnel;
 use App\Models\Position;
 use App\Models\Structure;
+use App\Models\User;
 use App\Modules\Orders\Application\Document\OrderComposition;
 use App\Modules\Orders\Infrastructure\Document\OrderCompositionIssuer;
 use App\Modules\Orders\Infrastructure\Document\OrderDocumentBuilder;
@@ -73,6 +74,7 @@ class OrderCompositionIssuerTest extends TestCase
 
     public function test_a_hire_without_a_free_slot_asks_to_create_one(): void
     {
+        $this->actingAs(grantAllStructures(User::factory()->create()));
         $structure = Structure::query()->create(['name' => 'Mərkəzi anbar', 'shortname' => 'MA']);
         $position = Position::query()->create(['name' => 'sürücü']);
         $candidate = $this->makeCandidate($structure);

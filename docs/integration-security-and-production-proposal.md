@@ -192,3 +192,7 @@ Bu hissə hüquqi dərəcə və ya bonus siyasəti seçmir. Hüquqşünas/mühas
 Əvvəl hazır təhlükəsizlik paketinin release hazırlığı, tenant/membership/rol preview-u və read-only inventarlar. API read pilot və ARBAY şirkət rolları ayrı mərhələlər olsun. KPI write və payroll approval siyasət cavablarından sonra; webhook worker hazır olandan sonra. CSP report-only ayrıca browser matrisi ilə irəliləsin. DOCX editor ehtiyac/lisenziya/sizing qərarınadək bağlı qalsın.
 
 Bu sənəd üçün mövcud kod oxunub və təchizatçıların rəsmi sənədləri yoxlanıb. Təklif olunan API, teams və CSP implementasiya edilməyib; document server quraşdırılmayıb. Canlı backup/migration/env/rol/token/scheduler/PDF və siyasət dəyişiklikləri edilməyib. Müştəri axınları və production performansı bu araşdırmada test edilməyib.
+
+## 11.10.2026 — son istifadəçi dəqiqləşdirməsi
+
+Tarixi məzuniyyət aktorlarının bərpası və istehsalat köçürmə auditi istifadəçinin “hələlik saxla” cavabı ilə təxirə salındı. Əsas məzuniyyət/pul təsdiqi üzrə qanuna əsaslanan araşdırma `vacation-legal-basis.md` və `payroll-compensation-plan.md`-də qeyd olunur. Qanunda göstərilməyən əsas məzuniyyət proporsiyası və konkret şirkət təsdiq marşrutu hüquqi tələb kimi tətbiq edilmədi.

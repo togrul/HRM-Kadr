@@ -5173,12 +5173,6 @@ parameters:
 			path: app/Modules/Payroll/Application/Services/PayrollExportService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Payslip\:\:\$currency\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Payroll/Application/Services/PayrollExportService.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Payslip\:\:\$gross\.$#'
 			identifier: property.notFound
 			count: 1
@@ -5225,12 +5219,6 @@ parameters:
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Modules/Payroll/Application/Services/PayrollExportService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Payslip\:\:\$currency\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Payroll/Application/Services/PayrollRunService.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Payslip\:\:\$employer_cost\.$#'
