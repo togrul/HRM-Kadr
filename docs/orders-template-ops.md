@@ -86,3 +86,42 @@ məzuniyyət hesabının vəzifə faktları gözləyən köçürməni də nəzə
 Onlar avtomatik geri çevrilmir: cari vəziyyət, sonrakı dəyişikliklər və əmrin tarixçəsi
 istehsalat backup-u ilə birlikdə ayrıca yoxlanmalıdır. Çoxşəxsli köçürmə bu paketdə
 aktivləşdirilməyib; həmin effekt əvvəlki kimi tək işçi üçündür.
+
+Köhnə köçürmələrin ilkin, yalnız oxuma inventarı:
+
+```bash
+php artisan orders:audit-transfer-timing
+php artisan orders:audit-transfer-timing --order-id=123
+```
+
+Komanda təsdiqlənmiş əmrləri (soft-delete daxil) 200-lük paketlərlə oxuyur və JSON
+Lines verir: hər tapıntı ayrıca sətir, sonda `summary` və təsnifat üzrə saylar.
+`confirmed_early_application` yalnız saxlanmış `transfer_applied_at` vaxtının
+tətbiqin yerli saat qurşağında `effective_date` günündən əvvəl olduğunu bildirir.
+Tarix artıq keçmiş olsa da bu sübut hesabatda qalır. Həmin günün tətbiqi erkən sayılmır.
+
+Tətbiq vaxtı olmayan əvvəlki snapshot-lar `legacy_requires_history_review` kimi
+çıxır; bu təsnifat erkən köçürməni sübut etmir. Sonradan dəyişmiş işçi kartından,
+əmrin yaradılma/redaktə vaxtından tətbiq vaxtı təxmin edilmir. Qüvvəyə minmə tarixi
+olmayan köhnə snapshot-da əmrin tarixi götürülür. Yanlış tarix və vaxtlar, həmçinin
+tətbiq vaxtı yazılmış pending vəziyyəti ayrıca göstərilir. Normal pending və
+vaxtında tətbiq edilmiş əmrlər hesabatdan çıxarılır.
+
+Hesabat heç bir kartı, əmri və audit jurnalını dəyişmir. Tam tarixçə yoxlamasını,
+silinmiş/mövcud olmayan snapshot-ların araşdırılmasını və istehsalatda icranı əvəz
+etmir. `legacy_requires_history_review` üzrə qərar üçün işçi tarixçəsi və backup
+ilə uyğunlaşdırma tələb olunur; avtomatik geri çevirmə nəzərdə tutulmayıb.
+
+## Render benchmark testlərinin vaxt ölçüsü
+
+`tests/Feature/Console/*RenderBenchmarkCommandTest.php` funksional yoxlamadır:
+Livewire komponentləri və qarşılıqlı əməliyyatlar həqiqətən icra edilir, cavab
+ölçüsü və render xətaları yoxlanılır. `UsesDeterministicRenderTiming` yalnız testdə
+qaytarılan vaxtı 10 ms edir. Paylaşılan CPU yükü, ilk Blade/Blaze kompilyasiyası və
+prosesin planlaşdırılması həmin testlərin uğurunu dəyişmir. Bu 10 ms performans
+nəticəsi deyil. `RenderBenchmarkBudgetTest` vaxt/cavab həddinin aşılması, sərhəd
+dəyəri və render xətasının uğursuz çıxış kodu yaratmasını ayrıca yoxlayır.
+
+Real vaxt ölçmək üçün `orders:list-render-benchmark --json` kimi Artisan
+komandalarını test runner-dən kənar, nəzarət olunan yük altında icra etmək lazımdır.
+İstehsalat komandaları və onların vaxt/payload hədləri dəyişdirilməyib.

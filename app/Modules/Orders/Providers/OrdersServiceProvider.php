@@ -31,6 +31,7 @@ class OrdersServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
+                \App\Modules\Orders\Console\Commands\AuditTransferTimingCommand::class,
                 \App\Modules\Orders\Console\Commands\ApplyDueTransfersCommand::class,
                 OrdersListQueryBudgetCommand::class,
                 OrdersListRenderBenchmarkCommand::class,

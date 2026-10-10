@@ -11,6 +11,7 @@ use Tests\TestCase;
 class LeavesRenderBenchmarkCommandTest extends TestCase
 {
     use RefreshDatabase;
+    use UsesDeterministicRenderTiming;
 
     public function test_it_reports_render_metrics_for_leaves_flows(): void
     {

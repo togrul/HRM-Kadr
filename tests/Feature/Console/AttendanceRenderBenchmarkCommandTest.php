@@ -11,6 +11,7 @@ use Tests\TestCase;
 class AttendanceRenderBenchmarkCommandTest extends TestCase
 {
     use RefreshDatabase;
+    use UsesDeterministicRenderTiming;
 
     public function test_it_reports_render_metrics_for_attendance_workbench_flows(): void
     {

@@ -14,6 +14,7 @@ use Tests\TestCase;
 class TrainingNeedsRenderBenchmarkCommandTest extends TestCase
 {
     use RefreshDatabase;
+    use UsesDeterministicRenderTiming;
 
     public function test_it_can_skip_when_dataset_is_empty_and_allow_empty_enabled(): void
     {
