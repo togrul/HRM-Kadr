@@ -154,10 +154,7 @@ class SelfServiceVacationOrderBinderService
             ->where(function ($query) {
                 $query->where('name', 'like', '%məzuniyyət%')
                     ->orWhere('name', 'like', '%mezuniyyet%')
-                    ->orWhere('name', 'like', '%vacation%')
-                    ->orWhere('content', 'like', '%məzuniyyət%')
-                    ->orWhere('content', 'like', '%mezuniyyet%')
-                    ->orWhere('content', 'like', '%vacation%');
+                    ->orWhere('name', 'like', '%vacation%');
             })
             ->orderBy('id')
             ->first();
@@ -176,9 +173,13 @@ class SelfServiceVacationOrderBinderService
             'id' => $orderId,
             'order_category_id' => $category->id,
             'name' => 'Məzuniyyət əmri',
-            'content' => 'Auto-generated operational order for self-service vacations.',
             'order_model' => PersonnelVacation::class,
         ];
+
+        // Keçid qoruyucusu: `orders.content` drop miqrasiyası işləyənə qədər sütun NOT NULL-dur.
+        if (InstalledTables::hasColumn('orders', 'content')) {
+            $payload['content'] = '';
+        }
 
         if (InstalledTables::hasColumn('orders', 'blade')) {
             $payload['blade'] = Order::BLADE_VACATION;

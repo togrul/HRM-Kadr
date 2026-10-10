@@ -21,7 +21,6 @@ class Order extends Model
     protected $fillable = [
         'order_category_id',
         'name',
-        'content',
         'order_model',
         'blade',
     ];

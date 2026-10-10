@@ -43,7 +43,6 @@ return [
         'icon' => 'İkon',
         'content' => 'Məzmun',
         'title' => 'Başlıq',
-        'dynamic_fields' => 'Dinamik sahələr',
         'rank_category' => 'Rütbə kateqoriyası',
         'duration' => 'Müddət',
         'fullname' => 'Soyad, ad, ata adı',

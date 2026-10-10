@@ -43,7 +43,6 @@ return [
         'icon' => 'Icon',
         'content' => 'Content',
         'title' => 'Title',
-        'dynamic_fields' => 'Dynamic fields',
         'rank_category' => 'Rank category',
         'duration' => 'Duration',
         'fullname' => 'Fullname',

@@ -63,18 +63,75 @@ Bu sənəd Orders engine-də köhnə component/DOCX fallback-larını təhlükə
   - [x] `componentForms` üçün `orderRows` adapter qatını əlavə etmək və daxili default/vacancy/edit oxunuşlarını adapterdən keçirmək.
   - [x] `HandlesOrderComponentFieldState` içində component row oxu/yazılarını lokal helper-lərlə mərkəzləşdirmək.
   - [x] `OrderCrud` içində `componentDefinitions` / `components.dynamic_fields` fallback oxunuşunu çıxarmaq.
-  - [ ] `OrderCrud` içində `componentForms` və `selectedComponents` runtime state adlarını designer/schema terminləri ilə əvəz etmək.
-  - [ ] Component row trait-lərini (`HandlesComponentRows`, `HandlesOrderComponentFieldState`, `ManagesOrderComponents`) designer/schema resolver axını ilə əvəz etmək.
-  - [ ] `OrderPrintPayloadFactory` içində legacy render payload branch-ını yalnız historical print üçün izolyasiya etmək, sonra silmək.
-  - [ ] `GenerateWordReplaceContent` və köhnə `${content}` DOCX axınını arxivləmək.
+  - [x] `OrderCrud` içində `componentForms` və `selectedComponents` runtime state adlarını designer/schema terminləri ilə əvəz etmək.
+  - [x] Component row trait-lərini (`HandlesComponentRows`, `HandlesOrderComponentFieldState`, `ManagesOrderComponents`) designer/schema resolver axını ilə əvəz etmək.
+  - [x] `OrderPrintPayloadFactory` içində legacy render payload branch-ını yalnız historical print üçün izolyasiya etmək, sonra silmək.
+  - [x] `GenerateWordReplaceContent` və köhnə `${content}` DOCX axınını arxivləmək.
 - Data cleanup:
-  - [ ] `orders.content` template path mənbəyi kimi oxunmadıqdan sonra drop migration planı hazırlamaq.
+  - [x] `orders.content` template path mənbəyi kimi oxunmadıqdan sonra drop migration planı hazırlamaq.
   - [x] `components.dynamic_fields` runtime/admin yazılışını dayandırmaq.
-  - [ ] `components.dynamic_fields` üçün staging təsdiqindən sonra ayrıca drop migration planı hazırlamaq.
-  - [ ] `order_log_components` / `order_log_component_attributes` historical print üçün lazım olmadıqda drop migration planı hazırlamaq.
+  - [x] `components.dynamic_fields` üçün staging təsdiqindən sonra ayrıca drop migration planı hazırlamaq.
+  - [x] `order_log_components` / `order_log_component_attributes` historical print üçün lazım olmadıqda drop migration planı hazırlamaq.
 - Test cleanup:
   - [x] Template schema olmayan order type üçün legacy `components.dynamic_fields` UI fallback-ının render olunmadığını testlə bağlamaq.
-  - [ ] Qalan legacy fallback testlərini designer-first gözləntilərlə əvəzləmək.
+  - [x] Qalan legacy fallback testlərini designer-first gözləntilərlə əvəzləmək.
+
+### 6.1) Bağlanış (2026-10-10)
+
+Bölmə 6 bağlanıb. Qeyd: kod bəndlərinin çoxu artıq phase 6 (4a–4b.3) commit-lərində
+silinmişdi; bu bağlanış qalan izləri təmizləyir, data drop-larını arxivlə təhlükəsiz edir
+və sənədi faktiki vəziyyətə uyğunlaşdırır.
+
+**Silinib (kod):**
+- `OrderCrud`, `EditOrder`, `componentForms` / `selectedComponents` state-i və row trait-ləri
+  (`HandlesComponentRows`, `HandlesOrderComponentFieldState`, `ManagesOrderComponents`) —
+  `cca1b888`-də silinib. Yerinə `OrderComposer` + Word şablonu (`order_word_templates`) gəlib;
+  ad dəyişikliyinə ehtiyac qalmayıb.
+- `OrderPrintPayloadFactory` və legacy render/snapshot builder-ləri — `cca1b888`. `printOrder()`
+  yalnız `template_render_mode = docx` əmrləri `template_snapshot.docx_path`-dan verir
+  (`c72a7e5a`); köhnə render rejimli əmr üçün print/PDF fallback **yoxdur** (404).
+- `App\Services\GenerateWordReplaceContent` + testi, ölü `x-dynamic-input` blade komponenti
+  (köhnə `$fullname`/`$structure` placeholder sahə renderer-i), `StructureSelect`-dəki
+  `componentFieldValue` hook-u, `radio-tree.item`-in `componentForms` default-u,
+  `services::components` dil faylı və `dynamic_fields` açarı.
+- `orders.content` oxunuşu: self-service məzuniyyət binder-inin `content LIKE` fallback-ı,
+  `Order::$fillable`, `OrderSeeder`. Binder `content`-i yalnız sütun hələ varsa (keçid anı) boş yazır.
+
+**Historical print üçün nə saxlanılıb:** heç nə. Köhnə (pre-designer) əmrlər artıq
+çap olunmur/yenidən render edilmir; onların məlumatı `order_logs` + `order_log_personnels`
+sətirlərində qalır. Ona görə `order_log_components*` və `orders.content`-i `template_snapshot`-a
+backfill etməyə ehtiyac yoxdur — yalnız arxivlənir.
+
+**Arxiv:** `legacy_order_archive` (`source`, `source_key`, JSON `payload`, `archived_at`).
+Hər dağıdıcı Orders miqrasiyası drop-dan əvvəl sətirləri buraya köçürür; down() məlumatı
+buradan geri yazır və öz arxiv sətirlərini silir.
+
+**Miqrasiyalar:**
+| Miqrasiya | Növ |
+|---|---|
+| `2026_06_20_110000_create_legacy_order_archive_table` | yeni cədvəl, dağıdıcı deyil (down() arxiv boş deyilsə imtina edir) |
+| `2026_06_20_120000_drop_legacy_component_tables` | **DAĞIDICI** — `components` (+ `dynamic_fields`), `order_log_components`, `order_log_component_attributes`, `order_log_personnels.component_id`. İndi drop-dan əvvəl arxivləyir. **Diqqət:** bu miqrasiya `main`-də artıq var idi; artıq işləmiş mühitlərdə arxiv addımı yenidən işləməyəcək (o data artıq silinib) |
+| `2026_10_10_200000_archive_and_drop_orders_content` | **DAĞIDICI** — `orders.content` |
+
+**Production rollout addımları:**
+1. Tam DB backup (`mysqldump` — ən azı `orders`, `order_log_personnels`, və hələ varsa
+   `components`, `order_log_components`, `order_log_component_attributes`). Backup-ı bərpa edə bildiyini yoxla.
+2. `php artisan migrate:status` — `2026_06_20_120000` artıq `Ran`-dırsa, komponent datası artıq
+   arxivsiz silinib (yalnız backup-dadır); `Pending`-dirsə, indi arxivlə silinəcək.
+3. Kodu deploy et, sonra `php artisan migrate --force`. Sıra fərqi problem deyil: binder sütun
+   varsa `content`-i boş yazır, yoxdursa yazmır.
+4. Yoxla: `SELECT source, COUNT(*) FROM legacy_order_archive GROUP BY source` mənbə cədvəl
+   sətir sayları ilə üst-üstə düşür.
+5. Rollback: `php artisan migrate:rollback --path=app/Modules/Orders/Database/Migrations/2026_10_10_200000_archive_and_drop_orders_content.php`
+   (sütunu nullable kimi qaytarıb dəyərləri arxivdən yazır).
+
+**Bayraqlar / readiness əmrləri:** `ORDERS_ENGINE_STRICT_MODE`,
+`ORDERS_ENGINE_WRITE_LEGACY_COMPONENT_SNAPSHOTS`, `ORDERS_ENGINE_DEFAULT_RENDER_MODE` və
+`orders:templates:{legacy-audit,doctor,readiness,smoke}` əmrləri `cca1b888`-də silinib —
+legacy yol fiziki olaraq yoxdur, ona görə "strict mode" artıq konfiqurasiya yox, kodun özüdür.
+Bölmə 2, 4 və 10 tarixi qeyd kimi qalır. Mövcud yoxlamalar: `composer ci:orders-gate`
+(`orders:list-query-budget`), `OrdersNoLegacyEngineTest` (köhnə simvolların geri qayıtmaması),
+`LegacyOrderArchiveMigrationTest` (arxiv + bərpa), `AllOrdersInteractionTest::test_pre_designer_orders_have_no_print_fallback`.
 
 ## 7) Yeni Əmr Tipini 0-dan Yaratmaq Ardıcıllığı
 1. `Şablonlar -> Əmr tipi` hissəsində yeni order type yaradılır.
@@ -101,6 +158,8 @@ Bu sənəd Orders engine-də köhnə component/DOCX fallback-larını təhlükə
    - signatory snapshot
 
 ## 8) Köhnə Strukturdan Nə Qalıb
+> Tarixi qeyd (bağlanışdan əvvəlki vəziyyət). Faktiki vəziyyət üçün bax 6.1: `componentForms`, `components.dynamic_fields`, `order_log_components*` və `orders.content` artıq yoxdur; yalnız `orders.blade` qalır (binder və `OrderLog::handleDeletion` istifadə edir).
+
 - `componentForms`
   - Hazırda form row state namespace kimi qalır.
   - Bu ad həm legacy, həm də yeni schema-driven row-lar üçün istifadə olunduğuna görə birbaşa silinməməlidir.

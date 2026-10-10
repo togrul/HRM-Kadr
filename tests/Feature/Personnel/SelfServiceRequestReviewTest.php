@@ -343,7 +343,6 @@ class SelfServiceRequestReviewTest extends TestCase
                 'id' => 1001,
                 'order_category_id' => 1,
                 'name' => 'Məzuniyyət əmri',
-                'content' => 'Vacation order',
                 'order_model' => \App\Models\PersonnelVacation::class,
                 'blade' => Order::BLADE_VACATION,
             ]);
