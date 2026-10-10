@@ -5,6 +5,7 @@ namespace App\Services\Staff;
 use App\Models\StaffSchedule;
 use App\Modules\Staff\Contracts\StaffingLookup;
 use App\Modules\Staff\Contracts\StaffSlotCheck;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Reads and adjusts the staff schedule (ştat cədvəli) vacancy for a structure+position.
@@ -41,30 +42,19 @@ class StaffScheduleVacancyService
      */
     public function ensureOneVacancy(int $structureId, int $positionId, int $minimumVacancies = 1): StaffSchedule
     {
-        $row = $this->row($structureId, $positionId);
-
-        if (! $row) {
-            return StaffSchedule::query()->create([
-                'structure_id' => $structureId,
-                'position_id' => $positionId,
-                'total' => max(1, $minimumVacancies),
-                'filled' => 0,
-                'vacant' => max(1, $minimumVacancies),
+        return DB::transaction(function () use ($structureId, $positionId, $minimumVacancies): StaffSchedule {
+            $row = StaffSchedule::query()->where('structure_id', $structureId)->where('position_id', $positionId)->lockForUpdate()->first();
+            $row ??= StaffSchedule::query()->create([
+                'structure_id' => $structureId, 'position_id' => $positionId, 'total' => 0, 'filled' => 0, 'vacant' => 0,
             ]);
-        }
+            $check = $this->staffing->check($structureId, $positionId);
+            if ($check->vacant() < max(1, $minimumVacancies)) {
+                $total = max((int) $row->total, $check->filled + max(1, $minimumVacancies));
+                $row->forceFill(['total' => $total, 'filled' => $check->filled, 'vacant' => max(0, $total - $check->filled)])->save();
+            }
 
-        $check = $this->staffing->check($structureId, $positionId);
-
-        if ($check->vacant() < max(1, $minimumVacancies)) {
-            // Grow this row so the pair's total sits one above the people already in it.
-            $total = max((int) $row->total, $check->filled + max(1, $minimumVacancies));
-            $row->forceFill([
-                'total' => $total,
-                'vacant' => max(0, $total - $check->filled),
-            ])->save();
-        }
-
-        return $row;
+            return $row;
+        });
     }
 
     /**
