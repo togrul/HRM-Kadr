@@ -12,12 +12,13 @@ return [
         'conditions' => 'Əmək şəraiti',
     ],
     'hints' => [
-        'base' => 'Standart 21 təqvim günü (m.114.2). Vəzifəyə görə 30 gün (m.114.3: rəhbər və mütəxəssis kateqoriyası, inzibati vəzifəli dövlət qulluqçuları, həkimlər və s.), pedaqoji işçilər 56/42 gün (m.118), 16 yaşadək 42, 16–18 yaş 35, əlilliyi olan işçi 42 gün (m.119). Bir neçə sətir şamil olunursa ən böyüyü götürülür. «Əlavə məzuniyyət verilmir» işarəli sətir şamil olunan işçiyə staj, uşaq və şərait əlavələri verilmir (m.116.3, 117.4).',
-        'seniority' => 'Ümumi əmək stajı (bütün işəgötürənlər üzrə, əmək fəaliyyəti qeydlərindən) iş ilinin başlanğıcına hesablanır: 5–10 il +2, 10–15 il +4, 15 ildən çox +6 gün (m.116.1). Aralıq «-dan» daxil, «-dək» xaric sayılır.',
+        'base' => 'Standart 21 təqvim günü (m.114.2). 30 gün (m.114.3): VTİSK üzrə rəhbər və mütəxəssis kateqoriyası — qanuni sətirlərlə, vəzifənin kateqoriyası Admin → Vəzifələr-də; inzibati vəzifəli dövlət qulluqçuları, həkimlər və s. — vəzifə üzrə, pedaqoji işçilər 56/42 gün (m.118), 16 yaşadək 42, 16–18 yaş 35, əlilliyi olan işçi 42 gün (m.119). Bir neçə sətir şamil olunursa ən böyüyü götürülür. «Əlavə məzuniyyət verilmir» işarəli sətir şamil olunan işçiyə staj, uşaq və şərait əlavələri verilmir (m.116.3, 117.4).',
+        'seniority' => 'Ümumi əmək stajı (bütün işəgötürənlər üzrə, əmək fəaliyyəti qeydlərindən) iş ilinin başlanğıcına hesablanır: 5–10 il +2, 10–15 il +4, 15 ildən çox +6 gün (m.116.1). Mətnə görə «-dan» və «-dək» daxil, «çox» xaric sayılır: düz 10 il — 4 gün, düz 15 il — hələ 4 gün, 6 gün yalnız 15 ildən çox olanda.',
         'children' => '14 yaşınadək iki uşağı olan qadınlara +2, üç və daha çox uşağı və ya əlilliyi olan uşağı olanlara +5 gün (m.117.1); 2 və 5 gün toplanmır. Uşaq 14 yaşını tamamladığı təqvim ilinin sonunadək sayılır (m.117.3). Uşaqları təkbaşına böyüdən ata və övladlığa götürən üçün «İşçi» sahəsi ilə sətir əlavə edin (m.117.2). Uşaqlar işçi kartının «Ailə üzvləri» bölməsindən oxunur.',
-        'conditions' => 'Zərərli və ağır əmək şəraitinə görə ən azı 6 təqvim günü (m.115.1); vəzifələrin siyahısı və günlər Nazirlər Kabinetinin siyahısındandır. Staj əlavəsi ilə birlikdə toplanır (m.136.2).',
+        'conditions' => 'Zərərli və ağır əmək şəraitinə görə ən azı 6 təqvim günü (m.115.1); vəzifələr və günlər Nazirlər Kabinetinin 92 nömrəli qərarının siyahısındandır. Staj əlavəsi ilə toplanır (m.136.2). NK 95: hüquq həmin şəraitdə üst-üstə 6 aydan sonra; iş ilində işlənmiş vaxta mütənasib, tam ay = günlər ÷ 30,4 (b.7, b.10); iş ilində müxtəlif şəraitli vəzifələr ayrı-ayrılıqda hesablanıb toplanır (köçürmə əmrlərindən, b.11), eyni vaxtda iki hüquqdan böyüyü (b.14); hazırda şəraitdə işləyənə cari il üçün tam verilir (avans, b.7). Dövr sahələri: peşəsi siyahıda olmayan işçiyə müəyyən dövrdə siyahıdakı iş tapşırılıbsa — işçi üzrə dövrlü sətir (b.13); işçi bir dövrdə iş gününün 90%-dən az həmin şəraitdə çalışıbsa — «Şəraitdən kənar» sətri (b.12).',
     ],
     'scopes' => [
+        'vtisk_category' => 'VTİSK kateqoriyası',
         'all' => 'Bütün işçilər',
         'position' => 'Vəzifə',
         'personnel' => 'İşçi',
@@ -30,6 +31,8 @@ return [
         'disabled_child' => 'Əlilliyi olan uşaq',
     ],
     'describe' => [
+        'not_in_conditions' => 'Şəraitdən kənar',
+        'vtisk_category' => 'VTİSK: :category',
         'position' => 'Vəzifə: :name',
         'personnel' => 'İşçi: :name',
         'seniority' => 'Staj :from – :to il',
@@ -41,6 +44,10 @@ return [
         'everyone' => 'bütün işçilər',
     ],
     'fields' => [
+        'not_in_conditions' => 'Bu dövrdə işçi iş gününün 90%-dən az həmin şəraitdə çalışıb — günlər sayılmır (NK 95, b.12)',
+        'valid_to' => 'Qüvvədədir, -dək',
+        'valid_from' => 'Qüvvədədir, -dan',
+        'vtisk_category' => 'VTİSK kateqoriyası',
         'scope' => 'Kimə şamil olunur',
         'position' => 'Vəzifə',
         'personnel' => 'İşçi',

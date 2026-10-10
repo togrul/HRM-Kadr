@@ -8,6 +8,7 @@ use App\Models\RankCategory;
 use App\Modules\Admin\Support\Traits\Admin\AdminCrudTrait;
 use App\Modules\Admin\Support\Traits\Admin\CallSwalTrait;
 use App\Support\PositionLevel;
+use App\Support\VtiskCategory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Arr;
@@ -34,6 +35,7 @@ class Positions extends Component
             'form.approval_rank' => 'required|integer|min:0|max:999',
             'form.is_approval_target' => 'boolean',
             'form.level' => 'nullable|integer|in:'.implode(',', PositionLevel::LEVELS),
+            'form.vtisk_category' => 'nullable|string|in:'.implode(',', VtiskCategory::ALL),
         ];
     }
 
@@ -46,6 +48,7 @@ class Positions extends Component
             'form.approval_rank' => __('admin::references.fields.approval_rank'),
             'form.is_approval_target' => __('admin::references.fields.is_approval_target'),
             'form.level' => __('admin::references.fields.position_level'),
+            'form.vtisk_category' => __('admin::references.fields.vtisk_category'),
         ];
     }
 
@@ -58,6 +61,7 @@ class Positions extends Component
             'approval_rank' => 0,
             'is_approval_target' => true,
             'level' => null,
+            'vtisk_category' => null,
         ];
     }
 
@@ -76,6 +80,7 @@ class Positions extends Component
             $this->form['approval_rank'] = $this->model->approval_rank ?? 0;
             $this->form['is_approval_target'] = (bool) ($this->model->is_approval_target ?? true);
             $this->form['level'] = $this->model->level;
+            $this->form['vtisk_category'] = $this->model->vtisk_category;
         }
         $this->isAdded = true;
     }
@@ -96,6 +101,8 @@ class Positions extends Component
         Gate::authorize('access-admin');
 
         $this->validate();
+
+        $this->form['vtisk_category'] = filled($this->form['vtisk_category'] ?? null) ? $this->form['vtisk_category'] : null;
 
         $this->model
             ? $this->model->update(Arr::except($this->form, 'id'))

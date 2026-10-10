@@ -1,12 +1,17 @@
 <?php
 
+use App\Enums\OrderStatusEnum;
+use App\Models\OrderLog;
+use App\Models\OrderWordTemplate;
 use App\Models\Personnel;
 use App\Models\PersonnelKinship;
 use App\Models\PersonnelLaborActivity;
+use App\Models\PersonnelVacation;
 use App\Models\Position;
 use App\Models\Setting;
 use App\Models\Structure;
 use App\Models\VacationNorm;
+use App\Modules\Vacation\Application\Services\VacationNormCatalog;
 use App\Modules\Vacation\Application\Services\VacationSettings;
 use App\Modules\Vacation\Application\Services\WorkYearCalendar;
 use App\Services\Vacation\VacationBalanceService;
@@ -93,7 +98,7 @@ function vnBreakdown(Personnel $personnel, string $on): array
 }
 
 it('seeds the statutory defaults', function (): void {
-    expect(VacationNorm::query()->where('is_statutory', true)->count())->toBe(10)
+    expect(VacationNorm::query()->where('is_statutory', true)->count())->toBe(12)
         ->and(VacationNorm::query()->where('group', 'base')->where('scope', 'all')->value('days'))->toBe(21)
         ->and(VacationNorm::query()->where('group', 'seniority')->orderBy('min_value')->pluck('days')->all())->toBe([2, 4, 6]);
 });
@@ -143,6 +148,9 @@ it('adds seniority leave by total length of service across employers', function 
     'exactly 5 years' => ['2020-01-01', null, 2],
     '9 years' => ['2016-01-01', null, 2],
     'exactly 10 years' => ['2015-01-01', null, 4],
+    // m.116.1: «on beş ildən çox» — düz 15 il hələ 4 gündür.
+    'exactly 15 years' => ['2010-01-01', null, 4],
+    '15 years and a day' => ['2009-12-31', ['2009-12-29', '2009-12-30'], 6],
     'previous employer counts' => ['2023-01-01', ['2013-01-01', '2022-12-31'], 4],
     'over 15 years' => ['2009-01-01', null, 6],
 ]);
@@ -186,8 +194,10 @@ it('adds working-conditions leave together with seniority leave', function (): v
     $personnel = vnPersonnel(['join_work_date' => '2014-01-01', 'gender' => 1]);
     VacationNorm::query()->create(['group' => 'conditions', 'scope' => 'position', 'position_id' => $personnel->position_id, 'days' => 6, 'legal_basis' => 'ƏM m.115.1']);
 
-    // 2025-01-01: 11 years of service → +4; conditions +6 — both added (m.136.2).
-    expect(vnBreakdown($personnel, '2025-06-01'))->toMatchArray(['base' => 21, 'seniority' => 4, 'conditions' => 6, 'total' => 31]);
+    // 2025-01-01: 11 years of service → +4; conditions +6 for the full work year — both added (m.136.2).
+    expect(vnBreakdown($personnel, '2025-12-31'))->toMatchArray(['base' => 21, 'seniority' => 4, 'conditions' => 6, 'total' => 31]);
+    // NK 95, b.7: still in the conditions — the full days may be given in advance mid-year.
+    expect(vnBreakdown($personnel, '2025-06-01')['conditions'])->toBe(6);
 });
 
 it('ignores inactive norms', function (): void {
@@ -215,4 +225,125 @@ it('keeps work years on the hire-date anniversary and shifts them by excluded ch
 
     expect($shifted[0]->end->toDateString())->toBe('2025-04-13')
         ->and($shifted[1]->start->toDateString())->toBe('2025-04-14');
+});
+
+it('gives managers and specialists 30 days by their VTİSK category (m.114.3 b)', function (): void {
+    $personnel = vnPersonnel();
+    $position = Position::query()->findOrFail($personnel->position_id);
+
+    $position->update(['vtisk_category' => 'mutexessis']);
+    expect(vnBreakdown($personnel, '2025-05-01')['base'])->toBe(30);
+
+    $position->update(['vtisk_category' => 'rehber']);
+    expect(vnBreakdown($personnel, '2025-05-01')['base'])->toBe(30);
+
+    // Texniki icraçı və fəhlə — 21 gün.
+    $position->update(['vtisk_category' => 'texniki_icraci']);
+    expect(vnBreakdown($personnel, '2025-05-01')['base'])->toBe(21);
+});
+
+it('leaves unpaid leave out of the seniority for the additional leave (m.116.2)', function (): void {
+    // 2015-01-01-dən: 2025-01-01-də düz 10 il → +4.
+    $personnel = vnPersonnel(['join_work_date' => '2015-01-01', 'gender' => 1]);
+    expect(vnBreakdown($personnel, '2025-06-01')['seniority'])->toBe(4);
+
+    OrderWordTemplate::query()->create(['code' => 'odenissiz_test', 'label' => 'Ödənişsiz məzuniyyət', 'effect' => 'unpaid_leave', 'docx_path' => 'x.docx']);
+    OrderLog::query()->create([
+        'order_no' => 'OM-1', 'given_date' => '2020-02-25', 'given_by' => 'Test', 'given_by_rank' => '',
+        'status_id' => OrderStatusEnum::APPROVED->value, 'template_render_mode' => 'docx',
+        'template_snapshot' => ['template_code' => 'odenissiz_test', 'fields' => []],
+    ]);
+    PersonnelVacation::withoutEvents(fn () => PersonnelVacation::query()->create([
+        'tabel_no' => $personnel->tabel_no, 'start_date' => '2020-03-01', 'end_date' => '2020-03-30',
+        'order_no' => 'OM-1', 'duration' => 30, 'vacation_places' => 'Bakı', 'return_work_date' => '2020-03-31', 'order_date' => '2020-02-25', 'order_given_by' => 'Test', 'vacation_days_total' => 30, 'remaining_days' => 0, 'added_by' => 1,
+    ]));
+
+    // 30 gün stajdan çıxılır: 10 ildən azdır → +2.
+    expect(vnBreakdown($personnel, '2025-06-01')['seniority'])->toBe(2);
+});
+
+it('grants working-conditions leave only after six months in the conditions (m.131.6)', function (): void {
+    $personnel = vnPersonnel(['join_work_date' => '2025-03-01', 'gender' => 1]);
+    VacationNorm::query()->create(['group' => 'conditions', 'scope' => 'position', 'position_id' => $personnel->position_id, 'days' => 6, 'legal_basis' => 'ƏM m.115.1']);
+
+    // 2025-03-01 – 2025-08-15: 168 gün < 6 ay.
+    expect(vnBreakdown($personnel, '2025-08-15')['conditions'])->toBe(0)
+        // Hüquq yaranıb və işçi hələ şəraitdədir — cari iş ili üçün tam (avans, NK 95 b.7).
+        ->and(vnBreakdown($personnel, '2025-09-15')['conditions'])->toBe(6);
+});
+
+it('counts working-conditions time from the transfer into the position', function (): void {
+    $personnel = vnPersonnel(['join_work_date' => '2020-01-01', 'gender' => 1]);
+    VacationNorm::query()->create(['group' => 'conditions', 'scope' => 'position', 'position_id' => $personnel->position_id, 'days' => 12, 'legal_basis' => 'ƏM m.115.1']);
+
+    expect(vnBreakdown($personnel, '2025-12-31')['conditions'])->toBe(12);
+
+    // 2025-07-01-də köçürmə əmri ilə bu vəzifəyə keçib.
+    OrderLog::query()->create([
+        'order_no' => 'OK-1', 'given_date' => '2025-07-01', 'given_by' => 'Test', 'given_by_rank' => '',
+        'status_id' => OrderStatusEnum::APPROVED->value, 'template_render_mode' => 'docx',
+        'template_snapshot' => ['template_code' => 'kecirme', 'fields' => [], 'personnel_id' => $personnel->id,
+            'effect_state' => ['prev_structure_id' => null, 'prev_position_id' => 1]],
+    ]);
+
+    // 2025-07-01 – 2025-12-28: 181 gün < 6 × 30,4 — hüquq hələ yoxdur.
+    expect(vnBreakdown($personnel, '2025-12-28')['conditions'])->toBe(0)
+        // İş ilində 184 gün ÷ 30,4 = 6 ay → 12 × 6 ÷ 12 = 6.
+        ->and(vnBreakdown($personnel, '2025-12-31')['conditions'])->toBe(6);
+});
+
+it('adds up the proportional days of each position within a work year (NK 95, b.11)', function (): void {
+    $personnel = vnPersonnel(['join_work_date' => '2020-01-01', 'gender' => 1]);
+    $previous = Position::query()->create(['id' => random_int(1000, 999999), 'name' => 'dehidratlaşdırma aparatçısı']);
+    VacationNorm::query()->create(['group' => 'conditions', 'scope' => 'position', 'position_id' => $previous->id, 'days' => 12]);
+    VacationNorm::query()->create(['group' => 'conditions', 'scope' => 'position', 'position_id' => $personnel->position_id, 'days' => 6]);
+
+    OrderLog::query()->create([
+        'order_no' => 'OK-2', 'given_date' => '2025-03-01', 'given_by' => 'Test', 'given_by_rank' => '',
+        'status_id' => OrderStatusEnum::APPROVED->value, 'template_render_mode' => 'docx',
+        'template_snapshot' => ['template_code' => 'kecirme', 'fields' => [], 'personnel_id' => $personnel->id,
+            'effect_state' => ['prev_structure_id' => null, 'prev_position_id' => $previous->id]],
+    ]);
+
+    // 59 gün → 2 ay × 12/12 = 2; 306 gün → 10 ay × 6/12 = 5; cəmi 7.
+    expect(vnBreakdown($personnel, '2025-12-31')['conditions'])->toBe(7);
+});
+
+it('leaves out a period with less than 90% of the day in the conditions (NK 95, b.12)', function (): void {
+    $personnel = vnPersonnel(['join_work_date' => '2020-01-01', 'gender' => 1]);
+    VacationNorm::query()->create(['group' => 'conditions', 'scope' => 'position', 'position_id' => $personnel->position_id, 'days' => 12]);
+    VacationNorm::query()->create(['group' => 'conditions', 'scope' => 'personnel', 'tabel_no' => $personnel->tabel_no, 'days' => 0,
+        'not_in_conditions' => true, 'valid_from' => '2025-01-01', 'valid_to' => '2025-06-30']);
+
+    // Yalnız 2025-07-01 – 2025-12-31: 184 gün → 6 ay → 6.
+    expect(vnBreakdown($personnel, '2025-12-31')['conditions'])->toBe(6);
+});
+
+it('gives listed work assigned for a period to an unlisted employee (NK 95, b.13)', function (): void {
+    $personnel = vnPersonnel(['join_work_date' => '2020-01-01', 'gender' => 1]);
+    VacationNorm::query()->create(['group' => 'conditions', 'scope' => 'personnel', 'tabel_no' => $personnel->tabel_no, 'days' => 6,
+        'valid_from' => '2025-02-01', 'valid_to' => '2025-08-31', 'legal_basis' => 'NK 95 b.13']);
+
+    // 212 gün → 7 ay; 6 × 7 ÷ 12 = 3,5 → 4. Dövr bitib — avans yoxdur.
+    expect(vnBreakdown($personnel, '2025-12-31')['conditions'])->toBe(4)
+        ->and(vnBreakdown($personnel, '2026-06-01')['conditions'])->toBe(0);
+});
+
+it('saves an outside-the-conditions period without days, only for an employee', function (): void {
+    $personnel = vnPersonnel();
+    $catalog = app(VacationNormCatalog::class);
+
+    $norm = $catalog->save('conditions', [
+        'scope' => 'personnel', 'personnel_id' => $personnel->id, 'not_in_conditions' => true,
+        'valid_from' => '2025-01-01', 'valid_to' => '2025-03-31', 'days' => null,
+    ]);
+
+    expect($norm->days)->toBe(0)
+        ->and($norm->not_in_conditions)->toBeTrue()
+        ->and($catalog->describe($norm))->toContain('01.01.2025 – 31.03.2025');
+
+    // Vəzifə üzrə sətir «şəraitdən kənar» ola bilməz və ən azı 6 gün tələb edir (m.115.1).
+    expect(fn () => $catalog->save('conditions', [
+        'scope' => 'position', 'position_id' => $personnel->position_id, 'not_in_conditions' => true, 'days' => 3,
+    ]))->toThrow(DomainException::class);
 });

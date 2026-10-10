@@ -3,6 +3,7 @@
 namespace App\Modules\Vacation\Application\Services;
 
 use App\Models\VacationNorm;
+use App\Support\VtiskCategory;
 
 /**
  * Qanunla təsdiqlənmiş standart məzuniyyət normaları (docs/vacation-legal-basis.md):
@@ -11,7 +12,9 @@ use App\Models\VacationNorm;
  *     bu işçilərə staj, şərait və uşaqlı valideyn əlavələri verilmir (m.116.3, 117.4);
  *   - m.116.1: staj 5–10 il +2, 10–15 il +4, 15 ildən çox +6 gün;
  *   - m.117.1: 14 yaşınadək iki uşaq +2, üç və daha çox uşaq və ya əlilliyi olan uşaq +5 gün.
- * m.114.3 (30 gün), m.118, 120, 121 vəzifə/kateqoriya üzrədir və m.115 (əmək şəraiti) siyahısı
+ *   - m.114.3 "b": VTİSK üzrə rəhbər və mütəxəssis kateqoriyası 30 gün (vəzifənin kateqoriyası
+ *     Admin → Vəzifələr-də).
+ * m.114.3-ün digər bəndləri, m.118, 120, 121 vəzifə/kateqoriya üzrədir və m.115 (əmək şəraiti) siyahısı
  * Nazirlər Kabinetinindir — onlar qurumun vəzifələrinə görə admin tərəfindən əlavə olunur.
  */
 class VacationNormDefaults
@@ -40,6 +43,8 @@ class VacationNormDefaults
 
         return [
             $row(['group' => VacationNorm::GROUP_BASE, 'scope' => VacationNorm::SCOPE_ALL, 'days' => 21, 'legal_basis' => 'ƏM m.114.2']),
+            $row(['group' => VacationNorm::GROUP_BASE, 'scope' => VacationNorm::SCOPE_VTISK_CATEGORY, 'condition' => VtiskCategory::MANAGER, 'days' => 30, 'legal_basis' => 'ƏM m.114.3(b)']),
+            $row(['group' => VacationNorm::GROUP_BASE, 'scope' => VacationNorm::SCOPE_VTISK_CATEGORY, 'condition' => VtiskCategory::SPECIALIST, 'days' => 30, 'legal_basis' => 'ƏM m.114.3(b)']),
             $row(['group' => VacationNorm::GROUP_BASE, 'scope' => VacationNorm::SCOPE_AGE_UNDER_16, 'days' => 42, 'exclusive' => true, 'legal_basis' => 'ƏM m.119.1']),
             $row(['group' => VacationNorm::GROUP_BASE, 'scope' => VacationNorm::SCOPE_AGE_16_18, 'days' => 35, 'exclusive' => true, 'legal_basis' => 'ƏM m.119.1']),
             $row(['group' => VacationNorm::GROUP_BASE, 'scope' => VacationNorm::SCOPE_DISABILITY, 'days' => 42, 'exclusive' => true, 'legal_basis' => 'ƏM m.119.2']),

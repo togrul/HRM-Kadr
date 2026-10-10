@@ -12,12 +12,13 @@ return [
         'conditions' => 'Working conditions',
     ],
     'hints' => [
-        'base' => 'Default 21 calendar days (art. 114.2). 30 days by position (art. 114.3: manager and specialist categories, civil servants in administrative posts, doctors, etc.), teaching staff 56/42 days (art. 118), under 16 — 42, aged 16–18 — 35, employees with a disability — 42 days (art. 119). When several rows apply the largest wins. A row marked "no additional leave" removes the seniority, children and conditions additions for the employees it covers (art. 116.3, 117.4).',
-        'seniority' => 'Total length of service (all employers, from the labour activity records) at the start of the work year: 5–10 years +2, 10–15 years +4, over 15 years +6 days (art. 116.1). "From" is inclusive, "to" exclusive.',
+        'base' => 'Default 21 calendar days (art. 114.2). 30 days (art. 114.3): VTİSK manager and specialist categories through the statutory rows, the category is set in Admin → Positions; civil servants in administrative posts, doctors, etc. by position, teaching staff 56/42 days (art. 118), under 16 — 42, aged 16–18 — 35, employees with a disability — 42 days (art. 119). When several rows apply the largest wins. A row marked "no additional leave" removes the seniority, children and conditions additions for the employees it covers (art. 116.3, 117.4).',
+        'seniority' => 'Total length of service (all employers, from the labour activity records) at the start of the work year: 5–10 years +2, 10–15 years +4, over 15 years +6 days (art. 116.1). Per the text both "from" and "to" are inclusive and "over" is exclusive: exactly 10 years gives 4 days, exactly 15 years still 4, 6 days only above 15 years.',
         'children' => 'Women with two children under 14: +2; three or more children or a child with a disability: +5 days (art. 117.1); 2 and 5 do not add up. A child counts until the end of the calendar year in which they turn 14 (art. 117.3). For a father raising children alone or an adoptive parent add a row for that employee (art. 117.2). Children are read from the employee card\'s family members.',
-        'conditions' => 'Harmful and hard working conditions: at least 6 calendar days (art. 115.1); the positions and days come from the Cabinet of Ministers list. Added together with the seniority leave (art. 136.2).',
+        'conditions' => 'Harmful and hard working conditions: at least 6 calendar days (art. 115.1); positions and days come from the list of Cabinet of Ministers decision 92. Added together with the seniority leave (art. 136.2). Decision 95: the right arises after 6 months in the conditions; proportional to the time worked in the work year, a full month = days ÷ 30.4 (items 7, 10); different positions within a work year are computed separately and added up (from transfer orders, item 11), of two simultaneous rights the larger one (item 14); an employee currently in the conditions gets the full days for the current year (advance, item 7). Period fields: a personnel row with a period when an employee outside the list was assigned listed work (item 13); an "outside the conditions" row when the employee spent less than 90% of the working day in the conditions (item 12).',
     ],
     'scopes' => [
+        'vtisk_category' => 'Qualification category (VTİSK)',
         'all' => 'All employees',
         'position' => 'Position',
         'personnel' => 'Employee',
@@ -30,6 +31,8 @@ return [
         'disabled_child' => 'Child with a disability',
     ],
     'describe' => [
+        'not_in_conditions' => 'Outside the conditions',
+        'vtisk_category' => 'VTİSK: :category',
         'position' => 'Position: :name',
         'personnel' => 'Employee: :name',
         'seniority' => 'Service :from – :to years',
@@ -41,6 +44,10 @@ return [
         'everyone' => 'all employees',
     ],
     'fields' => [
+        'not_in_conditions' => 'In this period the employee spent less than 90% of the working day in these conditions — the days do not count (CoM decision 95, item 12)',
+        'valid_to' => 'In force until',
+        'valid_from' => 'In force from',
+        'vtisk_category' => 'Qualification category (VTİSK)',
         'scope' => 'Applies to',
         'position' => 'Position',
         'personnel' => 'Employee',

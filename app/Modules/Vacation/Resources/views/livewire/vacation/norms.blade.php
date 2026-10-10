@@ -79,6 +79,20 @@
                     </div>
                 @endif
 
+                @if (($form['scope'] ?? null) === 'vtisk_category')
+                    <div class="flex flex-col">
+                        <x-ui.select-dropdown
+                            :label="__('vacation::norms.fields.vtisk_category')"
+                            mode="default"
+                            class="w-full"
+                            :clearable="false"
+                            wire:model.live="form.condition"
+                            :model="\App\Support\VtiskCategory::options()"
+                        />
+                        @error('form.condition') <x-validation>{{ $message }}</x-validation> @enderror
+                    </div>
+                @endif
+
                 @if ($group === 'children')
                     <div class="flex flex-col">
                         <x-ui.select-dropdown
@@ -109,6 +123,19 @@
                     </div>
                 @endif
 
+                @if ($group === 'conditions')
+                    <div class="flex flex-col">
+                        <x-label for="form.valid_from">{{ __('vacation::norms.fields.valid_from') }}</x-label>
+                        <x-ui.date-input wire:model="form.valid_from" name="form.valid_from" />
+                        @error('form.valid_from') <x-validation>{{ $message }}</x-validation> @enderror
+                    </div>
+                    <div class="flex flex-col">
+                        <x-label for="form.valid_to">{{ __('vacation::norms.fields.valid_to') }}</x-label>
+                        <x-ui.date-input wire:model="form.valid_to" name="form.valid_to" />
+                        @error('form.valid_to') <x-validation>{{ $message }}</x-validation> @enderror
+                    </div>
+                @endif
+
                 <div class="flex flex-col">
                     <x-label for="form.days">{{ __('vacation::norms.fields.days') }}</x-label>
                     <x-livewire-input mode="default" type="number" name="form.days" wire:model="form.days"></x-livewire-input>
@@ -132,6 +159,12 @@
                         <label class="inline-flex items-center gap-2">
                             <input type="checkbox" wire:model="form.exclusive" class="rounded border-zinc-300 text-zinc-700 focus:ring-zinc-300">
                             <span class="text-sm text-zinc-700">{{ __('vacation::norms.fields.exclusive') }}</span>
+                        </label>
+                    @endif
+                    @if ($group === 'conditions' && ($form['scope'] ?? null) === 'personnel')
+                        <label class="inline-flex items-center gap-2">
+                            <input type="checkbox" wire:model.live="form.not_in_conditions" class="rounded border-zinc-300 text-zinc-700 focus:ring-zinc-300">
+                            <span class="text-sm text-zinc-700">{{ __('vacation::norms.fields.not_in_conditions') }}</span>
                         </label>
                     @endif
                     @if ($group === 'children' && ($form['scope'] ?? null) !== 'personnel')

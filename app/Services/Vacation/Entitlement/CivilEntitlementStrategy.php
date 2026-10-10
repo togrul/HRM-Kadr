@@ -10,6 +10,7 @@ use App\Modules\Vacation\Application\Services\EntitlementBreakdown;
 use App\Modules\Vacation\Application\Services\VacationNormEvaluator;
 use App\Modules\Vacation\Application\Services\VacationSettings;
 use App\Modules\Vacation\Application\Services\WorkYearPeriod;
+use App\Services\Vacation\OrderLeaveFacts;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 
@@ -25,12 +26,13 @@ class CivilEntitlementStrategy implements EntitlementStrategy
     /** @var Collection<int, VacationNorm>|null */
     private ?Collection $norms = null;
 
-    /** @var array<string, LeaveEntitlementFacts> */
+    /** @var array<string, LeaveEntitlementFacts|null> */
     private array $facts = [];
 
     public function __construct(
         private readonly LeaveEntitlementFactsProvider $provider,
         private readonly VacationNormEvaluator $evaluator,
+        private readonly OrderLeaveFacts $orderFacts,
     ) {}
 
     public function key(): string
@@ -46,7 +48,7 @@ class CivilEntitlementStrategy implements EntitlementStrategy
             return new EntitlementBreakdown(0);
         }
 
-        return $this->evaluator->evaluate($facts, $period->start, $this->norms());
+        return $this->evaluator->evaluate($facts, $period->start, $this->norms(), $period, $asOf);
     }
 
     public function availableFrom(Personnel $personnel, WorkYearPeriod $period): CarbonImmutable
@@ -79,7 +81,17 @@ class CivilEntitlementStrategy implements EntitlementStrategy
             return null;
         }
 
-        return $this->facts[$tabelNo] ??= ($this->provider->facts([$tabelNo])[$tabelNo] ?? null);
+        if (! array_key_exists($tabelNo, $this->facts)) {
+            $facts = $this->provider->facts([$tabelNo])[$tabelNo] ?? null;
+
+            // Əmrlərdən çıxan faktlar: m.116 stajından çıxılan dövrlər və vəzifə tarixçəsi.
+            $this->facts[$tabelNo] = $facts?->withOrderFacts(
+                $this->orderFacts->seniorityGaps($tabelNo),
+                $this->orderFacts->positionChanges((int) $personnel->getKey(), $facts->positionId),
+            );
+        }
+
+        return $this->facts[$tabelNo];
     }
 
     /**

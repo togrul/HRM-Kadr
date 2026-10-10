@@ -10,12 +10,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * @property int $id
  * @property string $group base|seniority|children|conditions
- * @property string $scope all|position|personnel|age_under_16|age_16_18|disability
+ * @property string $scope all|vtisk_category|position|personnel|age_under_16|age_16_18|disability
  * @property int|null $position_id
  * @property string|null $tabel_no
  * @property string|null $condition
  * @property int|null $min_value
  * @property int|null $max_value
+ * @property \Illuminate\Support\Carbon|null $valid_from
+ * @property \Illuminate\Support\Carbon|null $valid_to
+ * @property bool $not_in_conditions
  * @property bool $women_only
  * @property bool $exclusive
  * @property int $days
@@ -48,6 +51,9 @@ class VacationNorm extends Model
 
     public const SCOPE_DISABILITY = 'disability';
 
+    /** Vəzifənin VTİSK kateqoriyası (`condition` = App\Support\VtiskCategory), ƏM m.114.3 "b". */
+    public const SCOPE_VTISK_CATEGORY = 'vtisk_category';
+
     public const CONDITION_CHILDREN_UNDER_14 = 'children_under_14';
 
     public const CONDITION_DISABLED_CHILD = 'disabled_child';
@@ -67,6 +73,9 @@ class VacationNorm extends Model
         'is_statutory',
         'legal_basis',
         'note',
+        'valid_from',
+        'valid_to',
+        'not_in_conditions',
     ];
 
     protected $casts = [
@@ -78,7 +87,17 @@ class VacationNorm extends Model
         'days' => 'integer',
         'is_active' => 'boolean',
         'is_statutory' => 'boolean',
+        'valid_from' => 'date',
+        'valid_to' => 'date',
+        'not_in_conditions' => 'boolean',
     ];
+
+    /** Sətir verilən gündə qüvvədədirmi (dövr göstərilməyibsə həmişə). */
+    public function coversDate(string $date): bool
+    {
+        return ($this->valid_from === null || $this->valid_from->toDateString() <= $date)
+            && ($this->valid_to === null || $date <= $this->valid_to->toDateString());
+    }
 
     /**
      * The scopes each group may use.
@@ -88,7 +107,7 @@ class VacationNorm extends Model
     public static function scopesByGroup(): array
     {
         return [
-            self::GROUP_BASE => [self::SCOPE_ALL, self::SCOPE_POSITION, self::SCOPE_PERSONNEL, self::SCOPE_AGE_UNDER_16, self::SCOPE_AGE_16_18, self::SCOPE_DISABILITY],
+            self::GROUP_BASE => [self::SCOPE_ALL, self::SCOPE_VTISK_CATEGORY, self::SCOPE_POSITION, self::SCOPE_PERSONNEL, self::SCOPE_AGE_UNDER_16, self::SCOPE_AGE_16_18, self::SCOPE_DISABILITY],
             self::GROUP_SENIORITY => [self::SCOPE_ALL],
             self::GROUP_CHILDREN => [self::SCOPE_ALL, self::SCOPE_PERSONNEL],
             self::GROUP_CONDITIONS => [self::SCOPE_POSITION, self::SCOPE_PERSONNEL],

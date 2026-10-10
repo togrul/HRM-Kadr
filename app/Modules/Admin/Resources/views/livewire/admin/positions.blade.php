@@ -57,6 +57,19 @@
                     @enderror
                 </div>
                 <div class="flex flex-col">
+                    <x-ui.select-dropdown
+                        :label="__('admin::references.fields.vtisk_category')"
+                        mode="default"
+                        class="w-full"
+                        wire:model="form.vtisk_category"
+                        :model="\App\Support\VtiskCategory::options()"
+                    />
+                    <span class="mt-1 text-xs text-zinc-500">{{ __('admin::references.messages.vtisk_category_help') }}</span>
+                    @error('form.vtisk_category')
+                        <x-validation> {{ $message }} </x-validation>
+                    @enderror
+                </div>
+                <div class="flex flex-col">
                     <x-label for="form.approval_rank">{{ __('admin::references.fields.approval_rank') }}</x-label>
                     <x-livewire-input mode="default" type="number" name="form.approval_rank" wire:model="form.approval_rank"></x-livewire-input>
                     @error('form.approval_rank')

@@ -75,6 +75,9 @@ class VacationNorms extends Component
                 'is_active' => $norm->is_active,
                 'legal_basis' => $norm->legal_basis,
                 'note' => $norm->note,
+                'valid_from' => $norm->valid_from?->toDateString(),
+                'valid_to' => $norm->valid_to?->toDateString(),
+                'not_in_conditions' => $norm->not_in_conditions,
             ];
         }
 
@@ -93,7 +96,7 @@ class VacationNorms extends Component
     {
         Gate::authorize('access-admin');
 
-        $this->validate($catalog->rules($this->group, $this->form['personnel_id'] ?? null), [], $this->validationAttributes());
+        $this->validate($catalog->rules($this->group, $this->form['personnel_id'] ?? null, $this->form), [], $this->validationAttributes());
 
         try {
             $catalog->save($this->group, $this->form, $this->editingId);
@@ -228,6 +231,9 @@ class VacationNorms extends Component
             'is_active' => true,
             'legal_basis' => null,
             'note' => null,
+            'valid_from' => null,
+            'valid_to' => null,
+            'not_in_conditions' => false,
         ];
     }
 
@@ -246,6 +252,8 @@ class VacationNorms extends Component
             'form.days' => __('vacation::norms.fields.days'),
             'form.legal_basis' => __('vacation::norms.fields.legal_basis'),
             'form.note' => __('vacation::norms.fields.note'),
+            'form.valid_from' => __('vacation::norms.fields.valid_from'),
+            'form.valid_to' => __('vacation::norms.fields.valid_to'),
         ];
     }
 }

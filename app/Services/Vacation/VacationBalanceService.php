@@ -2,9 +2,7 @@
 
 namespace App\Services\Vacation;
 
-use App\Models\OrderLog;
 use App\Models\Personnel;
-use App\Models\PersonnelVacation;
 use App\Models\VacationBalanceEntry;
 use App\Models\VacationWorkYear;
 use App\Modules\Vacation\Application\Services\EntitlementBreakdown;
@@ -15,7 +13,6 @@ use App\Modules\Vacation\Application\Services\WorkYearPeriod;
 use App\Services\Vacation\Entitlement\CivilEntitlementStrategy;
 use App\Services\Vacation\Entitlement\EntitlementStrategy;
 use App\Services\Vacation\Entitlement\RankedEntitlementStrategy;
-use App\Support\Database\InstalledTables;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
@@ -45,6 +42,7 @@ class VacationBalanceService
         private readonly VacationSettings $settings,
         private readonly CivilEntitlementStrategy $civil,
         private readonly RankedEntitlementStrategy $ranked,
+        private readonly OrderLeaveFacts $orderFacts,
     ) {}
 
     public function strategyFor(Personnel $personnel): EntitlementStrategy
@@ -664,29 +662,7 @@ class VacationBalanceService
      */
     private function excludedPeriods(Personnel $personnel): array
     {
-        $vacations = PersonnelVacation::query()
-            ->where('tabel_no', $personnel->tabel_no)
-            ->whereNotNull('order_no')
-            ->toBase()
-            ->get(['order_no', 'start_date', 'end_date']);
-
-        if ($vacations->isEmpty() || ! InstalledTables::has('order_logs')) {
-            return [];
-        }
-
-        $excludedOrders = OrderLog::query()
-            ->whereIn('order_no', $vacations->pluck('order_no')->unique()->values()->all())
-            ->whereNotNull('template_snapshot')
-            ->get(['order_no', 'template_snapshot'])
-            ->filter(fn (OrderLog $order): bool => in_array((string) data_get($order->template_snapshot, 'template_code'), VacationSettings::WORK_YEAR_EXCLUDED_TEMPLATES, true))
-            ->pluck('order_no')
-            ->all();
-
-        return $vacations
-            ->filter(fn ($vacation): bool => in_array($vacation->order_no, $excludedOrders, true) && filled($vacation->start_date) && filled($vacation->end_date))
-            ->map(fn ($vacation): array => [CarbonImmutable::parse($vacation->start_date)->startOfDay(), CarbonImmutable::parse($vacation->end_date)->startOfDay()])
-            ->values()
-            ->all();
+        return $this->orderFacts->workYearGaps((string) $personnel->tabel_no);
     }
 
     /**

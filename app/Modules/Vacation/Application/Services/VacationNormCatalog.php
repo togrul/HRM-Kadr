@@ -4,6 +4,7 @@ namespace App\Modules\Vacation\Application\Services;
 
 use App\Models\Personnel;
 use App\Models\VacationNorm;
+use App\Support\VtiskCategory;
 use DomainException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -53,22 +54,29 @@ class VacationNormCatalog
     /**
      * @return array<string, mixed>
      */
-    public function rules(string $group, ?int $personnelId): array
+    public function rules(string $group, ?int $personnelId, array $form = []): array
     {
+        $outside = $group === VacationNorm::GROUP_CONDITIONS && (bool) ($form['not_in_conditions'] ?? false);
+
         $scopes = VacationNorm::scopesByGroup()[$group] ?? [VacationNorm::SCOPE_ALL];
 
         return [
             'form.scope' => ['required', Rule::in($scopes)],
             'form.position_id' => ['nullable', 'integer', 'exists:positions,id', 'required_if:form.scope,'.VacationNorm::SCOPE_POSITION],
             'form.personnel_id' => ['nullable', 'integer', 'exists:personnels,id', 'required_if:form.scope,'.VacationNorm::SCOPE_PERSONNEL],
-            'form.condition' => $group === VacationNorm::GROUP_CHILDREN
-                ? ['required', Rule::in([VacationNorm::CONDITION_CHILDREN_UNDER_14, VacationNorm::CONDITION_DISABLED_CHILD])]
-                : ['nullable'],
+            'form.condition' => match (true) {
+                $group === VacationNorm::GROUP_CHILDREN => ['required', Rule::in([VacationNorm::CONDITION_CHILDREN_UNDER_14, VacationNorm::CONDITION_DISABLED_CHILD])],
+                $group === VacationNorm::GROUP_BASE => ['nullable', 'required_if:form.scope,'.VacationNorm::SCOPE_VTISK_CATEGORY, Rule::in(VtiskCategory::ALL)],
+                default => ['nullable'],
+            },
             'form.min_value' => $group === VacationNorm::GROUP_SENIORITY ? ['required', 'integer', 'min:0', 'max:80'] : ['nullable', 'integer', 'min:0', 'max:80'],
             'form.max_value' => ['nullable', 'integer', 'min:1', 'max:80'],
             'form.women_only' => ['boolean'],
             'form.exclusive' => ['boolean'],
-            'form.days' => ['required', 'integer', 'min:1', 'max:120'],
+            'form.days' => $outside ? ['nullable', 'integer', 'min:0', 'max:120'] : ['required', 'integer', 'min:1', 'max:120'],
+            'form.valid_from' => ['nullable', 'date'],
+            'form.valid_to' => ['nullable', 'date', 'after_or_equal:form.valid_from'],
+            'form.not_in_conditions' => ['boolean', $outside ? Rule::in([true, 1, '1']) : 'nullable', $outside ? 'required_if:form.scope,'.VacationNorm::SCOPE_PERSONNEL : 'nullable'],
             'form.is_active' => ['boolean'],
             'form.legal_basis' => ['nullable', 'string', 'max:60'],
             'form.note' => ['nullable', 'string', 'max:255'],
@@ -93,12 +101,15 @@ class VacationNormCatalog
             'scope' => $scope,
             'position_id' => $scope === VacationNorm::SCOPE_POSITION ? (int) $form['position_id'] : null,
             'tabel_no' => $tabelNo,
-            'condition' => $group === VacationNorm::GROUP_CHILDREN ? ($form['condition'] ?? null) : null,
+            'condition' => $group === VacationNorm::GROUP_CHILDREN || $scope === VacationNorm::SCOPE_VTISK_CATEGORY ? ($form['condition'] ?? null) : null,
             'min_value' => $this->intOrNull($form['min_value'] ?? null),
             'max_value' => $this->intOrNull($form['max_value'] ?? null),
             'women_only' => $group === VacationNorm::GROUP_CHILDREN && $scope !== VacationNorm::SCOPE_PERSONNEL && (bool) ($form['women_only'] ?? false),
             'exclusive' => $group === VacationNorm::GROUP_BASE && (bool) ($form['exclusive'] ?? false),
-            'days' => (int) $form['days'],
+            'days' => (int) ($form['days'] ?? 0),
+            'valid_from' => $group === VacationNorm::GROUP_CONDITIONS && filled($form['valid_from'] ?? null) ? (string) $form['valid_from'] : null,
+            'valid_to' => $group === VacationNorm::GROUP_CONDITIONS && filled($form['valid_to'] ?? null) ? (string) $form['valid_to'] : null,
+            'not_in_conditions' => $group === VacationNorm::GROUP_CONDITIONS && $scope === VacationNorm::SCOPE_PERSONNEL && (bool) ($form['not_in_conditions'] ?? false),
             'is_active' => (bool) ($form['is_active'] ?? true),
             'legal_basis' => filled($form['legal_basis'] ?? null) ? trim((string) $form['legal_basis']) : null,
             'note' => filled($form['note'] ?? null) ? trim((string) $form['note']) : null,
@@ -108,7 +119,12 @@ class VacationNormCatalog
             throw new DomainException(__('vacation::norms.errors.range'));
         }
 
-        $minimum = $this->minimumDays($norm, $values);
+        if ($values['not_in_conditions']) {
+            // Şəraitdən kənar dövr gün vermir, yalnız günləri çıxır (NK 95, b.12).
+            $values['days'] = 0;
+        }
+
+        $minimum = $values['not_in_conditions'] ? 0 : $this->minimumDays($norm, $values);
 
         if ($values['days'] < $minimum) {
             throw new DomainException(__('vacation::norms.errors.below_minimum', ['days' => $minimum]));
@@ -149,6 +165,7 @@ class VacationNormCatalog
     {
         $who = match ($norm->scope) {
             VacationNorm::SCOPE_POSITION => __('vacation::norms.describe.position', ['name' => $norm->position !== null ? $norm->position->name : '#'.$norm->position_id]),
+            VacationNorm::SCOPE_VTISK_CATEGORY => __('vacation::norms.describe.vtisk_category', ['category' => VtiskCategory::label($norm->condition)]),
             VacationNorm::SCOPE_PERSONNEL => __('vacation::norms.describe.personnel', ['name' => $norm->personnel
                 ? trim($norm->personnel->surname.' '.$norm->personnel->name).' ('.$norm->tabel_no.')'
                 : (string) $norm->tabel_no]),
@@ -165,8 +182,19 @@ class VacationNormCatalog
                     : __('vacation::norms.describe.disabled_child'))
                 : __('vacation::norms.describe.children_under_14', ['count' => max(1, (int) ($norm->min_value ?? 1))]))
                 .' · '.($norm->scope === VacationNorm::SCOPE_PERSONNEL ? $who : ($norm->women_only ? __('vacation::norms.describe.women') : __('vacation::norms.describe.everyone'))),
+            VacationNorm::GROUP_CONDITIONS => ($norm->not_in_conditions ? __('vacation::norms.describe.not_in_conditions').' · ' : '')
+                .$who.$this->period($norm),
             default => $who,
         };
+    }
+
+    private function period(VacationNorm $norm): string
+    {
+        if ($norm->valid_from === null && $norm->valid_to === null) {
+            return '';
+        }
+
+        return ' · '.($norm->valid_from?->format('d.m.Y') ?? '…').' – '.($norm->valid_to?->format('d.m.Y') ?? '…');
     }
 
     /**

@@ -100,9 +100,13 @@ müvəqqəti itirdiyi, habelə bu Məcəllənin 179-cu maddəsində nəzərdə t
 - Staja daxildir: əmək müqaviləsi üzrə faktik işlənmiş vaxt + müvəqqəti əmək qabiliyyətsizliyi dövrü +
   Md. 179-da nəzərdə tutulan, iş yeri və orta əmək haqqı saxlanılan dövrlər. Başqa dövr ("yalnız") daxil deyil.
 
-**Hədd sərhədləri:** Mətn "beş ildən on ilədək", "on ildən on beş ilədək", "on beş ildən çox" deyir.
-Dəqiq 10 və 15 ilin hansı banda düşdüyünü mətn birmənalı demir. Ən təbii oxunuş: [5, 10) → 2,
-[10, 15) → 4, ≥ 15 → 6; 5 ildən az → 0. **Sərhəd şərhi: Təsdiqlənmədi** (rəsmi izah tapılmadı).
+**Hədd sərhədləri:** Mətn "beş ildən on ilədək", "on ildən on beş ilədək", "on beş ildən **çox**" deyir.
+Rəsmi izah (Nazirlik mövqeyi, Plenum, məhkəmə təcrübəsi, 1C) tapılmadı. Mətnin hərfi oxunuşu:
+"-dan … -dək" hər iki ucu daxil edir, "çox" isə xaric edir → [5, 10] → 2, [10, 15] → 4 (düz 10 il iki
+aralığa düşür, böyüyü götürülür), **> 15 → 6**; düz 15 il hələ 4 gündür. Ləğv olunmuş 1994-cü il
+"Məzuniyyətlər haqqında" Qanunda (854) pillələr "beş ildən çox / on ildən çox / on beş ildən çox" idi.
+Praktiki şərhlərdə (banker.az, 2023) 6 gün "15 il tamam olduqdan sonra" verilir — bu, "çox" sözü ilə
+ziddiyyət təşkil edir. **Sistem hərfi oxunuşu tətbiq edir (09.10.2026); şərh Təsdiqlənmədi.**
 
 **Md. 116.3:** "Əmək stajına görə (o cümlədən əmək şəraitinə görə) əlavə məzuniyyətlər bu Məcəllənin
 118, 119, 120 və 121-ci maddələrində göstərilən işçilərə verilmir."
@@ -126,8 +130,16 @@ müvafiq istehsalatda, peşə və ya vəzifədə iş ili ərzində faktik işlə
 verilir. Bu əlavə məzuniyyətə işçinin hüququ həmin iş yerlərində üst-üstə azı altı ay işlədikdə
 əmələ gəlir."
 
-- Konkret siyahı (Nazirlər Kabinetinin müvafiq qərarı) bu araşdırmada **oxunmayıb** — vəzifə üzrə
-  günlər həmin siyahıdan götürülməlidir. **Təsdiqlənmədi.**
+- Siyahı: **NK-nin 05.07.2004 tarixli 92 nömrəli qərarı** (e-qanun ID 6304, "Qüvvədədir", 15 dəfə
+  dəyişdirilib; sonuncu — NK 08.09.2026 №267, asbest bəndləri, 01.07.2027-dən). 40 sahə bölməsi
+  (I Dağ-mədən … XXXVII Səhiyyə, XXXVIII Radioaktiv maddələr və rentgen, XXXIX Laboratoriyalar,
+  **XL Ümumi peşələr**), ~6 200 bənd. Günlər: 6 (≈6 400 xana), 12, 18, 24, 30 (tək). "Yüksək həssaslıq,
+  həyəcan, gərginlik" üçün ayrıca siyahı yoxdur — eyni siyahının adındadır.
+- Tətbiq qaydaları: **NK-nin 30.05.2005 tarixli 95 nömrəli qərarı** (ID 9900): "Qaynaq işləri",
+  "Rəngsaz işləri" sahədən asılı olmayaraq (b.3); "Ümumi peşələr" istənilən sahəyə (b.4); iş ilində
+  faktiki işlənmiş vaxta mütənasib, üst-üstə 6 ay (b.7); tam aylar = iş günləri ÷ 30,4 (b.10); gündə
+  ≥ 90% həmin şəraitdə (b.12); siyahı üzrə bir neçə hüquq olduqda ən böyüyü (b.14).
+- Siyahı yüklənmir: vəzifə üzrə sətirlər HR tərəfindən «Məzuniyyət normaları»nda əlavə olunur.
 - Md. 116.3 bu məzuniyyətin də Md. 118–121 işçilərinə verilmədiyini göstərir.
 
 **Etibarlılıq:** Təsdiqləndi (rəsmi mətn) — minimum 6 gün və siyahını təsdiq edən orqan; siyahının məzmunu Təsdiqlənmədi.
@@ -211,9 +223,14 @@ məzuniyyət müddəti ~~, habelə azadlıqdan məhrum etmədən islah işlərin
 KM-in 19.04.2001 qərarı, KMQ5 ilə qüvvədən düşüb.)
 
 - Md. 127 = uşağın 3 yaşınadək qulluğa görə qismən ödənişli sosial məzuniyyət → **iş ilinə daxil deyil**.
-- Ödənişsiz məzuniyyətlər (Md. 128–130) Md. 132.1-in siyahısında **yoxdur**, buna görə məntiqi
-  nəticə staja daxil edilmədikləridir. Lakin mətn bunu açıq şəkildə "daxil edilmir" kimi deməyib.
-  **Təsdiqlənmədi** (şərh).
+- Ödənişsiz məzuniyyətlər (Md. 128–130) Md. 132.1-in siyahısında **yoxdur**, 132.2-də də istisna
+  kimi adı çəkilmir; Md. 125–130-un heç birində staj barədə cümlə yoxdur. 132.1 "a" iki cür oxunur
+  (iş yeri saxlanılır, əmək haqqı yalnız Məcəllə nəzərdə tutanda → daxil; və ya hər ikisi
+  saxlanılmalıdır → daxil deyil). Şərhlər (mks.az 2020, vergiler.az 2020) "daxil edilmir" deyir, əsas
+  göstərmədən. Ləğv olunmuş 1994-cü il Qanunu (Md. 14) **bir aydan çox** ödənişsiz məzuniyyəti açıq
+  istisna edirdi; 1999 Məcəlləsi bu cümləni götürməyib. **Təsdiqlənmədi.**
+- **Md. 116 (staj əlavəsi) üçün isə birmənalıdır:** 116.2 "yalnız" faktiki iş, xəstəlik və Md. 179
+  dövrlərini daxil edir — ödənişsiz məzuniyyət staj əlavəsi üçün staja **daxil deyil**.
 - **İş ilinin sürüşməsi:** Məcəllə staja daxil olmayan dövrlər qədər iş ilinin sonunun uzadılmasını açıq
   yazmır. Bu, 132-ci maddədən çıxan praktik nəticədir (1C və yerli HR təcrübəsində belə tətbiq olunur).
   **Təsdiqlənmədi.**
@@ -394,8 +411,8 @@ təsadüf etdikdə üst-üstə düşən günlər bir gün hesabı ilə nəzərə
    - Natamam iş vaxtı müddəti azaltmır (Md. 114.4).
 3. **Staj əlavəsi (Md. 116):** ümumi staj < 5 il → 0; 5–10 → **2**; 10–15 → **4**; > 15 → **6**. Staj
    **bütün işəgötürənlər** üzrə əmək müqaviləsi ilə faktik işlənmiş müddətdir (KMQ2 "bir müəssisədə"ni
-   ləğv edib); işə qəbulda əvvəlki staj daxil edilməli, sonra avtomatik artmalıdır. Sərhədlər (dəqiq 10 və
-   15 il) konfiqurasiya edilə bilən olsun; default: `[5,10)→2, [10,15)→4, ≥15→6`. Bandın hansı tarixə
+   ləğv edib); işə qəbulda əvvəlki staj daxil edilməli, sonra avtomatik artmalıdır. Sərhədlər mətnə
+   görə: `[5,10]→2, [10,15]→4, >15→6` (düz 15 il → 4). Bandın hansı tarixə
    (iş ilinin başlanğıcı və ya məzuniyyət tarixi) görə təyin olunması mətndə yoxdur — konfiqurasiya.
 4. **Şərait əlavəsi (Md. 115):** minimum **6 gün**, dəqiq gün vəzifə/peşə üzrə Nazirlər Kabinetinin
    siyahısından; iş ilində həmin şəraitdə **faktik işlənmiş vaxta mütənasib**, hüquq üst-üstə **6 ay**
@@ -456,11 +473,13 @@ təsadüf etdikdə üst-üstə düşən günlər bir gün hesabı ilə nəzərə
 | Qayda | Tətbiq | Qeyd |
 |---|---|---|
 | Əsas 21 gün, m.119 yaş/əlillik normaları | `vacation_norms` (qrup «Əsas»), qanuni sətirlər seed olunub | Vəzifə / işçi üzrə 30, 42, 46, 56 gün admin tərəfindən əlavə olunur; şamil olan ən böyük norma götürülür |
+| 30 gün, m.114.3 "b" (VTİSK) | Vəzifə kartında «VTİSK kateqoriyası» (rəhbər / mütəxəssis / texniki icraçı / fəhlə); «rəhbər» və «mütəxəssis» üçün qanuni 30 günlük sətirlər | Mövcud vəzifələr miqrasiyada sıralama səviyyəsindən təxmin edildi (1–4 rəhbər, 5–6 mütəxəssis, 7 boş) — HR Admin → Vəzifələr-də yoxlamalıdır. m.114.3-ün digər bəndləri (həkim, kənd təsərrüfatı və s.) vəzifə üzrə sətirlə |
 | m.116.3, 117.4 istisnası | «Əlavə məzuniyyət verilmir» işarəsi (16 yaşadək, 16–18, əlillik sətirlərində qoşulu) | m.118, 120, 121 vəzifə sətirlərində admin işarələyir |
-| Staj əlavəsi (m.116.1) | `[5,10)→2`, `[10,15)→4`, `≥15→6`; ümumi staj = əvvəlki əmək fəaliyyəti + bu işəgötürəndə iş, üst-üstə düşən dövrlər bir dəfə | İş ilinin başlanğıc tarixinə hesablanır; dəqiq 10 və 15 il yuxarı banda düşür (işçinin xeyrinə şərh) |
+| Staj əlavəsi (m.116.1) | `[5,10]→2`, `[10,15]→4`, `>15→6` (hərfi oxunuş, təqvim üzrə dəqiq); ümumi staj = əvvəlki əmək fəaliyyəti + bu işəgötürəndə iş, üst-üstə düşən dövrlər bir dəfə | İş ilinin başlanğıc tarixinə hesablanır; düz 10 il → 4, düz 15 il → 4. Nəticə: yalnız bu işəgötürəndə işləyən işçi 6 günü 17-ci iş ilindən alır. |
 | Uşaqlı valideyn (m.117) | 2 uşaq → 2, 3+ uşaq və ya əlilliyi olan uşaq → 5 (toplanmır); uşaq 14 yaşını tamamladığı təqvim ilinin sonunadək sayılır | Uşaqlar «Ailə üzvləri»ndən (qohumluq «Oğul»/«Qız»), əlillik üçün yeni «Əlilliyi var» qeydi; təkbaşına böyüdən ata / övladlığa götürən — işçi üzrə sətir |
-| Əmək şəraiti (m.115) | Vəzifə / işçi üzrə sətir, minimum 6 gün; staj əlavəsi ilə toplanır (m.136.2) | Mütənasiblik (m.131.6) və 6 ay şərti tətbiq olunmayıb |
-| İş ili (m.113.3), m.132.2 | İş ili işə qəbul günündən; «Uşağa qulluq məzuniyyəti» əmri ilə verilmiş günlər qədər uzanır | Ödənişsiz məzuniyyət iş ilini sürüşdürmür (Təsdiqlənmədi) |
+| Əmək şəraiti (m.115) | Vəzifə / işçi üzrə sətir, minimum 6 gün; staj əlavəsi ilə toplanır (m.136.2). Gün-gün hesablanır (NK 95): günün normu işçinin həmin gündəki vəzifəsi (köçürmə əmrlərindən) və işçi sətirlərindən ən böyüyü (b.14); hüquq şəraitdə üst-üstə 6 aydan sonra (b.7); iş ilində hər norm üzrə tam aylar ayrıca, tam ay = günlər ÷ 30,4 (b.10, b.11), günlər = Σ norma × aylar ÷ 12; hazırda şəraitdə işləyənə cari iş ili üçün tam (avans, b.7); ödənişsiz və uşağa qulluq dövrləri sayılmır (b.8) | Dövrlü işçi sətri — peşəsi siyahıda olmayan işçiyə tapşırılmış siyahı işi (b.13); «Şəraitdən kənar» işçi sətri — iş gününün 90%-dən az şəraitdə keçən dövr (b.12). Gündəlik 90% faktını sistem özü bilmir, HR dövr kimi qeyd edir. Köçürmə tarixi əmrin tarixidir. Əlavə məzuniyyət üçün ayrıca iş ili (b.7, 3-cü misal) aparılmır — əsas iş ili istifadə olunur |
+| İş ili (m.113.3), m.132.2 | İş ili işə qəbul günündən; «Uşağa qulluq məzuniyyəti» əmri ilə verilmiş günlər qədər uzanır | Ödənişsiz məzuniyyət iş ilini sürüşdürmür: m.113.3 iş ilini sabit müəyyən edir, m.132 ödənişsiz məzuniyyəti açıq istisna etmir |
+| Staj (m.116.2) | Ödənişsiz məzuniyyət (effekti `unpaid_leave` olan şablonlar) və uşağa qulluq məzuniyyəti m.116 stajından çıxılır | Yalnız bu işəgötürəndəki əmrlərlə verilmiş məzuniyyətlər; əvvəlki işlərdəki fasilələr əmək fəaliyyəti qeydindən bilinmir |
 | Birinci il, 6 ay (m.131.1, 131.4) | Birinci iş ilinin günləri işə qəbuldan 6 ay sonra açılır; 18 yaşadək və əlilliyi olan işçi üçün dərhal | m.131.4-ün digər halları (hamiləlik, əvəzçilik və s.) avtomatik deyil |
 | Keçirmə (m.134–135) | Qalıq yanmır, sonrakı iş illərinə keçir; istifadə ən köhnə iş ilindən (əmrdə iş ili göstərilibsə əvvəlcə ondan) | — |
 | Kompensasiya (m.144.2) | «İstifadə olunmamış məzuniyyətə görə kompensasiya» əmri: xitam əmri olmadan tərtib edilmir, xitam təsdiqlənmədən təsdiqlənmir; günlər bütün iş illərinin qalığından çox ola bilməz | İşləmə dövründə kompensasiya «Vacation compensation without termination allowed» ayarı ilə açılır (standart: bağlı) |

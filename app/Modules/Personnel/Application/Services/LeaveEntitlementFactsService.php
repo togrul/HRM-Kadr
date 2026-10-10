@@ -5,6 +5,7 @@ namespace App\Modules\Personnel\Application\Services;
 use App\Models\Personnel;
 use App\Models\PersonnelKinship;
 use App\Models\PersonnelLaborActivity;
+use App\Models\Position;
 use App\Modules\Personnel\Contracts\LeaveEntitlementFacts;
 use App\Modules\Personnel\Contracts\LeaveEntitlementFactsProvider;
 use Carbon\CarbonImmutable;
@@ -13,7 +14,8 @@ use Throwable;
 
 /**
  * İşçi kartından məzuniyyət faktlarını yığır (üç sorğu, paket üçün):
- *   - işçi: cins, doğum tarixi, işə qəbul / xitam tarixi, vəzifə, əlillik və onun tarixi;
+ *   - işçi: cins, doğum tarixi, işə qəbul / xitam tarixi, vəzifə (və onun VTİSK kateqoriyası),
+ *     əlillik və onun tarixi;
  *   - ailə üzvləri: «Oğul» / «Qız» qohumluğu olanlar uşaq sayılır (doğum tarixi, əlillik qeydi);
  *   - əmək fəaliyyəti: cari iş qeydi xaricindəki dövrlər (ümumi əmək stajı, ƏM m.116 — staj
  *     bütün işəgötürənlər üzrə sayılır).
@@ -39,6 +41,7 @@ class LeaveEntitlementFactsService implements LeaveEntitlementFactsProvider
             ->toBase()
             ->get(['tabel_no', 'gender', 'birthdate', 'join_work_date', 'leave_work_date', 'position_id', 'disability_id', 'disability_given_date']);
 
+        $categories = $this->positionCategories($people->pluck('position_id')->filter()->unique()->values()->all());
         $children = $this->children($tabelNos);
         $employment = $this->previousEmployment($tabelNos);
         $facts = [];
@@ -57,10 +60,37 @@ class LeaveEntitlementFactsService implements LeaveEntitlementFactsProvider
                 disabledSince: $this->date($row->disability_given_date),
                 children: $children[$tabelNo] ?? [],
                 previousEmployment: $employment[$tabelNo] ?? [],
+                positionCategory: $row->position_id !== null ? ($categories[(int) $row->position_id] ?? null) : null,
             );
         }
 
         return $facts;
+    }
+
+    /**
+     * Vəzifələrin VTİSK kateqoriyası (ƏM m.114.3 "b").
+     *
+     * @param  list<int|string>  $positionIds
+     * @return array<int, string>
+     */
+    private function positionCategories(array $positionIds): array
+    {
+        if ($positionIds === []) {
+            return [];
+        }
+
+        try {
+            return Position::query()
+                ->whereIn('id', $positionIds)
+                ->whereNotNull('vtisk_category')
+                ->toBase()
+                ->pluck('vtisk_category', 'id')
+                ->mapWithKeys(fn ($category, $id): array => [(int) $id => (string) $category])
+                ->all();
+        } catch (QueryException) {
+            // Sütun hələ miqrasiya olunmayıbsa kateqoriya üzrə norma tətbiq olunmur.
+            return [];
+        }
     }
 
     /**
