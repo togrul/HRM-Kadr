@@ -6,6 +6,7 @@ use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\User;
 use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
 use App\Modules\Services\Livewire\Concerns\AuthorizesUserManagement;
+use App\Services\StructureService;
 use App\Services\UserAdministrationGuard;
 use DB;
 use Illuminate\Contracts\View\View;
@@ -143,6 +144,7 @@ class EditUser extends Component
         if ($this->roleId && ! $this->isSelf()) {
             $this->userModel->roles()->sync($this->roleId);
             app(PermissionRegistrar::class)->forgetCachedPermissions();
+            app(StructureService::class)->forgetUser((int) $this->userModel->getKey());
         }
 
         activity('users')

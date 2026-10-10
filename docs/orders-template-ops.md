@@ -47,7 +47,6 @@ Optional report thresholds (applied through `metrics`):
 
 Audit command:
 
-- `php artisan orders:templates:legacy-audit --json`
 
 Tracks:
 

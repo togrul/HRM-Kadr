@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Storage;
 
 class EmployeeContentAsset extends Model
 {
@@ -71,6 +70,6 @@ class EmployeeContentAsset extends Model
             return null;
         }
 
-        return Storage::disk($this->storage_disk ?: 'employee_content')->url($this->storage_path);
+        return route('personnel.learning-content.file', $this->getKey());
     }
 }

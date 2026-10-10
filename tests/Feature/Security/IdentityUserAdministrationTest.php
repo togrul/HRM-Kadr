@@ -165,3 +165,37 @@ it('keeps permission names immutable so permissions cannot be swapped', function
 
     expect($permission->fresh()->name)->toBe('show-staff');
 });
+
+it('invalidates warmed structure caches immediately when a user role changes', function (): void {
+    $this->actingAs(identityAdmin());
+    $target = identityUser();
+    grantAllStructures($target);
+    $scopes = app(\App\Services\StructureService::class);
+    expect($scopes->scopeFor($target)->isAll())->toBeTrue();
+    $role = Role::query()->create(['name' => 'Restricted', 'guard_name' => 'web']);
+
+    Livewire::test(EditUser::class, ['userModel' => $target->id])
+        ->set('roleId', $role->id)
+        ->call('store')
+        ->assertHasNoErrors();
+
+    expect($scopes->scopeFor($target->fresh())->isNone())->toBeTrue();
+});
+
+it('refuses to grant structures outside the role manager scope', function (bool $all): void {
+    $manager = identityUser(['access-settings', 'manage-roles']);
+    foreach ([1, 2] as $id) {
+        \App\Models\Structure::query()->create(['id' => $id, 'name' => 'Struktur'.$id, 'shortname' => 'S'.$id, 'code' => $id, 'level' => 1]);
+    }
+    grantStructures($manager, [1]);
+    $role = Role::query()->create(['name' => 'Foreign scope', 'guard_name' => 'web']);
+    $this->actingAs($manager);
+    Livewire::test(SetPermission::class, ['roleModel' => $role->id])
+        ->set('permissionStructureList', [2])
+        ->set('allStructures', $all)
+        ->call('store')
+        ->assertNotDispatched('permissionSet')
+        ->assertDispatched('notify', type: 'error', message: __('services::roles.messages.role_exceeds_your_structures'));
+    expect($role->fresh()->structures)->toHaveCount(0)
+        ->and((bool) $role->fresh()->all_structures)->toBeFalse();
+})->with([true, false]);

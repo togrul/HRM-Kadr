@@ -57,7 +57,13 @@ class RestKpiConnector
      */
     public function fetch(array $config, Personnel $personnel, Carbon $from, Carbon $to): float
     {
-        $url = strtr((string) ($config['url'] ?? ''), [
+        $templateUrl = (string) ($config['url'] ?? '');
+        if (self::usesSensitivePlaceholder($templateUrl)
+            && ! hash_equals(hash('sha256', $templateUrl), (string) ($config['sensitive_url_sha256'] ?? ''))) {
+            throw new RuntimeException(__('performance_evaluation::kpi.connector.errors.pin_requires_admin'));
+        }
+
+        $url = strtr($templateUrl, [
             '{tabel_no}' => rawurlencode((string) $personnel->tabel_no),
             '{email}' => rawurlencode((string) $personnel->email),
             '{pin}' => rawurlencode((string) $personnel->pin),

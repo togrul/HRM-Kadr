@@ -9,9 +9,6 @@
                 <x-context-panel.item href="#update-password" :note="__('ui::profile.descriptions.update_password')">
                     {{ __('ui::profile.titles.update_password') }}
                 </x-context-panel.item>
-                <x-context-panel.item href="#delete-account" dot="bg-[#f43f5e]">
-                    {{ __('ui::profile.titles.delete_account') }}
-                </x-context-panel.item>
             </x-context-panel.section>
         </x-context-panel>
     </x-slot>
@@ -57,8 +54,5 @@
             @include('profile.partials.update-password-form')
         </section>
 
-        <section id="delete-account" class="{{ $cardClass }}">
-            @include('profile.partials.delete-user-form')
-        </section>
     </div>
 </x-app-layout>

@@ -44,6 +44,48 @@ class FilesPrivateStorageTest extends TestCase
         Storage::fake('public');
     }
 
+    public function test_learning_material_is_gated_and_legacy_files_are_privatized_idempotently(): void
+    {
+        $owner = $this->makePersonnel();
+        $user = $this->linkedUser($owner);
+        $user->givePermissionTo(Permission::findOrCreate('view-own-learning-content', 'web'));
+        $asset = \App\Models\EmployeeContentAsset::query()->create([
+            'title' => 'Daxili qaydalar', 'content_type' => 'pdf', 'storage_disk' => 'employee_content',
+            'storage_path' => 'learning-content/rules.pdf', 'thumbnail_path' => 'learning-content/rules.png',
+        ]);
+        \App\Models\EmployeeContentAssignment::query()->create([
+            'asset_id' => $asset->id, 'personnel_id' => $owner->id, 'status' => 'assigned', 'assigned_at' => now(),
+        ]);
+        Storage::disk('public')->put('employee-content/learning-content/rules.pdf', '%PDF-1.4 rules');
+        Storage::disk('public')->put('employee-content/learning-content/rules.png', 'thumbnail');
+        $this->assertStringNotContainsString('/storage/', $asset->contentUrl());
+        $this->signIn(User::factory()->create())->get($asset->contentUrl())->assertForbidden();
+        $this->signIn($user)->get($asset->contentUrl())->assertOk()->assertHeader('X-Content-Type-Options', 'nosniff');
+
+        $this->artisan('files:privatize', ['--dry-run' => true])->assertSuccessful();
+        Storage::disk('public')->assertExists('employee-content/learning-content/rules.pdf');
+        $this->assertSame('employee_content', $asset->fresh()->storage_disk);
+        $this->artisan('files:privatize')->assertSuccessful();
+        $this->artisan('files:privatize')->assertSuccessful();
+        Storage::disk('public')->assertMissing('employee-content/learning-content/rules.pdf');
+        Storage::disk('public')->assertMissing('employee-content/learning-content/rules.png');
+        Storage::disk('local')->assertExists('employee-content/learning-content/rules.pdf');
+        $this->assertSame('local', $asset->fresh()->storage_disk);
+        $this->signIn($user)->get($asset->fresh()->contentUrl())->assertOk();
+    }
+
+    public function test_privatize_does_not_delete_a_different_file_of_the_same_size(): void
+    {
+        $owner = $this->makePersonnel();
+        $this->makeLeave($owner->tabel_no, 'leaves/conflict.pdf');
+        Storage::disk('public')->put('leaves/conflict.pdf', 'AAAA');
+        Storage::disk('local')->put('leaves/conflict.pdf', 'BBBB');
+
+        $this->artisan('files:privatize')->assertFailed();
+        $this->assertSame('AAAA', Storage::disk('public')->get('leaves/conflict.pdf'));
+        $this->assertSame('BBBB', Storage::disk('local')->get('leaves/conflict.pdf'));
+    }
+
     public function test_svg_and_html_are_never_served_inline_and_downloads_are_hardened(): void
     {
         $viewer = grantAllStructures(User::factory()->create());

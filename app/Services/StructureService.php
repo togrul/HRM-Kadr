@@ -128,6 +128,30 @@ class StructureService
         );
     }
 
+    /** @param iterable<int, string> $tabelNos */
+    public function allowsAllTabelNos(User $user, iterable $tabelNos): bool
+    {
+        $scope = $this->scopeFor($user);
+        if ($scope->isAll()) {
+            return true;
+        }
+        if ($scope->isNone()) {
+            return false;
+        }
+
+        $ids = collect($tabelNos)->map(fn ($id): string => (string) $id)->unique()->values();
+        foreach ($ids->chunk(500) as $chunk) {
+            $structures = Personnel::withTrashed()->whereIn('tabel_no', $chunk)->pluck('structure_id', 'tabel_no');
+            foreach ($chunk as $tabelNo) {
+                if (! $structures->has($tabelNo) || ! $scope->allows($structures->get($tabelNo))) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     /**
      * @return list<int>
      */

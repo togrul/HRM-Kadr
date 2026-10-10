@@ -6,9 +6,12 @@ use App\Models\PayrollOneOffEarning;
 use App\Models\PayrollPeriod;
 use App\Models\PayrollRun;
 use App\Models\Payslip;
+use App\Models\User;
 use App\Modules\Compensation\Domain\Contracts\CompensationReadRepository;
 use App\Modules\Integration\Domain\Contracts\PayrollOwnership;
+use App\Services\StructureService;
 use App\Support\Database\InstalledTables;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -23,6 +26,27 @@ class PayrollRunService
         private readonly RetroService $retro,
         private readonly PayrollOwnership $ownership,
     ) {}
+
+    /** Run bütövlükdə dəyişir: onun bütün işçiləri aktorun görünürlüyündə olmalıdır. */
+    private function guardStructureScope(PayrollRun $run, bool $includeAssignees = false): void
+    {
+        $actor = auth()->user();
+        if (! $actor instanceof User) {
+            return;
+        }
+
+        $tabelNos = $run->payslips()->pluck('tabel_no');
+        if ($includeAssignees) {
+            $tabelNos = $tabelNos->merge($this->compensation->activeAssignees(
+                $run->regime_id,
+                $run->period->ends_on->toDateString(),
+            ));
+        }
+
+        if (! app(StructureService::class)->allowsAllTabelNos($actor, $tabelNos)) {
+            throw new AuthorizationException;
+        }
+    }
 
     /**
      * Refuse to compute when the finance system owns payroll.
@@ -71,6 +95,8 @@ class PayrollRunService
      */
     public function deleteRun(PayrollRun $run): void
     {
+        $this->guardStructureScope($run);
+
         $this->guardStatus($run->isEditable(), 'not_editable');
 
         $run->delete();
@@ -81,6 +107,10 @@ class PayrollRunService
      */
     public function deletePayslip(Payslip $payslip): void
     {
+        if ($payslip->run !== null) {
+            $this->guardStructureScope($payslip->run);
+        }
+
         $this->guardStatus((bool) $payslip->run?->isEditable(), 'not_editable');
 
         $payslip->delete();
@@ -134,6 +164,8 @@ class PayrollRunService
      */
     public function calculate(PayrollRun $run): PayrollRun
     {
+        $this->guardStructureScope($run, true);
+
         $this->guardOwnership('calculation');
 
         $this->guardStatus($run->isEditable(), 'not_editable');
@@ -323,6 +355,8 @@ class PayrollRunService
 
     public function approve(PayrollRun $run): PayrollRun
     {
+        $this->guardStructureScope($run);
+
         $this->guardOwnership('approval');
 
         $this->guardStatus($run->status === 'calculated', 'approve_requires_calculated');
@@ -395,6 +429,8 @@ class PayrollRunService
 
     public function lock(PayrollRun $run): PayrollRun
     {
+        $this->guardStructureScope($run, true);
+
         $this->guardOwnership('locking');
 
         $this->guardStatus($run->status === 'approved', 'lock_requires_approval');
@@ -452,6 +488,8 @@ class PayrollRunService
      */
     public function reopen(PayrollRun $run): PayrollRun
     {
+        $this->guardStructureScope($run);
+
         $this->guardStatus(in_array($run->status, ['approved', 'locked'], true), 'reopen_not_allowed');
 
         $this->guardPeriodOpen($run->period);

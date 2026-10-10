@@ -28,6 +28,8 @@ use Illuminate\Validation\ValidationException;
 use RuntimeException;
 use Tests\TestCase;
 
+use function grantAllStructures;
+
 /**
  * What approved orders entitle an employee to reaches the payslip: rest-day / holiday
  * work paid at double the hourly rate (or a day off instead, unpaid), and the
@@ -50,7 +52,7 @@ class OrderEarningsPayrollTest extends TestCase
 
         $this->seedReferenceData();
         $this->regimeId = (int) CompensationRegime::where('code', 'private')->value('id');
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(grantAllStructures(User::factory()->create()));
     }
 
     public function test_double_pay_rest_day_work_is_paid_at_twice_the_hourly_rate_and_taxed(): void

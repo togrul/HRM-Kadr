@@ -51,42 +51,12 @@ test('email verification status is unchanged when the email address is unchanged
     $this->assertNotNull($user->refresh()->email_verified_at);
 });
 
-test('user can delete their account', function () {
+test('users cannot delete their own account even with the correct password', function (string $password): void {
     $user = User::factory()->create();
-
-    $response = $this
-        ->actingAs($user)
-        ->delete('/profile', [
-            'password' => 'password',
-        ]);
-
-    $response
-        ->assertSessionHasNoErrors()
-        ->assertRedirect('/');
-
-    $this->assertGuest();
-    $this->assertSoftDeleted('users', ['id' => $user->id]);
-});
-
-test('correct password must be provided to delete account', function () {
-    $user = User::factory()->create();
-
-    $response = $this
-        ->actingAs($user)
-        ->from('/profile')
-        ->delete('/profile', [
-            'password' => 'wrong-password',
-        ]);
-
-    $response
-        ->assertSessionHasErrorsIn('userDeletion', 'password')
-        ->assertRedirect('/profile');
-
-    $this->assertDatabaseHas('users', [
-        'id' => $user->id,
-        'deleted_at' => null,
-    ]);
-});
+    $this->actingAs($user)->delete('/profile', ['password' => $password])->assertForbidden();
+    $this->assertAuthenticatedAs($user);
+    $this->assertDatabaseHas('users', ['id' => $user->id, 'deleted_at' => null]);
+})->with(['password', 'wrong-password', '']);
 
 test('profile page renders the restyled sections', function () {
     $user = User::factory()->create();
@@ -97,7 +67,7 @@ test('profile page renders the restyled sections', function () {
         ->assertSee(__('ui::profile.titles.account_settings'))
         ->assertSee('id="profile-information"', false)
         ->assertSee('id="update-password"', false)
-        ->assertSee('id="delete-account"', false)
+        ->assertDontSee('id="delete-account"', false)
         ->assertSee('name="current_password"', false)
         ->assertSee('value="'.e($user->email).'"', false)
         ->assertDontSee('wire:confirm', false);

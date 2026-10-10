@@ -28,6 +28,10 @@ class DocxToPdfConverter implements PdfConverter
      */
     public function convert(string $docxPath): ?string
     {
+        if (is_file($docxPath)) {
+            app(DocxPlaceholderParser::class)->assertSafeFile($docxPath);
+        }
+
         $binary = $this->binary();
         if ($binary === null || ! is_file($docxPath)) {
             return null;

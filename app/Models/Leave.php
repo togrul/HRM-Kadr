@@ -221,12 +221,12 @@ class Leave extends Model
             return false;
         }
 
-        if (is_null($this->assigned_to)) {
-            return true;
-        }
-
         if (! $user) {
             return false;
+        }
+
+        if (is_null($this->assigned_to)) {
+            return $user->can('view', $this) && $user->can('approve-leaves') && $user->can('update', $this);
         }
 
         // assigned_to həmişə əməkdaş id-sidir; istifadəçi id-si ilə müqayisə edilmir (ayrı id məkanları).

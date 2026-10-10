@@ -170,6 +170,17 @@ class DocxPlaceholderParser
         return $parts;
     }
 
+    public function assertSafeFile(string $docxPath): void
+    {
+        $zip = new ZipArchive;
+        if ($zip->open($docxPath) !== true) {
+            throw new UnsafeDocxException('Unable to open .docx archive.');
+        }
+
+        $this->assertSafeArchive($zip);
+        $zip->close();
+    }
+
     /**
      * Zip bomb qoruması: heç bir giriş oxunmamışdan əvvəl mərkəzi kataloqdakı ölçülər
      * yoxlanır (fayl sayı, cəmi açılmış ölçü, mətn hissəsinin ölçüsü, sıxılma nisbəti).

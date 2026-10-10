@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Support\Uploads\PrivateFiles;
 use Illuminate\Console\Command;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
@@ -73,6 +74,8 @@ class PrivatizeUploadsCommand extends Command
             });
         }
 
+        $this->privatizeLearningAssets($dryRun);
+
         $this->table(array_keys($this->stats), [array_values($this->stats)]);
 
         if ($dryRun) {
@@ -80,6 +83,35 @@ class PrivatizeUploadsCommand extends Command
         }
 
         return $this->stats['failed'] > 0 ? self::FAILURE : self::SUCCESS;
+    }
+
+    private function privatizeLearningAssets(bool $dryRun): void
+    {
+        if (! Schema::hasTable('employee_content_assets')) {
+            return;
+        }
+
+        DB::table('employee_content_assets')
+            ->where(fn ($query) => $query->whereNull('storage_disk')->orWhereIn('storage_disk', ['', 'public', 'employee_content']))
+            ->orderBy('id')->chunkById(200, function ($rows) use ($dryRun): void {
+                foreach ($rows as $row) {
+                    $changes = ['storage_disk' => PrivateFiles::DISK];
+                    $ok = true;
+                    foreach (['storage_path', 'thumbnail_path'] as $column) {
+                        if (empty($row->{$column})) {
+                            continue;
+                        }
+                        $path = ($row->storage_disk === 'public' ? '' : 'employee-content/').$row->{$column};
+                        if (! $this->moveFile($path, $dryRun)) {
+                            $ok = false;
+                        }
+                        $changes[$column] = $path;
+                    }
+                    if ($ok && ! $dryRun) {
+                        $this->stats['rows_updated'] += DB::table('employee_content_assets')->where('id', $row->id)->update($changes);
+                    }
+                }
+            });
     }
 
     /**
@@ -114,7 +146,7 @@ class PrivatizeUploadsCommand extends Command
 
         try {
             if ($onPrivate) {
-                if ($private->size($path) !== $public->size($path)) {
+                if ($this->checksum($private, $path) !== $this->checksum($public, $path)) {
                     $this->stats['failed']++;
                     $this->warn("Hər iki diskdə fərqli fayl var, toxunulmadı: {$path}");
 
@@ -135,7 +167,7 @@ class PrivatizeUploadsCommand extends Command
                 fclose($stream);
             }
 
-            if ($private->size($path) !== $public->size($path)) {
+            if ($this->checksum($private, $path) !== $this->checksum($public, $path)) {
                 $private->delete($path);
                 throw new RuntimeException('ölçü uyğun gəlmir');
             }
@@ -149,6 +181,23 @@ class PrivatizeUploadsCommand extends Command
             $this->warn("Köçürülmədi ({$e->getMessage()}): {$path}");
 
             return false;
+        }
+    }
+
+    private function checksum(FilesystemAdapter $disk, string $path): string
+    {
+        $stream = $disk->readStream($path);
+        if (! is_resource($stream)) {
+            throw new RuntimeException('fayl oxuna bilmədi');
+        }
+
+        try {
+            $hash = hash_init('sha256');
+            hash_update_stream($hash, $stream);
+
+            return hash_final($hash);
+        } finally {
+            fclose($stream);
         }
     }
 }

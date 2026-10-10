@@ -141,6 +141,30 @@ class SsrfOutboundRequestTest extends TestCase
         $form()->assertHasNoErrors(['connectorForm.url']);
     }
 
+    public function test_legacy_pin_connector_cannot_send_personal_data_until_reauthorized(): void
+    {
+        Http::fake(['erp.example/*' => Http::response(['total' => 7])]);
+        $person = $this->person();
+        $url = 'https://erp.example/by-fin/{pin}';
+        $config = ['url' => $url, 'value_path' => 'total'];
+        $connector = app(RestKpiConnector::class);
+        $from = Carbon::parse('2026-01-01');
+        $to = Carbon::parse('2026-03-31');
+
+        foreach ([[], ['sensitive_url_sha256' => hash('sha256', $url.'/changed')]] as $approval) {
+            try {
+                $connector->fetch($config + $approval, $person, $from, $to);
+                $this->fail('An unapproved sensitive URL must not be called.');
+            } catch (RuntimeException $exception) {
+                $this->assertSame(__('performance_evaluation::kpi.connector.errors.pin_requires_admin'), $exception->getMessage());
+            }
+            Http::assertNothingSent();
+        }
+
+        $this->assertSame(7.0, $connector->fetch($config + ['sensitive_url_sha256' => hash('sha256', $url)], $person, $from, $to));
+        Http::assertSent(fn (Request $request): bool => $request->url() === 'https://erp.example/by-fin/AB12CD3');
+    }
+
     public function test_link_health_check_verifies_tls_and_stores_no_exception_text(): void
     {
         $source = (string) file_get_contents(app_path('Modules/Personnel/Application/Services/ProfessionalPortfolioLinkHealthService.php'));

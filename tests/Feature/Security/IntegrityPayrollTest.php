@@ -24,6 +24,8 @@ use Spatie\Activitylog\Models\Activity;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
+use function grantStructures;
+
 /**
  * Əmək haqqı bütövlüyü (H2, H4, H5, L1, L4): geriyə ödəniş yalnız hesab vərəqəsində olanla
  * yazılır, bağlı ay yenidən açılmır/silinmir, dövr+rejim üzrə bir müntəzəm run, ödənilmiş
@@ -40,6 +42,53 @@ class IntegrityPayrollTest extends TestCase
         parent::setUp();
         $this->seedReferenceData();
         $this->regimeId = (int) CompensationRegime::where('code', 'private')->value('id');
+    }
+
+    public function test_run_operations_refuse_a_partially_visible_roster_before_mutation(): void
+    {
+        $personnel = $this->makePersonnel();
+        app(CompensationService::class)->assignCompensation($personnel->tabel_no, [
+            'regime_id' => $this->regimeId, 'base_amount' => 1000, 'effective_from' => '2026-01-01',
+        ]);
+        $runs = app(PayrollRunService::class);
+        $run = $runs->calculate($runs->createRun(app(PayrollPeriodService::class)->createPeriod(2026, 1), $this->regimeId));
+        $actor = User::factory()->create();
+        $this->actingAs($actor);
+
+        foreach (['calculate', 'approve', 'lock', 'reopen', 'deleteRun'] as $method) {
+            try {
+                $runs->{$method}($run);
+                $this->fail($method.' must refuse a run outside the actor scope.');
+            } catch (AuthorizationException) {
+                $this->assertSame('calculated', $run->fresh()->status);
+                $this->assertSame(1, $run->payslips()->count());
+            }
+        }
+
+        grantStructures($actor, [(int) $personnel->structure_id]);
+        $this->assertSame('approved', $runs->approve($run)->status);
+    }
+
+    public function test_calculation_checks_assignees_even_before_payslips_exist(): void
+    {
+        $personnel = $this->makePersonnel();
+        app(CompensationService::class)->assignCompensation($personnel->tabel_no, [
+            'regime_id' => $this->regimeId, 'base_amount' => 1000, 'effective_from' => '2026-01-01',
+        ]);
+        $runs = app(PayrollRunService::class);
+        $run = $runs->createRun(app(PayrollPeriodService::class)->createPeriod(2026, 1), $this->regimeId);
+        $actor = User::factory()->create();
+        \App\Models\Structure::query()->create(['id' => 2, 'name' => 'Other', 'shortname' => 'O', 'code' => 2, 'level' => 1]);
+        grantStructures($actor, [2]);
+        $this->actingAs($actor);
+
+        try {
+            $runs->calculate($run);
+            $this->fail('An empty run still covers active assignees outside the scope.');
+        } catch (AuthorizationException) {
+            $this->assertSame('draft', $run->fresh()->status);
+            $this->assertSame(0, $run->payslips()->count());
+        }
     }
 
     public function test_lock_refuses_a_run_whose_pay_changed_and_books_only_the_retro_on_the_payslip(): void

@@ -24,6 +24,8 @@ class DocxToHtmlRenderer
             throw new RuntimeException("DOCX file not found: {$docxPath}");
         }
 
+        app(DocxPlaceholderParser::class)->assertSafeFile($docxPath);
+
         $escaping = Settings::isOutputEscapingEnabled();
         Settings::setOutputEscapingEnabled(true);
 

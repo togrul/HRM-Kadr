@@ -503,6 +503,8 @@ class KpiLibraryWorkspace extends Component
 
         return [
             'url' => $url,
+            'sensitive_url_sha256' => RestKpiConnector::usesSensitivePlaceholder($url)
+                && auth()->user()?->can(UserAdministrationGuard::MANAGE_USERS) ? hash('sha256', $url) : '',
             'auth' => $auth,
             'username' => trim((string) ($this->connectorForm['username'] ?? '')),
             'token' => $auth === 'bearer' ? ($secret !== '' ? $secret : (string) ($stored['token'] ?? '')) : '',

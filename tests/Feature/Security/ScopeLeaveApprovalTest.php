@@ -175,3 +175,11 @@ it('lets the approver the route assigned the leave to reject it', function (): v
 
     expect((int) $leave->fresh()->status_id)->toBe(OrderStatusEnum::CANCELLED->value);
 });
+
+it('does not expose approval for an unassigned leave without approval rights', function (): void {
+    $leave = approvalLeave('AP-EMP', $this->type->id);
+    expect($leave->canBeApprovedBy(null))->toBeFalse()
+        ->and($leave->canBeApprovedBy(approvalUser(['show-leaves'])))->toBeFalse()
+        ->and($leave->canBeApprovedBy(approvalUser(SCOPE_LEAVE_APPROVER_PERMISSIONS)))->toBeTrue()
+        ->and($leave->canBeApprovedBy(approvalUser(SCOPE_LEAVE_APPROVER_PERMISSIONS, [2])))->toBeFalse();
+});
