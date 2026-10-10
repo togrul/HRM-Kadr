@@ -27,6 +27,10 @@
 
                 <x-pill-button variant="secondary" wire:click.prevent="resetFilter">{{ __('services::common.actions.reset_filter') }}</x-pill-button>
 
+                @if (\Illuminate\Support\Facades\Route::has('performance-evaluation.user-personnel-links'))
+                    <x-pill-button variant="secondary" :href="route('performance-evaluation.user-personnel-links', ['return' => route('services', ['selectedService' => 'users'])])">{{ __('services::users.actions.personnel_links') }}</x-pill-button>
+                @endif
+
                 <x-pill-button variant="primary" wire:click.prevent="openSideMenu('add-user')">
                     <x-icons.add-user color="text-current" hover="text-current" size="w-4 h-4"></x-icons.add-user>
                     {{ __('services::users.actions.add_user') }}

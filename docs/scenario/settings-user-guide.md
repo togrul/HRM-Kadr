@@ -22,8 +22,8 @@ Açılan səhifənin sol panelində (`Sistem konfiqurasiyası`) bölmələrin si
 - `Bildirişlər`
 - `Dəyişiklik siyasəti` (yalnız bu bölməyə icazəsi olanlara)
 - `Menyular`
-- `Rollar və icazələr`
-- `İstifadəçilər`
+- `Rollar və icazələr` (yalnız `manage-roles` icazəsi olanlara)
+- `İstifadəçilər` (yalnız `manage-users` icazəsi olanlara)
 - `Rütbələr`
 
 `Menyular`, `Rollar və icazələr`, `İstifadəçilər` və `Rütbələr` yanında neçə qeyd olduğu rəqəmlə görünür.
@@ -33,7 +33,18 @@ Telefonda sol panel olmur — eyni bölmə siyahısı səhifənin yuxarısında,
 Heç bir bölmə seçilməyibsə, ortada `Tənzimləmələri fərdiləşdirə bilərsiniz` yazısı görünür. Seçdiyiniz bölmənin adı başlıqdakı yolda (breadcrumb) çıxır.
 
 ## Bu modul kimlər üçündür?
-Bu bölmə yalnız sistem administratorları üçündür. Səhifə və içindəki hər əməliyyat yalnız `Tənzimləmələr` bölməsinə giriş icazəsi olan istifadəçilərə açılır. Bu icazə olmayan istifadəçi səhifəni ümumiyyətlə görmür, keçid ilə açmağa çalışsa da giriş qadağan olunur.
+Bu bölmə yalnız sistem administratorları üçündür. Səhifə və içindəki hər əməliyyat yalnız `Tənzimləmələr` bölməsinə giriş icazəsi (`access-settings`) olan istifadəçilərə açılır. Bu icazə olmayan istifadəçi səhifəni ümumiyyətlə görmür, keçid ilə açmağa çalışsa da giriş qadağan olunur.
+
+Bölməyə giriş hələ tam admin hüququ demək deyil. İki iş ayrıca icazə ilə verilir:
+- `manage-users` — istifadəçi hesablarını yaratmaq, redaktə etmək, deaktiv etmək, silmək və istifadəçini əməkdaş kartına bağlamaq;
+- `manage-roles` — rolları, icazələri və rolların struktur girişini idarə etmək.
+
+Mövcud qurulumda bu iki icazə `access-settings` daşıyan bütün rollara avtomatik verilib; daha dar hüquq lazımdırsa, onları roldan götürün.
+
+Heç kim öz hüququnu genişləndirə bilməz:
+- sizdə olmayan icazəyə malik istifadəçini dəyişə və ya silə bilməzsiniz;
+- sizdə olmayan icazəni ehtiva edən rolu təyin edə, belə icazəni rola verə bilməzsiniz;
+- öz rolunuzu, öz rolunuzun icazələrini, öz e-poçtunuzu və öz aktivlik statusunuzu dəyişə bilməzsiniz — bunu başqa administrator edir.
 
 ## Ümumi
 Bu bölmədə üç hissə var.
@@ -132,6 +143,8 @@ Hər rol ayrıca kartda görünür: adı, qısa təsviri, neçə istifadəçiyə
 - Adı dəyişmək: kartdakı qələm ikonunu basın, adı düzəldin, yadda saxlayın.
 - Silmək: zibil qutusu ikonu — sistem təsdiq soruşacaq (`Rolu sil`). Geri qaytarılmır.
 
+Sistem rolları — `Admin`, `HR Admin`, `Employee Self-Service`, `hr` — proqramda adı ilə tanınır. Onların adını dəyişmək və onları silmək olmaz; başqa rola bu adları vermək də olmaz.
+
 ### İcazə pəncərəsi
 Rol kartının istənilən yerinə basanda sağda `İcazələrin idarə edilməsi` pəncərəsi açılır. Yuxarıda hansı rol üçün işlədiyiniz göstərilir.
 
@@ -144,12 +157,14 @@ Rol kartının istənilən yerinə basanda sağda `İcazələrin idarə edilməs
 
 Dəyişiklik həmin rola sahib bütün istifadəçilərə dərhal şamil olunur.
 
+Sizdə olmayan icazəni rola verə bilməzsiniz, özünüzün daşıdığı rolun icazələrini də dəyişə bilməzsiniz — belə halda `Yadda saxla` qırmızı bildirişlə rədd olunur.
+
 ### İcazələr tabı
 Burada sistemdə mövcud olan bütün icazələrin siyahısı var. Hər icazənin altında rəngli nişanlar olur: modul (`Davamiyyət`, `Əmrlər` və s.), risk səviyyəsi (`Yüksək risk`, `Orta risk`, `Aşağı risk`) və lazım olsa `Yalnız admin`.
 
 - `İcazə axtar` ilə ad və ya təsvir üzrə axtarın; tapılan söz vurğulanır.
 - `İcazə əlavə et` ilə yeni icazə yaradın: `İcazə` adı və `İcazə təsviri` mütləqdir, təsvir ən azı 12 simvol olmalıdır.
-- Qələm ikonu ilə redaktə edin, zibil qutusu ilə silin (sistem təsdiq soruşacaq).
+- Qələm ikonu ilə təsviri redaktə edin, zibil qutusu ilə silin (sistem təsdiq soruşacaq). Mövcud icazənin adı dəyişdirilmir — proqram icazəni adı ilə yoxlayır, ad dəyişsə rollar gözlənilmədən başqa hüquq qazana bilərdi.
 
 Yeni icazə yaratmaq özü heç nəyi açmır — onu rola təyin etmək lazımdır.
 
@@ -160,11 +175,24 @@ Cədvəldə `İstifadəçi`, `Rol`, `E-poçt`, `Aktiv?` sütunları görünür. 
 
 ### İstifadəçi əlavə etmək
 1. `İstifadəçi əlavə et` düyməsini basın.
-2. `Ad`, `E-poçt`, `Rol`, `Şifrə` və `Şifrəni təsdiqlə` xanalarını doldurun. Şifrə ən azı 8 simvol olmalıdır, e-poçt təkrarlana bilməz.
+2. `Ad`, `E-poçt`, `Rol`, `Şifrə` və `Şifrəni təsdiqlə` xanalarını doldurun. Şifrə ən azı 12 simvol olmalı, böyük və kiçik hərf, eləcə də rəqəm daxil etməlidir; e-poçt təkrarlana bilməz.
 3. `İstifadəçini yadda saxla` düyməsini basın.
 
 ### Redaktə etmək
 Sətirdəki qələm ikonunu basın. Ad, e-poçt, rol və `Aktivdir?` işarəsini dəyişə bilərsiniz. Şifrə xanalarını boş saxlasanız, şifrə dəyişmir. Hesabı müvəqqəti bağlamaq üçün silmək yerinə `Aktivdir?` işarəsini götürün.
+
+- Başqa istifadəçinin e-poçtunu və ya şifrəsini dəyişəndə `Sizin şifrəniz (təsdiq üçün)` xanasına öz şifrənizi yazmalısınız.
+- Deaktiv edilən istifadəçinin açıq sessiyası növbəti addımda bağlanır, o, daxil ola və şifrə bərpa linki ala bilmir.
+- Şifrəsi dəyişdirilən istifadəçinin digər cihazlardakı sessiyaları da bağlanır.
+
+### İstifadəçini əməkdaş kartına bağlamaq
+İstifadəçi hesabı əməkdaş kartına yalnız açıq bağla bağlanır — sistem e-poçt və ya ad-soyad eyniliyinə baxmır. Bağ şəxsi kabineti, maaş vərəqəsini, testləri və müraciətləri təsdiq hüququnu müəyyən edir.
+
+1. `İstifadəçilər` bölməsində `İstifadəçi ↔ əməkdaş bağları` düyməsini basın.
+2. İstifadəçini və əməkdaşı seçib yadda saxlayın. Bir əməkdaş yalnız bir istifadəçiyə bağlana bilər.
+3. Öz hesabınızı bağlaya bilməzsiniz; hər dəyişiklik fəaliyyət jurnalına yazılır.
+
+Əməkdaş üçün yeni şəxsi kabinet hesabı isə əməkdaşın kartında `Daha çox → Şəxsi kabinet hesabı` bölməsindən yaradılır — bağ orada avtomatik qurulur.
 
 ### Silmək və bərpa etmək
 - Zibil qutusu ikonu istifadəçini silir — sistem təsdiq soruşacaq.
@@ -192,6 +220,12 @@ Xananın altında qırmızı səhv mesajı olub-olmadığına baxın. Dəyər n�
 
 ### Rola icazə verdim, amma istifadəçi hələ də bölməni görmür.
 `Yadda saxla` düyməsini basdığınıza əmin olun. Sonra istifadəçi səhifəni yeniləsin. Həmçinin `Strukturlar` tabında lazım olan struktur seçilməyibsə, istifadəçi məlumatları görməyə bilər.
+
+### İstifadəçini redaktə etmək istəyirəm, amma «icazə yoxdur» çıxır.
+Həmin istifadəçidə sizdə olmayan icazə var. Onu yalnız daha geniş hüquqlu administrator dəyişə bilər.
+
+### Sistemdə qeydiyyat səhifəsi niyə yoxdur?
+Hesabları yalnız administratorlar (`manage-users`) yaradır; açıq qeydiyyat bağlanıb.
 
 ### İstifadəçini silmək, yoxsa deaktiv etmək?
 Müvəqqəti bağlamaq üçün `Aktivdir?` işarəsini götürün. Silinmiş istifadəçini `Silinmiş` filtrindən bərpa etmək olar, `Tam sil` isə geri qaytarılmır.

@@ -5,6 +5,7 @@ namespace App\Modules\Leaves\Livewire\SickCertificates;
 use App\Models\LeaveSickCertificate;
 use App\Models\Personnel;
 use App\Modules\Leaves\Application\Services\SickCertificateService;
+use App\Services\StructureService;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -94,6 +95,7 @@ class SickCertificateEditor extends Component
 
         $certificate = LeaveSickCertificate::query()->with('leave')->findOrFail((int) $certificateId);
         $this->authorize($mode === 'extend' ? 'create' : 'update', $certificate);
+        $this->authorize('view', $certificate);
 
         if ($certificate->isCancelled() || $certificate->leave === null) {
             return;
@@ -142,9 +144,9 @@ class SickCertificateEditor extends Component
             return;
         }
 
-        $personnel = Personnel::query()->where('tabel_no', $tabelNo)->first(['tabel_no', 'surname', 'name', 'patronymic']);
+        $personnel = Personnel::query()->where('tabel_no', $tabelNo)->first(['tabel_no', 'surname', 'name', 'patronymic', 'structure_id']);
 
-        if ($personnel === null) {
+        if ($personnel === null || ! app(StructureService::class)->scopeFor()->allows($personnel->structure_id)) {
             return;
         }
 
@@ -175,12 +177,15 @@ class SickCertificateEditor extends Component
             return collect();
         }
 
-        return Personnel::query()
+        $query = Personnel::query()
             ->nameLike($term)
             ->active()
             ->whereNull('deleted_at')
             ->orderBy('surname')
-            ->limit(8)
+            ->limit(8);
+
+        return app(StructureService::class)->scopeFor()
+            ->constrain($query, 'personnels.structure_id')
             ->get(['id', 'tabel_no', 'surname', 'name', 'patronymic']);
     }
 
@@ -253,10 +258,13 @@ class SickCertificateEditor extends Component
         try {
             if ($this->mode === 'create') {
                 $this->authorize('create', LeaveSickCertificate::class);
+                $this->assertEmployeeInScope((string) $data['tabel_no']);
                 $service->open($data, $actor);
             } elseif ($this->mode === 'extend') {
                 $this->authorize('create', LeaveSickCertificate::class);
-                $service->extend($this->certificateOrFail(), $data, $actor);
+                $certificate = $this->certificateOrFail();
+                $this->authorize('view', $certificate);
+                $service->extend($certificate, $data, $actor);
             } else {
                 $certificate = $this->certificateOrFail();
                 $this->authorize('update', $certificate);
@@ -287,6 +295,24 @@ class SickCertificateEditor extends Component
     public function render(): View
     {
         return view('leaves::livewire.sick-certificates.editor');
+    }
+
+    /**
+     * tabelNo müştəri tərəfdən dəyişdirilə bilər — yaradılan vərəqənin işçisi görünürlükdə olmalıdır.
+     *
+     * @throws ValidationException
+     */
+    private function assertEmployeeInScope(string $tabelNo): void
+    {
+        $structureId = $tabelNo !== ''
+            ? Personnel::query()->where('tabel_no', $tabelNo)->value('structure_id')
+            : null;
+
+        if ($tabelNo !== '' && ! app(StructureService::class)->scopeFor()->allows($structureId)) {
+            throw ValidationException::withMessages([
+                'tabel_no' => __('leaves::common.validation.personnel_out_of_scope'),
+            ]);
+        }
     }
 
     private function certificateOrFail(): LeaveSickCertificate

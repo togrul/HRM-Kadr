@@ -11,7 +11,6 @@ use App\Modules\Personnel\Livewire\DeletePersonnel;
 use App\Modules\Personnel\Livewire\TablePanel;
 use App\Modules\Personnel\Services\PersonnelCrudBenchmarkFixtureService;
 use App\Modules\Personnel\Services\PersonnelRowActionService;
-use App\Services\StructureService;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
@@ -36,7 +35,7 @@ function personnelListUser(array $permissions = ['show-personnels', 'add-personn
     test()->actingAs($user);
 
     // Siyahı istifadəçinin rollarına bağlı strukturları göstərir; testdə hamısı 1-dir.
-    test()->mock(StructureService::class, fn ($mock) => $mock->shouldReceive('getAccessibleStructures')->andReturn([1]));
+    grantStructures($user, [1]);
 
     return $user;
 }

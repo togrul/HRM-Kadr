@@ -4,6 +4,7 @@ namespace App\Modules\Personnel\Application\Services\MyHr;
 
 use App\Models\Personnel;
 use App\Models\PersonnelDocument;
+use App\Support\Uploads\PrivateFiles;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -35,7 +36,8 @@ class MyHrDocumentsReadService
                 'extension' => $extension,
                 'category' => $category,
                 'category_label' => __('personnel::my_hr.documents.categories.'.$category),
-                'url' => Storage::disk('public')->url((string) $document->file),
+                // Fayl özəl diskdədir; icazə (öz sənədi + görünmə müddəti) route-da yoxlanır.
+                'url' => route('personnel.files.download', $document),
                 'created_at' => optional($document->created_at)?->format('d.m.Y H:i') ?: '—',
                 'size_label' => $this->sizeLabel((string) $document->file),
             ];
@@ -65,11 +67,12 @@ class MyHrDocumentsReadService
 
     private function sizeLabel(string $path): string
     {
-        if ($path === '' || ! Storage::disk('public')->exists($path)) {
+        $disk = PrivateFiles::locate($path);
+        if ($disk === null) {
             return '—';
         }
 
-        $bytes = (int) Storage::disk('public')->size($path);
+        $bytes = (int) Storage::disk($disk)->size($path);
 
         if ($bytes <= 0) {
             return '0 KB';

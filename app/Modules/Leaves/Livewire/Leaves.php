@@ -9,8 +9,10 @@ use App\Models\Leave;
 use App\Models\OrderStatus;
 use App\Models\Structure;
 use App\Modules\Leaves\Application\Services\LeaveListCacheVersion;
+use App\Modules\Leaves\Application\Services\LeaveRecordService;
 use App\Modules\Leaves\Exports\LeaveExport;
 use App\Services\StructurePathService;
+use App\Services\StructureService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -19,6 +21,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\LazyCollection;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
@@ -168,6 +171,9 @@ class Leaves extends Component
     {
         $model = Leave::withTrashed()->find($id);
         $this->authorize('delete', $model);
+        if (! $this->passesLeaveIntegrity($model)) {
+            return;
+        }
         $model->forceDelete();
         $this->dispatch('leaveWasDeleted', __('leaves::common.messages.leave_deleted'));
     }
@@ -176,8 +182,31 @@ class Leaves extends Component
     {
         $model = Leave::withTrashed()->find($id);
         $this->authorize('restore', $model);
+        if (! $this->passesLeaveIntegrity($model)) {
+            return;
+        }
         $model->restore();
         $this->dispatch('leaveAdded', __('leaves::common.messages.leave_updated'));
+    }
+
+    /**
+     * An order's or a certificate's leave and a leave in a month closed for pay are not
+     * removed or restored here (LeaveRecordService holds the rules).
+     */
+    private function passesLeaveIntegrity(Leave $leave): bool
+    {
+        $records = app(LeaveRecordService::class);
+
+        try {
+            $records->assertEditable($leave);
+            $records->assertMonthsOpen(auth()->user(), [], $leave);
+        } catch (ValidationException $exception) {
+            $this->dispatch('addError', collect($exception->errors())->flatten()->first());
+
+            return false;
+        }
+
+        return true;
     }
 
     public function getTableHeaders(): array
@@ -232,7 +261,22 @@ class Leaves extends Component
      */
     protected function baseQuery(): Builder
     {
-        return Leave::query()->filter($this->search);
+        // Yalnız istifadəçinin struktur görünürlüyündəki işçilərin icazələri (fail closed).
+        return app(StructureService::class)->scopeFor()->constrainThrough(
+            Leave::query()->filter($this->search),
+            'personnel',
+        );
+    }
+
+    /**
+     * Siyahı/statistika keşi görünürlüyə görə ayrılır — eyni filtrli iki istifadəçi
+     * bir-birinin nəticəsini görməməlidir.
+     *
+     * @return array{all: bool, ids: list<int>}
+     */
+    protected function scopeCacheSegment(): array
+    {
+        return app(StructureService::class)->scopeFor()->toArray();
     }
 
     protected function returnData($type = 'normal'): array|LengthAwarePaginator|LazyCollection
@@ -353,6 +397,7 @@ class Leaves extends Component
     {
         return 'leaves:list:'.md5(json_encode([
             'version' => app(LeaveListCacheVersion::class)->current(),
+            'scope' => $this->scopeCacheSegment(),
             'status' => $this->status,
             'search' => $this->search->toArray(),
             'page' => method_exists($this, 'getPage') ? $this->getPage() : 1,
@@ -363,6 +408,7 @@ class Leaves extends Component
     {
         return 'leaves:stats:'.md5(json_encode([
             'version' => app(LeaveListCacheVersion::class)->current(),
+            'scope' => $this->scopeCacheSegment(),
             'status' => $this->status,
             'search' => $this->search->toArray(),
         ]));

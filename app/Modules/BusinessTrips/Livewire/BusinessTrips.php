@@ -9,6 +9,7 @@ use App\Models\Structure;
 use App\Modules\BusinessTrips\Exports\BusinessTripExport;
 use App\Modules\Orders\Contracts\OrderDrafter;
 use App\Services\StructureService;
+use App\Support\Uploads\SecureFileResponse;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -192,10 +193,15 @@ class BusinessTrips extends Component
             $templateProcessor->setValue('bullet', $filteredAttributes->attributes['$bullet']['value'] ?? '---------');
         }
 
-        $filename = "{$model->personnel->fullname}_ezamiyyet_{$model->start_date->format('d.m.Y')}";
-        $templateProcessor->saveAs($filename.'.docx');
+        // Fayl veb kökündə (public/) yox, storage/app/tmp-də təsadüfi adla yaradılır;
+        // istifadəçinin gördüyü ad ayrıca təmizlənir (yol ayırıcıları atılır).
+        $path = SecureFileResponse::temporaryPath('docx');
+        $templateProcessor->saveAs($path);
 
-        return response()->download($filename.'.docx')->deleteFileAfterSend();
+        return SecureFileResponse::temporaryDownload(
+            $path,
+            "{$model->personnel->fullname}_ezamiyyet_{$model->start_date->format('d.m.Y')}.docx",
+        );
     }
 
     /**

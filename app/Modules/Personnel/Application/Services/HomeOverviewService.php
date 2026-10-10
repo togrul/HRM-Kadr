@@ -13,6 +13,7 @@ use App\Modules\Leaves\Contracts\SickCertificateAttention;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestReviewReadService;
 use App\Modules\Personnel\Support\Presence\PersonnelPresenceStatus;
 use App\Modules\Staff\Contracts\StaffingLookup;
+use App\Services\StructureScope;
 use App\Services\StructureService;
 use App\Support\Database\InstalledTables;
 use Carbon\CarbonImmutable;
@@ -74,38 +75,41 @@ class HomeOverviewService
      */
     public function attention(?Authorizable $viewer): array
     {
+        $scope = $this->scopeOf($viewer);
+
         $tiles = [
             [
                 'key' => 'attendance_pending',
                 'permission' => 'show-attendance-manual',
                 'route' => 'attendance.manual-entries',
                 'accent' => 'amber',
-                'stats' => fn (): array => $this->pendingManualEntries(),
+                'stats' => fn (): array => $this->pendingManualEntries($scope),
             ],
             [
                 'key' => 'unsigned_orders',
                 'permission' => 'show-orders',
                 'route' => 'orders',
                 'accent' => 'rose',
-                'stats' => fn (): array => $this->unsignedOrders(),
+                'stats' => fn (): array => $this->unsignedOrders($scope),
             ],
             [
                 'key' => 'vacation_requests',
                 'permission' => 'show-vacations',
                 'route' => 'vacations.list',
                 'accent' => 'green',
-                'stats' => fn (): array => $this->pendingVacationRequests(),
+                'stats' => fn (): array => $this->pendingVacationRequests($scope),
             ],
             [
                 'key' => 'expiring_documents',
                 'permission' => 'show-document-compliance',
                 'route' => 'document-compliance',
                 'accent' => 'neutral',
-                'stats' => fn (): array => $this->expiringDocuments(),
+                'stats' => fn (): array => $this->expiringDocuments($scope),
             ],
         ];
 
-        if (app()->bound(SickCertificateAttention::class)) {
+        // Uzun açıq vərəqələr modulun təşkilat üzrə sayıdır — yalnız bütün strukturları görənə.
+        if (app()->bound(SickCertificateAttention::class) && $scope->isAll()) {
             $tiles[] = [
                 'key' => 'stale_sick_certificates',
                 'permission' => 'show-leaves',
@@ -158,8 +162,8 @@ class HomeOverviewService
     public function queueItems(string $key, User $viewer, int $limit = 5): array
     {
         return match ($key) {
-            'attendance_pending' => $this->can($viewer, 'show-attendance-manual') ? $this->manualEntryItems($limit) : [],
-            'unsigned_orders' => $this->can($viewer, 'show-orders') ? $this->unsignedOrderItems($limit) : [],
+            'attendance_pending' => $this->can($viewer, 'show-attendance-manual') ? $this->manualEntryItems($limit, $this->scopeOf($viewer)) : [],
+            'unsigned_orders' => $this->can($viewer, 'show-orders') ? $this->unsignedOrderItems($limit, $this->scopeOf($viewer)) : [],
             'vacation_requests' => $this->can($viewer, 'show-vacations')
                 ? app(MyHrRequestReviewReadService::class)->pendingVacationItems($viewer, $limit)
                 : [],
@@ -173,7 +177,7 @@ class HomeOverviewService
      *
      * @return list<array{id:int,title:string,meta:string,url:string}>
      */
-    private function manualEntryItems(int $limit): array
+    private function manualEntryItems(int $limit, StructureScope $scope): array
     {
         if (! InstalledTables::has('attendance_manual_entries')) {
             return [];
@@ -181,7 +185,7 @@ class HomeOverviewService
 
         $url = route('attendance.manual-entries');
 
-        return AttendanceManualEntry::query()
+        return $scope->constrainThrough(AttendanceManualEntry::query(), 'personnel')
             ->with('personnel:tabel_no,surname,name,patronymic')
             ->where('approval_status', 'pending')
             ->oldest('date')
@@ -206,13 +210,13 @@ class HomeOverviewService
     /**
      * @return list<array{id:int,title:string,meta:string,url:string}>
      */
-    private function unsignedOrderItems(int $limit): array
+    private function unsignedOrderItems(int $limit, StructureScope $scope): array
     {
         if (! InstalledTables::has('order_logs')) {
             return [];
         }
 
-        return OrderLog::query()
+        return $this->scopedOrders($scope)
             ->select(['id', 'order_no', 'given_date', 'description', 'template_snapshot'])
             ->where('status_id', OrderStatusEnum::PENDING->value)
             ->oldest('created_at')
@@ -233,37 +237,37 @@ class HomeOverviewService
     /**
      * @return array{count:int,oldest_days:int|null}
      */
-    private function pendingManualEntries(): array
+    private function pendingManualEntries(StructureScope $scope): array
     {
         if (! InstalledTables::has('attendance_manual_entries')) {
             return self::EMPTY_QUEUE;
         }
 
-        return $this->queueStats(AttendanceManualEntry::query()->where('approval_status', 'pending'));
+        return $this->queueStats($scope->constrainThrough(AttendanceManualEntry::query(), 'personnel')->where('approval_status', 'pending'));
     }
 
     /**
      * @return array{count:int,oldest_days:int|null}
      */
-    private function unsignedOrders(): array
+    private function unsignedOrders(StructureScope $scope): array
     {
         if (! InstalledTables::has('order_logs')) {
             return self::EMPTY_QUEUE;
         }
 
-        return $this->queueStats(OrderLog::query()->where('status_id', OrderStatusEnum::PENDING->value));
+        return $this->queueStats($this->scopedOrders($scope)->where('status_id', OrderStatusEnum::PENDING->value));
     }
 
     /**
      * @return array{count:int,oldest_days:int|null}
      */
-    private function pendingVacationRequests(): array
+    private function pendingVacationRequests(StructureScope $scope): array
     {
         if (! InstalledTables::has('personnel_vacations')) {
             return self::EMPTY_QUEUE;
         }
 
-        return $this->queueStats(PersonnelVacation::query()->where('approval_status', 'pending'));
+        return $this->queueStats($scope->constrainThrough(PersonnelVacation::query(), 'personnel')->where('approval_status', 'pending'));
     }
 
     /**
@@ -282,7 +286,7 @@ class HomeOverviewService
     /**
      * @return array{count:int,oldest_days:int|null}
      */
-    private function expiringDocuments(): array
+    private function expiringDocuments(StructureScope $scope): array
     {
         if (! InstalledTables::has('personnels')) {
             return ['count' => 0, 'oldest_days' => null];
@@ -299,12 +303,15 @@ class HomeOverviewService
             }
 
             $query->selectSub(
-                DB::table($table)
-                    ->selectRaw('COUNT(*)')
-                    ->join('personnels', 'personnels.tabel_no', '=', "{$table}.tabel_no")
-                    ->whereNull('personnels.deleted_at')
-                    ->whereNotNull("{$table}.{$column}")
-                    ->whereDate("{$table}.{$column}", '<=', $threshold),
+                $scope->constrain(
+                    DB::table($table)
+                        ->selectRaw('COUNT(*)')
+                        ->join('personnels', 'personnels.tabel_no', '=', "{$table}.tabel_no")
+                        ->whereNull('personnels.deleted_at')
+                        ->whereNotNull("{$table}.{$column}")
+                        ->whereDate("{$table}.{$column}", '<=', $threshold),
+                    'personnels.structure_id',
+                ),
                 $table,
             );
             $sources++;
@@ -344,7 +351,8 @@ class HomeOverviewService
         }
 
         if ($this->can($viewer, 'show-personnels')) {
-            $birthdays = $this->remember('birthdays', fn (): array => $this->birthdaysToday());
+            $scope = $this->scopeOf($viewer);
+            $birthdays = $this->remember('birthdays', fn (): array => $this->birthdaysToday($scope), $scope);
 
             $rows[] = [
                 'key' => 'birthdays',
@@ -358,7 +366,7 @@ class HomeOverviewService
         if ($this->can($viewer, 'show-vacations')) {
             $rows[] = [
                 'key' => 'vacations_starting',
-                'count' => $this->remember('vacations_starting', fn (): int => $this->vacationsStartingThisWeek()),
+                'count' => $this->remember('vacations_starting', fn (): int => $this->vacationsStartingThisWeek($this->scopeOf($viewer)), $this->scopeOf($viewer)),
                 'accent' => 'green',
                 'note' => null,
                 'route' => 'vacations.list',
@@ -377,7 +385,7 @@ class HomeOverviewService
      *
      * @return array{count:int,names:string|null}
      */
-    private function birthdaysToday(): array
+    private function birthdaysToday(StructureScope $scope): array
     {
         if (! InstalledTables::has('personnels')) {
             return ['count' => 0, 'names' => null];
@@ -385,7 +393,7 @@ class HomeOverviewService
 
         $today = CarbonImmutable::today();
 
-        $rows = DB::table('personnels')
+        $rows = $scope->constrain(DB::table('personnels'), 'structure_id')
             ->whereNull('deleted_at')
             ->whereMonth('birthdate', $today->month)
             ->whereDay('birthdate', $today->day)
@@ -404,7 +412,7 @@ class HomeOverviewService
      * Approved leaves opening inside the next seven days. Legacy rows carry no
      * approval status at all, which historically meant "entered by HR" — approved.
      */
-    private function vacationsStartingThisWeek(): int
+    private function vacationsStartingThisWeek(StructureScope $scope): int
     {
         if (! InstalledTables::has('personnel_vacations')) {
             return 0;
@@ -412,7 +420,7 @@ class HomeOverviewService
 
         $today = CarbonImmutable::today();
 
-        return PersonnelVacation::query()
+        return $scope->constrainThrough(PersonnelVacation::query(), 'personnel')
             ->whereBetween('start_date', [$today->toDateString(), $today->addDays(6)->toDateString()])
             ->where(fn ($query) => $query
                 ->whereNull('approval_status')
@@ -492,7 +500,7 @@ class HomeOverviewService
     public function attendanceWeek(?Authorizable $viewer): array
     {
         return $this->can($viewer, 'show-attendance')
-            ? $this->remember('attendance_week', fn (): array => $this->readAttendanceWeek())
+            ? $this->remember('attendance_week', fn (): array => $this->readAttendanceWeek($this->scopeOf($viewer)), $this->scopeOf($viewer))
             : [];
     }
 
@@ -501,7 +509,8 @@ class HomeOverviewService
      */
     public function activity(?Authorizable $viewer): array
     {
-        return $this->can($viewer, 'show-audit-logs')
+        // Audit lenti struktur üzrə süzülmür — yalnız bütün strukturları görənə göstərilir.
+        return $this->can($viewer, 'show-audit-logs') && $this->scopeOf($viewer)->isAll()
             ? $this->remember('activity', fn (): array => $this->recentActivity())
             : [];
     }
@@ -512,7 +521,7 @@ class HomeOverviewService
     public function structureFill(?Authorizable $viewer): array
     {
         return $this->can($viewer, 'show-staff')
-            ? $this->remember('structure_fill', fn (): array => $this->readStructureFill())
+            ? $this->remember('structure_fill', fn (): array => $this->readStructureFill($this->scopeOf($viewer)), $this->scopeOf($viewer))
             : [];
     }
 
@@ -522,7 +531,7 @@ class HomeOverviewService
      *
      * @return list<array<string,mixed>>
      */
-    private function readAttendanceWeek(): array
+    private function readAttendanceWeek(StructureScope $scope): array
     {
         if (! InstalledTables::has('attendance_daily_structure_summaries')) {
             return [];
@@ -531,7 +540,7 @@ class HomeOverviewService
         $today = CarbonImmutable::today();
         $start = $today->subDays(6);
 
-        $rows = DB::table('attendance_daily_structure_summaries')
+        $rows = $scope->constrain(DB::table('attendance_daily_structure_summaries'), 'structure_id')
             ->selectRaw('date, SUM(present_days) as present, SUM(absence_days) as absent, SUM(scheduled_days) as scheduled')
             ->whereBetween('date', [$start->toDateString(), $today->endOfDay()->toDateTimeString()])
             ->groupBy('date')
@@ -616,7 +625,7 @@ class HomeOverviewService
      *
      * @return list<array{id:int,name:string,total:int,filled:int,vacant:int,pct:int}>
      */
-    private function readStructureFill(int $limit = 6): array
+    private function readStructureFill(StructureScope $scope, int $limit = 6): array
     {
         if (! InstalledTables::has('staff_schedules') || ! InstalledTables::has('structures')) {
             return [];
@@ -624,7 +633,11 @@ class HomeOverviewService
 
         // Dolu comes from the live headcount (the stored staff_schedules.filled counter
         // drifts), credited per ştat row only up to its own total.
-        $fill = array_filter(app(StaffingLookup::class)->structureFill(), fn (array $row): bool => $row['total'] > 0);
+        $fill = array_filter(
+            app(StaffingLookup::class)->structureFill(),
+            fn (array $row, int|string $structureId): bool => $row['total'] > 0 && $scope->allows($structureId),
+            ARRAY_FILTER_USE_BOTH,
+        );
         if ($fill === []) {
             return [];
         }
@@ -658,13 +671,46 @@ class HomeOverviewService
      * @param  Closure():T  $resolver
      * @return T
      */
-    private function remember(string $block, Closure $resolver): mixed
+    private function remember(string $block, Closure $resolver, ?StructureScope $scope = null): mixed
     {
+        // Struktur görünürlüyü fərqli olan baxanlar eyni keşi bölüşmür.
+        $scopeKey = $scope === null ? 'org' : ($scope->isAll() ? 'all' : md5(implode(',', $scope->ids())));
+
         return Cache::remember(
-            'home:overview:'.$block.':'.CarbonImmutable::today()->toDateString(),
+            'home:overview:'.$block.':'.$scopeKey.':'.CarbonImmutable::today()->toDateString(),
             self::CACHE_TTL_SECONDS,
             $resolver,
         );
+    }
+
+    private function scopeOf(?Authorizable $viewer): StructureScope
+    {
+        return $viewer instanceof User ? app(StructureService::class)->scopeFor($viewer) : StructureScope::none();
+    }
+
+    /**
+     * Əmr görünürlüyü: bütün işçiləri görünürlükdə olan əmrlər (Orders modulunun qaydası).
+     * Məhdud baxana işçisiz (işə qəbul) əmrlər göstərilmir.
+     *
+     * @return EloquentBuilder<OrderLog>
+     */
+    private function scopedOrders(StructureScope $scope): EloquentBuilder
+    {
+        $query = OrderLog::query();
+
+        if ($scope->isAll()) {
+            return $query;
+        }
+
+        if ($scope->isNone()) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query
+            ->whereHas('personnels', fn ($personnel) => $personnel->whereIn('personnels.structure_id', $scope->ids()))
+            ->whereDoesntHave('personnels', fn ($personnel) => $personnel->where(fn ($outside) => $outside
+                ->whereNull('personnels.structure_id')
+                ->orWhereNotIn('personnels.structure_id', $scope->ids())));
     }
 
     private function can(?Authorizable $viewer, string $permission): bool

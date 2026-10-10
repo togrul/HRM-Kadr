@@ -96,7 +96,8 @@ class LeaveRecordIntegrityTest extends TestCase
         $leave = Leave::query()->sole();
         $this->assertSame(OrderStatusEnum::APPROVED->value, (int) $leave->status_id);
         $this->assertNotNull($leave->approved_at);
-        $this->assertSame($user->id, (int) $leave->approved_by);
+        // Təsdiqçi sütunu əməkdaş id-sidir; kartla bağı olmayan istifadəçinin id-si ora yazılmır.
+        $this->assertNull($leave->approved_by);
         $this->assertSame(1, $leave->logs()->where('status_id', OrderStatusEnum::APPROVED->value)->count());
     }
 
@@ -147,7 +148,8 @@ class LeaveRecordIntegrityTest extends TestCase
 
     public function test_approving_a_pending_leave_that_now_overlaps_a_business_trip_is_refused(): void
     {
-        $this->actingAs($this->user(['add-leaves']));
+        // Təsdiqləyici: icazəni görür, redaktə edir və təsdiq hüququ var.
+        $this->actingAs($this->user(['show-leaves', 'edit-leaves', 'approve-leaves']));
 
         $leave = Leave::withoutEvents(fn () => Leave::query()->create([
             'tabel_no' => $this->employee->tabel_no,
@@ -205,6 +207,7 @@ class LeaveRecordIntegrityTest extends TestCase
     public function test_an_active_or_disguised_document_is_rejected(): void
     {
         Storage::fake('public');
+        Storage::fake('local');
         $this->actingAs($this->user(['add-leaves']));
 
         $html = UploadedFile::fake()->createWithContent('note.html', '<html><script>alert(1)</script></html>');
@@ -288,7 +291,7 @@ class LeaveRecordIntegrityTest extends TestCase
             $user->givePermissionTo(Permission::findOrCreate($permission, 'web'));
         }
 
-        return $user;
+        return grantAllStructures($user);
     }
 
     private function makePersonnel(string $tabelNo, string $surname): Personnel

@@ -623,7 +623,10 @@ return [
         'stale' => 'Məlumat köhnədir',
         'errors' => [
             'bad_url' => 'Ünvan düzgün deyil. http:// və ya https:// ilə başlamalıdır.',
-            'unreachable' => 'Xarici sistem cavab vermədi (:error).',
+            'unreachable' => 'Xarici sistem cavab vermədi. Ünvanı və şəbəkə bağlantısını yoxlayın.',
+            'blocked_url' => 'Bu ünvana sorğuya icazə verilmir (daxili şəbəkə və ya təhlükəsiz olmayan ünvan). Daxili sistem üçün administrator OUTBOUND_ALLOWED_HOSTS siyahısına əlavə etməlidir.',
+            'http_status' => 'Xarici sistem xəta ilə cavab verdi (HTTP :status).',
+            'pin_requires_admin' => '{pin} (FİN) yer tutucusunu yalnız istifadəçi idarəçisi istifadə edə bilər.',
             'no_number' => 'Cavabda ":path" yerində rəqəm tapılmadı.',
             'no_person' => 'Yoxlamaq üçün sistemdə əməkdaş yoxdur.',
         ],
@@ -662,6 +665,8 @@ return [
     ],
     'formula' => [
         'errors' => [
+            'too_long' => 'Formula çox uzundur (ən çox :max simvol).',
+            'too_deep' => 'Formula çox dərin iç-içədir (ən çox :max səviyyə).',
             'no_manual' => 'Bu KPI formula ilə hesablanır, dəyəri əl ilə yazılmır.',
             'quantitative_only' => 'Formula yalnız kəmiyyət tipli KPI üçündür.',
             'circular' => 'Dairəvi asılılıq: formula birbaşa və ya digər KPI-lar vasitəsilə özünə istinad edir.',

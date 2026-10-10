@@ -8,7 +8,6 @@ use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadServ
 use App\Modules\Attendance\Support\LeaveLegendPresenter;
 use App\Services\StructurePathService;
 use App\Support\Translations\ModuleTranslation;
-use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
@@ -16,7 +15,6 @@ use Livewire\WithPagination;
 
 class PuantajGrid extends Component
 {
-    use NestedStructureTrait;
     use WithPagination;
 
     public int $year;
@@ -77,9 +75,7 @@ class PuantajGrid extends Component
         $from = Carbon::createFromDate($this->year, $this->month, 1)->startOfMonth();
         $to = $from->copy()->endOfMonth();
         $days = range(1, (int) $from->daysInMonth);
-        $structureIds = $this->selectedStructureId
-            ? $this->getNestedStructure($this->selectedStructureId)
-            : [];
+        $structureIds = app(AttendanceStructureScopeReadService::class)->resolveIds($this->selectedStructureId);
         /** @var AttendancePuantajReadService $readService */
         $readService = app(AttendancePuantajReadService::class);
         /** @var AttendanceStructureScopeReadService $structureScopeRead */

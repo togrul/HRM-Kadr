@@ -38,7 +38,7 @@ class ProfessionalPortfolioTest extends TestCase
 
     public function test_professional_portfolio_requires_view_permission(): void
     {
-        $user = User::factory()->create();
+        $user = grantAllStructures(User::factory()->create());
         $personnel = $this->makePersonnel($user->id);
 
         $this->actingAs($user);
@@ -102,6 +102,7 @@ class ProfessionalPortfolioTest extends TestCase
     public function test_ongoing_project_can_be_saved_without_end_date(): void
     {
         Storage::fake('public');
+        Storage::fake('local');
 
         $user = $this->makeUserWithPermissions([
             'view-professional-portfolio',
@@ -330,6 +331,7 @@ class ProfessionalPortfolioTest extends TestCase
     public function test_media_record_can_be_verified_after_create(): void
     {
         Storage::fake('public');
+        Storage::fake('local');
 
         $creator = $this->makeUserWithPermissions([
             'view-professional-portfolio',
@@ -733,6 +735,7 @@ class ProfessionalPortfolioTest extends TestCase
     public function test_broken_link_command_updates_health_and_status_for_verified_media(): void
     {
         Storage::fake('public');
+        Storage::fake('local');
         Http::fake([
             'https://broken.example.test/*' => Http::response('', 404),
         ]);
@@ -1028,7 +1031,7 @@ class ProfessionalPortfolioTest extends TestCase
 
     private function makeUserWithPermissions(array $permissions): User
     {
-        $user = User::factory()->create(['is_active' => true]);
+        $user = grantAllStructures(User::factory()->create(['is_active' => true]));
 
         foreach ($permissions as $permission) {
             Permission::findOrCreate($permission, 'web');

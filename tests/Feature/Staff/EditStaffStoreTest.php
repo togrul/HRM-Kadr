@@ -69,7 +69,7 @@ class EditStaffStoreTest extends TestCase
 
     private function authorizedUser(): User
     {
-        $user = User::factory()->create();
+        $user = grantAllStructures(User::factory()->create());
         $user->givePermissionTo(Permission::findOrCreate('edit-staff', 'web'));
 
         return $user;

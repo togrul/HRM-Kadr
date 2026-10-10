@@ -40,7 +40,7 @@ class UserManagementAuthorizationTest extends TestCase
     public function test_authorized_admin_can_create_user_and_password_is_hashed(): void
     {
         $admin = User::factory()->create();
-        $admin->givePermissionTo(Permission::findOrCreate('access-settings', 'web'));
+        $admin->givePermissionTo(Permission::findOrCreate('access-settings', 'web'), Permission::findOrCreate('manage-users', 'web'));
         $this->actingAs($admin);
 
         $roleId = Role::findOrCreate('staff', 'web')->id;
@@ -62,7 +62,7 @@ class UserManagementAuthorizationTest extends TestCase
     public function test_weak_password_is_rejected_on_create(): void
     {
         $admin = User::factory()->create();
-        $admin->givePermissionTo(Permission::findOrCreate('access-settings', 'web'));
+        $admin->givePermissionTo(Permission::findOrCreate('access-settings', 'web'), Permission::findOrCreate('manage-users', 'web'));
         $this->actingAs($admin);
 
         Livewire::test(AddUser::class)
@@ -99,7 +99,7 @@ class UserManagementAuthorizationTest extends TestCase
     public function test_authorized_admin_can_soft_delete_user(): void
     {
         $admin = User::factory()->create();
-        $admin->givePermissionTo(Permission::findOrCreate('access-settings', 'web'));
+        $admin->givePermissionTo(Permission::findOrCreate('access-settings', 'web'), Permission::findOrCreate('manage-users', 'web'));
         $this->actingAs($admin);
 
         $victim = User::factory()->create();
@@ -116,7 +116,7 @@ class UserManagementAuthorizationTest extends TestCase
     public function test_authorized_admin_can_force_delete_and_restore(): void
     {
         $admin = User::factory()->create();
-        $admin->givePermissionTo(Permission::findOrCreate('access-settings', 'web'));
+        $admin->givePermissionTo(Permission::findOrCreate('access-settings', 'web'), Permission::findOrCreate('manage-users', 'web'));
         $this->actingAs($admin);
 
         $trashed = User::factory()->create(['is_active' => false]);

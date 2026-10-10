@@ -5,6 +5,7 @@ namespace App\Modules\Leaves\Livewire\SickCertificates;
 use App\Models\LeaveSickCertificate;
 use App\Modules\Leaves\Application\Services\SickCertificateRegister;
 use App\Modules\Leaves\Livewire\Concerns\ManagesSickCertificates;
+use App\Services\StructureService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Collection;
@@ -29,6 +30,7 @@ class PersonnelSickCertificates extends Component
     public function mount(string $tabelNo): void
     {
         $this->authorize('viewAny', LeaveSickCertificate::class);
+        abort_unless(app(StructureService::class)->allowsTabelNo(auth()->user(), $tabelNo), 403);
         $this->tabelNo = $tabelNo;
     }
 

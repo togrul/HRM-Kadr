@@ -15,7 +15,7 @@ class LeavesQueryBudgetCommandTest extends TestCase
 
     public function test_it_reports_query_budget_metrics_for_leaves_flows(): void
     {
-        $user = User::factory()->create();
+        $user = grantAllStructures(User::factory()->create());
         Permission::findOrCreate('show-leaves', 'web');
         Permission::findOrCreate('add-leaves', 'web');
         Permission::findOrCreate('edit-leaves', 'web');

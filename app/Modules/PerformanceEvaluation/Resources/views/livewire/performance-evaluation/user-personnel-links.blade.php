@@ -5,6 +5,7 @@
             'manual' => __('performance_evaluation::dashboard.resolution_sources.manual'),
             'self_service_provisioned' => __('performance_evaluation::dashboard.resolution_sources.self_service_provisioned'),
             'manual_self_service_link' => __('performance_evaluation::dashboard.resolution_sources.manual_self_service_link'),
+            'email_backfill' => __('performance_evaluation::dashboard.resolution_sources.email_backfill'),
             null, '' => '—',
             default => __('performance_evaluation::dashboard.resolution_sources.unknown'),
         };

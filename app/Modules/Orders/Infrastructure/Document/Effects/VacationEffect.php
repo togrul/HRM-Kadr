@@ -6,6 +6,8 @@ use App\Models\OrderLog;
 use App\Models\Personnel;
 use App\Services\Vacation\VacationBalanceService;
 use App\Support\Language\AzerbaijaniDateFormatter;
+use Carbon\CarbonInterface;
+use DomainException;
 
 /**
  * Puts the employee on leave: creates the personnel vacation record from the order's
@@ -27,6 +29,12 @@ class VacationEffect implements OrderEffect
         // Fail safe: without a valid period we do not create a partial record.
         if (! $start || ! $end) {
             return;
+        }
+
+        // Two pending orders may each fit the balance alone: re-check it at approval with
+        // the employee's row locked, so concurrent approvals are counted one after the other.
+        if ($this->countsAgainstAnnualBalance() && (int) ($fields['days'] ?? 0) > 0) {
+            $this->guardBalance($personnel, $start, (int) $fields['days']);
         }
 
         $return = $this->dates->parse($fields['return_date'] ?? null) ?? $end->copy()->addDay();
@@ -57,6 +65,28 @@ class VacationEffect implements OrderEffect
                 $start,
                 $this->dates->parse($fields['work_year'] ?? null),
             );
+        }
+    }
+
+    /**
+     * @throws DomainException when the days exceed what is available on the start date
+     */
+    private function guardBalance(Personnel $personnel, CarbonInterface $start, int $days): void
+    {
+        Personnel::query()->whereKey($personnel->getKey())->lockForUpdate()->first();
+
+        $balance = $this->balance->balanceOn($personnel, $start, true);
+
+        if ($days > (int) $balance['remaining']) {
+            throw new DomainException(__('orders::order_composer.errors.approval_blocked', [
+                'reason' => __('orders::order_composer.vacation.exceeded', [
+                    'year' => (int) $start->year,
+                    'total' => $balance['total'],
+                    'used' => $balance['used'],
+                    'remaining' => $balance['remaining'],
+                    'requested' => $days,
+                ]),
+            ]));
         }
     }
 

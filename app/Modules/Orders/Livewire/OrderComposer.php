@@ -177,6 +177,7 @@ class OrderComposer extends Component
         $order = OrderLog::find($orderId);
 
         abort_if($order === null, 404);
+        $this->authorize('transition', $order);
         abort_unless((string) $order->template_render_mode === OrderIssueService::RENDER_MODE_DOCX, 404);
         abort_unless((int) $order->status_id === OrderIssueService::STATUS_PENDING, 403);
 
@@ -386,7 +387,7 @@ class OrderComposer extends Component
             return;
         }
         $composition = $this->composition();
-        if ($this->addErrors($subjects->subjectErrors($template, $composition))) {
+        if ($this->addErrors($subjects->scopeErrors($composition)) || $this->addErrors($subjects->subjectErrors($template, $composition))) {
             return;
         }
 
@@ -423,7 +424,7 @@ class OrderComposer extends Component
             return null;
         }
         $composition = $this->composition();
-        if ($this->addErrors($subjects->subjectErrors($template, $composition))) {
+        if ($this->addErrors($subjects->scopeErrors($composition)) || $this->addErrors($subjects->subjectErrors($template, $composition))) {
             return null;
         }
 
@@ -462,6 +463,11 @@ class OrderComposer extends Component
         }
 
         $composition = $this->composition();
+        $this->authorizeEditedOrder();
+        if ($this->addErrors(app(OrderSubjectResolver::class)->scopeErrors($composition))) {
+            return null;
+        }
+
         $outcome = app(OrderCompositionIssuer::class)->issue($template, $composition, $autoVacancy);
         $this->addErrors($outcome->errors);
 
@@ -502,7 +508,7 @@ class OrderComposer extends Component
             'uploadedDocx' => ['required', 'file', 'mimes:docx,doc', 'max:10240'],
         ], [], ['uploadedDocx' => __('orders::order_composer.labels.replace_word')]);
 
-        $order = OrderLog::findOrFail($this->editOrderId);
+        $order = $this->authorizeEditedOrder();
         $path = $this->uploadedDocx->storeAs('order-documents', $order->id.'-'.now()->timestamp.'.docx');
 
         $issuer->attachUploadedDocx($order, $path);
@@ -511,6 +517,21 @@ class OrderComposer extends Component
         $this->hasUploadedDocx = true;
 
         $this->dispatch('orderAdded', __('orders::order_composer.messages.word_replaced'));
+    }
+
+    /**
+     * Redaktə olunan əmr hər yazma əməliyyatında yenidən yoxlanılır: icazə + struktur görünürlüyü.
+     */
+    private function authorizeEditedOrder(): ?OrderLog
+    {
+        if (! $this->isEditing()) {
+            return null;
+        }
+
+        $order = OrderLog::findOrFail($this->editOrderId);
+        $this->authorize('transition', $order);
+
+        return $order;
     }
 
     public function render(): View

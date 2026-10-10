@@ -7,6 +7,7 @@ use App\Models\OnboardingDocumentAssignment;
 use App\Models\Personnel;
 use App\Models\PersonnelBusinessTrip;
 use App\Models\PersonnelVacation;
+use App\Modules\Personnel\Livewire\MyHr\Concerns\ResolvesOwnPersonnel;
 use App\Modules\Personnel\Support\MyHr\MyHrAccess;
 use App\Modules\Personnel\Support\MyHr\MyHrTabs;
 use App\Services\Vacation\VacationBalanceService;
@@ -26,8 +27,7 @@ use Livewire\Component;
 class MyHrDashboard extends Component
 {
     use InteractsWithTabbedWorkspace;
-
-    public ?int $personnelId = null;
+    use ResolvesOwnPersonnel;
 
     public string $activeTab = 'overview';
 
@@ -38,7 +38,7 @@ class MyHrDashboard extends Component
     {
         $access->authorize(Auth::user());
 
-        $this->personnelId = $access->resolvePersonnelId(Auth::user());
+        $this->bindOwnPersonnel(requireLink: false);
         $this->bootActiveTabFromRequest();
     }
 

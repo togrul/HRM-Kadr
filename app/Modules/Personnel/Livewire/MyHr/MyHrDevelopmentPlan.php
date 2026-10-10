@@ -4,6 +4,7 @@ namespace App\Modules\Personnel\Livewire\MyHr;
 
 use App\Models\Personnel;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrDevelopmentPlanReadService;
+use App\Modules\Personnel\Livewire\MyHr\Concerns\ResolvesOwnPersonnel;
 use App\Modules\Personnel\Support\MyHr\MyHrAccess;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -12,18 +13,16 @@ use Livewire\Component;
 
 class MyHrDevelopmentPlan extends Component
 {
-    public int $personnelId;
+    use ResolvesOwnPersonnel;
 
     public string $search = '';
 
     public string $statusFilter = 'all';
 
-    public function mount(MyHrAccess $access, int $personnelId): void
+    public function mount(MyHrAccess $access, ?int $personnelId = null): void
     {
         $access->authorize(Auth::user());
-        abort_if($personnelId <= 0, 404);
-
-        $this->personnelId = $personnelId;
+        $this->bindOwnPersonnel($personnelId);
     }
 
     #[Computed]

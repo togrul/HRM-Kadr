@@ -68,7 +68,10 @@ class OrderAdditionalEffectsTest extends TestCase
     {
         parent::setUp();
         Storage::fake('local');
-        $this->actingAs(User::factory()->create());
+        // Əmrin ləğvi hədəf əmri təsdiqdən çıxarır — revert-orders icazəsi tələb olunur.
+        $user = User::factory()->create();
+        $user->givePermissionTo(\Spatie\Permission\Models\Permission::findOrCreate('revert-orders', 'web'));
+        $this->actingAs($user);
 
         $this->artisan('orders:seed-word-templates')->assertSuccessful();
     }

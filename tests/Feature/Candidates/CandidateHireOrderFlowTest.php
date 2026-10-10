@@ -295,6 +295,7 @@ class CandidateHireOrderFlowTest extends TestCase
         $this->seedHireTemplate('ise_qebul');
 
         $user = User::factory()->create();
+        grantAllStructures($user);
         $user->givePermissionTo([
             Permission::findOrCreate('show-candidates', 'web'),
             Permission::findOrCreate('edit-candidates', 'web'),
@@ -351,6 +352,7 @@ class CandidateHireOrderFlowTest extends TestCase
     private function hrUser(): User
     {
         $user = User::factory()->create();
+        grantAllStructures($user);
         $user->givePermissionTo([
             Permission::findOrCreate('show-candidates', 'web'),
             Permission::findOrCreate('edit-candidates', 'web'),

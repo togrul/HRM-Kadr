@@ -79,12 +79,19 @@ sətrində də vardı. Hər ikisi `void` qaytaran closure-a çevrildi.
 | Metod | Ünvan | İcazə |
 |---|---|---|
 | `GET` | `/api/v1/handshake` | istənilən etibarlı token |
-| `GET` | `/api/v1/employees?after=&limit=` | `hr.employees:read` |
+| `GET` | `/api/v1/employees?after=&limit=` | `hr.employees:read` (`base_salary` üçün əlavə olaraq `hr.compensation:read`) |
 | `GET` | `/api/v1/org.units`, `/api/v1/org.positions` | `hr.org:read` |
 | `GET` | `/api/v1/orders?after=&limit=` | `hr.orders:read` |
 | `GET` | `/api/v1/attendance.month?year=&month=&after=&limit=` | `hr.attendance:read` |
 | `GET` | `/api/v1/compensation?after=&limit=` | `hr.compensation:read` |
 | `GET` | `/api/v1/leave.balance?year=&after=&limit=` | `hr.leave:read` |
+
+**`attendance.month`-un yan təsiri (qəsdən).** GET sorğusu bağlanmış (locked) ayı
+oxuyanda `AttendanceExportMark` qeyd olunur: "bu ay maliyyəyə ötürülüb". Bundan sonra
+`AttendanceMonthLockService::unlockMonth()` ayı `--force` olmadan açmır — maliyyə tərəfi
+həmin aydan maaş hesablamış ola bilər. Təkrar sorğu idempotentdir (eyni işarə). Davranış
+fail-closed olduğu üçün ayrıca "ack" endpoint-inə köçürülmədi; yalnız `hr.attendance:read`
+icazəli token bu işarəni qoya bilər.
 
 ### Autentifikasiya
 
@@ -96,6 +103,14 @@ php artisan integration:token "ARBAY maliyyə" --ability=hr.employees:read
 ```
 
 İcazə **feed üzrədir**: struktur ağacı üçün verilmiş token maaş oxuya bilmir.
+`employees` feed-ində `base_salary` sahəsi yalnız tokenin `hr.compensation:read`
+icazəsi də olduqda doldurulur; yoxdursa sahə cavabda qalır, amma `null` gəlir
+(sxem dəyişmir). Maliyyə tərəfi maaşı bu feed-dən götürürsə, onun tokeni hər iki
+icazəni daşımalıdır (və ya icazəsiz — bütün feed-lərə açıq — buraxılmalıdır):
+
+```bash
+php artisan integration:token "ARBAY maliyyə" --ability=hr.employees:read --ability=hr.compensation:read
+```
 Konsol əmri ona görə seçilib ki, açıq mətn brauzer tarixçəsində və Livewire
 paketində qalmasın.
 
@@ -141,8 +156,15 @@ Bu, ən vacib xassədir: effekt sonradan atsa, hadisə də onunla yox olur. Təs
 anında məftilə göndərsək, uğursuz tranzaksiya qarşı tərəfə **baş verməmiş faktı**
 verərdi — və ikinci hadisə olmadığı üçün heç nə onu düzəltməzdi.
 
-Kursor üçün ayrıca `sequence` sütunu yoxdur: `id` onsuz da artandır, `max+1`
-hesablamaq isə iki paralel təsdiqi eyni nömrəyə yarışdırardı.
+Kursor `id` deyil, `sequence` sütunudur. `id` sətir yazılanda verilir, sətir isə
+tranzaksiya commit olanda görünür: MySQL/PostgreSQL-də uzun tranzaksiyanın kiçik
+`id`-si oxucu kursoru onu keçəndən sonra görünə bilər və hadisə həmişəlik itərdi.
+`sequence` commit-dən **sonra** verilir (`OutboxSequencer`): tək sətirli
+`integration_outbox_sequence` sayğacı `lockForUpdate` ilə kilidlənir, növbəti
+nömrələr həmin kilid altında yazılır, ona görə görünən ardıcıllıqda boşluq olmur.
+Nömrəsiz qalan sətirləri (proses commit ilə nömrələmə arasında dayansa) növbəti
+yazı və ya feed oxunuşu nömrələyir. Köhnə sətirlərdə `sequence = id`, ona görə
+əvvəlki kursorlar (`after=<son id>`) dəyişmədən işləyir; API kontrakti eynidir.
 
 ### Ləğv ayrıca hadisədir
 

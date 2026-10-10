@@ -13,8 +13,8 @@ use App\Models\Setting;
 use App\Modules\Candidates\Application\Services\CandidateHireOrderService;
 use App\Modules\Candidates\Exports\CandidateExport;
 use App\Modules\Candidates\Support\CandidateModeResolver;
+use App\Modules\Candidates\Support\CandidateStructureScope;
 use App\Modules\Candidates\Support\Traits\InteractsWithRecruitmentPresentation;
-use App\Services\StructureService;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -65,8 +65,6 @@ class CandidateList extends Component
     public string $candidateMode = CandidateModeResolver::MILITARY;
 
     protected ?array $settingsMapCache = null;
-
-    protected array $accessibleStructureIds = [];
 
     public const SETTINGS_CACHE_KEY = 'candidates:list-settings';
 
@@ -174,10 +172,7 @@ class CandidateList extends Component
      */
     protected function filteredCandidateScope(): Builder
     {
-        return Candidate::query()->when(
-            ! empty($this->accessibleStructureIds),
-            fn ($query) => $query->whereIn('structure_id', $this->accessibleStructureIds)
-        );
+        return CandidateStructureScope::constrainOwn(Candidate::query());
     }
 
     public function searchFilter(): void
@@ -254,11 +249,7 @@ class CandidateList extends Component
 
     protected function filteredCandidateQuery(): Builder
     {
-        return Candidate::query()
-            ->when(
-                ! empty($this->accessibleStructureIds),
-                fn ($query) => $query->whereIn('structure_id', $this->accessibleStructureIds)
-            )
+        return CandidateStructureScope::constrainOwn(Candidate::query())
             ->when(is_numeric($this->status), fn ($q) => $q->where('status_id', $this->status))
             ->when($this->status === 'deleted', fn ($q) => $q->onlyTrashed())
             ->filter($this->search ?? []);
@@ -325,14 +316,13 @@ class CandidateList extends Component
         return $this->showDeletedTab();
     }
 
-    public function mount(StructureService $structureService): void
+    public function mount(): void
     {
         $this->authorize('viewAny', Candidate::class);
         $this->candidateMode = app(CandidateModeResolver::class)->resolve();
         $this->status = $this->sanitizeStatus(request()->query('status', $this->defaultStatus()));
         $this->filter = array_replace_recursive($this->defaultFilter(), $this->filter);
         $this->search = $this->searchableFilterForMode($this->search);
-        $this->accessibleStructureIds = $structureService->getAccessibleStructures();
     }
 
     public function render(): View

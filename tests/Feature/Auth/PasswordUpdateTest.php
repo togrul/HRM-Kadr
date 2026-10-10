@@ -11,15 +11,15 @@ test('password can be updated', function () {
         ->from('/profile')
         ->put('/password', [
             'current_password' => 'password',
-            'password' => 'new-password',
-            'password_confirmation' => 'new-password',
+            'password' => 'New-Passw0rd-2026',
+            'password_confirmation' => 'New-Passw0rd-2026',
         ]);
 
     $response
         ->assertSessionHasNoErrors()
         ->assertRedirect('/profile');
 
-    $this->assertTrue(Hash::check('new-password', $user->refresh()->password));
+    $this->assertTrue(Hash::check('New-Passw0rd-2026', $user->refresh()->password));
 });
 
 test('correct password must be provided to update password', function () {
@@ -30,8 +30,8 @@ test('correct password must be provided to update password', function () {
         ->from('/profile')
         ->put('/password', [
             'current_password' => 'wrong-password',
-            'password' => 'new-password',
-            'password_confirmation' => 'new-password',
+            'password' => 'New-Passw0rd-2026',
+            'password_confirmation' => 'New-Passw0rd-2026',
         ]);
 
     $response
@@ -50,15 +50,15 @@ test('a user forced to reset the password can set a new one and continue', funct
         ->from(route('profile.edit', ['force_password_reset' => 1]))
         ->put('/password', [
             'current_password' => 'password',
-            'password' => 'new-password',
-            'password_confirmation' => 'new-password',
+            'password' => 'New-Passw0rd-2026',
+            'password_confirmation' => 'New-Passw0rd-2026',
         ])
         ->assertSessionHasNoErrors()
         ->assertRedirect(route('profile.edit'));
 
     $user->refresh();
     expect($user->must_reset_password)->toBeFalse()
-        ->and(Hash::check('new-password', $user->password))->toBeTrue();
+        ->and(Hash::check('New-Passw0rd-2026', $user->password))->toBeTrue();
 
     $response = $this->actingAs($user)->get('/');
     expect((string) $response->headers->get('Location'))->not->toContain('force_password_reset');

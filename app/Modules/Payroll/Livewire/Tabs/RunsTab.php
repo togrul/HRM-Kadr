@@ -5,6 +5,7 @@ namespace App\Modules\Payroll\Livewire\Tabs;
 use App\Models\EmployeeCompensation;
 use App\Models\EmployeeLoan;
 use App\Models\PayrollRun;
+use App\Models\Payslip;
 use App\Models\PayslipLine;
 use App\Modules\Payroll\Application\Services\PayrollRunService;
 use Illuminate\Support\Collection;
@@ -60,7 +61,7 @@ class RunsTab extends PayrollTab
     #[Computed]
     public function forecastBaseTotal(): float
     {
-        return (float) EmployeeCompensation::query()->where('status', 'active')->sum('base_amount');
+        return (float) $this->scopeByPersonnel(EmployeeCompensation::query())->where('status', 'active')->sum('base_amount');
     }
 
     /**
@@ -82,6 +83,7 @@ class RunsTab extends PayrollTab
             ->where('payroll_runs.payroll_period_id', $this->periodId)
             ->where('payslip_lines.is_statutory', true)
             ->where('payslip_lines.kind', 'deduction')
+            ->whereIn('payslips.id', $this->scopeByPersonnel(Payslip::query())->select('payslips.id'))
             ->groupBy('payslip_lines.code')
             ->orderByDesc('total')
             ->limit(6)
@@ -99,7 +101,7 @@ class RunsTab extends PayrollTab
     #[Computed]
     public function activeLoans(): Collection
     {
-        return EmployeeLoan::query()
+        return $this->scopeByPersonnel(EmployeeLoan::query())
             ->where('status', 'active')
             ->with('personnel:tabel_no,surname,name')
             ->orderByDesc('id')

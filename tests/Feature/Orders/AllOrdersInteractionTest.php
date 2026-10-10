@@ -91,9 +91,9 @@ class AllOrdersInteractionTest extends TestCase
 
         $user = User::factory()->create();
         $user->givePermissionTo(Permission::findOrCreate('show-orders', 'web'));
-        $this->actingAs($user);
-
-        // Order::IG_EMR is globally visible, so this row needs no structure grant.
+        // İşçisi olmayan köhnə Order::IG_EMR əmri artıq qlobal görünmür — yalnız «bütün
+        // strukturlar» bayraqlı istifadəçi onu görür (fail closed).
+        $this->actingAs(grantAllStructures($user));
         OrderLog::query()->create([
             'order_id' => 1010,
             'order_no' => 'LEGACY-1',

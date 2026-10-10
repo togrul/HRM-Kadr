@@ -153,7 +153,12 @@ class HomeQueueTest extends TestCase
 
         $this->assertSame([], Livewire::test(Home::class)->call('toggleQueue', 'vacation_requests')->instance()->queueItems);
 
+        // review-self-service-requests yalnız təyin olunan müraciətləri açır — bu sorğu heç kimə təyin olunmayıb.
         $this->actingAsViewer(['show-vacations', 'review-self-service-requests']);
+        $this->assertSame([], Livewire::test(Home::class)->call('toggleQueue', 'vacation_requests')->instance()->queueItems);
+
+        // Hamısına baxış yalnız review-all-self-service-requests ilə verilir.
+        $this->actingAsViewer(['show-vacations', 'review-all-self-service-requests']);
         $items = Livewire::test(Home::class)->call('toggleQueue', 'vacation_requests')->instance()->queueItems;
 
         $this->assertSame([$mine->id], array_column($items, 'id'));
@@ -161,7 +166,7 @@ class HomeQueueTest extends TestCase
 
     public function test_a_reviewer_rejects_a_vacation_request_in_place(): void
     {
-        $this->actingAsViewer(['show-vacations', 'review-self-service-requests']);
+        $this->actingAsViewer(['show-vacations', 'review-all-self-service-requests']);
         $this->seedPersonnel();
         $vacation = $this->vacation(approverPersonnelId: null);
 
@@ -229,7 +234,7 @@ class HomeQueueTest extends TestCase
      */
     private function actingAsViewer(array $permissions): User
     {
-        $user = User::factory()->create();
+        $user = grantAllStructures(User::factory()->create());
 
         foreach ($permissions as $permission) {
             Permission::findOrCreate($permission, 'web');

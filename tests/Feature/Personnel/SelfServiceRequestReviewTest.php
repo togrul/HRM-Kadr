@@ -26,7 +26,7 @@ class SelfServiceRequestReviewTest extends TestCase
         $this->seedReferenceData();
 
         $reviewer = User::factory()->create(['is_active' => true]);
-        $reviewer->givePermissionTo(Permission::findOrCreate('review-self-service-requests', 'web'));
+        $reviewer->givePermissionTo(Permission::findOrCreate('review-all-self-service-requests', 'web'));
 
         $requester = User::factory()->create(['is_active' => true, 'email' => 'employee@example.test']);
         $personnel = $this->makePersonnel($requester->email);
@@ -59,7 +59,7 @@ class SelfServiceRequestReviewTest extends TestCase
         $this->seedReferenceData();
 
         $reviewer = User::factory()->create(['is_active' => true]);
-        $reviewer->givePermissionTo(Permission::findOrCreate('review-self-service-requests', 'web'));
+        $reviewer->givePermissionTo(Permission::findOrCreate('review-all-self-service-requests', 'web'));
 
         $requester = User::factory()->create(['is_active' => true, 'email' => 'employee@example.test']);
         $personnel = $this->makePersonnel($requester->email);
@@ -140,7 +140,7 @@ class SelfServiceRequestReviewTest extends TestCase
         $this->seedReferenceData();
 
         $reviewer = User::factory()->create(['is_active' => true]);
-        $reviewer->givePermissionTo(Permission::findOrCreate('review-self-service-requests', 'web'));
+        $reviewer->givePermissionTo(Permission::findOrCreate('review-all-self-service-requests', 'web'));
 
         $requester = User::factory()->create(['is_active' => true, 'email' => 'vacation.employee@example.test']);
         $personnel = $this->makePersonnel($requester->email);
@@ -197,7 +197,7 @@ class SelfServiceRequestReviewTest extends TestCase
             ]);
 
         $reviewer = User::factory()->create(['is_active' => true]);
-        $reviewer->givePermissionTo(Permission::findOrCreate('review-self-service-requests', 'web'));
+        $reviewer->givePermissionTo(Permission::findOrCreate('review-all-self-service-requests', 'web'));
 
         $requester = User::factory()->create(['is_active' => true, 'email' => 'vacation.fallback@example.test']);
         $personnel = $this->makePersonnel($requester->email);
@@ -239,7 +239,7 @@ class SelfServiceRequestReviewTest extends TestCase
         DB::table('order_types')->where('id', 1)->delete();
 
         $reviewer = User::factory()->create(['is_active' => true]);
-        $reviewer->givePermissionTo(Permission::findOrCreate('review-self-service-requests', 'web'));
+        $reviewer->givePermissionTo(Permission::findOrCreate('review-all-self-service-requests', 'web'));
 
         $requester = User::factory()->create(['is_active' => true, 'email' => 'vacation.create-type@example.test']);
         $personnel = $this->makePersonnel($requester->email);
@@ -284,6 +284,11 @@ class SelfServiceRequestReviewTest extends TestCase
     }
 
     private function makePersonnel(string $email): Personnel
+    {
+        return $this->linkFixtureUserByEmail($this->createPersonnelRecord($email));
+    }
+
+    private function createPersonnelRecord(string $email): Personnel
     {
         return Personnel::withoutEvents(fn () => Personnel::query()->create([
             'tabel_no' => 'TB'.Str::upper(Str::random(6)),

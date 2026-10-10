@@ -6,6 +6,8 @@ use App\Models\CompensationComponent;
 use App\Models\PayrollRun;
 use App\Models\PayslipLine;
 use App\Modules\Compensation\Domain\Contracts\CompensationReadRepository;
+use App\Services\StructureScope;
+use Illuminate\Database\Eloquent\Builder;
 
 class PayrollExportService
 {
@@ -16,9 +18,9 @@ class PayrollExportService
      *
      * @return array<int,array<string,mixed>>
      */
-    public function bankRows(PayrollRun $run): array
+    public function bankRows(PayrollRun $run, ?StructureScope $scope = null): array
     {
-        return $run->payslips()
+        return $this->payslips($run, $scope)
             ->with('personnel:tabel_no,surname,name')
             ->get()
             ->filter(fn ($payslip) => (float) $payslip->net > 0)
@@ -43,10 +45,10 @@ class PayrollExportService
      *
      * @return array<int,array<string,mixed>>
      */
-    public function glRows(PayrollRun $run): array
+    public function glRows(PayrollRun $run, ?StructureScope $scope = null): array
     {
         $glByCode = CompensationComponent::query()->pluck('gl_code', 'code');
-        $payslipIds = $run->payslips()->pluck('id');
+        $payslipIds = $this->payslips($run, $scope)->pluck('id');
 
         return PayslipLine::query()
             ->whereIn('payslip_id', $payslipIds)
@@ -72,9 +74,9 @@ class PayrollExportService
      *
      * @return array<int,array<string,mixed>>
      */
-    public function stateRows(PayrollRun $run): array
+    public function stateRows(PayrollRun $run, ?StructureScope $scope = null): array
     {
-        return $run->payslips()
+        return $this->payslips($run, $scope)
             ->with(['personnel:tabel_no,surname,name,pin', 'lines'])
             ->get()
             ->map(function ($payslip): array {
@@ -98,6 +100,19 @@ class PayrollExportService
             })
             ->values()
             ->all();
+    }
+
+    /**
+     * Run-ın hesab vərəqələri; görünürlük verilibsə yalnız istifadəçinin strukturlarındakı
+     * işçilərinki (ixrac faylı başqa strukturun maaşını sızdırmasın).
+     *
+     * @return Builder<\App\Models\Payslip>
+     */
+    private function payslips(PayrollRun $run, ?StructureScope $scope): Builder
+    {
+        $query = $run->payslips()->getQuery();
+
+        return $scope ? $scope->constrainThrough($query, 'personnel') : $query;
     }
 
     private function fullName($payslip): string

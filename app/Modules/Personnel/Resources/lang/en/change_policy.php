@@ -62,5 +62,6 @@ return [
     'validation' => [
         'order_only' => ':group can only be changed by an order.',
         'reason_required' => 'This change is journaled: give a reason of at least :min characters.',
+        'pending_flag_locked' => 'An approved employee cannot be returned to pending approval.',
     ],
 ];

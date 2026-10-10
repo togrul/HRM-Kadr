@@ -44,12 +44,20 @@ class Services extends Component
             $sections[] = ['key' => 'change-policy', 'label' => __('services::common.labels.change_policy'), 'count' => null];
         }
 
-        return array_merge($sections, [
-            ['key' => 'menus', 'label' => __('services::common.labels.menus'), 'count' => (string) Menu::query()->count()],
-            ['key' => 'roles', 'label' => __('services::common.navigation.roles_and_permissions'), 'count' => (string) Role::query()->count()],
-            ['key' => 'users', 'label' => __('services::common.labels.users'), 'count' => (string) User::query()->count()],
-            ['key' => 'ranks', 'label' => __('services::common.labels.ranks'), 'count' => (string) Rank::query()->count()],
-        ]);
+        $sections[] = ['key' => 'menus', 'label' => __('services::common.labels.menus'), 'count' => (string) Menu::query()->count()];
+
+        // Rollar və istifadəçilər ayrıca icazələrlə (manage-roles / manage-users) görünür.
+        if (auth()->user()?->can('manage-roles') ?? false) {
+            $sections[] = ['key' => 'roles', 'label' => __('services::common.navigation.roles_and_permissions'), 'count' => (string) Role::query()->count()];
+        }
+
+        if (auth()->user()?->can('manage-users') ?? false) {
+            $sections[] = ['key' => 'users', 'label' => __('services::common.labels.users'), 'count' => (string) User::query()->count()];
+        }
+
+        $sections[] = ['key' => 'ranks', 'label' => __('services::common.labels.ranks'), 'count' => (string) Rank::query()->count()];
+
+        return $sections;
     }
 
     public function render(): View

@@ -37,6 +37,7 @@ class LeavePersonnelSearchIsolationTest extends TestCase
     {
         $user = User::factory()->create();
         $user->givePermissionTo(Permission::findOrCreate('add-leaves', 'web'));
+        grantAllStructures($user);
 
         return $user;
     }

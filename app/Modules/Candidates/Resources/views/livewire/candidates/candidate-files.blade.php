@@ -65,7 +65,7 @@
                             class="space-y-2"
                         >
                             <label class="group block cursor-pointer">
-                                <input type="file" class="hidden" wire:model="uploadedFile" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.jpg,.jpeg,.png,.gif,.webp,.bmp,.svg" />
+                                <input type="file" class="hidden" wire:model="uploadedFile" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.jpg,.jpeg,.png,.gif,.webp,.bmp" />
                                 <div class="flex min-h-[92px] items-center gap-4 rounded-[20px] border border-dashed border-zinc-300 bg-zinc-50 px-4 py-4 transition duration-200 group-hover:border-zinc-400 group-hover:bg-zinc-100/80">
                                     <div class="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
                                         @if ($uploadedPreviewUrl)

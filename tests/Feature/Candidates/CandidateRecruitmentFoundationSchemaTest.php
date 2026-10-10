@@ -45,6 +45,7 @@ class CandidateRecruitmentFoundationSchemaTest extends TestCase
         ]);
 
         $user = User::factory()->create();
+        grantAllStructures($user);
         $status = AppealStatus::query()->create([
             'name' => 'Yeni',
             'locale' => app()->getLocale(),

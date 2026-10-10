@@ -3,12 +3,17 @@
 namespace App\Modules\Personnel\Application\Services;
 
 use App\Models\PersonnelMediaMention;
+use App\Support\Http\SafeUrl;
+use App\Support\Http\UnsafeUrlException;
+use App\Support\Uploads\PrivateFiles;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class ProfessionalPortfolioLinkHealthService
 {
+    public function __construct(private readonly SafeUrl $safeUrl) {}
+
     public function check(PersonnelMediaMention $record): array
     {
         $record->loadMissing('archiveAttachment');
@@ -43,6 +48,11 @@ class ProfessionalPortfolioLinkHealthService
         ];
     }
 
+    /**
+     * İstifadəçinin daxil etdiyi linki yoxlayır. SSRF-ə qarşı: URL {@see SafeUrl} ilə
+     * yoxlanır (daxili ünvanlar bloklanır), sorğu yoxlanmış IP-yə bağlanır, yönləndirmə
+     * izlənmir (3xx "ok" sayılır), TLS sertifikatı yoxlanır. İstisna mətni saxlanmır.
+     */
     private function checkUrl(?string $url): array
     {
         if (! filled($url)) {
@@ -50,17 +60,23 @@ class ProfessionalPortfolioLinkHealthService
         }
 
         try {
-            $response = Http::timeout((int) config('personnel.portfolio.link_health.timeout_seconds', 8))
-                ->withoutVerifying()
-                ->head($url);
+            $target = $this->safeUrl->assert((string) $url);
+        } catch (UnsafeUrlException $e) {
+            Log::info('Portfel link yoxlaması: URL bloklandı.', ['reason' => $e->getMessage()]);
+
+            return ['broken', __('personnel::portfolio.messages.link_check_failed'), null];
+        }
+
+        $timeout = (int) config('personnel.portfolio.link_health.timeout_seconds', 8);
+
+        try {
+            $response = $this->safeUrl->pin(Http::timeout($timeout), $target)->head($target->url);
 
             if ($this->isSuccessfulResponse($response->status())) {
                 return ['ok', __('personnel::portfolio.messages.link_check_ok'), $response->status()];
             }
 
-            $fallback = Http::timeout((int) config('personnel.portfolio.link_health.timeout_seconds', 8))
-                ->withoutVerifying()
-                ->get($url);
+            $fallback = $this->safeUrl->pin(Http::timeout($timeout), $target)->get($target->url);
 
             if ($this->isSuccessfulResponse($fallback->status())) {
                 return ['ok', __('personnel::portfolio.messages.link_check_ok'), $fallback->status()];
@@ -68,7 +84,9 @@ class ProfessionalPortfolioLinkHealthService
 
             return ['broken', __('personnel::portfolio.messages.link_check_failed'), $fallback->status()];
         } catch (Throwable $e) {
-            return ['broken', $e->getMessage(), null];
+            Log::info('Portfel link yoxlaması uğursuz oldu.', ['error' => $e->getMessage()]);
+
+            return ['broken', __('personnel::portfolio.messages.link_check_failed'), null];
         }
     }
 
@@ -79,7 +97,7 @@ class ProfessionalPortfolioLinkHealthService
             return ['missing', __('personnel::portfolio.messages.archive_health_missing')];
         }
 
-        $exists = Storage::disk($attachment->disk ?: 'public')->exists($attachment->file_path);
+        $exists = PrivateFiles::locate($attachment->file_path, $attachment->disk) !== null;
 
         return $exists
             ? ['ok', __('personnel::portfolio.messages.archive_health_ok')]

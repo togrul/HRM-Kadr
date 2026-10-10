@@ -65,7 +65,7 @@ class Dashboard extends Component
             ['key' => 'scales', 'value' => PayScale::query()->count(), 'accent' => 'bg-sky-500'],
             ['key' => 'grades', 'value' => PayGrade::query()->count(), 'accent' => 'bg-violet-500'],
             ['key' => 'components', 'value' => CompensationComponent::query()->where('is_active', true)->count(), 'accent' => 'bg-amber-400'],
-            ['key' => 'assignments', 'value' => EmployeeCompensation::query()->where('status', 'active')->count(), 'accent' => 'bg-emerald-500'],
+            ['key' => 'assignments', 'value' => $this->scopeByPersonnel(EmployeeCompensation::query())->where('status', 'active')->count(), 'accent' => 'bg-emerald-500'],
         ];
     }
 

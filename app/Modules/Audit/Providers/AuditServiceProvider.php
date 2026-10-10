@@ -10,6 +10,12 @@ class AuditServiceProvider extends ServiceProvider
 {
     use RegistersLivewireAliases;
 
+    public function register(): void
+    {
+        // Sorğu daxilində bir oxuyucu: istifadəçinin görünən subyekt id-ləri bir dəfə hesablanır.
+        $this->app->scoped(\App\Modules\Audit\Application\Services\ActivityLogReader::class);
+    }
+
     public function boot(): void
     {
         if (! $this->app->make(ModuleState::class)->enabled('audit')) {

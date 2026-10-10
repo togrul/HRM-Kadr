@@ -10,6 +10,7 @@ use App\Modules\Personnel\Services\PersonnelLookupService;
 use App\Modules\Personnel\Services\PersonnelQueryService;
 use App\Modules\Personnel\Support\Presence\PersonnelPresenceStatus;
 use App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioPermissionMatrix;
+use App\Services\StructureScope;
 use App\Services\StructureService;
 use App\Traits\NestedStructureTrait;
 use Carbon\Carbon;
@@ -58,7 +59,7 @@ class AllPersonnel extends Component
 
     public bool $pendingFilterOpen = false;
 
-    protected ?array $accessibleStructureCache = null;
+    protected ?StructureScope $accessibleStructureCache = null;
 
     protected array $allowedStatuses = ['current', 'leaves', 'all', 'deleted', 'pending'];
 
@@ -512,13 +513,10 @@ class AllPersonnel extends Component
         return app(PersonnelListStateNormalizer::class)->normalizeStructure($this->structure);
     }
 
-    protected function accessibleStructureIds(): array
+    /** Struktur görünürlüyü — müştəri filtri ($structure) PersonnelQueryService-də onunla kəsişdirilir. */
+    protected function accessibleStructureIds(): StructureScope
     {
-        if (! is_null($this->accessibleStructureCache)) {
-            return $this->accessibleStructureCache;
-        }
-
-        return $this->accessibleStructureCache = resolve(StructureService::class)->getAccessibleStructures();
+        return $this->accessibleStructureCache ??= resolve(StructureService::class)->scopeFor();
     }
 
     /**

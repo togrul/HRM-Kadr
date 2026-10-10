@@ -31,6 +31,7 @@ class CandidateListInteractionTest extends TestCase
     public function test_recruitment_panel_counts_cost_one_query_and_are_memoized(): void
     {
         $user = User::factory()->create();
+        grantAllStructures($user);
         $user->givePermissionTo(Permission::findOrCreate('show-candidates', 'web'));
         $this->actingAs($user);
 
@@ -60,6 +61,7 @@ class CandidateListInteractionTest extends TestCase
     public function test_candidate_list_can_open_add_candidate_side_menu(): void
     {
         $user = User::factory()->create();
+        grantAllStructures($user);
         $user->givePermissionTo([
             Permission::findOrCreate('show-candidates', 'web'),
             Permission::findOrCreate('add-candidates', 'web'),
@@ -76,6 +78,7 @@ class CandidateListInteractionTest extends TestCase
     public function test_candidate_list_can_rerender_after_status_and_filter_updates(): void
     {
         $user = User::factory()->create();
+        grantAllStructures($user);
         $user->givePermissionTo(Permission::findOrCreate('show-candidates', 'web'));
 
         $this->actingAs($user);
@@ -90,6 +93,7 @@ class CandidateListInteractionTest extends TestCase
     public function test_restore_action_is_forbidden_without_delete_permission(): void
     {
         $user = User::factory()->create();
+        grantAllStructures($user);
         $user->givePermissionTo(Permission::findOrCreate('show-candidates', 'web'));
 
         $candidate = $this->makeCandidate();
@@ -105,6 +109,7 @@ class CandidateListInteractionTest extends TestCase
     public function test_restore_button_follows_the_delete_permission_not_the_admin_role(): void
     {
         $user = User::factory()->create();
+        grantAllStructures($user);
         $user->givePermissionTo([
             Permission::findOrCreate('show-candidates', 'web'),
             Permission::findOrCreate('delete-candidates', 'web'),
@@ -127,6 +132,7 @@ class CandidateListInteractionTest extends TestCase
     public function test_force_delete_action_is_forbidden_without_delete_permission(): void
     {
         $user = User::factory()->create();
+        grantAllStructures($user);
         $user->givePermissionTo(Permission::findOrCreate('show-candidates', 'web'));
 
         $candidate = $this->makeCandidate();
@@ -142,6 +148,7 @@ class CandidateListInteractionTest extends TestCase
     public function test_candidate_list_can_filter_by_document_category(): void
     {
         $user = User::factory()->create();
+        grantAllStructures($user);
         $user->givePermissionTo(Permission::findOrCreate('show-candidates', 'web'));
 
         $matching = $this->makeCandidate('Ali');
@@ -193,6 +200,7 @@ class CandidateListInteractionTest extends TestCase
         ]);
 
         $creator = User::factory()->create();
+        grantAllStructures($creator);
         $status = AppealStatus::query()->create([
             'name' => 'Yeni '.$name,
             'locale' => app()->getLocale(),

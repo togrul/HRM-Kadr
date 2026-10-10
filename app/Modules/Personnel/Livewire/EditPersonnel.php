@@ -58,6 +58,7 @@ class EditPersonnel extends Component
 
     protected ?Personnel $personnelModelData = null;
 
+    #[Locked]
     public $personnelModel;
 
     /** Hide the built-in horizontal stepper when the host page supplies step navigation. */
@@ -131,7 +132,7 @@ class EditPersonnel extends Component
         $journal = $this->enforceChangePolicy($personnel);
 
         if (! empty($this->avatar)) {
-            $this->personalForm->personnel['photo'] = $this->avatar->store('personnel', 'public');
+            $this->personalForm->personnel['photo'] = $this->avatar->store('personnel', \App\Support\Uploads\PrivateFiles::DISK);
         }
 
         $assembled = app(PersonnelFormAssembler::class)->buildForStore(

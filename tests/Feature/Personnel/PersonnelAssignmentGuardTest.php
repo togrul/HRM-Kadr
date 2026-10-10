@@ -34,7 +34,7 @@ function assignmentGuardUser(array $permissions = ['add-personnels', 'edit-perso
 {
     Role::findOrCreate('admin', 'web');
     Permission::findOrCreate('get-notification', 'web');
-    $user = User::factory()->create();
+    $user = grantAllStructures(User::factory()->create());
 
     foreach ($permissions as $permission) {
         $user->givePermissionTo(Permission::findOrCreate($permission, 'web'));

@@ -19,7 +19,7 @@ function personnelFormUser(array $extraPermissions = []): User
 {
     Role::findOrCreate('admin', 'web');
     Permission::findOrCreate('get-notification', 'web');
-    $user = User::factory()->create();
+    $user = grantAllStructures(User::factory()->create());
 
     foreach (['add-personnels', 'edit-personnels', ...$extraPermissions] as $permission) {
         $user->givePermissionTo(Permission::findOrCreate($permission, 'web'));

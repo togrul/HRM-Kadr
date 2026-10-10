@@ -5,6 +5,7 @@ namespace App\Modules\Personnel\Livewire\MyHr;
 use App\Models\Payslip;
 use App\Models\Personnel;
 use App\Modules\Payroll\Domain\Contracts\PayslipReadRepository;
+use App\Modules\Personnel\Livewire\MyHr\Concerns\ResolvesOwnPersonnel;
 use App\Modules\Personnel\Support\MyHr\MyHrAccess;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
@@ -14,16 +15,14 @@ use Livewire\Component;
 
 class MyHrPayslips extends Component
 {
-    public int $personnelId;
+    use ResolvesOwnPersonnel;
 
     public ?int $selectedPayslipId = null;
 
-    public function mount(MyHrAccess $access, int $personnelId): void
+    public function mount(MyHrAccess $access, ?int $personnelId = null): void
     {
         $access->authorize(Auth::user());
-        abort_if($personnelId <= 0, 404);
-
-        $this->personnelId = $personnelId;
+        $this->bindOwnPersonnel($personnelId);
     }
 
     protected function tabelNo(): ?string
@@ -60,6 +59,11 @@ class MyHrPayslips extends Component
 
     public function viewPayslip(int $payslipId): void
     {
+        $tabelNo = $this->tabelNo();
+
+        // Yalnız öz (kilidlənmiş) vərəqəsi açılır — başqasının id-si 404 verir.
+        abort_unless($tabelNo && app(PayslipReadRepository::class)->payslipFor($payslipId, $tabelNo), 404);
+
         $this->selectedPayslipId = $payslipId;
     }
 

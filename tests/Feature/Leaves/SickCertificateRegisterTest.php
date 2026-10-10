@@ -91,6 +91,8 @@ function sickUser(array $permissions): User
         $user->givePermissionTo(Permission::findOrCreate($permission, 'web'));
     }
 
+    // Reyestr struktur görünürlüyünə görə süzülür — test istifadəçisi bütün təşkilatı görür.
+    grantAllStructures($user);
     test()->actingAs($user);
 
     return $user;
@@ -409,7 +411,6 @@ it('lists the person\'s certificates in the employee card\'s «Xəstəlik» sect
     sickCertificate(['tabel_no' => 'SC-2', 'number' => '2'], $actor);
 
     $person = Personnel::query()->where('tabel_no', 'SC-1')->firstOrFail();
-    $this->mock(\App\Services\StructureService::class, fn ($mock) => $mock->shouldReceive('getAccessibleStructures')->andReturn([1]));
 
     Livewire::withQueryParams(['section' => 'sick'])
         ->test(PersonnelProfile::class, ['personnel' => $person])
@@ -425,7 +426,6 @@ it('lists the person\'s certificates in the employee card\'s «Xəstəlik» sect
 it('hides the employee card section without show-leaves', function (): void {
     sickUser(['show-personnels', 'edit-personnels']);
     $person = Personnel::query()->where('tabel_no', 'SC-1')->firstOrFail();
-    $this->mock(\App\Services\StructureService::class, fn ($mock) => $mock->shouldReceive('getAccessibleStructures')->andReturn([1]));
 
     Livewire::withQueryParams(['section' => 'sick'])
         ->test(PersonnelProfile::class, ['personnel' => $person])

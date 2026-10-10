@@ -5,6 +5,8 @@
     $bonus = $card->bonus;
     $person = $card->personnel;
     $manager = $card->manager;
+    // Maaş bazası və bonus məbləği yalnız view-compensation-amounts icazəsi ilə (və ya öz kartında).
+    $canSeeSalary = (bool) ($canSeeSalary ?? false);
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
@@ -140,7 +142,7 @@
         @if ($bonus)
             <h2>{{ __($t.'.bonus.title') }}</h2>
             <p>
-                {{ __($t.'.bonus.factors.base_salary') }} {{ $fmt($bonus->base_salary) }} {{ $bonus->currency }} ·
+                {{ __($t.'.bonus.factors.base_salary') }} {{ $canSeeSalary ? $fmt($bonus->base_salary).' '.$bonus->currency : '•••' }} ·
                 @if ($bonus->mode === 'order')
                     {{ __($t.'.bonus.factors.reward_months') }} {{ $fmt($bonus->period_months) }} ·
                 @else
@@ -149,7 +151,7 @@
                 @endif
                 {{ __($t.'.bonus.factors.payout_pct') }} {{ $fmt($bonus->payout_pct) }}% · {{ __($t.'.bonus.factors.prorata') }} {{ $fmt($bonus->prorata * 100) }}%
             </p>
-            <p style="font-size: 14px"><b>{{ number_format((float) $bonus->amount, 2, '.', ' ') }} {{ $bonus->currency }}</b> <span class="muted">({{ __($t.'.bonus.statuses.'.$bonus->status) }})</span></p>
+            <p style="font-size: 14px"><b>{{ $canSeeSalary ? number_format((float) $bonus->amount, 2, '.', ' ').' '.$bonus->currency : '•••' }}</b> <span class="muted">({{ __($t.'.bonus.statuses.'.$bonus->status) }})</span></p>
         @endif
 
         <div class="signatures">

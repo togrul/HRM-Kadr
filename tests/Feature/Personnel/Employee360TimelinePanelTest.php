@@ -19,7 +19,7 @@ class Employee360TimelinePanelTest extends TestCase
     public function test_authorized_user_can_see_employee_360_timeline_in_profile_context(): void
     {
         $personnel = $this->makePersonnel();
-        $user = User::factory()->create();
+        $user = grantAllStructures(User::factory()->create());
         $user->givePermissionTo(Permission::findOrCreate('show-personnels', 'web'));
 
         DB::table('leaves')->insert([

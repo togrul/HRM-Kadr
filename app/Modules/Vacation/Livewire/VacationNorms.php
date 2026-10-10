@@ -6,6 +6,7 @@ use App\Models\Personnel;
 use App\Models\Position;
 use App\Models\VacationNorm;
 use App\Modules\Vacation\Application\Services\VacationNormCatalog;
+use App\Services\StructureService;
 use DomainException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
@@ -98,6 +99,9 @@ class VacationNorms extends Component
 
         $this->validate($catalog->rules($this->group, $this->form['personnel_id'] ?? null, $this->form), [], $this->validationAttributes());
 
+        $personnelId = $this->form['personnel_id'] ?? null;
+        abort_if(filled($personnelId) && ! app(StructureService::class)->allowsPersonnelId(auth()->user(), $personnelId), 403);
+
         try {
             $catalog->save($this->group, $this->form, $this->editingId);
         } catch (DomainException $e) {
@@ -180,7 +184,9 @@ class VacationNorms extends Component
         $term = mb_strtolower(trim($this->searchPersonnel));
         $selected = data_get($this->form, 'personnel_id');
 
-        $rows = Personnel::query()
+        $scope = app(StructureService::class)->scopeFor();
+
+        $rows = $scope->constrain(Personnel::query(), 'structure_id')
             ->select('id', 'tabel_no', 'surname', 'name', 'patronymic')
             ->when($term !== '', fn ($query) => $query->where(fn ($q) => $q
                 ->whereRaw('lower(surname) like ?', ["%{$term}%"])
@@ -191,7 +197,7 @@ class VacationNorms extends Component
             ->get();
 
         if ($selected && ! $rows->contains('id', (int) $selected)) {
-            $rows->prepend(Personnel::query()->select('id', 'tabel_no', 'surname', 'name', 'patronymic')->find((int) $selected));
+            $rows->prepend($scope->constrain(Personnel::query(), 'structure_id')->select('id', 'tabel_no', 'surname', 'name', 'patronymic')->find((int) $selected));
         }
 
         return $rows->filter()->map(fn (Personnel $p): array => [

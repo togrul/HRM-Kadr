@@ -34,7 +34,7 @@
                 $hasPendingUpload = (bool) $this->hasPendingUpload;
                 $certificateUrl = $hasPendingUpload
                     ? $this->temporaryCertificatePreviewUrl
-                    : ($hasCertificateFile ? \Illuminate\Support\Facades\Storage::disk('public')->url($record->certificate_path) : null);
+                    : ($hasCertificateFile ? $record->certificateUrl() : null);
                 $certificateExtension = $hasPendingUpload
                     ? $this->temporaryCertificateExtension
                     : ($hasCertificateFile

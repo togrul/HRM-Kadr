@@ -6,10 +6,10 @@ use App\Models\AttendanceShiftAssignment;
 use App\Models\Personnel;
 use App\Modules\Personnel\Application\Services\PersonnelPresenceResolver;
 use App\Services\StructurePathService;
+use App\Support\Uploads\PersonnelPhoto;
 use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Storage;
 
 class PersonnelRowViewModelService
 {
@@ -50,7 +50,7 @@ class PersonnelRowViewModelService
             $personnel->setAttribute('presence_reason', $presence?->reason);
             $personnel->setAttribute('presence_period', $presence?->periodLabel());
             $personnel->setAttribute('presence_return', $presence?->expectedReturnLabel());
-            $personnel->setAttribute('photo_url', $this->photoUrl($personnel->photo));
+            $personnel->setAttribute('photo_url', $this->photoUrl($personnel->id, $personnel->photo));
             $personnel->setAttribute('deleted_by_name', (string) optional($personnel->personDidDelete)->name);
             $personnel->setAttribute('active_shift_name', (string) optional($activeShiftAssignment?->shift)->name);
             $personnel->setAttribute(
@@ -96,10 +96,11 @@ class PersonnelRowViewModelService
             ->keyBy('tabel_no');
     }
 
-    protected function photoUrl(?string $path): string
+    protected function photoUrl(int|string|null $personnelId, ?string $path): string
     {
-        if (! empty($path)) {
-            return Storage::url($path);
+        $url = PersonnelPhoto::url($personnelId, $path);
+        if ($url !== null) {
+            return $url;
         }
 
         return asset('assets/images/no-image.png');

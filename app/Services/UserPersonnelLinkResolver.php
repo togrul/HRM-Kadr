@@ -5,8 +5,15 @@ namespace App\Services;
 use App\Models\Personnel;
 use App\Models\User;
 use App\Models\UserPersonnelLink;
-use Illuminate\Support\Str;
 
+/**
+ * İstifadəçi ↔ əməkdaş eyniləşdirməsinin YEGANƏ mənbəyi.
+ *
+ * İstifadəçi yalnız admin tərəfindən açıq yaradılmış `user_personnel_links` sətri ilə əməkdaşa
+ * bağlanır. E-poçt və ya ad-soyad uyğunluğu heç vaxt eyniləşdirmə sayılmır: istifadəçi öz
+ * e-poçtunu və adını dəyişə bilərdi, bu da başqasının kabinetinə, əmək haqqı vərəqəsinə və
+ * təsdiq hüququna yol açırdı. Resolver heç nə yazmır — yalnız mövcud bağı oxuyur.
+ */
 class UserPersonnelLinkResolver
 {
     /**
@@ -14,95 +21,70 @@ class UserPersonnelLinkResolver
      */
     private array $resolvedByUser = [];
 
-    public function resolve(User $user): ?int
+    /**
+     * İstifadəçinin açıq bağlı, aktiv əməkdaş kartının id-si; bağ yoxdursa və ya əməkdaş
+     * işdən çıxıbsa/təsdiq gözləyirsə — null.
+     */
+    public function resolve(?User $user): ?int
     {
-        if (array_key_exists($user->id, $this->resolvedByUser)) {
-            return $this->resolvedByUser[$user->id];
-        }
-
-        $linkedPersonnelId = UserPersonnelLink::query()
-            ->where('user_id', $user->id)
-            ->value('personnel_id');
-
-        if ($linkedPersonnelId) {
-            $activeLinkedId = Personnel::query()
-                ->active()
-                ->whereKey($linkedPersonnelId)
-                ->value('id');
-
-            if ($activeLinkedId) {
-                return $this->resolvedByUser[$user->id] = (int) $activeLinkedId;
-            }
-        }
-
-        $normalizedEmail = Str::lower(trim((string) $user->email));
-        if ($normalizedEmail !== '') {
-            $personnelId = Personnel::query()
-                ->active()
-                ->whereRaw('LOWER(TRIM(email)) = ?', [$normalizedEmail])
-                ->orderBy('id')
-                ->value('id');
-
-            if ($personnelId) {
-                return $this->persistLink($user, (int) $personnelId, 'email');
-            }
-        }
-
-        $nameTokens = collect(preg_split('/\s+/', trim((string) $user->name)) ?: [])
-            ->filter()
-            ->values();
-
-        if ($nameTokens->count() < 2) {
+        if (! $user || ! $user->getKey()) {
             return null;
         }
 
-        $firstToken = Str::lower((string) $nameTokens->first());
-        $lastToken = Str::lower((string) $nameTokens->last());
+        $userId = (int) $user->getKey();
 
-        $candidates = Personnel::query()
+        if (array_key_exists($userId, $this->resolvedByUser)) {
+            return $this->resolvedByUser[$userId];
+        }
+
+        $linkedPersonnelId = UserPersonnelLink::query()
+            ->where('user_id', $userId)
+            ->value('personnel_id');
+
+        if (! $linkedPersonnelId) {
+            return $this->resolvedByUser[$userId] = null;
+        }
+
+        $activeLinkedId = Personnel::query()
             ->active()
-            ->select('id', 'added_by')
-            ->where(function ($query) use ($firstToken, $lastToken): void {
-                $query
-                    ->where(function ($match) use ($firstToken, $lastToken): void {
-                        $match
-                            ->whereRaw('LOWER(TRIM(name)) = ?', [$firstToken])
-                            ->whereRaw('LOWER(TRIM(surname)) = ?', [$lastToken]);
-                    })
-                    ->orWhere(function ($match) use ($firstToken, $lastToken): void {
-                        $match
-                            ->whereRaw('LOWER(TRIM(name)) = ?', [$lastToken])
-                            ->whereRaw('LOWER(TRIM(surname)) = ?', [$firstToken]);
-                    });
-            })
-            ->get();
+            ->whereKey($linkedPersonnelId)
+            ->value('id');
 
-        if ($candidates->count() === 1) {
-            return $this->persistLink($user, (int) $candidates->first()->id, 'name_match');
-        }
-
-        $ownedCandidate = $candidates
-            ->where('added_by', $user->id)
-            ->values();
-
-        if ($ownedCandidate->count() === 1) {
-            return $this->persistLink($user, (int) $ownedCandidate->first()->id, 'owned_name_match');
-        }
-
-        return $this->resolvedByUser[$user->id] = null;
+        return $this->resolvedByUser[$userId] = $activeLinkedId ? (int) $activeLinkedId : null;
     }
 
-    private function persistLink(User $user, int $personnelId, string $source): int
+    /**
+     * Əməkdaş kartlarına açıq bağlı istifadəçilər: [personnel_id => user_id].
+     *
+     * @param  array<int, int>  $personnelIds
+     * @return array<int, int>
+     */
+    public function userIdsByPersonnel(array $personnelIds): array
     {
-        UserPersonnelLink::query()->updateOrCreate(
-            ['user_id' => $user->id],
-            [
-                'personnel_id' => $personnelId,
-                'resolution_source' => $source,
-                'resolved_at' => now(),
-            ]
-        );
+        $personnelIds = array_values(array_unique(array_filter(array_map('intval', $personnelIds))));
 
-        return $this->resolvedByUser[$user->id] = $personnelId;
+        if ($personnelIds === []) {
+            return [];
+        }
+
+        return UserPersonnelLink::query()
+            ->whereIn('personnel_id', $personnelIds)
+            ->pluck('user_id', 'personnel_id')
+            ->mapWithKeys(fn ($userId, $personnelId): array => [(int) $personnelId => (int) $userId])
+            ->all();
+    }
+
+    /**
+     * Bağ dəyişəndə (yaradıldı / silindi) eyni sorğu daxilindəki keşi təmizləyir.
+     */
+    public function forget(?int $userId = null): void
+    {
+        if ($userId === null) {
+            $this->resolvedByUser = [];
+
+            return;
+        }
+
+        unset($this->resolvedByUser[$userId]);
     }
 }

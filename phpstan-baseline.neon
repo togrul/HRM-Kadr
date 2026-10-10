@@ -13,24 +13,6 @@ parameters:
 			path: app/Console/Commands/AuditQueryBudgetCommand.php
 
 		-
-			message: '#^Method App\\Console\\Commands\\ImportPersonnelsFromAccessToMysql\:\:isValidDate\(\) is unused\.$#'
-			identifier: method.unused
-			count: 1
-			path: app/Console/Commands/ImportPersonnelsFromAccessToMysql.php
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
-			count: 1
-			path: app/Console/Commands/ImportPersonnelsFromAccessToMysql.php
-
-		-
-			message: '#^Variable \$item on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.variable
-			count: 1
-			path: app/Console/Commands/ImportPersonnelsFromAccessToMysql.php
-
-		-
 			message: '#^Call to function method_exists\(\) with Illuminate\\Database\\Connection and ''logging'' will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
@@ -53,12 +35,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/Http/Controllers/Auth/VerifyEmailController.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Personnel\>\:\:\$photo\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/PrintController.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Personnel\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\Personnel\>\:\:\$registered_address\.$#'
@@ -127,12 +103,6 @@ parameters:
 			path: app/Http/Controllers/PrintController.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/PrintController.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$position_label\.$#'
 			identifier: property.notFound
 			count: 1
@@ -147,12 +117,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$title_az\.$#'
 			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/PrintController.php
-
-		-
-			message: '#^Anonymous function has an unused use \$hasActiveDisposal\.$#'
-			identifier: closure.unusedUse
 			count: 1
 			path: app/Http/Controllers/PrintController.php
 
@@ -211,43 +175,13 @@ parameters:
 			path: app/Listeners/LogSuccessfulLogout.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\StaffSchedule\:\:\$filled\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Listeners/UpdateStaffSchedule.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\StaffSchedule\:\:\$vacant\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Listeners/UpdateStaffSchedule.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$approval_route_source\.$#'
 			identifier: property.notFound
 			count: 2
 			path: app/Livewire/Forms/LeaveForm.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$assigned_to\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Forms/LeaveForm.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$document_path\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Forms/LeaveForm.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$ends_at\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Forms/LeaveForm.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$ends_time\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Livewire/Forms/LeaveForm.php
@@ -265,61 +199,13 @@ parameters:
 			path: app/Livewire/Forms/LeaveForm.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$partial_day_part\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Forms/LeaveForm.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$reason\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Forms/LeaveForm.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$starts_at\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Forms/LeaveForm.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$starts_time\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Forms/LeaveForm.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$status_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Forms/LeaveForm.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$total_days\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Forms/LeaveForm.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$total_minutes\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Forms/LeaveForm.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$fullname\.$#'
 			identifier: property.notFound
-			count: 2
+			count: 1
 			path: app/Livewire/Forms/LeaveForm.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Forms/LeaveForm.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tabel_no\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Livewire/Forms/LeaveForm.php
@@ -433,18 +319,6 @@ parameters:
 			path: app/Livewire/Forms/Personnel/KinshipForm.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$position_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Forms/Personnel/LaborActivityForm.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$structure_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Forms/Personnel/LaborActivityForm.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$join_date\.$#'
 			identifier: property.notFound
 			count: 1
@@ -476,18 +350,6 @@ parameters:
 
 		-
 			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: method.unresolvableReturnType
-			count: 1
-			path: app/Livewire/Forms/Personnel/LaborActivityForm.php
-
-		-
-			message: '#^Return type of call to method Illuminate\\Support\\Collection\<int,array\>\:\:all\(\) contains unresolvable type\.$#'
-			identifier: method.unresolvableReturnType
-			count: 1
-			path: app/Livewire/Forms/Personnel/LaborActivityForm.php
-
-		-
-			message: '#^Return type of call to method Illuminate\\Support\\Collection\<int,array\>\:\:values\(\) contains unresolvable type\.$#'
 			identifier: method.unresolvableReturnType
 			count: 1
 			path: app/Livewire/Forms/Personnel/LaborActivityForm.php
@@ -601,30 +463,6 @@ parameters:
 			path: app/Livewire/Forms/Personnel/ServiceHistoryForm.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Candidate\:\:\$gender\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Candidate.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Candidate\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Candidate.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Candidate\:\:\$patronymic\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Candidate.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Candidate\:\:\$surname\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Candidate.php
-
-		-
 			message: '#^Parameter \#1 \$string of function str_pad expects string, int given\.$#'
 			identifier: argument.type
 			count: 1
@@ -641,12 +479,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/Models/City.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\EmployeeCompensation\:\:\$base_amount\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/EmployeeCompensation.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\EmployeeContentAsset\:\:\$external_url\.$#'
@@ -673,79 +505,13 @@ parameters:
 			path: app/Models/EmployeeLoan.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$approved_at\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Leave.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$assigned_to\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Leave.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$duration_unit\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Models/Leave.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$ends_at\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Models/Leave.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$ends_time\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Models/Leave.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$isPending\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Leave.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$partial_day_part\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Models/Leave.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$starts_at\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Models/Leave.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$starts_time\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Models/Leave.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$status_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Leave.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$total_days\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Models/Leave.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$total_minutes\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Models/Leave.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Models/Leave.php
@@ -763,55 +529,7 @@ parameters:
 			path: app/Models/Leave.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\OnboardingDocumentTemplate\:\:\$disk\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/OnboardingDocumentTemplate.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\OnboardingDocumentTemplate\:\:\$file_path\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/OnboardingDocumentTemplate.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$order_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/OrderLog.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$is_pending\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/OrderLog.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$position_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/OrderLog.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$structure_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/OrderLog.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\StaffSchedule\:\:\$filled\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/OrderLog.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\StaffSchedule\:\:\$total\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/OrderLog.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\StaffSchedule\:\:\$vacant\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Models/OrderLog.php
@@ -859,36 +577,6 @@ parameters:
 			path: app/Models/OrderWordTemplate.php
 
 		-
-			message: '#^Offset ''label'' on array\{token\: string, label\: string, source\: string, auto_key\: string\|null, field\: array\{key\: string, type\: string\}, effect_role\: string\|null\} on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Models/OrderWordTemplate.php
-
-		-
-			message: '#^Offset ''source'' on array\{token\: string, label\: string, source\: string, auto_key\: string\|null, field\: array\{key\: string, type\: string\}\|null, effect_role\: string\|null\} on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Models/OrderWordTemplate.php
-
-		-
-			message: '#^Offset ''type'' on array\{key\: non\-falsy\-string, type\: string\} on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Models/OrderWordTemplate.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PayrollPeriod\:\:\$status\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/PayrollPeriod.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PayrollRun\:\:\$status\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Models/PayrollRun.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\PerformanceGoal\:\:\$current_value\.$#'
 			identifier: property.notFound
 			count: 1
@@ -913,30 +601,6 @@ parameters:
 			path: app/Models/PerformanceTestQuestion.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$gender\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Personnel.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Personnel.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$patronymic\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Personnel.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$surname\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Personnel.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$disposal_date\.$#'
 			identifier: property.notFound
 			count: 1
@@ -950,18 +614,6 @@ parameters:
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$end_date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Personnel.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$is_current\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Personnel.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$leave_date\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Models/Personnel.php
@@ -1015,42 +667,6 @@ parameters:
 			path: app/Models/PersonnelLaborActivity.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\PersonnelLaborActivity\:\:\$leave_date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/PersonnelLaborActivity.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$currentWork\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/PersonnelLaborActivity.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:disposalTaggedLabel\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Models/PersonnelLaborActivity.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\StaffSchedule\:\:\$filled\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/StaffSchedule.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\StaffSchedule\:\:\$total\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/StaffSchedule.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\StaffSchedule\:\:\$vacant\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/StaffSchedule.php
-
-		-
 			message: '#^Expression on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.expr
 			count: 1
@@ -1061,36 +677,6 @@ parameters:
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Models/StaffSchedule.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$parent_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Structure.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:getAllNestedIds\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Models/Structure.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:reduce\(\) contains unresolvable type\.$#'
-			identifier: argument.unresolvableType
-			count: 1
-			path: app/Models/Structure.php
-
-		-
-			message: '#^Return type of call to method Illuminate\\Support\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:reduce\(\) contains unresolvable type\.$#'
-			identifier: method.unresolvableReturnType
-			count: 1
-			path: app/Models/Structure.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\TalentAssessment\:\:\$performance_level\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/TalentAssessment.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\TalentAssessment\:\:\$potential_level\.$#'
@@ -1127,18 +713,6 @@ parameters:
 			identifier: property.phpDocType
 			count: 1
 			path: app/Models/User.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Vacation\:\:\$remaining_days\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Vacation.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Vacation\:\:\$vacation_days_total\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Vacation.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Award\:\:\$type_label\.$#'
@@ -1399,79 +973,13 @@ parameters:
 			path: app/Modules/Admin/Livewire/SelfServiceApprovalRoutes.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Structure\:\:\$parent_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Admin/Livewire/Structures.php
-
-		-
 			message: '#^Call to function property_exists\(\) with \$this\(App\\Modules\\Admin\\Livewire\\Structures\) and ''dropdownCacheMinutes'' will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
 			path: app/Modules/Admin/Livewire/Structures.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceMonthlySummary\:\:\$tabel_no\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Contracts/AttendancePayrollExportContract.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceMonthlySummary\:\:\$total_absence_days\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Contracts/AttendancePayrollExportContract.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\AttendanceMonthlySummary\:\:\$total_absence_minutes\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Contracts/AttendancePayrollExportContract.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceMonthlySummary\:\:\$total_overtime_minutes\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Contracts/AttendancePayrollExportContract.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceMonthlySummary\:\:\$total_present_days\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Contracts/AttendancePayrollExportContract.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceMonthlySummary\:\:\$total_scheduled_minutes\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Contracts/AttendancePayrollExportContract.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceMonthlySummary\:\:\$total_workdays\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Contracts/AttendancePayrollExportContract.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceMonthlySummary\:\:\$total_worked_minutes\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Contracts/AttendancePayrollExportContract.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Contracts/AttendancePayrollExportContract.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$patronymic\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Contracts/AttendancePayrollExportContract.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$surname\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Attendance/Application/Contracts/AttendancePayrollExportContract.php
@@ -1507,40 +1015,10 @@ parameters:
 			path: app/Modules/Attendance/Application/Services/AttendanceCalendarManagementService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceCalendar\:\:\$day_type\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceCalendarManagementService.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\AttendanceCalendar\:\:\$updated_by\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Attendance/Application/Services/AttendanceCalendarManagementService.php
-
-		-
-			message: '#^Property App\\Models\\AttendanceCalendar\:\:\$date \(Illuminate\\Support\\Carbon\|null\) does not accept string\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceCalendarManagementService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Structure\:\:\$parent_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceCalendarSyncService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceManualEntry\:\:\$absence_code\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceDailyLedgerCalculatorService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceManualEntry\:\:\$approval_status\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceDailyLedgerCalculatorService.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\AttendanceManualEntry\:\:\$early_leave_minutes\.$#'
@@ -1580,12 +1058,6 @@ parameters:
 
 		-
 			message: '#^Access to an undefined property App\\Models\\AttendanceSetting\:\:\$overtime_policy\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceDailyLedgerCalculatorService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceShift\:\:\$break_minutes\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Attendance/Application/Services/AttendanceDailyLedgerCalculatorService.php
@@ -1651,61 +1123,13 @@ parameters:
 			path: app/Modules/Attendance/Application/Services/AttendanceDailyLedgerCalculatorService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceCalendar\:\:\$day_type\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Attendance/Application/Services/AttendanceDayContextResolverService.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$duration_unit\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Attendance/Application/Services/AttendanceDayContextResolverService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$ends_at\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceDayContextResolverService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$ends_time\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceDayContextResolverService.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$leave_type_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceDayContextResolverService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$partial_day_part\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceDayContextResolverService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$starts_at\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceDayContextResolverService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$starts_time\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceDayContextResolverService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$tabel_no\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceDayContextResolverService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$total_minutes\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Attendance/Application/Services/AttendanceDayContextResolverService.php
@@ -1718,30 +1142,6 @@ parameters:
 
 		-
 			message: '#^Access to an undefined property App\\Models\\PersonnelBusinessTrip\:\:\$start_date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceDayContextResolverService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PersonnelBusinessTrip\:\:\$tabel_no\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceDayContextResolverService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PersonnelVacation\:\:\$end_date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceDayContextResolverService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PersonnelVacation\:\:\$start_date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceDayContextResolverService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PersonnelVacation\:\:\$tabel_no\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Attendance/Application/Services/AttendanceDayContextResolverService.php
@@ -1831,24 +1231,6 @@ parameters:
 			path: app/Modules/Attendance/Application/Services/AttendanceManagerSummaryReadService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceManualEntry\:\:\$absence_code\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceManualEntryService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceManualEntry\:\:\$approval_status\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Modules/Attendance/Application/Services/AttendanceManualEntryService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceManualEntry\:\:\$approved_at\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Modules/Attendance/Application/Services/AttendanceManualEntryService.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\AttendanceManualEntry\:\:\$approved_by\.$#'
 			identifier: property.notFound
 			count: 3
@@ -1864,24 +1246,6 @@ parameters:
 			message: '#^Access to an undefined property App\\Models\\AttendanceManualEntry\:\:\$calculation_shift_source\.$#'
 			identifier: property.notFound
 			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceManualEntryService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceManualEntry\:\:\$check_in_at\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceManualEntryService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceManualEntry\:\:\$check_out_at\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceManualEntryService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceManualEntry\:\:\$date\.$#'
-			identifier: property.notFound
-			count: 5
 			path: app/Modules/Attendance/Application/Services/AttendanceManualEntryService.php
 
 		-
@@ -1909,18 +1273,6 @@ parameters:
 			path: app/Modules/Attendance/Application/Services/AttendanceManualEntryService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceManualEntry\:\:\$reason\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Modules/Attendance/Application/Services/AttendanceManualEntryService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceManualEntry\:\:\$tabel_no\.$#'
-			identifier: property.notFound
-			count: 6
-			path: app/Modules/Attendance/Application/Services/AttendanceManualEntryService.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\AttendanceManualEntry\:\:\$worked_minutes\.$#'
 			identifier: property.notFound
 			count: 1
@@ -1934,24 +1286,6 @@ parameters:
 
 		-
 			message: '#^Access to an undefined property App\\Models\\AttendanceSetting\:\:\$late_grace_minutes\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceManualMetricsResolverService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceShift\:\:\$break_minutes\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceManualMetricsResolverService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceShiftAssignment\:\:\$effective_from\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceManualMetricsResolverService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceShiftAssignment\:\:\$effective_to\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Attendance/Application/Services/AttendanceManualMetricsResolverService.php
@@ -1988,12 +1322,6 @@ parameters:
 
 		-
 			message: '#^Access to an undefined property App\\Models\\AttendanceDailyLedger\:\:\$total_ledgers\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceMonthLockService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceDailyLedger\:\:\$worked_minutes\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Attendance/Application/Services/AttendanceMonthLockService.php
@@ -2059,21 +1387,9 @@ parameters:
 			path: app/Modules/Attendance/Application/Services/AttendanceMonthLockService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceOvertimeRequest\:\:\$date\.$#'
-			identifier: property.notFound
-			count: 6
-			path: app/Modules/Attendance/Application/Services/AttendanceOvertimeApprovalService.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\AttendanceOvertimeRequest\:\:\$requested_minutes\.$#'
 			identifier: property.notFound
 			count: 2
-			path: app/Modules/Attendance/Application/Services/AttendanceOvertimeApprovalService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceOvertimeRequest\:\:\$tabel_no\.$#'
-			identifier: property.notFound
-			count: 4
 			path: app/Modules/Attendance/Application/Services/AttendanceOvertimeApprovalService.php
 
 		-
@@ -2095,19 +1411,7 @@ parameters:
 			path: app/Modules/Attendance/Application/Services/AttendanceOvertimeRequestSyncService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceManualEntry\:\:\$reason\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceOvertimeRequestSyncService.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\AttendanceManualEntry\:\:\$worked_minutes\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceOvertimeRequestSyncService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceOvertimeRequest\:\:\$date\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Attendance/Application/Services/AttendanceOvertimeRequestSyncService.php
@@ -2120,12 +1424,6 @@ parameters:
 
 		-
 			message: '#^Access to an undefined property App\\Models\\AttendanceOvertimeRequest\:\:\$requested_minutes\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceOvertimeRequestSyncService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceOvertimeRequest\:\:\$tabel_no\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Attendance/Application/Services/AttendanceOvertimeRequestSyncService.php
@@ -2165,12 +1463,6 @@ parameters:
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Modules/Attendance/Application/Services/AttendanceOvertimeRequestSyncService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceCalendar\:\:\$day_type\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Attendance/Application/Services/AttendanceOverviewService.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$absence_days\.$#'
@@ -2263,33 +1555,9 @@ parameters:
 			path: app/Modules/Attendance/Application/Services/AttendanceOverviewService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceCalendar\:\:\$day_type\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Attendance/Application/Services/AttendancePuantajReadService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceDailyLedger\:\:\$attendance_status\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendancePuantajReadService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceDailyLedger\:\:\$date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendancePuantajReadService.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\AttendanceDailyLedger\:\:\$meta\.$#'
 			identifier: property.notFound
 			count: 10
-			path: app/Modules/Attendance/Application/Services/AttendancePuantajReadService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceDailyLedger\:\:\$worked_minutes\.$#'
-			identifier: property.notFound
-			count: 1
 			path: app/Modules/Attendance/Application/Services/AttendancePuantajReadService.php
 
 		-
@@ -2329,49 +1597,13 @@ parameters:
 			path: app/Modules/Attendance/Application/Services/AttendancePunchPairingService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceDailyLedger\:\:\$date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendancePunchProcessingPipelineService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceDailyLedger\:\:\$tabel_no\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendancePunchProcessingPipelineService.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\AttendanceManualEntry\:\:\$calculation_shift_source\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Attendance/Application/Services/AttendancePunchProcessingPipelineService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceManualEntry\:\:\$date\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Attendance/Application/Services/AttendancePunchProcessingPipelineService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceManualEntry\:\:\$tabel_no\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendancePunchProcessingPipelineService.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\AttendanceOvertimeRequest\:\:\$approved_minutes\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendancePunchProcessingPipelineService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceOvertimeRequest\:\:\$date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendancePunchProcessingPipelineService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceOvertimeRequest\:\:\$tabel_no\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Attendance/Application/Services/AttendancePunchProcessingPipelineService.php
@@ -2384,24 +1616,6 @@ parameters:
 
 		-
 			message: '#^Access to an undefined property App\\Models\\AttendanceSetting\:\:\$default_shift_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendancePunchProcessingPipelineService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceShiftAssignment\:\:\$effective_from\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendancePunchProcessingPipelineService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceShiftAssignment\:\:\$effective_to\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendancePunchProcessingPipelineService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Structure\:\:\$parent_id\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Attendance/Application/Services/AttendancePunchProcessingPipelineService.php
@@ -2533,19 +1747,7 @@ parameters:
 			path: app/Modules/Attendance/Application/Services/AttendanceSettingsService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceShift\:\:\$break_minutes\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceShiftManagementService.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\AttendanceShift\:\:\$created_by\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceShiftManagementService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceShift\:\:\$end_time\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Attendance/Application/Services/AttendanceShiftManagementService.php
@@ -2593,12 +1795,6 @@ parameters:
 			path: app/Modules/Attendance/Application/Services/AttendanceShiftManagementService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceShift\:\:\$start_time\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceShiftManagementService.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\AttendanceShift\:\:\$updated_by\.$#'
 			identifier: property.notFound
 			count: 2
@@ -2617,33 +1813,9 @@ parameters:
 			path: app/Modules/Attendance/Application/Services/AttendanceShiftManagementService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceShiftAssignment\:\:\$effective_from\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceShiftManagementService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceShiftAssignment\:\:\$effective_to\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Modules/Attendance/Application/Services/AttendanceShiftManagementService.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\AttendanceShiftAssignment\:\:\$is_active\.$#'
 			identifier: property.notFound
 			count: 2
-			path: app/Modules/Attendance/Application/Services/AttendanceShiftManagementService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceShiftAssignment\:\:\$shift_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceShiftManagementService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceShiftAssignment\:\:\$tabel_no\.$#'
-			identifier: property.notFound
-			count: 1
 			path: app/Modules/Attendance/Application/Services/AttendanceShiftManagementService.php
 
 		-
@@ -2651,12 +1823,6 @@ parameters:
 			identifier: property.notFound
 			count: 2
 			path: app/Modules/Attendance/Application/Services/AttendanceShiftManagementService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceShift\:\:\$end_time\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceShiftWindowService.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\AttendanceShift\:\:\$in_flex_before_minutes\.$#'
@@ -2677,18 +1843,6 @@ parameters:
 			path: app/Modules/Attendance/Application/Services/AttendanceShiftWindowService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceShift\:\:\$start_time\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceShiftWindowService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Structure\:\:\$parent_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Application/Services/AttendanceStructureScopeReadService.php
-
-		-
 			message: '#^Call to function is_numeric\(\) with int will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
@@ -2701,12 +1855,6 @@ parameters:
 			path: app/Modules/Attendance/Application/Services/AttendanceStructureSummaryService.php
 
 		-
-			message: '#^Call to an undefined method Illuminate\\Contracts\\Pagination\\LengthAwarePaginator\:\:getCollection\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Modules/Attendance/Console/Commands/AttendanceQueryBudgetCommand.php
-
-		-
 			message: '#^Unable to resolve the template type TKey in call to function collect$#'
 			identifier: argument.templateType
 			count: 1
@@ -2731,18 +1879,6 @@ parameters:
 			path: app/Modules/Attendance/Http/Controllers/AttendancePunchIngestController.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceMonthlySummary\:\:\$total_absence_days\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Infrastructure/Persistence/Eloquent/EloquentPayrollAttendanceReadRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceMonthlySummary\:\:\$total_workdays\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Infrastructure/Persistence/Eloquent/EloquentPayrollAttendanceReadRepository.php
-
-		-
 			message: '#^Call to an undefined method Illuminate\\Contracts\\Pagination\\LengthAwarePaginator\:\:getCollection\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -2765,12 +1901,6 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: app/Modules/Attendance/Livewire/AttendanceManagerSummary.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceCalendar\:\:\$day_type\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Attendance/Livewire/CalendarRegimes.php
 
 		-
 			message: '#^Call to an undefined method Illuminate\\Contracts\\Pagination\\LengthAwarePaginator\:\:getCollection\(\)\.$#'
@@ -2797,28 +1927,10 @@ parameters:
 			path: app/Modules/Attendance/Livewire/ExceptionsInbox.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceException\:\:\$tabel_no\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Attendance/Livewire/ExceptionsInbox.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\AttendanceException\:\:\$type\.$#'
 			identifier: property.notFound
 			count: 2
 			path: app/Modules/Attendance/Livewire/ExceptionsInbox.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$structure_id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Attendance/Livewire/ExceptionsInbox.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$structure_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Livewire/ManualEntries.php
 
 		-
 			message: '#^Access to an undefined property App\\Modules\\Attendance\\Livewire\\ManualEntries\:\:\$availableShifts\.$#'
@@ -2830,12 +1942,6 @@ parameters:
 			message: '#^Access to an undefined property App\\Modules\\Attendance\\Livewire\\ManualEntries\:\:\$selectedPersonnelRecord\.$#'
 			identifier: property.notFound
 			count: 1
-			path: app/Modules/Attendance/Livewire/ManualEntries.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$structure_id\.$#'
-			identifier: property.notFound
-			count: 2
 			path: app/Modules/Attendance/Livewire/ManualEntries.php
 
 		-
@@ -2875,30 +1981,6 @@ parameters:
 			path: app/Modules/Attendance/Livewire/OvertimeBoard.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Livewire/OvertimeBoard.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$patronymic\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Livewire/OvertimeBoard.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$structure_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Livewire/OvertimeBoard.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$surname\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Livewire/OvertimeBoard.php
-
-		-
 			message: '#^Access to an undefined property App\\Modules\\Attendance\\Livewire\\OvertimeBoard\:\:\$activeFilters\.$#'
 			identifier: property.notFound
 			count: 1
@@ -2909,18 +1991,6 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Attendance/Livewire/OvertimeBoard.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$structure_id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Attendance/Livewire/OvertimeBoard.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Contracts\\Pagination\\LengthAwarePaginator\:\:getCollection\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: app/Modules/Attendance/Livewire/PuantajGrid.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\AttendanceSetting\:\:\$default_shift_id\.$#'
@@ -2965,18 +2035,6 @@ parameters:
 			path: app/Modules/Attendance/Livewire/Settings.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceShift\:\:\$break_minutes\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Livewire/ShiftManagement.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceShift\:\:\$end_time\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Livewire/ShiftManagement.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\AttendanceShift\:\:\$in_flex_after_minutes\.$#'
 			identifier: property.notFound
 			count: 1
@@ -3019,27 +2077,9 @@ parameters:
 			path: app/Modules/Attendance/Livewire/ShiftManagement.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceShift\:\:\$start_time\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Livewire/ShiftManagement.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\AttendanceShiftAssignment\:\:\$assignment_source\.$#'
 			identifier: property.notFound
 			count: 1
-			path: app/Modules/Attendance/Livewire/ShiftManagement.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceShiftAssignment\:\:\$effective_from\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Attendance/Livewire/ShiftManagement.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceShiftAssignment\:\:\$effective_to\.$#'
-			identifier: property.notFound
-			count: 2
 			path: app/Modules/Attendance/Livewire/ShiftManagement.php
 
 		-
@@ -3049,82 +2089,10 @@ parameters:
 			path: app/Modules/Attendance/Livewire/ShiftManagement.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceShiftAssignment\:\:\$shift_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Livewire/ShiftManagement.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceShiftAssignment\:\:\$tabel_no\.$#'
-			identifier: property.notFound
-			count: 5
-			path: app/Modules/Attendance/Livewire/ShiftManagement.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$structure_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Livewire/ShiftManagement.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$fullname\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Attendance/Livewire/ShiftManagement.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$structure_id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Attendance/Livewire/ShiftManagement.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>fullname" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Modules/Attendance/Livewire/ShiftManagement.php
-
-		-
-			message: '#^Call to function is_array\(\) with null will always evaluate to false\.$#'
-			identifier: function.impossibleType
-			count: 1
-			path: app/Modules/Audit/Exports/ActivityLogExport.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\AttendanceOvertimeRequest\:\:\$date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Audit/Livewire/ActivityLogDashboard.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$order_no\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Audit/Livewire/ActivityLogDashboard.php
-
-		-
-			message: '#^Anonymous function should return Illuminate\\Support\\Collection\<\(int\|string\), array\{type\: string, id\: int\}\|null\> but returns Illuminate\\Support\\Collection\<\(int\|string\), array\{type\: string, id\: int\}\|null\>\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Modules/Audit/Livewire/ActivityLogDashboard.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\:\:withTrashed\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Modules/Audit/Livewire/ActivityLogDashboard.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<int,array\<int, string\>\>\:\:flatMap\(\) expects callable\(array\{string, string\}, int\)\: \(array\<array\{type\: string, id\: int\}\|null\>\|Illuminate\\Support\\Collection\<int\|string, array\{type\: string, id\: int\}\|null\>\), Closure\(array\)\: Illuminate\\Support\\Collection\<int\|string, array\{type\: string, id\: int\}\|null\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Modules/Audit/Livewire/ActivityLogDashboard.php
-
-		-
-			message: '#^Unable to resolve the template type TWhenReturnType in call to method Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\:\:when\(\)$#'
-			identifier: argument.templateType
-			count: 1
-			path: app/Modules/Audit/Livewire/ActivityLogDashboard.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\PersonnelBusinessTrip\:\:\$deleted_at\.$#'
@@ -3181,12 +2149,6 @@ parameters:
 			path: app/Modules/BusinessTrips/Livewire/BusinessTrips.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\PersonnelBusinessTrip\:\:\$row_no\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/BusinessTrips/Livewire/BusinessTrips.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\PersonnelBusinessTrip\:\:\$start_date\.$#'
 			identifier: property.notFound
 			count: 2
@@ -3208,12 +2170,6 @@ parameters:
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$description\.$#'
 			identifier: property.notFound
 			count: 3
-			path: app/Modules/BusinessTrips/Livewire/BusinessTrips.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$fullname\.$#'
-			identifier: property.notFound
-			count: 2
 			path: app/Modules/BusinessTrips/Livewire/BusinessTrips.php
 
 		-
@@ -3307,12 +2263,6 @@ parameters:
 			path: app/Modules/Candidates/Application/Services/CandidateApplicationStageArtifactService.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$profile_pack\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Candidates/Application/Services/CandidateApplicationStageArtifactService.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
 			identifier: property.notFound
 			count: 2
@@ -3349,24 +2299,6 @@ parameters:
 			path: app/Modules/Candidates/Application/Services/CandidateApplicationStageService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\JobOpening\:\:\$profile_pack\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Candidates/Application/Services/CandidateApplicationStageService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$profile_pack\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Candidates/Application/Services/CandidateApplicationStageService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\CandidateApplication\:\:\$candidate_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Candidates/Application/Services/CandidateAtsCompletionService.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\CandidateApplication\:\:\$current_stage\.$#'
 			identifier: property.notFound
 			count: 4
@@ -3397,12 +2329,6 @@ parameters:
 			path: app/Modules/Candidates/Application/Services/CandidateAtsCompletionService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\JobRequisition\:\:\$approval_status\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Candidates/Application/Services/CandidateAtsCompletionService.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\JobRequisition\:\:\$created_at\.$#'
 			identifier: property.notFound
 			count: 2
@@ -3418,12 +2344,6 @@ parameters:
 			message: '#^Access to an undefined property App\\Models\\JobRequisition\:\:\$requested_by\.$#'
 			identifier: property.notFound
 			count: 2
-			path: app/Modules/Candidates/Application/Services/CandidateAtsCompletionService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\JobRequisition\:\:\$status\.$#'
-			identifier: property.notFound
-			count: 3
 			path: app/Modules/Candidates/Application/Services/CandidateAtsCompletionService.php
 
 		-
@@ -3469,24 +2389,6 @@ parameters:
 			path: app/Modules/Candidates/Application/Services/CandidateHireConversionService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Candidate\:\:\$gender\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Candidates/Application/Services/CandidateHireConversionService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Candidate\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Candidates/Application/Services/CandidateHireConversionService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Candidate\:\:\$patronymic\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Candidates/Application/Services/CandidateHireConversionService.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Candidate\:\:\$phone\.$#'
 			identifier: property.notFound
 			count: 2
@@ -3499,24 +2401,6 @@ parameters:
 			path: app/Modules/Candidates/Application/Services/CandidateHireConversionService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Candidate\:\:\$structure_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Candidates/Application/Services/CandidateHireConversionService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Candidate\:\:\$surname\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Candidates/Application/Services/CandidateHireConversionService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\CandidateApplication\:\:\$candidate_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Candidates/Application/Services/CandidateHireConversionService.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\CandidateApplication\:\:\$current_stage\.$#'
 			identifier: property.notFound
 			count: 1
@@ -3524,12 +2408,6 @@ parameters:
 
 		-
 			message: '#^Access to an undefined property App\\Models\\CandidateApplication\:\:\$final_decision\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Candidates/Application/Services/CandidateHireConversionService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\CandidateApplication\:\:\$job_opening_id\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Candidates/Application/Services/CandidateHireConversionService.php
@@ -3561,17 +2439,11 @@ parameters:
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
 			identifier: property.notFound
-			count: 2
-			path: app/Modules/Candidates/Application/Services/CandidateHireConversionService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
-			identifier: property.notFound
 			count: 1
 			path: app/Modules/Candidates/Application/Services/CandidateHireConversionService.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$owner_id\.$#'
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Candidates/Application/Services/CandidateHireConversionService.php
@@ -3589,12 +2461,6 @@ parameters:
 			path: app/Modules/Candidates/Application/Services/CandidateHireConversionService.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$position_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Candidates/Application/Services/CandidateHireConversionService.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$presented_by\.$#'
 			identifier: property.notFound
 			count: 1
@@ -3603,19 +2469,13 @@ parameters:
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$structure_id\.$#'
 			identifier: property.notFound
-			count: 2
+			count: 1
 			path: app/Modules/Candidates/Application/Services/CandidateHireConversionService.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$surname\.$#'
 			identifier: property.notFound
 			count: 1
-			path: app/Modules/Candidates/Application/Services/CandidateHireConversionService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$title\.$#'
-			identifier: property.notFound
-			count: 3
 			path: app/Modules/Candidates/Application/Services/CandidateHireConversionService.php
 
 		-
@@ -3663,19 +2523,19 @@ parameters:
 		-
 			message: '#^Access to an undefined property App\\Models\\CandidateDocument\:\:\$disk\.$#'
 			identifier: property.notFound
-			count: 2
+			count: 1
 			path: app/Modules/Candidates/Http/Controllers/CandidateDocumentDownloadController.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\CandidateDocument\:\:\$file_path\.$#'
 			identifier: property.notFound
-			count: 2
+			count: 1
 			path: app/Modules/Candidates/Http/Controllers/CandidateDocumentDownloadController.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\CandidateDocument\:\:\$original_name\.$#'
 			identifier: property.notFound
-			count: 2
+			count: 1
 			path: app/Modules/Candidates/Http/Controllers/CandidateDocumentDownloadController.php
 
 		-
@@ -3823,12 +2683,6 @@ parameters:
 			path: app/Modules/Candidates/Livewire/ApplicationArtifactTimelinePanel.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$profile_pack\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Candidates/Livewire/ApplicationArtifactTimelinePanel.php
-
-		-
 			message: '#^Parameter \#1 \$groupBy of method Illuminate\\Support\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:groupBy\(\) expects \(callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: \(int\|string\|Stringable\|UnitEnum\)\)\|list\<Closure\|string\>\|string, Closure\(App\\Models\\CandidateDocument\)\: mixed given\.$#'
 			identifier: argument.type
 			count: 1
@@ -3851,12 +2705,6 @@ parameters:
 			identifier: argument.templateType
 			count: 1
 			path: app/Modules/Candidates/Livewire/ApplicationArtifactTimelinePanel.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$profile_pack\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Candidates/Livewire/ApplicationDetail.php
 
 		-
 			message: '#^Access to an undefined property App\\Modules\\Candidates\\Livewire\\ApplicationPipeline\:\:\$pipelineMetrics\.$#'
@@ -3919,12 +2767,6 @@ parameters:
 			path: app/Modules/Candidates/Livewire/ApplicationPipeline.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\CandidateApplication\:\:\$candidate_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Candidates/Livewire/ApplicationStageActionPanel.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\CandidateApplication\:\:\$current_stage\.$#'
 			identifier: property.notFound
 			count: 3
@@ -3964,12 +2806,6 @@ parameters:
 			message: '#^Access to an undefined property App\\Modules\\Candidates\\Livewire\\ApplicationStageActionPanel\:\:\$stageDefinitions\.$#'
 			identifier: property.notFound
 			count: 2
-			path: app/Modules/Candidates/Livewire/ApplicationStageActionPanel.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$profile_pack\.$#'
-			identifier: property.notFound
-			count: 1
 			path: app/Modules/Candidates/Livewire/ApplicationStageActionPanel.php
 
 		-
@@ -4333,12 +3169,6 @@ parameters:
 			path: app/Modules/Candidates/Livewire/RecruitmentAnalytics.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\EmployeeCompensation\:\:\$base_amount\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Application/Services/AllowanceResolver.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$amount\.$#'
 			identifier: property.notFound
 			count: 1
@@ -4361,12 +3191,6 @@ parameters:
 			identifier: return.type
 			count: 1
 			path: app/Modules/Compensation/Application/Services/AllowanceResolver.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\EmployeeCompensation\:\:\$currency\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Application/Services/CompensationService.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\EmployeeCompensation\:\:\$regime_id\.$#'
@@ -4603,12 +3427,6 @@ parameters:
 			path: app/Modules/Compensation/Livewire/Tabs/ScalesTab.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$email\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Compliance/Application/Services/ComplianceReminderNotifier.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$parent_id\.$#'
 			identifier: property.notFound
 			count: 1
@@ -4619,12 +3437,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/Modules/Compliance/Application/Services/ComplianceReminderNotifier.php
-
-		-
-			message: '#^Parameter \#1 \$daysLeft of method App\\Modules\\Compliance\\Application\\Services\\DocumentExpiryReadService\:\:status\(\) expects int, float given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Modules/Compliance/Application/Services/DocumentExpiryReadService.php
 
 		-
 			message: '#^Unable to resolve the template type TKey in call to function collect$#'
@@ -5125,12 +3937,6 @@ parameters:
 			path: app/Modules/Leaves/Livewire/AddLeave.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$assigned_to\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Modules/Leaves/Livewire/AddLeave.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$fallback_approver_personnel_id\.$#'
 			identifier: property.notFound
 			count: 5
@@ -5157,7 +3963,7 @@ parameters:
 		-
 			message: '#^Access to an undefined property App\\Models\\OrderStatus\:\:\$label\.$#'
 			identifier: property.notFound
-			count: 2
+			count: 1
 			path: app/Modules/Leaves/Livewire/AddLeave.php
 
 		-
@@ -5173,12 +3979,6 @@ parameters:
 			path: app/Modules/Leaves/Livewire/AddLeave.php
 
 		-
-			message: '#^Access to an undefined property App\\Modules\\Leaves\\Livewire\\AddLeave\:\:\$selectedApplicantPersonnel\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Leaves/Livewire/AddLeave.php
-
-		-
 			message: '#^Access to an undefined property App\\Modules\\Leaves\\Livewire\\AddLeave\:\:\$selectedLeaveTypeMeta\.$#'
 			identifier: property.notFound
 			count: 2
@@ -5187,7 +3987,7 @@ parameters:
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
 			identifier: property.notFound
-			count: 2
+			count: 1
 			path: app/Modules/Leaves/Livewire/AddLeave.php
 
 		-
@@ -5199,7 +3999,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$personnel of method App\\Modules\\Personnel\\Contracts\\ApprovalRouteResolver\:\:personnelPreviewCard\(\) expects App\\Models\\Personnel, Illuminate\\Database\\Eloquent\\Model given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 1
 			path: app/Modules/Leaves/Livewire/AddLeave.php
 
 		-
@@ -5233,12 +4033,6 @@ parameters:
 			path: app/Modules/Leaves/Livewire/EditLeave.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$assigned_to\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Modules/Leaves/Livewire/EditLeave.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$fallback_approver_personnel_id\.$#'
 			identifier: property.notFound
 			count: 5
@@ -5265,7 +4059,7 @@ parameters:
 		-
 			message: '#^Access to an undefined property App\\Models\\OrderStatus\:\:\$label\.$#'
 			identifier: property.notFound
-			count: 2
+			count: 1
 			path: app/Modules/Leaves/Livewire/EditLeave.php
 
 		-
@@ -5281,12 +4075,6 @@ parameters:
 			path: app/Modules/Leaves/Livewire/EditLeave.php
 
 		-
-			message: '#^Access to an undefined property App\\Modules\\Leaves\\Livewire\\EditLeave\:\:\$selectedApplicantPersonnel\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Leaves/Livewire/EditLeave.php
-
-		-
 			message: '#^Access to an undefined property App\\Modules\\Leaves\\Livewire\\EditLeave\:\:\$selectedLeaveTypeMeta\.$#'
 			identifier: property.notFound
 			count: 2
@@ -5295,7 +4083,7 @@ parameters:
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
 			identifier: property.notFound
-			count: 2
+			count: 1
 			path: app/Modules/Leaves/Livewire/EditLeave.php
 
 		-
@@ -5307,7 +4095,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$personnel of method App\\Modules\\Personnel\\Contracts\\ApprovalRouteResolver\:\:personnelPreviewCard\(\) expects App\\Models\\Personnel, Illuminate\\Database\\Eloquent\\Model given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 1
 			path: app/Modules/Leaves/Livewire/EditLeave.php
 
 		-
@@ -5336,18 +4124,6 @@ parameters:
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$personnel_structure_path\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Leaves/Livewire/Leaves.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$row_no\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Leaves/Livewire/Leaves.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$structure\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Leaves/Livewire/Leaves.php
@@ -5489,54 +4265,6 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Notifications/Livewire/AnnouncementComposer.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$fullname\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Notifications/Livewire/AnnouncementComposer.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$structure\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Notifications/Livewire/AnnouncementComposer.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\User\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: argument.unresolvableType
-			count: 2
-			path: app/Modules/Notifications/Livewire/AnnouncementComposer.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<int,array\<string, mixed\>\>\:\:sortBy\(\) contains unresolvable type\.$#'
-			identifier: argument.unresolvableType
-			count: 1
-			path: app/Modules/Notifications/Livewire/AnnouncementComposer.php
-
-		-
-			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\User\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: method.unresolvableReturnType
-			count: 2
-			path: app/Modules/Notifications/Livewire/AnnouncementComposer.php
-
-		-
-			message: '#^Return type of call to method Illuminate\\Support\\Collection\<int,array\<string, mixed\>\>\:\:all\(\) contains unresolvable type\.$#'
-			identifier: method.unresolvableReturnType
-			count: 2
-			path: app/Modules/Notifications/Livewire/AnnouncementComposer.php
-
-		-
-			message: '#^Return type of call to method Illuminate\\Support\\Collection\<int,array\<string, mixed\>\>\:\:values\(\) contains unresolvable type\.$#'
-			identifier: method.unresolvableReturnType
-			count: 1
-			path: app/Modules/Notifications/Livewire/AnnouncementComposer.php
-
-		-
-			message: '#^Access to an undefined property App\\Modules\\Notifications\\Livewire\\ApprovalQueue\:\:\$campaigns\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Notifications/Livewire/ApprovalQueue.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\NotificationCampaign\:\:\$failed_dispatches_count\.$#'
@@ -5719,48 +4447,6 @@ parameters:
 			path: app/Modules/Notifications/Livewire/RuleManager.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$fullname\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Notifications/Livewire/RuleManager.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$structure\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Notifications/Livewire/RuleManager.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\User\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: argument.unresolvableType
-			count: 2
-			path: app/Modules/Notifications/Livewire/RuleManager.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<int,array\<string, mixed\>\>\:\:sortBy\(\) contains unresolvable type\.$#'
-			identifier: argument.unresolvableType
-			count: 1
-			path: app/Modules/Notifications/Livewire/RuleManager.php
-
-		-
-			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\User\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: method.unresolvableReturnType
-			count: 2
-			path: app/Modules/Notifications/Livewire/RuleManager.php
-
-		-
-			message: '#^Return type of call to method Illuminate\\Support\\Collection\<int,array\<string, mixed\>\>\:\:all\(\) contains unresolvable type\.$#'
-			identifier: method.unresolvableReturnType
-			count: 2
-			path: app/Modules/Notifications/Livewire/RuleManager.php
-
-		-
-			message: '#^Return type of call to method Illuminate\\Support\\Collection\<int,array\<string, mixed\>\>\:\:values\(\) contains unresolvable type\.$#'
-			identifier: method.unresolvableReturnType
-			count: 1
-			path: app/Modules/Notifications/Livewire/RuleManager.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\NotificationTemplate\:\:\$body_template\.$#'
 			identifier: property.notFound
 			count: 1
@@ -5813,18 +4499,6 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Notifications/Support/DispatchRetryScheduler.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$email\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Notifications/Support/NotificationAudienceResolver.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$structure_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Notifications/Support/NotificationAudienceResolver.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$manager\.$#'
@@ -6451,67 +5125,8 @@ parameters:
 			path: app/Modules/OnboardingLibrary/Livewire/Dashboard.php
 
 		-
-			message: '#^Offset ''source'' on array\{token\: string, label\: string, source\: string, auto_key\: string\|null, field\: array\{key\: string, type\: string\}\|null, effect_role\: string\|null\} on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Modules/Orders/Infrastructure/Document/OrderSubjectResolver.php
-		-
-			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$order_no\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Orders/Livewire/AllOrders.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$row_no\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Orders/Livewire/AllOrders.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$status_color_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Orders/Livewire/AllOrders.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$status_id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Orders/Livewire/AllOrders.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$template_render_mode\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Orders/Livewire/AllOrders.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$template_snapshot\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Orders/Livewire/AllOrders.php
-
-		-
 			message: '#^Access to an undefined property App\\Modules\\Orders\\Livewire\\OrderTemplateDesigner\:\:\$effectRoles\.$#'
 			identifier: property.notFound
-			count: 1
-			path: app/Modules/Orders/Livewire/OrderTemplateDesigner.php
-
-		-
-			message: '#^Offset ''effect_role'' on array\{token\: string, label\: string, source\: string, auto_key\: string, field_type\: string\} on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 2
-			path: app/Modules/Orders/Livewire/OrderTemplateDesigner.php
-
-		-
-			message: '#^Result of && is always false\.$#'
-			identifier: booleanAnd.alwaysFalse
-			count: 1
-			path: app/Modules/Orders/Livewire/OrderTemplateDesigner.php
-
-		-
-			message: '#^Strict comparison using \!\=\= between '''' and '''' will always evaluate to false\.$#'
-			identifier: notIdentical.alwaysFalse
 			count: 1
 			path: app/Modules/Orders/Livewire/OrderTemplateDesigner.php
 
@@ -6534,28 +5149,10 @@ parameters:
 			path: app/Modules/Payroll/Application/Services/LoanService.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$ends_on\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Payroll/Application/Services/LoanService.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$remaining\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Payroll/Application/Services/LoanService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\EmployeeCompensation\:\:\$base_amount\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Payroll/Application/Services/PayrollCalculator.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\EmployeeCompensation\:\:\$currency\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Payroll/Application/Services/PayrollCalculator.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\EmployeeCompensation\:\:\$regime_id\.$#'
@@ -6594,57 +5191,15 @@ parameters:
 			path: app/Modules/Payroll/Application/Services/PayrollExportService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Payslip\:\:\$tabel_no\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Modules/Payroll/Application/Services/PayrollExportService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PayslipLine\:\:\$code\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Payroll/Application/Services/PayrollExportService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PayslipLine\:\:\$kind\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Payroll/Application/Services/PayrollExportService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PayslipLine\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Payroll/Application/Services/PayrollExportService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$pin\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Payroll/Application/Services/PayrollExportService.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<\(int\|string\),Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\PayslipLine\>\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: argument.unresolvableType
-			count: 1
-			path: app/Modules/Payroll/Application/Services/PayrollExportService.php
-
-		-
 			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Payslip\>\:\:map\(\) contains unresolvable type\.$#'
 			identifier: argument.unresolvableType
-			count: 2
-			path: app/Modules/Payroll/Application/Services/PayrollExportService.php
-
-		-
-			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<\(int\|string\),Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\PayslipLine\>\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: method.unresolvableReturnType
 			count: 1
 			path: app/Modules/Payroll/Application/Services/PayrollExportService.php
 
 		-
 			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Payslip\>\:\:map\(\) contains unresolvable type\.$#'
 			identifier: method.unresolvableReturnType
-			count: 2
+			count: 1
 			path: app/Modules/Payroll/Application/Services/PayrollExportService.php
 
 		-
@@ -6670,18 +5225,6 @@ parameters:
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Modules/Payroll/Application/Services/PayrollExportService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PayrollRun\:\:\$regime_id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Payroll/Application/Services/PayrollRunService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PayrollRun\:\:\$status\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Payroll/Application/Services/PayrollRunService.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Payslip\:\:\$currency\.$#'
@@ -6714,91 +5257,7 @@ parameters:
 			path: app/Modules/Payroll/Application/Services/PayrollRunService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\PayslipLine\:\:\$amount\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Payroll/Application/Services/PayrollRunService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PayslipLine\:\:\$code\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Payroll/Application/Services/PayrollRunService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PayslipLine\:\:\$kind\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Payroll/Application/Services/PayrollRunService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PayslipLine\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Payroll/Application/Services/PayrollRunService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$ends_on\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Payroll/Application/Services/PayrollRunService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$month\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Payroll/Application/Services/PayrollRunService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$year\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Payroll/Application/Services/PayrollRunService.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\PayslipLine\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: argument.unresolvableType
-			count: 1
-			path: app/Modules/Payroll/Application/Services/PayrollRunService.php
-
-		-
-			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\PayslipLine\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: method.unresolvableReturnType
-			count: 1
-			path: app/Modules/Payroll/Application/Services/PayrollRunService.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Payslip\:\:\$net\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Payroll/Application/Services/RetroService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Payslip\:\:\$payroll_run_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Payroll/Application/Services/RetroService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$code\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Payroll/Application/Services/RetroService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$ends_on\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Payroll/Application/Services/RetroService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$month\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Payroll/Application/Services/RetroService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$year\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Payroll/Application/Services/RetroService.php
@@ -6834,18 +5293,6 @@ parameters:
 			path: app/Modules/Payroll/Http/Controllers/PayslipPrintController.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Payslip\:\:\$tabel_no\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Payroll/Http/Controllers/PayslipPrintController.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tabel_no\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Payroll/Http/Controllers/PayslipPrintController.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\CompensationRegime\:\:\$name\.$#'
 			identifier: property.notFound
 			count: 1
@@ -6870,26 +5317,9 @@ parameters:
 			path: app/Modules/Payroll/Livewire/Dashboard.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Payslip\:\:\$tabel_no\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Payroll/Livewire/Tabs/PayslipsTab.php
-		-
 			message: '#^Access to an undefined property App\\Models\\PerformanceFeedbackRequest\:\:\$performance_form_template_id\.$#'
 			identifier: property.notFound
 			count: 2
-			path: app/Modules/PerformanceEvaluation/Application/Services/Feedback360Service.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$items\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Application/Services/Feedback360Service.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
 			path: app/Modules/PerformanceEvaluation/Application/Services/Feedback360Service.php
 
 		-
@@ -7403,49 +5833,13 @@ parameters:
 			path: app/Modules/PerformanceEvaluation/Application/Services/PerformanceTestTranscriptService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceForm\:\:\$final_category\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Application/Services/PerformanceWeakAreaTrainingNeedService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceFormScore\:\:\$performance_form_template_item_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Application/Services/PerformanceWeakAreaTrainingNeedService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceFormScore\:\:\$score\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Modules/PerformanceEvaluation/Application/Services/PerformanceWeakAreaTrainingNeedService.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\RoleCompetencyRequirement\:\:\$required_level_id\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/PerformanceEvaluation/Application/Services/PerformanceWeakAreaTrainingNeedService.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$final_category\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Application/Services/PerformanceWeakAreaTrainingNeedService.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Modules/PerformanceEvaluation/Application/Services/PerformanceWeakAreaTrainingNeedService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$low_score_threshold\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Application/Services/PerformanceWeakAreaTrainingNeedService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$personnel\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/PerformanceEvaluation/Application/Services/PerformanceWeakAreaTrainingNeedService.php
@@ -7457,46 +5851,10 @@ parameters:
 			path: app/Modules/PerformanceEvaluation/Application/Services/PerformanceWeakAreaTrainingNeedService.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$score\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Application/Services/PerformanceWeakAreaTrainingNeedService.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$source\.$#'
 			identifier: property.notFound
 			count: 2
 			path: app/Modules/PerformanceEvaluation/Application/Services/PerformanceWeakAreaTrainingNeedService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$training_competency_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Application/Services/PerformanceWeakAreaTrainingNeedService.php
-
-		-
-			message: '#^Parameter \#1 \$score of method App\\Modules\\PerformanceEvaluation\\Application\\Services\\PerformanceWeakAreaTrainingNeedService\:\:syncForScore\(\) expects App\\Models\\PerformanceFormScore, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Application/Services/PerformanceWeakAreaTrainingNeedService.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>low_score_threshold" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Application/Services/PerformanceWeakAreaTrainingNeedService.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>weight_percent" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Application/Services/PerformanceWeakAreaTrainingNeedService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\TalentAssessment\:\:\$performance_level\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Application/Services/SuccessionService.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\TalentAssessment\:\:\$personnel_id\.$#'
@@ -7511,12 +5869,6 @@ parameters:
 			path: app/Modules/PerformanceEvaluation/Application/Services/SuccessionService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceForm\:\:\$manager_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Console/Commands/PerformanceEvaluationQueryBudgetCommand.php
-
-		-
 			message: '#^Unable to resolve the template type TKey in call to function collect$#'
 			identifier: argument.templateType
 			count: 1
@@ -7527,36 +5879,6 @@ parameters:
 			identifier: argument.templateType
 			count: 1
 			path: app/Modules/PerformanceEvaluation/Console/Commands/PerformanceEvaluationQueryBudgetCommand.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceForm\:\:\$manager_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Console/Commands/PerformanceEvaluationRenderBenchmarkCommand.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceForm\:\:\$performance_form_template_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Console/Commands/PerformanceEvaluationRenderBenchmarkCommand.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$code\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Console/Commands/PerformanceEvaluationRenderBenchmarkCommand.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$fullname\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Console/Commands/PerformanceEvaluationRenderBenchmarkCommand.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Console/Commands/PerformanceEvaluationRenderBenchmarkCommand.php
 
 		-
 			message: '#^Method App\\Modules\\PerformanceEvaluation\\Console\\Commands\\PerformanceEvaluationRenderBenchmarkCommand\:\:skipped\(\) should return array\<string, float\|int\|string\|null\> but returns array\<string, array\|string\|false\|null\>\.$#'
@@ -7775,24 +6097,6 @@ parameters:
 			path: app/Modules/PerformanceEvaluation/Livewire/EvaluationsSummary.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceForm\:\:\$hr_reviewer_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Livewire/EvaluatorScoreCapture.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceForm\:\:\$manager_id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/PerformanceEvaluation/Livewire/EvaluatorScoreCapture.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceForm\:\:\$performance_form_template_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Livewire/EvaluatorScoreCapture.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\PerformanceFormTemplateItem\:\:\$label\.$#'
 			identifier: property.notFound
 			count: 1
@@ -7815,18 +6119,6 @@ parameters:
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Modules/PerformanceEvaluation/Livewire/EvaluatorScoreCapture.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceForm\:\:\$manager_id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/PerformanceEvaluation/Livewire/EvaluatorWorkspace.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceForm\:\:\$performance_form_template_id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/PerformanceEvaluation/Livewire/EvaluatorWorkspace.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\PerformanceForm\:\:\$personnel_fullname\.$#'
@@ -7925,120 +6217,6 @@ parameters:
 			path: app/Modules/PerformanceEvaluation/Livewire/Feedback360Workspace.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceCycle\:\:\$auto_generate_forms\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Livewire/FoundationWorkspace.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceCycle\:\:\$cycle_type\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Livewire/FoundationWorkspace.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceCycle\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/PerformanceEvaluation/Livewire/FoundationWorkspace.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceCycle\:\:\$period_end\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Livewire/FoundationWorkspace.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceCycle\:\:\$period_start\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Livewire/FoundationWorkspace.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceCycle\:\:\$status\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Livewire/FoundationWorkspace.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceFormTemplate\:\:\$is_active\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Livewire/FoundationWorkspace.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceFormTemplate\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/PerformanceEvaluation/Livewire/FoundationWorkspace.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceFormTemplateItem\:\:\$low_score_threshold\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Livewire/FoundationWorkspace.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceFormTemplateItem\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/PerformanceEvaluation/Livewire/FoundationWorkspace.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceFormTemplateItem\:\:\$performance_form_template_section_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Livewire/FoundationWorkspace.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceFormTemplateItem\:\:\$requires_comment\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Livewire/FoundationWorkspace.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceFormTemplateItem\:\:\$sort_order\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Livewire/FoundationWorkspace.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceFormTemplateItem\:\:\$training_competency_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Livewire/FoundationWorkspace.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceFormTemplateItem\:\:\$weight_percent\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Livewire/FoundationWorkspace.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceFormTemplateSection\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/PerformanceEvaluation/Livewire/FoundationWorkspace.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceFormTemplateSection\:\:\$performance_form_template_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Livewire/FoundationWorkspace.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceFormTemplateSection\:\:\$sort_order\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Livewire/FoundationWorkspace.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceFormTemplateSection\:\:\$weight_percent\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Livewire/FoundationWorkspace.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\PerformanceGoal\:\:\$title\.$#'
 			identifier: property.notFound
 			count: 1
@@ -8069,36 +6247,6 @@ parameters:
 			path: app/Modules/PerformanceEvaluation/Livewire/Lists.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceForm\:\:\$hr_reviewer_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Livewire/OperationsWorkspace.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceForm\:\:\$manager_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Livewire/OperationsWorkspace.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceForm\:\:\$performance_cycle_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Livewire/OperationsWorkspace.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceForm\:\:\$performance_form_template_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Livewire/OperationsWorkspace.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceForm\:\:\$personnel_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Livewire/OperationsWorkspace.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\PerformanceTestQuestion\:\:\$performance_test_bank_id\.$#'
 			identifier: property.notFound
 			count: 1
@@ -8106,30 +6254,6 @@ parameters:
 
 		-
 			message: '#^Access to an undefined property App\\Models\\PerformanceTestSession\:\:\$performance_test_bank_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Livewire/OperationsWorkspace.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$fullname\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Livewire/OperationsWorkspace.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$low_score_threshold\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Livewire/OperationsWorkspace.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Livewire/OperationsWorkspace.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$training_competency_id\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/PerformanceEvaluation/Livewire/OperationsWorkspace.php
@@ -8229,24 +6353,6 @@ parameters:
 			identifier: method.unresolvableReturnType
 			count: 1
 			path: app/Modules/PerformanceEvaluation/Livewire/Overview.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Livewire/PersonnelPicker.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$patronymic\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Livewire/PersonnelPicker.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$surname\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Livewire/PersonnelPicker.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\PerformanceTestAttempt\:\:\$meta\.$#'
@@ -8507,12 +6613,6 @@ parameters:
 			path: app/Modules/PerformanceEvaluation/Livewire/UserPersonnelLinks.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\UserPersonnelLink\:\:\$personnel_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Livewire/UserPersonnelLinks.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\UserPersonnelLink\:\:\$personnel_name\.$#'
 			identifier: property.notFound
 			count: 1
@@ -8549,12 +6649,6 @@ parameters:
 			path: app/Modules/PerformanceEvaluation/Livewire/UserPersonnelLinks.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\UserPersonnelLink\:\:\$user_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/PerformanceEvaluation/Livewire/UserPersonnelLinks.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>manual_links" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
@@ -8571,12 +6665,6 @@ parameters:
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Modules/PerformanceEvaluation/Livewire/UserPersonnelLinks.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$structure_id\.$#'
-			identifier: property.notFound
-			count: 5
-			path: app/Modules/Personnel/Application/Services/MyHr/ApprovalRouteResolverService.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\SelfServiceApprovalRoute\:\:\$hr_always_included\.$#'
@@ -8597,12 +6685,6 @@ parameters:
 			path: app/Modules/Personnel/Application/Services/MyHr/ApprovalRouteResolverService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Structure\:\:\$parent_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Application/Services/MyHr/ApprovalRouteResolverService.php
-
-		-
 			message: '#^Property App\\Modules\\Personnel\\Application\\Services\\MyHr\\ApprovalRouteResolverService\:\:\$routeCache is never read, only written\.$#'
 			identifier: property.onlyWritten
 			count: 1
@@ -8611,7 +6693,7 @@ parameters:
 		-
 			message: '#^Using nullsafe property access "\?\-\>approval_rank" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
-			count: 4
+			count: 3
 			path: app/Modules/Personnel/Application/Services/MyHr/ApprovalRouteResolverService.php
 
 		-
@@ -8628,12 +6710,6 @@ parameters:
 
 		-
 			message: '#^Using nullsafe property access "\?\-\>include_upper_approver" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Modules/Personnel/Application/Services/MyHr/ApprovalRouteResolverService.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>is_approval_target" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Modules/Personnel/Application/Services/MyHr/ApprovalRouteResolverService.php
@@ -8661,54 +6737,6 @@ parameters:
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Modules/Personnel/Application/Services/MyHr/LearningAssignmentManagerService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$email\.$#'
-			identifier: property.notFound
-			count: 6
-			path: app/Modules/Personnel/Application/Services/MyHr/MyHrAccountProvisioningService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$is_pending\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Application/Services/MyHr/MyHrAccountProvisioningService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$email\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Application/Services/MyHr/MyHrAccountProvisioningService.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:assignRole\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Modules/Personnel/Application/Services/MyHr/MyHrAccountProvisioningService.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:hasRole\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Modules/Personnel/Application/Services/MyHr/MyHrAccountProvisioningService.php
-
-		-
-			message: '#^Method App\\Modules\\Personnel\\Application\\Services\\MyHr\\MyHrAccountProvisioningService\:\:provision\(\) should return array\{user\: App\\Models\\User, reset_url\: string, created\: bool\} but returns array\{user\: Illuminate\\Database\\Eloquent\\Model\|null, reset_url\: string, created\: bool\}\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Modules/Personnel/Application/Services/MyHr/MyHrAccountProvisioningService.php
-
-		-
-			message: '#^Parameter \#1 \$user of method App\\Modules\\Personnel\\Application\\Services\\MyHr\\MyHrAccountProvisioningService\:\:syncBaselinePermissions\(\) expects App\\Models\\User, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Modules/Personnel/Application/Services/MyHr/MyHrAccountProvisioningService.php
-
-		-
-			message: '#^Parameter \#1 \$user of method Illuminate\\Auth\\Passwords\\PasswordBroker\:\:createToken\(\) expects Illuminate\\Contracts\\Auth\\CanResetPassword, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Modules/Personnel/Application/Services/MyHr/MyHrAccountProvisioningService.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\TrainingNeedItem\:\:\$priority\.$#'
@@ -9017,12 +7045,6 @@ parameters:
 			path: app/Modules/Personnel/Application/Services/MyHr/MyHrRequestReviewReadService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$assigned_to\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Application/Services/MyHr/MyHrRequestReviewReadService.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$created_at\.$#'
 			identifier: property.notFound
 			count: 2
@@ -9042,18 +7064,6 @@ parameters:
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$period_label\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Application/Services/MyHr/MyHrRequestReviewReadService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$reason\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Application/Services/MyHr/MyHrRequestReviewReadService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$tabel_no\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Personnel/Application/Services/MyHr/MyHrRequestReviewReadService.php
@@ -9113,12 +7123,6 @@ parameters:
 			path: app/Modules/Personnel/Application/Services/MyHr/MyHrRequestReviewReadService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\PersonnelBusinessTrip\:\:\$tabel_no\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Application/Services/MyHr/MyHrRequestReviewReadService.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\PersonnelVacation\:\:\$approval_route_source\.$#'
 			identifier: property.notFound
 			count: 1
@@ -9134,18 +7138,6 @@ parameters:
 			message: '#^Access to an undefined property App\\Models\\PersonnelVacation\:\:\$created_at\.$#'
 			identifier: property.notFound
 			count: 2
-			path: app/Modules/Personnel/Application/Services/MyHr/MyHrRequestReviewReadService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PersonnelVacation\:\:\$duration\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Application/Services/MyHr/MyHrRequestReviewReadService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PersonnelVacation\:\:\$end_date\.$#'
-			identifier: property.notFound
-			count: 1
 			path: app/Modules/Personnel/Application/Services/MyHr/MyHrRequestReviewReadService.php
 
 		-
@@ -9167,18 +7159,6 @@ parameters:
 			path: app/Modules/Personnel/Application/Services/MyHr/MyHrRequestReviewReadService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\PersonnelVacation\:\:\$start_date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Application/Services/MyHr/MyHrRequestReviewReadService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PersonnelVacation\:\:\$tabel_no\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Application/Services/MyHr/MyHrRequestReviewReadService.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\PersonnelVacation\:\:\$vacation_places\.$#'
 			identifier: property.notFound
 			count: 1
@@ -9193,7 +7173,7 @@ parameters:
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$fullname\.$#'
 			identifier: property.notFound
-			count: 26
+			count: 5
 			path: app/Modules/Personnel/Application/Services/MyHr/MyHrRequestReviewReadService.php
 
 		-
@@ -9205,13 +7185,13 @@ parameters:
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$position\.$#'
 			identifier: property.notFound
-			count: 7
+			count: 1
 			path: app/Modules/Personnel/Application/Services/MyHr/MyHrRequestReviewReadService.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$structure\.$#'
 			identifier: property.notFound
-			count: 7
+			count: 1
 			path: app/Modules/Personnel/Application/Services/MyHr/MyHrRequestReviewReadService.php
 
 		-
@@ -9287,12 +7267,6 @@ parameters:
 			path: app/Modules/Personnel/Application/Services/MyHr/MyHrRequestReviewService.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Modules/Personnel/Application/Services/MyHr/MyHrRequestReviewService.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
 			identifier: property.notFound
 			count: 2
@@ -9323,33 +7297,9 @@ parameters:
 			path: app/Modules/Personnel/Application/Services/MyHr/MyHrRequestsReadService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$ends_at\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Personnel/Application/Services/MyHr/MyHrRequestsReadService.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$period_label\.$#'
 			identifier: property.notFound
 			count: 1
-			path: app/Modules/Personnel/Application/Services/MyHr/MyHrRequestsReadService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$reason\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Application/Services/MyHr/MyHrRequestsReadService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$starts_at\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Modules/Personnel/Application/Services/MyHr/MyHrRequestsReadService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$status_id\.$#'
-			identifier: property.notFound
-			count: 2
 			path: app/Modules/Personnel/Application/Services/MyHr/MyHrRequestsReadService.php
 
 		-
@@ -9407,18 +7357,6 @@ parameters:
 			path: app/Modules/Personnel/Application/Services/MyHr/MyHrRequestsReadService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\PersonnelVacation\:\:\$duration\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Application/Services/MyHr/MyHrRequestsReadService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PersonnelVacation\:\:\$end_date\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Personnel/Application/Services/MyHr/MyHrRequestsReadService.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\PersonnelVacation\:\:\$order_no\.$#'
 			identifier: property.notFound
 			count: 1
@@ -9431,12 +7369,6 @@ parameters:
 			path: app/Modules/Personnel/Application/Services/MyHr/MyHrRequestsReadService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\PersonnelVacation\:\:\$start_date\.$#'
-			identifier: property.notFound
-			count: 5
-			path: app/Modules/Personnel/Application/Services/MyHr/MyHrRequestsReadService.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\PersonnelVacation\:\:\$vacation_places\.$#'
 			identifier: property.notFound
 			count: 1
@@ -9445,7 +7377,7 @@ parameters:
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$fullname\.$#'
 			identifier: property.notFound
-			count: 6
+			count: 1
 			path: app/Modules/Personnel/Application/Services/MyHr/MyHrRequestsReadService.php
 
 		-
@@ -9605,12 +7537,6 @@ parameters:
 			path: app/Modules/Personnel/Application/Services/MyHr/Review/SelfServiceReviewAuthorizationService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$assigned_to\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Personnel/Application/Services/MyHr/Review/SelfServiceReviewAuthorizationService.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$fallback_approver_personnel_id\.$#'
 			identifier: property.notFound
 			count: 2
@@ -9618,12 +7544,6 @@ parameters:
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$isPending\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Application/Services/MyHr/Review/SelfServiceReviewAuthorizationService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$submission_source\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Personnel/Application/Services/MyHr/Review/SelfServiceReviewAuthorizationService.php
@@ -9677,12 +7597,6 @@ parameters:
 			path: app/Modules/Personnel/Application/Services/MyHr/Review/SelfServiceReviewAuthorizationService.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Application/Services/MyHr/Review/SelfServiceReviewAuthorizationService.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Order\:\:\$name\.$#'
 			identifier: property.notFound
 			count: 1
@@ -9695,50 +7609,8 @@ parameters:
 			path: app/Modules/Personnel/Application/Services/MyHr/Review/SelfServiceVacationOrderBinderService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\PersonnelVacation\:\:\$duration\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Application/Services/MyHr/Review/SelfServiceVacationOrderBinderService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PersonnelVacation\:\:\$start_date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Application/Services/MyHr/Review/SelfServiceVacationOrderBinderService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$latestRank\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Application/Services/MyHr/Review/SelfServiceVacationOrderBinderService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tabel_no\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Application/Services/MyHr/Review/SelfServiceVacationOrderBinderService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$yearlyVacation\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Personnel/Application/Services/MyHr/Review/SelfServiceVacationOrderBinderService.php
-
-		-
 			message: '#^Method App\\Modules\\Personnel\\Application\\Services\\MyHr\\Review\\SelfServiceVacationOrderBinderService\:\:resolveOrCreateVacationOrderCategory\(\) never returns null so it can be removed from the return type\.$#'
 			identifier: return.unusedType
-			count: 1
-			path: app/Modules/Personnel/Application/Services/MyHr/Review/SelfServiceVacationOrderBinderService.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>remaining_days" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Modules/Personnel/Application/Services/MyHr/Review/SelfServiceVacationOrderBinderService.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>vacation_days_total" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Modules/Personnel/Application/Services/MyHr/Review/SelfServiceVacationOrderBinderService.php
 
@@ -10409,45 +8281,9 @@ parameters:
 			path: app/Modules/Personnel/Livewire/AddPersonnel.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Livewire/AllPersonnel.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$patronymic\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Livewire/AllPersonnel.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$surname\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Livewire/AllPersonnel.php
-
-		-
 			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 2
-			path: app/Modules/Personnel/Livewire/AllPersonnel.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\LazyCollection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: argument.unresolvableType
-			count: 1
-			path: app/Modules/Personnel/Livewire/AllPersonnel.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\LazyCollection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) expects callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: array\{name\: mixed, surname\: mixed, patronymic\: mixed\}, Closure\(App\\Models\\Personnel\)\: array\{name\: mixed, surname\: mixed, patronymic\: mixed\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Modules/Personnel/Livewire/AllPersonnel.php
-
-		-
-			message: '#^Return type of call to method Illuminate\\Support\\LazyCollection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: method.unresolvableReturnType
-			count: 1
 			path: app/Modules/Personnel/Livewire/AllPersonnel.php
 
 		-
@@ -11105,24 +8941,6 @@ parameters:
 			path: app/Modules/Personnel/Livewire/MyHr/MyHrOnboarding.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$ends_at\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Livewire/MyHr/MyHrRequests.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$reason\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Livewire/MyHr/MyHrRequests.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$starts_at\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Livewire/MyHr/MyHrRequests.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\LeaveType\:\:\$name\.$#'
 			identifier: property.notFound
 			count: 1
@@ -11154,18 +8972,6 @@ parameters:
 
 		-
 			message: '#^Access to an undefined property App\\Models\\PersonnelBusinessTrip\:\:\$start_date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Livewire/MyHr/MyHrRequests.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PersonnelVacation\:\:\$end_date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Livewire/MyHr/MyHrRequests.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PersonnelVacation\:\:\$start_date\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Personnel/Livewire/MyHr/MyHrRequests.php
@@ -11357,12 +9163,6 @@ parameters:
 			path: app/Modules/Personnel/Livewire/Steps/AbstractPersonnelWizardStep.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Vacation\:\:\$reserved_date_month\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Livewire/VacationList.php
-
-		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\:\:filter\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -11375,55 +9175,7 @@ parameters:
 			path: app/Modules/Personnel/Services/PersonnelQueryService.php
 
 		-
-			message: '#^Parameter \#1 \$array \(array\{\}\|list\{0\: App\\Modules\\Personnel\\Services\\PersonnelRowActionDescriptor, 1\?\: App\\Modules\\Personnel\\Services\\PersonnelRowActionDescriptor, 2\?\: App\\Modules\\Personnel\\Services\\PersonnelRowActionDescriptor, 3\?\: App\\Modules\\Personnel\\Services\\PersonnelRowActionDescriptor, 4\?\: App\\Modules\\Personnel\\Services\\PersonnelRowActionDescriptor, 5\?\: App\\Modules\\Personnel\\Services\\PersonnelRowActionDescriptor, 6\?\: App\\Modules\\Personnel\\Services\\PersonnelRowActionDescriptor, 7\?\: App\\Modules\\Personnel\\Services\\PersonnelRowActionDescriptor, \.\.\.\}\) of array_values is already a list, call has no effect\.$#'
-			identifier: arrayValues.list
-			count: 1
-			path: app/Modules/Personnel/Services/PersonnelRowActionService.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$deleted_at\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Services/PersonnelRowViewModelService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$gender\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Services/PersonnelRowViewModelService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$leave_work_date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Services/PersonnelRowViewModelService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$photo\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Services/PersonnelRowViewModelService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PersonnelBusinessTrip\:\:\$end_date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Services/PersonnelRowViewModelService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PersonnelBusinessTrip\:\:\$start_date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Services/PersonnelRowViewModelService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PersonnelVacation\:\:\$return_work_date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Services/PersonnelRowViewModelService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PersonnelVacation\:\:\$start_date\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Personnel/Services/PersonnelRowViewModelService.php
@@ -11435,28 +9187,10 @@ parameters:
 			path: app/Modules/Personnel/Services/PersonnelRowViewModelService.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$rank\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Personnel/Services/PersonnelRowViewModelService.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$start_time\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Personnel/Services/PersonnelRowViewModelService.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Support\\Collection\<int, App\\Models\\Personnel\>\:\:loadMissing\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Modules/Personnel/Services/PersonnelRowViewModelService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PerformanceForm\:\:\$final_category\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Reports/Application/Services/ComparativeReportService.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\PerformanceForm\:\:\$forms_count\.$#'
@@ -11609,18 +9343,6 @@ parameters:
 			path: app/Modules/Reports/Application/Services/ReportsOverviewService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\TrainingDeliveryRecord\:\:\$attended_hours\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Reports/Application/Services/ReportsOverviewService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\TrainingDeliveryRecord\:\:\$delivered_trainings_count\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Reports/Application/Services/ReportsOverviewService.php
-
-		-
 			message: '#^Offset ''attended_hours'' on array\{delivered_trainings_count\: int, attended_hours\: float\} on left side of \?\? always exists and is not nullable\.$#'
 			identifier: nullCoalesce.offset
 			count: 1
@@ -11631,78 +9353,6 @@ parameters:
 			identifier: nullCoalesce.offset
 			count: 1
 			path: app/Modules/Reports/Application/Services/ReportsOverviewService.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>absence_days" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 2
-			path: app/Modules/Reports/Application/Services/ReportsOverviewService.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>active_personnel_count" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Modules/Reports/Application/Services/ReportsOverviewService.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>attended_hours" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Modules/Reports/Application/Services/ReportsOverviewService.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>delivered_trainings_count" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Modules/Reports/Application/Services/ReportsOverviewService.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>exits" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Modules/Reports/Application/Services/ReportsOverviewService.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>new_hires" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Modules/Reports/Application/Services/ReportsOverviewService.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>scheduled_days" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 2
-			path: app/Modules/Reports/Application/Services/ReportsOverviewService.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>scheduled_sum" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 2
-			path: app/Modules/Reports/Application/Services/ReportsOverviewService.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>structures_covered" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Modules/Reports/Application/Services/ReportsOverviewService.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>summary_rows" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Modules/Reports/Application/Services/ReportsOverviewService.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>worked_sum" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 2
-			path: app/Modules/Reports/Application/Services/ReportsOverviewService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Structure\:\:\$parent_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Reports/Application/Services/ReportsStructureScopeService.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\AttendanceDailyStructureSummary\:\:\$absence_days\.$#'
@@ -11951,25 +9601,7 @@ parameters:
 			path: app/Modules/Services/Livewire/Roles/SetPermission.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Services/Livewire/Settings/SettingsList.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$patronymic\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Services/Livewire/Settings/SettingsList.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$position_name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Services/Livewire/Settings/SettingsList.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$surname\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Services/Livewire/Settings/SettingsList.php
@@ -12017,12 +9649,6 @@ parameters:
 			path: app/Modules/Services/Livewire/Users/AllUsers.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Services/Livewire/Users/EditUser.php
-
-		-
 			message: '#^Call to function property_exists\(\) with \$this\(App\\Modules\\Services\\Livewire\\Users\\EditUser\) and ''dropdownCacheMinutes'' will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
@@ -12035,46 +9661,10 @@ parameters:
 			path: app/Modules/Staff/Database/Migrations/2023_10_28_011552_create_staff_schedules_table.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$aggregate\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Staff/Livewire/AddStaff.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$position_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Staff/Livewire/AddStaff.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$structure_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Staff/Livewire/AddStaff.php
-
-		-
 			message: '#^Call to function property_exists\(\) with \$this\(App\\Modules\\Staff\\Livewire\\AddStaff\) and ''dropdownCacheMinutes'' will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
 			path: app/Modules/Staff/Livewire/AddStaff.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$aggregate\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Staff/Livewire/EditStaff.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$position_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Staff/Livewire/EditStaff.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$structure_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Staff/Livewire/EditStaff.php
 
 		-
 			message: '#^Call to function property_exists\(\) with \$this\(App\\Modules\\Staff\\Livewire\\EditStaff\) and ''dropdownCacheMinutes'' will always evaluate to true\.$#'
@@ -12095,45 +9685,9 @@ parameters:
 			path: app/Modules/Staff/Livewire/EditStaff.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$aggregate\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Staff/Livewire/Staffs.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$position_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Staff/Livewire/Staffs.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$structure_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Staff/Livewire/Staffs.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Structure\:\:\$parent_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Staff/Livewire/Staffs.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$parent_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Staff/Livewire/Staffs.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
-			path: app/Modules/Staff/Livewire/Staffs.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>parent_id" in empty\(\) is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 2
 			path: app/Modules/Staff/Livewire/Staffs.php
 
 		-
@@ -12279,24 +9833,6 @@ parameters:
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Modules/TrainingNeeds/Application/Services/TrainingExecutiveReportingService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\TrainingAnnualPlan\:\:\$plan_quarter\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/TrainingNeeds/Application/Services/TrainingNeedPlanningService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\TrainingAnnualPlan\:\:\$plan_year\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/TrainingNeeds/Application/Services/TrainingNeedPlanningService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\TrainingAnnualPlan\:\:\$status\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Modules/TrainingNeeds/Application/Services/TrainingNeedPlanningService.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\EmployeeCompetencyProfile\:\:\$personnel_id\.$#'
@@ -13013,12 +10549,6 @@ parameters:
 			path: app/Modules/TrainingNeeds/Livewire/Dashboard.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$position_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/TrainingNeeds/Livewire/FoundationWorkspace.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\TrainingCompetency\:\:\$is_active\.$#'
 			identifier: property.notFound
 			count: 1
@@ -13131,36 +10661,6 @@ parameters:
 			identifier: property.notFound
 			count: 2
 			path: app/Modules/TrainingNeeds/Livewire/Lists.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\TrainingAnnualPlan\:\:\$auto_generated\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/TrainingNeeds/Livewire/OperationsWorkspace.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\TrainingAnnualPlan\:\:\$plan_quarter\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/TrainingNeeds/Livewire/OperationsWorkspace.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\TrainingAnnualPlan\:\:\$plan_year\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/TrainingNeeds/Livewire/OperationsWorkspace.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\TrainingAnnualPlan\:\:\$status\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/TrainingNeeds/Livewire/OperationsWorkspace.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\TrainingAnnualPlan\:\:\$title\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/TrainingNeeds/Livewire/OperationsWorkspace.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\TrainingProgram\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\TrainingProgram\>\:\:\$title\.$#'
@@ -13433,15 +10933,9 @@ parameters:
 			path: app/Modules/TrainingNeeds/Livewire/Overview.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\TrainingDeliveryRecord\:\:\$certificate_name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/TrainingNeeds/Livewire/ResultsSummary.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\TrainingDeliveryRecord\:\:\$certificate_path\.$#'
 			identifier: property.notFound
-			count: 4
+			count: 2
 			path: app/Modules/TrainingNeeds/Livewire/ResultsSummary.php
 
 		-
@@ -13627,13 +11121,13 @@ parameters:
 		-
 			message: '#^Access to an undefined property App\\Models\\TrainingDeliveryRecord\:\:\$certificate_name\.$#'
 			identifier: property.notFound
-			count: 2
+			count: 1
 			path: app/Modules/TrainingNeeds/Livewire/ResultsWorkspace.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\TrainingDeliveryRecord\:\:\$certificate_path\.$#'
 			identifier: property.notFound
-			count: 4
+			count: 2
 			path: app/Modules/TrainingNeeds/Livewire/ResultsWorkspace.php
 
 		-
@@ -13745,19 +11239,7 @@ parameters:
 			path: app/Modules/TrainingNeeds/Livewire/SessionDetailWorkspace.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$approved_at\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/UI/Livewire/Confirmation/AddComment.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$approved_by\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/UI/Livewire/Confirmation/AddComment.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$status_id\.$#'
 			identifier: property.notFound
 			count: 2
 			path: app/Modules/UI/Livewire/Confirmation/AddComment.php
@@ -13770,18 +11252,6 @@ parameters:
 
 		-
 			message: '#^Access to an undefined property App\\Models\\PersonnelVacation\:\:\$approval_status\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Vacation/Livewire/Vacations.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PersonnelVacation\:\:\$duration\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Vacation/Livewire/Vacations.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\PersonnelVacation\:\:\$end_date\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Vacation/Livewire/Vacations.php
@@ -13835,12 +11305,6 @@ parameters:
 			path: app/Modules/Vacation/Livewire/Vacations.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\PersonnelVacation\:\:\$start_date\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Modules/Vacation/Livewire/Vacations.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\PersonnelVacation\:\:\$submission_source\.$#'
 			identifier: property.notFound
 			count: 1
@@ -13859,24 +11323,6 @@ parameters:
 			path: app/Modules/Vacation/Livewire/Vacations.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$fullname\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Vacation/Livewire/Vacations.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$fullname_max\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Vacation/Livewire/Vacations.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$latestRank\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Vacation/Livewire/Vacations.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$orderType\.$#'
 			identifier: property.notFound
 			count: 1
@@ -13889,36 +11335,6 @@ parameters:
 			path: app/Modules/Vacation/Livewire/Vacations.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$ends_at\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Notifications/LeaveStatusChanged.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$starts_at\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Notifications/LeaveStatusChanged.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$status_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Notifications/LeaveStatusChanged.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$tabel_no\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Notifications/LeaveStatusChanged.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$fullname\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/LeaveStatusChanged.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
 			identifier: property.notFound
 			count: 2
@@ -13937,30 +11353,6 @@ parameters:
 			path: app/Notifications/LeaveStatusChanged.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$ends_at\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/NewLeaveRequested.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$starts_at\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/NewLeaveRequested.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$tabel_no\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Notifications/NewLeaveRequested.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$fullname\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/NewLeaveRequested.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
 			identifier: property.notFound
 			count: 3
@@ -13977,18 +11369,6 @@ parameters:
 			identifier: nullsafe.neverNull
 			count: 2
 			path: app/Notifications/NewLeaveRequested.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$status_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Observers/LeaveObserver.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$users\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Observers/RoleStructureObserver.php
 
 		-
 			message: '#^Method App\\Services\\BaseWordExportService\:\:cm\(\) should return int but returns float\.$#'
@@ -14063,12 +11443,6 @@ parameters:
 			path: app/Services/Chief/ChiefResolver.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$rank\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Services/Chief/ChiefResolver.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 4
@@ -14079,18 +11453,6 @@ parameters:
 			identifier: argument.type
 			count: 6
 			path: app/Services/CvWordExportService.php
-
-		-
-			message: '#^Offset ''source'' on array\{token\: string, label\: string, source\: string, auto_key\: string\|null, field\: array\{key\: string, type\: string\}\|null, effect_role\: string\|null\} on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Modules/Orders/Infrastructure/Document/DocxVariableResolver.php
-
-		-
-			message: '#^Offset ''token'' on array\{token\: string, label\: string, source\: string, auto_key\: string\|null, field\: array\{key\: string, type\: string\}\|null, effect_role\: string\|null\} on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Modules/Orders/Infrastructure/Document/DocxVariableResolver.php
 
 		-
 			message: '#^Offset ''type'' on array\{key\: non\-falsy\-string, type\: string\} on left side of \?\? always exists and is not nullable\.$#'
@@ -14105,58 +11467,10 @@ parameters:
 			path: app/Modules/Orders/Infrastructure/Document/DocxVariableResolver.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$given_date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Orders/Infrastructure/Document/Effects/SurnameChangeEffect.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$previous_surname\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Orders/Infrastructure/Document/Effects/SurnameChangeEffect.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$surname\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Modules/Orders/Infrastructure/Document/Effects/SurnameChangeEffect.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$order_no\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Orders/Infrastructure/Document/Effects/TransferEffect.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$template_snapshot\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Orders/Infrastructure/Document/Effects/TransferEffect.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$position_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Orders/Infrastructure/Document/Effects/TransferEffect.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$structure_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Orders/Infrastructure/Document/Effects/TransferEffect.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$given_date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Orders/Infrastructure/Document/Effects/VacationEffect.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$order_no\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Orders/Infrastructure/Document/Effects/VacationEffect.php
 
 		-
 			message: '#^Using nullsafe property access "\?\-\>year" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
@@ -14165,31 +11479,7 @@ parameters:
 			path: app/Modules/Orders/Infrastructure/Document/Effects/VacationEffect.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$signatory_snapshot\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Orders/Infrastructure/Document/OrderIssueService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$status_id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Orders/Infrastructure/Document/OrderIssueService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$template_render_mode\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Orders/Infrastructure/Document/OrderIssueService.php
-
-		-
 			message: '#^Offset ''candidate_id'' on array\{template_code\: string, label\?\: string, personnel_id\?\: int\|null, fields\?\: array\<string, mixed\>, order_number\: string, order_date\?\: string, given_by\?\: string, given_by_rank\?\: string, \.\.\.\} on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Modules/Orders/Infrastructure/Document/OrderIssueService.php
-
-		-
-			message: '#^Offset ''candidate_id'' on array\{template_code\?\: string, label\?\: string, personnel_id\?\: int\|null, fields\?\: array\<string, mixed\>, order_number\: string, order_date\?\: string, signatory\?\: array\<string, mixed\>\} on left side of \?\? does not exist\.$#'
 			identifier: nullCoalesce.offset
 			count: 1
 			path: app/Modules/Orders/Infrastructure/Document/OrderIssueService.php
@@ -14201,19 +11491,7 @@ parameters:
 			path: app/Modules/Orders/Infrastructure/Document/OrderIssueService.php
 
 		-
-			message: '#^Offset ''hire_position_id'' on array\{template_code\?\: string, label\?\: string, personnel_id\?\: int\|null, fields\?\: array\<string, mixed\>, order_number\: string, order_date\?\: string, signatory\?\: array\<string, mixed\>\} on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Modules/Orders/Infrastructure/Document/OrderIssueService.php
-
-		-
 			message: '#^Offset ''hire_structure_id'' on array\{template_code\: string, label\?\: string, personnel_id\?\: int\|null, fields\?\: array\<string, mixed\>, order_number\: string, order_date\?\: string, given_by\?\: string, given_by_rank\?\: string, \.\.\.\} on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Modules/Orders/Infrastructure/Document/OrderIssueService.php
-
-		-
-			message: '#^Offset ''hire_structure_id'' on array\{template_code\?\: string, label\?\: string, personnel_id\?\: int\|null, fields\?\: array\<string, mixed\>, order_number\: string, order_date\?\: string, signatory\?\: array\<string, mixed\>\} on left side of \?\? does not exist\.$#'
 			identifier: nullCoalesce.offset
 			count: 1
 			path: app/Modules/Orders/Infrastructure/Document/OrderIssueService.php
@@ -14223,84 +11501,6 @@ parameters:
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Modules/Orders/Infrastructure/Document/OrderIssueService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Structure\:\:\$parent_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Orders/Infrastructure/Document/OrderLookupFieldRegistry.php
-
-		-
-			message: '#^Unable to resolve the template type TGroupKey in call to method Illuminate\\Support\\Collection\<int,App\\Models\\Structure\>\:\:groupBy\(\)$#'
-			identifier: argument.templateType
-			count: 1
-			path: app/Modules/Orders/Infrastructure/Document/OrderLookupFieldRegistry.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$order_no\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Orders/Infrastructure/Document/OrderStatusTransitionService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$order_type_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Orders/Infrastructure/Document/OrderStatusTransitionService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$status_id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Orders/Infrastructure/Document/OrderStatusTransitionService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$template_render_mode\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Orders/Infrastructure/Document/OrderStatusTransitionService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\OrderLog\:\:\$template_snapshot\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Orders/Infrastructure/Document/OrderStatusTransitionService.php
-
-		-
-			message: '#^Offset ''token'' on array\{token\: string, label\: string, source\: string, auto_key\: string\|null, field\: array\{key\: string, type\: string\}\|null, effect_role\: string\|null\} on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Modules/Orders/Infrastructure/Document/OrderStatusTransitionService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Orders/Infrastructure/Variables/OrderEmployeeVariableResolver.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$patronymic\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Orders/Infrastructure/Variables/OrderEmployeeVariableResolver.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$structure_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Orders/Infrastructure/Variables/OrderEmployeeVariableResolver.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$surname\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Orders/Infrastructure/Variables/OrderEmployeeVariableResolver.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Structure\:\:\$parent_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Orders/Infrastructure/Variables/OrderEmployeeVariableResolver.php
 
 		-
 			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
@@ -14315,40 +11515,10 @@ parameters:
 			path: app/Modules/Orders/Application/Variables/VariableInterpolator.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$is_pending\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Services/PersonnelPendingApprovalService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$position_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Services/PersonnelPendingApprovalService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$structure_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Services/PersonnelPendingApprovalService.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Services/PersonnelPendingApprovalService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$position_id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Services/PersonnelRelationsService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Personnel\:\:\$structure_id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Services/PersonnelRelationsService.php
 
 		-
 			message: '#^Variable \$positionId on left side of \?\? always exists and is not nullable\.$#'
@@ -14573,39 +11743,9 @@ parameters:
 			path: app/Services/PersonnelServiceBook/ServiceBookPageRenderer.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\StaffSchedule\:\:\$filled\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Services/Staff/StaffScheduleVacancyService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\StaffSchedule\:\:\$total\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Services/Staff/StaffScheduleVacancyService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\StaffSchedule\:\:\$vacant\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Services/Staff/StaffScheduleVacancyService.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>vacant" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Services/Staff/StaffScheduleVacancyService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Structure\:\:\$parent_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Services/StructurePathService.php
-
-		-
 			message: '#^Match expression does not handle remaining value\: mixed$#'
 			identifier: match.unhandled
-			count: 3
+			count: 2
 			path: app/Services/WordSuffixService.php
 
 		-
@@ -14661,12 +11801,6 @@ parameters:
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Support/Navigation/MenuPresentation.php
-
-		-
-			message: '#^Unsafe call to private method App\\Support\\Permissions\\PermissionDescriptionCatalog\:\:fallbackDescription\(\) through static\:\:\.$#'
-			identifier: staticClassAccess.privateMethod
-			count: 1
-			path: app/Support/Permissions/PermissionDescriptionCatalog.php
 
 		-
 			message: '#^Strict comparison using \=\=\= between non\-empty\-string and '''' will always evaluate to false\.$#'

@@ -20,7 +20,7 @@ use Spatie\Permission\Models\Permission;
 
 function vaAdmin(): User
 {
-    return User::factory()->create()->givePermissionTo(
+    return grantAllStructures(User::factory()->create())->givePermissionTo(
         Permission::findOrCreate('access-admin', 'web'),
         Permission::findOrCreate('edit-personnels', 'web'),
     );
@@ -125,7 +125,7 @@ it('shows the work years with their breakdown and lets an admin add and delete a
 });
 
 it('does not let a non-admin add an opening balance', function (): void {
-    $user = User::factory()->create()->givePermissionTo(Permission::findOrCreate('edit-personnels', 'web'));
+    $user = grantAllStructures(User::factory()->create())->givePermissionTo(Permission::findOrCreate('edit-personnels', 'web'));
     $this->actingAs($user);
     $personnel = vaPersonnel();
 

@@ -11,6 +11,7 @@ use App\Modules\PerformanceEvaluation\Application\Services\PerformanceSkillMeasu
 use App\Modules\PerformanceEvaluation\Application\Services\PerformanceTestQuestionImportService;
 use App\Modules\PerformanceEvaluation\Exports\PerformanceTestQuestionImportTemplateExport;
 use App\Modules\PerformanceEvaluation\Imports\PerformanceTestQuestionSheetImport;
+use App\Modules\PerformanceEvaluation\Support\PerformanceStructureScope;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -162,6 +163,8 @@ trait HandlesPerformanceTestingMutations
             'sessionForm.reviewer_id' => __('performance_evaluation::dashboard.fields.reviewer'),
         ]);
 
+        PerformanceStructureScope::ensurePersonnelVisible(data_get($validated, 'sessionForm.personnel_id'));
+
         PerformanceTestSession::query()->create([
             'performance_cycle_id' => data_get($validated, 'sessionForm.performance_cycle_id'),
             'performance_test_bank_id' => (int) data_get($validated, 'sessionForm.performance_test_bank_id'),
@@ -199,7 +202,7 @@ trait HandlesPerformanceTestingMutations
         ]);
 
         $question = PerformanceTestQuestion::query()->with('options:id,performance_test_question_id')->findOrFail((int) data_get($validated, 'attemptAnswerForm.performance_test_question_id'));
-        $session = PerformanceTestSession::query()->findOrFail((int) data_get($validated, 'attemptAnswerForm.performance_test_session_id'));
+        $session = PerformanceStructureScope::sessions()->findOrFail((int) data_get($validated, 'attemptAnswerForm.performance_test_session_id'));
 
         if ($session->performance_test_bank_id !== $question->performance_test_bank_id) {
             $this->addError('attemptAnswerForm.performance_test_question_id', __('performance_evaluation::dashboard.validation.question_bank_mismatch'));
@@ -266,7 +269,7 @@ trait HandlesPerformanceTestingMutations
             'attemptSubmitForm.performance_test_attempt_id' => __('performance_evaluation::dashboard.fields.attempt'),
         ]);
 
-        $attempt = PerformanceTestAttempt::query()->findOrFail((int) data_get($validated, 'attemptSubmitForm.performance_test_attempt_id'));
+        $attempt = PerformanceStructureScope::attempts()->findOrFail((int) data_get($validated, 'attemptSubmitForm.performance_test_attempt_id'));
         app(PerformanceSkillMeasurementService::class)->submitAttempt($attempt);
 
         $this->reset('attemptSubmitForm', 'searchTestAttempt');
@@ -289,7 +292,7 @@ trait HandlesPerformanceTestingMutations
             'reviewForm.feedback' => __('performance_evaluation::dashboard.fields.feedback'),
         ]);
 
-        $answer = PerformanceTestAttemptAnswer::query()->findOrFail((int) data_get($validated, 'reviewForm.performance_test_attempt_answer_id'));
+        $answer = PerformanceStructureScope::answers()->findOrFail((int) data_get($validated, 'reviewForm.performance_test_attempt_answer_id'));
         app(PerformanceSkillMeasurementService::class)->reviewAnswer(
             $answer,
             (float) data_get($validated, 'reviewForm.score'),

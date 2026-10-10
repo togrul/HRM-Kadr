@@ -5,8 +5,10 @@ namespace App\Modules\Staff\Livewire;
 use App\Models\Personnel;
 use App\Models\Position;
 use App\Models\Structure;
+use App\Services\StructureService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -15,8 +17,10 @@ class ShowStaff extends Component
     use AuthorizesRequests;
     use WithPagination;
 
+    #[Locked]
     public $structureModel;
 
+    #[Locked]
     public $positionModel;
 
     public $title;
@@ -24,6 +28,7 @@ class ShowStaff extends Component
     public function mount(): void
     {
         $this->authorize('viewAny', \App\Models\StaffSchedule::class);
+        abort_unless(app(StructureService::class)->scopeFor()->allows($this->structureModel), 403);
         $structure = Structure::where('id', $this->structureModel)->value('name');
         $position = Position::where('id', $this->positionModel)->value('name');
         $this->title = "{$structure}($position)";

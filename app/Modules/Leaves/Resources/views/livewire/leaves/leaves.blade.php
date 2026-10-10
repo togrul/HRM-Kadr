@@ -233,7 +233,7 @@
 
                 <x-table.td>
                     @if ($leave->document_path)
-                        <a href="/{{ $leave->document_path }}" target="_blank" rel="noopener"
+                        <a href="{{ route('leaves.document', $leave) }}" target="_blank" rel="noopener"
                             title="{{ __('leaves::common.actions.download_document') }}"
                             class="flex h-8 w-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-[#f4f4f5] hover:text-[#0369a1]">
                             <x-icons.link-icon size="w-4 h-4" color="text-current" hover="text-current" />
@@ -268,6 +268,12 @@
                                 <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
                                 {{ __('leaves::common.labels.sick_certificate') }}
                             </a>
+                        @elseif ($leave->isManagedByOrder())
+                            {{-- Read-only here: the order that wrote this leave owns it. --}}
+                            <span title="{{ __('leaves::common.validation.managed_by_order') }}"
+                                class="inline-flex items-center gap-1 rounded-full border border-hairline bg-white px-2.5 py-1 text-[11.5px] font-medium text-ink-muted">
+                                {{ __('leaves::common.labels.by_order') }}
+                            </span>
                         @elseif ($status != 'deleted')
                             @can('update', $leave)
                                 <button type="button" wire:click="openEditLeaveModal({{ $leave->id }})"

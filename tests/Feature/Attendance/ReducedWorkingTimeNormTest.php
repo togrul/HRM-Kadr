@@ -214,6 +214,7 @@ it('saves the weekly norm from the employee form and rejects more than 40 hours'
     foreach (['add-personnels', 'edit-personnels'] as $permission) {
         $user->givePermissionTo(Permission::findOrCreate($permission, 'web'));
     }
+    grantAllStructures($user);
     $personnel = app(PersonnelCrudBenchmarkFixtureService::class)->ensureEditablePersonnel($user);
     Livewire::actingAs($user);
 

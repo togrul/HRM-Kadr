@@ -8,6 +8,7 @@ return [
         'leaves' => 'İcazələr',
     ],
     'labels' => [
+        'by_order' => 'Əmrlə',
         'sick_certificate' => 'Xəstəlik vərəqəsi',
         'sick_certificate_hint' => 'Bu icazə xəstəlik vərəqəsinə bağlıdır; dəyişiklik yalnız vərəqələr reyestrində edilir.',
         'approval_route' => 'Təsdiq marşrutu',
@@ -89,6 +90,8 @@ return [
         'approval_note' => 'Təsdiq iyerarxiyaya görə təyin olunur',
     ],
     'messages' => [
+        'approval_forbidden' => 'Bu icazəni təsdiqləmək və ya rədd etmək hüququnuz yoxdur.',
+        'approval_own_leave' => 'Öz icazənizi təsdiqləyə və ya rədd edə bilməzsiniz.',
         'recorded_as_approved' => 'İcazə qeydə alınarkən təsdiqlənmiş kimi daxil edildi.',
         'leave_added' => 'İcazə uğurla əlavə olundu!',
         'leave_updated' => 'İcazə uğurla yeniləndi!',
@@ -122,7 +125,11 @@ return [
         'no_hierarchy_chain' => 'Bu əməkdaş üçün ierarxik xətt görünmür.',
     ],
     'validation' => [
+        'personnel_out_of_scope' => 'Seçilmiş əməkdaş sizin struktur görünürlüyünüzdə deyil.',
         'managed_by_sick_certificate' => 'Bu icazə xəstəlik vərəqəsinə bağlıdır; onu «Xəstəlik vərəqələri» reyestrində dəyişin.',
+        'managed_by_order' => 'Bu icazə əmrlə yaradılıb; onu yalnız əmri geri qaytarmaqla və ya ləğv etməklə dəyişmək olar.',
+        'self_approval' => 'Öz icazənizi təsdiqlənmiş kimi qeyd edə bilməzsiniz — o, təsdiq marşrutundan keçməlidir.',
+        'month_closed' => ':period ayı əmək haqqı üçün bağlanıb — bu aya düşən icazəni yaratmaq, dəyişmək və ya silmək üçün ayrıca icazə tələb olunur.',
         'status_not_allowed' => 'Bu statusu seçmək üçün icazəniz yoxdur. İcazə təsdiq marşrutu ilə təsdiqlənməlidir.',
         'self_approver' => 'Əməkdaş öz icazəsini təsdiqləyə bilməz — başqa təsdiqləyici seçin.',
         'end_before_start' => 'Bitmə tarixi başlama tarixindən əvvəl ola bilməz.',

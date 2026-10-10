@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $candidate_id
+ * @property int $job_opening_id
+ */
 class CandidateApplication extends Model
 {
     use HasFactory;

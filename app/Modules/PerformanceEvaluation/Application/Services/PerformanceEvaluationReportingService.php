@@ -2,20 +2,24 @@
 
 namespace App\Modules\PerformanceEvaluation\Application\Services;
 
-use App\Models\PerformanceForm;
 use App\Models\PerformanceTestAttempt;
 use App\Models\PerformanceTestAttemptAnswer;
 use App\Models\PerformanceTestSession;
 use App\Models\PerformanceTrainingNeedLink;
+use App\Modules\PerformanceEvaluation\Support\PerformanceStructureScope;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Spatie\Activitylog\Models\Activity;
 
+/**
+ * Hesabat sətirləri işçinin strukturu üzrə istifadəçinin görünürlüyü ilə məhdudlaşır
+ * (PerformanceStructureScope) — eksport və çap da yalnız görünən işçiləri daşıyır.
+ */
 class PerformanceEvaluationReportingService
 {
     public function formSummaryRows(): EloquentCollection
     {
-        return PerformanceForm::query()
+        return PerformanceStructureScope::forms()
             ->leftJoin('performance_cycles', 'performance_cycles.id', '=', 'performance_forms.performance_cycle_id')
             ->leftJoin('performance_form_templates', 'performance_form_templates.id', '=', 'performance_forms.performance_form_template_id')
             ->selectRaw('
@@ -36,6 +40,7 @@ class PerformanceEvaluationReportingService
     public function weakLinkPivotRows(): EloquentCollection
     {
         return PerformanceTrainingNeedLink::query()
+            ->whereIn('performance_training_need_links.performance_form_id', PerformanceStructureScope::forms()->select('performance_forms.id'))
             ->leftJoin('training_need_items', 'training_need_items.id', '=', 'performance_training_need_links.training_need_item_id')
             ->leftJoin('training_competencies', 'training_competencies.id', '=', 'performance_training_need_links.training_competency_id')
             ->selectRaw('
@@ -51,7 +56,7 @@ class PerformanceEvaluationReportingService
 
     public function formRows(): EloquentCollection
     {
-        return PerformanceForm::query()
+        return PerformanceStructureScope::forms()
             ->with([
                 'cycle:id,name',
                 'template:id,name,code',
@@ -66,6 +71,7 @@ class PerformanceEvaluationReportingService
     public function weakLinkRows(): EloquentCollection
     {
         return PerformanceTrainingNeedLink::query()
+            ->whereIn('performance_form_id', PerformanceStructureScope::forms()->select('performance_forms.id'))
             ->with([
                 'form:id,personnel_id,performance_cycle_id,performance_form_template_id,final_score,final_category',
                 'form.personnel:id,surname,name,patronymic,tabel_no',
@@ -104,6 +110,7 @@ class PerformanceEvaluationReportingService
             ->join('personnels', 'personnels.id', '=', 'performance_test_sessions.personnel_id')
             ->leftJoin('users as reviewers', 'reviewers.id', '=', 'performance_test_sessions.reviewer_id')
             ->leftJoin('performance_test_attempts', 'performance_test_attempts.performance_test_session_id', '=', 'performance_test_sessions.id')
+            ->tap(fn ($query) => PerformanceStructureScope::onPersonnelTable($query))
             ->selectRaw('
                 performance_test_sessions.id,
                 performance_cycles.name as cycle_name,
@@ -145,6 +152,7 @@ class PerformanceEvaluationReportingService
             ->join('performance_test_sessions', 'performance_test_sessions.id', '=', 'performance_test_attempts.performance_test_session_id')
             ->join('performance_test_banks', 'performance_test_banks.id', '=', 'performance_test_sessions.performance_test_bank_id')
             ->join('personnels', 'personnels.id', '=', 'performance_test_sessions.personnel_id')
+            ->tap(fn ($query) => PerformanceStructureScope::onPersonnelTable($query))
             ->selectRaw('
                 performance_test_attempts.id,
                 performance_test_attempts.attempt_no,
@@ -175,6 +183,7 @@ class PerformanceEvaluationReportingService
             ->join('personnels', 'personnels.id', '=', 'performance_test_sessions.personnel_id')
             ->join('performance_test_questions', 'performance_test_questions.id', '=', 'performance_test_attempt_answers.performance_test_question_id')
             ->leftJoin('performance_test_question_options', 'performance_test_question_options.id', '=', 'performance_test_attempt_answers.selected_option_id')
+            ->tap(fn ($query) => PerformanceStructureScope::onPersonnelTable($query))
             ->selectRaw('
                 performance_test_attempt_answers.id,
                 performance_test_attempts.id as attempt_id,
@@ -208,6 +217,7 @@ class PerformanceEvaluationReportingService
             ->join('performance_test_attempts', 'performance_test_attempts.id', '=', 'performance_test_attempt_answers.performance_test_attempt_id')
             ->join('performance_test_sessions', 'performance_test_sessions.id', '=', 'performance_test_attempts.performance_test_session_id')
             ->join('performance_test_banks', 'performance_test_banks.id', '=', 'performance_test_sessions.performance_test_bank_id')
+            ->tap(fn ($query) => PerformanceStructureScope::onPersonnelColumn($query, 'performance_test_sessions.personnel_id'))
             ->selectRaw('
                 performance_test_questions.id,
                 performance_test_banks.name as bank_name,
@@ -243,6 +253,7 @@ class PerformanceEvaluationReportingService
         $rows = PerformanceTestAttemptAnswer::query()
             ->join('performance_test_attempts', 'performance_test_attempts.id', '=', 'performance_test_attempt_answers.performance_test_attempt_id')
             ->leftJoin('users as reviewers', 'reviewers.id', '=', 'performance_test_attempt_answers.reviewed_by')
+            ->whereIn('performance_test_attempts.performance_test_session_id', PerformanceStructureScope::sessions()->select('performance_test_sessions.id'))
             ->whereNotNull('performance_test_attempt_answers.reviewed_at')
             ->get([
                 'reviewers.id as reviewer_id',
@@ -285,6 +296,7 @@ class PerformanceEvaluationReportingService
         $query = PerformanceTestAttempt::query()
             ->join('performance_test_sessions', 'performance_test_sessions.id', '=', 'performance_test_attempts.performance_test_session_id')
             ->join('personnels', 'personnels.id', '=', 'performance_test_sessions.personnel_id')
+            ->tap(fn ($query) => PerformanceStructureScope::onPersonnelTable($query))
             ->selectRaw('
                 personnels.id as personnel_id,
                 CONCAT_WS(" ", personnels.surname, personnels.name, personnels.patronymic) as personnel_fullname,

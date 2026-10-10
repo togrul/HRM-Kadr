@@ -38,6 +38,7 @@ class CandidateFormValidationTest extends TestCase
         $this->structure = Structure::query()->create(['name' => 'Mərkəz', 'shortname' => 'MRK']);
 
         $user = User::factory()->create();
+        grantAllStructures($user);
         $user->givePermissionTo([
             Permission::findOrCreate('add-candidates', 'web'),
             Permission::findOrCreate('edit-candidates', 'web'),

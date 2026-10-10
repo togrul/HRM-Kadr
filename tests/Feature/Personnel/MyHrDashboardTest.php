@@ -154,6 +154,11 @@ class MyHrDashboardTest extends TestCase
 
     private function makePersonnel(string $email, string $surname, string $name, string $patronymic): Personnel
     {
+        return $this->linkFixtureUserByEmail($this->createPersonnelRecord($email, $surname, $name, $patronymic));
+    }
+
+    private function createPersonnelRecord(string $email, string $surname, string $name, string $patronymic): Personnel
+    {
         $this->seedReferenceData();
 
         return Personnel::withoutEvents(fn () => Personnel::query()->create([

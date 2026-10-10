@@ -29,6 +29,8 @@ class CompensationDashboardTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        // Struktur görünürlüyü fail closed-dur: bu testlərin istifadəçiləri bütün strukturları görür.
+        \App\Models\User::created(fn (\App\Models\User $user) => grantAllStructures($user));
         $this->seedReferenceData();
     }
 

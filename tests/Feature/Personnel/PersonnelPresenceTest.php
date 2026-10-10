@@ -12,7 +12,6 @@ use App\Modules\Personnel\Livewire\Home;
 use App\Modules\Personnel\Livewire\TablePanel;
 use App\Modules\Personnel\Services\PersonnelQueryService;
 use App\Modules\Personnel\Support\Presence\PersonnelPresenceStatus;
-use App\Services\StructureService;
 use App\Support\Database\InstalledTables;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
@@ -395,7 +394,7 @@ class PersonnelPresenceTest extends TestCase
 
         $this->actingAs($user);
         Livewire::actingAs($user);
-        $this->mock(StructureService::class, fn ($mock) => $mock->shouldReceive('getAccessibleStructures')->andReturn([1]));
+        grantStructures($user, [1]);
 
         return $user;
     }

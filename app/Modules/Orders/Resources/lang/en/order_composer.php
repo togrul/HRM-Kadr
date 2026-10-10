@@ -78,8 +78,13 @@ return [
         'auto_number' => 'Leave it empty to have the number assigned automatically on approval (format: :format).',
     ],
     'errors' => [
+        'subject_out_of_scope' => 'The selected employee is outside your structures.',
+        'hire_structure_out_of_scope' => 'The selected structure is outside your structures.',
         'reason_required' => 'Enter a reason to revert or cancel an approved order (at least :min characters).',
         'period_closed' => 'The month :period is closed (:reason) — the approved order cannot be reverted or cancelled.',
+        'status_changed' => 'The order status has already been changed by another user — refresh the list and check again.',
+        'period_closed_approve' => 'The month :period is closed (:reason) — an order affecting this month cannot be approved.',
+        'cancellation_forbidden' => 'An order cancellation undoes its target order — this requires the permission to revert approved orders.',
         'period_closed_by' => [
             'payroll' => 'the payroll period is closed',
             'finance' => 'the finance system has closed the accounting period',
@@ -160,6 +165,7 @@ return [
         'choose_file' => 'Choose a Word file (.docx)',
         'parsing' => 'Reading file…',
         'word_file' => 'Word file',
+        'unsafe_docx' => 'The Word file is too large or damaged (its unpacked size exceeds the allowed limit).',
         'word_required' => 'Please upload a Word (.docx) file.',
         'no_variables' => 'No [variables] found in the file. Mark dynamic parts with square brackets.',
         'no_variables_yet' => 'No variables yet. Upload the Word file above — detected [variables] will appear here.',

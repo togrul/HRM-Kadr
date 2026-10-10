@@ -216,7 +216,7 @@ it('words the compensation order for the termination and upgrades an unedited st
 });
 
 it('offers the remaining days per work year in the order form and fills the picked work year', function (): void {
-    $this->actingAs(User::factory()->create()->givePermissionTo(Permission::findOrCreate('add-orders', 'web')));
+    $this->actingAs(grantAllStructures(User::factory()->create()->givePermissionTo(Permission::findOrCreate('add-orders', 'web'))));
     $personnel = vwPersonnel();
     $template = vwTemplate('emek_mezuniyyeti');
     $key = fn (string $label): string => (string) collect($template->manualFields())->firstWhere('label', $label)['key'];

@@ -37,6 +37,7 @@ class ComplianceReminderNotifierTest extends TestCase
             ['tabel_no' => $employee->tabel_no, 'personnel_name' => 'İşçiyev', 'document_label' => 'Müqavilə', 'status' => 'expired', 'days_left' => -3],
         ]);
 
+        $this->linkFixtureUsersByEmail();
         $result = app(ComplianceReminderNotifier::class)->notify($rows);
 
         $this->assertSame(['employees' => 1, 'managers' => 1], $result);
@@ -62,6 +63,7 @@ class ComplianceReminderNotifierTest extends TestCase
             ['tabel_no' => $employee->tabel_no, 'personnel_name' => 'İşçi2', 'document_label' => 'Pasport', 'status' => 'expiring_60', 'days_left' => 45],
         ]);
 
+        $this->linkFixtureUsersByEmail();
         $result = app(ComplianceReminderNotifier::class)->notify($rows);
 
         $this->assertSame(['employees' => 1, 'managers' => 0], $result);

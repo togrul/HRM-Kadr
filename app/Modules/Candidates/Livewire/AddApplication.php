@@ -6,6 +6,7 @@ use App\Models\Candidate;
 use App\Models\CandidateApplication;
 use App\Models\JobOpening;
 use App\Modules\Candidates\Application\Services\CandidateApplicationStageService;
+use App\Modules\Candidates\Support\CandidateStructureScope;
 use App\Modules\Candidates\Support\Traits\BuildsRecruitmentOptions;
 use App\Modules\Candidates\Support\Traits\InteractsWithRecruitmentPresentation;
 use Illuminate\Contracts\View\View;
@@ -122,7 +123,8 @@ class AddApplication extends Component
     {
         $validated = $this->validate()['form'];
         $opening = JobOpening::query()->findOrFail((int) $validated['job_opening_id']);
-        $candidate = Candidate::query()->findOrFail((int) $validated['candidate_id']);
+        $candidate = CandidateStructureScope::constrainOwn(Candidate::query())->findOrFail((int) $validated['candidate_id']);
+        abort_unless($opening->structure_id === null || CandidateStructureScope::for()->allows($opening->structure_id), 403);
 
         $stageService->createInitialApplication($candidate, $opening, [
             'candidate_source_id' => $validated['candidate_source_id'] ?: null,

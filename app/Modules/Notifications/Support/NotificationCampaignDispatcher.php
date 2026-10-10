@@ -598,13 +598,13 @@ class NotificationCampaignDispatcher
         return $this->templateRenderer->render($template->subject_template, $payload);
     }
 
-    protected function renderBody(?NotificationTemplate $template, array $payload): string
+    protected function renderBody(?NotificationTemplate $template, array $payload, bool $escapeHtml = false): string
     {
         if (! $template) {
             return '';
         }
 
-        return $this->templateRenderer->render($template->body_template, $payload);
+        return $this->templateRenderer->render($template->body_template, $payload, $escapeHtml);
     }
 
     protected function deliverToRecipient(
@@ -623,10 +623,12 @@ class NotificationCampaignDispatcher
                 throw new RuntimeException(__('notifications::common.messages.recipient_email_missing'));
             }
 
+            $isHtml = ($campaign->format ?: $template?->format ?: 'text') === 'html';
+
             Mail::to($recipient->email)->send(new NotificationCampaignMail(
                 subjectLine: $this->renderSubject($template, $payload) ?: __('notifications::common.mail.subject_notification'),
-                body: $this->renderBody($template, $payload),
-                isHtml: ($campaign->format ?: $template?->format ?: 'text') === 'html',
+                body: $this->renderBody($template, $payload, $isHtml),
+                isHtml: $isHtml,
             ));
 
             return [

@@ -117,19 +117,21 @@ class PolicyAuthorizationMatrixTest extends TestCase
     ): void {
         Permission::findOrCreate($permission, 'web');
 
-        $policy = new $policyClass;
+        $policy = app($policyClass);
         $args = in_array($method, self::MODEL_METHODS, true) && $modelClass !== null
             ? [new $modelClass]
             : [];
 
-        $granted = User::factory()->create();
+        // Struktur görünürlüyü ayrıca yoxlanır (Security/Scope*Test); burada hər iki
+        // istifadəçi bütün strukturları görür ki, nəticəni yalnız icazə müəyyən etsin.
+        $granted = grantAllStructures(User::factory()->create());
         $granted->givePermissionTo($permission);
         $this->assertTrue(
             $policy->{$method}($granted->fresh(), ...$args),
             "{$policyClass}::{$method}() must ALLOW a user holding '{$permission}'."
         );
 
-        $denied = User::factory()->create();
+        $denied = grantAllStructures(User::factory()->create());
         $this->assertFalse(
             $policy->{$method}($denied->fresh(), ...$args),
             "{$policyClass}::{$method}() must DENY a user without '{$permission}'."

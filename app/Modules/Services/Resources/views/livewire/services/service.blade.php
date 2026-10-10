@@ -91,6 +91,7 @@
                     @break
 
                     @case('roles')
+                        @can('manage-roles')
                         <div class="space-y-4" x-data="{ activeRoleTab: 'roles' }">
                             @php
                                 $roleTab = 'h-[30px] shrink-0 rounded-[9px] border px-2.5 text-[12px] transition';
@@ -114,10 +115,13 @@
                                 @livewire('services.roles.permissions', key('permissions'))
                             </div>
                         </div>
+                        @endcan
                     @break
 
                     @case('users')
-                        @livewire('services.users.all-users', key('users'))
+                        @can('manage-users')
+                            @livewire('services.users.all-users', key('users'))
+                        @endcan
                     @break
 
                     @case('ranks')

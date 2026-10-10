@@ -10,7 +10,6 @@ use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendanceShiftManagementService;
 use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
 use App\Services\StructurePathService;
-use App\Traits\NestedStructureTrait;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
@@ -18,13 +17,14 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class ShiftManagement extends Component
 {
-    use NestedStructureTrait;
     use WithRuntimeMemo;
 
+    #[Locked]
     public bool $canManage = false;
 
     public ?int $editingShiftId = null;
@@ -178,7 +178,7 @@ class ShiftManagement extends Component
 
     public function saveShift(AttendanceShiftManagementService $service): void
     {
-        if (! $this->canManage) {
+        if (! app(AttendanceAuthorizationService::class)->can('attendance.shifts.manage')) {
             abort(403);
         }
 
@@ -202,7 +202,7 @@ class ShiftManagement extends Component
 
     public function deactivateShift(int $shiftId, AttendanceShiftManagementService $service): void
     {
-        if (! $this->canManage) {
+        if (! app(AttendanceAuthorizationService::class)->can('attendance.shifts.manage')) {
             abort(403);
         }
 
@@ -232,6 +232,8 @@ class ShiftManagement extends Component
         $assignment = AttendanceShiftAssignment::query()
             ->with(['personnel:tabel_no,surname,name,patronymic'])
             ->findOrFail($assignmentId);
+
+        abort_unless(app(AttendanceStructureScopeReadService::class)->allowsTabelNo($assignment->tabel_no), 403);
 
         $this->editingAssignmentId = $assignment->id;
         $this->assignmentForm = [
@@ -273,17 +275,22 @@ class ShiftManagement extends Component
 
     public function saveAssignment(AttendanceShiftManagementService $service): void
     {
-        if (! $this->canManage) {
+        if (! app(AttendanceAuthorizationService::class)->can('attendance.shifts.manage')) {
             abort(403);
         }
 
         $this->validate($this->assignmentRules());
 
+        $scopeRead = app(AttendanceStructureScopeReadService::class);
+        $existing = $this->editingAssignmentId ? AttendanceShiftAssignment::query()->find($this->editingAssignmentId) : null;
+        abort_unless($scopeRead->allowsTabelNo((string) ($this->assignmentForm['tabel_no'] ?? '')), 403);
+        abort_unless($existing === null || $scopeRead->allowsTabelNo($existing->tabel_no), 403);
+
         try {
             $service->upsertAssignment(
                 payload: $this->assignmentForm,
                 userId: (int) Auth::id(),
-                assignment: $this->editingAssignmentId ? AttendanceShiftAssignment::query()->find($this->editingAssignmentId) : null
+                assignment: $existing
             );
         } catch (ValidationException $exception) {
             $this->dispatch('notify', type: 'error', message: collect($exception->errors())->flatten()->first());
@@ -297,7 +304,7 @@ class ShiftManagement extends Component
 
     public function deactivateAssignment(int $assignmentId, AttendanceShiftManagementService $service): void
     {
-        if (! $this->canManage) {
+        if (! app(AttendanceAuthorizationService::class)->can('attendance.shifts.manage')) {
             abort(403);
         }
 
@@ -305,6 +312,8 @@ class ShiftManagement extends Component
         if (! $assignment) {
             return;
         }
+
+        abort_unless(app(AttendanceStructureScopeReadService::class)->allowsTabelNo($assignment->tabel_no), 403);
 
         $service->deactivateAssignment($assignment, (int) Auth::id());
 
@@ -513,9 +522,7 @@ class ShiftManagement extends Component
     protected function currentStructureIds(): array
     {
         return $this->rememberRuntime('attendanceShiftManagement.currentStructureIds.'.($this->selectedStructureId ?? 'all'), function () {
-            return $this->selectedStructureId
-                ? $this->getNestedStructure($this->selectedStructureId)
-                : [];
+            return app(AttendanceStructureScopeReadService::class)->resolveIds($this->selectedStructureId);
         });
     }
 

@@ -20,8 +20,8 @@
 
         <div class="flex flex-col gap-1.5">
             <x-ui.field-label for="email">{{ __('ui::auth.fields.email') }}</x-ui.field-label>
-            <x-ui.input id="email" name="email" type="email" :value="old('email', $user->email)" required autocomplete="username" :aria-invalid="$errors->has('email') ? 'true' : null" />
-            <x-input-error :messages="$errors->get('email')" />
+            <x-ui.input id="email" type="email" :value="$user->email" readonly disabled autocomplete="username" aria-describedby="email-admin-only" />
+            <p id="email-admin-only" class="text-[11.5px] leading-4 text-ink-faint">{{ __('ui::auth.messages.email_admin_only') }}</p>
         </div>
     </div>
 

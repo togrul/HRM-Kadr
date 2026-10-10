@@ -215,7 +215,7 @@ it('issues without a number, prints none, and prints the assigned number at appr
     $personnel = numberingPersonnel();
     $user = User::factory()->create();
     $user->givePermissionTo(Permission::findOrCreate('add-orders', 'web'));
-    $this->actingAs($user);
+    $this->actingAs(grantAllStructures($user));
 
     $composer = Livewire::test(OrderComposer::class, ['presetCode' => 'numbered', 'personnelId' => $personnel->id])
         ->assertSee(__('orders::order_composer.hints.auto_number', ['format' => '{il}/ƏM-{N:3}']))
@@ -253,7 +253,7 @@ it('still requires a typed number when numbering is manual, and rejects a duplic
     $personnel = numberingPersonnel();
     $user = User::factory()->create();
     $user->givePermissionTo(Permission::findOrCreate('add-orders', 'web'));
-    $this->actingAs($user);
+    $this->actingAs(grantAllStructures($user));
 
     Livewire::test(OrderComposer::class, ['presetCode' => 'numbered', 'personnelId' => $personnel->id])
         ->set('orderNumber', '')

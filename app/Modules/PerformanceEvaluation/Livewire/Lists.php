@@ -3,16 +3,13 @@
 namespace App\Modules\PerformanceEvaluation\Livewire;
 
 use App\Livewire\Concerns\WithRuntimeMemo;
-use App\Models\PerformanceForm;
 use App\Models\PerformanceFormTemplate;
 use App\Models\PerformanceFormTemplateItem;
-use App\Models\PerformanceTestAttempt;
-use App\Models\PerformanceTestAttemptAnswer;
 use App\Models\PerformanceTestBank;
 use App\Models\PerformanceTestQuestion;
-use App\Models\PerformanceTestSession;
 use App\Models\PerformanceTrainingNeedLink;
 use App\Modules\PerformanceEvaluation\Livewire\Concerns\InteractsWithPerformanceEvaluationAccess;
+use App\Modules\PerformanceEvaluation\Support\PerformanceStructureScope;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -188,7 +185,7 @@ class Lists extends Component
                     ])
                     ->withCount('answers')
                     ->find($selectedRowId),
-                'test_sessions' => PerformanceTestSession::query()
+                'test_sessions' => PerformanceStructureScope::sessions()
                     ->with([
                         'cycle:id,name',
                         'bank:id,name,code',
@@ -197,14 +194,14 @@ class Lists extends Component
                     ])
                     ->withCount('attempts')
                     ->find($selectedRowId),
-                'attempts' => PerformanceTestAttempt::query()
+                'attempts' => PerformanceStructureScope::attempts()
                     ->with([
                         'session:id,personnel_id,performance_test_bank_id',
                         'session.personnel:id,surname,name,patronymic,tabel_no',
                         'session.bank:id,name',
                     ])
                     ->find($selectedRowId),
-                'test_answers' => PerformanceTestAttemptAnswer::query()
+                'test_answers' => PerformanceStructureScope::answers()
                     ->with([
                         'attempt:id,performance_test_session_id,attempt_no,status,score,percentage',
                         'attempt.session:id,personnel_id,performance_test_bank_id',
@@ -215,7 +212,7 @@ class Lists extends Component
                         'reviewer:id,name,email',
                     ])
                     ->find($selectedRowId),
-                'weak_links' => PerformanceTrainingNeedLink::query()
+                'weak_links' => PerformanceTrainingNeedLink::query()->whereIn('performance_form_id', PerformanceStructureScope::forms()->select('performance_forms.id'))
                     ->with([
                         'form:id,personnel_id,final_score,final_category',
                         'form.personnel:id,surname,name,patronymic,tabel_no',
@@ -223,7 +220,7 @@ class Lists extends Component
                         'trainingNeed:id,priority,status,reason',
                     ])
                     ->find($selectedRowId),
-                default => PerformanceForm::query()
+                default => PerformanceStructureScope::forms()
                     ->with([
                         'cycle:id,name',
                         'template:id,name,code',
@@ -304,7 +301,7 @@ class Lists extends Component
                     ->withCount('answers')
                     ->latest('id')
                     ->paginate(12, pageName: $pageName),
-                'test_sessions' => PerformanceTestSession::query()
+                'test_sessions' => PerformanceStructureScope::sessions()
                     ->when($search !== '', function ($query) use ($search) {
                         $query->where(function ($inner) use ($search) {
                             $inner->whereHas('bank', fn ($bank) => $bank->where('name', 'like', "%{$search}%"))
@@ -324,7 +321,7 @@ class Lists extends Component
                     ->withCount('attempts')
                     ->latest('id')
                     ->paginate(12, pageName: $pageName),
-                'attempts' => PerformanceTestAttempt::query()
+                'attempts' => PerformanceStructureScope::attempts()
                     ->when($search !== '', function ($query) use ($search) {
                         $query->where(function ($inner) use ($search) {
                             $inner->where('id', 'like', "%{$search}%")
@@ -342,7 +339,7 @@ class Lists extends Component
                     ])
                     ->latest('id')
                     ->paginate(12, pageName: $pageName),
-                'test_answers' => PerformanceTestAttemptAnswer::query()
+                'test_answers' => PerformanceStructureScope::answers()
                     ->when($search !== '', function ($query) use ($search) {
                         $query->where(function ($inner) use ($search) {
                             $inner->whereHas('question', fn ($question) => $question->where('prompt', 'like', "%{$search}%"))
@@ -367,7 +364,7 @@ class Lists extends Component
                     ])
                     ->latest('id')
                     ->paginate(12, pageName: $pageName),
-                'weak_links' => PerformanceTrainingNeedLink::query()
+                'weak_links' => PerformanceTrainingNeedLink::query()->whereIn('performance_form_id', PerformanceStructureScope::forms()->select('performance_forms.id'))
                     ->when($search !== '', function ($query) use ($search) {
                         $query->where(function ($inner) use ($search) {
                             $inner->whereHas('competency', fn ($competency) => $competency->where('name', 'like', "%{$search}%"))
@@ -385,7 +382,7 @@ class Lists extends Component
                     ])
                     ->latest('id')
                     ->paginate(12, pageName: $pageName),
-                default => PerformanceForm::query()
+                default => PerformanceStructureScope::forms()
                     ->when($search !== '', function ($query) use ($search) {
                         $query->where(function ($inner) use ($search) {
                             $inner->whereHas('cycle', fn ($cycle) => $cycle->where('name', 'like', "%{$search}%"))

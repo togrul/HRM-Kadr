@@ -6,7 +6,6 @@ use App\Models\AuditActivity;
 use App\Modules\Audit\Application\Services\ActivityLogReader;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -96,15 +95,10 @@ class ActivityLogExport implements FromQuery, ShouldAutoSize, WithHeadings, With
         ];
     }
 
+    /** Məbləğ sahələri icazəsiz istifadəçi üçün maskalanmış xassələr. */
     private function properties(AuditActivity $activity): array
     {
-        $properties = $activity->properties;
-
-        if ($properties instanceof Collection) {
-            return $properties->toArray();
-        }
-
-        return is_array($properties) ? $properties : [];
+        return $this->reader->visibleProperties($activity);
     }
 
     private function viewedPersonnelLabel(array $properties): string

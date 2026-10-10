@@ -78,8 +78,13 @@ return [
         'auto_number' => 'Boş saxlasanız, nömrə təsdiq zamanı avtomatik veriləcək (format: :format).',
     ],
     'errors' => [
+        'subject_out_of_scope' => 'Seçilmiş işçi sizin strukturlarınızdan kənardadır.',
+        'hire_structure_out_of_scope' => 'Seçilmiş struktur sizin strukturlarınızdan kənardadır.',
         'reason_required' => 'Təsdiqlənmiş əmri geri qaytarmaq və ya ləğv etmək üçün səbəb yazın (ən azı :min simvol).',
         'period_closed' => ':period ayı bağlanıb (:reason) — təsdiqlənmiş əmr geri qaytarıla və ya ləğv edilə bilməz.',
+        'status_changed' => 'Əmrin statusu artıq başqa istifadəçi tərəfindən dəyişdirilib — siyahını yeniləyib yenidən yoxlayın.',
+        'period_closed_approve' => ':period ayı bağlanıb (:reason) — bu aya təsir edən əmr təsdiqlənə bilməz.',
+        'cancellation_forbidden' => 'Əmrin ləğvi əmri hədəf əmri geri alır — bunun üçün təsdiqlənmiş əmri geri qaytarmaq icazəsi tələb olunur.',
         'period_closed_by' => [
             'payroll' => 'əmək haqqı dövrü bağlanıb',
             'finance' => 'maliyyə sistemi mühasibat dövrünü bağlayıb',
@@ -160,6 +165,7 @@ return [
         'choose_file' => 'Word faylı seçin (.docx)',
         'parsing' => 'Fayl oxunur…',
         'word_file' => 'Word faylı',
+        'unsafe_docx' => 'Word faylı çox böyükdür və ya zədələnib (açılmış ölçü icazə verilən həddi aşır).',
         'word_required' => 'Zəhmət olmasa Word (.docx) faylı yükləyin.',
         'no_variables' => 'Faylda [dəyişən] tapılmadı. Dinamik hissələri kvadrat mötərizə ilə işarələyin.',
         'no_variables_yet' => 'Hələ dəyişən yoxdur. Yuxarıda Word faylını yükləyin — tapılan [dəyişən]-lər burada görünəcək.',

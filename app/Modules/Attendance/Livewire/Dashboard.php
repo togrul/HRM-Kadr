@@ -69,12 +69,17 @@ class Dashboard extends Component
     #[Computed]
     public function overview(): array
     {
+        $scopeRead = app(AttendanceStructureScopeReadService::class);
+
+        // Keş açarı yalnız seçilmiş struktura görə qurulur — məhdud görünürlüklü istifadəçi
+        // başqasının (daha geniş) keşlənmiş aqreqatını görməsin deyə keşdən yalnız «bütün
+        // strukturlar» istifadəçisi istifadə edir.
         return app(AttendanceOverviewService::class)->build(
             $this->year,
             $this->month,
             $this->selectedStructureId,
-            true,
-            app(AttendanceStructureScopeReadService::class)->resolveIds($this->selectedStructureId)
+            $scopeRead->unrestricted(),
+            $scopeRead->resolveIds($this->selectedStructureId)
         );
     }
 

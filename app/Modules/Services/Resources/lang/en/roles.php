@@ -28,6 +28,11 @@ return [
         'permission_assigned' => 'Permission was added to role successfully!',
         'delete_role_description' => 'Are you sure you want to delete this role? This action cannot be undone.',
         'delete_permission_description' => 'Are you sure you want to delete this permission? This action cannot be undone.',
+        'system_role_protected' => 'This is a system role referenced by name in code — it cannot be renamed or deleted.',
+        'system_role_name_reserved' => 'This name is reserved for a system role — choose another.',
+        'own_role_locked' => 'You cannot change your own role\'s permissions.',
+        'role_exceeds_your_permissions' => 'You cannot grant a permission you do not hold, or change a role that holds one.',
+        'role_exceeds_your_structures' => 'You cannot grant a role structures you cannot see yourself, or the all-structures visibility.',
     ],
     'badges' => [
         'modules' => [

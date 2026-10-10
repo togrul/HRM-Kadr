@@ -3,7 +3,7 @@
 namespace App\Observers;
 
 use App\Models\RoleStructure;
-use Illuminate\Support\Facades\Cache;
+use App\Services\StructureService;
 
 class RoleStructureObserver
 {
@@ -19,14 +19,6 @@ class RoleStructureObserver
 
     protected function flushCaches(RoleStructure $roleStructure): void
     {
-        $role = $roleStructure->role()->with('users')->first();
-
-        if (! $role) {
-            return;
-        }
-
-        foreach ($role->users as $user) {
-            Cache::forget("structure-accessible-{$user->id}");
-        }
+        app(StructureService::class)->forgetRole((int) $roleStructure->role_id);
     }
 }

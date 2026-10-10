@@ -6,6 +6,7 @@ use App\Livewire\Forms\LeaveForm;
 use App\Models\Leave;
 use App\Modules\Leaves\Application\Services\LeaveRecordService;
 use App\Modules\Leaves\Livewire\Concerns\InteractsWithLeaveForm;
+use App\Support\Uploads\PrivateFiles;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Locked;
@@ -61,6 +62,7 @@ class EditLeave extends Component
         $this->leave->validate();
 
         $payload = $this->leave->toPayload();
+        $this->assertApplicantInScope($payload);
         $records = app(LeaveRecordService::class);
 
         // Business rules first, so a rejected edit never leaves an orphan upload behind.
@@ -68,7 +70,7 @@ class EditLeave extends Component
 
         $file = $this->leave->document_path;
         if ($file instanceof TemporaryUploadedFile) {
-            $payload['document_path'] = $file->store('leaves', 'public');
+            $payload['document_path'] = $file->store('leaves', PrivateFiles::DISK);
         }
 
         $this->withLeaveFormErrors(fn () => $records->update($record, $payload, auth()->user()));

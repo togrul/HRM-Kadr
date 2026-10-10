@@ -68,7 +68,21 @@
     </div>
         <div class="grid grid-cols-1">
             <x-checkbox name="user.is_active"  model="user.is_active">{{ __('services::common.labels.is_active_question') }}</x-checkbox>
+            @error('user.is_active')
+                <x-validation> {{ $message }} </x-validation>
+            @enderror
         </div>
+
+        @if ((int) $userModel->id !== (int) auth()->id())
+            <div class="grid grid-cols-1 sm:w-1/2 sm:pr-1">
+                <x-label for="user.actor_password">{{ __('services::users.fields.actor_password') }}</x-label>
+                <x-livewire-input mode="gray" type="password" name="user.actor_password" wire:model="user.actor_password" autocomplete="current-password"></x-livewire-input>
+                <p class="mt-1 text-[11.5px] leading-4 text-ink-faint">{{ __('services::users.messages.actor_password_required') }}</p>
+                @error('user.actor_password')
+                    <x-validation> {{ $message }} </x-validation>
+                @enderror
+            </div>
+        @endif
 
       <x-modal-button>{{ __('services::users.actions.save_user') }}</x-modal-button>
 </div>

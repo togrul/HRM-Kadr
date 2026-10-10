@@ -322,6 +322,13 @@ class PersonnelChangeGuard implements GuardsPersonnelChanges
         }
 
         $violations = [];
+
+        // Təsdiqlənmiş əməkdaş yenidən "təsdiq gözləyən" edilə bilməz: bu bayraq qoruma
+        // istisnasının əsasıdır, onu yazmaq bütün siyasətdən yan keçmək olardı.
+        if ($personnel->isDirty('is_pending') && (bool) $personnel->getAttributes()['is_pending'] && ! $this->isAllowed()) {
+            $violations['is_pending'] = __('personnel::change_policy.validation.pending_flag_locked');
+        }
+
         foreach ($this->registry->columnMap() as $attribute => $group) {
             if (! $personnel->isDirty($attribute) || $this->isAllowed($group)) {
                 continue;
@@ -349,7 +356,9 @@ class PersonnelChangeGuard implements GuardsPersonnelChanges
     }
 
     /**
-     * Yeni yaradılan və hələ təsdiqlənməmiş əməkdaş siyasətə tabe deyil.
+     * Yeni yaradılan və hələ təsdiqlənməmiş əməkdaş siyasətə tabe deyil. `is_pending`
+     * yalnız server tərəfindən yazılır (forma onu qəbul etmir, false → true keçidi isə
+     * `violations()`-da rədd edilir), ona görə saxlanmış dəyər etibarlı faktdır.
      */
     private function isExempt(Personnel $personnel): bool
     {

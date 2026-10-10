@@ -14,6 +14,7 @@ use App\Services\Chief\ChiefResolver;
 use App\Services\NumberToWordsService;
 use App\Services\StructureService;
 use App\Services\WordSuffixService;
+use App\Support\Uploads\SecureFileResponse;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -193,10 +194,15 @@ class Vacations extends Component
         $templateProcessor->setValue('rank_signature', $chiefRank);
         $templateProcessor->setValue('person_signature', $chiefName);
 
-        $filename = "{$model->personnel->fullname}_mezuniyyet_{$model->start_date->format('d.m.Y')}";
-        $templateProcessor->saveAs($filename.'.docx');
+        // Fayl veb kökündə (public/) yox, storage/app/tmp-də təsadüfi adla yaradılır;
+        // istifadəçinin gördüyü ad ayrıca təmizlənir (yol ayırıcıları atılır).
+        $path = SecureFileResponse::temporaryPath('docx');
+        $templateProcessor->saveAs($path);
 
-        return response()->download($filename.'.docx')->deleteFileAfterSend();
+        return SecureFileResponse::temporaryDownload(
+            $path,
+            "{$model->personnel->fullname}_mezuniyyet_{$model->start_date->format('d.m.Y')}.docx",
+        );
     }
 
     /** Who may bind an approved self-service vacation to an order — the button uses the same rule. */

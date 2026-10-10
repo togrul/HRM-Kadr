@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Data\AbsencePeriod;
 use App\Data\LeaveFilterData;
 use App\Enums\OrderStatusEnum;
+use App\Services\UserPersonnelLinkResolver;
 use App\Traits\PersonnelTrait;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
@@ -33,6 +34,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property \Carbon\CarbonInterface|null $approved_at
  * @property string|null $submission_source
  * @property string|null $reason
+ * @property int|null $assigned_to
  */
 class Leave extends Model
 {
@@ -158,6 +160,19 @@ class Leave extends Model
     }
 
     /**
+     * A leave written by an order's effect (OrderAbsenceRecorderService) is the order's: it
+     * changes only when the order is revoked, never through the general edit / delete paths.
+     */
+    public function isManagedByOrder(): bool
+    {
+        if (array_key_exists('submission_source', $this->attributes)) {
+            return $this->attributes['submission_source'] === 'order';
+        }
+
+        return $this->exists && static::query()->withTrashed()->whereKey($this->getKey())->value('submission_source') === 'order';
+    }
+
+    /**
      * An open-ended leave (an open sick certificate) has no end date yet: it covers every
      * day from its start up to today. Only the certificate register writes one.
      */
@@ -214,27 +229,10 @@ class Leave extends Model
             return false;
         }
 
-        $assignedTo = (int) $this->assigned_to;
-        $userId = (int) $user->getKey();
+        // assigned_to həmişə əməkdaş id-sidir; istifadəçi id-si ilə müqayisə edilmir (ayrı id məkanları).
+        $personnelId = app(UserPersonnelLinkResolver::class)->resolve($user);
 
-        // Backward compatibility: some old rows may still carry users.id.
-        if ($assignedTo === $userId) {
-            return true;
-        }
-
-        static $personnelIdCache = [];
-
-        if (! array_key_exists($userId, $personnelIdCache)) {
-            $personnelId = $user->relationLoaded('personnel')
-                ? $user->personnel?->id
-                : $user->personnel()->value('id');
-
-            $personnelIdCache[$userId] = $personnelId ? (int) $personnelId : null;
-        }
-
-        $personnelId = $personnelIdCache[$userId];
-
-        return $personnelId !== null && $assignedTo === $personnelId;
+        return $personnelId !== null && (int) $this->assigned_to === $personnelId;
     }
 
     /* --------------------------------- Scopes -------------------------------- */

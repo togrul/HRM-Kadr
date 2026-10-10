@@ -3,9 +3,9 @@
 namespace App\Modules\PerformanceEvaluation\Livewire;
 
 use App\Livewire\Traits\SideModalAction;
-use App\Models\PerformanceForm;
 use App\Modules\PerformanceEvaluation\Livewire\Concerns\HandlesPerformanceEvaluationFlowMutations;
 use App\Modules\PerformanceEvaluation\Livewire\Concerns\HandlesPerformanceTestingMutations;
+use App\Modules\PerformanceEvaluation\Support\PerformanceStructureScope;
 use App\Services\HrPolicies\HrPolicyPackService;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Isolate;
@@ -34,7 +34,7 @@ class OperationsWorkspace extends AbstractPerformanceWorkspace
 
     public function confirmDeleteEvaluationForm(int $id): void
     {
-        $form = PerformanceForm::query()->with(['personnel', 'cycle:id,name'])->findOrFail($id);
+        $form = PerformanceStructureScope::forms()->with(['personnel', 'cycle:id,name'])->findOrFail($id);
 
         $details = array_filter([
             $form->personnel?->fullname,

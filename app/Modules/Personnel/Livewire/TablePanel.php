@@ -8,6 +8,7 @@ use App\Modules\Personnel\Services\PersonnelQueryService;
 use App\Modules\Personnel\Services\PersonnelRowActionService;
 use App\Modules\Personnel\Services\PersonnelRowViewModelService;
 use App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioPermissionMatrix;
+use App\Services\StructureScope;
 use App\Services\StructureService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -38,7 +39,7 @@ class TablePanel extends Component
     /** @var list<string> */
     public array $presence = [];
 
-    protected ?array $accessibleStructureCache = null;
+    protected ?StructureScope $accessibleStructureCache = null;
 
     protected ?array $rowActionCapabilities = null;
 
@@ -107,13 +108,10 @@ class TablePanel extends Component
         );
     }
 
-    protected function accessibleStructureIds(): array
+    /** Struktur görünürlüyü — müştəri filtri ($structure) PersonnelQueryService-də onunla kəsişdirilir. */
+    protected function accessibleStructureIds(): StructureScope
     {
-        if (! is_null($this->accessibleStructureCache)) {
-            return $this->accessibleStructureCache;
-        }
-
-        return $this->accessibleStructureCache = resolve(StructureService::class)->getAccessibleStructures();
+        return $this->accessibleStructureCache ??= resolve(StructureService::class)->scopeFor();
     }
 
     protected function normalizeStructureState(mixed $value): array

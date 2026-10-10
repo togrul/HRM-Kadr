@@ -7,12 +7,14 @@ use App\Modules\Personnel\Application\Services\Personnel360TimelineService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Collection;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class Employee360Timeline extends Component
 {
     use AuthorizesRequests;
 
+    #[Locked]
     public int $personnelId;
 
     public string $search = '';

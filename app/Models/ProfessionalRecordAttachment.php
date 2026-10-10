@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * @property string $file_path
@@ -40,6 +39,7 @@ class ProfessionalRecordAttachment extends Model
             return null;
         }
 
-        return Storage::disk($this->disk ?: 'public')->url($this->file_path);
+        // Fayl özəl diskdədir; icazəni yoxlayan route ilə verilir.
+        return route('personnel.portfolio-attachments.show', $this);
     }
 }

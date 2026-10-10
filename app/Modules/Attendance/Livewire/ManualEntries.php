@@ -12,7 +12,6 @@ use App\Modules\Attendance\Application\Services\AttendanceManualEntryService;
 use App\Modules\Attendance\Application\Services\AttendanceManualMetricsResolverService;
 use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
 use App\Services\StructurePathService;
-use App\Traits\NestedStructureTrait;
 use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -20,13 +19,13 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Throwable;
 
 class ManualEntries extends Component
 {
-    use NestedStructureTrait;
     use WithPagination;
     use WithRuntimeMemo;
 
@@ -38,8 +37,10 @@ class ManualEntries extends Component
 
     public array $rejectNotes = [];
 
+    #[Locked]
     public bool $canWrite = false;
 
+    #[Locked]
     public bool $canApprove = false;
 
     public bool $autoCalculatedPreview = false;
@@ -197,11 +198,13 @@ class ManualEntries extends Component
 
     public function save(AttendanceManualEntryService $service): void
     {
-        if (! $this->canWrite) {
+        if (! app(AttendanceAuthorizationService::class)->can('attendance.manual.write')) {
             abort(403);
         }
 
         $this->validate();
+
+        abort_unless(app(AttendanceStructureScopeReadService::class)->allowsTabelNo((string) $this->form['tabel_no']), 403);
 
         try {
             $service->upsert(
@@ -239,7 +242,7 @@ class ManualEntries extends Component
 
     public function approve(int $entryId, AttendanceManualEntryService $service): void
     {
-        if (! $this->canApprove) {
+        if (! app(AttendanceAuthorizationService::class)->can('attendance.manual.approve')) {
             abort(403);
         }
 
@@ -247,6 +250,8 @@ class ManualEntries extends Component
         if (! $entry) {
             return;
         }
+
+        abort_unless(app(AttendanceStructureScopeReadService::class)->allowsTabelNo($entry->tabel_no), 403);
 
         try {
             $service->approve($entry, (int) Auth::id());
@@ -262,7 +267,7 @@ class ManualEntries extends Component
 
     public function reject(int $entryId, AttendanceManualEntryService $service): void
     {
-        if (! $this->canApprove) {
+        if (! app(AttendanceAuthorizationService::class)->can('attendance.manual.approve')) {
             abort(403);
         }
 
@@ -278,6 +283,8 @@ class ManualEntries extends Component
         if (! $entry) {
             return;
         }
+
+        abort_unless(app(AttendanceStructureScopeReadService::class)->allowsTabelNo($entry->tabel_no), 403);
 
         try {
             $service->reject($entry, (int) Auth::id(), trim((string) $this->rejectNotes[$entryId]));
@@ -549,9 +556,7 @@ class ManualEntries extends Component
     private function currentStructureIds(): array
     {
         return $this->rememberRuntime('attendanceManualEntries.currentStructureIds.'.($this->selectedStructureId ?? 'all'), function () {
-            return $this->selectedStructureId
-                ? $this->getNestedStructure($this->selectedStructureId)
-                : [];
+            return app(AttendanceStructureScopeReadService::class)->resolveIds($this->selectedStructureId);
         });
     }
 

@@ -43,6 +43,7 @@ class PerformanceEvaluationDashboardTest extends TestCase
     public function test_authenticated_user_can_open_performance_evaluation_route(): void
     {
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $this->grantPerformancePermissions($user);
 
         $this->actingAs($user)
@@ -54,6 +55,7 @@ class PerformanceEvaluationDashboardTest extends TestCase
     public function test_overview_component_renders_performance_summary_cards(): void
     {
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $this->grantPerformancePermissions($user);
 
         $this->actingAs($user);
@@ -70,6 +72,7 @@ class PerformanceEvaluationDashboardTest extends TestCase
         // The overview renders inside a Livewire update request, where url()->current() is the
         // Livewire endpoint — a `return` built from it sent the back button to a 405 GET.
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $this->grantPerformancePermissions($user);
 
         $this->actingAs($user);
@@ -83,6 +86,7 @@ class PerformanceEvaluationDashboardTest extends TestCase
     public function test_evaluations_summary_component_renders_recent_forms_and_relays_actions(): void
     {
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $this->grantPerformancePermissions($user);
         $manager = \App\Models\User::factory()->create(['name' => 'Team Manager']);
         $hrReviewer = \App\Models\User::factory()->create(['name' => 'HR Reviewer']);
@@ -141,6 +145,7 @@ class PerformanceEvaluationDashboardTest extends TestCase
     public function test_dashboard_refreshes_evaluations_summary_after_form_assignment_changes(): void
     {
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $manager = \App\Models\User::factory()->create(['name' => 'Team Manager']);
         $hrReviewer = \App\Models\User::factory()->create(['name' => 'HR Reviewer']);
         $this->grantPerformancePermissions($user);
@@ -190,6 +195,7 @@ class PerformanceEvaluationDashboardTest extends TestCase
     public function test_dashboard_refreshes_summary_islands_after_score_and_test_mutations(): void
     {
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $manager = \App\Models\User::factory()->create(['name' => 'Team Manager']);
         $hrReviewer = \App\Models\User::factory()->create(['name' => 'HR Reviewer']);
         $this->grantPerformancePermissions($user);
@@ -265,6 +271,7 @@ class PerformanceEvaluationDashboardTest extends TestCase
     public function test_tests_summary_component_renders_testing_cards(): void
     {
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $this->grantPerformancePermissions($user);
 
         $this->actingAs($user);
@@ -278,6 +285,7 @@ class PerformanceEvaluationDashboardTest extends TestCase
     public function test_reports_component_renders_test_delivery_reporting_cards(): void
     {
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $this->grantPerformancePermissions($user);
 
         $this->actingAs($user);
@@ -292,6 +300,7 @@ class PerformanceEvaluationDashboardTest extends TestCase
     public function test_lists_component_supports_test_archive_entities(): void
     {
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $reviewer = \App\Models\User::factory()->create(['name' => 'Reviewer User']);
         $this->grantPerformancePermissions($user);
         Role::findOrCreate('admin', 'web');
@@ -376,6 +385,7 @@ class PerformanceEvaluationDashboardTest extends TestCase
     public function test_personnel_options_exclude_pending_duplicates(): void
     {
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $this->grantPerformancePermissions($user);
         Role::findOrCreate('admin', 'web');
         Permission::findOrCreate('get-notification', 'web');
@@ -516,6 +526,7 @@ class PerformanceEvaluationDashboardTest extends TestCase
     public function test_performance_evaluation_route_requires_view_permission(): void
     {
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         Permission::findOrCreate('show-performance-evaluation', 'web');
 
         $this->actingAs($user)
@@ -539,6 +550,8 @@ class PerformanceEvaluationDashboardTest extends TestCase
         ]);
 
         $personnel = $this->createPersonnel($user->id, 514, 'PE-514');
+
+        $this->linkUserToPersonnel($user, $personnel);
 
         $cycle = PerformanceCycle::query()->create([
             'name' => '2026 Taker Cycle',
@@ -621,6 +634,8 @@ class PerformanceEvaluationDashboardTest extends TestCase
         ]);
 
         $personnel = $this->createPersonnel($user->id, 515, 'PE-515');
+
+        $this->linkUserToPersonnel($user, $personnel);
 
         $bank = \App\Models\PerformanceTestBank::query()->create([
             'name' => 'Workspace Bank',
@@ -716,6 +731,8 @@ class PerformanceEvaluationDashboardTest extends TestCase
 
         $personnel = $this->createPersonnel($user->id, 516, 'PE-516');
 
+        $this->linkUserToPersonnel($user, $personnel);
+
         $bank = \App\Models\PerformanceTestBank::query()->create([
             'name' => 'Priority Bank',
             'code' => 'PB-516',
@@ -797,6 +814,8 @@ class PerformanceEvaluationDashboardTest extends TestCase
         ]);
 
         $personnel = $this->createPersonnel($user->id, 517, 'PE-517');
+
+        $this->linkUserToPersonnel($user, $personnel);
 
         $bank = \App\Models\PerformanceTestBank::query()->create([
             'name' => 'Switch Bank',
@@ -882,6 +901,8 @@ class PerformanceEvaluationDashboardTest extends TestCase
 
         $personnel = $this->createPersonnel($user->id, 518, 'PE-518');
 
+        $this->linkUserToPersonnel($user, $personnel);
+
         $bank = \App\Models\PerformanceTestBank::query()->create([
             'name' => 'Expiry Bank',
             'code' => 'EB-518',
@@ -957,6 +978,7 @@ class PerformanceEvaluationDashboardTest extends TestCase
     public function test_dashboard_can_create_foundation_records_and_link_weak_score_to_training_need(): void
     {
         $user = \App\Models\User::factory()->create(['name' => 'HR Specialist']);
+        grantAllStructures($user);
         $manager = \App\Models\User::factory()->create(['name' => 'Team Manager']);
         $hrReviewer = \App\Models\User::factory()->create(['name' => 'Reviewer User']);
         $this->grantPerformancePermissions($user);
@@ -1089,6 +1111,7 @@ class PerformanceEvaluationDashboardTest extends TestCase
     public function test_existing_medium_performance_need_is_upgraded_when_final_result_becomes_weak(): void
     {
         $user = \App\Models\User::factory()->create(['name' => 'HR Specialist']);
+        grantAllStructures($user);
         $manager = \App\Models\User::factory()->create(['name' => 'Team Manager']);
         $hrReviewer = \App\Models\User::factory()->create(['name' => 'Reviewer User']);
         $this->grantPerformancePermissions($user);
@@ -1208,6 +1231,7 @@ class PerformanceEvaluationDashboardTest extends TestCase
         app()->setLocale('az');
 
         $user = \App\Models\User::factory()->create(['name' => 'HR Specialist']);
+        grantAllStructures($user);
         $this->grantPerformancePermissions($user);
         Role::findOrCreate('admin', 'web');
         Permission::findOrCreate('get-notification', 'web');
@@ -1301,6 +1325,7 @@ class PerformanceEvaluationDashboardTest extends TestCase
     public function test_cycle_delete_is_confirmed_via_modal_before_execution(): void
     {
         $user = \App\Models\User::factory()->create(['name' => 'HR Specialist']);
+        grantAllStructures($user);
         $this->grantPerformancePermissions($user);
 
         $cycle = PerformanceCycle::query()->create([
@@ -1403,7 +1428,10 @@ class PerformanceEvaluationDashboardTest extends TestCase
     public function test_manager_can_open_user_personnel_links_and_save_manual_link(): void
     {
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $this->grantPerformancePermissions($user);
+        // Bağ ekranı istifadəçi idarəçiliyidir — manage-users tələb olunur.
+        $user->givePermissionTo(Permission::findOrCreate('manage-users', 'web'));
         Role::findOrCreate('admin', 'web');
         Permission::findOrCreate('get-notification', 'web');
 
@@ -1440,7 +1468,10 @@ class PerformanceEvaluationDashboardTest extends TestCase
     public function test_user_personnel_links_render_stays_within_query_budget(): void
     {
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $this->grantPerformancePermissions($user);
+        // Bağ ekranı istifadəçi idarəçiliyidir — manage-users tələb olunur.
+        $user->givePermissionTo(Permission::findOrCreate('manage-users', 'web'));
         Role::findOrCreate('admin', 'web');
         Permission::findOrCreate('get-notification', 'web');
 

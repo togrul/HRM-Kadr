@@ -241,7 +241,7 @@ class PerformanceFormResultTest extends TestCase
             return $this->managerUser;
         }
 
-        $this->managerUser = User::factory()->create();
+        $this->managerUser = grantAllStructures(User::factory()->create());
         foreach (['show-performance-evaluation', 'manage-performance-evaluation', 'review-performance-evaluation'] as $permission) {
             $this->managerUser->givePermissionTo(Permission::findOrCreate($permission, 'web'));
         }

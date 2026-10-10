@@ -379,7 +379,7 @@ class ApplicationStageActionPanel extends Component
             'uploadedDocumentFiles.'.$documentKey => ['required', 'array', 'min:1'],
             'uploadedDocumentFiles.'.$documentKey.'.*' => [
                 'required',
-                File::types(['pdf', 'doc', 'docx', 'xls', 'xlsx', 'csv', 'txt', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'])
+                File::types(['pdf', 'doc', 'docx', 'xls', 'xlsx', 'csv', 'txt', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'])
                     ->max(max(1, (int) config('candidates.documents.max_upload_kb', 10240))),
             ],
         ]);

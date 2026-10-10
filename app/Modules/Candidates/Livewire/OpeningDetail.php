@@ -6,8 +6,10 @@ use App\Livewire\Traits\SideModalAction;
 use App\Models\Candidate;
 use App\Models\JobOpening;
 use App\Modules\Candidates\Application\Services\CandidateApplicationStageService;
+use App\Modules\Candidates\Support\CandidateStructureScope;
 use App\Modules\Candidates\Support\Traits\InteractsWithRecruitmentPresentation;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
@@ -25,6 +27,11 @@ class OpeningDetail extends Component
     public function mount(JobOpening $opening): void
     {
         $this->authorize('viewAny', Candidate::class);
+        // Strukturu olan vakansiya yalnız həmin struktur görünürlükdə olanda açılır.
+        abort_unless(
+            $opening->structure_id === null || CandidateStructureScope::for()->allows($opening->structure_id),
+            403
+        );
 
         $this->opening = $opening;
         $this->loadOpening();
@@ -49,7 +56,7 @@ class OpeningDetail extends Component
             'position:id,name',
             'owner:id,name,email',
             'creator:id,name,email',
-            'applications' => fn ($query) => $query
+            'applications' => fn (Relation $query) => CandidateStructureScope::constrainApplications($query->getQuery())
                 ->with([
                     'candidate:id,name,surname,patronymic,phone',
                     'source:id,name',

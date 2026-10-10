@@ -6,14 +6,12 @@ use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendanceDailyMonitorReadService;
 use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
 use App\Services\StructurePathService;
-use App\Traits\NestedStructureTrait;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class DailyMonitor extends Component
 {
-    use NestedStructureTrait;
     use WithPagination;
 
     public string $date = '';
@@ -57,9 +55,7 @@ class DailyMonitor extends Component
 
     public function render(): View
     {
-        $structureIds = $this->selectedStructureId
-            ? $this->getNestedStructure($this->selectedStructureId)
-            : [];
+        $structureIds = app(AttendanceStructureScopeReadService::class)->resolveIds($this->selectedStructureId);
 
         /** @var AttendanceDailyMonitorReadService $readService */
         $readService = app(AttendanceDailyMonitorReadService::class);

@@ -26,6 +26,7 @@ function salaryPolicyManager(): User
     foreach (['show-compensation', 'manage-compensation', 'view-compensation-amounts'] as $permission) {
         $user->givePermissionTo(Permission::findOrCreate($permission, 'web'));
     }
+    grantAllStructures($user);
     test()->actingAs($user);
 
     return $user;

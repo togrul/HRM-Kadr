@@ -10,11 +10,14 @@ use App\Modules\Personnel\Application\Services\ProfessionalPortfolioRegistrySync
 use App\Modules\Personnel\Application\Services\ProfessionalPortfolioWorkflowPolicyService;
 use App\Modules\Personnel\Exports\ProfessionalPortfolioEventsExport;
 use App\Modules\Personnel\Support\ProfessionalPortfolio\HandlesPortfolioAttachments;
+use App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioOptions;
 use App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioPermissionMatrix;
+use App\Services\StructureService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Maatwebsite\Excel\Excel as ExcelWriter;
@@ -26,6 +29,7 @@ class EventsManager extends Component
     use HandlesPortfolioAttachments;
     use WithFileUploads;
 
+    #[Locked]
     public int $personnelId;
 
     public string $search = '';
@@ -70,6 +74,7 @@ class EventsManager extends Component
     {
         abort_unless(auth()->user()?->canAny(ProfessionalPortfolioPermissionMatrix::eventViewPermissions()), 403);
 
+        abort_unless(app(StructureService::class)->allowsPersonnelId(auth()->user(), $personnelId), 403);
         $this->personnelId = $personnelId;
         $this->statusFilter = 'all';
     }
@@ -314,8 +319,8 @@ class EventsManager extends Component
     protected function rules(): array
     {
         $rules = [
-            'form.event_type' => ['required', 'string', Rule::in(\App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioOptions::eventTypes())],
-            'form.participation_role' => ['required', 'string', Rule::in(\App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioOptions::participationRoles())],
+            'form.event_type' => ['required', 'string', Rule::in(ProfessionalPortfolioOptions::eventTypes())],
+            'form.participation_role' => ['required', 'string', Rule::in(ProfessionalPortfolioOptions::participationRoles())],
             'form.title' => 'required|string|max:255',
             'form.topic' => 'nullable|string|max:255',
             'form.organizer_name' => 'nullable|string|max:255',
@@ -323,12 +328,12 @@ class EventsManager extends Component
             'form.end_date' => 'nullable|date|after_or_equal:form.start_date',
             'form.location' => 'nullable|string|max:255',
             'form.country_id' => 'nullable|integer|exists:countries,id',
-            'form.attendance_format' => ['required', 'string', Rule::in(\App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioOptions::attendanceFormats())],
-            'form.strategic_level' => ['required', 'string', Rule::in(\App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioOptions::strategicLevels())],
+            'form.attendance_format' => ['required', 'string', Rule::in(ProfessionalPortfolioOptions::attendanceFormats())],
+            'form.strategic_level' => ['required', 'string', Rule::in(ProfessionalPortfolioOptions::strategicLevels())],
             'form.result_summary' => 'nullable|string',
             'form.impact_summary' => 'nullable|string',
             'form.source_url' => 'nullable|url',
-            'form.visibility' => ['required', 'string', Rule::in(\App\Modules\Personnel\Support\ProfessionalPortfolio\ProfessionalPortfolioOptions::eventVisibilities())],
+            'form.visibility' => ['required', 'string', Rule::in(ProfessionalPortfolioOptions::eventVisibilities())],
             'form.notes' => 'nullable|string',
             'certificateUpload' => 'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx',
             'agendaUpload' => 'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx',

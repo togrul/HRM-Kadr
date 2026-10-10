@@ -43,7 +43,7 @@ class LoansTab extends PayrollTab
     #[Computed]
     public function loans(): Collection
     {
-        if (! $this->selectedTabelNo) {
+        if (! $this->selectedTabelNo || ! $this->tabelInScope($this->selectedTabelNo)) {
             return collect();
         }
 
@@ -66,6 +66,7 @@ class LoansTab extends PayrollTab
     {
         abort_unless($this->canManage(), 403);
         abort_unless($this->selectedTabelNo !== null, 422);
+        abort_unless($this->tabelInScope($this->selectedTabelNo), 403);
 
         $data = $this->validate([
             'loanForm.type' => 'required|in:loan,advance',
@@ -91,7 +92,9 @@ class LoansTab extends PayrollTab
     public function deleteLoan(int $loanId): void
     {
         abort_unless($this->canManage(), 403);
-        EmployeeLoan::whereKey($loanId)->delete();
+        // Yalnız seçilmiş (və görünən) işçinin krediti silinə bilər.
+        abort_unless($this->selectedTabelNo !== null && $this->tabelInScope($this->selectedTabelNo), 403);
+        EmployeeLoan::query()->where('tabel_no', $this->selectedTabelNo)->findOrFail($loanId)->delete();
         $this->announce('deleted');
     }
 }

@@ -28,6 +28,11 @@ return [
         'permission_assigned' => 'İcazə rola uğurla təyin olundu!',
         'delete_role_description' => 'Bu rolu silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarılmır.',
         'delete_permission_description' => 'Bu icazəni silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarılmır.',
+        'system_role_protected' => 'Bu sistem roludur — kodda adı ilə istifadə olunur, adını dəyişmək və ya silmək olmaz.',
+        'system_role_name_reserved' => 'Bu ad sistem roluna aiddir — başqa ad seçin.',
+        'own_role_locked' => 'Öz rolunuzun icazələrini dəyişə bilməzsiniz.',
+        'role_exceeds_your_permissions' => 'Sizdə olmayan icazəni rola verə və ya belə icazəsi olan rolu dəyişə bilməzsiniz.',
+        'role_exceeds_your_structures' => 'Rola özünüzün görmədiyi strukturu və ya «bütün strukturlar» görünürlüyünü verə bilməzsiniz.',
     ],
     'badges' => [
         'modules' => [

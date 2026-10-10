@@ -28,6 +28,7 @@ class PayslipPrintTest extends TestCase
         $payslip = $this->makeLockedPayslip($personnel->tabel_no);
 
         $user = User::factory()->create(['email' => 'owner@example.test']);
+        $this->linkUserToPersonnel($user, $personnel);
         $this->actingAs($user);
 
         $this->get(route('payroll.payslip.print', $payslip->id))
@@ -52,6 +53,7 @@ class PayslipPrintTest extends TestCase
         $payslip = $this->makeLockedPayslip($personnel->tabel_no, 'calculated');
 
         $user = User::factory()->create(['email' => 'c@example.test']);
+        $this->linkUserToPersonnel($user, $personnel);
         $this->actingAs($user);
 
         $this->get(route('payroll.payslip.print', $payslip->id))->assertNotFound();

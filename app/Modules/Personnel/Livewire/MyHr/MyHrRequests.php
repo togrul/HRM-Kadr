@@ -12,6 +12,7 @@ use App\Models\PersonnelVacation;
 use App\Modules\Personnel\Application\Services\MyHr\ApprovalRouteResolverService;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestCorrectionService;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestsReadService;
+use App\Modules\Personnel\Livewire\MyHr\Concerns\ResolvesOwnPersonnel;
 use App\Modules\Personnel\Support\MyHr\MyHrAccess;
 use App\Services\Absence\AbsenceOverlapGuard;
 use App\Support\Uploads\UploadRules;
@@ -26,6 +27,7 @@ use Livewire\WithFileUploads;
 
 class MyHrRequests extends Component
 {
+    use ResolvesOwnPersonnel;
     use WithFileUploads;
 
     /** Create form => the permission that may submit it. */
@@ -34,8 +36,6 @@ class MyHrRequests extends Component
         'vacation' => 'submit-self-service-vacations',
         'business_trip' => 'submit-self-service-business-trips',
     ];
-
-    public int $personnelId;
 
     private ?Personnel $personnelRecord = null;
 
@@ -67,11 +67,10 @@ class MyHrRequests extends Component
 
     public array $correctionForm = [];
 
-    public function mount(int $personnelId, string $openForm = ''): void
+    public function mount(?int $personnelId = null, string $openForm = ''): void
     {
-        abort_if($personnelId <= 0, 404);
-
-        $this->personnelId = $personnelId;
+        app(MyHrAccess::class)->authorize(Auth::user());
+        $this->bindOwnPersonnel($personnelId);
         $this->resetCreateForms();
 
         // Arrived from an overview quick link: open that form straight away, but only if the
@@ -200,7 +199,7 @@ class MyHrRequests extends Component
         }
 
         if ($this->leaveDocument instanceof TemporaryUploadedFile) {
-            $payload['document_path'] = $this->leaveDocument->store('leaves', 'public');
+            $payload['document_path'] = $this->leaveDocument->store('leaves', \App\Support\Uploads\PrivateFiles::DISK);
         }
 
         Leave::query()->create($payload);

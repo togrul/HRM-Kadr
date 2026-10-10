@@ -321,6 +321,10 @@ Useful optional flags:
 - `RUN_EVENT_CACHE=1`
 - `RESTART_QUEUE_WORKER=1`
 
+Struktur görünürlüyü fail closed qaydasına keçən yerləşdirmədə (`roles.all_structures`
+miqrasiyası) yerləşdirmədən əvvəl və sonra `php artisan security:audit-role-structures`
+işə salın — bax [structure-scope-security.md](structure-scope-security.md).
+
 ## What you need to edit before running
 
 These are the values you must set for almost every new server:

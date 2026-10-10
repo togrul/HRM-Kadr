@@ -126,7 +126,7 @@ class TemplateManager extends Component
         $payload = $this->samplePayload();
         $renderer = app(NotificationTemplateRenderer::class);
         $subject = $renderer->render((string) ($validated['form']['subject_template'] ?? ''), $payload);
-        $body = $renderer->render((string) $validated['form']['body_template'], $payload);
+        $body = $renderer->render((string) $validated['form']['body_template'], $payload, $validated['form']['format'] === 'html');
 
         Mail::to($validated['testEmail'])->send(new NotificationTemplatePreviewMail(
             subjectLine: $subject !== '' ? $subject : __('notifications::common.mail.subject_notification'),

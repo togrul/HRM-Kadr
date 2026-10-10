@@ -46,7 +46,7 @@ class PayslipsTab extends PayrollTab
             return collect();
         }
 
-        return Payslip::query()
+        return $this->scopeByPersonnel(Payslip::query())
             ->where('payroll_run_id', $this->runId)
             ->with('personnel:tabel_no,surname,name')
             ->orderBy('tabel_no')
@@ -60,7 +60,7 @@ class PayslipsTab extends PayrollTab
             return null;
         }
 
-        return Payslip::query()->with(['lines', 'personnel:tabel_no,surname,name'])->find($this->selectedPayslipId);
+        return $this->scopeByPersonnel(Payslip::query())->with(['lines', 'personnel:tabel_no,surname,name'])->find($this->selectedPayslipId);
     }
 
     /**
@@ -80,6 +80,8 @@ class PayslipsTab extends PayrollTab
 
     public function viewPayslip(int $payslipId): void
     {
+        abort_unless($this->scopeByPersonnel(Payslip::query())->whereKey($payslipId)->exists(), 403);
+
         $this->selectedPayslipId = $payslipId;
     }
 
@@ -92,7 +94,7 @@ class PayslipsTab extends PayrollTab
     {
         abort_unless($this->canManage(), 403);
 
-        if (! $this->attempt(fn () => $service->deletePayslip(Payslip::with('run')->findOrFail($payslipId)))) {
+        if (! $this->attempt(fn () => $service->deletePayslip($this->scopeByPersonnel(Payslip::query())->with('run')->findOrFail($payslipId)))) {
             return;
         }
 

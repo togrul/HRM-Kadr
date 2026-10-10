@@ -86,6 +86,7 @@ class NotificationAudienceResolverTest extends TestCase
         ]);
         $adminUser->assignRole($adminRole);
 
+        $this->linkFixtureUsersByEmail();
         $resolved = app(NotificationAudienceResolver::class)->resolve([
             'targets' => ['employee', 'same_structure', 'admins'],
         ], $subject);
@@ -179,6 +180,7 @@ class NotificationAudienceResolverTest extends TestCase
             'is_active' => true,
         ]);
 
+        $this->linkFixtureUsersByEmail();
         $resolved = app(NotificationAudienceResolver::class)->resolve([
             'targets' => ['direct_manager', 'department', 'specific_users'],
             'structure_ids' => [8],
@@ -251,6 +253,7 @@ class NotificationAudienceResolverTest extends TestCase
             'is_active' => true,
         ]);
 
+        $this->linkFixtureUsersByEmail();
         $resolved = app(NotificationAudienceResolver::class)->resolve([
             'targets' => ['employee'],
             'structure_ids' => [18],
@@ -348,6 +351,7 @@ class NotificationAudienceResolverTest extends TestCase
             'is_active' => true,
         ]);
 
+        $this->linkFixtureUsersByEmail();
         $resolved = app(NotificationAudienceResolver::class)->resolve([
             'targets' => ['manager_chain'],
         ], $subject);

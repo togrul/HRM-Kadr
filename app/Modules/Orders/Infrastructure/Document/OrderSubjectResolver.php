@@ -8,6 +8,8 @@ use App\Models\Personnel;
 use App\Models\Position;
 use App\Models\Structure;
 use App\Modules\Orders\Application\Document\OrderComposition;
+use App\Services\StructureScope;
+use App\Services\StructureService;
 
 /**
  * Who an order is about: validates that the composer picked the subject a template
@@ -63,7 +65,7 @@ class OrderSubjectResolver
             return [];
         }
 
-        return Personnel::query()
+        return $this->scope()->constrain(Personnel::query(), 'personnels.structure_id')
             ->active()
             ->where(fn ($q) => $q->nameLike($term)->orWhere('tabel_no', 'like', "%{$term}%"))
             ->orderBy('surname')
@@ -99,7 +101,56 @@ class OrderSubjectResolver
     {
         $personnel = Personnel::find($personnelId);
 
+        if ($personnel && ! $this->scope()->allows($personnel->structure_id)) {
+            return null;
+        }
+
         return $personnel ? ['id' => $personnel->id, 'label' => $personnel->fullname] : null;
+    }
+
+    /**
+     * İşçi seçimləri cari istifadəçinin struktur görünürlüyü ilə məhdudlaşır (fail closed).
+     */
+    private function scope(): StructureScope
+    {
+        return app(StructureService::class)->scopeFor();
+    }
+
+    /**
+     * Seçilmiş subyektlər (işçi, iştirakçılar, işə qəbul hədəf strukturu)
+     * istifadəçinin strukturlarından kənardadırsa xəta qaytarır — müştəri tərəfdən
+     * göndərilən id-lər serverdə yoxlanılır.
+     *
+     * @return array<string,string>
+     */
+    public function scopeErrors(OrderComposition $composition, ?StructureScope $scope = null): array
+    {
+        $scope ??= $this->scope();
+
+        if ($scope->isAll()) {
+            return [];
+        }
+
+        if ($composition->personnelId && ! $scope->allows(Personnel::withTrashed()->whereKey($composition->personnelId)->value('structure_id'))) {
+            return ['personnelId' => __('orders::order_composer.errors.subject_out_of_scope')];
+        }
+
+        $participantIds = array_map('intval', array_column($composition->participantList(), 'personnel_id'));
+        if ($participantIds !== []) {
+            $structureIds = Personnel::withTrashed()->whereKey($participantIds)->pluck('structure_id', 'id');
+
+            foreach ($participantIds as $id) {
+                if (! $scope->allows($structureIds[$id] ?? null)) {
+                    return ['participants' => __('orders::order_composer.errors.subject_out_of_scope')];
+                }
+            }
+        }
+
+        if ($composition->hireStructureId && ! $scope->allows($composition->hireStructureId)) {
+            return ['hireStructureId' => __('orders::order_composer.errors.hire_structure_out_of_scope')];
+        }
+
+        return [];
     }
 
     /**
@@ -152,7 +203,7 @@ class OrderSubjectResolver
         $duplicates = array_keys(array_filter(array_count_values($ids), fn (int $count): bool => $count > 1));
         if ($duplicates !== []) {
             return ['participants' => __('orders::order_composer.errors.participant_duplicate', [
-                'name' => $this->personnelPick((int) $duplicates[0])['label'] ?? '#'.$duplicates[0],
+                'name' => $this->personnel((int) $duplicates[0])->fullname ?? '#'.$duplicates[0],
             ])];
         }
 
@@ -196,7 +247,7 @@ class OrderSubjectResolver
             return [];
         }
 
-        return Personnel::query()->whereKey($ids)->get(['id', 'surname', 'name', 'patronymic', 'tabel_no'])
+        return $this->scope()->constrain(Personnel::query()->whereKey($ids), 'personnels.structure_id')->get(['id', 'surname', 'name', 'patronymic', 'tabel_no'])
             ->mapWithKeys(fn (Personnel $p): array => [(int) $p->id => trim("{$p->surname} {$p->name} {$p->patronymic}")." ({$p->tabel_no})"])
             ->all();
     }

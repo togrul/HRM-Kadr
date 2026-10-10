@@ -195,7 +195,8 @@ class ActivityLogDashboard extends Component
             return null;
         }
 
-        return AuditActivity::query()->find($this->selectedActivityId);
+        // Detal paneli də siyahı ilə eyni görünürlükdən keçir (id ilə başqa strukturun sətri açılmasın).
+        return $this->reader()->visibleQuery()->find($this->selectedActivityId);
     }
 
     private function logNameOptions(): Collection

@@ -12,6 +12,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -24,6 +25,7 @@ class CalendarRegimes extends Component
 
     public int $month;
 
+    #[Locked]
     public bool $canManage = false;
 
     public ?int $editingId = null;
@@ -78,7 +80,7 @@ class CalendarRegimes extends Component
 
     public function save(AttendanceCalendarManagementService $service): void
     {
-        if (! $this->canManage) {
+        if (! app(AttendanceAuthorizationService::class)->can('attendance.calendars.manage')) {
             abort(403);
         }
 
@@ -146,7 +148,7 @@ class CalendarRegimes extends Component
 
     public function remove(int $id, AttendanceCalendarManagementService $service): void
     {
-        if (! $this->canManage) {
+        if (! app(AttendanceAuthorizationService::class)->can('attendance.calendars.manage')) {
             abort(403);
         }
 

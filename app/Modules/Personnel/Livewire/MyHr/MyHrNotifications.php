@@ -4,6 +4,7 @@ namespace App\Modules\Personnel\Livewire\MyHr;
 
 use App\Modules\Notifications\Support\DispatchesNotificationRefresh;
 use App\Modules\Notifications\Support\NotificationCountCache;
+use App\Modules\Personnel\Livewire\MyHr\Concerns\ResolvesOwnPersonnel;
 use App\Modules\Personnel\Support\MyHr\MyHrAccess;
 use App\Notifications\NewLeaveRequested;
 use App\Notifications\NewPersonnelAdded;
@@ -18,6 +19,7 @@ use Livewire\WithPagination;
 class MyHrNotifications extends Component
 {
     use DispatchesNotificationRefresh;
+    use ResolvesOwnPersonnel;
     use WithPagination;
 
     public const PER_PAGE = 12;
@@ -32,13 +34,11 @@ class MyHrNotifications extends Component
         PersonnelWasDeleted::class,
     ];
 
-    public ?int $personnelId = null;
-
     public function mount(MyHrAccess $access, ?int $personnelId = null): void
     {
         $access->authorize(Auth::user());
 
-        $this->personnelId = $personnelId ?: $access->resolvePersonnelId(Auth::user());
+        $this->bindOwnPersonnel($personnelId ?: null, requireLink: false);
 
         $user = Auth::user();
         if (! $user) {

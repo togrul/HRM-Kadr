@@ -25,7 +25,7 @@ class LearningAssignmentManagerTest extends TestCase
         Storage::fake('employee_content');
         $this->seedReferenceData();
 
-        $hr = User::factory()->create(['is_active' => true]);
+        $hr = grantAllStructures(User::factory()->create(['is_active' => true]));
         $hr->givePermissionTo([
             Permission::findOrCreate('assign-employee-content', 'web'),
             Permission::findOrCreate('manage-employee-content-library', 'web'),
@@ -62,7 +62,7 @@ class LearningAssignmentManagerTest extends TestCase
     {
         $this->seedReferenceData();
 
-        $hr = User::factory()->create(['is_active' => true]);
+        $hr = grantAllStructures(User::factory()->create(['is_active' => true]));
         $hr->givePermissionTo(Permission::findOrCreate('assign-employee-content', 'web'));
 
         $personnel = $this->makePersonnel('employee@example.test');

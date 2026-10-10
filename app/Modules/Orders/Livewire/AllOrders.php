@@ -7,6 +7,7 @@ use App\Livewire\Traits\SideModalAction;
 use App\Models\Order;
 use App\Models\OrderLog;
 use App\Modules\Orders\Application\Document\OrderTemplateProvider;
+use App\Modules\Orders\Application\Services\OrderVisibilityService;
 use App\Modules\Orders\Contracts\OrderDrafter;
 use App\Modules\Orders\Domain\Contracts\OrderTypeStatusLookupReadRepository;
 use App\Modules\Orders\Exports\OrderExport;
@@ -14,7 +15,6 @@ use App\Modules\Orders\Infrastructure\Document\OrderDeletionService;
 use App\Modules\Orders\Infrastructure\Document\OrderFinalPdfService;
 use App\Modules\Orders\Infrastructure\Document\OrderIssueService;
 use App\Modules\Orders\Infrastructure\Document\OrderStatusTransitionService;
-use App\Services\StructureService;
 use Carbon\Carbon;
 use DomainException;
 use Illuminate\Contracts\View\View;
@@ -28,7 +28,6 @@ use Illuminate\Support\LazyCollection;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Isolate;
-use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
@@ -53,9 +52,6 @@ class AllOrders extends Component
 
     #[Url]
     public $search = [];
-
-    #[Locked]
-    public array $accessibleStructureIds = [];
 
     public function selectOrder($id): void
     {
@@ -130,7 +126,7 @@ class AllOrders extends Component
     #[Renderless]
     public function deleteOrder(string $order_no, OrderDeletionService $deletions): void
     {
-        $order = OrderLog::where('order_no', $order_no)->first();
+        $order = $this->findVisibleOrder($order_no);
         if (! $order) {
             return;
         }
@@ -158,12 +154,12 @@ class AllOrders extends Component
     #[Renderless]
     public function duplicateOrder(string $order_no, OrderIssueService $issuer): void
     {
-        $order = OrderLog::where('order_no', $order_no)->first();
+        $order = $this->findVisibleOrder($order_no);
         if (! $order) {
             return;
         }
 
-        abort_unless((bool) auth()->user()?->can('add-orders'), 403);
+        $this->authorize('transition', $order);
 
         $issuer->duplicateWord($order);
 
@@ -196,7 +192,7 @@ class AllOrders extends Component
     #[Renderless]
     public function restoreData($order_no): void
     {
-        $orderLog = OrderLog::withTrashed()->where('order_no', $order_no)->first();
+        $orderLog = $this->findVisibleOrder((string) $order_no, withTrashed: true);
         if (! $orderLog) {
             return;
         }
@@ -213,7 +209,7 @@ class AllOrders extends Component
     #[Renderless]
     public function forceDeleteData($order_no, OrderDeletionService $deletions): void
     {
-        $model = OrderLog::withTrashed()->where('order_no', $order_no)->first();
+        $model = $this->findVisibleOrder((string) $order_no, withTrashed: true);
 
         if (! $model) {
             return;
@@ -240,14 +236,14 @@ class AllOrders extends Component
 
     public function printOrder(string $order_no): StreamedResponse
     {
-        $order = OrderLog::where('order_no', $order_no)->first();
+        $order = $this->findVisibleOrder($order_no);
         if (! $order) {
             abort(404);
         }
 
         // Only Word-engine orders are printable: they carry their filled .docx.
         abort_unless((string) $order->template_render_mode === OrderIssueService::RENDER_MODE_DOCX, 404);
-        abort_unless((bool) auth()->user()?->can('export-orders'), 403);
+        $this->authorize('download', $order);
 
         // Order numbers may contain "/" (e.g. 2026/ƏM-145), which is illegal in a
         // download filename — fold path separators to a dash.
@@ -265,14 +261,14 @@ class AllOrders extends Component
      */
     public function downloadPdf(string $order_no, OrderFinalPdfService $finalPdf): ?BinaryFileResponse
     {
-        $order = OrderLog::where('order_no', $order_no)->first();
+        $order = $this->findVisibleOrder($order_no);
         if (! $order) {
             abort(404);
         }
 
         abort_unless((string) $order->template_render_mode === OrderIssueService::RENDER_MODE_DOCX, 404);
         abort_unless((int) $order->status_id === OrderStatusEnum::APPROVED->value, 404);
-        abort_unless((bool) auth()->user()?->can('export-orders'), 403);
+        $this->authorize('download', $order);
 
         $pdf = $finalPdf->forDownload($order);
         if ($pdf === null) {
@@ -290,7 +286,7 @@ class AllOrders extends Component
     public function approveOrder(string $order_no): void
     {
         // A draft has no document yet — it is finished in the composer first.
-        if (($order = OrderLog::where('order_no', $order_no)->first()) && OrderIssueService::isDraft($order)) {
+        if (($order = $this->findVisibleOrder($order_no)) && OrderIssueService::isDraft($order)) {
             $this->dispatch('orderError', __('orders::order_list.messages.draft_not_ready'));
 
             return;
@@ -324,7 +320,7 @@ class AllOrders extends Component
      */
     private function changeStatus(string $order_no, string $action, string $successKey, string $reason = ''): void
     {
-        $order = OrderLog::where('order_no', $order_no)->first();
+        $order = $this->findVisibleOrder($order_no);
         if (! $order) {
             return;
         }
@@ -332,7 +328,7 @@ class AllOrders extends Component
         if ((int) $order->status_id === OrderStatusEnum::APPROVED->value && in_array($action, ['cancel', 'revert'], true)) {
             $this->authorize('revert', $order);
         } else {
-            abort_unless((bool) auth()->user()?->can('add-orders'), 403);
+            $this->authorize('transition', $order);
         }
 
         $transitions = app(OrderStatusTransitionService::class);
@@ -358,26 +354,21 @@ class AllOrders extends Component
      */
     protected function baseQuery(): Builder
     {
-        $globalOrderIds = Order::globalVisibilityOrderIds();
-
-        return OrderLog::query()
-            ->where(function ($query) use ($globalOrderIds) {
-                // Globally-visible legacy orders OR orders whose personnel sit in an
-                // accessible structure. orWhereHas (not whereNotIn) so block-engine
-                // orders with a null order_id are included rather than dropped by
-                // SQL's "NULL NOT IN (...)".
-                $query->when(
-                    $globalOrderIds !== [],
-                    fn ($q) => $q->whereIn('order_id', $globalOrderIds)
-                )->orWhereHas('personnels', fn ($personnelQuery) => $personnelQuery->whereIn('structure_id', $this->accessibleStructureIds))
-                    // Pending hire (işə qəbul) orders have no personnel attached until
-                    // approval, so they would otherwise be invisible. Scope them by the
-                    // target structure frozen in the order snapshot.
-                    ->orWhere(fn ($q) => $q
-                        ->where('template_render_mode', OrderIssueService::RENDER_MODE_DOCX)
-                        ->whereIn('template_snapshot->hire_structure_id', $this->accessibleStructureIds));
-            })
+        return app(OrderVisibilityService::class)
+            ->constrain(OrderLog::query())
             ->filter($this->search ?? []);
+    }
+
+    /**
+     * Siyahıdakı əməliyyatlar əmri yalnız siyahının özü ilə eyni görünürlük sorğusundan
+     * tapır: struktur xaricindəki əmr «tapılmadı» kimi qəbul edilir.
+     */
+    private function findVisibleOrder(string $order_no, bool $withTrashed = false): ?OrderLog
+    {
+        return app(OrderVisibilityService::class)
+            ->visibleQuery(auth()->user(), $withTrashed)
+            ->where('order_no', $order_no)
+            ->first();
     }
 
     /**
@@ -531,13 +522,11 @@ class AllOrders extends Component
         );
     }
 
-    public function mount(
-        StructureService $structureService
-    ): void {
+    public function mount(): void
+    {
         $this->authorize('viewAny', Order::class);
         $this->fillFilter();
         $this->selectedOrder = $this->selectedOrder ?? request()->query('selectedOrder');
-        $this->accessibleStructureIds = $structureService->getAccessibleStructures();
 
         // Deep link from the command palette / quick links: land with the composer open.
         // ?preset=<template code> lands with that order type already chosen (e.g. a vacation order).

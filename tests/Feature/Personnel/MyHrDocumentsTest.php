@@ -62,7 +62,8 @@ class MyHrDocumentsTest extends TestCase
 
         Livewire::test(MyHrDocuments::class, ['personnelId' => $personnel->id])
             ->call('openDocument', $document->id)
-            ->assertRedirect('/storage/files/test-manual.pdf');
+            // Sənəd özəl diskdədir — icazə yoxlayan route-a yönləndirilir, /storage linkinə yox.
+            ->assertRedirect(route('personnel.files.download', $document));
     }
 
     public function test_hidden_or_future_documents_do_not_appear_in_my_hr_documents(): void
@@ -106,6 +107,11 @@ class MyHrDocumentsTest extends TestCase
     }
 
     private function makePersonnel(string $email): Personnel
+    {
+        return $this->linkFixtureUserByEmail($this->createPersonnelRecord($email));
+    }
+
+    private function createPersonnelRecord(string $email): Personnel
     {
         return Personnel::withoutEvents(fn () => Personnel::query()->create([
             'tabel_no' => 'TB'.Str::upper(Str::random(6)),

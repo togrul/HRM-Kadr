@@ -2,6 +2,7 @@
 
 namespace App\Modules\Services\Livewire\Roles;
 
+use App\Modules\Services\Livewire\Concerns\AuthorizesRoleManagement;
 use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Str;
@@ -15,6 +16,7 @@ use Spatie\Permission\Models\Permission;
 #[On('permissionWasDeleted')]
 class Permissions extends Component
 {
+    use AuthorizesRoleManagement;
     use AuthorizesSettingsAccess;
     use WithoutUrlPagination, WithPagination;
 
@@ -70,9 +72,11 @@ class Permissions extends Component
         $data = $this->validate();
 
         if ($this->permission_id) {
+            // Mövcud icazənin adı dəyişdirilmir: kod icazəni adı ilə yoxlayır, rollar isə id ilə
+            // bağlıdır — ad dəyişmək (və ya iki icazənin adını dəyişdirib yerini dəyişmək)
+            // rola görünmədən başqa hüquq vermək olardı. Yalnız təsvir yenilənir.
             $permission = Permission::findOrFail($this->permission_id);
             $permission->forceFill([
-                'name' => $data['permission_name'],
                 'description' => $data['permission_description'],
             ])->save();
         } else {

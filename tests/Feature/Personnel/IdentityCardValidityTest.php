@@ -18,7 +18,7 @@ function idCardEditor(): array
 {
     Role::findOrCreate('admin', 'web');
     Permission::findOrCreate('get-notification', 'web');
-    $user = User::factory()->create();
+    $user = grantAllStructures(User::factory()->create());
 
     foreach (['add-personnels', 'edit-personnels'] as $permission) {
         $user->givePermissionTo(Permission::findOrCreate($permission, 'web'));

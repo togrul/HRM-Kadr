@@ -7,6 +7,8 @@ use App\Models\SuccessionPlan;
 use App\Models\TalentAssessment;
 use App\Models\TalentPool;
 use App\Models\TalentPoolMember;
+use App\Models\User;
+use App\Modules\PerformanceEvaluation\Support\PerformanceStructureScope;
 use Illuminate\Support\Collection;
 
 /**
@@ -21,9 +23,11 @@ class SuccessionService
      *
      * @return array<int, array<string, mixed>>
      */
-    public function nineBox(?int $cycleId): array
+    public function nineBox(?int $cycleId, ?User $viewer = null): array
     {
         $assessments = TalentAssessment::query()
+            // Baxan istifadəçi verilibsə, yalnız onun struktur görünürlüyündəki işçilər.
+            ->when($viewer, fn ($q) => PerformanceStructureScope::onPersonnelColumn($q, 'talent_assessments.personnel_id', $viewer))
             ->when($cycleId, fn ($q) => $q->where('performance_cycle_id', $cycleId), fn ($q) => $q->whereNull('performance_cycle_id'))
             ->with('personnel:id,surname,name,patronymic')
             ->get();

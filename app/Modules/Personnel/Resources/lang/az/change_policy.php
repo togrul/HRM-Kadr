@@ -62,5 +62,6 @@ return [
     'validation' => [
         'order_only' => ':group yalnız əmrlə dəyişdirilir.',
         'reason_required' => 'Bu dəyişiklik jurnala yazılır: səbəbi ən azı :min simvolla göstərin.',
+        'pending_flag_locked' => 'Təsdiqlənmiş əməkdaş yenidən təsdiq gözləyən vəziyyətə qaytarıla bilməz.',
     ],
 ];

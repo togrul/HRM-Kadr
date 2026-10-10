@@ -43,7 +43,7 @@
                                 <x-ui.file-upload
                                     model="uploadedFile"
                                     :data="$uploadedFile"
-                                    accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.jpg,.jpeg,.png,.gif,.webp,.bmp,.svg"
+                                    accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.jpg,.jpeg,.png,.gif,.webp,.bmp"
                                 />
                                 @error('uploadedFile')
                                     <x-validation>{{ $message }}</x-validation>

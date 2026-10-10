@@ -5,6 +5,7 @@ namespace App\Modules\Personnel\Livewire\MyHr;
 use App\Models\EmployeeContentAssignment;
 use App\Models\Personnel;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrLearningReadService;
+use App\Modules\Personnel\Livewire\MyHr\Concerns\ResolvesOwnPersonnel;
 use App\Modules\Personnel\Support\MyHr\MyHrAccess;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -13,15 +14,13 @@ use Livewire\Component;
 
 class MyHrLearning extends Component
 {
-    public int $personnelId;
+    use ResolvesOwnPersonnel;
 
-    public function mount(MyHrAccess $access, int $personnelId): void
+    public function mount(MyHrAccess $access, ?int $personnelId = null): void
     {
         $access->authorize(Auth::user());
         abort_unless($access->canAccess(Auth::user(), 'view-own-learning-content'), 403);
-        abort_if($personnelId <= 0, 404);
-
-        $this->personnelId = $personnelId;
+        $this->bindOwnPersonnel($personnelId);
     }
 
     public function openContent(int $assignmentId): void

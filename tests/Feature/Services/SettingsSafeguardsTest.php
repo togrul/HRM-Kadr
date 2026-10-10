@@ -25,7 +25,11 @@ class SettingsSafeguardsTest extends TestCase
     private function admin(): User
     {
         $admin = User::factory()->create(['password' => Hash::make('current-secret')]);
-        $admin->givePermissionTo(Permission::findOrCreate('access-settings', 'web'));
+        $admin->givePermissionTo(
+            Permission::findOrCreate('access-settings', 'web'),
+            Permission::findOrCreate('manage-users', 'web'),
+            Permission::findOrCreate('manage-roles', 'web'),
+        );
         $admin->assignRole(Role::findOrCreate('staff', 'web'));
         $this->actingAs($admin);
 
@@ -55,18 +59,25 @@ class SettingsSafeguardsTest extends TestCase
         $this->assertTrue(Hash::check('Brand-New-Pass-1', $admin->refresh()->password));
     }
 
-    public function test_editing_another_user_does_not_ask_for_a_current_password(): void
+    public function test_editing_another_user_asks_for_the_admins_own_password_not_the_targets(): void
     {
         $this->admin();
         $other = User::factory()->create();
 
-        Livewire::test(EditUser::class, ['userModel' => $other->id])
+        $component = Livewire::test(EditUser::class, ['userModel' => $other->id])
             ->assertDontSee(__('services::common.labels.current_password'))
+            ->assertSee(__('services::users.fields.actor_password'))
             ->set('roleId', Role::findOrCreate('staff', 'web')->id)
             ->set('user.password', 'Brand-New-Pass-1')
             ->set('user.confirm-password', 'Brand-New-Pass-1')
             ->call('store')
+            ->assertHasErrors(['user.actor_password' => 'required']);
+
+        $component->set('user.actor_password', 'current-secret')
+            ->call('store')
             ->assertHasNoErrors();
+
+        $this->assertTrue(Hash::check('Brand-New-Pass-1', $other->refresh()->password));
     }
 
     public function test_admin_role_and_roles_with_users_cannot_be_deleted(): void

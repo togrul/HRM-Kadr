@@ -114,6 +114,33 @@ class IntegrationApiTest extends TestCase
     }
 
     /**
+     * İşçi siyahısı icazəsi maaşı açmır: `base_salary` yalnız `hr.compensation:read` ilə
+     * dolur, əks halda sahə qalır, amma null gəlir (sxem dəyişmir).
+     */
+    public function test_base_salary_requires_the_compensation_ability(): void
+    {
+        $this->makePersonnel('TB-1', 'Əliyev', 'Elçin');
+        $regime = CompensationRegime::query()->firstOrCreate(['code' => 'private'], ['name' => 'Özəl', 'is_active' => true]);
+        EmployeeCompensation::query()->create([
+            'tabel_no' => 'TB-1',
+            'regime_id' => $regime->id,
+            'base_amount' => 1800,
+            'currency' => 'AZN',
+            'effective_from' => '2020-01-01',
+            'status' => 'active',
+        ]);
+
+        $employeesOnly = ApiToken::generate('Yalnız işçilər', [Contract::ABILITY_EMPLOYEES])['plain'];
+        $row = $this->withToken($employeesOnly)->getJson('/api/v1/employees')->assertOk()->json('data.items.0');
+        $this->assertArrayHasKey('base_salary', $row);
+        $this->assertNull($row['base_salary']);
+
+        $withPay = ApiToken::generate('İşçilər + maaş', [Contract::ABILITY_EMPLOYEES, Contract::ABILITY_COMPENSATION])['plain'];
+        $row = $this->withToken($withPay)->getJson('/api/v1/employees')->assertOk()->json('data.items.0');
+        $this->assertEqualsWithDelta(1800.0, $row['base_salary'], 0.001);
+    }
+
+    /**
      * Nothing beyond the contract crosses.
      *
      * This is the whole point of naming fields explicitly: a column added to

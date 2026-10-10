@@ -168,6 +168,7 @@ class LeaveHierarchyAssignmentTest extends TestCase
     {
         $user = User::factory()->create();
         $user->givePermissionTo(Permission::findOrCreate('add-leaves', 'web'));
+        grantAllStructures($user);
 
         return $user;
     }
@@ -176,6 +177,7 @@ class LeaveHierarchyAssignmentTest extends TestCase
     {
         $user = User::factory()->create();
         $user->givePermissionTo(Permission::findOrCreate('add-leaves', 'web'));
+        grantAllStructures($user);
         $user->givePermissionTo(Permission::findOrCreate('edit-leaves', 'web'));
 
         return $user;

@@ -6,14 +6,12 @@ use App\Modules\Attendance\Application\Services\AttendanceAuthorizationService;
 use App\Modules\Attendance\Application\Services\AttendanceManagerSummaryReadService;
 use App\Modules\Attendance\Application\Services\AttendanceStructureScopeReadService;
 use App\Services\StructurePathService;
-use App\Traits\NestedStructureTrait;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class AttendanceManagerSummary extends Component
 {
-    use NestedStructureTrait;
     use WithPagination;
 
     public int $year;
@@ -64,9 +62,7 @@ class AttendanceManagerSummary extends Component
 
     public function render(): View
     {
-        $structureIds = $this->selectedStructureId
-            ? $this->getNestedStructure($this->selectedStructureId)
-            : [];
+        $structureIds = app(AttendanceStructureScopeReadService::class)->resolveIds($this->selectedStructureId);
 
         /** @var AttendanceManagerSummaryReadService $readService */
         $readService = app(AttendanceManagerSummaryReadService::class);
@@ -102,9 +98,7 @@ class AttendanceManagerSummary extends Component
 
     private function refreshTotals(AttendanceManagerSummaryReadService $readService): void
     {
-        $structureIds = $this->selectedStructureId
-            ? $this->getNestedStructure($this->selectedStructureId)
-            : [];
+        $structureIds = app(AttendanceStructureScopeReadService::class)->resolveIds($this->selectedStructureId);
 
         $this->totals = $readService->totals($this->year, $this->month, $structureIds);
     }

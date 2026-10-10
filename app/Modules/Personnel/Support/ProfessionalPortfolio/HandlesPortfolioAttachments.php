@@ -3,7 +3,7 @@
 namespace App\Modules\Personnel\Support\ProfessionalPortfolio;
 
 use App\Models\ProfessionalRecordAttachment;
-use Illuminate\Support\Facades\Storage;
+use App\Support\Uploads\PrivateFiles;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 trait HandlesPortfolioAttachments
@@ -15,11 +15,11 @@ trait HandlesPortfolioAttachments
         }
 
         if ($existing && filled($existing->file_path)) {
-            Storage::disk($existing->disk ?: 'public')->delete($existing->file_path);
+            PrivateFiles::delete($existing->file_path, $existing->disk);
             $existing->delete();
         }
 
-        $disk = 'public';
+        $disk = PrivateFiles::DISK;
         $path = $upload->store("professional-portfolio/{$personnelId}/{$kind}", $disk);
 
         return ProfessionalRecordAttachment::query()->create([

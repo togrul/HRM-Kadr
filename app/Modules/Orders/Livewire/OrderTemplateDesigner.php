@@ -8,6 +8,7 @@ use App\Modules\Orders\Application\Document\DocxTemplateRenderer;
 use App\Modules\Orders\Application\Document\DocxToPdfConverter;
 use App\Modules\Orders\Application\Document\OrderWordTemplateRepository;
 use App\Modules\Orders\Application\Document\ParticipantTemplateProcessor;
+use App\Modules\Orders\Application\Document\UnsafeDocxException;
 use App\Modules\Orders\Application\Variables\OrderVariableRegistry;
 use App\Modules\Orders\Infrastructure\Document\Effects\OrderEffectCatalog;
 use App\Modules\Orders\Infrastructure\Document\OrderLookupFieldRegistry;
@@ -210,7 +211,13 @@ class OrderTemplateDesigner extends Component
         $this->templatePdf = '';
         $this->originalFileName = $this->upload->getClientOriginalName();
 
-        $labels = app(DocxPlaceholderParser::class)->extract($this->upload->getRealPath());
+        try {
+            $labels = app(DocxPlaceholderParser::class)->extract($this->upload->getRealPath());
+        } catch (UnsafeDocxException) {
+            $this->addError('upload', __('orders::order_composer.designer.unsafe_docx'));
+
+            return;
+        }
 
         $this->variables = [];
         $this->blockMarkers = [];

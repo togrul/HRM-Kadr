@@ -5,11 +5,14 @@ namespace App\Modules\Services\Livewire\Users;
 use App\Livewire\Traits\DropdownConstructTrait;
 use App\Models\User;
 use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
+use App\Modules\Services\Livewire\Concerns\AuthorizesUserManagement;
+use App\Services\UserAdministrationGuard;
 use DB;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Spatie\Permission\Models\Role;
@@ -18,6 +21,7 @@ class AddUser extends Component
 {
     use AuthorizesRequests;
     use AuthorizesSettingsAccess;
+    use AuthorizesUserManagement;
     use DropdownConstructTrait;
 
     public $title;
@@ -33,7 +37,7 @@ class AddUser extends Component
         return [
             'user.name' => 'required|string|min:1',
             'user.email' => 'required|email|unique:users,email',
-            'user.password' => ['required', Password::min(8)],
+            'user.password' => ['required', Password::defaults()],
             'user.confirm-password' => 'required_with:user.password|same:user.password',
             'roleId' => 'required|exists:roles,id',
         ];
@@ -52,13 +56,18 @@ class AddUser extends Component
 
     public function store(): void
     {
-        $this->authorize('access-settings');
+        $this->authorize(UserAdministrationGuard::MANAGE_USERS);
 
         // Livewire updates skip the HTTP TrimStrings middleware, so trim here.
         $this->user['name'] = trim((string) ($this->user['name'] ?? ''));
         $this->user['email'] = trim((string) ($this->user['email'] ?? ''));
 
         $this->validate();
+
+        $role = Role::query()->find($this->roleId);
+        if ($role && ! app(UserAdministrationGuard::class)->canAssignRole(auth()->user(), $role)) {
+            throw ValidationException::withMessages(['roleId' => __('services::users.messages.role_exceeds_your_permissions')]);
+        }
 
         // Whitelist the columns that may be set — never mass-assign the raw
         // client-controlled $this->user array (it could carry is_active,
@@ -69,19 +78,23 @@ class AddUser extends Component
             'password' => Hash::make($this->user['password']),
         ]);
 
-        if ($this->roleId) {
-            $role = Role::find($this->roleId);
-            if ($role) {
-                $user->assignRole($role->name);
-            }
+        if ($role) {
+            $user->assignRole($role->name);
         }
+
+        activity('users')
+            ->performedOn($user)
+            ->causedBy(auth()->user())
+            ->event('created')
+            ->withProperties(['email' => $user->email, 'role' => $role?->name])
+            ->log('user.created');
 
         $this->dispatch('userAdded', __('services::users.messages.created'));
     }
 
     public function mount(): void
     {
-        $this->authorize('access-settings');
+        $this->authorize(UserAdministrationGuard::MANAGE_USERS);
         $this->title = __('services::users.titles.add');
         $this->roleId = null;
     }

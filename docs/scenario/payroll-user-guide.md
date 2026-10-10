@@ -68,7 +68,16 @@ Aşağıda iki əlavə kart var:
 2. Sağdan açılan paneldə `İl` və `Ay` yazın.
 3. `Dövr yarat` basın.
 
-Eyni paneldə `Dövrlər` siyahısı da görünür. Dövrü oradakı kiçik silmə ikonu ilə silmək olar — sistem təsdiq soruşur.
+Eyni paneldə `Dövrlər` siyahısı da görünür. Dövrü oradakı kiçik silmə ikonu ilə silmək olar — sistem təsdiq soruşur. Bağlanmış dövr və ya içində təsdiqlənmiş/kilidlənmiş hesablama olan dövr silinmir: onunla birlikdə maaş vərəqələri, kredit ödənişləri və geriyə ödəniş qeydləri itərdi.
+
+Artıq mövcud olan ay üçün `Dövr yarat` yeni dövr açmır və mövcud dövrün statusunu dəyişmir — bağlanmış ay bununla yenidən açılmır.
+
+### Bağlanmış dövrü yenidən açmaq
+Bağlanmış ayda hesablama yaradılmır, hesablanmır və kilidlənmiş hesablama yenidən açılmır. Səhv bağlanmış ayı yalnız `Bağlanmış əmək haqqı ayını yenidən açmaq` icazəsi olan şəxs aça bilər:
+1. `Dövr yarat` panelində `Yenidən açma səbəbi` sahəsinə səbəbi yazın (ən azı 5 simvol).
+2. `Dövrlər` siyahısında bağlı dövrün yanındakı yenidən açma ikonunu basın və təsdiqləyin.
+
+Səbəb və kimin açdığı audit jurnalına yazılır.
 
 ### Hesablama yaratmaq
 1. Qara `Yeni hesablama` düyməsini basın.
@@ -76,6 +85,8 @@ Eyni paneldə `Dövrlər` siyahısı da görünür. Dövrü oradakı kiçik silm
 3. `Rejim` seçin və ya boş saxlayın — onda `Bütün rejimlər` üzrə hesablanır.
 4. `Hesablama növü` seçin: `Adi` (aylıq maaş) və ya `Off-cycle` (növbədənkənar ödəniş).
 5. `Hesablama yarat` basın.
+
+Bir dövr və rejim üçün yalnız bir `Adi` hesablama ola bilər — ikincisi ayın maaşını, birdəfəlik ödənişləri və kredit hissəsini təkrar ödəyərdi. Əlavə ödəniş üçün `Off-cycle` hesablama yaradın. `Off-cycle` hesablamaya artıq ödənilmiş birdəfəlik ödənişlər düşmür və ondan kredit hissəsi tutulmur.
 
 Yeni hesablama `Qaralama` statusunda yaranır.
 
@@ -106,9 +117,11 @@ Məbləğləri görmə icazəniz yoxdursa, pəncərədə cəm göstərilmir — 
 2. Sistem xəbərdarlıq edir: `Hesablama kilidlənəcək və maaş vərəqələri dondurulacaq. Davam edilsin?`
 3. Təsdiqləyin.
 
-Hesablamadan sonra birdəfəlik ödənişlər dəyişibsə, sistem kilidləməyə icazə vermir və əvvəlcə yenidən hesablamağı xahiş edir.
+Hesablamadan sonra birdəfəlik ödənişlər, maaş, davamiyyət, tutulmalar, geriyə ödəniş və ya işçi tərkibi dəyişibsə, sistem kilidləməyə icazə vermir və əvvəlcə yenidən hesablamağı xahiş edir.
 
-Kilidlənmiş hesablamanı `Yenidən aç` düyməsi ilə açmaq olar (təsdiq soruşulur). Açılandan sonra status yenidən `Hesablanıb` olur və təsdiqi təkrar vermək lazımdır.
+Kilidləmə geriyə ödənişi (retro) yalnız maaş vərəqəsində olduğu qədər qeydə alır: `Retro` sətri hansı aylar üçün nə qədər ödədiyini özündə saxlayır. Kilidlənən hesablamanın öz vərəqələri və `Off-cycle` vərəqələr retro mənbəyi sayılmır.
+
+Kilidlənmiş hesablamanı `Yenidən aç` düyməsi ilə açmaq olar (təsdiq soruşulur). Açılandan sonra status yenidən `Hesablanıb` olur və təsdiqi təkrar vermək lazımdır. Dövr bağlanıbsa, əvvəlcə dövrün özü yenidən açılmalıdır.
 
 ### Maaş vərəqəsini çap etmək
 Kilidlənmiş hesablamada əməkdaşın maaş vərəqəsini açın və `İxrac (PDF)` düyməsini basın. Vərəqə yeni pəncərədə çap üçün açılır. Bu düymə yalnız kilidlənmiş maaş vərəqələrində görünür.
@@ -146,7 +159,7 @@ Sizdə idarəetmə icazəsi yoxdur.
 Ya təsdiq icazəniz yoxdur, ya da hesablamanın statusu `Hesablanıb` deyil. Əvvəlcə `Hesabla` basılmalıdır.
 
 **`Kilidlə` basdım, amma xəta çıxdı.**
-Hesablamadan sonra birdəfəlik ödənişlər dəyişib. `Hesabla` basıb yenidən hesablayın, sonra kilidləyin.
+Hesablamadan sonra birdəfəlik ödənişlər və ya digər əmək haqqı məlumatları dəyişib. `Hesabla` basıb yenidən hesablayın, sonra kilidləyin.
 
 **Hesablama cədvəli boşdur.**
 Soldakı `Dövr` və rejim seçiminə baxın — başqa ay və ya rejim seçilmiş ola bilər.

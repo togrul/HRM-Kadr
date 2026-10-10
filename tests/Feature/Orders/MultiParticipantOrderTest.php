@@ -222,7 +222,7 @@ class MultiParticipantOrderTest extends TestCase
     {
         $user = User::factory()->create();
         $user->givePermissionTo(Permission::findOrCreate('add-orders', 'web'));
-        $this->actingAs($user);
+        $this->actingAs(grantAllStructures($user));
 
         [$a, $b] = [$this->makePersonnel('Əliyev'), $this->makePersonnel('Həsənova', 2)];
         $template = $this->template('ezamiyyet');

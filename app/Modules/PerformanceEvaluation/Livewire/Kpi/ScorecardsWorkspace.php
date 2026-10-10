@@ -18,6 +18,7 @@ use App\Modules\PerformanceEvaluation\Application\Services\Kpi\KpiActualsImportS
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\ScorecardReviewService;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\ScorecardService;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\TargetChangeService;
+use App\Support\Exports\RawImportValueBinder;
 use App\Support\Livewire\DownloadsReportsTable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
@@ -28,7 +29,6 @@ use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Maatwebsite\Excel\Facades\Excel;
-use stdClass;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
@@ -387,7 +387,7 @@ class ScorecardsWorkspace extends Component
         $this->authorize('manage-performance-evaluation');
         $this->validate(['importFile' => ['required', 'file', 'max:10240', 'mimes:xlsx,xls,csv,txt']]);
 
-        $rows = Excel::toArray(new stdClass, $this->importFile->getRealPath(), null, $this->readerType())[0] ?? [];
+        $rows = Excel::toArray(new RawImportValueBinder, $this->importFile->getRealPath(), null, $this->readerType())[0] ?? [];
         $result = app(KpiActualsImportService::class)->import(PerformanceCycle::query()->findOrFail($this->cycleId), $rows, auth()->user());
 
         $this->importErrors = $result['errors'];

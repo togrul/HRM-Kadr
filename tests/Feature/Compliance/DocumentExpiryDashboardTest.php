@@ -24,6 +24,7 @@ class DocumentExpiryDashboardTest extends TestCase
     public function test_status_and_type_filters_are_selects_bound_to_the_component(): void
     {
         $user = User::factory()->create();
+        grantAllStructures($user);
         $user->givePermissionTo(Permission::findOrCreate('show-document-compliance', 'web'));
 
         // The selects must live in the component's own output (not the layout's sidebar
@@ -50,6 +51,7 @@ class DocumentExpiryDashboardTest extends TestCase
         // 12 personnel without documents -> 36 synthesized "missing" rows.
         LifecycleDashboardBoundedQueuesTest::seedLargeFixture(12);
         $user = User::factory()->create();
+        grantAllStructures($user);
         $user->givePermissionTo(Permission::findOrCreate('show-document-compliance', 'web'));
 
         $component = Livewire::actingAs($user)->test(DocumentExpiryDashboard::class);
@@ -72,6 +74,7 @@ class DocumentExpiryDashboardTest extends TestCase
     {
         LifecycleDashboardBoundedQueuesTest::seedLargeFixture(2);
         $user = User::factory()->create();
+        grantAllStructures($user);
         $user->givePermissionTo(Permission::findOrCreate('show-document-compliance', 'web'));
 
         $csv = Livewire::actingAs($user)

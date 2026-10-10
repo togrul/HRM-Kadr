@@ -509,6 +509,8 @@ class PersonnelSeeder extends Seeder
             'edit-personnels',
             'delete-personnels',
             'access-settings',
+            'manage-users',
+            'manage-roles',
             'manage-change-policy',
             'show-candidates',
             'add-candidates',
@@ -538,6 +540,7 @@ class PersonnelSeeder extends Seeder
             'delete-leaves',
             'export-leaves',
             'approve-leaves',
+            'edit-closed-month-leaves',
             'view-medical-diagnosis',
             'show-attendance',
             'show-attendance-daily-monitor',
@@ -568,6 +571,7 @@ class PersonnelSeeder extends Seeder
             'manage-payroll',
             'approve-payroll',
             'lock-payroll',
+            'reopen-payroll-period',
             'export-payroll',
         ];
 
@@ -589,6 +593,9 @@ class PersonnelSeeder extends Seeder
             ['name' => 'Admin', 'guard_name' => 'web'],
             ['created_at' => $now, 'updated_at' => $now]
         );
+
+        // Admin bütün strukturları görür; bayraqsız rol struktur verilməyibsə heç nə görmür.
+        $role->forceFill(['all_structures' => true])->save();
 
         $role->syncPermissions($permissionNames);
         $adminUser->syncRoles($role);

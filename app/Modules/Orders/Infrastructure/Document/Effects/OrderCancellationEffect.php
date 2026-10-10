@@ -28,6 +28,9 @@ class OrderCancellationEffect implements OrderEffect
 
     public const EFFECT = 'order_cancellation';
 
+    /** The permission that takes an approved order out of the approved state. */
+    public const REVERT_PERMISSION = 'revert-orders';
+
     public function __construct(
         private readonly OrderStatusTransitionService $transitions,
         private readonly OrderWordTemplateRepository $templates,
@@ -36,6 +39,7 @@ class OrderCancellationEffect implements OrderEffect
 
     public function apply(OrderLog $order, array $fields, Personnel $personnel): void
     {
+        $this->guardActorMayRevert();
         $target = $this->target($order, $fields, $personnel);
 
         try {
@@ -62,7 +66,10 @@ class OrderCancellationEffect implements OrderEffect
         $targetId = (int) ($this->rememberedState($order)['cancelled_order_id'] ?? 0);
         $target = $targetId > 0 ? OrderLog::query()->find($targetId) : null;
 
-        // Re-approve only what this order cancelled and nobody has touched since.
+        $this->guardActorMayRevert();
+
+        // Re-approve only what this order cancelled and nobody has touched since. Approving
+        // the target again runs the closed-month check of its own months.
         if ($target !== null
             && (int) $target->status_id === OrderStatusEnum::CANCELLED->value
             && (int) data_get($target->template_snapshot, 'cancelled_by_order_id') === (int) $order->id) {
@@ -78,6 +85,22 @@ class OrderCancellationEffect implements OrderEffect
         }
 
         $this->forgetState($order, ['cancelled_order_id']);
+    }
+
+    /**
+     * Approving or reversing a cancellation order takes the target out of (or back into) the
+     * approved state, which the transition service authorises by revert-orders — an actor who
+     * may only approve orders must not reach it through this order type.
+     *
+     * @throws DomainException
+     */
+    private function guardActorMayRevert(): void
+    {
+        $user = auth()->user();
+
+        if ($user !== null && ! $user->can(self::REVERT_PERMISSION)) {
+            throw new DomainException(__('orders::order_composer.errors.cancellation_forbidden'));
+        }
     }
 
     /**

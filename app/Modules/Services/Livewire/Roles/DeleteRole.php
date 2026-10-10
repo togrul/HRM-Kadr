@@ -2,7 +2,9 @@
 
 namespace App\Modules\Services\Livewire\Roles;
 
+use App\Modules\Services\Livewire\Concerns\AuthorizesRoleManagement;
 use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
+use App\Services\UserAdministrationGuard;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Attributes\Locked;
@@ -13,6 +15,7 @@ use Spatie\Permission\Models\Role;
 class DeleteRole extends Component
 {
     use AuthorizesRequests;
+    use AuthorizesRoleManagement;
     use AuthorizesSettingsAccess;
 
     #[Locked]
@@ -76,6 +79,7 @@ class DeleteRole extends Component
     {
         $reason = match (true) {
             self::isAdminRole($role->name) => __('services::roles.messages.admin_role_protected'),
+            app(UserAdministrationGuard::class)->isSystemRole($role->name) => __('services::roles.messages.system_role_protected'),
             $role->users()->exists() => __('services::roles.messages.role_has_users'),
             default => null,
         };

@@ -3,6 +3,7 @@
 namespace App\Modules\PerformanceEvaluation\Livewire;
 
 use App\Models\Personnel;
+use App\Modules\PerformanceEvaluation\Support\PerformanceStructureScope;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
@@ -42,7 +43,7 @@ class PersonnelPicker extends Component
             return [];
         }
 
-        return Personnel::query()
+        return PerformanceStructureScope::onPersonnelTable(Personnel::query())
             ->where('is_pending', false)
             ->where(fn ($q) => $q
                 ->where('surname', 'like', "%{$term}%")

@@ -3,9 +3,13 @@
 namespace App\Modules\PerformanceEvaluation\Application\Services\Kpi;
 
 use App\Models\Personnel;
+use App\Support\Http\SafeUrl;
+use App\Support\Http\UnsafeUrlException;
 use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
 use Throwable;
 
@@ -17,10 +21,34 @@ use Throwable;
  * three times with a growing pause.
  *
  * Config: url, auth (none|bearer|basic), token, username, password, value_path.
+ *
+ * Təhlükəsizlik: URL {@see SafeUrl} ilə yoxlanır (daxili/özəl ünvanlar, metadata xidməti
+ * bloklanır), sorğu yoxlanmış IP-yə bağlanır, yönləndirmə izlənmir. Xarici sistemin cavab
+ * mətni və istisna mesajı istifadəçiyə heç vaxt göstərilmir — yalnız jurnala yazılır.
+ * `{pin}` (FİN) yer tutucusu yalnız istifadəçi idarəçisi tərəfindən qurula bilər.
  */
 class RestKpiConnector
 {
     public const AUTH_TYPES = ['none', 'bearer', 'basic'];
+
+    /** FİN kimi həssas şəxsi məlumatı xarici sistemə ötürən yer tutucular. */
+    public const SENSITIVE_PLACEHOLDERS = ['{pin}'];
+
+    public function __construct(private readonly SafeUrl $safeUrl) {}
+
+    /**
+     * URL-də həssas yer tutucu ({pin}) varmı.
+     */
+    public static function usesSensitivePlaceholder(string $url): bool
+    {
+        foreach (self::SENSITIVE_PLACEHOLDERS as $placeholder) {
+            if (str_contains(strtolower($url), $placeholder)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /**
      * @param  array<string, mixed>  $config
@@ -42,9 +70,25 @@ class RestKpiConnector
         }
 
         try {
-            $response = $this->request($config)->get($url);
+            $target = $this->safeUrl->assert($url);
+        } catch (UnsafeUrlException $exception) {
+            Log::warning('KPI REST konnektoru: URL bloklandı.', ['reason' => $exception->getMessage()]);
+
+            throw new RuntimeException(__('performance_evaluation::kpi.connector.errors.blocked_url'));
+        }
+
+        try {
+            $response = $this->safeUrl->pin($this->request($config), $target)->get($url);
+        } catch (RequestException $exception) {
+            throw new RuntimeException(__('performance_evaluation::kpi.connector.errors.http_status', ['status' => $exception->response->status()]));
         } catch (Throwable $exception) {
-            throw new RuntimeException(__('performance_evaluation::kpi.connector.errors.unreachable', ['error' => mb_strimwidth($exception->getMessage(), 0, 160, '…')]));
+            Log::warning('KPI REST konnektoru: xarici sistem cavab vermədi.', ['error' => $exception->getMessage()]);
+
+            throw new RuntimeException(__('performance_evaluation::kpi.connector.errors.unreachable'));
+        }
+
+        if (! $response->successful()) {
+            throw new RuntimeException(__('performance_evaluation::kpi.connector.errors.http_status', ['status' => $response->status()]));
         }
 
         $value = data_get($response->json(), (string) ($config['value_path'] ?? ''));

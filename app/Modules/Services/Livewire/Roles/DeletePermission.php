@@ -2,6 +2,7 @@
 
 namespace App\Modules\Services\Livewire\Roles;
 
+use App\Modules\Services\Livewire\Concerns\AuthorizesRoleManagement;
 use App\Modules\Services\Livewire\Concerns\AuthorizesSettingsAccess;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -13,6 +14,7 @@ use Spatie\Permission\Models\Permission;
 class DeletePermission extends Component
 {
     use AuthorizesRequests;
+    use AuthorizesRoleManagement;
     use AuthorizesSettingsAccess;
 
     #[Locked]

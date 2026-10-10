@@ -4,13 +4,15 @@ namespace App\Modules\Leaves\Application\Services;
 
 use App\Models\LeaveSickCertificate;
 use App\Models\Personnel;
+use App\Services\StructureService;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Throwable;
 
 /**
  * The certificate register's read side: one filtered query for the page, the employee
- * card and the Excel export, plus the header figures. The diagnosis column is never
+ * card and the Excel export, plus the header figures. Every read is narrowed to the
+ * current user's structure scope. The diagnosis column is never
  * selected here — lists and exports cannot show what they never read.
  *
  * Filters: tabel_no, fullname, number (series or number), status, institution, stale
@@ -54,6 +56,15 @@ class SickCertificateRegister
                 'leaves.ends_at as period_end',
                 'leaves.total_days as period_days',
             ]);
+
+        // Yalnız istifadəçinin struktur görünürlüyündəki işçilərin vərəqələri (fail closed).
+        $scope = app(StructureService::class)->scopeFor();
+        if (! $scope->isAll()) {
+            $query->whereIn('leaves.tabel_no', $scope->constrain(
+                Personnel::query()->withTrashed()->whereNotNull('tabel_no')->select('tabel_no'),
+                'personnels.structure_id',
+            ));
+        }
 
         $tabelNo = trim((string) ($filters['tabel_no'] ?? ''));
         if ($tabelNo !== '') {

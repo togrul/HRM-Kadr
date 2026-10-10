@@ -5,6 +5,7 @@ namespace App\Modules\Compliance\Application\Services;
 use App\Models\Personnel;
 use App\Models\User;
 use App\Notifications\PlatformNotification;
+use App\Services\UserPersonnelLinkResolver;
 use Illuminate\Support\Collection;
 
 /**
@@ -32,19 +33,23 @@ class ComplianceReminderNotifier
 
         $personnel = Personnel::query()
             ->whereIn('tabel_no', $byTabel->keys()->all())
-            ->get(['id', 'tabel_no', 'email', 'parent_id'])
+            ->get(['id', 'tabel_no', 'parent_id'])
             ->keyBy('tabel_no');
 
-        $managerById = Personnel::query()
-            ->whereIn('id', $personnel->pluck('parent_id')->filter()->unique()->all())
-            ->get(['id', 'email'])
-            ->keyBy('id');
+        // Alıcı yalnız açıq bağ (user_personnel_links) ilə tapılır — e-poçt uyğunluğu ilə yox.
+        $userIdByPersonnel = app(UserPersonnelLinkResolver::class)->userIdsByPersonnel(
+            $personnel->pluck('id')->merge($personnel->pluck('parent_id'))->filter()->unique()->all()
+        );
 
-        $userByEmail = User::query()
-            ->whereIn('email', $personnel->pluck('email')->merge($managerById->pluck('email'))->filter()->unique()->all())
+        $usersById = User::query()
+            ->whereIn('id', array_values($userIdByPersonnel))
             ->where('is_active', true)
             ->get()
-            ->keyBy('email');
+            ->keyBy('id');
+
+        $userForPersonnel = fn (?int $personnelId): ?User => $personnelId && isset($userIdByPersonnel[$personnelId])
+            ? $usersById->get($userIdByPersonnel[$personnelId])
+            : null;
 
         $notifyEmployee = (bool) config('compliance.document_expiry.reminders.notify_employee', true);
         $escalateStatuses = (array) config('compliance.document_expiry.reminders.escalate_manager_statuses', ['expired', 'missing']);
@@ -58,16 +63,16 @@ class ComplianceReminderNotifier
                 continue;
             }
 
-            if ($notifyEmployee && $person->email && ($employeeUser = $userByEmail->get($person->email))) {
+            if ($notifyEmployee && ($employeeUser = $userForPersonnel((int) $person->id))) {
                 $employeeUser->notify($this->employeeNotification($docRows));
                 $employees++;
             }
 
             $escalations = $docRows->filter(fn (array $row): bool => in_array($row['status'] ?? '', $escalateStatuses, true));
-            $managerEmail = $person->parent_id ? $managerById->get($person->parent_id)?->email : null;
-            if ($escalations->isNotEmpty() && $managerEmail) {
-                $managerBuckets[$managerEmail] = array_merge(
-                    $managerBuckets[$managerEmail] ?? [],
+            $managerUser = $person->parent_id ? $userForPersonnel((int) $person->parent_id) : null;
+            if ($escalations->isNotEmpty() && $managerUser) {
+                $managerBuckets[$managerUser->id] = array_merge(
+                    $managerBuckets[$managerUser->id] ?? [],
                     $escalations->map(fn (array $row): string => sprintf(
                         '%s · %s · %s',
                         $row['personnel_name'],
@@ -79,8 +84,8 @@ class ComplianceReminderNotifier
         }
 
         $managers = 0;
-        foreach ($managerBuckets as $email => $lines) {
-            $manager = $userByEmail->get($email);
+        foreach ($managerBuckets as $managerUserId => $lines) {
+            $manager = $usersById->get($managerUserId);
             if (! $manager) {
                 continue;
             }

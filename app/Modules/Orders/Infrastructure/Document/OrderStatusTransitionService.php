@@ -151,7 +151,15 @@ class OrderStatusTransitionService
             $this->guardLeavingApproved($order, $reason);
         }
 
+        if ($target === OrderStatusEnum::APPROVED->value) {
+            $this->guardMonthsOpen($order, 'period_closed_approve');
+        }
+
         DB::transaction(function () use ($order, $from, $target, $reason) {
+            // Two requests holding the same pending copy must not both apply the effect:
+            // re-read the row under a lock and continue only if it is still where we left it.
+            $this->lockCurrentStatus($order, $from);
+
             // Approving applies the effect; leaving an approved state reverses it.
             // pending↔cancelled carry no side-effect.
             $effectDirection = 'none';
@@ -188,15 +196,107 @@ class OrderStatusTransitionService
             throw new DomainException(__('orders::order_composer.errors.reason_required', ['min' => self::MIN_REASON_LENGTH]));
         }
 
-        $date = $this->effectiveDate($order);
-        $closedBy = $this->closedPeriods->closedBy($date);
+        $this->guardMonthsOpen($order, 'period_closed');
+    }
 
-        if ($closedBy !== null) {
-            throw new DomainException(__('orders::order_composer.errors.period_closed', [
-                'period' => $date->format('m.Y'),
-                'reason' => __('orders::order_composer.errors.period_closed_by.'.$closedBy),
-            ]));
+    /**
+     * Re-read the order under a row lock inside the transition's transaction and refuse when
+     * another request moved it meanwhile; the caller's copy is refreshed from the locked row.
+     *
+     * @throws DomainException
+     */
+    private function lockCurrentStatus(OrderLog $order, int $from): void
+    {
+        $current = OrderLog::query()->whereKey($order->getKey())->lockForUpdate()->first();
+
+        if ($current === null || (int) $current->status_id !== $from) {
+            throw new DomainException(__('orders::order_composer.errors.status_changed'));
         }
+
+        $order->setRawAttributes($current->getAttributes(), true);
+    }
+
+    /**
+     * Every month the order's effect touches must be open for pay — when it is approved
+     * (the effect is written into the month) and when it leaves the approved state (the
+     * effect is taken out of it).
+     *
+     * @throws DomainException
+     */
+    private function guardMonthsOpen(OrderLog $order, string $messageKey): void
+    {
+        foreach ($this->effectMonths($order) as $month) {
+            $closedBy = $this->closedPeriods->closedBy($month);
+
+            if ($closedBy !== null) {
+                throw new DomainException(__('orders::order_composer.errors.'.$messageKey, [
+                    'period' => $month->format('m.Y'),
+                    'reason' => __('orders::order_composer.errors.period_closed_by.'.$closedBy),
+                ]));
+            }
+        }
+    }
+
+    /**
+     * The first day of every month the order's effect touches: each date role the effect
+     * declares (start/end, effective date, work date, recall date…) for the order and each
+     * participant, with a start–end span covering every month in between. The work year
+     * (a reference to an entitlement year) and the return-to-work day are not effect days.
+     * Falls back to effectiveDate() when the template declares no dated role.
+     *
+     * @return list<CarbonInterface>
+     */
+    public function effectMonths(OrderLog $order): array
+    {
+        $snapshot = (array) $order->template_snapshot;
+        $template = $this->templates->find((string) ($snapshot['template_code'] ?? ''));
+        $months = [];
+
+        if ($template !== null) {
+            $roles = collect($this->effects->roles((string) $template->effect))
+                ->filter(fn (array $role): bool => $role['type'] === 'date' && ! in_array($role['key'], ['work_year', 'return_date'], true))
+                ->pluck('key')
+                ->all();
+            if ($template->isHire()) {
+                $roles[] = 'start_date';
+            }
+
+            $orderFields = (array) ($snapshot['fields'] ?? []);
+            $fieldSets = [$orderFields];
+            foreach ($this->participantsOf($order) as $participant) {
+                $fieldSets[] = OrderParticipantFields::effective($template, $orderFields, (array) $participant->fields);
+            }
+
+            foreach ($fieldSets as $raw) {
+                $fields = $this->effectFields($template, $raw);
+                $dates = [];
+                foreach (array_unique($roles) as $role) {
+                    $date = $this->dates->parse(is_scalar($fields[$role] ?? null) ? (string) $fields[$role] : null);
+                    if ($date !== null) {
+                        $dates[$role] = Carbon::parse($date->format('Y-m-d'))->startOfMonth();
+                    }
+                }
+
+                if (isset($dates['start_date'], $dates['end_date']) && $dates['end_date']->gte($dates['start_date'])) {
+                    for ($month = $dates['start_date']->copy(); $month->lte($dates['end_date']) && count($months) < 600; $month->addMonth()) {
+                        $months[$month->format('Y-m')] = $month->copy();
+                    }
+                }
+
+                foreach ($dates as $date) {
+                    $months[$date->format('Y-m')] = $date;
+                }
+            }
+        }
+
+        if ($months === []) {
+            $date = Carbon::parse($this->effectiveDate($order)->format('Y-m-d'))->startOfMonth();
+            $months[$date->format('Y-m')] = $date;
+        }
+
+        ksort($months);
+
+        return array_values($months);
     }
 
     /**

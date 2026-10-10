@@ -339,6 +339,7 @@ class LifecycleDashboardReadServiceTest extends TestCase
         }
 
         $user = User::factory()->create(['name' => 'Lifecycle Manager', 'is_active' => true]);
+        grantAllStructures($user);
         $user->givePermissionTo(['show-employee-lifecycle', 'manage-employee-lifecycle']);
 
         $personnel = $this->makePersonnel();
@@ -413,6 +414,7 @@ class LifecycleDashboardReadServiceTest extends TestCase
         }
 
         $user = User::factory()->create(['name' => 'Lifecycle Manager', 'is_active' => true]);
+        grantAllStructures($user);
         $user->givePermissionTo(['show-employee-lifecycle', 'manage-employee-lifecycle']);
 
         $templateId = app(LifecyclePlanTemplateService::class)->createTemplate([
@@ -563,6 +565,7 @@ class LifecycleDashboardReadServiceTest extends TestCase
         Permission::findOrCreate('show-employee-lifecycle', 'web');
 
         $user = User::factory()->create(['is_active' => true]);
+        grantAllStructures($user);
         $user->givePermissionTo('show-employee-lifecycle');
         $personnel = $this->makePersonnel();
 
@@ -665,6 +668,7 @@ class LifecycleDashboardReadServiceTest extends TestCase
         Permission::findOrCreate('show-employee-lifecycle', 'web');
 
         $user = User::factory()->create(['is_active' => true]);
+        grantAllStructures($user);
         $user->givePermissionTo('show-employee-lifecycle');
 
         Livewire::actingAs($user);
@@ -691,6 +695,7 @@ class LifecycleDashboardReadServiceTest extends TestCase
         }
 
         $user = User::factory()->create(['name' => 'Lifecycle Manager', 'is_active' => true]);
+        grantAllStructures($user);
         $user->givePermissionTo(['show-employee-lifecycle', 'manage-employee-lifecycle']);
 
         Livewire::actingAs($user);

@@ -149,6 +149,12 @@ Bu düymələr yalnız statusu `Təsdiq gözləyən` olan və sizə təyin olunm
 3. `İcazəni redaktə et` forması açılır — sahələr yeni icazədəki kimidir.
 4. Lazımi düzəlişi edib `Yadda saxla` basın.
 
+Düzəliş qaydaları:
+- **Əmrlə yaranmış icazə** (siyahıda `Əmrlə` nişanı) burada dəyişdirilmir, silinmir və bərpa edilmir — onu yalnız əmri geri qaytarmaqla və ya ləğv etməklə dəyişmək olar. Xəstəlik vərəqəsinə bağlı icazə də eyni qayda ilə yalnız `Xəstəlik vərəqələri` reyestrində dəyişir.
+- **Təsdiqlənmiş icazənin tarixi** (əməkdaş, növ, başlama/bitmə, saat) dəyişəndə icazə yenidən `Təsdiq gözləyən` statusuna qayıdır və təsdiq marşrutundan keçir. İcazələri təsdiqləmək hüququ olan şəxs dəyişdirirsə, icazə onun adına və dəyişiklik anına yenidən təsdiqlənmiş kimi qeyd olunur.
+- **Öz icazəniz:** hesabınıza bağlı əməkdaşın icazəsini `Təsdiqlənmiş` statusu ilə yaza bilməzsiniz — o, təsdiq marşrutundan keçməlidir.
+- **Bağlanmış ay:** əmək haqqı (və ya davamiyyət) üçün bağlanmış aya düşən icazə yalnız `Bağlanmış aya düşən icazələri dəyişmək` icazəsi ilə yaradılır, dəyişdirilir və silinir. Bu qayda həm köhnə, həm də yeni tarixlərə aiddir.
+
 ### 5. İcazəni silmək
 1. Sətrin sonunda zibil qutusu işarəsinə (`Sil`) basın.
 2. `İcazəni sil` pəncərəsi açılır və sistem təsdiq soruşur.

@@ -36,6 +36,7 @@ class AttendanceManagerSummaryTabTest extends TestCase
 
         $user = User::factory()->create();
         $user->assignRole($role);
+        grantAllStructures($user);
 
         $personnel = $this->makePersonnel([
             'surname' => 'Məmmədov',

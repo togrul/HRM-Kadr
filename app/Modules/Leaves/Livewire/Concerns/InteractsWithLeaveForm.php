@@ -9,6 +9,7 @@ use App\Models\OrderStatus;
 use App\Models\Personnel;
 use App\Modules\Leaves\Application\Services\LeaveRecordService;
 use App\Modules\Personnel\Contracts\ApprovalRouteResolver;
+use App\Services\StructureService;
 use App\Support\DateInput;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -131,10 +132,11 @@ trait InteractsWithLeaveForm
         }
     }
 
+    /** Ərizəçi axtarışı yalnız istifadəçinin struktur görünürlüyündəki işçiləri təklif edir. */
     #[Computed]
     public function applicantPersonnelList(): Collection
     {
-        return $this->searchPersonnelOptions($this->personnelName);
+        return $this->searchPersonnelOptions($this->personnelName, scoped: true);
     }
 
     /** Approver candidates: the employee the leave is for is never offered as their own approver. */
@@ -432,18 +434,45 @@ trait InteractsWithLeaveForm
         $this->leave->total_minutes = null;
     }
 
-    protected function searchPersonnelOptions(string $term): Collection
+    protected function searchPersonnelOptions(string $term, bool $scoped = false): Collection
     {
         if (mb_strlen(trim($term)) <= 2) {
             return collect();
         }
 
-        return Personnel::query()
+        $query = Personnel::query()
             ->nameLike($term)
             ->active()
             ->whereNull('deleted_at')
-            ->limit(20)
-            ->get();
+            ->limit(20);
+
+        if ($scoped) {
+            app(StructureService::class)->scopeFor()->constrain($query, 'personnels.structure_id');
+        }
+
+        return $query->get();
+    }
+
+    /**
+     * Müştəri tərəfdən göndərilən ərizəçi istifadəçinin struktur görünürlüyündə olmalıdır —
+     * görünməyən işçinin adından icazə yaratmaq/köçürmək olmaz.
+     *
+     * @param  array<string, mixed>  $payload
+     *
+     * @throws ValidationException
+     */
+    protected function assertApplicantInScope(array $payload): void
+    {
+        $tabelNo = $payload['tabel_no'] ?? null;
+        $structureId = filled($tabelNo)
+            ? Personnel::query()->where('tabel_no', $tabelNo)->value('structure_id')
+            : null;
+
+        if (! app(StructureService::class)->scopeFor()->allows($structureId)) {
+            throw ValidationException::withMessages([
+                'leave.tabel_no' => __('leaves::common.validation.personnel_out_of_scope'),
+            ]);
+        }
     }
 
     protected function syncSelectedLeaveTypeMeta(): void

@@ -88,6 +88,7 @@ class LeaveListFacetFilterTest extends TestCase
     {
         $user = User::factory()->create();
         $user->givePermissionTo(Permission::findOrCreate('show-leaves', 'web'));
+        grantAllStructures($user);
 
         return $user;
     }

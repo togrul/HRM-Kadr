@@ -68,12 +68,12 @@ class MyHrRequestReviewService implements MyHrRequestReview
             $locked->forceFill([
                 'status_id' => OrderStatusEnum::APPROVED->value,
                 'approved_at' => $now,
-                'approved_by' => $reviewer->personnel?->id ?: $reviewer->id,
+                'approved_by' => $this->authorization->reviewerPersonnelId($reviewer),
             ])->save();
 
             $locked->logs()->create([
                 'status_id' => OrderStatusEnum::APPROVED->value,
-                'changed_by' => $reviewer->personnel?->id ?: $reviewer->id,
+                'changed_by' => $this->authorization->reviewerPersonnelId($reviewer),
                 'comment' => $note,
                 'changed_at' => $now,
             ]);
@@ -104,7 +104,7 @@ class MyHrRequestReviewService implements MyHrRequestReview
 
             $locked->logs()->create([
                 'status_id' => OrderStatusEnum::CANCELLED->value,
-                'changed_by' => $reviewer->personnel?->id ?: $reviewer->id,
+                'changed_by' => $this->authorization->reviewerPersonnelId($reviewer),
                 'comment' => $note,
                 'changed_at' => now(),
             ]);

@@ -22,6 +22,17 @@ class PersonnelFormAssembler
     public const TERMINATION_MANAGED_FIELDS = ['leave_work_date'];
 
     /**
+     * Yalnız server tərəfindən idarə olunan sütunlar: təsdiq gözləmə bayrağı (işə qəbulun
+     * təsdiqi PersonnelPendingApprovalService ilə), müəllif/silən istifadəçi. Formun
+     * vəziyyəti əl ilə dəyişdirilsə belə bu açarlar saxlanmır — `is_pending` qəbul
+     * edilsəydi, əməkdaş "təsdiqlənməmiş" sayılıb əmrlə dəyişmə qaydasından yan keçərdi.
+     */
+    public const SERVER_MANAGED_FIELDS = ['is_pending', 'added_by', 'deleted_by'];
+
+    /** Formun `personnel_extra` hissəsində icazə verilən sütunlar (ağ siyahı). */
+    public const EXTRA_FIELDS = ['participation_in_war', 'discrediting_information'];
+
+    /**
      * Normalize all form state into persistence-ready payloads.
      *
      * @param  array<int, string>  $dateFields
@@ -51,7 +62,7 @@ class PersonnelFormAssembler
         // işdən çıxmış əməkdaşın tarixini silib onu yenidən "işdə" edərdi.
         $personnelData = Arr::except(
             $dateNormalizer($personalPayload['personnel'] ?? [], $dateFields),
-            self::TERMINATION_MANAGED_FIELDS
+            [...self::TERMINATION_MANAGED_FIELDS, ...self::SERVER_MANAGED_FIELDS]
         );
 
         if (! is_null($forcePending)) {
@@ -81,7 +92,7 @@ class PersonnelFormAssembler
 
         return [
             'personnel_data' => $personnelData,
-            'personnel_extra' => Arr::wrap($personalPayload['personnel_extra'] ?? []),
+            'personnel_extra' => Arr::only(Arr::wrap($personalPayload['personnel_extra'] ?? []), self::EXTRA_FIELDS),
             'relation_payloads' => $relationPayloads,
         ];
     }

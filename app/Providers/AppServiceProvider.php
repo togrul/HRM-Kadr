@@ -29,6 +29,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Blaze\Blaze;
 use Livewire\Livewire;
+use PhpOffice\PhpWord\Settings as PhpWordSettings;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -102,6 +103,11 @@ class AppServiceProvider extends ServiceProvider
         $this->configureBlazeOptimization();
         $this->loadLogDatabaseMigrationsInTests();
         Livewire::componentHook(ClearFieldErrorOnUpdate::class);
+
+        // PhpWord: dəyərlər (ad, ünvan, təsvir…) Word XML-ə yazılanda escape olunsun —
+        // yoxsa `<`/`&` sənədi pozur və ya XML yeridilməsinə yol açır. TemplateProcessor::setValue
+        // və Word2007/HTML yazıcıları bu bayrağa baxır; bir dəfə qlobal yandırılır.
+        PhpWordSettings::setOutputEscapingEnabled(true);
     }
 
     /**
@@ -125,10 +131,10 @@ class AppServiceProvider extends ServiceProvider
      */
     private function registerMacros(): void
     {
+        // Struktur görünürlüyü: «bütün strukturlar» bayrağı heç nə əlavə etmir, boş
+        // görünürlük heç bir struktur qaytarmır (fail closed).
         Builder::macro('accessible', function (?User $user = null) {
-            $ids = resolve(StructureService::class)->getAccessibleStructures($user);
-
-            return empty($ids) ? $this : $this->whereIn('id', $ids);
+            return resolve(StructureService::class)->scopeFor($user)->constrain($this, $this->getModel()->qualifyColumn('id'));
         });
     }
 

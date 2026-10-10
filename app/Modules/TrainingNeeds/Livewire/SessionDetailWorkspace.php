@@ -8,7 +8,9 @@ use App\Models\TrainingSession;
 use App\Models\TrainingSessionParticipant;
 use App\Modules\TrainingNeeds\Application\Services\TrainingDeliveryService;
 use App\Modules\TrainingNeeds\Livewire\Concerns\InteractsWithTrainingNeedsAccess;
+use App\Modules\TrainingNeeds\Support\TrainingStructureScope;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Isolate;
@@ -48,6 +50,7 @@ class SessionDetailWorkspace extends Component
             return TrainingSession::query()
                 ->with([
                     'program:id,title,duration_hours',
+                    'participants' => fn (Relation $query) => TrainingStructureScope::onPersonnelColumn($query->getQuery(), 'training_session_participants.personnel_id'),
                     'participants.personnel:id,tabel_no,surname,name,patronymic',
                     'participants.trainingNeed:id,reason,priority,status,source',
                 ])
@@ -108,7 +111,7 @@ class SessionDetailWorkspace extends Component
         $this->authorizeTrainingNeedsManage();
         abort_unless(in_array($status, ['planned', 'confirmed', 'attended', 'absent', 'cancelled'], true), 404);
 
-        $participant = TrainingSessionParticipant::query()
+        $participant = TrainingStructureScope::onPersonnelColumn(TrainingSessionParticipant::query(), 'training_session_participants.personnel_id')
             ->where('training_session_id', $this->sessionId)
             ->findOrFail($participantId);
 
@@ -143,7 +146,7 @@ class SessionDetailWorkspace extends Component
 
         $status = (string) $validated['bulkAttendanceStatus'];
 
-        TrainingSessionParticipant::query()
+        TrainingStructureScope::onPersonnelColumn(TrainingSessionParticipant::query(), 'training_session_participants.personnel_id')
             ->where('training_session_id', $this->sessionId)
             ->whereIn('id', $validated['bulkParticipantIds'])
             ->get()
@@ -190,7 +193,7 @@ class SessionDetailWorkspace extends Component
             'bulkParticipantIds' => __('training_needs::dashboard.fields.selected_participants'),
         ]);
 
-        TrainingSessionParticipant::query()
+        TrainingStructureScope::onPersonnelColumn(TrainingSessionParticipant::query(), 'training_session_participants.personnel_id')
             ->where('training_session_id', $this->sessionId)
             ->whereIn('id', $validated['bulkParticipantIds'])
             ->delete();

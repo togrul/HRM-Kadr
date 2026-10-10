@@ -34,6 +34,7 @@ class PerformanceEvaluationSkillMeasurementTest extends TestCase
     public function test_skill_measurement_flow_scores_attempts_reviews_open_answers_and_creates_training_needs(): void
     {
         $user = \App\Models\User::factory()->create(['name' => 'HR Specialist']);
+        grantAllStructures($user);
         $reviewer = \App\Models\User::factory()->create(['name' => 'Skill Reviewer']);
         $this->grantPerformancePermissions($user);
 

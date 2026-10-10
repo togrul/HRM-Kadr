@@ -5,10 +5,33 @@ namespace App\Modules\Audit\Application\Services;
 use App\Models\AttendanceOvertimeRequest;
 use App\Models\AuditActivity;
 use App\Models\Candidate;
+use App\Models\EmployeeBankAccount;
+use App\Models\EmployeeCompensation;
+use App\Models\EmployeeLoan;
+use App\Models\Leave;
 use App\Models\OrderLog;
+use App\Models\PayrollRun;
+use App\Models\PerformanceForm;
+use App\Models\PerformanceGoal;
+use App\Models\PerformanceScorecard;
+use App\Models\PerformanceTestSession;
 use App\Models\Personnel;
+use App\Models\PersonnelCard;
+use App\Models\PersonnelEducation;
+use App\Models\PersonnelExtraEducation;
+use App\Models\PersonnelIdentityDocument;
+use App\Models\PersonnelInjury;
+use App\Models\PersonnelLaborActivity;
+use App\Models\PersonnelMilitaryService;
+use App\Models\PersonnelPassports;
+use App\Models\PersonnelRank;
+use App\Models\PersonnelTakenCaptive;
 use App\Models\StaffSchedule;
+use App\Models\TrainingDeliveryRecord;
+use App\Models\TrainingNeedItem;
 use App\Models\User;
+use App\Services\StructureScope;
+use App\Services\StructureService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -42,6 +65,47 @@ class ActivityLogReader
 
     /** Cap on name matches a search expands into, so a one-letter term stays cheap. */
     private const NAME_MATCH_LIMIT = 500;
+
+    /** Maskalanan məbləğ sahələri (view-compensation-amounts icazəsi olmadan «•••»). */
+    private const AMOUNT_FIELDS = [
+        EmployeeCompensation::class => ['base_amount'],
+        EmployeeLoan::class => ['principal', 'monthly_installment', 'remaining'],
+        PayrollRun::class => ['gross_total', 'deduction_total', 'net_total', 'employer_total'],
+    ];
+
+    public const AMOUNT_MASK = '•••';
+
+    /**
+     * İşçiyə bağlı jurnal subyektləri və işçini tapan sütun: «id» — subyekt işçinin özüdür,
+     * «tabel_no» / «personnel_id» — subyekt işçiyə həmin sütunla bağlanır. Belə sətirlər
+     * yalnız işçinin strukturu istifadəçinin görünürlüyündədirsə göstərilir.
+     */
+    private const PERSONNEL_SUBJECTS = [
+        Personnel::class => 'id',
+        PersonnelCard::class => 'tabel_no',
+        PersonnelTakenCaptive::class => 'tabel_no',
+        PersonnelLaborActivity::class => 'tabel_no',
+        PersonnelPassports::class => 'tabel_no',
+        PersonnelEducation::class => 'tabel_no',
+        PersonnelExtraEducation::class => 'tabel_no',
+        PersonnelInjury::class => 'tabel_no',
+        PersonnelRank::class => 'tabel_no',
+        PersonnelMilitaryService::class => 'tabel_no',
+        PersonnelIdentityDocument::class => 'tabel_no',
+        EmployeeCompensation::class => 'tabel_no',
+        EmployeeLoan::class => 'tabel_no',
+        EmployeeBankAccount::class => 'tabel_no',
+        Leave::class => 'tabel_no',
+        PerformanceScorecard::class => 'personnel_id',
+        PerformanceTestSession::class => 'personnel_id',
+        PerformanceGoal::class => 'personnel_id',
+        PerformanceForm::class => 'personnel_id',
+        TrainingDeliveryRecord::class => 'personnel_id',
+        TrainingNeedItem::class => 'personnel_id',
+    ];
+
+    /** @var array<int, array<string, list<int>>> İstifadəçi üzrə görünən subyekt id-ləri (sorğu daxilində bir dəfə). */
+    private array $visibleSubjectIds = [];
 
     /**
      * @param  array<string,mixed>  $filters
@@ -296,12 +360,12 @@ class ActivityLogReader
      */
     public function changeRows(AuditActivity $activity): array
     {
-        $properties = $activity->properties;
-        if ($properties instanceof Collection) {
-            $properties = $properties->toArray();
-        }
+        // Dəyişiklik xam dəyərlərlə müəyyən olunur (maskalanmış «••• → •••» sətri itməsin),
+        // göstərilən dəyər isə maskalanmış xassələrdən götürülür.
+        $properties = $this->rawProperties($activity);
+        $visible = $this->visibleProperties($activity);
 
-        if (! is_array($properties)) {
+        if ($properties === []) {
             return [];
         }
 
@@ -327,12 +391,61 @@ class ActivityLogReader
             $rows[] = [
                 'key' => $field,
                 'field' => $this->attributeLabel($field),
-                'old' => $hasOld ? $this->changeValueLabel($before) : null,
-                'new' => $this->changeValueLabel($after),
+                'old' => $hasOld ? $this->changeValueLabel($this->normalizedChangeValue($visible['old'][$field] ?? null)) : null,
+                'new' => $this->changeValueLabel($this->normalizedChangeValue($visible['attributes'][$field] ?? null)),
             ];
         }
 
         return $rows;
+    }
+
+    /**
+     * Jurnal sətrinin xassələri; maaş/kredit məbləğləri view-compensation-amounts icazəsi
+     * olmayan istifadəçi üçün «•••» ilə əvəz olunur (həm dəyişiklik siyahısında, həm ixracda).
+     *
+     * @return array<string,mixed>
+     */
+    public function visibleProperties(AuditActivity $activity, ?User $viewer = null): array
+    {
+        $properties = $this->rawProperties($activity);
+
+        if ($properties === []) {
+            return [];
+        }
+
+        $fields = self::AMOUNT_FIELDS[(string) $activity->subject_type] ?? [];
+        $viewer ??= auth()->user();
+
+        if ($fields === [] || ($viewer?->can('view-compensation-amounts') ?? false)) {
+            return $properties;
+        }
+
+        foreach (['attributes', 'old'] as $bag) {
+            if (! is_array($properties[$bag] ?? null)) {
+                continue;
+            }
+
+            foreach ($fields as $field) {
+                if (array_key_exists($field, $properties[$bag]) && $properties[$bag][$field] !== null) {
+                    $properties[$bag][$field] = self::AMOUNT_MASK;
+                }
+            }
+        }
+
+        return $properties;
+    }
+
+    /**
+     * @return array<string,mixed>
+     */
+    private function rawProperties(AuditActivity $activity): array
+    {
+        $properties = $activity->properties;
+        if ($properties instanceof Collection) {
+            $properties = $properties->toArray();
+        }
+
+        return is_array($properties) ? $properties : [];
     }
 
     /**
@@ -427,9 +540,100 @@ class ActivityLogReader
         $logName = $this->filter($filters, 'log_name');
         $search = $this->filter($filters, 'search');
 
-        return AuditActivity::query()
+        $query = AuditActivity::query()
             ->when($logName !== '', fn (Builder $query) => $query->where('log_name', $logName))
             ->when($search !== '', fn (Builder $query) => $this->whereSearch($query, $search));
+
+        return $this->whereVisibleToViewer($query);
+    }
+
+    /**
+     * Tək sətir (detal paneli) üçün görünürlük yoxlaması ilə sorğu.
+     *
+     * @return Builder<AuditActivity>
+     */
+    public function visibleQuery(): Builder
+    {
+        return $this->whereVisibleToViewer(AuditActivity::query());
+    }
+
+    /**
+     * İşçiyə bağlı subyektli sətirlər yalnız işçinin strukturu görünürlükdədirsə; işçiyə
+     * bağlı olmayan (və subyektsiz) sətirlər əvvəlki kimi görünür. Jurnal ayrı bazada
+     * ola bildiyi üçün id-lər əvvəlcə əsas bazadan oxunur, sonra whereIn ilə qoşulur.
+     *
+     * @param  Builder<AuditActivity>  $query
+     * @return Builder<AuditActivity>
+     */
+    private function whereVisibleToViewer(Builder $query, ?User $viewer = null): Builder
+    {
+        $viewer ??= auth()->user();
+        $scope = $viewer instanceof User
+            ? app(StructureService::class)->scopeFor($viewer)
+            : StructureScope::none();
+
+        if ($scope->isAll()) {
+            return $query;
+        }
+
+        $visible = $this->visibleSubjectIds($viewer, $scope);
+
+        return $query->where(function (Builder $nested) use ($visible): void {
+            $nested->whereNull('subject_type')
+                ->orWhereNotIn('subject_type', array_keys(self::PERSONNEL_SUBJECTS));
+
+            foreach ($visible as $type => $ids) {
+                if ($ids !== []) {
+                    $nested->orWhere(fn (Builder $subject) => $subject->where('subject_type', $type)->whereIn('subject_id', $ids));
+                }
+            }
+        });
+    }
+
+    /**
+     * @return array<string, list<int>>
+     */
+    private function visibleSubjectIds(?User $viewer, StructureScope $scope): array
+    {
+        if ($scope->isNone() || ! $viewer instanceof User) {
+            return [];
+        }
+
+        $key = (int) $viewer->getKey();
+
+        if (isset($this->visibleSubjectIds[$key])) {
+            return $this->visibleSubjectIds[$key];
+        }
+
+        $personnel = $scope->constrain(Personnel::query()->withTrashed(), 'structure_id')->get(['id', 'tabel_no']);
+        $personnelIds = $personnel->pluck('id')->map(fn ($id): int => (int) $id)->all();
+        $tabelNos = $personnel->pluck('tabel_no')->filter()->map(fn ($tabel): string => (string) $tabel)->values()->all();
+        $visible = [];
+
+        foreach (self::PERSONNEL_SUBJECTS as $modelClass => $column) {
+            $values = $column === 'tabel_no' ? $tabelNos : $personnelIds;
+
+            if ($values === []) {
+                $visible[$modelClass] = [];
+
+                continue;
+            }
+
+            if ($column === 'id') {
+                $visible[$modelClass] = $personnelIds;
+
+                continue;
+            }
+
+            $visible[$modelClass] = $modelClass::query()
+                ->when($this->usesSoftDeletes($modelClass), fn (Builder $query): Builder => $query->withoutGlobalScope(SoftDeletingScope::class))
+                ->whereIn($column, $values)
+                ->pluck('id')
+                ->map(fn ($id): int => (int) $id)
+                ->all();
+        }
+
+        return $this->visibleSubjectIds[$key] = $visible;
     }
 
     private function whereSearch(Builder $query, string $search): void

@@ -21,7 +21,7 @@ class MyHrAccountProvisioningTest extends TestCase
     {
         $this->seedReferenceData();
 
-        $hr = User::factory()->create(['is_active' => true]);
+        $hr = grantAllStructures(User::factory()->create(['is_active' => true]));
         $hr->givePermissionTo(Permission::findOrCreate('manage-my-hr-accounts', 'web'));
 
         $personnel = $this->makePersonnel('employee@example.test');
@@ -51,7 +51,7 @@ class MyHrAccountProvisioningTest extends TestCase
     {
         $this->seedReferenceData();
 
-        $hr = User::factory()->create(['is_active' => true]);
+        $hr = grantAllStructures(User::factory()->create(['is_active' => true]));
         $hr->givePermissionTo(Permission::findOrCreate('manage-my-hr-accounts', 'web'));
 
         $personnel = $this->makePersonnel('employee@example.test');
@@ -82,7 +82,7 @@ class MyHrAccountProvisioningTest extends TestCase
     {
         $this->seedReferenceData();
 
-        $hr = User::factory()->create(['is_active' => true]);
+        $hr = grantAllStructures(User::factory()->create(['is_active' => true]));
         $hr->givePermissionTo(Permission::findOrCreate('manage-my-hr-accounts', 'web'));
 
         $personnel = $this->makePersonnel(null);
@@ -97,7 +97,7 @@ class MyHrAccountProvisioningTest extends TestCase
     {
         $this->seedReferenceData();
 
-        $hr = User::factory()->create(['is_active' => true]);
+        $hr = grantAllStructures(User::factory()->create(['is_active' => true]));
         $hr->givePermissionTo(Permission::findOrCreate('manage-my-hr-accounts', 'web'));
 
         $personnel = $this->makePersonnel('employee@example.test');
@@ -126,7 +126,7 @@ class MyHrAccountProvisioningTest extends TestCase
     {
         $this->seedReferenceData();
 
-        $hr = User::factory()->create(['is_active' => true]);
+        $hr = grantAllStructures(User::factory()->create(['is_active' => true]));
         $hr->givePermissionTo(Permission::findOrCreate('manage-my-hr-accounts', 'web'));
 
         $personnel = $this->makePersonnel('employee@example.test');

@@ -190,6 +190,7 @@ class Feedback360Test extends TestCase
     private function userWith(array $permissions): User
     {
         $user = User::factory()->create();
+        grantAllStructures($user);
         foreach ($permissions as $permission) {
             $user->givePermissionTo(Permission::findOrCreate($permission, 'web'));
         }

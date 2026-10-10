@@ -8,6 +8,7 @@ return [
         'leaves' => 'Leaves',
     ],
     'labels' => [
+        'by_order' => 'By order',
         'sick_certificate' => 'Sick-leave certificate',
         'sick_certificate_hint' => 'This leave belongs to a sick-leave certificate; change it in the certificate register.',
         'approval_route' => 'Approval route',
@@ -89,6 +90,8 @@ return [
         'approval_note' => 'Approvers are resolved from the hierarchy',
     ],
     'messages' => [
+        'approval_forbidden' => 'You are not allowed to approve or reject this leave.',
+        'approval_own_leave' => 'You cannot approve or reject your own leave.',
         'recorded_as_approved' => 'Recorded as approved when the leave was entered.',
         'leave_added' => 'Leave was added successfully!',
         'leave_updated' => 'Leave was updated successfully!',
@@ -122,7 +125,11 @@ return [
         'no_hierarchy_chain' => 'No hierarchy chain is available for this employee.',
     ],
     'validation' => [
+        'personnel_out_of_scope' => 'The selected employee is outside your structure scope.',
         'managed_by_sick_certificate' => 'This leave belongs to a sick-leave certificate; change it in the «Sick-leave certificates» register.',
+        'managed_by_order' => 'This leave was created by an order; it can only be changed by reverting or cancelling that order.',
+        'self_approval' => 'You cannot record your own leave as approved — it has to go through its approval route.',
+        'month_closed' => 'The month :period is closed for pay — creating, changing or deleting a leave in it requires a separate permission.',
         'status_not_allowed' => 'You are not allowed to set this status. The leave has to go through its approval route.',
         'self_approver' => 'An employee cannot approve their own leave — choose another approver.',
         'end_before_start' => 'The end date cannot be before the start date.',

@@ -186,7 +186,15 @@
                             @forelse ($this->periods as $item)
                                 <span wire:key="payroll-period-chip-{{ $item->id }}" class="inline-flex items-center gap-1.5 rounded-full border border-hairline bg-[#fafafa] py-1 pl-3 pr-1.5 text-[12px] font-medium text-ink-soft">
                                     <span class="hrm-num">{{ $item->code }}</span>
-                                    @if ($canManage)
+                                    @if ($item->isClosed())
+                                        <span class="text-[11px] text-ink-faint">{{ __('payroll::dashboard.periods.closed') }}</span>
+                                    @endif
+                                    @if ($item->isClosed() && $this->canReopenPeriod())
+                                        <button type="button" x-on:click="{{ $confirm('amber', 'reopen_period', 'reopen_period', 'reopenPeriod('.$item->id.')') }}" title="{{ __('payroll::dashboard.actions.reopen_period') }}" class="inline-flex h-5 w-5 items-center justify-center rounded-full text-ink-faint transition hover:bg-amber-100 hover:text-amber-700">
+                                            <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+                                        </button>
+                                    @endif
+                                    @if ($canManage && ! $item->isClosed())
                                         <button type="button" x-on:click="{{ $confirmDelete('deletePeriod('.$item->id.')') }}" title="{{ __('payroll::dashboard.actions.delete') }}" class="inline-flex h-5 w-5 items-center justify-center rounded-full text-ink-faint transition hover:bg-rose-100 hover:text-rose-600">
                                             <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
                                         </button>
@@ -197,6 +205,12 @@
                             @endforelse
                         </div>
                     </div>
+
+                    @if ($this->canReopenPeriod() && $this->periods->contains(fn ($item) => $item->isClosed()))
+                        <x-ui.input-shell :label="__('payroll::dashboard.fields.reopen_reason')" :error="$errors->first('reopenReason')">
+                            <x-ui.input type="text" wire:model="reopenReason" />
+                        </x-ui.input-shell>
+                    @endif
                 @else
                     <div class="grid gap-3 sm:grid-cols-2">
                         <div class="min-w-0">

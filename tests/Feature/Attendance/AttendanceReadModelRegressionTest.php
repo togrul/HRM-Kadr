@@ -217,7 +217,7 @@ class AttendanceReadModelRegressionTest extends TestCase
         $user = User::factory()->create();
         $user->assignRole($role);
 
-        return $user;
+        return grantAllStructures($user);
     }
 
     private function makePersonnel(array $overrides = []): Personnel

@@ -5,6 +5,7 @@ namespace App\Modules\TrainingNeeds\Application\Services;
 use App\Models\TrainingDeliveryRecord;
 use App\Models\TrainingFeedbackResponse;
 use App\Models\TrainingSession;
+use App\Modules\TrainingNeeds\Support\TrainingStructureScope;
 use Illuminate\Database\Eloquent\Collection;
 use Spatie\Activitylog\Models\Activity;
 
@@ -62,7 +63,8 @@ class TrainingNeedReportingService
 
     public function deliveryRows(): Collection
     {
-        return TrainingDeliveryRecord::query()
+        // Eksport sətirləri baxan istifadəçinin struktur görünürlüyü ilə məhdudlaşır.
+        return TrainingStructureScope::onPersonnelColumn(TrainingDeliveryRecord::query(), 'training_delivery_records.personnel_id')
             ->with([
                 'session:id,title,scheduled_start_at,location',
                 'program:id,title',
@@ -75,7 +77,7 @@ class TrainingNeedReportingService
 
     public function feedbackRows(): Collection
     {
-        return TrainingFeedbackResponse::query()
+        return TrainingStructureScope::onPersonnelColumn(TrainingFeedbackResponse::query(), 'training_feedback_responses.personnel_id')
             ->with([
                 'form:id,title',
                 'session:id,title',

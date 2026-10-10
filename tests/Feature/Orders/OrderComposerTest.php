@@ -915,7 +915,8 @@ class OrderComposerTest extends TestCase
         $user = User::factory()->create();
         $user->givePermissionTo(Permission::findOrCreate($permission, 'web'));
 
-        return $user;
+        // Struktur görünürlüyü fail closed-dur: bütün təşkilatı görən HR istifadəçisi.
+        return grantAllStructures($user);
     }
 
     private function makePersonnel(): Personnel

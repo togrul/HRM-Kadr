@@ -7,6 +7,7 @@ use App\Models\PerformanceCycle;
 use App\Models\PerformanceFeedbackRater;
 use App\Models\PerformanceFeedbackRequest;
 use App\Models\PerformanceFormTemplate;
+use App\Models\User;
 use App\Modules\PerformanceEvaluation\Application\Services\Feedback360Service;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
@@ -76,12 +77,12 @@ class Feedback360Workspace extends Component
 
     public function getSummaryProperty(): array
     {
-        return $this->service()->summary();
+        return $this->service()->summary($this->viewer());
     }
 
     public function getRequestsProperty(): \Illuminate\Support\Collection
     {
-        return $this->service()->requests($this->cycleId);
+        return $this->service()->requests($this->cycleId, $this->viewer());
     }
 
     public function getCyclesProperty(): Collection
@@ -96,7 +97,7 @@ class Feedback360Workspace extends Component
 
     public function getActiveRequestProperty(): ?PerformanceFeedbackRequest
     {
-        return $this->activeRequestId ? $this->service()->find($this->activeRequestId) : null;
+        return $this->activeRequestId ? $this->service()->find($this->activeRequestId, $this->viewer()) : null;
     }
 
     public function getTemplateItemsProperty(): array
@@ -108,7 +109,9 @@ class Feedback360Workspace extends Component
 
     public function getAggregateProperty(): array
     {
-        return $this->activeRequestId ? $this->service()->aggregate($this->activeRequestId) : ['items' => [], 'by_type' => [], 'raw_final' => null];
+        return $this->activeRequestId && $this->service()->isRequestVisible($this->viewer(), $this->activeRequestId)
+            ? $this->service()->aggregate($this->activeRequestId)
+            : ['items' => [], 'by_type' => [], 'raw_final' => null];
     }
 
     public function setSection(string $section): void
@@ -166,6 +169,8 @@ class Feedback360Workspace extends Component
             'createForm.due_date' => ['nullable', 'date'],
         ])['createForm'];
 
+        abort_unless($this->service()->isPersonnelVisible($this->viewer(), (int) $data['subject_personnel_id']), 403);
+
         $request = $this->service()->createRequest(
             (int) $data['performance_cycle_id'],
             (int) $data['performance_form_template_id'],
@@ -182,6 +187,7 @@ class Feedback360Workspace extends Component
 
     public function openDetail(int $requestId): void
     {
+        $this->ensureRequestVisible($requestId);
         $this->activeRequestId = $requestId;
         $this->section = 'detail';
         $this->personnelTarget = '';
@@ -208,6 +214,8 @@ class Feedback360Workspace extends Component
             'raterForm.rater_personnel_id' => ['required', 'integer', 'exists:personnels,id'],
         ])['raterForm'];
 
+        $this->ensureRequestVisible((int) $this->activeRequestId);
+
         $this->service()->addRater(
             (int) $this->activeRequestId,
             $data['rater_type'],
@@ -223,12 +231,14 @@ class Feedback360Workspace extends Component
     public function removeRater(int $raterId): void
     {
         $this->authorize('manage-performance-evaluation');
+        $this->ensureRaterVisible($raterId);
         $this->service()->removeRater($raterId);
     }
 
     public function openScoring(int $raterId): void
     {
         $this->authorize('manage-performance-evaluation');
+        $this->ensureRaterVisible($raterId);
 
         $rater = PerformanceFeedbackRater::query()->with('scores')->findOrFail($raterId);
         $this->scoringRaterId = $raterId;
@@ -250,6 +260,8 @@ class Feedback360Workspace extends Component
             return;
         }
 
+        $this->ensureRaterVisible((int) $this->scoringRaterId);
+
         $this->service()->submitScores($this->scoringRaterId, $this->scoreInputs, $this->commentInputs);
 
         $this->closeSideMenu();
@@ -262,6 +274,7 @@ class Feedback360Workspace extends Component
     public function openCalibrate(int $requestId): void
     {
         $this->authorize('manage-performance-evaluation');
+        $this->ensureRequestVisible($requestId);
 
         $this->activeRequestId = $requestId;
         $this->section = 'calibrate';
@@ -281,6 +294,7 @@ class Feedback360Workspace extends Component
     public function saveCalibration(bool $approve = false): void
     {
         $this->authorize('manage-performance-evaluation');
+        $this->ensureRequestVisible((int) $this->activeRequestId);
 
         $this->service()->calibrate(
             (int) $this->activeRequestId,
@@ -303,6 +317,7 @@ class Feedback360Workspace extends Component
     public function reopenRequest(int $requestId): void
     {
         $this->authorize('manage-performance-evaluation');
+        $this->ensureRequestVisible($requestId);
         $this->service()->reopen($requestId);
         $this->dispatch('notify', type: 'success', message: __('performance_evaluation::feedback.messages.reopened'));
     }
@@ -310,11 +325,31 @@ class Feedback360Workspace extends Component
     public function deleteRequest(int $requestId): void
     {
         $this->authorize('manage-performance-evaluation');
+        $this->ensureRequestVisible($requestId);
         $this->service()->delete($requestId);
 
         if ($this->activeRequestId === $requestId) {
             $this->backToList();
         }
+    }
+
+    protected function viewer(): User
+    {
+        $user = auth()->user();
+        abort_unless($user instanceof User, 403);
+
+        return $user;
+    }
+
+    /** Sorğu yalnız qiymətləndirilən işçi istifadəçinin struktur görünürlüyündə olanda açılır. */
+    protected function ensureRequestVisible(int $requestId): void
+    {
+        abort_unless($this->service()->isRequestVisible($this->viewer(), $requestId), 404);
+    }
+
+    protected function ensureRaterVisible(int $raterId): void
+    {
+        abort_unless($this->service()->isRaterVisible($this->viewer(), $raterId), 404);
     }
 
     public function resetCreateForm(): void

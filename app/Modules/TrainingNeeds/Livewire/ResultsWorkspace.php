@@ -6,6 +6,7 @@ use App\Models\TrainingDeliveryRecord;
 use App\Models\TrainingFeedbackForm;
 use App\Modules\TrainingNeeds\Livewire\Concerns\HandlesTrainingDeliveryMutations;
 use App\Modules\TrainingNeeds\Livewire\Concerns\HandlesTrainingFeedbackMutations;
+use App\Modules\TrainingNeeds\Support\TrainingStructureScope;
 use App\Services\HrPolicies\HrPolicyPackService;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Isolate;
@@ -26,7 +27,7 @@ class ResultsWorkspace extends AbstractTrainingNeedsWorkspace
 
     public function confirmDeleteDeliveryCertificate(int $deliveryRecordId): void
     {
-        $record = TrainingDeliveryRecord::query()->with(['personnel', 'program'])->findOrFail($deliveryRecordId);
+        $record = TrainingStructureScope::onPersonnelColumn(TrainingDeliveryRecord::query(), 'training_delivery_records.personnel_id')->with(['personnel', 'program'])->findOrFail($deliveryRecordId);
 
         $details = array_filter([
             $record->personnel?->fullname,

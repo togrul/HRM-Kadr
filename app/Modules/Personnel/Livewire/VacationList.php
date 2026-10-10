@@ -63,7 +63,7 @@ class VacationList extends Component
         $this->months = UsefulHelpers::monthsList(config('app.locale'));
 
         $this->title = __('personnel::vacations.titles.vacations_for', [
-            'name' => "<span class='text-blue-500'>{$this->personnelModelData->fullname}</span>",
+            'name' => "<span class='text-blue-500'>".e($this->personnelModelData->fullname).'</span>',
         ]);
     }
 

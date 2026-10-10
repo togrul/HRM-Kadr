@@ -53,11 +53,13 @@ class AssignmentsTab extends CompensationTab
     #[Computed]
     public function currentAssignment(): ?EmployeeCompensation
     {
-        if (! $this->tabelNo) {
+        $tabelNo = $this->visibleTabel();
+
+        if (! $tabelNo) {
             return null;
         }
 
-        return app(CompensationService::class)->currentFor($this->tabelNo);
+        return app(CompensationService::class)->currentFor($tabelNo);
     }
 
     /**
@@ -76,11 +78,13 @@ class AssignmentsTab extends CompensationTab
     #[Computed]
     public function salaryPolicyMode(): ?string
     {
-        if (! $this->tabelNo) {
+        $tabelNo = $this->visibleTabel();
+
+        if (! $tabelNo) {
             return null;
         }
 
-        return app(CompensationService::class)->manualSalaryMode($this->tabelNo)?->value;
+        return app(CompensationService::class)->manualSalaryMode($tabelNo)?->value;
     }
 
     /** «Əmək haqqının dəyişdirilməsi» əmri ilə açılan əmrlər siyahısı (icazə və şablon varsa). */
@@ -111,6 +115,7 @@ class AssignmentsTab extends CompensationTab
     {
         $this->guardManage();
         abort_unless($this->tabelNo !== null, 422);
+        abort_unless($this->visibleTabel() !== null, 403);
 
         $validated = $this->validate([
             'assignmentForm.regime_id' => 'required|exists:compensation_regimes,id',

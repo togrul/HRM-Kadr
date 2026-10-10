@@ -32,9 +32,12 @@ class EmployeeFeedService
     /**
      * One page of the feed.
      *
+     * `base_salary` yalnız tokenin `hr.compensation:read` icazəsi də olduqda doldurulur;
+     * əks halda sahə sxemdə qalır, amma `null` olur (müqavilə forması dəyişmir).
+     *
      * @return array{items: list<array<string, mixed>>, last_sequence: int, has_more: bool}
      */
-    public function page(int $after = 0, int $limit = Contract::DEFAULT_LIMIT): array
+    public function page(int $after = 0, int $limit = Contract::DEFAULT_LIMIT, bool $includeSalary = false): array
     {
         $limit = max(1, min($limit, Contract::MAX_LIMIT));
 
@@ -50,7 +53,7 @@ class EmployeeFeedService
         $hasMore = $people->count() > $limit;
         $people = $people->take($limit);
 
-        $salaries = $this->salariesFor($people);
+        $salaries = $includeSalary ? $this->salariesFor($people) : null;
 
         return [
             'items' => $people->map(fn (Personnel $p) => $this->row($p, $salaries))->values()->all(),
@@ -67,10 +70,10 @@ class EmployeeFeedService
     /**
      * One employee, whitelisted.
      *
-     * @param  Collection<string, float>  $salaries
+     * @param  Collection<string, float>|null  $salaries  null — token maaşı görməyə icazəli deyil
      * @return array<string, mixed>
      */
-    private function row(Personnel $person, Collection $salaries): array
+    private function row(Personnel $person, ?Collection $salaries): array
     {
         $tabelNo = trim((string) $person->tabel_no);
 
@@ -102,7 +105,7 @@ class EmployeeFeedService
             'hire_date' => $this->date($person->join_work_date),
             'dismiss_date' => $this->date($person->leave_work_date),
             'status' => $person->leave_work_date ? 'dismissed' : 'active',
-            'base_salary' => (float) ($salaries[$tabelNo] ?? 0.0),
+            'base_salary' => $salaries === null ? null : (float) ($salaries[$tabelNo] ?? 0.0),
 
             'work_schedule_code' => $this->text($person->work_norm_id),
         ];

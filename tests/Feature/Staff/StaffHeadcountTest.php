@@ -80,7 +80,7 @@ function staffHeadcountRow(int $structureId, ?int $positionId, int $total, int $
 
 function staffHeadcountViewer(): User
 {
-    $user = User::factory()->create();
+    $user = grantAllStructures(User::factory()->create());
     $user->givePermissionTo(Permission::findOrCreate('show-staff', 'web'));
     $role = Role::findOrCreate('staff-headcount-tester', 'web');
     $user->assignRole($role);
@@ -240,7 +240,7 @@ it('renders the header with Artıq only when there is over-staffing', function (
 
 it('lets HR fix a position-less row in the edit form, which now requires the position', function (): void {
     $row = staffHeadcountRow(2, null, 18);
-    $user = User::factory()->create();
+    $user = grantAllStructures(User::factory()->create());
     $user->givePermissionTo(Permission::findOrCreate('edit-staff', 'web'));
 
     Livewire::actingAs($user)->test(EditStaff::class, ['staffModel' => 2])
@@ -325,7 +325,7 @@ it('warns in the hire form when the chosen structure + position has no free şta
     staffHeadcountPerson(2, 1);
     Role::findOrCreate('admin', 'web');
     Permission::findOrCreate('get-notification', 'web');
-    $user = User::factory()->create();
+    $user = grantAllStructures(User::factory()->create());
     $user->givePermissionTo(Permission::findOrCreate('add-personnels', 'web'));
 
     $form = Livewire::actingAs($user)->test(\App\Modules\Personnel\Livewire\AddPersonnel::class)

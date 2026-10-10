@@ -46,3 +46,37 @@ function something()
 {
     // ..
 }
+
+/**
+ * Struktur görünürlüyü fail closed-dur: struktur verilməmiş istifadəçi heç bir işçi qeydini
+ * görmür. Bütün təşkilatı görməli olan test istifadəçisinə «bütün strukturlar» bayraqlı rol ver.
+ */
+function grantAllStructures(App\Models\User $user): App\Models\User
+{
+    $role = App\Models\Role::query()->firstOrCreate(
+        ['name' => 'test-all-structures', 'guard_name' => 'web'],
+    );
+    $role->forceFill(['all_structures' => true])->save();
+    $user->assignRole($role);
+    app(App\Services\StructureService::class)->forgetUser((int) $user->getKey());
+
+    return $user;
+}
+
+/**
+ * İstifadəçiyə yalnız verilmiş strukturları açan ayrıca rol verir.
+ *
+ * @param  list<int>  $structureIds
+ */
+function grantStructures(App\Models\User $user, array $structureIds): App\Models\User
+{
+    $role = App\Models\Role::query()->create([
+        'name' => 'test-structures-'.Illuminate\Support\Str::random(8),
+        'guard_name' => 'web',
+    ]);
+    $role->structures()->sync($structureIds);
+    $user->assignRole($role);
+    app(App\Services\StructureService::class)->forgetUser((int) $user->getKey());
+
+    return $user;
+}

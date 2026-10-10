@@ -273,6 +273,8 @@ return [
         'test_question_imported' => ':banks yeni bank, :questions yeni sual yaradıldı, :updated_questions sual yeniləndi.',
         'user_personnel_link_saved' => 'İstifadəçi və əməkdaş bağı yadda saxlanıldı.',
         'user_personnel_link_deleted' => 'İstifadəçi və əməkdaş bağı silindi.',
+        'personnel_already_linked' => 'Bu əməkdaş artıq başqa istifadəçiyə bağlıdır — əvvəlcə həmin bağı silin.',
+        'self_link_forbidden' => 'Öz hesabınızı əməkdaş kartına bağlaya bilməzsiniz — bunu başqa administrator edir.',
         'auto_created_weak_area_note' => 'Performans üzrə zəif sahədən avtomatik yaradılıb.',
         'auto_created_skill_weak_area_note' => 'Bacarıq ölçümündə zəif nəticədən avtomatik yaradılıb.',
         'performance_gap_reason' => 'Forma #:form, meyar #:item üzrə aşağı performans balı qeydə alındı: :score',
@@ -283,6 +285,7 @@ return [
         'manual' => 'Əl ilə qurulan bağ',
         'self_service_provisioned' => 'Şəxsi kabinet üçün sistem tərəfindən yaradılıb',
         'manual_self_service_link' => 'Şəxsi kabinet üçün bağ əl ilə qurulub',
+        'email_backfill' => 'Köçürmə zamanı birmənalı e-poçt uyğunluğundan yaradılıb',
         'unknown' => 'Bağ qurulub',
     ],
     'cycle_types' => [
@@ -461,7 +464,7 @@ return [
     'hints' => [
         'options_text' => 'Çoxseçimli suallar üçün hər sətri `Variant | 1 | 100` formatında daxil edin. İkinci hissə düzdür/düz deyil, üçüncü hissə baldır.',
         'test_question_import' => '`.xlsx`, `.xls` və ya `.csv` yükləyə bilərsiniz. Şablon faylı yükləyib eyni sütun quruluşu ilə doldurun.',
-        'user_personnel_links' => 'Bu ekranda testlərdə hansı istifadəçinin hansı işçiyə aid olduğunu təyin edirsiniz. Yanlış bağ testlərin görünüşünü və nəticə vərəqəsinə girişi poza bilər.',
+        'user_personnel_links' => 'İstifadəçi hesabı əməkdaş kartına yalnız açıq bağla bağlanır — bu ekranda və ya əməkdaş kartında şəxsi kabinet hesabı yaradılanda (e-poçt və ad uyğunluğu nəzərə alınmır). Bağ şəxsi kabineti, əmək haqqı vərəqəsini, testləri və təsdiq hüququnu müəyyən edir — yanlış bağ başqasının məlumatını açır. Öz hesabınızı bağlaya bilməzsiniz; hər dəyişiklik jurnala yazılır.',
         'test_bank_rules' => 'Bank testin qaydasını yığır: keçid balı, vaxt limiti və cəhd sayı burada müəyyən olunur.',
         'pass_score' => 'Keçid həddi testin keçmiş sayılıb-sayılmayacağını, həm də analitik hesabatlarda risk səviyyəsini formalaşdırır.',
         'duration_minutes' => 'Müddət test səhifəsində geri sayım kimi görünür və vaxt bitəndə cəhd avtomatik yekunlaşır.',

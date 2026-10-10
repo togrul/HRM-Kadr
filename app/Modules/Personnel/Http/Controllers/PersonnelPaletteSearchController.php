@@ -25,7 +25,7 @@ class PersonnelPaletteSearchController
             return response()->json(['results' => []]);
         }
 
-        $results = $query->quickFind($term, $structures->getAccessibleStructures())
+        $results = $query->quickFind($term, $structures->scopeFor())
             ->map(fn (Personnel $personnel): array => [
                 'id' => $personnel->id,
                 'name' => $personnel->fullname,

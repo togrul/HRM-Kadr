@@ -43,6 +43,7 @@ class MyHrPayslipsTest extends TestCase
 
         $user = User::factory()->create(['email' => 'self@example.test']);
         $user->givePermissionTo(Permission::findOrCreate('show-my-hr', 'web'));
+        $this->linkUserToPersonnel($user, $self);
         $this->actingAs($user);
 
         $instance = Livewire::test(MyHrPayslips::class, ['personnelId' => $self->id])->instance();
@@ -65,13 +66,13 @@ class MyHrPayslipsTest extends TestCase
 
         $user = User::factory()->create(['email' => 'a@example.test']);
         $user->givePermissionTo(Permission::findOrCreate('show-my-hr', 'web'));
+        $this->linkUserToPersonnel($user, $self);
         $this->actingAs($user);
 
-        $instance = Livewire::test(MyHrPayslips::class, ['personnelId' => $self->id])
+        Livewire::test(MyHrPayslips::class, ['personnelId' => $self->id])
             ->call('viewPayslip', $othersPayslip->id)
-            ->instance();
-
-        $this->assertNull($instance->selectedPayslip);
+            ->assertStatus(404)
+            ->assertSet('selectedPayslipId', null);
     }
 
     private function makePayslip(int $runId, string $tabelNo, string $status, float $gross, float $net): Payslip
@@ -89,6 +90,11 @@ class MyHrPayslipsTest extends TestCase
     }
 
     private function makePersonnel(string $email): Personnel
+    {
+        return $this->linkFixtureUserByEmail($this->createPersonnelRecord($email));
+    }
+
+    private function createPersonnelRecord(string $email): Personnel
     {
         return Personnel::withoutEvents(fn () => Personnel::query()->create([
             'tabel_no' => 'TB'.Str::upper(Str::random(6)),

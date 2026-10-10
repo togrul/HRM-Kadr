@@ -2,6 +2,7 @@
 
 namespace App\Modules\Orders\Infrastructure\Document;
 
+use App\Enums\OrderStatusEnum;
 use App\Models\OrderLog;
 use App\Models\OrderWordTemplate;
 use App\Models\Position;
@@ -318,6 +319,9 @@ class OrderCompositionIssuer
         }
 
         $balance = $composition->personnelId ? $this->vacationBalance($template, $composition) : null;
+        if ($balance !== null) {
+            $balance = $this->withPendingDays($balance, (int) $composition->personnelId, $composition->editOrderId);
+        }
         $violation = $balance ? $this->vacationRules->violation($balance) : null;
 
         return $violation === null ? null : OrderIssueOutcome::rejected(message: $violation);
@@ -342,7 +346,8 @@ class OrderCompositionIssuer
             }
 
             $request = $this->vacationRules->request($template, OrderParticipantFields::effective($template, $composition->fields, $participant['fields']));
-            $violation = $this->vacationRules->violation([...$this->balances->snapshot($personnel, $request['year']), ...$request]);
+            $balance = $this->withPendingDays([...$this->balances->snapshot($personnel, $request['year']), ...$request], (int) $personnel->getKey(), $composition->editOrderId);
+            $violation = $this->vacationRules->violation($balance);
 
             if ($violation !== null) {
                 $message = __('orders::order_composer.errors.participant_blocked', ['name' => (string) $personnel->fullname, 'reason' => $violation]);
@@ -352,6 +357,62 @@ class OrderCompositionIssuer
         }
 
         return null;
+    }
+
+    /**
+     * The balance less the days other pending (issued, not yet approved) vacation orders of
+     * the same employee already ask for: two orders that each fit alone must not both be
+     * issued past the balance. Approval re-checks the balance under a lock (VacationEffect).
+     *
+     * @param  array<string,mixed>  $balance
+     * @return array<string,mixed>
+     */
+    private function withPendingDays(array $balance, int $personnelId, ?int $exceptOrderId): array
+    {
+        $pending = $this->pendingVacationDays($personnelId, $exceptOrderId);
+
+        if ($pending > 0) {
+            $balance['used'] = (int) $balance['used'] + $pending;
+            $balance['remaining'] = max(0, (int) $balance['remaining'] - $pending);
+        }
+
+        return $balance;
+    }
+
+    private function pendingVacationDays(int $personnelId, ?int $exceptOrderId): int
+    {
+        $tabelNo = $this->subjects->personnel($personnelId)?->tabel_no;
+        if ($tabelNo === null) {
+            return 0;
+        }
+
+        $orders = OrderLog::query()
+            ->where('status_id', OrderStatusEnum::PENDING->value)
+            ->where('template_render_mode', OrderIssueService::RENDER_MODE_DOCX)
+            ->whereHas('personnels', fn ($query) => $query->where('personnels.tabel_no', $tabelNo))
+            ->when($exceptOrderId !== null, fn ($query) => $query->whereKeyNot($exceptOrderId))
+            ->with('participants')
+            ->get(['id', 'order_no', 'template_snapshot']);
+
+        $days = 0;
+        foreach ($orders as $order) {
+            $snapshot = (array) $order->template_snapshot;
+            $template = OrderWordTemplate::query()->where('code', (string) ($snapshot['template_code'] ?? ''))->first();
+            if ($template === null || ! $this->vacationRules->isDayCounted($template)) {
+                continue;
+            }
+
+            $fields = (array) ($snapshot['fields'] ?? []);
+            if ($order->participants->isNotEmpty()) {
+                foreach ($order->participants->where('personnel_id', $personnelId) as $participant) {
+                    $days += $this->vacationRules->request($template, OrderParticipantFields::effective($template, $fields, (array) $participant->fields))['requested'];
+                }
+            } elseif ((int) ($snapshot['personnel_id'] ?? 0) === $personnelId) {
+                $days += $this->vacationRules->request($template, $fields)['requested'];
+            }
+        }
+
+        return $days;
     }
 
     /** Another order (deleted ones included — order_no is unique) already carries this number. */

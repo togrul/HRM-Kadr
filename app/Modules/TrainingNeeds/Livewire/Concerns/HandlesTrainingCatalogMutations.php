@@ -11,6 +11,7 @@ use App\Models\TrainingLevel;
 use App\Models\TrainingNeedItem;
 use App\Models\TrainingProgram;
 use App\Models\TrainingProgramCompetency;
+use App\Modules\TrainingNeeds\Support\TrainingStructureScope;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Validation\Rule;
 
@@ -487,6 +488,8 @@ trait HandlesTrainingCatalogMutations
             'profileForm.last_assessed_at' => __('training_needs::dashboard.fields.last_assessed_at'),
         ]);
 
+        TrainingStructureScope::ensurePersonnelVisible(data_get($validated, 'profileForm.personnel_id'));
+
         EmployeeCompetencyProfile::query()->updateOrCreate(
             [
                 'personnel_id' => (int) data_get($validated, 'profileForm.personnel_id'),
@@ -532,7 +535,7 @@ trait HandlesTrainingCatalogMutations
             'needForm.target_completion_date' => __('training_needs::dashboard.fields.target_completion_date'),
         ]);
 
-        $personnel = Personnel::query()->select('id', 'position_id')->findOrFail((int) data_get($validated, 'needForm.personnel_id'));
+        $personnel = TrainingStructureScope::onPersonnelTable(Personnel::query())->select('id', 'position_id')->findOrFail((int) data_get($validated, 'needForm.personnel_id'));
 
         TrainingNeedItem::query()->create([
             'personnel_id' => $personnel->id,

@@ -18,7 +18,7 @@ beforeEach(function (): void {
         'join_work_date' => '2019-03-12', 'added_by' => 1, 'work_norm_id' => 1, 'is_pending' => 0,
     ]);
 
-    $user = User::factory()->create();
+    $user = grantAllStructures(User::factory()->create());
     foreach (['show-personnels', 'edit-personnels', 'update-personnels'] as $permission) {
         Permission::findOrCreate($permission, 'web');
     }

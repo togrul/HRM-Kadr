@@ -8,10 +8,12 @@ use App\Modules\Attendance\Application\Services\AttendanceSettingsService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class Settings extends Component
 {
+    #[Locked]
     public bool $canManage = false;
 
     /**
@@ -65,7 +67,7 @@ class Settings extends Component
 
     public function save(AttendanceSettingsService $settingsService): void
     {
-        if (! $this->canManage) {
+        if (! app(AttendanceAuthorizationService::class)->can('attendance.settings.manage')) {
             abort(403);
         }
 

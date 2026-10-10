@@ -28,6 +28,7 @@ class TrainingNeedsPlanningAnalyticsTest extends TestCase
     public function test_dashboard_can_generate_annual_plan_and_surface_analytics(): void
     {
         $user = \App\Models\User::factory()->create();
+        grantAllStructures($user);
         $this->grantTrainingNeedsPermissions($user);
         Role::findOrCreate('admin', 'web');
         Permission::findOrCreate('get-notification', 'web');
@@ -160,6 +161,7 @@ class TrainingNeedsPlanningAnalyticsTest extends TestCase
     public function test_generated_plan_items_can_move_through_hr_review_flow(): void
     {
         $user = \App\Models\User::factory()->create(['name' => 'HR Reviewer']);
+        grantAllStructures($user);
         $this->grantTrainingNeedsPermissions($user);
         Role::findOrCreate('admin', 'web');
         Permission::findOrCreate('get-notification', 'web');

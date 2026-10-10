@@ -5,6 +5,8 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -48,6 +50,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'is_active' => 'boolean',
         'must_reset_password' => 'boolean',
         'self_service_invited_at' => 'datetime',
     ];
@@ -57,10 +60,30 @@ class User extends Authenticatable
         return $this->belongsTo(self::class, 'deleted_by', 'id');
     }
 
-    /** @return BelongsTo<Personnel, $this> */
-    public function personnel(): BelongsTo
+    /**
+     * İstifadəçinin əməkdaş kartı — YALNIZ admin tərəfindən yaradılmış açıq bağ
+     * (`user_personnel_links`) üzərindən. E-poçt uyğunluğu eyniləşdirmə deyil.
+     * İcazə qərarlarında bunun əvəzinə `UserPersonnelLinkResolver::resolve()` işlət —
+     * o, işdən çıxmış əməkdaşın bağını da nəzərə almır.
+     *
+     * @return HasOneThrough<Personnel, UserPersonnelLink, $this>
+     */
+    public function personnel(): HasOneThrough
     {
-        return $this->belongsTo(Personnel::class, 'email', 'email');
+        return $this->hasOneThrough(
+            Personnel::class,
+            UserPersonnelLink::class,
+            'user_id',
+            'id',
+            'id',
+            'personnel_id',
+        );
+    }
+
+    /** @return HasOne<UserPersonnelLink, $this> */
+    public function personnelLink(): HasOne
+    {
+        return $this->hasOne(UserPersonnelLink::class);
     }
 
     protected static function boot()

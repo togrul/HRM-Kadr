@@ -210,6 +210,7 @@
                 <x-ui.file-upload
                     model="leave.document_path"
                     :data="$leave->document_path"
+                    :url="! empty($leaveModel) && is_string($leave->document_path) ? route('leaves.document', $leaveModel) : null"
                 />
 
                 @error('leave.document_path')

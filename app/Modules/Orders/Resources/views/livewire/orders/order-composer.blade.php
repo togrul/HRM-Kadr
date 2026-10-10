@@ -79,6 +79,7 @@
                     <div>
                         <x-label for="hireStructureId">{{ __('orders::order_composer.labels.hire_structure') }}</x-label>
                         <x-orders.lookup-picker wire:model="hireStructureId" :options="$this->lookupOptions['structure']" />
+                        @error('hireStructureId') <x-validation>{{ $message }}</x-validation> @enderror
                     </div>
                     <div>
                         <x-label for="hirePositionId">{{ __('orders::order_composer.labels.hire_position') }}</x-label>

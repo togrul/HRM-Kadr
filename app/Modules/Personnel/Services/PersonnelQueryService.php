@@ -5,6 +5,7 @@ namespace App\Modules\Personnel\Services;
 use App\Models\Personnel;
 use App\Modules\Personnel\Application\Services\PersonnelPresenceResolver;
 use App\Modules\Personnel\Support\Presence\PersonnelPresenceStatus;
+use App\Services\StructureScope;
 use App\Support\PositionLevel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -19,7 +20,7 @@ class PersonnelQueryService
      * Build personnel listing query with eager loads, filters and ordering.
      *
      * @param  array<int, int>  $selectedStructureIds
-     * @param  array<int, int>  $accessibleStructureIds
+     * @param  StructureScope|array<int, int>  $accessibleStructureIds
      * @param  array<string, mixed>  $filters
      * @param  array<int, string>  $presence  today's resolved statuses to keep (empty = any)
      */
@@ -27,7 +28,7 @@ class PersonnelQueryService
         ?string $status,
         array $filters,
         array $selectedStructureIds,
-        array $accessibleStructureIds,
+        StructureScope|array $accessibleStructureIds,
         ?int $selectedPosition = null,
         ?string $search = null,
         string $sort = self::SORT_POSITION,
@@ -93,25 +94,22 @@ class PersonnelQueryService
      * round trips per render.
      *
      * @param  array<int, int>  $selectedStructureIds
-     * @param  array<int, int>  $accessibleStructureIds
+     * @param  StructureScope|array<int, int>  $accessibleStructureIds
      * @param  array<string, mixed>  $filters
      * @return array<string, int>
      */
     public function statusCounts(
         array $filters,
         array $selectedStructureIds,
-        array $accessibleStructureIds,
+        StructureScope|array $accessibleStructureIds,
         ?int $selectedPosition = null,
         ?string $search = null,
     ): array {
         $query = Personnel::query()->withTrashed();
 
+        $this->applyStructureScope($query, $selectedStructureIds, $accessibleStructureIds);
+
         $query
-            ->when(! empty($selectedStructureIds), function (Builder $builder) use ($selectedStructureIds) {
-                $builder->whereIn('personnels.structure_id', $selectedStructureIds);
-            }, function (Builder $builder) use ($accessibleStructureIds) {
-                $builder->whereIn('personnels.structure_id', $accessibleStructureIds);
-            })
             ->when(! empty($selectedPosition), function (Builder $builder) use ($selectedPosition) {
                 $builder->where('personnels.position_id', $selectedPosition);
             });
@@ -157,14 +155,14 @@ class PersonnelQueryService
      * Lightweight export query without list-only eager loads and sort joins.
      *
      * @param  array<int, int>  $selectedStructureIds
-     * @param  array<int, int>  $accessibleStructureIds
+     * @param  StructureScope|array<int, int>  $accessibleStructureIds
      * @return Builder<Personnel>
      */
     public function buildExport(
         ?string $status,
         array $filters,
         array $selectedStructureIds,
-        array $accessibleStructureIds,
+        StructureScope|array $accessibleStructureIds,
         ?int $selectedPosition = null
     ): Builder {
         $query = Personnel::query()
@@ -221,7 +219,7 @@ class PersonnelQueryService
 
     /**
      * @param  array<int, int>  $selectedStructureIds
-     * @param  array<int, int>  $accessibleStructureIds
+     * @param  StructureScope|array<int, int>  $accessibleStructureIds
      * @param  array<string, mixed>  $filters
      */
     protected function applySharedScopes(
@@ -229,16 +227,13 @@ class PersonnelQueryService
         ?string $status,
         array $filters,
         array $selectedStructureIds,
-        array $accessibleStructureIds,
+        StructureScope|array $accessibleStructureIds,
         ?int $selectedPosition = null,
         ?string $search = null,
     ): void {
+        $this->applyStructureScope($query, $selectedStructureIds, $accessibleStructureIds);
+
         $query
-            ->when(! empty($selectedStructureIds), function (Builder $builder) use ($selectedStructureIds) {
-                $builder->whereIn('personnels.structure_id', $selectedStructureIds);
-            }, function (Builder $builder) use ($accessibleStructureIds) {
-                $builder->whereIn('personnels.structure_id', $accessibleStructureIds);
-            })
             ->when(! empty($selectedPosition), function (Builder $builder) use ($selectedPosition) {
                 $builder->where('personnels.position_id', $selectedPosition);
             });
@@ -256,22 +251,25 @@ class PersonnelQueryService
      * Command-palette lookup: every word must match one of the quick-search columns, so
      * "Məmmədov Elçin" finds the person; current employees come before those who left.
      *
-     * @param  array<int, int>  $accessibleStructureIds
+     * @param  StructureScope|array<int, int>  $accessibleStructureIds
      * @return Collection<int, Personnel>
      */
-    public function quickFind(string $term, array $accessibleStructureIds, int $limit = 8): Collection
+    public function quickFind(string $term, StructureScope|array $accessibleStructureIds, int $limit = 8): Collection
     {
         $words = preg_split('/\s+/u', trim($term), -1, PREG_SPLIT_NO_EMPTY) ?: [];
 
-        if ($words === [] || $accessibleStructureIds === []) {
+        $scope = $this->toScope($accessibleStructureIds);
+
+        if ($words === [] || $scope->isNone()) {
             return collect();
         }
 
         $query = Personnel::query()
             ->select(['personnels.id', 'personnels.tabel_no', 'personnels.surname', 'personnels.name', 'personnels.patronymic', 'personnels.position_id', 'personnels.leave_work_date'])
             ->with('position:id,name')
-            ->whereIn('personnels.structure_id', $accessibleStructureIds)
             ->where('personnels.is_pending', false);
+
+        $scope->constrain($query, 'personnels.structure_id');
 
         foreach (array_slice($words, 0, 4) as $word) {
             $this->applyQuickSearch($query, $word);
@@ -283,6 +281,33 @@ class PersonnelQueryService
             ->orderBy('personnels.name')
             ->limit($limit)
             ->get();
+    }
+
+    /**
+     * Müştərinin seçdiyi struktur filtri HƏMİŞƏ görünürlüklə kəsişdirilir: seçilmiş, amma
+     * görünməyən struktur heç nə qaytarmır; boş görünürlük də heç nə qaytarmır.
+     *
+     * @param  array<int, int>  $selectedStructureIds
+     * @param  StructureScope|array<int, int>  $accessibleStructureIds
+     */
+    protected function applyStructureScope(Builder $query, array $selectedStructureIds, StructureScope|array $accessibleStructureIds): void
+    {
+        $scope = $this->toScope($accessibleStructureIds);
+
+        if ($selectedStructureIds !== []) {
+            $selected = array_map('intval', $selectedStructureIds);
+            $scope = StructureScope::of($scope->isAll() ? $selected : array_intersect($selected, $scope->ids()));
+        }
+
+        $scope->constrain($query, 'personnels.structure_id');
+    }
+
+    /**
+     * @param  StructureScope|array<int, int>  $accessible
+     */
+    private function toScope(StructureScope|array $accessible): StructureScope
+    {
+        return $accessible instanceof StructureScope ? $accessible : StructureScope::of($accessible);
     }
 
     /**
