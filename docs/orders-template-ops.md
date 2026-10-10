@@ -137,3 +137,5 @@ Gələcək iştirakçılar kartı vaxtından əvvəl dəyişmir. Scheduler singl
 Məzuniyyətin vəzifə faktları həm tətbiq edilmiş, həm pending participant vəziyyətini oxuyur. Bu dəyişiklik VTİSK 30 günlük əsas məzuniyyətin hüquqi bölünmə qaydasını seçmir. Audit komandası multi iştirakçıların state-lərini də yoxlayır. İstehsalatda köhnə məlumat avtomatik düzəldilmir.
 
 Tərtib zamanı eyni hədəf ştatına gedən iştirakçılar birlikdə sayılır. Bir boş yer iki yeni işçi üçün kifayət sayılmır. Auto-vacancy seçimi lazım olan qədər yeri yaradır/artırır; blok siyasəti aktivdirsə əvvəlcə rədd edilir. Bu yoxlama gələcək əmrlər üçün ayrıca ştat rezervasiya sistemi deyil.
+
+Köçürmənin faktiki effekt növü təsdiq snapshot-unda `applied_effect` kimi saxlanır. Yeni köçürmənin deferred hadisəsi, ləğvi və bağlı ayların yoxlaması sonradan dəyişmiş/silinmiş master şablona əsaslanmır; saxlanmış transfer hədəfi və effektiv tarixdən istifadə edir. Reapproval başqa effektlə aparılarsa həmin marker yenilənir, köhnə transfer state-i ikinci dəfə geri çevrilmir. Redaktə edilən pending əmr üçün də hədəf strukturun görünürlük yoxlaması saxlanır.

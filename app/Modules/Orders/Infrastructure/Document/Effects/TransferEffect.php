@@ -96,7 +96,7 @@ class TransferEffect implements DeferredTransferApplier, OrderEffect
                 'prev_position_id' => $personnel->position_id,
             ], $participant);
             $this->applyUpdate($locked, $personnel, (array) $state['transfer_target'], $participant);
-            $this->publisher->publish($locked, 'applied', $participantId);
+            $this->publisher->publish($locked, 'applied', $participantId, deferredTransfer: true);
 
             return true;
         });
@@ -121,11 +121,12 @@ class TransferEffect implements DeferredTransferApplier, OrderEffect
             return;
         }
 
+        $target = (array) ($state['transfer_target'] ?? []);
         $restore = [];
-        if (array_key_exists('prev_structure_id', $state) && ! empty($fields['new_structure'])) {
+        if (array_key_exists('prev_structure_id', $state) && (! empty($fields['new_structure']) || array_key_exists('structure_id', $target))) {
             $restore['structure_id'] = $state['prev_structure_id'] !== null ? (int) $state['prev_structure_id'] : null;
         }
-        if (array_key_exists('prev_position_id', $state) && ! empty($fields['new_position'])) {
+        if (array_key_exists('prev_position_id', $state) && (! empty($fields['new_position']) || array_key_exists('position_id', $target))) {
             $restore['position_id'] = $state['prev_position_id'] !== null ? (int) $state['prev_position_id'] : null;
         }
 
