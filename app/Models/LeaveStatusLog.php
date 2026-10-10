@@ -32,6 +32,6 @@ class LeaveStatusLog extends Model
 
     public function changedBy(): BelongsTo
     {
-        return $this->belongsTo(Personnel::class, 'changed_by', 'id');
+        return $this->belongsTo(User::class, 'changed_by', 'id')->withTrashed();
     }
 }

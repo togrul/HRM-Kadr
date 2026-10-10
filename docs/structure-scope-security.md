@@ -66,5 +66,42 @@ Tövsiyə olunan ardıcıllıq:
 3. Əmri **yenidən** işə salın; «HEÇ NƏ görmür» rollarına və «bəli — yoxla» istifadəçilərinə
    struktur və ya bayraq verin.
 
-Rol təyinatı dəyişəndə görünürlük keşi 5 dəqiqə ərzində yenilənir; rolun strukturu və ya
+İstifadəçi idarəsində rol təyinatı dəyişəndə görünürlük keşi dərhal təmizlənir; rolun strukturu və ya
 bayrağı dəyişəndə həmin rolun bütün istifadəçiləri üçün dərhal təmizlənir.
+
+
+## 10.10.2026 — əlavə qoruma
+
+- KPI bonusu qlobal fonda görə hesablanır. Dövrün bütün kartlarının işçiləri aktorun
+  struktur görünürlüyündə deyilsə önizləmə, qayda saxlama, hesablama, maliyyəyə ötürmə
+  və mükafat əmri yaratma rədd edilir. Beləliklə fondun bölgüsü qismən hesablanmır.
+  Ayrı kartın bonus təxmini yalnız həmin işçi görünürsə oxunur. Keşlənmiş önizləmə də
+  hər sorğuda yenidən görünürlük yoxlamasından keçir.
+- KPI REST mənbəyini sınamaq üçün nümunə işçi aktorun strukturlarından seçilir.
+  Düsturun sintaksis önizləməsi real işçi məlumatı oxumur, nümunə dəyərlər işlədilir.
+- Məqsədlərin ağacı, sayları, üst məqsəd seçimi, statusu və check-in əməliyyatları
+  görünürlüklə məhdudlaşır. Görünən məqsədin gizli üst məqsədi ekrana çıxmır.
+- Qiymətləndirici ekranında təyinat təkbaşına digər strukturu açmır.
+- Davamiyyət tarixçəsi, performans və təlim audit eksportları ortaq audit görünürlük
+  müqaviləsi ilə oxunur. Performans balları və test cavabları sahib işçinin strukturu
+  üzərindən yoxlanır. Compliance rəhbər bildirişləri də həmin görünürlüyə tabedir.
+- Rolu istifadəçiyə təyin etmək struktur məhdudiyyətini keçmək üçün alternativ yol
+  deyil: rolun struktur görünürlüyü idarəçinin öz görünürlüyündən geniş ola bilməz.
+  Daha geniş görünürlüklü istifadəçinin hesabını redaktə/silmək də bloklanır.
+
+## Məzuniyyət aktor tarixçəsinin köçürülməsi
+
+`2026_10_11_010000_preserve_legacy_leave_actor_ids` miqrasiyası qarışıq köhnə açarları
+`leaves.legacy_approved_by` və `leave_status_logs.legacy_changed_by` sütunlarında
+olduğu kimi saxlayır. Bu sütunlar FK deyil və istifadəçi hesabının silinməsi onları
+itirmir. Köhnə `approved_by` / `changed_by` dəyərləri boşaldılır; rəqəmdən aktor
+üçün users/personnels seçimi təxmin edilmir. Buna görə köhnə qeydlərin aktor adı
+sübutla bərpa olunana qədər boş görünür. Status, tarix, şərh və köhnə xam ID saxlanır.
+
+Yeni qərarlar yalnız `users.id` ilə yazılır. İşçi kartına bağı olmayan administrator
+üçün də aktor saxlanır; hesab soft-delete olsa adı tarixçədə qalır. Təyin olunmuş
+rəhbər isə əvvəlki kimi ayrıca `personnels.id` (`assigned_to`) ilə göstərilir.
+
+Deploydan əvvəl backup alınmalı, sonra miqrasiyadan sonra tarixi legacy sütunlar
+köhnə audit/backup sübutları ilə tutuşdurulmalıdır. Sadəcə eyni rəqəmin və ya cari
+istifadəçi–işçi bağının mövcudluğu tarixi aktorun sübutu deyil.

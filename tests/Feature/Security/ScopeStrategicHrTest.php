@@ -116,3 +116,15 @@ it('limits training need lists to visible employees', function (): void {
 
     expect($rows->getCollection()->pluck('id')->all())->toBe([$own->id]);
 });
+
+it('keeps training audit exports within employee structure access', function (): void {
+    $group = TrainingCompetencyGroup::query()->create(['name' => 'Audit', 'slug' => 'audit', 'is_active' => true]);
+    $competency = TrainingCompetency::query()->create(['training_competency_group_id' => $group->id, 'name' => 'Audit', 'slug' => 'audit', 'is_active' => true]);
+    foreach ([$this->ownPerson, $this->foreignPerson] as $person) {
+        $need = TrainingNeedItem::query()->create(['personnel_id' => $person->id, 'training_competency_id' => $competency->id]);
+        \App\Models\AuditActivity::query()->create(['log_name' => 'training', 'description' => $person->surname, 'subject_type' => $need::class, 'subject_id' => $need->id]);
+    }
+    $this->actingAs($this->viewer);
+    $rows = app(\App\Modules\TrainingNeeds\Application\Services\TrainingNeedReportingService::class)->auditRows();
+    expect($rows->pluck('description')->all())->toContain('Görünənov')->not->toContain('Gizliyev');
+});

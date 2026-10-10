@@ -12,6 +12,8 @@ use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
+use function grantAllStructures;
+
 class PerformanceGoalsTest extends TestCase
 {
     use RefreshDatabase;
@@ -141,6 +143,6 @@ class PerformanceGoalsTest extends TestCase
             $user->givePermissionTo(Permission::findOrCreate($permission, 'web'));
         }
 
-        return $user;
+        return grantAllStructures($user);
     }
 }

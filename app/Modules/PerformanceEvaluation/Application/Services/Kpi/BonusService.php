@@ -14,6 +14,8 @@ use App\Modules\Integration\Domain\Contracts\IntegrationOutbox;
 use App\Modules\Orders\Contracts\OrderDrafter;
 use App\Modules\Payroll\Domain\Contracts\PayrollOneOffEarnings;
 use App\Services\Profiles\ProfileState;
+use App\Services\StructureService;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -52,6 +54,25 @@ class BonusService
         private readonly OrderDrafter $orders,
     ) {}
 
+    /** Qlobal fondun hesabı bölünmür: bütün dövrün işçiləri görünməlidir. */
+    private function guardCycleScope(PerformanceCycle $cycle, ?User $actor = null): void
+    {
+        $actor ??= auth()->user();
+        if (! $actor instanceof User) {
+            return;
+        }
+        $scope = app(StructureService::class)->scopeFor($actor);
+        if ($scope->isAll()) {
+            return;
+        }
+        if ($scope->isNone() || PerformanceScorecard::query()
+            ->where('performance_cycle_id', $cycle->id)
+            ->whereDoesntHave('personnel', fn ($query) => $query->whereIn('structure_id', $scope->ids()))
+            ->exists()) {
+            throw new AuthorizationException;
+        }
+    }
+
     /** Military regime pays by order; every other service area uses the company model. */
     public function mode(): string
     {
@@ -85,6 +106,8 @@ class BonusService
      */
     public function saveRule(PerformanceCycle $cycle, array $data, User $user): PerformanceBonusRule
     {
+        $this->guardCycleScope($cycle, $user);
+
         $rule = $this->rule($cycle)->fill($this->validRule($data));
         $rule->updated_by = $user->id;
         $rule->save();
@@ -101,6 +124,8 @@ class BonusService
      */
     public function previewInputs(PerformanceCycle $cycle): array
     {
+        $this->guardCycleScope($cycle);
+
         $cards = PerformanceScorecard::query()
             ->where('performance_cycle_id', $cycle->id)
             ->whereIn('status', ['approved', 'closed'])
@@ -125,6 +150,8 @@ class BonusService
      */
     public function preview(PerformanceCycle $cycle, PerformanceBonusRule $rule, ?array $inputs = null): array
     {
+        $this->guardCycleScope($cycle);
+
         ['cards' => $cards, 'bases' => $bases, 'months' => $months, 'parents' => $parents] = $inputs ?? $this->previewInputs($cycle);
 
         $companyMult = $rule->mode === 'order' ? 1.0 : $this->companyMultiplier($rule);
@@ -206,6 +233,11 @@ class BonusService
      */
     public function estimate(PerformanceScorecard $card, ?float $score): ?float
     {
+        $actor = auth()->user();
+        if ($actor instanceof User && ! app(StructureService::class)->allowsPersonnelId($actor, $card->personnel_id)) {
+            throw new AuthorizationException;
+        }
+
         $cycle = $card->cycle;
         $card->loadMissing('personnel:id,tabel_no,structure_id,join_work_date,probation_unit,probation_amount');
         $rule = $this->rule($cycle);
@@ -231,6 +263,8 @@ class BonusService
      */
     public function calculate(PerformanceCycle $cycle): int
     {
+        $this->guardCycleScope($cycle);
+
         $rule = $this->rule($cycle);
         $preview = $this->preview($cycle, $rule);
 
@@ -282,6 +316,8 @@ class BonusService
      */
     public function exportToPayroll(PerformanceCycle $cycle): array
     {
+        $this->guardCycleScope($cycle);
+
         $this->ensureMode('company');
         $batch = (string) Str::ulid();
         $payMonth = now()->format('Y-m');
@@ -329,6 +365,8 @@ class BonusService
      */
     public function issueOrders(PerformanceCycle $cycle): int
     {
+        $this->guardCycleScope($cycle);
+
         $this->ensureMode('order');
 
         if (! $this->orders->hasTemplate(self::ORDER_TEMPLATE)) {

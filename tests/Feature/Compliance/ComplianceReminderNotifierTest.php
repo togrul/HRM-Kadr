@@ -29,7 +29,7 @@ class ComplianceReminderNotifierTest extends TestCase
         $manager = $this->makePersonnel('Rəhbərov', 'mgr@example.com', $structure->id, null);
         $employee = $this->makePersonnel('İşçiyev', 'emp@example.com', $structure->id, $manager->id);
 
-        $managerUser = User::factory()->create(['email' => 'mgr@example.com', 'is_active' => true]);
+        $managerUser = grantStructures(User::factory()->create(['email' => 'mgr@example.com', 'is_active' => true]), [$structure->id]);
         $employeeUser = User::factory()->create(['email' => 'emp@example.com', 'is_active' => true]);
 
         $rows = collect([
@@ -67,6 +67,22 @@ class ComplianceReminderNotifierTest extends TestCase
         $result = app(ComplianceReminderNotifier::class)->notify($rows);
 
         $this->assertSame(['employees' => 1, 'managers' => 0], $result);
+        Notification::assertSentTo($employeeUser, PlatformNotification::class);
+        Notification::assertNotSentTo($managerUser, PlatformNotification::class);
+    }
+
+    public function test_a_manager_without_structure_access_receives_no_escalation(): void
+    {
+        Notification::fake();
+        $structure = Structure::query()->create(['name' => 'Private', 'shortname' => 'PR']);
+        $manager = $this->makePersonnel('Manager', 'limited@example.test', $structure->id, null);
+        $employee = $this->makePersonnel('Employee', 'owner@example.test', $structure->id, $manager->id);
+        $managerUser = User::factory()->create(['email' => 'limited@example.test', 'is_active' => true]);
+        $employeeUser = User::factory()->create(['email' => 'owner@example.test', 'is_active' => true]);
+        $this->linkFixtureUsersByEmail();
+
+        $rows = collect([['tabel_no' => $employee->tabel_no, 'personnel_name' => 'Employee', 'document_label' => 'Passport', 'status' => 'expired']]);
+        $this->assertSame(['employees' => 1, 'managers' => 0], app(ComplianceReminderNotifier::class)->notify($rows));
         Notification::assertSentTo($employeeUser, PlatformNotification::class);
         Notification::assertNotSentTo($managerUser, PlatformNotification::class);
     }

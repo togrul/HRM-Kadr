@@ -86,6 +86,33 @@ class FilesPrivateStorageTest extends TestCase
         $this->assertSame('BBBB', Storage::disk('local')->get('leaves/conflict.pdf'));
     }
 
+    public function test_replacing_a_photo_cleans_old_copies_only_after_commit(): void
+    {
+        $person = $this->makePersonnel(['photo' => 'personnel/old.jpg']);
+        Storage::disk('local')->put('personnel/old.jpg', 'old');
+        Storage::disk('public')->put('personnel/old.jpg', 'old');
+        DB::beginTransaction();
+        $person->update(['photo' => 'personnel/new.jpg']);
+        Storage::disk('local')->assertExists('personnel/old.jpg');
+        DB::rollBack();
+        Storage::disk('local')->assertExists('personnel/old.jpg');
+        $person->refresh()->update(['photo' => 'personnel/new.jpg']);
+        Storage::disk('local')->assertMissing('personnel/old.jpg');
+        Storage::disk('public')->assertMissing('personnel/old.jpg');
+    }
+
+    public function test_replacing_a_leave_document_preserves_files_still_referenced_elsewhere(): void
+    {
+        $person = $this->makePersonnel();
+        $one = $this->makeLeave($person->tabel_no, 'leaves/shared.pdf');
+        $two = $this->makeLeave($person->tabel_no, 'leaves/shared.pdf');
+        Storage::disk('local')->put('leaves/shared.pdf', 'old');
+        $one->update(['document_path' => 'leaves/new1.pdf']);
+        Storage::disk('local')->assertExists('leaves/shared.pdf');
+        $two->update(['document_path' => 'leaves/new2.pdf']);
+        Storage::disk('local')->assertMissing('leaves/shared.pdf');
+    }
+
     public function test_svg_and_html_are_never_served_inline_and_downloads_are_hardened(): void
     {
         $viewer = grantAllStructures(User::factory()->create());
@@ -302,7 +329,7 @@ class FilesPrivateStorageTest extends TestCase
     private function makeLeave(string $tabelNo, string $documentPath): Leave
     {
         OrderStatus::query()->firstOrCreate(['id' => OrderStatusEnum::PENDING->value], ['locale' => 'az', 'name' => 'Gözləyən']);
-        $type = LeaveType::query()->create(['name' => 'Xəstəlik', 'max_days' => 0, 'requires_document' => true]);
+        $type = LeaveType::query()->firstOrCreate(['name' => 'Xəstəlik'], ['max_days' => 0, 'requires_document' => true]);
 
         return Leave::withoutEvents(fn (): Leave => Leave::query()->create([
             'tabel_no' => $tabelNo,

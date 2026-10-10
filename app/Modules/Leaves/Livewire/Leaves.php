@@ -325,7 +325,7 @@ class Leaves extends Component
                         'leave_status_logs.changed_at',
                     ])
                     ->with([
-                        'changedBy:id,surname,name,patronymic',
+                        'changedBy:id,name',
                     ]),
             ])
             ->orderByDesc('created_at');

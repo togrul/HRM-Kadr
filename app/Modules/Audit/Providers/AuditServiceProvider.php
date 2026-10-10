@@ -14,6 +14,7 @@ class AuditServiceProvider extends ServiceProvider
     {
         // Sorğu daxilində bir oxuyucu: istifadəçinin görünən subyekt id-ləri bir dəfə hesablanır.
         $this->app->scoped(\App\Modules\Audit\Application\Services\ActivityLogReader::class);
+        $this->app->alias(\App\Modules\Audit\Application\Services\ActivityLogReader::class, \App\Contracts\VisibleAuditActivities::class);
     }
 
     public function boot(): void

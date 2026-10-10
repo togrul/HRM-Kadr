@@ -9,6 +9,8 @@ use App\Modules\Notifications\Support\NotificationCampaignDispatcher;
 use App\Modules\Personnel\Contracts\GuardsPersonnelChanges;
 use App\Notifications\NewPersonnelAdded;
 use App\Notifications\PersonnelWasDeleted;
+use App\Support\Uploads\PrivateFiles;
+use Illuminate\Support\Facades\DB;
 
 class PersonnelObserver
 {
@@ -62,6 +64,15 @@ class PersonnelObserver
      */
     public function updated(Personnel $personnel): void
     {
+        $oldPath = $personnel->getOriginal('photo');
+        if ($personnel->wasChanged('photo') && filled($oldPath)) {
+            DB::afterCommit(function () use ($oldPath): void {
+                if (! Personnel::withTrashed()->where('photo', $oldPath)->exists()) {
+                    PrivateFiles::delete((string) $oldPath);
+                }
+            });
+        }
+
         // Jurnal rejimli sahələrin köhnə → yeni dəyərləri səbəblə birlikdə.
         app(GuardsPersonnelChanges::class)->journal($personnel);
 

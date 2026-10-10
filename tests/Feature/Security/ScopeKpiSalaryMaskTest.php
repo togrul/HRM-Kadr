@@ -92,6 +92,27 @@ class ScopeKpiSalaryMaskTest extends TestCase
             ->assertOk();
     }
 
+    public function test_bonus_operations_and_cached_preview_refuse_a_cycle_outside_scope(): void
+    {
+        $card = $this->cardWithBonus();
+        $bonus = app(\App\Modules\PerformanceEvaluation\Application\Services\Kpi\BonusService::class);
+        $rule = $bonus->rule($card->cycle);
+        $inputs = $bonus->previewInputs($card->cycle);
+        $limited = $this->hrUser(all: false);
+        $this->actingAs($limited);
+
+        foreach (['previewInputs', 'calculate', 'exportToPayroll', 'issueOrders'] as $method) {
+            try {
+                $bonus->{$method}($card->cycle);
+                $this->fail($method.' must refuse an out-of-scope cycle.');
+            } catch (\Illuminate\Auth\Access\AuthorizationException) {
+                $this->assertSame('calculated', $card->bonus->fresh()->status);
+            }
+        }
+        $this->expectException(\Illuminate\Auth\Access\AuthorizationException::class);
+        $bonus->preview($card->cycle, $rule, $inputs);
+    }
+
     private function hrUser(bool $all): User
     {
         $user = User::factory()->create();

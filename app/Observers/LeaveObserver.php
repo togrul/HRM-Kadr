@@ -11,7 +11,9 @@ use App\Notifications\LeaveStatusChanged;
 use App\Notifications\NewLeaveRequested;
 use App\Services\Modules\ModuleState;
 use App\Services\StructureService;
+use App\Support\Uploads\PrivateFiles;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Models\Permission;
 
@@ -32,6 +34,15 @@ class LeaveObserver
 
     public function updated(Leave $leave): void
     {
+        $oldPath = $leave->getOriginal('document_path');
+        if ($leave->wasChanged('document_path') && filled($oldPath)) {
+            DB::afterCommit(function () use ($oldPath): void {
+                if (! Leave::withTrashed()->where('document_path', $oldPath)->exists()) {
+                    PrivateFiles::delete((string) $oldPath);
+                }
+            });
+        }
+
         $this->syncAttendance($leave, $leave->getOriginal());
 
         if (! $leave->isDirty('status_id')) {

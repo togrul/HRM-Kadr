@@ -48,10 +48,13 @@ final class PrivateFiles
      */
     public static function delete(?string $path, ?string $recordedDisk = null): void
     {
-        $disk = self::locate($path, $recordedDisk);
-
-        if ($disk !== null) {
-            Storage::disk($disk)->delete((string) $path);
+        if (blank($path) || str_contains((string) $path, '..') || str_starts_with((string) $path, '/')) {
+            return;
+        }
+        foreach ([self::DISK, self::LEGACY_DISK] as $disk) {
+            if (Storage::disk($disk)->exists((string) $path)) {
+                Storage::disk($disk)->delete((string) $path);
+            }
         }
     }
 

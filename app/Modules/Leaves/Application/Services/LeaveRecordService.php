@@ -334,13 +334,10 @@ class LeaveRecordService
         ]);
     }
 
-    /**
-     * Təsdiqçi sütunları əməkdaş kartına işarə edir; kart yalnız açıq bağdan götürülür.
-     * Bağı olmayan istifadəçi üçün null yazılır — istifadəçi id-si əməkdaş id-si kimi saxlanmır.
-     */
-    private function actorKey(User $actor): ?int
+    /** Təsdiq və status tarixçəsində aktor həmişə users cədvəlinin açarıdır. */
+    private function actorKey(User $actor): int
     {
-        return app(UserPersonnelLinkResolver::class)->resolve($actor);
+        return (int) $actor->getKey();
     }
 
     private function date(mixed $value): ?CarbonImmutable

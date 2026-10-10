@@ -2,12 +2,12 @@
 
 namespace App\Modules\TrainingNeeds\Application\Services;
 
+use App\Contracts\VisibleAuditActivities;
 use App\Models\TrainingDeliveryRecord;
 use App\Models\TrainingFeedbackResponse;
 use App\Models\TrainingSession;
 use App\Modules\TrainingNeeds\Support\TrainingStructureScope;
 use Illuminate\Database\Eloquent\Collection;
-use Spatie\Activitylog\Models\Activity;
 
 class TrainingNeedReportingService
 {
@@ -125,7 +125,7 @@ class TrainingNeedReportingService
 
     public function auditRows(): Collection
     {
-        return Activity::query()
+        return app(VisibleAuditActivities::class)->visibleQuery()
             ->whereIn('subject_type', [
                 \App\Models\TrainingAnnualPlan::class,
                 \App\Models\TrainingPlanItem::class,

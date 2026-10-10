@@ -167,7 +167,7 @@ it('keeps permission names immutable so permissions cannot be swapped', function
 });
 
 it('invalidates warmed structure caches immediately when a user role changes', function (): void {
-    $this->actingAs(identityAdmin());
+    $this->actingAs(grantAllStructures(identityAdmin()));
     $target = identityUser();
     grantAllStructures($target);
     $scopes = app(\App\Services\StructureService::class);
@@ -199,3 +199,20 @@ it('refuses to grant structures outside the role manager scope', function (bool 
     expect($role->fresh()->structures)->toHaveCount(0)
         ->and((bool) $role->fresh()->all_structures)->toBeFalse();
 })->with([true, false]);
+
+it('does not bypass structure limits by assigning a role with broader access', function (): void {
+    $this->actingAs(identityAdmin());
+    $target = identityUser();
+    $role = Role::query()->forceCreate(['name' => 'Wide scope', 'guard_name' => 'web', 'all_structures' => true]);
+    Livewire::test(EditUser::class, ['userModel' => $target->id])
+        ->set('roleId', $role->id)->call('store')->assertHasErrors('roleId');
+    expect($target->fresh()->hasRole($role))->toBeFalse();
+});
+
+it('does not let a limited administrator take over a user with broader structures', function (): void {
+    $this->actingAs(identityAdmin());
+    $target = grantAllStructures(identityUser());
+    Livewire::test(EditUser::class, ['userModel' => $target->id])->assertForbidden();
+    Livewire::test(DeleteUser::class)->call('setDeleteUser', $target->id)->assertForbidden();
+    expect($target->fresh()->deleted_at)->toBeNull();
+});

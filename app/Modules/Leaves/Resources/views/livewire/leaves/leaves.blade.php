@@ -225,7 +225,7 @@
                         </div>
 
                         @if ((int) $leave->status_id !== 10 && $leave->latestLog)
-                            <p class="mt-1 truncate text-[11px] text-ink-faint">{{ $leave->latestLog->changedBy?->fullname }}</p>
+                            <p class="mt-1 truncate text-[11px] text-ink-faint">{{ $leave->latestLog->changedBy?->name ?? '—' }}</p>
                             <p class="hrm-num text-[11px] text-ink-faint">{{ \Carbon\Carbon::parse($leave->latestLog->changed_at)->format('d.m.Y H:i') }}</p>
                         @endif
                     </div>

@@ -155,14 +155,18 @@ it('refuses statuses other than approve / reject', function (): void {
 
 it('lets a proper reviewer approve an in-scope leave', function (): void {
     $leave = approvalLeave('AP-EMP', $this->type->id);
-    $this->actingAs(approvalUser(SCOPE_LEAVE_APPROVER_PERMISSIONS, [1], $this->reviewerPerson));
+    $actor = approvalUser(SCOPE_LEAVE_APPROVER_PERMISSIONS, [1], $this->reviewerPerson);
+    $this->actingAs($actor);
 
     Livewire::test(AddComment::class)
         ->set('comment', 'Razıyam')
         ->call('confirmComment', 'APPROVED', $leave->id)
         ->assertDispatched('leaveApproved');
 
-    expect((int) $leave->fresh()->status_id)->toBe(OrderStatusEnum::APPROVED->value);
+    expect((int) $leave->fresh()->status_id)->toBe(OrderStatusEnum::APPROVED->value)
+        ->and((int) $leave->fresh()->approved_by)->toBe($actor->id)
+        ->and($leave->fresh()->approver->id)->toBe($actor->id)
+        ->and($leave->logs()->sole()->changedBy->id)->toBe($actor->id);
 });
 
 it('lets the approver the route assigned the leave to reject it', function (): void {
@@ -182,4 +186,24 @@ it('does not expose approval for an unassigned leave without approval rights', f
         ->and($leave->canBeApprovedBy(approvalUser(['show-leaves'])))->toBeFalse()
         ->and($leave->canBeApprovedBy(approvalUser(SCOPE_LEAVE_APPROVER_PERMISSIONS)))->toBeTrue()
         ->and($leave->canBeApprovedBy(approvalUser(SCOPE_LEAVE_APPROVER_PERMISSIONS, [2])))->toBeFalse();
+});
+
+it('preserves ambiguous historical actor ids without attributing them to a user', function (): void {
+    $actor = approvalUser(SCOPE_LEAVE_APPROVER_PERMISSIONS);
+    $leave = approvalLeave('AP-EMP', $this->type->id);
+    $leave->forceFill(['approved_by' => $actor->id])->save();
+    $log = $leave->logs()->create(['status_id' => 20, 'changed_by' => $actor->id, 'changed_at' => now()]);
+    \Illuminate\Support\Facades\Schema::table('leaves', fn ($table) => $table->dropColumn('legacy_approved_by'));
+    \Illuminate\Support\Facades\Schema::table('leave_status_logs', fn ($table) => $table->dropColumn('legacy_changed_by'));
+    $migration = require app_path('Modules/Leaves/Database/Migrations/2026_10_11_010000_preserve_legacy_leave_actor_ids.php');
+    $migration->up();
+    $migration->up();
+
+    expect($leave->fresh()->getAttribute('legacy_approved_by'))->toBe($actor->id)
+        ->and($leave->fresh()->approved_by)->toBeNull()
+        ->and($leave->fresh()->approver)->toBeNull()
+        ->and($log->fresh()->getAttribute('legacy_changed_by'))->toBe($actor->id)
+        ->and($log->fresh()->changedBy)->toBeNull();
+    $actor->forceDelete();
+    expect($log->fresh()->getAttribute('legacy_changed_by'))->toBe($actor->id);
 });

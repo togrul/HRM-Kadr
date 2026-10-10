@@ -66,8 +66,6 @@ class StructureScopeCoverageTest extends TestCase
         'app/Modules/Candidates/Livewire/OpeningList.php' => 'vakansiya üzrə müraciət SAYI — ad/qeyd qaytarmır',
         'app/Modules/Candidates/Livewire/RecruitmentAnalytics.php' => 'işə qəbul analitikası — yalnız aqreqat saylar',
         'app/Modules/PerformanceEvaluation/Livewire/Kpi/AnalyticsWorkspace.php' => 'baxanın rəhbər olub-olmadığını yoxlayır (exists), sətir qaytarmır',
-        'app/Modules/PerformanceEvaluation/Livewire/Kpi/BonusWorkspace.php' => 'dövr üzrə bonus kalkulyatoru (vəzifə/struktur cütləri) — borc: struktur üzrə süzülmür',
-        'app/Modules/PerformanceEvaluation/Livewire/Kpi/KpiLibraryWorkspace.php' => 'düstur önizləməsi üçün nümunə işçi — borc: görünürlükdən seçilməlidir',
         'app/Modules/PerformanceEvaluation/Livewire/UserPersonnelLinks.php' => 'istifadəçi↔işçi bağlantısının idarəsi (admin ekranı, identity sahəsi)',
         'app/Modules/Personnel/Livewire/Home.php' => 'oxumalar HomeOverviewService-dədir (görünürlüklə); qərar MyHrRequestReviewService::canReviewVacation ilə yoxlanır',
         'app/Modules/Personnel/Livewire/MyHr/SelfServiceRequestReviews.php' => 'self-service sorğuları təyin olunmuş rəyçiyə görə açılır (canReview*), struktura görə yox',

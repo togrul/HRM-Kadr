@@ -127,3 +127,44 @@ it('limits the nine-box to visible employees', function (): void {
 
     expect($people)->toBe([$this->ownPerson->id]);
 });
+
+it('scopes goal trees summaries parents and every goal mutation', function (): void {
+    $service = app(\App\Modules\PerformanceEvaluation\Application\Services\PerformanceGoalService::class);
+    $foreign = $service->createGoal(['performance_cycle_id' => $this->cycle->id, 'personnel_id' => $this->foreignPerson->id, 'title' => 'Secret goal']);
+    $own = $service->createGoal(['performance_cycle_id' => $this->cycle->id, 'personnel_id' => $this->ownPerson->id, 'parent_goal_id' => $foreign->id, 'title' => 'Visible goal']);
+    $this->actingAs($this->viewer);
+    $scoped = $service->forViewer($this->viewer);
+    expect($scoped->summary($this->cycle->id)['total'])->toBe(1)
+        ->and(array_column($scoped->tree($this->cycle->id), 'title'))->toBe(['Visible goal']);
+
+    $workspace = \App\Modules\PerformanceEvaluation\Livewire\GoalsWorkspace::class;
+    Livewire::test($workspace)->assertSee('Visible goal')->assertDontSee('Secret goal');
+    foreach (['deleteGoal', 'startCheckin'] as $method) {
+        Livewire::test($workspace)->call($method, $foreign->id)->assertNotFound();
+    }
+    Livewire::test($workspace)->call('setStatus', $foreign->id, 'done')->assertNotFound();
+    Livewire::test($workspace)->set('checkinGoalId', $foreign->id)->set('checkinValue', 50)->call('saveCheckin')->assertNotFound();
+    Livewire::test($workspace)->set('form.title', 'Forged')->set('form.personnel_id', $this->foreignPerson->id)->call('saveGoal')->assertForbidden();
+    Livewire::test($workspace)->set('form.title', 'Hidden parent')->set('form.personnel_id', $this->ownPerson->id)->set('form.parent_goal_id', $foreign->id)->call('saveGoal')->assertForbidden();
+    expect($foreign->fresh()->status)->toBe('active')
+        ->and($foreign->checkins()->count())->toBe(0);
+    Livewire::test($workspace)->call('setStatus', $own->id, 'done')->assertHasNoErrors();
+});
+
+it('hides out-of-scope assignments from the evaluator workspace even when assigned', function (): void {
+    foreach ([$this->ownPerson, $this->foreignPerson] as $person) {
+        PerformanceForm::query()->create([
+            'performance_cycle_id' => $this->cycle->id,
+            'performance_form_template_id' => $this->template->id,
+            'personnel_id' => $person->id,
+            'manager_id' => $this->viewer->id,
+            'manager_status' => 'draft',
+        ]);
+        \App\Models\AuditActivity::query()->create(['log_name' => 'performance', 'description' => $person->surname, 'subject_type' => PerformanceForm::class, 'subject_id' => PerformanceForm::query()->latest('id')->value('id')]);
+    }
+    $this->actingAs($this->viewer);
+    Livewire::test(\App\Modules\PerformanceEvaluation\Livewire\EvaluatorWorkspace::class)
+        ->assertSee('Görünənov')->assertDontSee('Gizliyev');
+    $audit = app(PerformanceEvaluationReportingService::class)->auditRows();
+    expect($audit->pluck('description')->all())->toContain('Görünənov')->not->toContain('Gizliyev');
+});

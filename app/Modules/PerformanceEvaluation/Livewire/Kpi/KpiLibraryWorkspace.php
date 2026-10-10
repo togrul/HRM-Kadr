@@ -15,6 +15,7 @@ use App\Modules\PerformanceEvaluation\Application\Services\Kpi\KpiLibraryService
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\KpiNotificationDelivery;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\KpiTemplateService;
 use App\Modules\PerformanceEvaluation\Application\Services\Kpi\RestKpiConnector;
+use App\Services\StructureService;
 use App\Services\UserAdministrationGuard;
 use Closure;
 use Illuminate\Contracts\View\View;
@@ -339,7 +340,9 @@ class KpiLibraryWorkspace extends Component
         $this->authorize('manage-performance-evaluation');
         $this->validate($this->connectorRules(true));
 
-        $personnel = Personnel::query()->whereNotNull('tabel_no')->where('is_pending', false)->orderBy('id')->first();
+        $personnel = app(StructureService::class)->scopeFor(auth()->user())
+            ->constrain(Personnel::query(), 'structure_id')
+            ->whereNotNull('tabel_no')->where('is_pending', false)->orderBy('id')->first();
         if ($personnel === null) {
             $this->dispatch('notify', type: 'error', message: __('performance_evaluation::kpi.connector.errors.no_person'));
 

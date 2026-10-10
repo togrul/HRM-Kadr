@@ -2,6 +2,7 @@
 
 namespace App\Modules\PerformanceEvaluation\Application\Services;
 
+use App\Contracts\VisibleAuditActivities;
 use App\Models\PerformanceTestAttempt;
 use App\Models\PerformanceTestAttemptAnswer;
 use App\Models\PerformanceTestSession;
@@ -9,7 +10,6 @@ use App\Models\PerformanceTrainingNeedLink;
 use App\Modules\PerformanceEvaluation\Support\PerformanceStructureScope;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
-use Spatie\Activitylog\Models\Activity;
 
 /**
  * Hesabat sətirləri işçinin strukturu üzrə istifadəçinin görünürlüyü ilə məhdudlaşır
@@ -84,7 +84,7 @@ class PerformanceEvaluationReportingService
 
     public function auditRows(): EloquentCollection
     {
-        return Activity::query()
+        return app(VisibleAuditActivities::class)->visibleQuery()
             ->whereIn('subject_type', [
                 \App\Models\PerformanceCycle::class,
                 \App\Models\PerformanceFormTemplate::class,

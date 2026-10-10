@@ -108,10 +108,10 @@ class Leave extends Model
         return $this->hasOne(LeaveStatusLog::class, 'leave_id')->latestOfMany('changed_at');
     }
 
-    /** @return BelongsTo<Personnel, $this> */
+    /** @return BelongsTo<User, $this> */
     public function approver(): BelongsTo
     {
-        return $this->belongsTo(Personnel::class, 'approved_by', 'id');
+        return $this->belongsTo(User::class, 'approved_by', 'id')->withTrashed();
     }
 
     public function assigned(): BelongsTo

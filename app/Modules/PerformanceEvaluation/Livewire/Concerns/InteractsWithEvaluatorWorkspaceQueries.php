@@ -6,6 +6,7 @@ use App\Models\PerformanceForm;
 use App\Models\PerformanceFormScore;
 use App\Models\PerformanceFormTemplateItem;
 use App\Models\PerformanceTestAttemptAnswer;
+use App\Modules\PerformanceEvaluation\Support\PerformanceStructureScope;
 use Illuminate\Database\Eloquent\Collection;
 
 trait InteractsWithEvaluatorWorkspaceQueries
@@ -27,7 +28,7 @@ trait InteractsWithEvaluatorWorkspaceQueries
             function () {
                 $userId = auth()->id();
 
-                return PerformanceForm::query()
+                return PerformanceStructureScope::forms()
                     ->leftJoin('performance_cycles', 'performance_cycles.id', '=', 'performance_forms.performance_cycle_id')
                     ->leftJoin('performance_form_templates', 'performance_form_templates.id', '=', 'performance_forms.performance_form_template_id')
                     ->leftJoin('personnels', 'personnels.id', '=', 'performance_forms.personnel_id')
@@ -148,7 +149,7 @@ trait InteractsWithEvaluatorWorkspaceQueries
                 $this->pendingQuestionTypeFilter,
             ])),
             function () {
-                return PerformanceTestAttemptAnswer::query()
+                return PerformanceStructureScope::answers()
                     ->leftJoin('performance_test_attempts', 'performance_test_attempts.id', '=', 'performance_test_attempt_answers.performance_test_attempt_id')
                     ->leftJoin('performance_test_sessions', 'performance_test_sessions.id', '=', 'performance_test_attempts.performance_test_session_id')
                     ->leftJoin('personnels', 'personnels.id', '=', 'performance_test_sessions.personnel_id')

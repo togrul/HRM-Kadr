@@ -96,8 +96,9 @@ class LeaveRecordIntegrityTest extends TestCase
         $leave = Leave::query()->sole();
         $this->assertSame(OrderStatusEnum::APPROVED->value, (int) $leave->status_id);
         $this->assertNotNull($leave->approved_at);
-        // Təsdiqçi sütunu əməkdaş id-sidir; kartla bağı olmayan istifadəçinin id-si ora yazılmır.
-        $this->assertNull($leave->approved_by);
+        $this->assertSame($user->id, (int) $leave->approved_by);
+        $this->assertSame($user->id, $leave->approver->id);
+        $this->assertSame($user->id, (int) $leave->logs()->sole()->changed_by);
         $this->assertSame(1, $leave->logs()->where('status_id', OrderStatusEnum::APPROVED->value)->count());
     }
 

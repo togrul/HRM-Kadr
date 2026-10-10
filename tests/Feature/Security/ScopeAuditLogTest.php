@@ -159,3 +159,21 @@ it('hides personnel-related rows outside the viewer\'s structures', function ():
     test()->actingAs($all);
     expect(app(ActivityLogReader::class)->query([])->count())->toBe(4);
 });
+
+it('applies the same employee scope to attendance history and its counters', function (): void {
+    $actor = User::factory()->create();
+    foreach ([$this->inside, $this->outside] as $person) {
+        $entry = \App\Models\AttendanceManualEntry::query()->forceCreate([
+            'tabel_no' => $person->tabel_no, 'date' => '2026-10-10', 'worked_minutes' => 480, 'reason' => 'Test', 'approval_status' => 'pending', 'entered_by' => $actor->id,
+        ]);
+        AuditActivity::query()->create([
+            'log_name' => 'attendance', 'event' => 'manual_entry.created', 'description' => $person->surname,
+            'subject_type' => $entry::class, 'subject_id' => $entry->id,
+        ]);
+    }
+    $this->actingAs(scopeAuditViewer([], [1]));
+    $history = app(\App\Modules\Attendance\Application\Services\AttendanceHistoryReadService::class);
+    $rows = $history->paginateRows('all', '', '', '', 25);
+    expect($rows->total())->toBe(1)
+        ->and($rows->items()[0]->description)->toBe('Daxiliyev');
+});

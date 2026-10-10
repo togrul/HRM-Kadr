@@ -66,7 +66,9 @@ class AddUser extends Component
 
         $role = Role::query()->find($this->roleId);
         if ($role && ! app(UserAdministrationGuard::class)->canAssignRole(auth()->user(), $role)) {
-            throw ValidationException::withMessages(['roleId' => __('services::users.messages.role_exceeds_your_permissions')]);
+            throw ValidationException::withMessages(['roleId' => app(UserAdministrationGuard::class)->canAssignRoleStructures(auth()->user(), $role)
+                ? __('services::users.messages.role_exceeds_your_permissions')
+                : __('services::roles.messages.role_exceeds_your_structures')]);
         }
 
         // Whitelist the columns that may be set — never mass-assign the raw

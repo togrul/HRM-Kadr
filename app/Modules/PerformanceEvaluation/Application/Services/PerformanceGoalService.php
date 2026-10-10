@@ -4,6 +4,10 @@ namespace App\Modules\PerformanceEvaluation\Application\Services;
 
 use App\Models\PerformanceGoal;
 use App\Models\PerformanceGoalCheckin;
+use App\Models\User;
+use App\Services\StructureScope;
+use App\Services\StructureService;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * Goals / OKR for a performance cycle: builds the aligned goal tree (objective →
@@ -14,13 +18,47 @@ use App\Models\PerformanceGoalCheckin;
  */
 class PerformanceGoalService
 {
+    private ?StructureScope $scope = null;
+
+    public function forViewer(?User $viewer): static
+    {
+        $clone = clone $this;
+        $clone->scope = app(StructureService::class)->scopeFor($viewer);
+
+        return $clone;
+    }
+
+    /** @return Builder<PerformanceGoal> */
+    public function queryForCycle(int $cycleId): Builder
+    {
+        $query = PerformanceGoal::query()->where('performance_cycle_id', $cycleId);
+
+        return $this->scope ? $this->scope->constrainThrough($query, 'personnel') : $query;
+    }
+
+    public function findForCycle(int $cycleId, int $goalId): PerformanceGoal
+    {
+        return $this->queryForCycle($cycleId)->find($goalId) ?? abort(404);
+    }
+
+    private function assertOwnerScope(int|string|null $personnelId): void
+    {
+        $actor = auth()->user();
+        if (! $actor instanceof User) {
+            return;
+        }
+        $structures = app(StructureService::class);
+        if (! ($personnelId ? $structures->allowsPersonnelId($actor, $personnelId) : $structures->scopeFor($actor)->isAll())) {
+            abort(403);
+        }
+    }
+
     /**
      * @return array<int, array<string, mixed>>
      */
     public function tree(int $cycleId): array
     {
-        $goals = PerformanceGoal::query()
-            ->where('performance_cycle_id', $cycleId)
+        $goals = $this->queryForCycle($cycleId)
             ->with(['personnel:id,surname,name,patronymic'])
             ->orderBy('parent_goal_id')
             ->orderBy('id')
@@ -28,36 +66,43 @@ class PerformanceGoalService
 
         $childrenByParent = $goals->groupBy(fn (PerformanceGoal $g): int => (int) ($g->parent_goal_id ?? 0));
 
-        $build = function (PerformanceGoal $goal) use (&$build, $childrenByParent): array {
-            $children = $childrenByParent->get($goal->id, collect())
-                ->map(fn (PerformanceGoal $child): array => $build($child))
-                ->all();
+        $visibleIds = $goals->pluck('id')->flip();
 
-            $node = [
-                'id' => $goal->id,
-                'title' => $goal->title,
-                'goal_type' => $goal->goal_type,
-                'status' => $goal->status,
-                'unit' => (string) $goal->unit,
-                'target' => (float) $goal->target_value,
-                'current' => (float) $goal->current_value,
-                'weight' => (float) $goal->weight_percent,
-                'progress_pct' => $goal->progress_pct,
-                'personnel_name' => $goal->personnel
-                    ? trim($goal->personnel->surname.' '.$goal->personnel->name)
-                    : null,
-                'due_date' => optional($goal->due_date)->format('d.m.Y'),
-                'children' => $children,
-            ];
-
-            $node['rollup_pct'] = $this->rollup($node);
-
-            return $node;
-        };
-
-        return $childrenByParent->get(0, collect())
-            ->map(fn (PerformanceGoal $goal): array => $build($goal))
+        return $goals->filter(fn (PerformanceGoal $goal): bool => ! $goal->getAttribute('parent_goal_id') || ! $visibleIds->has($goal->getAttribute('parent_goal_id')))
+            ->map(fn (PerformanceGoal $goal): array => $this->buildNode($goal, $childrenByParent))
             ->all();
+    }
+
+    /**
+     * @param  \Illuminate\Support\Collection<array-key, mixed>  $childrenByParent
+     * @return array<string, mixed>
+     */
+    private function buildNode(PerformanceGoal $goal, \Illuminate\Support\Collection $childrenByParent): array
+    {
+        $children = $childrenByParent->get($goal->getAttribute('id'), collect())
+            ->map(fn (PerformanceGoal $child): array => $this->buildNode($child, $childrenByParent))
+            ->all();
+
+        $node = [
+            'id' => $goal->getAttribute('id'),
+            'title' => $goal->getAttribute('title'),
+            'goal_type' => $goal->getAttribute('goal_type'),
+            'status' => $goal->getAttribute('status'),
+            'unit' => (string) $goal->getAttribute('unit'),
+            'target' => (float) $goal->getAttribute('target_value'),
+            'current' => (float) $goal->getAttribute('current_value'),
+            'weight' => (float) $goal->getAttribute('weight_percent'),
+            'progress_pct' => $goal->progress_pct,
+            'personnel_name' => $goal->personnel
+                ? trim($goal->personnel->surname.' '.$goal->personnel->name)
+                : null,
+            'due_date' => optional($goal->getAttribute('due_date'))->format('d.m.Y'),
+            'children' => $children,
+        ];
+
+        $node['rollup_pct'] = $this->rollup($node);
+
+        return $node;
     }
 
     /**
@@ -93,8 +138,7 @@ class PerformanceGoalService
     public function summary(int $cycleId): array
     {
         $tree = $this->tree($cycleId);
-        $byStatus = PerformanceGoal::query()
-            ->where('performance_cycle_id', $cycleId)
+        $byStatus = $this->queryForCycle($cycleId)
             ->selectRaw('status, COUNT(*) as aggregate')
             ->groupBy('status')
             ->pluck('aggregate', 'status');
@@ -117,6 +161,12 @@ class PerformanceGoalService
      */
     public function createGoal(array $data): PerformanceGoal
     {
+        $this->assertOwnerScope($data['personnel_id'] ?? null);
+        if (! empty($data['parent_goal_id'])) {
+            $parent = PerformanceGoal::query()->where('performance_cycle_id', $data['performance_cycle_id'])->whereKey($data['parent_goal_id'])->first() ?? abort(404);
+            $this->assertOwnerScope($parent->getAttribute('personnel_id'));
+        }
+
         return PerformanceGoal::create([
             'performance_cycle_id' => $data['performance_cycle_id'],
             'personnel_id' => $data['personnel_id'] ?? null,
@@ -136,6 +186,8 @@ class PerformanceGoalService
 
     public function addCheckin(PerformanceGoal $goal, float $value, ?string $note = null): PerformanceGoalCheckin
     {
+        $this->assertOwnerScope($goal->getAttribute('personnel_id'));
+
         $checkin = $goal->checkins()->create([
             'value' => $value,
             'note' => $note,

@@ -221,7 +221,9 @@ class EditUser extends Component
 
         $role = Role::query()->find($this->roleId);
         if ($role && (int) $role->id !== (int) $currentRoleId && ! $guard->canAssignRole(auth()->user(), $role)) {
-            throw ValidationException::withMessages(['roleId' => __('services::users.messages.role_exceeds_your_permissions')]);
+            throw ValidationException::withMessages(['roleId' => app(UserAdministrationGuard::class)->canAssignRoleStructures(auth()->user(), $role)
+                ? __('services::users.messages.role_exceeds_your_permissions')
+                : __('services::roles.messages.role_exceeds_your_structures')]);
         }
     }
 

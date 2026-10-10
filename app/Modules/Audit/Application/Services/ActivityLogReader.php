@@ -2,7 +2,13 @@
 
 namespace App\Modules\Audit\Application\Services;
 
+use App\Contracts\VisibleAuditActivities;
+use App\Models\AttendanceDailyLedger;
+use App\Models\AttendanceException;
+use App\Models\AttendanceManualEntry;
+use App\Models\AttendanceMonthlySummary;
 use App\Models\AttendanceOvertimeRequest;
+use App\Models\AttendanceShiftAssignment;
 use App\Models\AuditActivity;
 use App\Models\Candidate;
 use App\Models\EmployeeBankAccount;
@@ -12,8 +18,11 @@ use App\Models\Leave;
 use App\Models\OrderLog;
 use App\Models\PayrollRun;
 use App\Models\PerformanceForm;
+use App\Models\PerformanceFormScore;
 use App\Models\PerformanceGoal;
 use App\Models\PerformanceScorecard;
+use App\Models\PerformanceTestAttempt;
+use App\Models\PerformanceTestAttemptAnswer;
 use App\Models\PerformanceTestSession;
 use App\Models\Personnel;
 use App\Models\PersonnelCard;
@@ -48,7 +57,7 @@ use Illuminate\Support\Str;
  * Filters: search, log_name, event (self::NO_EVENT = entries without an event), date_from,
  * date_to, users_only.
  */
-class ActivityLogReader
+class ActivityLogReader implements VisibleAuditActivities
 {
     public const NO_EVENT = '__none__';
 
@@ -96,10 +105,19 @@ class ActivityLogReader
         EmployeeLoan::class => 'tabel_no',
         EmployeeBankAccount::class => 'tabel_no',
         Leave::class => 'tabel_no',
+        AttendanceDailyLedger::class => 'tabel_no',
+        AttendanceManualEntry::class => 'tabel_no',
+        AttendanceException::class => 'tabel_no',
+        AttendanceShiftAssignment::class => 'tabel_no',
+        AttendanceMonthlySummary::class => 'tabel_no',
+        AttendanceOvertimeRequest::class => 'tabel_no',
         PerformanceScorecard::class => 'personnel_id',
         PerformanceTestSession::class => 'personnel_id',
         PerformanceGoal::class => 'personnel_id',
         PerformanceForm::class => 'personnel_id',
+        PerformanceFormScore::class => 'performance_form_id',
+        PerformanceTestAttempt::class => 'performance_test_session_id',
+        PerformanceTestAttemptAnswer::class => 'performance_test_attempt_id',
         TrainingDeliveryRecord::class => 'personnel_id',
         TrainingNeedItem::class => 'personnel_id',
     ];
@@ -611,7 +629,13 @@ class ActivityLogReader
         $visible = [];
 
         foreach (self::PERSONNEL_SUBJECTS as $modelClass => $column) {
-            $values = $column === 'tabel_no' ? $tabelNos : $personnelIds;
+            $values = match ($column) {
+                'tabel_no' => $tabelNos,
+                'performance_form_id' => $visible[PerformanceForm::class] ?? [],
+                'performance_test_session_id' => $visible[PerformanceTestSession::class] ?? [],
+                'performance_test_attempt_id' => $visible[PerformanceTestAttempt::class] ?? [],
+                default => $personnelIds,
+            };
 
             if ($values === []) {
                 $visible[$modelClass] = [];

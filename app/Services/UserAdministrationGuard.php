@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\RoleStructure;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
@@ -79,7 +80,12 @@ class UserAdministrationGuard
             return false;
         }
 
-        return $this->missingPermissions($actor, $this->permissionNamesOf($target)) === [];
+        $structures = app(StructureService::class);
+        $actorScope = $structures->scopeFor($actor);
+        $targetScope = $structures->scopeFor($target);
+
+        return $this->missingPermissions($actor, $this->permissionNamesOf($target)) === []
+            && ($actorScope->isAll() || (! $targetScope->isAll() && $actorScope->allowsAll($targetScope->ids())));
     }
 
     /**
@@ -91,7 +97,23 @@ class UserAdministrationGuard
             return false;
         }
 
-        return $this->missingPermissions($actor, $role->permissions()->pluck('name')) === [];
+        if ($this->missingPermissions($actor, $role->permissions()->pluck('name')) !== []) {
+            return false;
+        }
+
+        return $this->canAssignRoleStructures($actor, $role);
+    }
+
+    public function canAssignRoleStructures(User $actor, Role $role): bool
+    {
+        $scope = app(StructureService::class)->scopeFor($actor);
+        if ($scope->isAll()) {
+            return true;
+        }
+
+        return ! (bool) $role->getAttribute('all_structures') && $scope->allowsAll(
+            RoleStructure::query()->where('role_id', $role->getKey())->pluck('structure_id'),
+        );
     }
 
     /**

@@ -12,7 +12,6 @@ use App\Models\Personnel;
 use App\Models\User;
 use App\Modules\Leaves\Policies\LeaveSickCertificatePolicy;
 use App\Services\Absence\AbsenceOverlapGuard;
-use App\Services\UserPersonnelLinkResolver;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -529,13 +528,10 @@ class SickCertificateService
         return $normalized;
     }
 
-    /**
-     * Təsdiqçi sütunları əməkdaş kartına işarə edir; kart yalnız açıq bağdan götürülür.
-     * Bağı olmayan istifadəçi üçün null yazılır — istifadəçi id-si əməkdaş id-si kimi saxlanmır.
-     */
-    private function actorKey(User $actor): ?int
+    /** Təsdiq və status tarixçəsində aktor həmişə users cədvəlinin açarıdır. */
+    private function actorKey(User $actor): int
     {
-        return app(UserPersonnelLinkResolver::class)->resolve($actor);
+        return (int) $actor->getKey();
     }
 
     private function date(mixed $value): ?CarbonImmutable

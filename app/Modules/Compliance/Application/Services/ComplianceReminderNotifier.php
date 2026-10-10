@@ -5,6 +5,7 @@ namespace App\Modules\Compliance\Application\Services;
 use App\Models\Personnel;
 use App\Models\User;
 use App\Notifications\PlatformNotification;
+use App\Services\StructureService;
 use App\Services\UserPersonnelLinkResolver;
 use Illuminate\Support\Collection;
 
@@ -33,7 +34,7 @@ class ComplianceReminderNotifier
 
         $personnel = Personnel::query()
             ->whereIn('tabel_no', $byTabel->keys()->all())
-            ->get(['id', 'tabel_no', 'parent_id'])
+            ->get(['id', 'tabel_no', 'parent_id', 'structure_id'])
             ->keyBy('tabel_no');
 
         // Alıcı yalnız açıq bağ (user_personnel_links) ilə tapılır — e-poçt uyğunluğu ilə yox.
@@ -70,7 +71,8 @@ class ComplianceReminderNotifier
 
             $escalations = $docRows->filter(fn (array $row): bool => in_array($row['status'] ?? '', $escalateStatuses, true));
             $managerUser = $person->parent_id ? $userForPersonnel((int) $person->parent_id) : null;
-            if ($escalations->isNotEmpty() && $managerUser) {
+            if ($escalations->isNotEmpty() && $managerUser
+                && app(StructureService::class)->allowsPersonnel($managerUser, $person)) {
                 $managerBuckets[$managerUser->id] = array_merge(
                     $managerBuckets[$managerUser->id] ?? [],
                     $escalations->map(fn (array $row): string => sprintf(
