@@ -768,6 +768,76 @@ class MultiParticipantOrderTest extends TestCase
         $this->assertSame(2, $service->vacancy($personnel->structure_id, $personnel->position_id));
     }
 
+    public function test_editing_a_multi_transfer_cannot_target_an_invisible_structure(): void
+    {
+        [$a, $b] = [$this->makePersonnel('Scoped A'), $this->makePersonnel('Scoped B')];
+        $outside = Structure::query()->create(['name' => 'Outside', 'shortname' => 'O']);
+        $target = Position::query()->create(['name' => 'Scoped target']);
+        $order = $this->transferOrder($a, $b, $target->id, ['2026-10-20', '2026-10-20']);
+        $role = \App\Models\Role::query()->create(['name' => 'transfer-scope', 'guard_name' => 'web']);
+        $role->forceFill(['all_structures' => false])->save();
+        $role->structures()->sync([$a->structure_id]);
+        auth()->user()->syncRoles([$role]);
+        app(\App\Services\StructureService::class)->forgetUser((int) auth()->id());
+        $template = OrderWordTemplate::query()->where('code', 'multi_transfer_test')->firstOrFail();
+        $template->update(['variables' => [...$template->variables, ['token' => 'structure', 'source' => 'manual', 'label' => 'Structure', 'scope' => 'participant', 'field' => ['key' => 'structure', 'type' => 'structure', 'required' => true], 'effect_role' => 'new_structure']]]);
+        $fields = ['target' => $target->id, 'on' => '2026-10-20', 'structure' => $outside->id];
+        $composition = new OrderComposition($template->code, null, null, null, null, [], $order->order_no, '10.10.2026', 'Bakı', editOrderId: $order->id, participants: [
+            ['personnel_id' => $a->id, 'fields' => $fields], ['personnel_id' => $b->id, 'fields' => $fields],
+        ]);
+        $outcome = app(OrderCompositionIssuer::class)->issue($template, $composition, false);
+        $this->assertFalse($outcome->isSaved());
+        $this->assertSame(__('orders::order_composer.errors.subject_out_of_scope'), $outcome->message);
+        $this->assertSame(1, OrderLog::query()->count());
+    }
+
+    public function test_deferred_transfer_events_survive_deleted_templates(): void
+    {
+        \Illuminate\Support\Carbon::setTestNow('2026-10-10 12:00:00');
+        try {
+            [$a, $b] = [$this->makePersonnel('Frozen A'), $this->makePersonnel('Frozen B')];
+            $old = $a->position_id;
+            $target = Position::query()->create(['name' => 'Frozen target']);
+            $order = $this->transferOrder($a, $b, $target->id, ['2026-10-12', '2026-10-12']);
+            $snapshot = $order->template_snapshot;
+            $snapshot['label'] = 'Frozen transfer';
+            $order->update(['template_snapshot' => $snapshot]);
+            app(OrderStatusTransitionService::class)->approve($order);
+            OrderWordTemplate::query()->where('code', 'multi_transfer_test')->delete();
+            \Illuminate\Support\Carbon::setTestNow('2026-10-12 12:00:00');
+            $this->assertSame(['applied' => 2, 'skipped' => 0, 'failed' => 0], app(\App\Modules\Orders\Application\Services\DeferredTransferService::class)->applyDue());
+            $events = OutboxEvent::query()->where('topic', 'orders')->latest('id')->take(2)->get();
+            $this->assertSame(['transfer', 'transfer'], $events->pluck('payload.effect')->all());
+            $this->assertSame(['Frozen transfer', 'Frozen transfer'], $events->pluck('payload.label')->all());
+            $this->assertSame(['2026-10-12', '2026-10-12'], $events->pluck('payload.start_date')->all());
+            $this->assertSame(['2026-10'], array_map(fn ($month): string => $month->format('Y-m'), app(OrderStatusTransitionService::class)->effectMonths($order->fresh())));
+            app(OrderStatusTransitionService::class)->cancel($order->fresh(), 'Wrong transfer');
+            $this->assertSame($old, $a->fresh()->position_id);
+            $this->assertSame($old, $b->fresh()->position_id);
+            $this->assertSame(['reversed', 'reversed'], OutboxEvent::query()->where('topic', 'orders')->latest('id')->take(2)->get()->pluck('payload.status')->all());
+        } finally {
+            \Illuminate\Support\Carbon::setTestNow();
+        }
+    }
+
+    public function test_reapproval_as_document_only_does_not_reverse_old_transfer_state_again(): void
+    {
+        [$a, $b] = [$this->makePersonnel('Reapproval A'), $this->makePersonnel('Reapproval B')];
+        $target = Position::query()->create(['name' => 'First target']);
+        $later = Position::query()->create(['name' => 'Later actual position']);
+        $order = $this->transferOrder($a, $b, $target->id, ['2020-01-01', '2020-01-01']);
+        $transitions = app(OrderStatusTransitionService::class);
+        $transitions->approve($order);
+        $transitions->cancel($order->fresh(), 'Wrong transfer');
+        $transitions->reopen($order->fresh());
+        OrderWordTemplate::query()->where('code', 'multi_transfer_test')->update(['effect' => 'none']);
+        $transitions->approve($order->fresh());
+        app(\App\Modules\Personnel\Contracts\GuardsPersonnelChanges::class)->allowForEffect('transfer', fn (): bool => $a->fresh()->forceFill(['position_id' => $later->id])->save());
+        $transitions->cancel($order->fresh(), 'Document cancellation');
+        $this->assertSame($later->id, $a->fresh()->position_id);
+        $this->assertSame('none', $order->fresh()->template_snapshot['applied_effect']);
+    }
+
     private function transferOrder(Personnel $a, Personnel $b, int $target, array $dates): OrderLog
     {
         OrderWordTemplate::query()->firstOrCreate(['code' => 'multi_transfer_test'], [

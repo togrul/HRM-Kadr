@@ -247,6 +247,20 @@ class OrderStatusTransitionService
      */
     public function effectMonths(OrderLog $order): array
     {
+        if ((int) $order->status_id === OrderStatusEnum::APPROVED->value && $this->isRecordedTransfer($order)) {
+            $participants = $this->participantsOf($order);
+            $states = $participants->isEmpty() ? [(array) data_get($order->template_snapshot, 'effect_state', [])] : $participants->pluck('effect_state')->all();
+            $months = [];
+            foreach ($states as $state) {
+                $value = $state['effective_date'] ?? $order->getRawOriginal('given_date');
+                $date = $this->dates->parse(is_scalar($value) ? (string) $value : null);
+                if ($date !== null) {
+                    $months[$date->format('Y-m')] = $date->startOfMonth();
+                }
+            }
+
+            return array_values($months);
+        }
         $snapshot = (array) $order->template_snapshot;
         $template = $this->templates->find((string) ($snapshot['template_code'] ?? ''));
         $months = [];
@@ -446,6 +460,10 @@ class OrderStatusTransitionService
             return;
         }
 
+        $snapshot['applied_effect'] = (string) $template->effect;
+        $snapshot['label'] ??= (string) $template->label;
+        $order->forceFill(['template_snapshot' => $snapshot])->save();
+
         // Hire converts the selected candidate into an active employee.
         if ($template->isHire()) {
             $this->hire($template, $snapshot, $order);
@@ -477,10 +495,26 @@ class OrderStatusTransitionService
         }
     }
 
+    private function isRecordedTransfer(OrderLog $order): bool
+    {
+        $snapshot = (array) $order->template_snapshot;
+        if (array_key_exists('applied_effect', $snapshot)) {
+            return $snapshot['applied_effect'] === 'transfer';
+        }
+
+        return ! empty(data_get($snapshot, 'effect_state.transfer_target'))
+            || $order->participants()->whereNotNull('effect_state->transfer_target')->exists();
+    }
+
     private function reverseEffect(OrderLog $order): void
     {
         $snapshot = (array) $order->template_snapshot;
         $template = $this->templates->find((string) ($snapshot['template_code'] ?? ''));
+        if ($this->isRecordedTransfer($order)) {
+            $snapshot['applied_effect'] = 'transfer';
+            $order->forceFill(['template_snapshot' => $snapshot])->save();
+            $template = new OrderWordTemplate(['effect' => 'transfer', 'variables' => []]);
+        }
         if (! $template) {
             return;
         }

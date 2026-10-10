@@ -19,14 +19,16 @@ class OrderIntegrationPublisher
         private readonly AzerbaijaniDateFormatter $dates,
     ) {}
 
-    public function publish(OrderLog $order, string $effectDirection, ?int $participantId = null): void
+    public function publish(OrderLog $order, string $effectDirection, ?int $participantId = null, bool $deferredTransfer = false): void
     {
         if ($effectDirection === 'none') {
             return;
         }
 
         $snapshot = (array) $order->template_snapshot;
-        $template = $this->templates->find((string) ($snapshot['template_code'] ?? ''));
+        $template = ($deferredTransfer || ($snapshot['applied_effect'] ?? null) === 'transfer')
+            ? new OrderWordTemplate(['effect' => 'transfer', 'label' => is_scalar($snapshot['label'] ?? null) ? (string) $snapshot['label'] : '', 'variables' => []])
+            : $this->templates->find((string) ($snapshot['template_code'] ?? ''));
 
         if (! $template) {
             return;

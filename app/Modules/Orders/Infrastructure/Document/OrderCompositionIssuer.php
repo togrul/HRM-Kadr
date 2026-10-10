@@ -67,10 +67,13 @@ class OrderCompositionIssuer
         // Staff-schedule (ştat cədvəli) gate for new hire and transfer orders: the target
         // structure+position should have a free slot. By default the author is asked to
         // create one (or go ahead); with `staff.hire_guard.block` the order is refused.
-        $targets = $composition->isEditing() ? [] : $this->staffTargets($template, $composition);
+        $targets = $this->staffTargets($template, $composition);
         foreach ($targets as [$structureId, $positionId, $required]) {
             if (! app(StructureService::class)->scopeFor()->allows($structureId)) {
                 return OrderIssueOutcome::rejected([], __('orders::order_composer.errors.subject_out_of_scope'));
+            }
+            if ($composition->isEditing()) {
+                continue;
             }
             $check = $this->vacancies->check($structureId, $positionId);
             if ($check->status === StaffSlotCheck::AVAILABLE && $check->vacant() < $required) {
