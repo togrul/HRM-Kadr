@@ -8,7 +8,6 @@ use App\Models\OrderParticipant;
 use App\Models\OrderWordTemplate;
 use App\Models\Personnel;
 use App\Modules\Compensation\Contracts\OrderCompensationSync;
-use App\Modules\Integration\Domain\Contracts\IntegrationOutbox;
 use App\Modules\Orders\Application\Document\OrderParticipantFields;
 use App\Modules\Orders\Application\Document\OrderWordTemplateRepository;
 use App\Modules\Orders\Infrastructure\Document\Effects\OrderEffectCatalog;
@@ -76,7 +75,7 @@ class OrderStatusTransitionService
         private readonly ImportCandidateToPersonnel $candidateImport,
         private readonly AzerbaijaniDateFormatter $dates,
         private readonly OrderCompensationSync $compensation,
-        private readonly IntegrationOutbox $outbox,
+        private readonly OrderIntegrationPublisher $publisher,
         private readonly OrderPeriodGuard $periods,
         private readonly HireOrderRevocation $hireRevocation,
         private readonly GuardsPersonnelChanges $changes,
@@ -399,79 +398,7 @@ class OrderStatusTransitionService
      */
     private function publish(OrderLog $order, string $effectDirection): void
     {
-        if ($effectDirection === 'none') {
-            return;
-        }
-
-        $snapshot = (array) $order->template_snapshot;
-        $template = $this->templates->find((string) ($snapshot['template_code'] ?? ''));
-
-        if (! $template) {
-            return;
-        }
-
-        $orderFields = (array) ($snapshot['fields'] ?? []);
-        $participants = $this->participantsOf($order);
-
-        if ($participants->isEmpty()) {
-            $this->outbox->record('orders', (string) $order->order_no, $this->eventPayload(
-                $order, $template, $effectDirection, $this->personnel($snapshot), $this->effectFields($template, $orderFields),
-            ));
-
-            return;
-        }
-
-        // One event per participant, same shape: the counterpart books each person's
-        // trip/leave on its own. external_id is per participant; order_external_id ties
-        // the events of one order together.
-        $people = $this->peopleOf($participants);
-        foreach ($participants as $participant) {
-            $fields = $this->effectFields($template, OrderParticipantFields::effective($template, $orderFields, (array) $participant->fields));
-
-            $this->outbox->record('orders', (string) $order->order_no, [
-                ...$this->eventPayload($order, $template, $effectDirection, $people[(int) $participant->personnel_id] ?? null, $fields),
-                'external_id' => $order->id.'-'.$participant->position,
-                'order_external_id' => (string) $order->id,
-                'participant_index' => (int) $participant->position,
-                'participant_count' => $participants->count(),
-            ]);
-        }
-    }
-
-    /**
-     * The outbox payload for one employee of an order.
-     *
-     * @param  array<string,mixed>  $fields  role => value
-     * @return array<string,mixed>
-     */
-    private function eventPayload(OrderLog $order, OrderWordTemplate $template, string $effectDirection, ?Personnel $personnel, array $fields): array
-    {
-        return [
-            'external_id' => (string) $order->id,
-            'order_no' => (string) $order->order_no,
-            'effect' => (string) $template->effect,
-            'label' => (string) $template->label,
-            'date' => optional($order->given_date)->format('Y-m-d'),
-            // The counterpart correlates people by our internal key, never by
-            // staff number: that one is editable and cascades, leaving no trace.
-            'employee_external_id' => $personnel ? (string) $personnel->id : null,
-            'person_uid' => $personnel?->person_uid,
-            'status' => $effectDirection === 'applied' ? 'approved' : 'reversed',
-            // A hire can be undone here only while the employee has no records yet, so the
-            // counterpart must not offer an undo of its own; a revocation still arrives as 'reversed'.
-            'reversible' => ! $template->isHire(),
-            'start_date' => $this->dateField($fields, 'start_date'),
-            'end_date' => $this->dateField($fields, 'end_date'),
-            'days' => isset($fields['days']) ? (int) $fields['days'] : null,
-        ];
-    }
-
-    /**
-     * @param  array<string, mixed>  $fields
-     */
-    private function dateField(array $fields, string $role): ?string
-    {
-        return $this->dates->parse($fields[$role] ?? null)?->format('Y-m-d');
+        $this->publisher->publish($order, $effectDirection);
     }
 
     /**

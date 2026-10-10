@@ -39,7 +39,7 @@ class StaffScheduleVacancyService
      * Guarantee at least one vacant slot, creating or expanding the schedule row as
      * needed. Returns the affected row.
      */
-    public function ensureOneVacancy(int $structureId, int $positionId): StaffSchedule
+    public function ensureOneVacancy(int $structureId, int $positionId, int $minimumVacancies = 1): StaffSchedule
     {
         $row = $this->row($structureId, $positionId);
 
@@ -47,17 +47,17 @@ class StaffScheduleVacancyService
             return StaffSchedule::query()->create([
                 'structure_id' => $structureId,
                 'position_id' => $positionId,
-                'total' => 1,
+                'total' => max(1, $minimumVacancies),
                 'filled' => 0,
-                'vacant' => 1,
+                'vacant' => max(1, $minimumVacancies),
             ]);
         }
 
         $check = $this->staffing->check($structureId, $positionId);
 
-        if ($check->status === StaffSlotCheck::FULL) {
+        if ($check->vacant() < max(1, $minimumVacancies)) {
             // Grow this row so the pair's total sits one above the people already in it.
-            $total = (int) $row->total + max(1, $check->filled - $check->total + 1);
+            $total = max((int) $row->total, $check->filled + max(1, $minimumVacancies));
             $row->forceFill([
                 'total' => $total,
                 'vacant' => max(0, $total - $check->filled),

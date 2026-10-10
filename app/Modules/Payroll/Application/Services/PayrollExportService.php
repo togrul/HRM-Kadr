@@ -4,9 +4,12 @@ namespace App\Modules\Payroll\Application\Services;
 
 use App\Models\CompensationComponent;
 use App\Models\PayrollRun;
+use App\Models\Payslip;
 use App\Models\PayslipLine;
 use App\Modules\Compensation\Domain\Contracts\CompensationReadRepository;
 use App\Services\StructureScope;
+use Brick\Math\BigDecimal;
+use Brick\Math\RoundingMode;
 use Illuminate\Database\Eloquent\Builder;
 
 class PayrollExportService
@@ -23,7 +26,7 @@ class PayrollExportService
         return $this->payslips($run, $scope)
             ->with('personnel:tabel_no,surname,name')
             ->get()
-            ->filter(fn ($payslip) => (float) $payslip->net > 0)
+            ->filter(fn (Payslip $payslip): bool => BigDecimal::of($payslip->net)->isPositive())
             ->map(function ($payslip): array {
                 $bank = $this->compensation->primaryBankAccount($payslip->tabel_no);
 
@@ -41,7 +44,7 @@ class PayrollExportService
     }
 
     /**
-     * General-ledger rows: payslip lines aggregated by component code with GL account mapping.
+     * General-ledger rows: payslip lines aggregated by component, kind and currency with GL account mapping.
      *
      * @return array<int,array<string,mixed>>
      */
@@ -52,17 +55,23 @@ class PayrollExportService
 
         return PayslipLine::query()
             ->whereIn('payslip_id', $payslipIds)
+            ->with('payslip:id,currency')
             ->get()
-            ->groupBy('code')
+            ->groupBy(fn (PayslipLine $line): string => json_encode([$line->code, $line->kind, $line->payslip->currency], JSON_THROW_ON_ERROR))
             ->map(function ($group) use ($glByCode): array {
                 $first = $group->first();
+                $amount = BigDecimal::zero();
+                foreach ($group as $line) {
+                    $amount = $amount->plus($line->amount);
+                }
 
                 return [
                     'gl_code' => $glByCode[$first->code] ?? null,
                     'code' => $first->code,
                     'name' => $first->name,
                     'kind' => $first->kind,
-                    'amount' => $this->money($group->sum('amount')),
+                    'amount' => $this->money((string) $amount),
+                    'currency' => $first->payslip->currency,
                 ];
             })
             ->values()
@@ -122,6 +131,6 @@ class PayrollExportService
 
     private function money(float|string|null $value): string
     {
-        return number_format((float) $value, 2, '.', '');
+        return (string) BigDecimal::of($value ?? '0')->toScale(2, RoundingMode::HalfUp);
     }
 }

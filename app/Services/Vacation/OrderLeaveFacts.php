@@ -9,6 +9,7 @@ use App\Models\PersonnelVacation;
 use App\Modules\Vacation\Application\Services\VacationSettings;
 use App\Support\Database\InstalledTables;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * Məzuniyyət hüququna təsir edən, əmrlərdən çıxan faktlar:
@@ -60,7 +61,8 @@ class OrderLeaveFacts
 
         $orders = OrderLog::query()
             ->where('status_id', OrderStatusEnum::APPROVED->value)
-            ->where('template_snapshot', 'like', '%prev_position_id%')
+            ->where(fn (Builder $query): Builder => $query->where('template_snapshot', 'like', '%prev_position_id%')->orWhereHas('participants', fn (Builder $participants): Builder => $participants->where('personnel_id', $personnelId)))
+            ->with('participants:id,order_log_id,personnel_id,effect_state')
             ->whereNotNull('given_date')
             ->get(['id', 'given_date', 'template_snapshot']);
 
@@ -69,9 +71,11 @@ class OrderLeaveFacts
 
         foreach ($orders as $order) {
             $snapshot = (array) $order->template_snapshot;
-            $state = (array) ($snapshot['effect_state'] ?? []);
+            $state = $order->participants->isNotEmpty()
+                ? (array) $order->participants->firstWhere('personnel_id', $personnelId)?->effect_state
+                : ((int) ($snapshot['personnel_id'] ?? 0) === $personnelId ? (array) ($snapshot['effect_state'] ?? []) : []);
 
-            if ((int) ($snapshot['personnel_id'] ?? 0) !== $personnelId || ! array_key_exists('prev_position_id', $state)) {
+            if (! array_key_exists('prev_position_id', $state)) {
                 continue;
             }
 

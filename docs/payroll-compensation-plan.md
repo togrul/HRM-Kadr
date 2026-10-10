@@ -188,3 +188,17 @@ Arxitektura: Livewire başqa modulun modelini birbaşa sorğulamır; translation
 **Digər (Faza 5 — sonra):** məhkəmə/icra tutulmaları (aliment, icra vərəqəsi), avans/bank krediti, maddi məsuliyyət tutulması.
 
 **⚠️ Rejim fərqi:** neft-qaz və dövlət/hərbi sektorlar üçün fərqli cədvəllər var → buna görə engine qayda-dəsti, `regime_id` ilə. Yuxarıdakılar qeyri-neft özəl sektor üçündür.
+
+## 11.10.2026 — qabaqcıl payroll işlərinin hazırlıq sərhədi
+
+Çoxvalyutalı hesablamanın tamamlanması GL ixracında valyuta göstərilməsindən böyük işdir. Müqavilə valyutası, ödəniş valyutası və vergi/hesabat valyutası ayrı müəyyən edilməlidir. Məzənnə mənbəyi ARBAY olmalı, məzənnənin tarixi, nominalı, currency pair-i, dəyəri və source/version-u payslip snapshot-unda dondurulmalıdır. Köhnə locked run cari məzənnə ilə yenidən hesablanmamalıdır. Məzənnə tapılmasa səssiz 1 götürmək olmaz. Foreign currency üzrə vergi bazasına çevirmə qaydası mühasib təsdiqi tələb edir.
+
+Hesablar planı üçün `CompensationComponent.gl_code` sərbəst mətndən ARBAY-da həmin şirkətdə aktiv və postinqə icazəli hesabı seçən/validasiya edən contract-a keçməlidir. HRM ayrıca hesablar planı saxlamasın. Mübadilədə company konteksti token/integration mapping-dən alınmalıdır; ekrandan göndərilmiş company/account ID təkbaşına etibar mənbəyi deyil. Bağlı hesab və silinmiş kodun davranışı müəyyən edilməlidir. Hesab mapping-i export/payment snapshot-unda tarixlə qorunmalıdır.
+
+Çoxpilləli təsdiq üçün run üzrə immutable route snapshot, hər mərhələdə səlahiyyətli aktor, rədd/səbəb, əvəzləmə, self-approval sərhədi və yenidən hesablamadan sonra əvvəlki approval-ların ləğvi tələb olunur. HR → maliyyə → kilid ardıcıllığı nümunədir, seçilmiş müştəri qaydası deyil. User cavabı gəlmədən mövcud run approval dəyişdirilməməlidir.
+
+Float-dan keçid `PayrollCalculator`, `StatutoryEngine`, compensation komponent faizi, order earnings, proration, loan/retro, run toplamları, bank/GL/state export və API representation-u üzrə vahid işdir. Hesablama daxilində decimal, məbləğ çıxışında decimal string və aydın rounding qaydası seçilməlidir. Proration nisbəti və faiz üçün ara precision ilə yekun qəpik yuvarlaqlaşdırması ayrı saxlanmalıdır. Qanuni dərəcələr bu refaktorla dəyişdirilmir; eyni təsdiqlənmiş input üçün əvvəl/sonra nəticə müqayisəsi və qəpik sərhədi testləri lazımdır.
+
+İlk konkret düzəliş: GL ixracı komponent + kind + currency üzrə ayrılır, decimal məbləğlər float cəminə çevrilmir; bank/state ixracındakı formatlama da decimal ilə aparılır. Bu, müxtəlif valyutaları səhvən toplamaq riskini bağlayır. FX çevirməsini, mühasibat hesabı sinxronunu və bütün payroll mühərrikinin decimal keçidini tamamlamır. GL XLSX-də valyuta sütunu əlavə olunur; downstream importer sütun müqaviləsini nəzərə almalıdır.
+
+Payroll sahibliyi də qorunmalıdır: maliyyə ARBAY-dadırsa HRM-də ikinci ödəniş/postinq mexanizmi açılmır. HRM compensation şərtlərini və icazəli faktları verir, son maliyyə əməliyyatı sahib sistemdə qalır.

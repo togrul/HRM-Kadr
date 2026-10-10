@@ -108,3 +108,11 @@ it('rejects invalid order filters and emits an empty summary for an unknown orde
     Artisan::call('orders:audit-transfer-timing', ['--order-id' => 99999]);
     expect(json_decode(trim(Artisan::output()), true, flags: JSON_THROW_ON_ERROR))->toMatchArray(['type' => 'summary', 'count' => 0]);
 });
+
+it('audits each multi-transfer participant without borrowing the lead employee state', function (): void {
+    $order = timingAuditOrder([]);
+    $order->participants()->create(['personnel_id' => 12, 'position' => 1, 'effect_state' => ['prev_position_id' => 4, 'effective_date' => '2026-10-20']]);
+    $order->participants()->create(['personnel_id' => 13, 'position' => 2, 'effect_state' => ['prev_position_id' => 5, 'effective_date' => '2026-10-21', 'transfer_pending' => true]]);
+    $findings = iterator_to_array(app(TransferTimingAudit::class)->findings());
+    expect($findings)->toHaveCount(1)->and($findings[0]['personnel_id'])->toBe(12)->and($findings[0]['participant_id'])->not->toBeNull();
+});
