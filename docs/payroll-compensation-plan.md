@@ -202,3 +202,11 @@ Float-dan keçid `PayrollCalculator`, `StatutoryEngine`, compensation komponent 
 İlk konkret düzəliş: GL ixracı komponent + kind + currency üzrə ayrılır, decimal məbləğlər float cəminə çevrilmir; bank/state ixracındakı formatlama da decimal ilə aparılır. Bu, müxtəlif valyutaları səhvən toplamaq riskini bağlayır. FX çevirməsini, mühasibat hesabı sinxronunu və bütün payroll mühərrikinin decimal keçidini tamamlamır. GL XLSX-də valyuta sütunu əlavə olunur; downstream importer sütun müqaviləsini nəzərə almalıdır.
 
 Payroll sahibliyi də qorunmalıdır: maliyyə ARBAY-dadırsa HRM-də ikinci ödəniş/postinq mexanizmi açılmır. HRM compensation şərtlərini və icazəli faktları verir, son maliyyə əməliyyatı sahib sistemdə qalır.
+
+### 11.10.2026 — təsdiq marşrutu haqqında hüquqi sərhəd
+
+Md.173 haqq-hesab sənədinin məzmununu, onu tərtib edən mühasibin imzasını və işçinin məlumat alma hüququnu müəyyən edir; kompüter hesablamasına da icazə verir. Bu maddədə proqram üçün konkret “HR → maliyyə → kilid” üçmərhələli ardıcıllıq müəyyən edilmir. [Rəsmi Əmək Məcəlləsi, Md.173](https://frameworks.e-qanun.az/46/f_46943.html).
+
+Belə bir ardıcıllığı qanuni tələb adı ilə hardcode etmirik. Mühəndis təklifi kimi hesablayan və təsdiqləyən aktorun ayrılması, mühasibat yoxlaması, səlahiyyətli ödəniş/kilid qərarı, rədd/səbəb və run version-u üzrə audit faydalıdır. Bunlar şirkətin təşkilati rolları ilə konfiqurasiya olunmalıdır. Audit actor ID-si kağız imzasının və ya qanunun tələb etdiyi elektron imza/kabinet prosedurunun avtomatik ekvivalenti kimi təqdim edilməsin.
+
+Bu yoxlamada vergi, DSMF və tibbi sığorta dərəcələri dəyişdirilmədi. Köhnə cədvəldəki hüquqi məbləğləri bu append-in özü təsdiqləmir. Çoxvalyutalı statutory baza, company profil və müqavilə valyutası üçün ayrıca təsdiqlənmiş input və effective date tələb olunur.
