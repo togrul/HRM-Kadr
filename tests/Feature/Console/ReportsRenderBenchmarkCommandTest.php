@@ -63,9 +63,11 @@ class ReportsRenderBenchmarkCommandTest extends TestCase
 
     private function grantPermissions(User $user): void
     {
-        Permission::findOrCreate('show-reports', 'web');
-        Permission::findOrCreate('export-reports', 'web');
+        $names = ['show-reports', 'export-reports', 'show-personnel-reports', 'show-attendance-reports', 'show-training-reports', 'show-performance-reports'];
+        foreach ($names as $name) {
+            Permission::findOrCreate($name, 'web');
+        }
 
-        $user->givePermissionTo(['show-reports', 'export-reports']);
+        $user->givePermissionTo($names);
     }
 }

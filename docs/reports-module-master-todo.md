@@ -3,6 +3,8 @@
 > **Status (10.10.2026):** bu sənədin işarələri fevral–may aylarından sonra yenilənməyib; açıq qalan bəndlərin çoxu real vəziyyəti əks etdirməyə bilər. Aktiv iş siyahısı `~/Desktop/projects/ISLER_PLANI.md`-dir. Bəndi icra etməzdən əvvəl kodda yoxlayın.
 >
 > **Tutuşdurma (11.10.2026):** 64/64 bənd kodla yoxlanıb: 32 `[x]`, 32 açıq. Əsas modul (standart/dinamik/müqayisəli hesabat, Excel/CSV/print) hazırdır; preset, audit, konsolidə/executive paket, scheduled/queue export, unit testlər və 7 permission modeli yoxdur.
+>
+> **Yeniləmə (11.10.2026, sonra):** rol matrisi, audit, saved presets, planlı hesabatlar (email) və server-side PDF quruldu — 38 `[x]`, 26 açıq. Hələ açıq: konsolidə/executive paket, queue-based export center, məzuniyyət və əmək haqqı qruplarının öz hesabatları (icazələr hazırdır, hesabat yoxdur).
 
 Bu sənəd müştərinin verdiyi aşağıdakı tələb əsasında hazırlanıb:
 
@@ -580,8 +582,8 @@ Bu modul başlanğıcdan performanslı qurulmalıdır.
 - [x] Excel export əlavə et — kod: app/Modules/Reports/Exports/ReportsTableExport.php, StandardReports::exportExcel()
 - [x] CSV export əlavə et — kod: StandardReports::exportCsv(), DynamicBuilder::exportCsv()
 - [x] print-friendly PDF çıxışı əlavə et — kod: app/Modules/Reports/Resources/views/print/report.blade.php, marşrut reports.print-standard/reports.print-dynamic (brauzer print; server-side PDF mühərriki yoxdur)
-- [ ] permission seed və role matrix yaz — qismən: show-reports və export-reports seed olunub (app/Modules/Reports/Database/Migrations/2026_03_15_100000_seed_reports_permissions_and_update_menu.php); sənəddəki 7 permission/rol matrisi yoxdur
-- [ ] audit log hadisələrini əlavə et — kodda tapılmadı (app/Modules/Reports-da audit/activity yazısı yoxdur)
+- [x] permission seed və role matrix yaz — kod: app/Modules/Reports/Support/ReportPermissions.php (tək mənbə), miqrasiya 2026_10_11_100000_seed_report_group_permissions.php: qrup üzrə baxış (`show-{personnel,attendance,leave,payroll,training,performance}-reports`; maaş qrupu əlavə `show-payroll` istəyir), `manage-report-presets`, `schedule-reports`; köhnə `show-reports`/`export-reports` rolları və birbaşa icazəli istifadəçilər qrup icazələrini avtomatik alır. Test: tests/Feature/Reports/ReportsPermissionMatrixTest.php. `view-report-audit` ayrıca yaradılmayıb — audit `show-audit-logs` ilə Audit jurnalında görünür
+- [x] audit log hadisələrini əlavə et — kod: Application/Services/ReportsAuditLogger.php (log adı `reports`): hesabat açıldı, ixrac (xlsx/csv/print/pdf), preset yaradıldı/dəyişdi/silindi/tətbiq edildi, planlı hesabat yaradıldı/dəyişdi/silindi/göndərildi/uğursuz
 
 ### Phase 2. Dynamic builder və müqayisə
 
@@ -590,7 +592,7 @@ Bu modul başlanğıcdan performanslı qurulmalıdır.
 - [x] comparative report ekranını qur — kod: app/Modules/Reports/Livewire/Comparisons.php, Application/Services/ComparativeReportService.php
 - [x] year-over-year müqayisələri əlavə et — kod: ComparativeReportService::headcountYearComparison()/trainingYearComparison(), attendanceMonthComparison()
 - [ ] structure comparison əlavə et — qismən: ComparativeReportService::build() structureId süzgəci var, strukturlar arası müqayisə kartı yoxdur; DynamicBuilder 'structure' üzrə qruplaşdırır
-- [ ] saved presets əlavə et — kodda tapılmadı (preset saxlama və manage-report-presets yoxdur)
+- [x] saved presets əlavə et — kod: `report_presets` cədvəli, Domain/Models/ReportPreset.php, Policies/ReportPresetPolicy.php, Application/Services/ReportPresetService.php; panelin «Saxlanmış filtrlər» bölməsi (şəxsi və `manage-report-presets` ilə paylaşılan); tətbiqdə struktur görünürlüyü yenidən yoxlanılır. Test: tests/Feature/Reports/ReportPresetsTest.php
 - [ ] chart panel komponentlərini yaz — qismən: app/Modules/Reports/Resources/views/livewire/reports/overview.blade.php-də inline bar chart var; ayrıca chart komponenti yoxdur
 - [ ] chart export / print uyğunluğu əlavə et — kodda tapılmadı
 
@@ -605,9 +607,9 @@ Bu modul başlanğıcdan performanslı qurulmalıdır.
 
 ### Phase 4. Advanced maturity
 
-- [ ] scheduled report generation — kodda tapılmadı
-- [ ] email / notification-based report delivery — kodda tapılmadı
-- [ ] server-side PDF engine — kodda tapılmadı
+- [x] scheduled report generation — kod: `report_schedules` + `report_schedule_recipients`, «Planlı hesabatlar» tabı (Livewire/Schedules.php), `reports:send-scheduled` (Kernel, hər 5 dəq.), Application/Jobs/SendScheduledReportJob.php (sync-də də işləyir), sahibin icazə və strukturları ilə qurulur. Test: tests/Feature/Reports/ReportSchedulesTest.php
+- [x] email / notification-based report delivery — kod: Application/Mail/ScheduledReportMail.php; alıcılar yalnız hesabata baxa bilən aktiv sistem istifadəçiləridir
+- [x] server-side PDF engine — kod: Application/Pdf/LibreOfficeReportPdfRenderer.php (başsız LibreOffice, DejaVu Sans gömülü), StandardReports/DynamicBuilder/Dashboard `exportPdf`, planlı hesabatın PDF formatı. Test: tests/Feature/Reports/ReportPdfExportTest.php (Azərbaycan hərfləri pdftotext ilə yoxlanılır)
 - [ ] deeper snapshot strategy — kodda tapılmadı
 - [ ] anomaly / trend insight layer — kodda tapılmadı
 

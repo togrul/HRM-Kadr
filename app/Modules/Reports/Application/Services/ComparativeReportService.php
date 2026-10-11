@@ -16,18 +16,21 @@ class ComparativeReportService
     ) {}
 
     /**
+     * @param  list<string>|null  $cards  qurulacaq kartlar (null — hamısı); icazəsi olmayan
+     *                                    qrupun kartı heç hesablanmır
      * @return array<string,mixed>
      */
-    public function build(int $year, int $month, ?int $structureId = null): array
+    public function build(int $year, int $month, ?int $structureId = null, ?array $cards = null): array
     {
         $structureIds = $this->structureScope->resolveIds($structureId);
+        $wants = fn (string $card): bool => $cards === null || in_array($card, $cards, true);
 
-        return [
-            'headcount_years' => $this->headcountYearComparison($year, $structureIds),
-            'attendance_months' => $this->attendanceMonthComparison($year, $month, $structureId, $structureIds),
-            'training_years' => $this->trainingYearComparison($year, $structureIds),
-            'performance_distribution' => $this->performanceDistribution($year, $month, $structureIds),
-        ];
+        return array_filter([
+            'headcount_years' => $wants('headcount_years') ? $this->headcountYearComparison($year, $structureIds) : null,
+            'attendance_months' => $wants('attendance_months') ? $this->attendanceMonthComparison($year, $month, $structureId, $structureIds) : null,
+            'training_years' => $wants('training_years') ? $this->trainingYearComparison($year, $structureIds) : null,
+            'performance_distribution' => $wants('performance_distribution') ? $this->performanceDistribution($year, $month, $structureIds) : null,
+        ], fn ($value): bool => $value !== null);
     }
 
     protected function headcountYearComparison(int $year, array $structureIds = []): array

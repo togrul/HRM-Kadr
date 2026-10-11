@@ -6,14 +6,15 @@
     </x-surface-card>
 
     @php
-        $headcountMax = max(1, (int) collect($this->payload['headcount_years'])->max('value'));
-        $performanceMax = max(1, (int) collect($this->payload['performance_distribution'])->max('value'));
+        $headcountMax = max(1, (int) collect($this->payload['headcount_years'] ?? [])->max('value'));
+        $performanceMax = max(1, (int) collect($this->payload['performance_distribution'] ?? [])->max('value'));
     @endphp
 
     <div class="grid gap-5 xl:grid-cols-2">
+        @if (in_array('headcount_years', $visibleCards, true))
         <x-surface-card :title="__('reports::dashboard.comparisons.cards.headcount_yoy')" icon="icons.profile-icon">
             <div class="space-y-4">
-                @foreach ($this->payload['headcount_years'] as $row)
+                @foreach (($this->payload['headcount_years'] ?? []) as $row)
                     @php
                         $width = max(12, min(100, round(($row['value'] / $headcountMax) * 100, 1)));
                     @endphp
@@ -32,10 +33,12 @@
                 @endforeach
             </div>
         </x-surface-card>
+        @endif
 
+        @if (in_array('attendance_months', $visibleCards, true))
         <x-surface-card :title="__('reports::dashboard.comparisons.cards.attendance_mom')" icon="icons.calendar-icon">
             <div class="grid gap-4 md:grid-cols-2">
-                @foreach ($this->payload['attendance_months'] as $row)
+                @foreach (($this->payload['attendance_months'] ?? []) as $row)
                     <div class="rounded-2xl border border-zinc-200/90 bg-zinc-50/70 px-5 py-5 shadow-card">
                         <p class="text-sm font-semibold text-zinc-900">{{ $row['label'] }}</p>
                         <div class="mt-4 space-y-4">
@@ -52,12 +55,14 @@
                 @endforeach
             </div>
         </x-surface-card>
+        @endif
     </div>
 
     <div class="grid gap-5 xl:grid-cols-2">
+        @if (in_array('training_years', $visibleCards, true))
         <x-surface-card :title="__('reports::dashboard.comparisons.cards.training_yoy')" icon="icons.training-icon">
             <div class="space-y-3">
-                @forelse ($this->payload['training_years'] as $row)
+                @forelse (($this->payload['training_years'] ?? []) as $row)
                     <div class="rounded-2xl border border-zinc-200/90 bg-zinc-50/70 px-4 py-4 shadow-card">
                         <div class="flex items-center justify-between gap-3">
                             <p class="text-sm font-semibold text-zinc-900">{{ $row['label'] }}</p>
@@ -74,10 +79,12 @@
                 @endforelse
             </div>
         </x-surface-card>
+        @endif
 
+        @if (in_array('performance_distribution', $visibleCards, true))
         <x-surface-card :title="__('reports::dashboard.comparisons.cards.performance_distribution')" icon="icons.performance-icon">
             <div class="space-y-4">
-                @forelse ($this->payload['performance_distribution'] as $row)
+                @forelse (($this->payload['performance_distribution'] ?? []) as $row)
                     @php
                         $width = max(12, min(100, round(($row['value'] / $performanceMax) * 100, 1)));
                     @endphp
@@ -102,5 +109,6 @@
                 @endforelse
             </div>
         </x-surface-card>
+        @endif
     </div>
 </div>

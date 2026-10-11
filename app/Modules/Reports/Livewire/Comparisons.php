@@ -21,11 +21,20 @@ class Comparisons extends Component
     public ?int $structureId = null;
 
     /**
+     * İstifadəçinin hesabat qruplarına düşən müqayisə kartları.
+     *
+     * @var list<string>
+     */
+    public array $visibleCards = [];
+
+    /**
      * The period comes from the dashboard's panel, the one period control every tab shares.
      */
     public function mount(ReportsAccessService $access, ?int $year = null, ?int $month = null, ?int $structureId = null): void
     {
         $access->authorizeView();
+        $this->visibleCards = $access->visibleComparisonCards();
+        abort_if($this->visibleCards === [], 403);
 
         $this->year = $year ?: (int) request()->integer('year', now()->year);
         $this->month = max(1, min(12, $month ?: (int) request()->integer('month', now()->month)));
@@ -53,7 +62,7 @@ class Comparisons extends Component
     {
         return $this->rememberRuntime(
             "reports.comparisons.{$this->year}.{$this->month}.".($this->structureId ?: 'all'),
-            fn () => app(ComparativeReportService::class)->build($this->year, $this->month, $this->structureId)
+            fn () => app(ComparativeReportService::class)->build($this->year, $this->month, $this->structureId, $this->visibleCards)
         );
     }
 

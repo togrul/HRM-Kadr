@@ -5,8 +5,9 @@
         'standard' => __('reports::dashboard.tab_descriptions.standard'),
         'dynamic' => __('reports::dashboard.tab_descriptions.dynamic'),
         'comparisons' => __('reports::dashboard.tab_descriptions.comparisons'),
+        'schedules' => __('reports::dashboard.tab_descriptions.schedules'),
     ];
-    $tabOrder = array_keys($tabDescriptions);
+    $tabOrder = array_values(array_intersect(array_keys($tabDescriptions), $availableTabs));
 @endphp
 
 <div class="flex flex-col">
@@ -60,8 +61,54 @@
                     </label>
                 </div>
             </x-context-panel.section>
+
+            @if (in_array($activeTab, ['standard', 'dynamic'], true))
+                @php
+                    $presetList = $this->presets();
+                @endphp
+                <x-context-panel.section :title="__('reports::presets.title')" :padded="false">
+                    <div class="space-y-2.5 px-3.5 pb-3.5 pt-1" data-testid="reports-presets">
+                        @forelse ($presetList as $preset)
+                            <div wire:key="reports-preset-{{ $preset['id'] }}" class="flex items-center justify-between gap-2 rounded-lg border border-hairline-subtle px-2.5 py-2">
+                                <button type="button" wire:click="applyPreset({{ $preset['id'] }})" class="min-w-0 flex-1 text-left" title="{{ __('reports::presets.actions.apply') }}">
+                                    <span class="block truncate text-[13px] font-medium text-ink">{{ $preset['name'] }}</span>
+                                    <span class="block text-[11px] text-ink-muted">{{ $preset['shared'] ? __('reports::presets.labels.shared') : __('reports::presets.labels.personal') }}</span>
+                                </button>
+                                @if ($preset['can_delete'])
+                                    <button type="button" wire:click="confirmPresetDeletion({{ $preset['id'] }})" class="shrink-0 rounded-md p-1 hover:bg-rose-50" aria-label="{{ __('reports::presets.actions.delete') }}" title="{{ __('reports::presets.actions.delete') }}">
+                                        <x-icons.delete-icon color="text-rose-500" hover="text-rose-600"></x-icons.delete-icon>
+                                    </button>
+                                @endif
+                            </div>
+                        @empty
+                            <p class="text-[12px] text-ink-muted">{{ __('reports::presets.empty') }}</p>
+                        @endforelse
+
+                        <form wire:submit="savePreset" class="space-y-2 border-t border-hairline-subtle pt-2.5">
+                            <label class="block">
+                                <span class="block pb-1 text-[12px] font-medium text-ink-muted">{{ __('reports::presets.fields.name') }}</span>
+                                <x-ui.input wire:model="presetName" maxlength="120" :placeholder="__('reports::presets.fields.name_placeholder')" />
+                            </label>
+                            @error('presetName')
+                                <p class="text-[12px] text-rose-600">{{ $message }}</p>
+                            @enderror
+                            @if ($canSharePresets)
+                                <label class="flex items-center justify-between gap-2">
+                                    <span class="text-[12px] text-ink-muted">{{ __('reports::presets.fields.shared') }}</span>
+                                    <x-ui.toggle wire:model="presetShared" />
+                                </label>
+                            @endif
+                            <x-pill-button type="submit" wire:loading.attr="disabled" wire:target="savePreset">
+                                {{ __('reports::presets.actions.save') }}
+                            </x-pill-button>
+                        </form>
+                    </div>
+                </x-context-panel.section>
+            @endif
         </x-context-panel>
     @endteleport
+
+    <x-ui.delete-confirmation-modal />
 
     {{-- ===================== header ===================== --}}
     <x-page-header
@@ -77,11 +124,16 @@
                 {{ __('reports::dashboard.actions.build_report') }}
             </x-pill-button>
 
-            @if ($canExport)
+            @if ($this->headerExportAllowed())
                 <x-pill-button variant="emerald" :icon="true" wire:click="exportExcel"
                     wire:loading.attr="disabled" wire:target="exportExcel"
                     title="{{ __('reports::dashboard.actions.export_excel') }}">
                     <x-icons.excel-icon />
+                </x-pill-button>
+
+                <x-pill-button wire:click="exportPdf" wire:loading.attr="disabled" wire:target="exportPdf"
+                    title="{{ __('reports::dashboard.actions.export_pdf') }}">
+                    {{ __('reports::dashboard.actions.export_pdf') }}
                 </x-pill-button>
 
                 <x-pill-button :href="$this->printUrl()" target="_blank">
@@ -135,7 +187,7 @@
         @if ($activeTab === 'overview')
             <livewire:reports.overview
                 lazy
-                :key="'reports-overview-'.$year.'-'.$month.'-'.($structureId ?? 'all')"
+                :key="'reports-overview-'.$year.'-'.$month.'-'.($structureId ?? 'all').'-'.$selectionVersion"
                 :year="$year"
                 :month="$month"
                 :structure-id="$structureId"
@@ -143,7 +195,7 @@
         @elseif ($activeTab === 'standard')
             <livewire:reports.standard-reports
                 lazy
-                :key="'reports-standard-'.$year.'-'.$month.'-'.($structureId ?? 'all')"
+                :key="'reports-standard-'.$year.'-'.$month.'-'.($structureId ?? 'all').'-'.$selectionVersion"
                 :report="$report"
                 :year="$year"
                 :month="$month"
@@ -152,7 +204,7 @@
         @elseif ($activeTab === 'dynamic')
             <livewire:reports.dynamic-builder
                 lazy
-                :key="'reports-dynamic-'.$year.'-'.$month.'-'.($structureId ?? 'all')"
+                :key="'reports-dynamic-'.$year.'-'.$month.'-'.($structureId ?? 'all').'-'.$selectionVersion"
                 :source="$source"
                 :group-by="$groupBy"
                 :metric="$metric"
@@ -163,10 +215,15 @@
         @elseif ($activeTab === 'comparisons')
             <livewire:reports.comparisons
                 lazy
-                :key="'reports-comparisons-'.$year.'-'.$month.'-'.($structureId ?? 'all')"
+                :key="'reports-comparisons-'.$year.'-'.$month.'-'.($structureId ?? 'all').'-'.$selectionVersion"
                 :year="$year"
                 :month="$month"
                 :structure-id="$structureId"
+            />
+        @elseif ($activeTab === 'schedules')
+            <livewire:reports.schedules
+                lazy
+                :key="'reports-schedules-'.$selectionVersion"
             />
         @endif
     </div>

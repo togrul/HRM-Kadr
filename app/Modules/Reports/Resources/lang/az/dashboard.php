@@ -10,12 +10,14 @@ return [
         'standard' => 'Standart hesabatlar',
         'dynamic' => 'Dinamik hesabatlar',
         'comparisons' => 'Müqayisələr',
+        'schedules' => 'Planlı hesabatlar',
     ],
     'tab_descriptions' => [
         'overview' => 'Rəhbərlik üçün əsas KPI və struktur xülasəsi.',
         'standard' => 'Standart HR hesabatlarını filtrlərlə çıxarın.',
         'dynamic' => 'Mənbə, metrik və qruplaşdırma seçərək hesabat qurun.',
         'comparisons' => 'İllər, aylar və nəticə kateqoriyalarını müqayisə edin.',
+        'schedules' => 'Hesabatları dövriyyə ilə email-ə göndərin.',
     ],
     'months_short' => [
         1 => 'Yan',
@@ -119,7 +121,7 @@ return [
         'build_report' => 'Hesabat qur',
         'print' => 'Çap et',
         'export_csv' => 'CSV',
-        'export_pdf' => 'PDF / Çap',
+        'export_pdf' => 'PDF',
     ],
     'cards' => [
         'active_personnel' => 'Aktiv əməkdaşlar',

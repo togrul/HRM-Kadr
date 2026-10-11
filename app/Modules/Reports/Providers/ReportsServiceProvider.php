@@ -2,21 +2,37 @@
 
 namespace App\Modules\Reports\Providers;
 
+use App\Modules\Reports\Application\Pdf\LibreOfficeReportPdfRenderer;
+use App\Modules\Reports\Application\Pdf\ReportPdfRenderer;
 use App\Modules\Reports\Console\Commands\ReportsQueryBudgetCommand;
 use App\Modules\Reports\Console\Commands\ReportsRenderBenchmarkCommand;
+use App\Modules\Reports\Console\Commands\SendScheduledReportsCommand;
+use App\Modules\Reports\Domain\Models\ReportPreset;
+use App\Modules\Reports\Domain\Models\ReportSchedule;
+use App\Modules\Reports\Policies\ReportPresetPolicy;
+use App\Modules\Reports\Policies\ReportSchedulePolicy;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class ReportsServiceProvider extends ServiceProvider
 {
     use RegistersLivewireAliases;
 
+    public function register(): void
+    {
+        $this->app->bind(ReportPdfRenderer::class, LibreOfficeReportPdfRenderer::class);
+    }
+
     public function boot(): void
     {
         if (! $this->app->make(ModuleState::class)->enabled('reports')) {
             return;
         }
+
+        Gate::policy(ReportPreset::class, ReportPresetPolicy::class);
+        Gate::policy(ReportSchedule::class, ReportSchedulePolicy::class);
 
         $this->loadRoutesFrom(__DIR__.'/../Routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'reports');
@@ -26,6 +42,7 @@ class ReportsServiceProvider extends ServiceProvider
             $this->commands([
                 ReportsQueryBudgetCommand::class,
                 ReportsRenderBenchmarkCommand::class,
+                SendScheduledReportsCommand::class,
             ]);
         }
     }
@@ -43,6 +60,7 @@ class ReportsServiceProvider extends ServiceProvider
             'standard-reports' => \App\Modules\Reports\Livewire\StandardReports::class,
             'dynamic-builder' => \App\Modules\Reports\Livewire\DynamicBuilder::class,
             'comparisons' => \App\Modules\Reports\Livewire\Comparisons::class,
+            'schedules' => \App\Modules\Reports\Livewire\Schedules::class,
         ];
     }
 }

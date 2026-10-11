@@ -10,12 +10,14 @@ return [
         'standard' => 'Standard reports',
         'dynamic' => 'Dynamic reports',
         'comparisons' => 'Comparisons',
+        'schedules' => 'Scheduled reports',
     ],
     'tab_descriptions' => [
         'overview' => 'Leadership KPIs and structure-level summary.',
         'standard' => 'Run standard HR reports with filters.',
         'dynamic' => 'Build custom reports by source, metric, and grouping.',
         'comparisons' => 'Compare years, months, and result categories.',
+        'schedules' => 'Email reports on a daily, weekly or monthly cadence.',
     ],
     'months_short' => [
         1 => 'Jan',
@@ -119,7 +121,7 @@ return [
         'build_report' => 'Build report',
         'print' => 'Print',
         'export_csv' => 'CSV',
-        'export_pdf' => 'PDF / Print',
+        'export_pdf' => 'PDF',
     ],
     'cards' => [
         'active_personnel' => 'Active personnel',

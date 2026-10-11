@@ -11,10 +11,12 @@ use App\Modules\Reports\Livewire\StandardReports;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
+use Tests\Feature\Reports\Concerns\GrantsReportPermissions;
 use Tests\TestCase;
 
 class ReportsDashboardTest extends TestCase
 {
+    use GrantsReportPermissions;
     use RefreshDatabase;
 
     public function test_authenticated_user_can_open_reports_route(): void
@@ -188,9 +190,6 @@ class ReportsDashboardTest extends TestCase
 
     protected function grantReportsPermissions(User $user): void
     {
-        Permission::findOrCreate('show-reports', 'web');
-        Permission::findOrCreate('export-reports', 'web');
-
-        $user->givePermissionTo(['show-reports', 'export-reports']);
+        $this->grantReports($user);
     }
 }

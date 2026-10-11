@@ -20,7 +20,8 @@
                 <div class="flex flex-wrap items-center gap-2 lg:justify-end">
                     <x-button mode="secondary" wire:click="exportExcel" wire:loading.attr="disabled" class="whitespace-nowrap">{{ __('reports::dashboard.actions.export_excel') }}</x-button>
                     <x-button mode="secondary" wire:click="exportCsv" wire:loading.attr="disabled" class="whitespace-nowrap">{{ __('reports::dashboard.actions.export_csv') }}</x-button>
-                    <x-button type="link" mode="black" href="{{ $this->printUrl() }}" target="_blank" class="whitespace-nowrap">{{ __('reports::dashboard.actions.export_pdf') }}</x-button>
+                    <x-button mode="secondary" wire:click="exportPdf" wire:loading.attr="disabled" wire:target="exportPdf" class="whitespace-nowrap">{{ __('reports::dashboard.actions.export_pdf') }}</x-button>
+                    <x-button type="link" mode="black" href="{{ $this->printUrl() }}" target="_blank" class="whitespace-nowrap">{{ __('reports::dashboard.actions.print') }}</x-button>
                 </div>
             </div>
         @endif

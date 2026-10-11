@@ -18,6 +18,11 @@ class Kernel extends ConsoleKernel
             $schedule->command('orders:apply-due-transfers')->everyFiveMinutes()->withoutOverlapping();
         }
         $schedule->command('performance:kpi-daily')->dailyAt('07:30')->withoutOverlapping();
+
+        // Planlı hesabatlar: vaxtı çatmış planlar sahibin icazələri ilə qurulub email ilə göndərilir.
+        if ((bool) config('reports.schedules.enabled', true) && app(\App\Services\Modules\ModuleState::class)->enabled('reports')) {
+            $schedule->command('reports:send-scheduled')->everyFiveMinutes()->withoutOverlapping();
+        }
         // Disciplinary sanctions stop counting once their term (default 12 months) has run out.
         $schedule->command('personnel:lift-expired-sanctions')->dailyAt('00:20')->withoutOverlapping();
 

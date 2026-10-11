@@ -5,17 +5,21 @@ namespace App\Modules\Reports\Livewire;
 use App\Livewire\Concerns\WithRuntimeMemo;
 use App\Modules\Reports\Application\Services\DynamicReportBuilderService;
 use App\Modules\Reports\Application\Services\ReportsAccessService;
+use App\Modules\Reports\Application\Services\ReportsAuditLogger;
 use App\Modules\Reports\Exports\ReportsTableExport;
+use App\Modules\Reports\Livewire\Concerns\DownloadsReportPdf;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Isolate;
 use Livewire\Component;
 use Maatwebsite\Excel\Excel as ExcelWriter;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 #[Isolate]
 class DynamicBuilder extends Component
 {
+    use DownloadsReportPdf;
     use WithRuntimeMemo;
 
     public bool $canExport = false;
@@ -49,23 +53,29 @@ class DynamicBuilder extends Component
         ?int $structureId = null,
     ): void {
         $access->authorizeView();
-        $this->canExport = (bool) auth()->user()?->can('export-reports');
+        $this->canExport = $access->canExport();
 
-        $this->source = $source ?: (string) request()->string('source', 'personnel');
+        // Yalnız istifadəçinin hesabat qruplarına düşən mənbələr seçilə bilər.
+        $this->sourceOptions = $access->filterDynamicSources($builder->sourceOptions());
+        abort_if($this->sourceOptions === [], 403);
+
+        $this->source = $this->allowedSource($source ?: (string) request()->string('source', 'personnel'));
         $this->groupBy = $groupBy ?: (string) request()->string('group_by', 'structure');
         $this->metric = $metric ?: (string) request()->string('metric', 'count');
         $this->year = $year ?: (int) request()->integer('year', now()->year);
         $this->month = max(1, min(12, $month ?: (int) request()->integer('month', now()->month)));
         $this->structureId = $structureId ?: request()->integer('structure_id') ?: null;
-        $this->sourceOptions = $builder->sourceOptions();
         $this->syncDependentOptions($builder);
     }
 
     public function updatedSource(): void
     {
+        $this->source = $this->allowedSource($this->source);
         $this->syncDependentOptions(app(DynamicReportBuilderService::class));
         $this->resetRuntimeMemo();
         $this->syncSelection();
+
+        app(ReportsAuditLogger::class)->opened($this->auditContext());
     }
 
     public function updatedGroupBy(): void
@@ -107,6 +117,8 @@ class DynamicBuilder extends Component
 
     public function getPayloadProperty(): array
     {
+        app(ReportsAccessService::class)->authorizeDynamicSource($this->source);
+
         return $this->rememberRuntime(
             "reports.dynamic.{$this->source}.{$this->groupBy}.{$this->metric}.{$this->year}.{$this->month}.".($this->structureId ?: 'all'),
             fn () => app(DynamicReportBuilderService::class)->build($this->source, $this->groupBy, $this->metric, $this->filters())
@@ -115,7 +127,7 @@ class DynamicBuilder extends Component
 
     public function exportExcel(): BinaryFileResponse
     {
-        app(ReportsAccessService::class)->authorizeExport();
+        $this->authorizeExport('xlsx');
 
         return Excel::download(
             new ReportsTableExport(collect($this->payload['rows']), $this->payload['columns']),
@@ -125,13 +137,29 @@ class DynamicBuilder extends Component
 
     public function exportCsv(): BinaryFileResponse
     {
-        app(ReportsAccessService::class)->authorizeExport();
+        $this->authorizeExport('csv');
 
         return Excel::download(
             new ReportsTableExport(collect($this->payload['rows']), $this->payload['columns']),
             "dynamic-report-{$this->source}-{$this->groupBy}-{$this->metric}.csv",
             ExcelWriter::CSV
         );
+    }
+
+    /**
+     * Server-side PDF (LibreOffice). Audit yalnız fayl hazır olanda yazılır.
+     */
+    public function exportPdf(): ?StreamedResponse
+    {
+        $this->authorizeExport('pdf', log: false);
+
+        $download = $this->downloadReportPdf($this->getPayloadProperty(), $this->filters(), "dynamic-report-{$this->source}-{$this->groupBy}-{$this->metric}");
+
+        if ($download !== null) {
+            app(ReportsAuditLogger::class)->exported('pdf', $this->auditContext());
+        }
+
+        return $download;
     }
 
     public function printUrl(): string
@@ -166,6 +194,37 @@ class DynamicBuilder extends Component
             'month' => $this->month,
             'structure_id' => $this->structureId,
         ];
+    }
+
+    protected function authorizeExport(string $format, bool $log = true): void
+    {
+        $access = app(ReportsAccessService::class);
+        $access->authorizeExport();
+        $access->authorizeDynamicSource($this->source);
+
+        if ($log) {
+            app(ReportsAuditLogger::class)->exported($format, $this->auditContext());
+        }
+    }
+
+    protected function allowedSource(string $source): string
+    {
+        $keys = array_column($this->sourceOptions, 'key');
+
+        return in_array($source, $keys, true) ? $source : (string) ($keys[0] ?? 'personnel');
+    }
+
+    /**
+     * @return array<string,mixed>
+     */
+    protected function auditContext(): array
+    {
+        return [
+            'tab' => 'dynamic',
+            'source' => $this->source,
+            'group_by' => $this->groupBy,
+            'metric' => $this->metric,
+        ] + $this->filters();
     }
 
     protected function syncDependentOptions(DynamicReportBuilderService $builder): void

@@ -107,3 +107,22 @@ php artisan queue:flush             # hamısını sil
 3. `QUEUE_CONNECTION=database` və `PERFORMANCE_KPI_QUEUE_RECALCULATION=true` təyin et, web-i yenidən başlat.
 4. Bir fakt təsdiq et, `jobs` sayını və kartın xalını yoxla.
 5. Geri qayıtmaq: `PERFORMANCE_KPI_QUEUE_RECALCULATION=false` (növbədə qalan job-lar worker tərəfindən boşaldılır).
+
+## Planlı hesabatlar (Hesabatlar modulu)
+
+- Scheduler hər 5 dəqiqədən bir `reports:send-scheduled` işlədir (`app/Console/Kernel.php`;
+  `REPORTS_SCHEDULES_ENABLED=false` ilə söndürülür). Əmr vaxtı çatmış aktiv planları tapır,
+  hər planı `next_run_at` şərti yeniləməsi ilə "tutur" (üst-üstə düşən iki icra eyni hesabatı
+  iki dəfə göndərmir) və `SendScheduledReportJob` göndərir.
+- `QUEUE_CONNECTION=sync`-də job dərhal, scheduler prosesinin içində icra olunur — worker lazım
+  deyil. `database`/`redis`-də job `REPORTS_SCHEDULES_QUEUE` (standart `default`) növbəsinə düşür.
+- Job `tries=1`-dir: xəta runner-in içində tutulur, planın `last_status=failed` və `last_error`
+  sahələrinə, xəta jurnalına (`reports.schedule.failed`) və audit jurnalına
+  (`reports` / `report_schedule_failed`) yazılır; növbəti icra vaxtı yenə irəliləyir. Alıcılar eyni
+  faylı iki dəfə almasın deyə avtomatik təkrar yoxdur — lazım olsa plan ekranından "İndi göndər".
+- Hesabat sahibin adından qurulur (icazə və struktur görünürlüyü icra anında yenidən yoxlanılır);
+  sahib passivdirsə, `schedule-reports`/ixrac icazəsini və ya seçilmiş strukturu itiribsə göndəriş
+  dayanır (`owner_inactive`, `owner_not_allowed`, `structure_out_of_scope`).
+- Göndəriş üçün `MAIL_*` dəyişənləri (SMTP) qurulmalıdır; PDF formatı üçün imicdəki LibreOffice
+  (`REPORTS_SOFFICE_PATH`, boşdursa `ORDERS_SOFFICE_PATH`/`/usr/bin/soffice`) istifadə olunur.
+- Əl ilə yoxlama: `php artisan reports:send-scheduled --dry-run` (vaxtı çatmış planları göstərir).

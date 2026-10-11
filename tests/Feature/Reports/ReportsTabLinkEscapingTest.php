@@ -5,7 +5,7 @@ namespace Tests\Feature\Reports;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Blade;
-use Spatie\Permission\Models\Permission;
+use Tests\Feature\Reports\Concerns\GrantsReportPermissions;
 use Tests\TestCase;
 
 /**
@@ -14,13 +14,13 @@ use Tests\TestCase;
  */
 class ReportsTabLinkEscapingTest extends TestCase
 {
+    use GrantsReportPermissions;
     use RefreshDatabase;
 
     public function test_reports_tab_links_keep_the_period_in_a_single_escaped_query_string(): void
     {
         $user = User::factory()->create();
-        Permission::findOrCreate('show-reports', 'web');
-        $user->givePermissionTo('show-reports');
+        $this->grantReports($user, export: false);
 
         $html = $this->actingAs($user)
             ->get(route('reports', ['year' => 2026, 'month' => 10]))
