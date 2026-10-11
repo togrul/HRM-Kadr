@@ -151,8 +151,10 @@ it('adds seniority leave by total length of service across employers', function 
     'exactly 5 years' => ['2020-01-01', null, 2],
     '9 years' => ['2016-01-01', null, 2],
     'exactly 10 years' => ['2015-01-01', null, 4],
-    // m.116.1: «on beş ildən çox» — düz 15 il hələ 4 gündür.
-    'exactly 15 years' => ['2010-01-01', null, 4],
+    // m.116.1: «on ildən on beş ilədək» düz 15 ildə bitir (Məcəllədə «-dan … -dək» = [X, Y),
+    // m.119.1) — 15 il tamam olanda 6 gün (docs/vacation-legal-basis.md, (b-2)).
+    'exactly 15 years' => ['2010-01-01', null, 6],
+    '14 years' => ['2011-01-01', null, 4],
     '15 years and a day' => ['2009-12-31', ['2009-12-29', '2009-12-30'], 6],
     'previous employer counts' => ['2023-01-01', ['2013-01-01', '2022-12-31'], 4],
     'over 15 years' => ['2009-01-01', null, 6],
@@ -574,4 +576,127 @@ it('applies overdue transfers by effective date rather than approval sequence', 
     } finally {
         \Illuminate\Support\Carbon::setTestNow();
     }
+});
+
+/*
+ * Şərait ilində fasilələr (NK 95, b.6–b.11; ƏM m.131.6) — hal-hal təhlil:
+ * docs/vacation-legal-basis.md, (c-2).
+ */
+
+/**
+ * Şərait illəri və hər birinin $asOf tarixinə əlavə məzuniyyət günləri.
+ *
+ * @return list<array{0: string, 1: string, 2: int}>
+ */
+function vnConditionsDays(Personnel $personnel, string $asOf): array
+{
+    $strategy = app(CivilEntitlementStrategy::class);
+    $strategy->forget();
+    $on = CarbonImmutable::parse($asOf);
+
+    return array_map(
+        fn ($p): array => [$p->start->toDateString(), $p->end->toDateString(), $strategy->conditionsEntitlement($personnel->fresh(), $p, $on)->conditions],
+        $strategy->conditionsPeriods($personnel->fresh(), $on),
+    );
+}
+
+/** Təsdiqlənmiş əmrlə verilmiş məzuniyyət (şablon kodu ilə: uşağa qulluq, ödənişsiz və s.). */
+function vnLeave(Personnel $personnel, string $templateCode, string $from, string $to): void
+{
+    $orderNo = 'OL-'.Str::upper(Str::random(5));
+    OrderLog::query()->create([
+        'order_no' => $orderNo, 'given_date' => $from, 'given_by' => 'Test', 'given_by_rank' => '',
+        'status_id' => OrderStatusEnum::APPROVED->value, 'template_render_mode' => 'docx',
+        'template_snapshot' => ['template_code' => $templateCode, 'fields' => []],
+    ]);
+    PersonnelVacation::withoutEvents(fn () => PersonnelVacation::query()->create([
+        'tabel_no' => $personnel->tabel_no, 'start_date' => $from, 'end_date' => $to,
+        'order_no' => $orderNo, 'duration' => 1, 'vacation_places' => 'Bakı', 'return_work_date' => $to, 'order_date' => $from,
+        'order_given_by' => 'Test', 'vacation_days_total' => 1, 'remaining_days' => 0, 'added_by' => 1,
+    ]));
+}
+
+it('gives a transferred-out worker the months of the work year in the conditions (NK 95, b.7, example 1)', function (): void {
+    // Misal 1: 12 günlük sex ustası 01.03-də qəbul, növbəti ilin 01.07-də mühəndisliyə keçirilib.
+    $personnel = vnPersonnel(['join_work_date' => '2023-03-01', 'gender' => 1]);
+    $master = Position::query()->create(['id' => random_int(1000, 999999), 'name' => 'sex ustası']);
+    VacationNorm::query()->create(['group' => 'conditions', 'scope' => 'position', 'position_id' => $master->id, 'days' => 12]);
+    vnTransfer($personnel, 'OK-U1', '2024-06-25', ['prev_position_id' => $master->id, 'effective_date' => '2024-07-01']);
+
+    // 1-ci il tam (12); 2-ci il 01.03–30.06.2024 = 122 gün → 4 ay → 4 gün. Misal mart ayını
+    // (məzuniyyətdə keçib) saymır və 3 gün yazır; b.8.2 iş yeri və əmək haqqı saxlanılan
+    // məzuniyyət dövrünü staja daxil edir — sistem normativ mətni götürür (işçinin xeyrinə).
+    // 3-cü il bütünlüklə şəraitsizdir — göstərilmir.
+    expect(vnConditionsDays($personnel, '2025-06-01'))->toBe([
+        ['2023-03-01', '2024-02-29', 12],
+        ['2024-03-01', '2025-02-28', 4],
+    ]);
+});
+
+it('adds up interrupted conditions time within one conditions year once six months are reached (m.131.6 «üst-üstə»)', function (): void {
+    $personnel = vnPersonnel(['join_work_date' => '2020-01-01', 'gender' => 1]);
+    VacationNorm::query()->create(['group' => 'conditions', 'scope' => 'personnel', 'tabel_no' => $personnel->tabel_no, 'days' => 12, 'valid_from' => '2025-01-01']);
+    VacationNorm::query()->create(['group' => 'conditions', 'scope' => 'personnel', 'tabel_no' => $personnel->tabel_no, 'days' => 0,
+        'not_in_conditions' => true, 'valid_from' => '2025-04-01', 'valid_to' => '2025-06-30']);
+
+    // 90 gün (yanvar–mart) + 92 gün (iyul–sentyabr) = 182 < 6 × 30,4 — hüquq hələ yoxdur.
+    expect(vnConditionsDays($personnel, '2025-09-30'))->toBe([['2025-01-01', '2025-12-31', 0]])
+        // 183-cü gün: hüquq yaranır, fasilədən əvvəlki aylar da sayılır; işçi şəraitdədir — ilin
+        // qalanı avansla: 90 + 184 = 274 gün → 9 ay → 12 × 9 ÷ 12 = 9 gün (b.7, b.10).
+        ->and(vnConditionsDays($personnel, '2025-10-01'))->toBe([['2025-01-01', '2025-12-31', 9]]);
+});
+
+it('keeps a short conditions year without days when six months are reached only in the next year', function (): void {
+    $personnel = vnPersonnel(['join_work_date' => '2020-01-01', 'gender' => 1]);
+    VacationNorm::query()->create(['group' => 'conditions', 'scope' => 'personnel', 'tabel_no' => $personnel->tabel_no, 'days' => 12,
+        'valid_from' => '2024-01-01', 'valid_to' => '2024-04-30']);
+    VacationNorm::query()->create(['group' => 'conditions', 'scope' => 'personnel', 'tabel_no' => $personnel->tabel_no, 'days' => 12, 'valid_from' => '2025-03-01']);
+
+    // 2024: 121 gün (4 ay) — il bitəndə hüquq yox idi. 2025: zəncir davam edir (ildə şəraitli gün
+    // var), 01.03–31.12 = 306 gün → 10 ay → 10 gün. 2024-ün 4 ayı sonradan əlavə olunmur — bax
+    // docs/vacation-legal-basis.md, (c-2), qalıq risk.
+    expect(vnConditionsDays($personnel, '2025-12-31'))->toBe([
+        ['2024-01-01', '2024-12-31', 0],
+        ['2025-01-01', '2025-12-31', 10],
+    ]);
+});
+
+it('continues the conditions year chain when the break is shorter than a whole conditions year', function (): void {
+    $personnel = vnPersonnel(['join_work_date' => '2020-01-01', 'gender' => 1]);
+    VacationNorm::query()->create(['group' => 'conditions', 'scope' => 'personnel', 'tabel_no' => $personnel->tabel_no, 'days' => 12,
+        'valid_from' => '2020-01-01', 'valid_to' => '2021-03-31']);
+    VacationNorm::query()->create(['group' => 'conditions', 'scope' => 'personnel', 'tabel_no' => $personnel->tabel_no, 'days' => 12, 'valid_from' => '2022-02-01']);
+
+    // 2021: 3 ay → 3 gün; 2022 şərait ili ildönümündən davam edir: 01.02–31.12 = 334 gün → 11 ay → 11.
+    expect(vnConditionsDays($personnel, '2022-12-31'))->toBe([
+        ['2020-01-01', '2020-12-31', 12],
+        ['2021-01-01', '2021-12-31', 3],
+        ['2022-01-01', '2022-12-31', 11],
+    ]);
+});
+
+it('extends the conditions year by child-care leave and breaks the chain after a whole year of unpaid leave (NK 95, b.8; ƏM m.132.2)', function (): void {
+    // Uşağa qulluq məzuniyyəti (m.127) staja daxil deyil və iş ilini uzadır — şərait ili də uzanır.
+    $mother = vnPersonnel(['join_work_date' => '2020-01-01']);
+    VacationNorm::query()->create(['group' => 'conditions', 'scope' => 'position', 'position_id' => $mother->position_id, 'days' => 12]);
+    vnLeave($mother, 'usaga_qulluq_mezuniyyeti', '2021-03-01', '2022-02-28');
+
+    // 2-ci şərait ili 365 gün uzanır; içində 730 − 365 = 365 gün → 12 ay → 12 gün.
+    expect(vnConditionsDays($mother, '2023-06-01'))->toBe([
+        ['2020-01-01', '2020-12-31', 12],
+        ['2021-01-01', '2022-12-31', 12],
+        ['2023-01-01', '2023-12-31', 12],
+    ]);
+
+    // Ödənişsiz məzuniyyət b.8-in siyahısında yoxdur: sayılmır və ili uzatmır. Bütöv şərait ili
+    // (2021) ödənişsiz keçibsə növbəti şərait ili qayıdış günündən başlayır.
+    OrderWordTemplate::query()->create(['code' => 'odenissiz_sert', 'label' => 'Ödənişsiz məzuniyyət', 'effect' => 'unpaid_leave', 'docx_path' => 'x.docx']);
+    $worker = vnPersonnel(['join_work_date' => '2020-01-01', 'gender' => 1]);
+    VacationNorm::query()->create(['group' => 'conditions', 'scope' => 'position', 'position_id' => $worker->position_id, 'days' => 12]);
+    vnLeave($worker, 'odenissiz_sert', '2021-01-01', '2022-01-31');
+
+    expect(vnConditionsDays($worker, '2022-12-31'))->toBe([
+        ['2020-01-01', '2020-12-31', 12],
+        ['2022-02-01', '2023-01-31', 12],
+    ]);
 });

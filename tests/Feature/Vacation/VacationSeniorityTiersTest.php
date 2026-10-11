@@ -89,38 +89,76 @@ function vstForm(VacationNorm $norm, array $overrides = []): array
     ];
 }
 
-it('keeps the statutory tiers with the 15-year bound exclusive by default (m.116.1)', function (): void {
+it('counts 6 days once 15 years of service are complete by default (m.116.1)', function (): void {
     expect(vstTier('seniority_5')->only(['min_value', 'max_value', 'min_inclusive', 'days']))
         ->toBe(['min_value' => 5, 'max_value' => 10, 'min_inclusive' => true, 'days' => 2])
         ->and(vstTier('seniority_15')->only(['min_value', 'max_value', 'min_inclusive', 'days']))
-        ->toBe(['min_value' => 15, 'max_value' => null, 'min_inclusive' => false, 'days' => 6]);
+        ->toBe(['min_value' => 15, 'max_value' => null, 'min_inclusive' => true, 'days' => 6]);
 
-    // 16-cı iş ili düz 15 il stajla başlayır — qanunun hərfi oxunuşu ilə hələ 4 gün.
-    expect(vstSeniority(vstPersonnel('2011-12-01'), '2026-12-15'))->toBe(4)
-        // 17-ci iş ili 16 il stajla — 6 gün.
-        ->and(vstSeniority(vstPersonnel('2010-12-01'), '2026-12-15'))->toBe(6);
+    // 16-cı iş ili (01.12.2026) düz 15 il stajla başlayır — «on ildən on beş ilədək» pilləsi
+    // bitib, 6 gün (docs/vacation-legal-basis.md, (b-2)).
+    expect(vstSeniority(vstPersonnel('2011-12-01'), '2026-12-15'))->toBe(6)
+        // 15-ci iş ili 14 il stajla — 4 gün.
+        ->and(vstSeniority(vstPersonnel('2012-12-01'), '2026-12-15'))->toBe(4)
+        // Düz 10 il — 4 gün, düz 5 il — 2 gün.
+        ->and(vstSeniority(vstPersonnel('2016-12-01'), '2026-12-15'))->toBe(4)
+        ->and(vstSeniority(vstPersonnel('2021-12-01'), '2026-12-15'))->toBe(2);
 });
 
-it('applies an organisation\'s inclusive 15-year bound only to work years starting from its effective date', function (): void {
-    $before = vstPersonnel('2011-06-01'); // 16-cı iş ili 01.06.2026-da (dəyişiklikdən əvvəl) başlayıb
+/** Yeni standartı tətbiq edən miqrasiya (2026_10_11_190000). */
+function vstFifteenMigration(): object
+{
+    return require base_path('app/Modules/Vacation/Database/Migrations/2026_10_11_190000_include_full_fifteen_years_in_seniority_leave.php');
+}
+
+it('moves a running system to the new 15-year rule only for work years starting from the update day', function (): void {
+    // Yeniləmədən əvvəlki vəziyyət: qanuni pillə «15 ildən çox» (15 xaric).
+    vstTier('seniority_15')->forceFill(['min_inclusive' => false])->save();
+
+    $before = vstPersonnel('2011-06-01'); // 16-cı iş ili 01.06.2026-da (yeniləmədən əvvəl) başlayıb
     $after = vstPersonnel('2011-12-01');  // 16-cı iş ili 01.12.2026-da başlayacaq
 
-    expect(vstSeniority($before, '2026-10-11'))->toBe(4);
+    expect(vstSeniority($before, '2026-10-11'))->toBe(4)
+        ->and(vstSeniority($after, '2026-12-15'))->toBe(4);
 
-    $statutory = vstTier('seniority_15');
-    $catalog = app(VacationNormCatalog::class);
-    $next = $catalog->save('seniority', vstForm($statutory, ['min_inclusive' => true]), $statutory->id);
+    $old = vstTier('seniority_15');
+    vstFifteenMigration()->up();
 
-    // Köhnə versiya dünəndən bağlanır, yeni versiya bu gündən — tarixçə saxlanılır.
-    expect($statutory->fresh()->valid_to->toDateString())->toBe('2026-10-10')
+    $next = vstTier('seniority_15');
+    expect($old->fresh()->valid_to->toDateString())->toBe('2026-10-10')
+        ->and($next->id)->not->toBe($old->id)
+        ->and($next->only(['min_value', 'max_value', 'min_inclusive', 'days', 'is_statutory', 'legal_basis']))
+        ->toBe(['min_value' => 15, 'max_value' => null, 'min_inclusive' => true, 'days' => 6, 'is_statutory' => true, 'legal_basis' => 'ƏM m.116.1'])
         ->and($next->valid_from->toDateString())->toBe('2026-10-11')
-        ->and($next->is_statutory)->toBeTrue()
-        ->and($next->statutory_key)->toBe('seniority_15')
-        ->and($catalog->differsFromLaw($next))->toBeTrue()
-        ->and($catalog->describe($next))->toContain('15 il və daha çox');
+        ->and(app(VacationNormCatalog::class)->differsFromLaw($next))->toBeFalse();
 
+    // Artıq başlamış iş ili köhnə versiya ilə qalır, yeniləmədən sonra başlayan — 6 gün.
     expect(vstSeniority($before, '2026-10-11'))->toBe(4)
         ->and(vstSeniority($after, '2026-12-15'))->toBe(6);
+
+    // Geri qaytarma köhnə vəziyyəti bərpa edir.
+    vstFifteenMigration()->down();
+    expect(VacationNorm::query()->where('statutory_key', 'seniority_15')->count())->toBe(1)
+        ->and(vstTier('seniority_15')->only(['id', 'min_inclusive']))->toBe(['id' => $old->id, 'min_inclusive' => false]);
+});
+
+it('leaves a 15-year tier the organisation already changed untouched', function (): void {
+    vstPersonnel('2011-06-01');
+    vstTier('seniority_15')->forceFill(['min_inclusive' => false, 'days' => 8])->save();
+
+    vstFifteenMigration()->up();
+
+    expect(VacationNorm::query()->where('statutory_key', 'seniority_15')->count())->toBe(1)
+        ->and(vstTier('seniority_15')->only(['min_inclusive', 'days', 'valid_from']))->toBe(['min_inclusive' => false, 'days' => 8, 'valid_from' => null]);
+});
+
+it('changes the 15-year tier in place on a fresh install without employees', function (): void {
+    vstTier('seniority_15')->forceFill(['min_inclusive' => false])->save();
+
+    vstFifteenMigration()->up();
+
+    expect(VacationNorm::query()->where('statutory_key', 'seniority_15')->count())->toBe(1)
+        ->and(vstTier('seniority_15')->only(['min_inclusive', 'valid_from']))->toBe(['min_inclusive' => true, 'valid_from' => null]);
 });
 
 it('refuses tiers that give fewer days than the law at any length of service', function (array $overrides, string $key): void {
@@ -133,6 +171,7 @@ it('refuses tiers that give fewer days than the law at any length of service', f
         ->and($statutory->fresh()->valid_to)->toBeNull();
 })->with([
     'fewer days over 15 years' => [['days' => 5], 'seniority_15'],
+    'exactly 15 years excluded' => [['min_inclusive' => false], 'seniority_15'],
     'higher 15-year bound' => [['min_value' => 16], 'seniority_15'],
     'higher 5-year bound' => [['min_value' => 6], 'seniority_5'],
     'exactly 5 years excluded' => [['min_inclusive' => false], 'seniority_5'],
@@ -189,30 +228,30 @@ it('refuses an effective date in the past and keeps tiers on through the screen,
         ->call('openCrud', $fifteen->id)
         ->assertSet('form.valid_from', '2026-10-11')
         ->set('form.valid_from', '2026-10-01')
-        ->set('form.min_inclusive', true)
+        ->set('form.days', 7)
         ->call('store')
         ->assertHasErrors(['form.valid_from'])
         ->call('toggle', $fifteen->id)
         ->assertDispatched('notify', type: 'error');
 
-    expect($fifteen->fresh()->only(['min_inclusive', 'is_active', 'valid_to']))
-        ->toBe(['min_inclusive' => false, 'is_active' => true, 'valid_to' => null]);
+    expect($fifteen->fresh()->only(['days', 'is_active', 'valid_to']))
+        ->toBe(['days' => 6, 'is_active' => true, 'valid_to' => null]);
 
     Livewire::test(VacationNorms::class)
         ->call('selectGroup', 'seniority')
         ->call('openCrud', $fifteen->id)
-        ->set('form.min_inclusive', true)
+        ->set('form.days', 7)
         ->call('store')
         ->assertHasNoErrors();
 
     $current = vstTier('seniority_15');
-    expect($current->min_inclusive)->toBeTrue()
+    expect($current->days)->toBe(7)
         ->and(Activity::query()->where('log_name', 'vacation_norm')->where('subject_id', $current->id)->where('event', 'created')->exists())->toBeTrue()
         ->and(Activity::query()->where('log_name', 'vacation_norm')->where('subject_id', $fifteen->id)->where('event', 'updated')->exists())->toBeTrue();
 
     // Qanuni dəyərə qaytarma: yeni versiya gələcək tarixli olmadığından eyni gün yerində dəyişir.
     Livewire::test(VacationNorms::class)->call('restoreLaw', $current->id)->assertDispatched('notify', type: 'success');
-    expect(vstTier('seniority_15')->min_inclusive)->toBeFalse();
+    expect(vstTier('seniority_15')->only(['days', 'min_inclusive']))->toBe(['days' => 6, 'min_inclusive' => true]);
 });
 
 it('closes an organisation band in force from today instead of deleting it', function (): void {

@@ -13,7 +13,8 @@ use Illuminate\Support\Collection;
  *     əmək müqaviləsi daha çox verə bilər — m.145); şamil olan sətir `exclusive`-dirsə (m.118–121
  *     kateqoriyası) staj, uşaq və şərait əlavələri verilmir (m.116.3, 117.4);
  *   - staj: ümumi əmək stajının düşdüyü aralıq (aşağı hədd `min_inclusive`-ə görə, yuxarı hədd
- *     daxil), iş ilinin başlanğıcında qüvvədə olan pillələrdən ən böyük gün;
+ *     daxil; standartda 15 il tamam olanda 6 gün), iş ilinin başlanğıcında qüvvədə olan
+ *     pillələrdən ən böyük gün;
  *   - uşaqlı valideyn: şərtə uyğun sətirlərin ən böyüyü (2 və 5 gün toplanmır); qadınlara, eləcə də
  *     işçi üzrə yazılmış sətirlə (uşaqlarını təkbaşına böyüdən ata, övladlığa götürən) tətbiq olunur;
  *     14 yaşınadək uşaq həmin təqvim ilinin sonunadək sayılır (m.117.3);
@@ -89,8 +90,11 @@ class VacationNormEvaluator
      *   - birinci şərait ili işə qəbuldan sonra şəraitdə sayılan ilk gündən başlayır;
      *   - hər il bir təqvim ilidir, ümumi iş ili kimi iş ilinə daxil olmayan dövrlər (m.132.2)
      *     qədər uzanır;
+     *   - il ərzində şəraitdən çıxıb qayıtmaq ili qırmır — həmin ildə hər dövr ayrıca sayılıb
+     *     toplanır (b.11; b.7, 1-ci misal: köçürülmüş ustaya həmin iş ilində işlədiyi aylar);
      *   - bütöv bir şərait ili ərzində şəraitdə heç bir gün sayılmayıbsa zəncir qırılır: növbəti
-     *     şərait ili şəraitə qayıdış günündən başlayır (b.7-nin məntiqi; mətn bu halı açıq demir);
+     *     şərait ili şəraitə qayıdış günündən başlayır (b.7, 3-cü misal — şəraitli işə keçdiyi
+     *     gündən; mətn qayıdışı ayrıca demir, bax docs/vacation-legal-basis.md, (c-2));
      *   - hələ heç bir gün sayılmayan davam edən il göstərilmir.
      *
      * @param  Collection<int, VacationNorm>  $norms  aktiv normalar
@@ -292,10 +296,11 @@ class VacationNormEvaluator
     }
 
     /**
-     * m.116.1 sərhədləri mətnə görə: «X ildən Y ilədək» — hər iki uc daxil, «X ildən çox» — X
-     * xaric. Düz 10 il iki aralığa düşür, böyük olanı (4 gün) götürülür; düz 15 il hələ «on
-     * ildən on beş ilədək» aralığıdır (4 gün), 6 gün yalnız 15 ildən çox olanda. Qurum aşağı
-     * həddi daxil edə bilər (`min_inclusive` — «15 il və daha çox», daha əlverişli şərt).
+     * m.116.1 sərhədləri (docs/vacation-legal-basis.md, (b-2)): pillənin aşağı həddi
+     * `min_inclusive`-ə görə, yuxarı həddi daxil; üst-üstə düşən nöqtədə ən böyük gün. Standart
+     * cədvəldə düz 5 il → 2, düz 10 il → 4, düz 15 il → 6 gün (15 il tamam olanda; işləyən
+     * sistemdə yeniləmə günündən başlayan iş illərinə, əvvəl başlamış iş illəri köhnə versiya ilə
+     * — düz 15 il → 4).
      * Pillə iş ilinin başlanğıcında qüvvədə olmalıdır (`valid_from` / `valid_to`): qurumun
      * dəyişikliyi yalnız qüvvəyə minmə tarixindən sonra başlayan iş illərinə tətbiq olunur.
      */

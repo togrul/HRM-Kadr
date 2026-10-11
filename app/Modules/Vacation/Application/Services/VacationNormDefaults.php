@@ -10,7 +10,7 @@ use App\Support\VtiskCategory;
  *   - ƏM m.114.2: əsas məzuniyyət 21 təqvim günü;
  *   - m.119.1: 16 yaşadək 42, 16–18 yaş 35 gün; m.119.2: əlilliyi olan işçi 42 gün —
  *     bu işçilərə staj, şərait və uşaqlı valideyn əlavələri verilmir (m.116.3, 117.4);
- *   - m.116.1: staj 5–10 il +2, 10–15 il +4, 15 ildən çox +6 gün;
+ *   - m.116.1: staj 5–10 il +2, 10–15 il +4, 15 il və daha çox +6 gün (bax seniorityLaw());
  *   - m.117.1: 14 yaşınadək iki uşaq +2, üç və daha çox uşaq və ya əlilliyi olan uşaq +5 gün.
  *   - m.114.3 "b": VTİSK üzrə rəhbər və mütəxəssis kateqoriyası 30 gün (vəzifənin kateqoriyası
  *     Admin → Vəzifələr-də).
@@ -20,9 +20,13 @@ use App\Support\VtiskCategory;
 class VacationNormDefaults
 {
     /**
-     * ƏM m.116.1-in qanuni staj pillələri (açar => hədlər, günlər). «beş ildən on ilədək» və «on
-     * ildən on beş ilədək» — hər iki uc daxil; «on beş ildən çox» — 15 xaric (düz 15 il → 4 gün).
-     * Qurumun pillələri hər bir staj nöqtəsində bu cədvəldən az gün verə bilməz.
+     * ƏM m.116.1-in qanuni staj pillələri (açar => hədlər, günlər). Məcəllə «X-dan Y-dək»
+     * ifadəsini [X, Y) kimi işlədir (m.119.1: «16 yaşından 18 yaşınadək»): düz 5 il → 2, düz 10
+     * il → 4 gün. «On ildən on beş ilədək» düz 15 ildə bitir, «on beş ildən çox» isə hərfən 15-i
+     * daxil etmir — bu boşluq işçinin xeyrinə doldurulur: 15 il tamam olanda 6 gün
+     * (docs/vacation-legal-basis.md, (b-2)). Yuxarı hədd cədvəldə daxil saxlanılır,
+     * üst-üstə düşən nöqtədə ən böyük gün götürülür. Qurumun pillələri hər bir staj nöqtəsində bu
+     * cədvəldən az gün verə bilməz.
      *
      * @return array<string, array{min_value: int, max_value: int|null, min_inclusive: bool, days: int}>
      */
@@ -31,7 +35,7 @@ class VacationNormDefaults
         return [
             'seniority_5' => ['min_value' => 5, 'max_value' => 10, 'min_inclusive' => true, 'days' => 2],
             'seniority_10' => ['min_value' => 10, 'max_value' => 15, 'min_inclusive' => true, 'days' => 4],
-            'seniority_15' => ['min_value' => 15, 'max_value' => null, 'min_inclusive' => false, 'days' => 6],
+            'seniority_15' => ['min_value' => 15, 'max_value' => null, 'min_inclusive' => true, 'days' => 6],
         ];
     }
 

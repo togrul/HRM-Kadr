@@ -14,7 +14,7 @@ Bu sənəd məzuniyyət modulunun hesablama qaydalarının hüquqi əsasını to
 | Caspian Legal Center, KM qərarı barədə qeyd (ikinci mənbə) | https://www.caspianlegalcenter.az/news/more/employment-leave-update | 18.02.2026 KM qərarının xülasəsi |
 | mks.az, "Əmək Məcəlləsi 2026" ön söz (ikinci mənbə, yalnız axtarışda göründü) | https://www.mks.az/upload_files/pdf/On_Soz_Emek_Mecellesi_2026.pdf | Oxunmayıb |
 
-- **Müraciət tarixi:** 2026-10-09.
+- **Müraciət tarixi:** 2026-10-09; m.116 sərhədləri və NK 95 fasilə halları üzrə yenidən 2026-10-11.
 - **Versiya:** HTML faylı serverdə `Last-Modified: 08.10.2026` tarixlidir. Dəyişikliklər siyahısında
   sonuncu qanunlar **14 iyul 2026-cı il tarixli 452-VIIQD və 468-VIIQD** (dərc: 28.07.2026) qanunlarıdır.
   Məzuniyyət fəslinə ən çox toxunan son dəyişiklik **30 dekabr 2025-ci il tarixli 332-VIIQD** qanunudur
@@ -100,18 +100,10 @@ müvəqqəti itirdiyi, habelə bu Məcəllənin 179-cu maddəsində nəzərdə t
 - Staja daxildir: əmək müqaviləsi üzrə faktik işlənmiş vaxt + müvəqqəti əmək qabiliyyətsizliyi dövrü +
   Md. 179-da nəzərdə tutulan, iş yeri və orta əmək haqqı saxlanılan dövrlər. Başqa dövr ("yalnız") daxil deyil.
 
-**Hədd sərhədləri:** Mətn "beş ildən on ilədək", "on ildən on beş ilədək", "on beş ildən **çox**" deyir.
-Rəsmi izah (Nazirlik mövqeyi, Plenum, məhkəmə təcrübəsi, 1C) tapılmadı. Mətnin hərfi oxunuşu:
-"-dan … -dək" hər iki ucu daxil edir, "çox" isə xaric edir → [5, 10] → 2, [10, 15] → 4 (düz 10 il iki
-aralığa düşür, böyüyü götürülür), **> 15 → 6**; düz 15 il hələ 4 gündür. Ləğv olunmuş 1994-cü il
-"Məzuniyyətlər haqqında" Qanunda (854) pillələr "beş ildən çox / on ildən çox / on beş ildən çox" idi.
-Praktiki şərhlərdə (banker.az, 2023) 6 gün "15 il tamam olduqdan sonra" verilir — bu, "çox" sözü ilə
-ziddiyyət təşkil edir. **Sistem hərfi oxunuşu tətbiq edir (09.10.2026); şərh Təsdiqlənmədi.**
-
-**Yenidən yoxlama (11.10.2026):** e-qanun.az-dakı cari mətndə üçüncü pillə yenə də «on beş ildən
-**çox** əmək stajı olduqda – 6 təqvim günü»dür. Nazirliyin (sosial.gov.az), Plenumun və ya
-məhkəmənin düz 15 il halına dair rəsmi izahı tapılmadı; muhasibat.az, muhasib.az, mks.az pillələri
-təkrarlayır, sərhəd halına toxunmur. Standart dəyər buna görə dəyişmədi: düz 15 il → 4 gün.
+**Hədd sərhədləri:** 11.10.2026-da yenidən araşdırıldı və standart dəyişdirildi — bax (b-2).
+Qısa: düz 5 il → 2, düz 10 il → 4, **düz 15 il → 6 gün** (15 il tamam olanda). 09–11.10.2026
+arasında sistem «-dək»i daxil sayan hərfi oxunuşu tətbiq edirdi (düz 15 il → 4); həmin oxunuş
+Məcəllənin öz dil təcrübəsi ilə təkzib olundu.
 
 ### (b-1) Qurumun staj pillələri — daha əlverişli şərt (11.10.2026)
 
@@ -132,7 +124,7 @@ Tətbiq (Admin → Məzuniyyət normaları → «Staja görə»):
 
 1. Üç qanuni pillə sabit açarla saxlanılır (`statutory_key`: seniority_5 / _10 / _15). Qurum həddi,
    günü və aşağı həddin daxil olmasını (`min_inclusive`: «15 il və daha çox» / «15 ildən çox»)
-   dəyişə, öz pilləsini əlavə edə bilər. Qanuni pillə silinmir və söndürülmür.
+   dəyişə, öz pilləsini əlavə edə bilər (11.10.2026-dan standart artıq «15 il və daha çox»dur, bax (b-2)). Qanuni pillə silinmir və söndürülmür.
 2. **Validasiya:** hər dəyişiklikdən sonra qüvvədə olan pillələr hər staj nöqtəsində (düz N il və N
    ildən bir az çox, N = 0…81) qanuni cədvəldən az gün verməməlidir; əks halda dəyişiklik rədd
    olunur. Beləliklə yalnız daha çox gün, daha aşağı hədd və ya həddin daxil edilməsi keçir.
@@ -144,6 +136,90 @@ Tətbiq (Admin → Məzuniyyət normaları → «Staja görə»):
    pilləsi silinəndə də qüvvədədirsə dünəndən bağlanır.
 4. «Qanuni dəyərə qaytar» düyməsi pilləni bu gündən qanundakı dəyərə qaytarır (yeni versiya).
 5. Bütün dəyişikliklər audit jurnalına düşür (log adı `vacation_norm`).
+
+### (b-2) Düz 10 və düz 15 il — sərhədlərin şərhi (araşdırma 11.10.2026)
+
+**Mətn.** ƏM m.116.1 (e-qanun.az, rəsmi konsolidasiya, `frameworks.e-qanun.az/46/f_46943.html`,
+oxunma 11.10.2026): «beş ildən on ilədək əmək stajı olduqda — 2 təqvim günü; on ildən on beş ilədək
+əmək stajı olduqda — 4 təqvim günü; on beş ildən çox əmək stajı olduqda — 6 təqvim günü». Maddənin
+1-ci hissəsində dəyişiklik qeydi (izah işarəsi) yoxdur — mətn 1999-cu il redaksiyasındadır; 2-ci
+hissədə yalnız KM-in 29.11.2000 qərarı (KMQ2, «bir müəssisədə» sözləri) var. Ləğv olunmuş 1994-cü il
+«Məzuniyyətlər haqqında» Qanununda pillələr «… ildən çox» formasında idi.
+
+**Rəsmi izah axtarışı (11.10.2026):**
+- Əmək və Əhalinin Sosial Müdafiəsi Nazirliyinin rəsmi portalı, «Əmək qanunvericiliyi» FAQ
+  (https://e-social.gov.az/az/faq/labor-legislation): sual «Əmək stajına görə əlavə məzuniyyətin
+  müddəti hansı dövrə əsasən hesablanır?» — cavab m.116.1–2-nin mətnini təkrarlayır, sərhəd halına
+  toxunmur. Eyni FAQ m.77-ni də «1 ilədək … 1 ildən 5 ilədək» formasında təkrarlayır.
+- sosial.gov.az, Dövlət Əmək Müfəttişliyi Xidməti: düz 10/15 il barədə izah tapılmadı.
+- Rəsmi məzuniyyət kalkulyatoru (e-gov.az, e-social.gov.az, sosial.gov.az) tapılmadı
+  (`e-social.gov.az/az/calculator(s)` — 404); e-Sosial tətbiqində yalnız pensiya kalkulyatoru var.
+- Ali Məhkəmə Plenumu: m.116 və ya staj sərhədi barədə qərar tapılmadı (supremecourt.gov.az axtarışı).
+  Konstitusiya Məhkəməsi m.116 üzrə yalnız 2-ci hissəni şərh edib (KMQ2, 29.11.2000) — sərhəd deyil.
+- 1C (Azərbaycan konfiqurasiyası): açıq mənbədə parametr/izah tapılmadı. mks.az (17.06.2020,
+  «Əmək Qanunvericiliyi və Şərhlər Toplusu 2020»), vergiler.az, muhasib.az — yalnız mətni təkrarlayır.
+  banker.az (2023, qeyri-rəsmi): 6 gün «15 il tamam olduqdan sonra».
+
+**Məcəllənin öz dil təcrübəsi (həlledici arqument):**
+- **m.119.1:** «Yaşı 16-dan az olan işçilərə … 42 təqvim günündən, **16 yaşından 18 yaşınadək**
+  işçilərə isə 35 təqvim günündən az olmayaraq verilir.» «16-dan az» qrupu ayrıca olduğuna görə
+  «16 yaşından» 16-nı **daxil** edir, «18 yaşınadək» isə 18-i **xaric** edir (18 yaşlı yetkindir).
+  Deməli, eyni fəsildə «X-dan Y-dək» = **[X, Y)**.
+- **m.46 (əmək müqaviləsinin bağlanması):** «15 yaşına çatmamış şəxslərlə bağlanılan əmək müqaviləsi etibarsız sayılır … On beş yaşından on səkkiz yaşınadək olan şəxslərlə» — 15 daxil, 18 xaric; eyni quruluş.
+- **m.77.1 və 77.3:** «bir ilədək … bir ildən beş ilədək … beş ildən on ilədək … on ildən çox» —
+  staj pillələri m.116 ilə eyni texnika ilə yazılıb.
+- **m.8 (müddətlərin hesablanması):** «İllərlə … hesablanan müddətlər müvafiq olaraq ilin … sonuncu
+  günündə başa çatır» — 15 il müddəti bitən gün işçinin 15 ili **tamamdır**.
+
+Bu oxunuşla «on ildən on beş ilədək» pilləsi [10, 15) — düz 15 ildə artıq bitir. «On beş ildən çox»
+hərfən (15, ∞) olduğundan düz 15 il heç bir pilləyə düşmür. Qanunverici pillələri boşluqsuz
+düşünüb (staj artdıqca əlavə artır); boşluğu yalnız iki cür doldurmaq olar: 4 gün (bitmiş pilləni
+uzatmaq) və ya 6 gün (növbəti pilləni başlatmaq). Mətndə 4-ün lehinə dəlil yoxdur — 4 günlük pillənin
+özü 15-dən əvvəl bitir.
+
+**Düz 10 il:** [5, 10) oxunuşunda 10 il 4 günlük pillədədir; əvvəlki (hər iki uc daxil) oxunuşda da
+böyük olan 4 götürülürdü. Nəticə dəyişmir: **düz 10 il → 4 gün**. Düz 5 il → 2 gün.
+
+**İşçinin xeyrinə şərh prinsipi.** Məcəllədə «şübhə işçinin xeyrinə həll olunur» kimi açıq ümumi
+norma **yoxdur** (mətndə «xeyrinə», «şübhə» axtarışı — nəticə yoxdur). Lakin:
+- **m.7.1:** «İşçilərin əmək hüquqları və bu hüquqlarla bağlı müvafiq təminatlarının **minimum
+  səviyyəsi** bu Məcəllənin 1-ci maddəsində göstərilən normativ hüquqi aktlarla müəyyən edilmiş hüquq
+  normaları ilə təmin edilir»;
+- **m.7.3, 24.2, 145:** qanundan çox vermək olar, az vermək olmaz; işçinin vəziyyətini pisləşdirən
+  şərt etibarsızdır və ziyan işəgötürən tərəfindən tam ödənilir (m.7.3).
+
+**Risk təhlili.** Düz 15 ildə 6 gün vermək, 4 gün düzgün olsa belə, qanunidir (m.7.3, 145 — daha
+əlverişli şərt). 4 gün vermək isə, 6 gün düzgün olarsa, minimumun pozulmasıdır (m.7.1): işçinin
+iddiası, Əmək Müfəttişliyinin göstərişi və xitamda kompensasiya fərqi (m.144.2, KMQ16) riski. Fərq
+işçi başına ömründə bir iş ili üçün 2 gündür; uyğunsuzluq riski isə asimmetrikdir.
+
+**Qərar (11.10.2026):** standart **«15 il və daha çox» → 6 gün** (`seniority_15.min_inclusive =
+true`). Bu həm də «-dək» sözünün Məcəllədəki mənasına uyğun gələn yeganə boşluqsuz oxunuşdur.
+Validasiya da yeni cədvələ görədir: qurum düz 15 il üçün 6 gündən az verən pillə yaza bilməz.
+
+**Tətbiq:** miqrasiya `2026_10_11_190000_include_full_fifteen_years_in_seniority_leave`:
+- yalnız qanuni pillə köhnə qanun dəyərlərindədirsə (15, açıq, 15 xaric, 6 gün) — qurumun
+  dəyişdirdiyi sətrə toxunulmur (o sətir növbəti redaktədə yeni minimumla yoxlanacaq);
+- işləyən sistemdə köhnə sətir yeniləmə günündən bir gün əvvəl bağlanır (`valid_to`), yeni versiya
+  yeniləmə günündən başlayır — pillə iş ilinin başlanğıcına görə seçildiyi üçün **artıq başlamış iş
+  illəri dəyişmir**; təzə qurulumda (heç bir işçi və iş ili yoxdur) sətir yerində dəyişir;
+- geri qaytarma (`down`) köhnə sətri bərpa edir. Lokal MySQL-də migrate → rollback → migrate yoxlanıb.
+
+**Nümunələr (yalnız bu işəgötürəndə işləyən işçi, staj iş ilinin başlanğıcına):**
+
+| İşə qəbul | İş ili | Staj | Əvvəl | Sonra |
+|---|---|---|---|---|
+| 01.12.2011 | 16-cı, 01.12.2026-dan | düz 15 il | 4 | **6** |
+| 01.06.2011 | 16-cı, 01.06.2026-dan (yeniləmədən əvvəl başlayıb) | düz 15 il | 4 | 4 (dəyişmir) |
+| 01.12.2012 | 15-ci, 01.12.2026-dan | 14 il | 4 | 4 |
+| 01.12.2016 | 11-ci, 01.12.2026-dan | düz 10 il | 4 | 4 |
+| 01.12.2021 | 6-cı, 01.12.2026-dan | düz 5 il | 2 | 2 |
+
+**Qalıq risk (hüquqşünas təsdiqi):** (1) rəsmi izah yoxdur — qərar mətnin sistemli şərhinə və risk
+asimmetriyasına əsaslanır; (2) yeniləmədən əvvəl başlamış iş illərində düz 15 il stajlı işçilərə 4 gün
+hesablanıb — tapşırıq üzrə toxunulmadı; hüquqşünas 6-nı təsdiq edərsə, HR həmin işçilərə «düzəliş»
+(adjustment) ilə +2 gün yaza bilər; (3) stajın hansı tarixə ölçüldüyü (iş ilinin başlanğıcı) mətndə
+yoxdur — mövcud qayda saxlanıb.
 
 **Md. 116.3:** "Əmək stajına görə (o cümlədən əmək şəraitinə görə) əlavə məzuniyyətlər bu Məcəllənin
 118, 119, 120 və 121-ci maddələrində göstərilən işçilərə verilmir."
@@ -218,24 +294,106 @@ Sistemin oxunuşu:
    verilmiş dövrlər (şəraitdən kənar, ödənişsiz, uşağa qulluq) saymanı sıfırlamır, sadəcə sayılmır.
 3. **Avans (b.7, 3-cü abzas):** hüququ yaranmış və hazırda şəraitdə daimi işləyən işçiyə şərait ili
    üçün əlavə məzuniyyət 12 ay bitmədən tam verilə bilər (3-cü misal: sentyabrda tam).
-4. **Fasilə (Təsdiqlənmədi — mətn açıq demir; yenidən yoxlandı 11.10.2026):** NK 95-in tam
-   mətnində «fasilə», «yenidən», «qayıt» sözləri yoxdur və şərait ilinin qırılması / qayıdışdan
-   yenidən başlaması barədə qayda yoxdur. Yaxın müddəalar: b.7 (3-cü misal — şərait ili şəraitli
-   işə keçdiyi gündən), b.7 («üst-üstə azı altı ay»), b.8 (staja daxil olan dövrlərin qapalı
-   siyahısı — başqa işdə keçən vaxt orada yoxdur), b.6 («bir iş ilindən artıq dövrün bu əlavə
-   məzuniyyətinin verilməməsi və ya onun başqa iş ilinə keçirilməsi qadağandır»). Mövcud davranış
-   saxlanıldı, hüquqşünas təsdiqi gözlənilir: bütöv bir şərait ili ərzində şəraitdə heç bir gün
-   sayılmayıbsa, zəncir qırılır və növbəti şərait ili şəraitə **qayıdış günündən** başlayır — b.7-nin
-   «şəraitli işə keçdiyi gündən» məntiqinin tətbiqi. Qırılmadan əvvəlki aylar 6 ay şərti üçün
-   cəmlənməyə davam edir (2-ci bənd). Uşağa qulluq məzuniyyəti (m.132.2) şərait ilini də ümumi iş
-   ili kimi uzadır.
+4. **Fasilə** — ətraflı hal təhlili (c-2)-də. Qısa: il ərzində çıxıb-qayıtmaq ili qırmır (b.11,
+   1-ci misal); bütöv bir şərait ili ərzində şəraitdə heç bir gün sayılmayıbsa zəncir qırılır və
+   növbəti şərait ili şəraitə **qayıdış günündən** başlayır (3-cü misalın «şəraitli işə keçdiyi
+   gündən» qaydası). Qırılmadan əvvəlki aylar 6 ay şərti üçün cəmlənməyə davam edir (2-ci bənd).
+   Uşağa qulluq məzuniyyəti (m.132.2) şərait ilini də ümumi iş ili kimi uzadır.
 5. **Balans:** şərait illəri məzuniyyət uçotunda ayrıca sətirlərdir («Şərait ili»); əmrlə
    istifadə ən köhnə sətirdən başlayır, əsas və əlavə məzuniyyət «bir qayda olaraq, tam və birlikdə»
    (b.7) bir əmrlə verilə bilər.
 6. **Köçürmə tarixi:** vəzifənin dəyişdiyi gün əmrdə göstərilən «... tarixdən» günüdür (ƏM m.59
    əsasında verilən köçürmə əmri), əmrin verilmə tarixi deyil; tarix göstərilməyibsə əmrin tarixi.
 
-**Etibarlılıq:** 1–3 və 5 Təsdiqləndi (rəsmi mətn və misal); 4 — şərh, Təsdiqlənmədi.
+**Etibarlılıq:** 1–3 və 5 Təsdiqləndi (rəsmi mətn və misal); 4 — mətnə əsaslanan şərh (bax (c-2)), qayıdış halı üçün açıq norma yoxdur.
+
+### (c-2) Şərait ilində fasilə — hal-hal təhlil (araşdırma 11.10.2026)
+
+**Mənbələr (oxunma 11.10.2026):**
+- NK-nin 30.05.2005 tarixli 95 nömrəli qərarı ilə təsdiq edilmiş «… Siyahı»nın tətbiqi Qaydaları —
+  https://e-qanun.az/framework/9900 (mətn: `frameworks.e-qanun.az/9/f_9900.html`). Rekvizitlər
+  (api.e-qanun.az/framework/9900): qəbul və qüvvəyə minmə 30.05.2005 («imzalandığı gündən»),
+  dərc — AR Qanunvericilik Toplusu, 31.05.2005, № 5, m.459; status «Qüvvədədir». Mətndə
+  **dəyişiklik qeydi yoxdur** — 2005 redaksiyası qüvvədədir. Qaydalar 15 bənddir (b.1–b.15).
+- Siyahının özü: NK-nin 05.07.2004 tarixli 92 nömrəli qərarı (bax (c)).
+- ƏM m.115 və **m.131.6** (zərərli/ağır şəraitə görə əlavə məzuniyyət). Qeyd: tapşırıqda adı çəkilən
+  m.117 uşaqlı qadınların əlavə məzuniyyətidir; şərait əlavəsi m.115 + 131.6-dadır.
+- Nazirliyin rəsmi FAQ-ı (e-social.gov.az/az/faq/labor-legislation): şərait əlavəsində fasilə
+  barədə sual-cavab yoxdur; sosial.gov.az və Əmək Müfəttişliyində də izah tapılmadı.
+
+**Fasilə üçün əhəmiyyətli bəndlər (qısa sitatlarla):**
+- **b.6:** əlavə məzuniyyət «bir qayda olaraq, əsas əmək məzuniyyəti ilə birlikdə verilir»; «bir iş
+  ilindən artıq dövrün bu əlavə məzuniyyətinin verilməməsi və ya onun başqa iş ilinə keçirilməsi
+  qadağandır».
+- **b.7:** «iş ili ərzində faktiki işlədiyi vaxta mütənasib»; «hüququ həmin iş yerlərində üst-üstə
+  azı altı ay işlədikdə əmələ gəlir»; «iş ilində … 12 aydan az olan müddətdə işlədiyi halda …
+  mütənasib»; daimi işləyənə avans — «tam müddətə 12 ayın bitməsinə qədər verilə bilər»; «iş stajı
+  əsas əmək və əlavə məzuniyyətlər üzrə ayrı-ayrılıqda hesablanır». Misallar: (1) usta 01.03-də
+  qəbul, növbəti ilin 01.07-də mühəndisliyə keçirilib — «sexdə faktik işlədiyi müddətə mütənasib …
+  3 aya … 3 gün»; (3) şəraitli işə 01.02-də keçirilib — «əlavə məzuniyyət isə 2003-cü ilin
+  fevralından 2004-cü ilin fevralınadək».
+- **b.8:** staja daxildir — 8.1 faktiki iş, 8.2 iş yeri və əmək haqqı saxlanılan dövr, 8.3 məcburi
+  işburaxma, 8.4 müvəqqəti əmək qabiliyyətsizliyi, 8.5 bəraət almış şəxsin işburaxma/həbs dövrü.
+  Siyahı qapalıdır.
+- **b.10:** tam aylar = günlər ÷ 30,4; yarımdan az qalıq atılır, yarım və çox — tam ay.
+- **b.11:** iş ilində müxtəlif şəraitli işlər «hər bir iş üzrə ayrı-ayrılıqda» hesablanır.
+
+**Hal (a) — il ərzində qismən şəraitli iş:**
+- *Hüquq artıq var (cəmi ≥ 6 ay), il ərzində çıxıb:* həmin şərait ilində şəraitdə keçən aylar
+  qədər (b.7, 1-ci misal; b.10). Nümunə: 12 günlük usta 01.03.2023 qəbul, 01.07.2024-dən mühəndis
+  → 1-ci şərait ili 12 gün, 2-ci il (01.03.2024–28.02.2025) 122 gün → 4 ay → **4 gün**. Misal 3 gün
+  yazır — ehtimal ki, mart (usta həmin ay məzuniyyətdə olub) sayılmayıb; b.8.2 iş yeri və əmək haqqı saxlanılan məzuniyyəti
+  staja daxil edir, sistem normativ bəndi tətbiq edir (işçinin xeyrinə). Növbəti şəraitsiz il
+  göstərilmir.
+- *6 ay il ərzində fasilə ilə tamamlanır:* «üst-üstə» — cəmi; fasilə saymanı sıfırlamır, hüquq
+  yarananda fasilədən əvvəlki aylar da sayılır (m.131.1-dəki birinci il qaydası ilə eyni quruluş:
+  6 ay gözləmə şərtidir, həmin 6 ayı istisna etmir). Nümunə: 12 günlük norma, 01.01–31.03.2025 şəraitdə,
+  01.04–30.06 kənarda, 01.07-dən yenə şəraitdə: 30.09.2025-də 182 gün (< 183) → 0; 01.10.2025-də
+  hüquq var, işçi şəraitdədir → il üçün 90 + 184 = 274 gün → 9 ay → **9 gün** (avans).
+- *Cəmi 6 aydan az və bir daha qayıtmır:* hüquq yaranmır → 0 (m.131.6).
+- *Şərait ilində < 6 ay, 6 ay yalnız növbəti şərait ilində tamamlanır:* sistem birinci il üçün 0,
+  ikinci il üçün mütənasib verir (nümunə: 2024-də 4 ay, 01.03.2025-dən qayıdış → 2024: 0, 2025:
+  306 gün → 10 ay → **10 gün**). Mətn bu halı həll etmir; işçinin xeyrinə alternativ — hüquq
+  yarananda birinci ilin 4 ayını da (4 gün) vermək — bitmiş (dondurulmuş) iş illərini geriyə
+  dəyişməyi tələb edir. **Mövcud saxlanıldı, hüquqşünas təsdiqi lazımdır** (qalıq risk 1).
+
+**Hal (b) — tam il şəraitsiz, sonra qayıdış:**
+- Bütöv şərait ili ərzində şəraitdə sayılan heç bir gün yoxdursa həmin il yaranmır və zəncir
+  qırılır; növbəti şərait ili **qayıdış günündən** başlayır. Əsas: b.7, 3-cü misal — şəraitsiz işdən
+  şəraitli işə keçən işçinin şərait ili keçid günündən sayılır; qayıdış hüquqi baxımdan eyni haldır
+  (cari şərait ili yoxdur). Bu variant işçinin xeyrinədir: qayıdan və artıq 6 ay hüququ olan işçi
+  dərhal yeni ilin tam avansını ala bilir (ildönümünə bağlansaydı, qayıdış ilinin yalnız qalan
+  hissəsi verilərdi). Nümunə (mövcud test): 2020–30.06.2021 şəraitdə, 2022 bütünlüklə kənarda,
+  01.03.2023-dən qayıdış → illər 2020, 2021, **01.03.2023–29.02.2024**, …; əvvəlki 18 ay 6 ay
+  şərti üçün sayılır — 01.04.2023-də 6 gün (avans).
+- *Fasilə bir şərait ilindən qısadırsa* (növbəti ildə şəraitli gün var) — zəncir davam edir, il
+  ildönümündən sayılır, dövrlər b.11 ilə toplanır. Nümunə: 2020–31.03.2021 və 01.02.2022-dən şəraitdə
+  → 2020: 12, 2021: 3 ay → 3, **2022 (01.01–31.12): 334 gün → 11 ay → 11 gün**.
+
+**Hal (c) — uzun məzuniyyət / xəstəlik:**
+- Xəstəlik (b.8.4), ödənişli əmək məzuniyyəti, ezamiyyət və digər iş yeri + əmək haqqı saxlanılan
+  dövrlər (b.8.2), məcburi işburaxma (b.8.3, 8.5) — şəraitli vəzifədə keçibsə **sayılır**; sistem
+  bunları staj boşluğu saymır.
+- Uşağa qulluq məzuniyyəti (m.127) — b.8-də yoxdur, **sayılmır**; m.132.2 ilə ümumi iş ili kimi
+  şərait ili də həmin müddət qədər **uzanır** (zəncir qırılmır). Nümunə: 01.03.2021–28.02.2022
+  uşağa qulluq → 2-ci şərait ili 01.01.2021–31.12.2022, içində 365 gün → **12 gün**.
+- Ödənişsiz məzuniyyət (m.128–130) — b.8-də yoxdur, **sayılmır** və ili uzatmır (m.132-də açıq
+  istisna yoxdur). Bütöv şərait ili ödənişsiz keçibsə hal (b) tətbiq olunur. Nümunə: 01.01.2021–
+  31.01.2022 ödənişsiz → 2021 şərait ili yaranmır, növbəti il **01.02.2022–31.01.2023** (12 gün).
+- Hamiləlik və doğuşa görə məzuniyyət (m.125) — «ödənişli» sosial məzuniyyətdir, b.8-də adı
+  çəkilmir; sistem onu sayır (boşluq kimi qeyd edilmir). Bu, işçinin xeyrinə şərhdir (qalıq risk 2).
+
+**Qərar:** NK 95 qayıdış halı üçün açıq qayda vermir; mövcud kod mətnlə (b.7 misalları, b.8, b.10,
+b.11) ziddiyyət təşkil etmir və işçinin xeyrinə olan variantdır — **kod dəyişdirilmədi**, hər hal
+testlərlə sabitləndi (`tests/Feature/Vacation/VacationNormsTest.php`, «Şərait ilində fasilələr»).
+
+**Qalıq risk (hüquqşünas təsdiqi):**
+1. 6 ay növbəti şərait ilində tamamlananda əvvəlki qısa ilin aylarının verilib-verilməməsi.
+2. Hamiləlik/doğuş məzuniyyətinin şərait stajına daxil edilməsi (sistem daxil edir).
+3. b.10-da «iş günlərinin cəmlənmiş sayı ÷ 30,4» — sistem təqvim günlərini sayır (iş günü ÷ 30,4
+   ildə ~8 ay verərdi, bu, b.7-nin «12 ay» məntiqi ilə uyğun gəlmir); b.12-nin «tam faktiki iş
+   günləri» tələbi HR-ın «Şəraitdən kənar» dövrü ilə qeyd edilir.
+4. 1-ci misaldakı 3 gün (b.8.2-yə görə sistem 4 verir).
 
 ---
 
@@ -502,10 +660,10 @@ təsadüf etdikdə üst-üstə düşən günlər bir gün hesabı ilə nəzərə
    - Bir işçiyə bir neçə norma şamil olunursa, **ən böyüyü** götürülməlidir (bunlar "az olmayaraq" minimumlardır).
    - Mövsümi işçi: hər işlənmiş ay üçün **2 gün** (Md. 114.5).
    - Natamam iş vaxtı müddəti azaltmır (Md. 114.4).
-3. **Staj əlavəsi (Md. 116):** ümumi staj < 5 il → 0; 5–10 → **2**; 10–15 → **4**; > 15 → **6**. Staj
+3. **Staj əlavəsi (Md. 116):** ümumi staj < 5 il → 0; 5–10 → **2**; 10–15 → **4**; ≥ 15 → **6**. Staj
    **bütün işəgötürənlər** üzrə əmək müqaviləsi ilə faktik işlənmiş müddətdir (KMQ2 "bir müəssisədə"ni
-   ləğv edib); işə qəbulda əvvəlki staj daxil edilməli, sonra avtomatik artmalıdır. Sərhədlər mətnə
-   görə: `[5,10]→2, [10,15]→4, >15→6` (düz 15 il → 4). Bandın hansı tarixə
+   ləğv edib); işə qəbulda əvvəlki staj daxil edilməli, sonra avtomatik artmalıdır. Sərhədlər
+   (b-2) üzrə: `[5,10)→2, [10,15)→4, ≥15→6` (düz 10 il → 4, düz 15 il → 6). Bandın hansı tarixə
    (iş ilinin başlanğıcı və ya məzuniyyət tarixi) görə təyin olunması mətndə yoxdur — konfiqurasiya.
 4. **Şərait əlavəsi (Md. 115):** minimum **6 gün**, dəqiq gün vəzifə/peşə üzrə Nazirlər Kabinetinin
    siyahısından; iş ilində həmin şəraitdə **faktik işlənmiş vaxta mütənasib**, hüquq üst-üstə **6 ay**
@@ -568,7 +726,7 @@ təsadüf etdikdə üst-üstə düşən günlər bir gün hesabı ilə nəzərə
 | Əsas 21 gün, m.119 yaş/əlillik normaları | `vacation_norms` (qrup «Əsas»), qanuni sətirlər seed olunub | Vəzifə / işçi üzrə 30, 42, 46, 56 gün admin tərəfindən əlavə olunur; şamil olan ən böyük norma götürülür |
 | 30 gün, m.114.3 "b" (VTİSK) | Vəzifə kartında «VTİSK kateqoriyası» (rəhbər / mütəxəssis / texniki icraçı / fəhlə); «rəhbər» və «mütəxəssis» üçün qanuni 30 günlük sətirlər | Mövcud vəzifələr miqrasiyada sıralama səviyyəsindən təxmin edildi (1–4 rəhbər, 5–6 mütəxəssis, 7 boş) — HR Admin → Vəzifələr-də yoxlamalıdır. m.114.3-ün digər bəndləri (həkim, kənd təsərrüfatı və s.) vəzifə üzrə sətirlə |
 | m.116.3, 117.4 istisnası | «Əlavə məzuniyyət verilmir» işarəsi (16 yaşadək, 16–18, əlillik sətirlərində qoşulu) | m.118, 120, 121 vəzifə sətirlərində admin işarələyir |
-| Staj əlavəsi (m.116.1) | Standart `[5,10]→2`, `[10,15]→4`, `>15→6` (hərfi oxunuş, təqvim üzrə dəqiq); qurum pillələri yalnız daha əlverişli istiqamətdə, qüvvəyə minmə tarixi ilə dəyişə bilər (bax (b-1)); ümumi staj = əvvəlki əmək fəaliyyəti + bu işəgötürəndə iş, üst-üstə düşən dövrlər bir dəfə | İş ilinin başlanğıc tarixinə hesablanır; düz 10 il → 4, düz 15 il → 4. Nəticə: yalnız bu işəgötürəndə işləyən işçi 6 günü 17-ci iş ilindən alır. |
+| Staj əlavəsi (m.116.1) | Standart `[5,10)→2`, `[10,15)→4`, `≥15→6` (bax (b-2); 11.10.2026-dan, əvvəl başlamış iş illəri köhnə versiya ilə); qurum pillələri yalnız daha əlverişli istiqamətdə, qüvvəyə minmə tarixi ilə dəyişə bilər (bax (b-1)); ümumi staj = əvvəlki əmək fəaliyyəti + bu işəgötürəndə iş, üst-üstə düşən dövrlər bir dəfə | İş ilinin başlanğıc tarixinə hesablanır; düz 10 il → 4, düz 15 il → 6. Nəticə: yalnız bu işəgötürəndə işləyən işçi 6 günü 16-cı iş ilindən alır (əvvəl 17-ci). |
 | Uşaqlı valideyn (m.117) | 2 uşaq → 2, 3+ uşaq və ya əlilliyi olan uşaq → 5 (toplanmır); uşaq 14 yaşını tamamladığı təqvim ilinin sonunadək sayılır | Uşaqlar «Ailə üzvləri»ndən (qohumluq «Oğul»/«Qız»), əlillik üçün yeni «Əlilliyi var» qeydi; təkbaşına böyüdən ata / övladlığa götürən — işçi üzrə sətir |
 | Əmək şəraiti (m.115) | Vəzifə / işçi üzrə sətir, minimum 6 gün; staj əlavəsi ilə toplanır (m.136.2). Gün-gün hesablanır (NK 95): günün normu işçinin həmin gündəki vəzifəsi (köçürmə əmrlərindən) və işçi sətirlərindən ən böyüyü (b.14); hüquq şəraitdə üst-üstə 6 aydan sonra (b.7); iş ilində hər norm üzrə tam aylar ayrıca, tam ay = günlər ÷ 30,4 (b.10, b.11), günlər = Σ norma × aylar ÷ 12; hazırda şəraitdə işləyənə cari iş ili üçün tam (avans, b.7); ödənişsiz və uşağa qulluq dövrləri sayılmır (b.8) | Dövrlü işçi sətri — peşəsi siyahıda olmayan işçiyə tapşırılmış siyahı işi (b.13); «Şəraitdən kənar» işçi sətri — iş gününün 90%-dən az şəraitdə keçən dövr (b.12). Gündəlik 90% faktını sistem özü bilmir, HR dövr kimi qeyd edir. Köçürmə tarixi — əmrdəki «Köçürmə tarixi» sahəsi (`effective_date` rolu), boşdursa əmrin tarixi. Şərait əlavəsinin ayrıca iş ili var — «Şərait ili», şəraitdə ilk sayılan gündən (b.7, 3-cü misal; bax (c-1)), balansda ayrıca sətir |
 | İş ili (m.113.3), m.132.2 | İş ili işə qəbul günündən; «Uşağa qulluq məzuniyyəti» əmri ilə verilmiş günlər qədər uzanır | Ödənişsiz məzuniyyət iş ilini sürüşdürmür: m.113.3 iş ilini sabit müəyyən edir, m.132 ödənişsiz məzuniyyəti açıq istisna etmir |
