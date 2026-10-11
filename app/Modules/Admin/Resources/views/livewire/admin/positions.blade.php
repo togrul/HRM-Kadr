@@ -6,6 +6,15 @@
                 <span>{{ __('admin::references.buttons.add_position') }}</span>
             </x-button>
         </div>
+        <label class="mt-2 inline-flex items-center gap-2 sm:mt-0">
+            <input type="checkbox" wire:model.live="onlyMissingVtisk" class="rounded border-zinc-300 text-zinc-700 focus:ring-zinc-300">
+            <span class="text-sm text-zinc-700">{{ __('admin::references.filters.vtisk_missing') }}</span>
+            <span @class([
+                'rounded-md px-1.5 text-[11px]',
+                'bg-amber-50 text-amber-800' => $missingVtisk > 0,
+                'bg-zinc-100 text-zinc-500' => $missingVtisk === 0,
+            ])>{{ $missingVtisk }}</span>
+        </label>
     </div>
 
     @if($isAdded)
@@ -96,7 +105,7 @@
         <div class="relative min-h-[300px] -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
                 <div class="overflow-visible">
-                    <x-table.tbl :headers="[__('admin::references.fields.id'),__('admin::references.fields.category'),__('admin::references.fields.name'),__('admin::references.fields.approval_rank'),__('admin::references.fields.is_approval_target'),__('admin::references.table.action')]">
+                    <x-table.tbl :headers="[__('admin::references.fields.id'),__('admin::references.fields.category'),__('admin::references.fields.name'),__('admin::references.fields.vtisk_category'),__('admin::references.fields.approval_rank'),__('admin::references.fields.is_approval_target'),__('admin::references.table.action')]">
                         @forelse ($positions as $position)
                             <tr>
                                 <x-table.td>
@@ -115,6 +124,15 @@
                                 <x-table.td>
                                       <span class="text-sm text-zinc-500 font-medium">
                                           {{ $position->name }}
+                                      </span>
+                                </x-table.td>
+                                <x-table.td>
+                                      <span @class([
+                                            'text-sm font-medium',
+                                            'text-zinc-500' => $position->vtisk_category,
+                                            'rounded-sm bg-amber-50 px-3 py-1 text-amber-800' => ! $position->vtisk_category,
+                                      ])>
+                                          {{ $position->vtisk_category ? \App\Support\VtiskCategory::label($position->vtisk_category) : __('admin::references.messages.vtisk_missing') }}
                                       </span>
                                 </x-table.td>
                                 <x-table.td>

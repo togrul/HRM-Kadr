@@ -14,6 +14,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 #[On(['positionUpdated', 'deleted'])]
@@ -25,6 +26,10 @@ class Positions extends Component
     use DropdownConstructTrait;
 
     public string $searchRankCategory = '';
+
+    /** Yalnız VTİSK kateqoriyası təyin olunmamış vəzifələr (ƏM m.114.3 «b» — 30 gün bundan asılıdır). */
+    #[Url(as: 'vtisk_missing')]
+    public bool $onlyMissingVtisk = false;
 
     public function rules(): array
     {
@@ -116,9 +121,12 @@ class Positions extends Component
 
     public function render(): View
     {
-        $positions = Position::all();
+        $positions = Position::query()
+            ->when($this->onlyMissingVtisk, fn ($query) => $query->whereNull('vtisk_category'))
+            ->get();
+        $missingVtisk = Position::query()->whereNull('vtisk_category')->count();
 
-        return view('admin::livewire.admin.positions', compact('positions'));
+        return view('admin::livewire.admin.positions', compact('positions', 'missingVtisk'));
     }
 
     public function rankCategoryOptions(): array

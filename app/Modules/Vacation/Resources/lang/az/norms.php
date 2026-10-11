@@ -13,9 +13,16 @@ return [
     ],
     'hints' => [
         'base' => 'Standart 21 təqvim günü (m.114.2). 30 gün (m.114.3): VTİSK üzrə rəhbər və mütəxəssis kateqoriyası — qanuni sətirlərlə, vəzifənin kateqoriyası Admin → Vəzifələr-də; inzibati vəzifəli dövlət qulluqçuları, həkimlər və s. — vəzifə üzrə, pedaqoji işçilər 56/42 gün (m.118), 16 yaşadək 42, 16–18 yaş 35, əlilliyi olan işçi 42 gün (m.119). Bir neçə sətir şamil olunursa ən böyüyü götürülür. «Əlavə məzuniyyət verilmir» işarəli sətir şamil olunan işçiyə staj, uşaq və şərait əlavələri verilmir (m.116.3, 117.4).',
-        'seniority' => 'Ümumi əmək stajı (bütün işəgötürənlər üzrə, əmək fəaliyyəti qeydlərindən) iş ilinin başlanğıcına hesablanır: 5–10 il +2, 10–15 il +4, 15 ildən çox +6 gün (m.116.1). Mətnə görə «-dan» və «-dək» daxil, «çox» xaric sayılır: düz 10 il — 4 gün, düz 15 il — hələ 4 gün, 6 gün yalnız 15 ildən çox olanda.',
+        'seniority' => 'Ümumi əmək stajı (bütün işəgötürənlər üzrə, əmək fəaliyyəti qeydlərindən) iş ilinin başlanğıcına hesablanır. Qanuni cədvəl (m.116.1): 5–10 il +2, 10–15 il +4, 15 ildən çox +6 gün; mətnə görə «-dan» və «-dək» daxil, «çox» xaric sayılır: düz 10 il — 4 gün, düz 15 il — hələ 4 gün, 6 gün yalnız 15 ildən çox olanda. Qurum pillələri özünə uyğun dəyişə bilər (məsələn, «15 il və daha çox» — aşağı həddi daxil edin): dəyişiklik qüvvəyə minmə tarixindən sonra başlayan iş illərinə tətbiq olunur, artıq başlamış iş illəri və istifadə olunmuş günlər dəyişmir.',
         'children' => '14 yaşınadək iki uşağı olan qadınlara +2, üç və daha çox uşağı və ya əlilliyi olan uşağı olanlara +5 gün (m.117.1); 2 və 5 gün toplanmır. Uşaq 14 yaşını tamamladığı təqvim ilinin sonunadək sayılır (m.117.3). Uşaqları təkbaşına böyüdən ata və övladlığa götürən üçün «İşçi» sahəsi ilə sətir əlavə edin (m.117.2). Uşaqlar işçi kartının «Ailə üzvləri» bölməsindən oxunur.',
         'conditions' => 'Zərərli və ağır əmək şəraitinə görə ən azı 6 təqvim günü (m.115.1); vəzifələr və günlər Nazirlər Kabinetinin 92 nömrəli qərarının siyahısındandır. Staj əlavəsi ilə toplanır (m.136.2). NK 95: hüquq həmin şəraitdə üst-üstə 6 aydan sonra; iş ilində işlənmiş vaxta mütənasib, tam ay = günlər ÷ 30,4 (b.7, b.10); iş ilində müxtəlif şəraitli vəzifələr ayrı-ayrılıqda hesablanıb toplanır (köçürmə əmrlərindən, b.11), eyni vaxtda iki hüquqdan böyüyü (b.14); hazırda şəraitdə işləyənə cari il üçün tam verilir (avans, b.7). Dövr sahələri: peşəsi siyahıda olmayan işçiyə müəyyən dövrdə siyahıdakı iş tapşırılıbsa — işçi üzrə dövrlü sətir (b.13); işçi bir dövrdə iş gününün 90%-dən az həmin şəraitdə çalışıbsa — «Şəraitdən kənar» sətri (b.12).',
+    ],
+    'warnings' => [
+        'seniority_law' => 'Qanundan az gün vermək olmaz: əmək müqaviləsinə işçinin hüquqlarını qanunvericiliyə nisbətən məhdudlaşdıran şərtlərin daxil edilməsi yolverilməzdir (ƏM m.7.3), işçilərin vəziyyətini qanuna nisbətən pisləşdirən kollektiv müqavilə şərtləri etibarsızdır (ƏM m.24.2). Sistem yalnız daha əlverişli dəyərləri qəbul edir: daha çox gün, daha aşağı hədd və ya həddin daxil edilməsi.',
+    ],
+    'points' => [
+        'exact' => 'düz :years il',
+        'over' => ':years ildən çox',
     ],
     'scopes' => [
         'vtisk_category' => 'VTİSK kateqoriyası',
@@ -37,6 +44,8 @@ return [
         'personnel' => 'İşçi: :name',
         'seniority' => 'Staj :from – :to il',
         'seniority_open' => 'Staj :from ildən çox',
+        'seniority_open_inclusive' => 'Staj :from il və daha çox',
+        'seniority_exclusive' => 'Staj :from ildən çox – :to il',
         'children_under_14' => '14 yaşınadək :count və daha çox uşaq',
         'disabled_child' => 'Əlilliyi olan uşaq',
         'disabled_child_age' => 'Əlilliyi olan uşaq (:age yaşınadək)',
@@ -47,6 +56,8 @@ return [
         'not_in_conditions' => 'Bu dövrdə işçi iş gününün 90%-dən az həmin şəraitdə çalışıb — günlər sayılmır (NK 95, b.12)',
         'valid_to' => 'Qüvvədədir, -dək',
         'valid_from' => 'Qüvvədədir, -dan',
+        'valid_from_seniority' => 'Qüvvəyə minir (bu tarixdən başlayan iş illərinə)',
+        'min_inclusive' => 'Aşağı hədd daxildir («X il və daha çox»); işarəsiz — «X ildən çox»',
         'vtisk_category' => 'VTİSK kateqoriyası',
         'scope' => 'Kimə şamil olunur',
         'position' => 'Vəzifə',
@@ -76,6 +87,9 @@ return [
     ],
     'badges' => [
         'statutory' => 'Qanuni',
+        'differs_from_law' => 'Qurumun dəyəri (qanundan əlverişli)',
+        'history' => 'Tarixçə',
+        'scheduled' => 'Gələcəkdə qüvvəyə minir',
         'exclusive' => 'Əlavə verilmir',
     ],
     'actions' => [
@@ -84,6 +98,7 @@ return [
         'edit' => 'Redaktə et',
         'delete' => 'Sil',
         'close' => 'Bağla',
+        'restore_law' => 'Qanuni dəyərə qaytar',
     ],
     'confirm' => [
         'delete_title' => 'Norma silinsin?',
@@ -98,10 +113,16 @@ return [
     ],
     'messages' => [
         'saved' => 'Norma yadda saxlanıldı.',
+        'restored' => 'Pillə bu gündən qanuni dəyərə qaytarıldı.',
     ],
     'errors' => [
         'below_minimum' => 'Gün sayı qanuni minimumdan (:days gün) az ola bilməz.',
         'range' => 'Stajın yuxarı həddi aşağı həddən böyük olmalıdır.',
+        'seniority_below_law' => 'Staj :point olanda pillələr :given gün verir, qanun isə ən azı :days gün tələb edir (ƏM m.116.1). Qanundan az gün vermək olmaz (ƏM m.7.3, m.24.2).',
+        'seniority_past' => 'Staj pilləsinin dəyişikliyi keçmiş tarixdən qüvvəyə minə bilməz — artıq başlamış iş illəri dəyişmir.',
+        'seniority_history' => 'Bu sətir artıq bağlanıb (tarixçə) — yalnız əvvəl başlamış iş illərinə aiddir və dəyişdirilmir.',
+        'seniority_toggle' => 'Staj pilləsi söndürülmür: dəyişmək üçün redaktə edin (yeni dəyər qüvvəyə minmə tarixindən tətbiq olunur), qurumun öz pilləsini isə silin.',
+        'seniority_not_statutory' => 'Yalnız qanuni staj pilləsi qanuni dəyərə qaytarılır.',
         'statutory_delete' => 'Qanuni norma silinmir — lazım deyilsə deaktiv edin.',
         'compensation_requires_termination' => 'İstifadə olunmamış məzuniyyətə görə pul kompensasiyası yalnız əmək müqaviləsinə xitam verildikdə ödənilir (ƏM m.144.2). Əvvəlcə xitam əmrini təsdiqləyin.',
         'opening_days' => 'Açılış qalığı 1–366 gün olmalıdır.',

@@ -6,6 +6,7 @@ return [
     ],
     'filters' => [
         'all' => 'Hamısı',
+        'vtisk_missing' => 'Yalnız VTİSK kateqoriyası təyin olunmamış',
     ],
     'actions' => [
         'close' => 'Bağla',
@@ -210,6 +211,7 @@ return [
         'scope_position' => 'Vəzifə',
     ],
     'messages' => [
+        'vtisk_missing' => 'Təyin olunmayıb',
         'vtisk_category_help' => 'Vahid Tarif-İxtisas Sorğu Kitabçası üzrə. Rəhbər və mütəxəssis 30 gün əsas məzuniyyət alır (ƏM m.114.3 «b»).',
         'approval_route_help' => 'Burada hər müraciət növü üçün ierarxik təsdiq siyasəti qurulur. Sistem əməkdaşın strukturunu və vəzifəsini götürüb ən yaxın təsdiqləyən rəhbəri, istəsəniz onun da yuxarı xəttini və ayrıca HR izləyicisini avtomatik müəyyən edir.',
         'approval_route_scope_required' => 'Bu ekranda artıq əhatə dairəsi seçimi yoxdur; siyasət müraciət növü səviyyəsində qurulur.',

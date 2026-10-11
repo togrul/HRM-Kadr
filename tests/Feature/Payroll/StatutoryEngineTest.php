@@ -5,6 +5,7 @@ namespace Tests\Feature\Payroll;
 use App\Models\CompensationRegime;
 use App\Models\Personnel;
 use App\Modules\Compensation\Application\Services\CompensationService;
+use App\Modules\Compensation\Domain\Contracts\CompensationReadRepository;
 use App\Modules\Payroll\Application\Services\PayrollCalculator;
 use App\Modules\Payroll\Application\Services\StatutoryEngine;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -56,6 +57,39 @@ class StatutoryEngineTest extends TestCase
         $this->assertSame(15.0, (float) $byCode['unemployment_ee']['amount']);
         $this->assertSame(52.5, (float) $byCode['medical_ee']['amount']);
         $this->assertSame('employer', $byCode['dsmf_er']['kind']);
+    }
+
+    /**
+     * 297-VIIQD (01.01.2026): «Sosial sığorta haqqında» Qanun m.14.4 — işəgötürən payı
+     * 8000 manatdan çox hissədən 11% (1214 + 11%), işçi payı 786 + 10%.
+     */
+    public function test_dsmf_above_8000_follows_article_14_4(): void
+    {
+        $engine = app(StatutoryEngine::class);
+        $rates = collect(app(CompensationReadRepository::class)->statutoryRatesFor(null, '2026-06-30'))
+            ->keyBy(fn ($rate) => $rate->component_code.'_'.$rate->payer);
+
+        $this->assertSame(1214.0, round($engine->applyBrackets(8000, (array) $rates['dsmf_er']->brackets), 2));
+        $this->assertSame(1434.0, round($engine->applyBrackets(10000, (array) $rates['dsmf_er']->brackets), 2)); // 1214 + 2000 × 11%
+        $this->assertSame(986.0, round($engine->applyBrackets(10000, (array) $rates['dsmf_ee']->brackets), 2)); // 786 + 2000 × 10%
+        $this->assertSame(44.0, round($engine->applyBrackets(200, (array) $rates['dsmf_er']->brackets), 2));
+    }
+
+    /** Vergi Məcəlləsi m.101.1-1.1–101.1-1.3: 2026 — 3%, 2027 — 5%, 2028-dən — 7% (2500-dək). */
+    public function test_income_tax_schedule_steps_up_in_2027_and_2028(): void
+    {
+        $engine = app(StatutoryEngine::class);
+        $repository = app(CompensationReadRepository::class);
+        $tax = fn (string $date, float $amount): float => round($engine->applyBrackets(
+            $amount,
+            (array) collect($repository->statutoryRatesFor(null, $date))->first(fn ($rate) => $rate->component_code === 'income_tax')->brackets,
+        ), 2);
+
+        $this->assertSame(125.0, $tax('2026-12-31', 3000)); // 75 + 500 × 10%
+        $this->assertSame(175.0, $tax('2027-01-31', 3000)); // 125 + 500 × 10%
+        $this->assertSame(675.0, $tax('2027-06-30', 8000));
+        $this->assertSame(225.0, $tax('2028-01-31', 3000)); // 175 + 500 × 10%
+        $this->assertSame(865.0, $tax('2030-01-31', 9000)); // 725 + 1000 × 14%
     }
 
     private function makePersonnel(string $email): Personnel

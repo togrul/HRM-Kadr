@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
  * Bir məzuniyyət norması sətri (bax: App\Modules\Vacation\Application\Services\VacationNormEvaluator).
@@ -16,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $condition
  * @property int|null $min_value
  * @property int|null $max_value
+ * @property bool $min_inclusive staj pilləsində aşağı hədd daxildirmi («X il və daha çox»)
  * @property \Illuminate\Support\Carbon|null $valid_from
  * @property \Illuminate\Support\Carbon|null $valid_to
  * @property bool $not_in_conditions
@@ -24,11 +27,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $days
  * @property bool $is_active
  * @property bool $is_statutory
+ * @property string|null $statutory_key qanuni staj pilləsinin açarı (seniority_5 / _10 / _15)
  * @property string|null $legal_basis
  * @property string|null $note
  */
 class VacationNorm extends Model
 {
+    use LogsActivity;
+
     public const GROUP_BASE = 'base';
 
     public const GROUP_SENIORITY = 'seniority';
@@ -66,11 +72,13 @@ class VacationNorm extends Model
         'condition',
         'min_value',
         'max_value',
+        'min_inclusive',
         'women_only',
         'exclusive',
         'days',
         'is_active',
         'is_statutory',
+        'statutory_key',
         'legal_basis',
         'note',
         'valid_from',
@@ -82,6 +90,7 @@ class VacationNorm extends Model
         'position_id' => 'integer',
         'min_value' => 'integer',
         'max_value' => 'integer',
+        'min_inclusive' => 'boolean',
         'women_only' => 'boolean',
         'exclusive' => 'boolean',
         'days' => 'integer',
@@ -97,6 +106,34 @@ class VacationNorm extends Model
     {
         return ($this->valid_from === null || $this->valid_from->toDateString() <= $date)
             && ($this->valid_to === null || $date <= $this->valid_to->toDateString());
+    }
+
+    /**
+     * Staj pilləsi verilən staja şamil olunurmu. `$compare(N)` — staj düz N ildən azdırsa -1,
+     * düz N ildirsə 0, çoxdursa 1 (LeaveEntitlementFacts::compareSeniorityTo). Aşağı hədd
+     * `min_inclusive`-ə görə daxil / xaric, yuxarı hədd həmişə daxildir («-dək»).
+     *
+     * @param  callable(int): int  $compare
+     */
+    public function coversSeniority(callable $compare): bool
+    {
+        $from = $compare((int) ($this->min_value ?? 0));
+
+        if ($this->min_inclusive !== false ? $from < 0 : $from <= 0) {
+            return false;
+        }
+
+        return $this->max_value === null || $compare((int) $this->max_value) <= 0;
+    }
+
+    /** Dəyişikliklər audit jurnalına düşür (Audit → «Məzuniyyət normaları»). */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('vacation_norm')
+            ->logFillable()
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
     }
 
     /**

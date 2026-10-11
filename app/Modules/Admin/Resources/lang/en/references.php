@@ -6,6 +6,7 @@ return [
     ],
     'filters' => [
         'all' => 'All',
+        'vtisk_missing' => 'Only without a VTİSK category',
     ],
     'actions' => [
         'close' => 'Close',
@@ -210,6 +211,7 @@ return [
         'scope_position' => 'Position',
     ],
     'messages' => [
+        'vtisk_missing' => 'Not set',
         'vtisk_category_help' => 'Per the unified tariff-qualification handbook. Managers and specialists get 30 days of basic leave (Labour Code art. 114.3(b)).',
         'approval_route_help' => 'Use this page to configure the hierarchy-based approval policy per request type. The system resolves the employee structure and position, finds the nearest approver-capable manager, optionally includes the next upper manager, and keeps HR as a watcher when enabled.',
         'approval_route_scope_required' => 'Scope selection is no longer used on this page; the policy is configured per request type.',

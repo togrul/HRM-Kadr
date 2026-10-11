@@ -12,7 +12,8 @@ use Illuminate\Support\Collection;
  *   - əsas: işçiyə şamil olan bütün sətirlərin ən böyüyü (normalar «azı» minimumlardır, kollektiv /
  *     əmək müqaviləsi daha çox verə bilər — m.145); şamil olan sətir `exclusive`-dirsə (m.118–121
  *     kateqoriyası) staj, uşaq və şərait əlavələri verilmir (m.116.3, 117.4);
- *   - staj: ümumi əmək stajının düşdüyü [min, max) aralığı — ən böyük gün;
+ *   - staj: ümumi əmək stajının düşdüyü aralıq (aşağı hədd `min_inclusive`-ə görə, yuxarı hədd
+ *     daxil), iş ilinin başlanğıcında qüvvədə olan pillələrdən ən böyük gün;
  *   - uşaqlı valideyn: şərtə uyğun sətirlərin ən böyüyü (2 və 5 gün toplanmır); qadınlara, eləcə də
  *     işçi üzrə yazılmış sətirlə (uşaqlarını təkbaşına böyüdən ata, övladlığa götürən) tətbiq olunur;
  *     14 yaşınadək uşaq həmin təqvim ilinin sonunadək sayılır (m.117.3);
@@ -293,17 +294,15 @@ class VacationNormEvaluator
     /**
      * m.116.1 sərhədləri mətnə görə: «X ildən Y ilədək» — hər iki uc daxil, «X ildən çox» — X
      * xaric. Düz 10 il iki aralığa düşür, böyük olanı (4 gün) götürülür; düz 15 il hələ «on
-     * ildən on beş ilədək» aralığıdır (4 gün), 6 gün yalnız 15 ildən çox olanda.
+     * ildən on beş ilədək» aralığıdır (4 gün), 6 gün yalnız 15 ildən çox olanda. Qurum aşağı
+     * həddi daxil edə bilər (`min_inclusive` — «15 il və daha çox», daha əlverişli şərt).
+     * Pillə iş ilinin başlanğıcında qüvvədə olmalıdır (`valid_from` / `valid_to`): qurumun
+     * dəyişikliyi yalnız qüvvəyə minmə tarixindən sonra başlayan iş illərinə tətbiq olunur.
      */
     private function seniorityBandApplies(VacationNorm $norm, LeaveEntitlementFacts $facts, CarbonImmutable $on): bool
     {
-        $from = $facts->compareSeniorityTo((int) ($norm->min_value ?? 0), $on);
-
-        if ($norm->max_value === null) {
-            return $from > 0;
-        }
-
-        return $from >= 0 && $facts->compareSeniorityTo((int) $norm->max_value, $on) <= 0;
+        return $norm->coversDate($on->toDateString())
+            && $norm->coversSeniority(fn (int $years): int => $facts->compareSeniorityTo($years, $on));
     }
 
     /**

@@ -172,8 +172,8 @@ Arxitektura: Livewire başqa modulun modelini birbaşa sorğulamır; translation
 **İşçi tutulmaları (payslip-də deduction):**
 | Komponent | İşçi dərəcəsi (2026) | Qeyd |
 |---|---|---|
-| `income_tax` (gəlir vergisi) | ≤2500: 3% · 2500–8000: 75 + 10%×(məbləğ−2500) · >8000: 625 + 14%×(məbləğ−8000) | 2026-dan 7illik güzəşt bitdi (progressiv) |
-| `dsmf_ee` (sosial sığorta, işçi) | ≤200: 3% · >200: 6 + 10%×(məbləğ−200) | |
+| `income_tax` (gəlir vergisi) | ≤2500: 3% · 2500–8000: 75 + 10%×(məbləğ−2500) · >8000: 625 + 14%×(məbləğ−8000) | 2026-dan 7illik güzəşt bitdi (progressiv); 2027 — 5%, 2028-dən — 7% (EK A.1) |
+| `dsmf_ee` (sosial sığorta, işçi) | ≤200: 3% · 200–8000: 6 + 10%×(məbləğ−200) · >8000: 786 + 10%×(məbləğ−8000) | |
 | `unemployment_ee` (işsizlik, işçi) | 0.5% (brüt) | YENİ kataloqa əlavə olundu |
 | `medical_ee` (icbari tibbi, işçi) | ≤2500: 2% · >2500: 50 + 0.5%×(məbləğ−2500) | 2026-da hədd 8000→2500 endirildi; YENİ |
 | `union` (həmkarlar ittifaqı) | adətən 1% (könüllü/müqavilə) | statutory deyil |
@@ -181,13 +181,55 @@ Arxitektura: Livewire başqa modulun modelini birbaşa sorğulamır; translation
 **İşəgötürən payları (employer cost — işçidən tutulmur; engine `Employer` cəmində):**
 | Komponent | İşəgötürən dərəcəsi (2026) |
 |---|---|
-| DSMF (er) | ≤200: 22% · >200: 44 + 15%×(məbləğ−200) (bəzi mənbələrdə >8000 üçün 11%) |
+| DSMF (er) | ≤200: 22% · 200–8000: 44 + 15%×(məbləğ−200) · >8000: 1214 + 11%×(məbləğ−8000) (m.14.4, bax EK A.1) |
 | İşsizlik (er) | 0.5% |
 | İcbari tibbi (er) | ≤2500: 2% · >2500: 0.5% |
 
 **Digər (Faza 5 — sonra):** məhkəmə/icra tutulmaları (aliment, icra vərəqəsi), avans/bank krediti, maddi məsuliyyət tutulması.
 
 **⚠️ Rejim fərqi:** neft-qaz və dövlət/hərbi sektorlar üçün fərqli cədvəllər var → buna görə engine qayda-dəsti, `regime_id` ilə. Yuxarıdakılar qeyri-neft özəl sektor üçündür.
+
+### EK A.1 — rəsmi mətnlə yoxlama (11.10.2026)
+
+Bütün 2026 dəyişiklikləri **09.12.2025 tarixli 297-VIIQD nömrəli Qanunla** edilib (AZƏRTAC 29.12.2025,
+"Azərbaycan" qəzeti 30.12.2025 № 274; m.19.6 — **01.01.2026-dan** qüvvədədir;
+<https://meclis.gov.az/documents/297-VIIQD.pdf>). Mətnlər e-qanun.az-ın konsolidasiya edilmiş
+redaksiyasından oxunub (fayl `https://e-qanun.az/frameworks/<id÷1000>/f_<id>.html`, `Referer`
+başlığı ilə), müraciət tarixi **11.10.2026**.
+
+| Komponent | Rəsmi mətn (qeyri-neft-qaz, qeyri-dövlət sektoru) | Mənbə | Kod (əvvəl) | Nəticə |
+|---|---|---|---|---|
+| Gəlir vergisi 2026 | 2500-dək 3%; 2500–8000: 75 + 10%; 8000-dən çox: 625 + 14% | Vergi Məcəlləsi m.101.1-1.1 (<https://e-qanun.az/framework/46948>) | eyni | ✅ uyğun |
+| Gəlir vergisi 2027 | 5%; 125 + 10%; 675 + 14% | VM m.101.1-1.2 | yox idi | ➕ 01.01.2027 sətri əlavə edildi |
+| Gəlir vergisi 2028-dən | 7%; 175 + 10%; 725 + 14% (son tarix yoxdur) | VM m.101.1-1.3 | yox idi | ➕ 01.01.2028 sətri əlavə edildi |
+| DSMF, işçi | 200-dək 3%; 200–8000: 6 + 10%; 8000-dən çox: 786 + 10% | «Sosial sığorta haqqında» Qanun m.14.4 (<https://e-qanun.az/framework/3813>) | 3% / 10% (həddsiz) | ✅ riyazi eyni; 8000 pilləsi aydınlıq üçün yazıldı |
+| DSMF, işəgötürən | 200-dək 22%; 200–8000: 44 + 15%; **8000-dən çox: 1214 + 11%** | eyni, m.14.4 | 22% / **15% (həddsiz)** | ❗ düzəldildi: 8000-dən yuxarı 11% |
+| İşsizlikdən sığorta | işəgötürən — əməyin ödənişi fondunun 0,5%; işçi — əməkhaqqının 0,5% | «İşsizlikdən sığorta haqqında» 765-VQ, m.9.0.1–9.0.2 (<https://e-qanun.az/framework/36310>); 297-VIIQD toxunmur | 0,5% / 0,5% | ✅ uyğun |
+| İcbari tibbi sığorta | hər tərəf: 2500-dək hissədən 2%, 2500-dən yuxarı hissədən 0,5% | «Tibbi sığorta haqqında» Qanun m.15-10.1.2-1 (297-VIIQD ilə əlavə; <https://e-qanun.az/framework/80>) | eyni | ✅ uyğun |
+
+Düzəliş `app/Modules/Compensation/Database/Migrations/2026_10_11_102000_correct_statutory_rates_per_law_297_viiqd.php`
+miqrasiyası ilə edilir: yalnız standart (`regime_id = null`) 2026 sətrinə və yalnız seed dəyəri
+dəyişdirilməyibsə toxunur — mühasibin ekranda (Kompensasiya → Qanuni dərəcələr) düzəltdiyi sətir
+üstündən yazılmır. Testlər: `tests/Feature/Payroll/StatutoryEngineTest.php`
+(`test_dsmf_above_8000_follows_article_14_4`, `test_income_tax_schedule_steps_up_in_2027_and_2028`).
+Nümunə: 10 000 AZN brüt → DSMF işəgötürən 1 434 AZN (əvvəl 1 514), işçi 986 AZN.
+
+**Mühasib təsdiqi tələb edən (kod dəyişdirilmədi):**
+
+1. **VM m.102.1.6 — 200 manat azadolma:** "Fiziki şəxsin əsas iş yerində … muzdlu işlə əlaqədar
+   əldə edilən aylıq gəliri 2500 manatadək olduqda, 200 manat … məbləğində olan hissəsi" gəlir
+   vergisindən azaddır. Mətn rejimə görə məhdudlaşdırılmır, 2019–2025-də özəl sektorda 8000-dək
+   0% olduğu üçün təsiri yox idi; 2026-dan 3% dərəcə ilə (məs. 1 100 AZN-də 33 yox, 27 AZN) təsir
+   edir. Mühərrikin pillə modeli bu şərti azadolmanı (yalnız əsas iş yeri, yalnız ≤ 2500) ifadə
+   etmir — mühasib tətbiqi təsdiqləyənə qədər hesablamaya daxil edilmədi.
+2. **Dövlət qulluğu və hərbi rejimlər:** `regime_id = null` sətirləri bütün rejimlərə tətbiq olunur.
+   Rəsmi mətndə dövlət / neft-qaz sektoru üçün: gəlir vergisi 2500-dək 14%, yuxarı 350 + 25%
+   (VM m.101.1, 1-ci cədvəl); DSMF işəgötürən 22%, işçi 3% (m.14.3); tibbi sığorta 8000-dək 2%,
+   yuxarı 0,5% (m.15-10.1.2 — hərbi qulluqçular da daxil). Bu rejimlər üçün ayrıca sətirlər
+   yaradılmadı: hərbi qulluqçuların gəlir vergisi azadolmaları və DSMF/işsizlik statusu
+   yoxlanılmayıb. Belə işçilər varsa mühasib «Qanuni dərəcələr»də rejim üzrə sətir yazmalıdır.
+3. Gəlir vergisi bazasına hansı ödənişlərin daxil olmadığı (VM m.102 digər bəndləri) komponent
+   səviyyəsində (`taxable`) idarə olunur — bu yoxlamada baxılmayıb.
 
 ## 11.10.2026 — qabaqcıl payroll işlərinin hazırlıq sərhədi
 

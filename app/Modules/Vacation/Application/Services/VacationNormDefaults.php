@@ -20,6 +20,22 @@ use App\Support\VtiskCategory;
 class VacationNormDefaults
 {
     /**
+     * ƏM m.116.1-in qanuni staj pillələri (açar => hədlər, günlər). «beş ildən on ilədək» və «on
+     * ildən on beş ilədək» — hər iki uc daxil; «on beş ildən çox» — 15 xaric (düz 15 il → 4 gün).
+     * Qurumun pillələri hər bir staj nöqtəsində bu cədvəldən az gün verə bilməz.
+     *
+     * @return array<string, array{min_value: int, max_value: int|null, min_inclusive: bool, days: int}>
+     */
+    public static function seniorityLaw(): array
+    {
+        return [
+            'seniority_5' => ['min_value' => 5, 'max_value' => 10, 'min_inclusive' => true, 'days' => 2],
+            'seniority_10' => ['min_value' => 10, 'max_value' => 15, 'min_inclusive' => true, 'days' => 4],
+            'seniority_15' => ['min_value' => 15, 'max_value' => null, 'min_inclusive' => false, 'days' => 6],
+        ];
+    }
+
+    /**
      * @return list<array<string, mixed>>
      */
     public static function rows(): array

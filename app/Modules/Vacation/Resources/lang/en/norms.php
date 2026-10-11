@@ -13,9 +13,16 @@ return [
     ],
     'hints' => [
         'base' => 'Default 21 calendar days (art. 114.2). 30 days (art. 114.3): VTİSK manager and specialist categories through the statutory rows, the category is set in Admin → Positions; civil servants in administrative posts, doctors, etc. by position, teaching staff 56/42 days (art. 118), under 16 — 42, aged 16–18 — 35, employees with a disability — 42 days (art. 119). When several rows apply the largest wins. A row marked "no additional leave" removes the seniority, children and conditions additions for the employees it covers (art. 116.3, 117.4).',
-        'seniority' => 'Total length of service (all employers, from the labour activity records) at the start of the work year: 5–10 years +2, 10–15 years +4, over 15 years +6 days (art. 116.1). Per the text both "from" and "to" are inclusive and "over" is exclusive: exactly 10 years gives 4 days, exactly 15 years still 4, 6 days only above 15 years.',
+        'seniority' => 'Total length of service (all employers, from the labour activity records) at the start of the work year. Statutory table (art. 116.1): 5–10 years +2, 10–15 years +4, over 15 years +6 days; per the text both "from" and "to" are inclusive and "over" is exclusive: exactly 10 years gives 4 days, exactly 15 years still 4, 6 days only above 15 years. The organisation may adjust the bands (e.g. "15 years or more" — make the lower bound inclusive): a change applies to work years starting on or after its effective date; work years already started and days already used do not change.',
         'children' => 'Women with two children under 14: +2; three or more children or a child with a disability: +5 days (art. 117.1); 2 and 5 do not add up. A child counts until the end of the calendar year in which they turn 14 (art. 117.3). For a father raising children alone or an adoptive parent add a row for that employee (art. 117.2). Children are read from the employee card\'s family members.',
         'conditions' => 'Harmful and hard working conditions: at least 6 calendar days (art. 115.1); positions and days come from the list of Cabinet of Ministers decision 92. Added together with the seniority leave (art. 136.2). Decision 95: the right arises after 6 months in the conditions; proportional to the time worked in the work year, a full month = days ÷ 30.4 (items 7, 10); different positions within a work year are computed separately and added up (from transfer orders, item 11), of two simultaneous rights the larger one (item 14); an employee currently in the conditions gets the full days for the current year (advance, item 7). Period fields: a personnel row with a period when an employee outside the list was assigned listed work (item 13); an "outside the conditions" row when the employee spent less than 90% of the working day in the conditions (item 12).',
+    ],
+    'warnings' => [
+        'seniority_law' => 'Granting fewer days than the law is not allowed: terms restricting employee rights compared with the legislation may not be included in an employment contract (Labour Code art. 7.3), and collective agreement terms worsening the employees\' position compared with the law are void (art. 24.2). Only more favourable values are accepted: more days, a lower threshold or an inclusive bound.',
+    ],
+    'points' => [
+        'exact' => 'exactly :years years',
+        'over' => 'over :years years',
     ],
     'scopes' => [
         'vtisk_category' => 'Qualification category (VTİSK)',
@@ -37,6 +44,8 @@ return [
         'personnel' => 'Employee: :name',
         'seniority' => 'Service :from – :to years',
         'seniority_open' => 'Service over :from years',
+        'seniority_open_inclusive' => 'Service :from years or more',
+        'seniority_exclusive' => 'Service over :from – :to years',
         'children_under_14' => ':count or more children under 14',
         'disabled_child' => 'Child with a disability',
         'disabled_child_age' => 'Child with a disability (under :age)',
@@ -47,6 +56,8 @@ return [
         'not_in_conditions' => 'In this period the employee spent less than 90% of the working day in these conditions — the days do not count (CoM decision 95, item 12)',
         'valid_to' => 'In force until',
         'valid_from' => 'In force from',
+        'valid_from_seniority' => 'Effective from (work years starting on or after)',
+        'min_inclusive' => 'Lower bound inclusive ("X years or more"); unchecked — "over X years"',
         'vtisk_category' => 'Qualification category (VTİSK)',
         'scope' => 'Applies to',
         'position' => 'Position',
@@ -76,6 +87,9 @@ return [
     ],
     'badges' => [
         'statutory' => 'Statutory',
+        'differs_from_law' => 'Organisation value (more favourable than the law)',
+        'history' => 'History',
+        'scheduled' => 'Takes effect later',
         'exclusive' => 'No additions',
     ],
     'actions' => [
@@ -84,6 +98,7 @@ return [
         'edit' => 'Edit',
         'delete' => 'Delete',
         'close' => 'Close',
+        'restore_law' => 'Restore the statutory value',
     ],
     'confirm' => [
         'delete_title' => 'Delete this norm?',
@@ -98,10 +113,16 @@ return [
     ],
     'messages' => [
         'saved' => 'Norm saved.',
+        'restored' => 'The band is back to the statutory value from today.',
     ],
     'errors' => [
         'below_minimum' => 'The day count cannot be below the legal minimum (:days days).',
         'range' => 'The upper service limit must be greater than the lower one.',
+        'seniority_below_law' => 'At :point of service the bands give :given days, while the law requires at least :days days (Labour Code art. 116.1). Fewer days than the law are not allowed (art. 7.3, 24.2).',
+        'seniority_past' => 'A seniority band change cannot take effect in the past — work years already started do not change.',
+        'seniority_history' => 'This row is closed (history) — it applies only to work years that started earlier and cannot be changed.',
+        'seniority_toggle' => 'A seniority band is not switched off: edit it (the new value applies from its effective date) or delete the organisation\'s own band.',
+        'seniority_not_statutory' => 'Only a statutory seniority band can be restored to the statutory value.',
         'statutory_delete' => 'A statutory norm cannot be deleted — deactivate it instead.',
         'compensation_requires_termination' => 'Unused leave is paid out in money only when the employment contract ends (Labour Code art. 144.2). Approve the termination order first.',
         'opening_days' => 'An opening balance must be 1–366 days.',

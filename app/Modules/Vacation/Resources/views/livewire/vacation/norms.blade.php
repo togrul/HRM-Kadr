@@ -28,6 +28,10 @@
 
     <p class="rounded-xl border border-hairline bg-[#fafafa] px-3 py-2 text-[12px] leading-5 text-ink-muted">{{ __('vacation::norms.hints.'.$group) }}</p>
 
+    @if ($group === 'seniority')
+        <p class="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] leading-5 text-amber-800" role="note">{{ __('vacation::norms.warnings.seniority_law') }}</p>
+    @endif
+
     @if ($isAdded)
         <div wire:transition class="relative flex rounded-2xl border border-zinc-200 bg-white px-4 py-4 shadow-sm">
             <x-action-button class="absolute right-2 top-2 h-9 w-9 hover:bg-zinc-100" wire:click="closeCrud()" :title="__('vacation::norms.actions.close')">
@@ -123,6 +127,14 @@
                     </div>
                 @endif
 
+                @if ($group === 'seniority')
+                    <div class="flex flex-col">
+                        <x-label for="form.valid_from">{{ __('vacation::norms.fields.valid_from_seniority') }}</x-label>
+                        <x-ui.date-input wire:model="form.valid_from" name="form.valid_from" />
+                        @error('form.valid_from') <x-validation>{{ $message }}</x-validation> @enderror
+                    </div>
+                @endif
+
                 @if ($group === 'conditions')
                     <div class="flex flex-col">
                         <x-label for="form.valid_from">{{ __('vacation::norms.fields.valid_from') }}</x-label>
@@ -155,6 +167,12 @@
                 </div>
 
                 <div class="flex flex-col justify-end gap-2 md:col-span-2">
+                    @if ($group === 'seniority')
+                        <label class="inline-flex items-center gap-2">
+                            <input type="checkbox" wire:model="form.min_inclusive" class="rounded border-zinc-300 text-zinc-700 focus:ring-zinc-300">
+                            <span class="text-sm text-zinc-700">{{ __('vacation::norms.fields.min_inclusive') }}</span>
+                        </label>
+                    @endif
                     @if ($group === 'base')
                         <label class="inline-flex items-center gap-2">
                             <input type="checkbox" wire:model="form.exclusive" class="rounded border-zinc-300 text-zinc-700 focus:ring-zinc-300">
@@ -173,10 +191,12 @@
                             <span class="text-sm text-zinc-700">{{ __('vacation::norms.fields.women_only') }}</span>
                         </label>
                     @endif
-                    <label class="inline-flex items-center gap-2">
-                        <input type="checkbox" wire:model="form.is_active" class="rounded border-zinc-300 text-zinc-700 focus:ring-zinc-300">
-                        <span class="text-sm text-zinc-700">{{ __('vacation::norms.fields.is_active') }}</span>
-                    </label>
+                    @unless ($group === 'seniority')
+                        <label class="inline-flex items-center gap-2">
+                            <input type="checkbox" wire:model="form.is_active" class="rounded border-zinc-300 text-zinc-700 focus:ring-zinc-300">
+                            <span class="text-sm text-zinc-700">{{ __('vacation::norms.fields.is_active') }}</span>
+                        </label>
+                    @endunless
                 </div>
 
                 <div class="flex items-end">
@@ -190,7 +210,10 @@
         <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
             <x-table.tbl :headers="[__('vacation::norms.table.rule'), __('vacation::norms.table.days'), __('vacation::norms.table.legal_basis'), __('vacation::norms.table.status'), __('vacation::norms.table.actions')]">
                 @forelse ($norms as $norm)
-                    <tr wire:key="norm-{{ $norm->id }}">
+                    @php
+                        $isHistory = $catalog->isHistory($norm);
+                    @endphp
+                    <tr wire:key="norm-{{ $norm->id }}" @class(['opacity-60' => $isHistory])>
                         <x-table.td style="white-space: normal !important;">
                             <div class="flex flex-col gap-1">
                                 <span class="text-sm font-medium text-ink">{{ $catalog->describe($norm) }}</span>
@@ -200,6 +223,14 @@
                                     @endif
                                     @if ($norm->exclusive)
                                         <x-small-badge mode="blue">{{ __('vacation::norms.badges.exclusive') }}</x-small-badge>
+                                    @endif
+                                    @if ($group === 'seniority' && $catalog->differsFromLaw($norm))
+                                        <x-small-badge mode="blue">{{ __('vacation::norms.badges.differs_from_law') }}</x-small-badge>
+                                    @endif
+                                    @if ($isHistory)
+                                        <x-small-badge mode="secondary">{{ __('vacation::norms.badges.history') }}</x-small-badge>
+                                    @elseif ($group === 'seniority' && $norm->valid_from !== null && $norm->valid_from->isFuture())
+                                        <x-small-badge mode="secondary">{{ __('vacation::norms.badges.scheduled') }}</x-small-badge>
                                     @endif
                                 </div>
                                 @if (filled($norm->note))
@@ -215,14 +246,23 @@
                             <span class="text-[13px] text-ink-muted">{{ $norm->legal_basis ?? '—' }}</span>
                         </x-table.td>
                         <x-table.td>
-                            <x-ui.toggle wire:click="toggle({{ $norm->id }})" :checked="$norm->is_active" aria-label="{{ __('vacation::norms.fields.is_active') }}" />
+                            @if ($group === 'seniority' && $norm->is_active)
+                                <span class="text-[13px] text-ink-muted">{{ $isHistory ? '—' : __('vacation::norms.fields.is_active') }}</span>
+                            @else
+                                <x-ui.toggle wire:click="toggle({{ $norm->id }})" :checked="$norm->is_active" aria-label="{{ __('vacation::norms.fields.is_active') }}" />
+                            @endif
                         </x-table.td>
                         <x-table.td :isButton="true" width="100">
                             <div class="flex items-center space-x-2">
-                                <x-action-button wire:click.prevent="openCrud({{ $norm->id }})" class="h-9 w-9 hover:bg-zinc-100" :title="__('vacation::norms.actions.edit')">
-                                    <x-icons.edit-icon color="text-zinc-400" hover="text-zinc-500"></x-icons.edit-icon>
-                                </x-action-button>
-                                @unless ($norm->is_statutory)
+                                @unless ($isHistory)
+                                    <x-action-button wire:click.prevent="openCrud({{ $norm->id }})" class="h-9 w-9 hover:bg-zinc-100" :title="__('vacation::norms.actions.edit')">
+                                        <x-icons.edit-icon color="text-zinc-400" hover="text-zinc-500"></x-icons.edit-icon>
+                                    </x-action-button>
+                                @endunless
+                                @if ($group === 'seniority' && ! $isHistory && $catalog->differsFromLaw($norm))
+                                    <x-button mode="default" class="whitespace-nowrap text-[12px]" wire:click.prevent="restoreLaw({{ $norm->id }})">{{ __('vacation::norms.actions.restore_law') }}</x-button>
+                                @endif
+                                @unless ($norm->is_statutory || $isHistory)
                                     <x-action-button wire:click.prevent="confirmDelete({{ $norm->id }})" class="h-9 w-9 hover:bg-red-100" :title="__('vacation::norms.actions.delete')">
                                         <x-icons.delete-icon color="text-rose-500" hover="text-rose-600"></x-icons.delete-icon>
                                     </x-action-button>

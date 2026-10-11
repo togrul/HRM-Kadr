@@ -70,13 +70,17 @@ class VacationNorms extends Component
                 'condition' => $norm->condition,
                 'min_value' => $norm->min_value,
                 'max_value' => $norm->max_value,
+                'min_inclusive' => $norm->min_inclusive !== false,
                 'women_only' => $norm->women_only,
                 'exclusive' => $norm->exclusive,
                 'days' => $norm->days,
                 'is_active' => $norm->is_active,
                 'legal_basis' => $norm->legal_basis,
                 'note' => $norm->note,
-                'valid_from' => $norm->valid_from?->toDateString(),
+                // Staj pilləsinin dəyişikliyi bu gündən tez qüvvəyə minə bilməz.
+                'valid_from' => $norm->group === VacationNorm::GROUP_SENIORITY
+                    ? max($norm->valid_from?->toDateString() ?? '', now()->toDateString())
+                    : $norm->valid_from?->toDateString(),
                 'valid_to' => $norm->valid_to?->toDateString(),
                 'not_in_conditions' => $norm->not_in_conditions,
             ];
@@ -117,7 +121,25 @@ class VacationNorms extends Component
     public function toggle(int $id, VacationNormCatalog $catalog): void
     {
         Gate::authorize('access-admin');
-        $catalog->toggle($id);
+
+        try {
+            $catalog->toggle($id);
+        } catch (DomainException $e) {
+            $this->dispatch('notify', type: 'error', message: $e->getMessage());
+        }
+    }
+
+    /** Qanuni staj pilləsini bu gündən qanundakı dəyərə qaytarır. */
+    public function restoreLaw(int $id, VacationNormCatalog $catalog): void
+    {
+        Gate::authorize('access-admin');
+
+        try {
+            $catalog->restoreLaw($id);
+            $this->dispatch('notify', type: 'success', message: __('vacation::norms.messages.restored'));
+        } catch (DomainException $e) {
+            $this->dispatch('notify', type: 'error', message: $e->getMessage());
+        }
     }
 
     /** Asks the global confirm modal; on confirm it calls delete(). */
@@ -231,13 +253,14 @@ class VacationNorms extends Component
             'condition' => $this->group === VacationNorm::GROUP_CHILDREN ? VacationNorm::CONDITION_CHILDREN_UNDER_14 : null,
             'min_value' => null,
             'max_value' => null,
+            'min_inclusive' => true,
             'women_only' => $this->group === VacationNorm::GROUP_CHILDREN,
             'exclusive' => false,
             'days' => null,
             'is_active' => true,
             'legal_basis' => null,
             'note' => null,
-            'valid_from' => null,
+            'valid_from' => $this->group === VacationNorm::GROUP_SENIORITY ? now()->toDateString() : null,
             'valid_to' => null,
             'not_in_conditions' => false,
         ];
