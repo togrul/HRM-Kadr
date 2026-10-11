@@ -152,6 +152,7 @@ return [
         'payroll_period' => 'Əmək haqqı dövrləri',
         'payroll_run' => 'Əmək haqqı hesablamaları',
         'vacation_norm' => 'Məzuniyyət normaları',
+        'benefits' => 'İmtiyazlar',
     ],
     'changes' => [
         'empty' => 'boş',

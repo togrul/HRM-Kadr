@@ -217,6 +217,11 @@
         </section>
     </div>
 
+    {{-- İmtiyazlar modulu: şirkət növünə görə standart + adminin seçimi (modul yüklənibsə) --}}
+    @if (\Illuminate\Support\Facades\Route::has('benefits'))
+        <livewire:benefits.module-switch />
+    @endif
+
     {{-- ───────────────────────── Workflow + Approval defaults ───────────────────────── --}}
     <div class="grid gap-5 xl:grid-cols-2">
         {{-- Workflow defaults --}}

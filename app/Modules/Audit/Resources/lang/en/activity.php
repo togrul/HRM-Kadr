@@ -152,6 +152,7 @@ return [
         'payroll_period' => 'Payroll periods',
         'payroll_run' => 'Payroll runs',
         'vacation_norm' => 'Vacation norms',
+        'benefits' => 'Benefits',
     ],
     'changes' => [
         'empty' => 'empty',
