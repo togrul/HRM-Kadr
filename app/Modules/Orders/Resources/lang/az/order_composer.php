@@ -4,6 +4,10 @@ return [
     'title' => 'Əmrin tərtibatı',
     'create_title' => 'Yeni əmr',
     'edit_title' => 'Əmrin redaktəsi',
+    'draft' => [
+        'restored' => 'Yarımçıq qalmış qaralama bərpa olundu.',
+        'discard' => 'Təmizlə',
+    ],
     'labels' => [
         'type' => 'Əmrin növü',
         'number' => 'Əmrin nömrəsi',

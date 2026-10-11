@@ -7,6 +7,7 @@ use App\Models\OrderWordTemplate;
 use App\Modules\Orders\Application\Document\OrderComposition;
 use App\Modules\Orders\Application\Document\OrderLeaveDateRules;
 use App\Modules\Orders\Application\Document\OrderTemplateProvider;
+use App\Modules\Orders\Infrastructure\Document\OrderComposerDraftStore;
 use App\Modules\Orders\Infrastructure\Document\OrderCompositionIssuer;
 use App\Modules\Orders\Infrastructure\Document\OrderDocumentBuilder;
 use App\Modules\Orders\Infrastructure\Document\OrderDraftService;
@@ -77,6 +78,13 @@ class OrderComposer extends Component
 
     public bool $hasUploadedDocx = false;
 
+    /** The author reopened the composer and an unsent draft was put back (banner). */
+    public bool $draftRestored = false;
+
+    /** The employee the composer was opened for; keys the autosaved draft. */
+    #[Locked]
+    public ?int $draftPersonnelId = null;
+
     /** Base64 of the generated PDF, shown inline as a faithful preview. */
     public string $previewPdf = '';
 
@@ -104,6 +112,64 @@ class OrderComposer extends Component
         $this->orderDate = now()->format('Y-m-d');
         $this->pickPersonnel($personnelId);
         $this->seedParticipantFromPersonnel();
+        $this->draftPersonnelId = $personnelId;
+        $this->restoreDraft();
+    }
+
+    /** Throw the autosaved draft away and start the form from its defaults again. */
+    public function discardDraft(): void
+    {
+        $this->authorize('add-orders');
+
+        app(OrderComposerDraftStore::class)->forget((int) auth()->id(), $this->draftPersonnelId);
+        $this->draftRestored = false;
+        $this->fields = [];
+        $this->participantFields = [];
+        $this->applyFieldDefaults();
+        $this->seedParticipantFromPersonnel();
+    }
+
+    private function restoreDraft(): void
+    {
+        $draft = app(OrderComposerDraftStore::class)->get((int) auth()->id(), $this->draftPersonnelId);
+        if ($draft === null) {
+            return;
+        }
+
+        // A caller that asked for a specific type only gets a draft of that same type.
+        if ($this->presetCode !== '' && $this->presetCode !== $draft['preset']) {
+            return;
+        }
+
+        $this->presetCode = $draft['preset'];
+        $this->templateLoaded = false;
+        $this->applyFieldDefaults();
+        $this->fields = array_merge($this->fields, $draft['fields']);
+        foreach ($this->participantIds as $id) {
+            if (isset($draft['participants'][$id])) {
+                $this->participantFields[$id] = array_merge($this->participantFields[$id] ?? [], $draft['participants'][$id]);
+            }
+        }
+        if ($draft['city'] !== '') {
+            $this->organizationCity = $draft['city'];
+        }
+        $this->draftRestored = true;
+    }
+
+    private function saveDraft(): void
+    {
+        if ($this->isEditing() || auth()->id() === null) {
+            return;
+        }
+
+        app(OrderComposerDraftStore::class)->put(
+            (int) auth()->id(),
+            $this->draftPersonnelId,
+            (string) $this->presetCode,
+            $this->fields,
+            $this->participantFields,
+            $this->organizationCity,
+        );
     }
 
     /** Whether the selected type is issued for a list of employees (çoxşəxsli). */
@@ -325,6 +391,8 @@ class OrderComposer extends Component
         if ($template && is_string($key) && $key !== '') {
             $this->fields = app(OrderLeaveDateRules::class)->autofill($template, $this->fields, $key);
         }
+
+        $this->saveDraft();
     }
 
     /**
@@ -347,6 +415,8 @@ class OrderComposer extends Component
         if ($template && is_array($this->participantFields[(int) $id] ?? null)) {
             $this->participantFields[(int) $id] = app(OrderLeaveDateRules::class)->autofill($template, $this->participantFields[(int) $id], $field);
         }
+
+        $this->saveDraft();
     }
 
     public function updatedPresetCode(): void
@@ -485,6 +555,8 @@ class OrderComposer extends Component
             return null;
         }
 
+        app(OrderComposerDraftStore::class)->forget((int) auth()->id(), $this->draftPersonnelId);
+        $this->draftRestored = false;
         $this->dispatch('orderAdded', $outcome->message);
 
         return $outcome->documentPath === null

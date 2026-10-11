@@ -34,6 +34,15 @@
 
     <div class="flex flex-col w-full px-0 py-6 mx-auto space-y-6 bg-white">
 
+        @if ($draftRestored)
+            <div class="flex items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                <span>{{ __('orders::order_composer.draft.restored') }}</span>
+                <button type="button" wire:click="discardDraft" class="font-medium underline">
+                    {{ __('orders::order_composer.draft.discard') }}
+                </button>
+            </div>
+        @endif
+
         {{-- Step 1: type + subject --}}
         <section class="space-y-4 rounded-2xl border border-zinc-200 bg-zinc-50/60 p-5">
             <div class="flex items-center gap-2 text-sm font-semibold text-zinc-900">

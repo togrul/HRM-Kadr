@@ -4,6 +4,10 @@ return [
     'title' => 'Compose order',
     'create_title' => 'New order',
     'edit_title' => 'Edit order',
+    'draft' => [
+        'restored' => 'An unsent draft was restored.',
+        'discard' => 'Discard',
+    ],
     'labels' => [
         'type' => 'Order type',
         'number' => 'Order number',

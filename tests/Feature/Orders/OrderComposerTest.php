@@ -87,6 +87,69 @@ class OrderComposerTest extends TestCase
         $this->assertStringNotContainsString('${', $text);
     }
 
+    public function test_unsent_fields_are_autosaved_and_restored_on_reopen(): void
+    {
+        $this->seedTemplate();
+        $personnel = $this->makePersonnel();
+        $this->actingAs($this->userWith('add-orders'));
+
+        Livewire::test(OrderComposer::class, ['presetCode' => 'leave', 'personnelId' => $personnel->id])
+            ->assertSet('draftRestored', false)
+            ->set('fields', ['var_2' => '19.05.2026-cı il']);
+
+        Livewire::test(OrderComposer::class, ['presetCode' => 'leave', 'personnelId' => $personnel->id])
+            ->assertSet('draftRestored', true)
+            ->assertSet('fields.var_2', '19.05.2026-cı il')
+            ->assertSee(__('orders::order_composer.draft.restored'));
+    }
+
+    public function test_a_draft_is_private_to_its_author_and_bound_to_the_employee(): void
+    {
+        $this->seedTemplate();
+        $personnel = $this->makePersonnel();
+        $this->actingAs($this->userWith('add-orders'));
+
+        Livewire::test(OrderComposer::class, ['presetCode' => 'leave', 'personnelId' => $personnel->id])
+            ->set('fields', ['var_2' => 'gizli']);
+
+        // Başqa əməkdaş üçün açılan tərtibçi bu qaralamanı görmür.
+        Livewire::test(OrderComposer::class, ['presetCode' => 'leave', 'personnelId' => null])
+            ->assertSet('draftRestored', false)
+            ->assertSet('fields', []);
+
+        // Başqa istifadəçi də görmür.
+        $this->actingAs($this->userWith('add-orders'));
+        Livewire::test(OrderComposer::class, ['presetCode' => 'leave', 'personnelId' => $personnel->id])
+            ->assertSet('draftRestored', false);
+    }
+
+    public function test_issuing_or_discarding_removes_the_draft(): void
+    {
+        $this->seedTemplate();
+        $personnel = $this->makePersonnel();
+        $this->actingAs($this->userWith('add-orders'));
+
+        Livewire::test(OrderComposer::class, ['presetCode' => 'leave', 'personnelId' => $personnel->id])
+            ->set('orderNumber', 'DR-1')
+            ->set('fields', ['var_2' => '19.05.2026-cı il'])
+            ->call('issue');
+
+        Livewire::test(OrderComposer::class, ['presetCode' => 'leave', 'personnelId' => $personnel->id])
+            ->assertSet('draftRestored', false);
+
+        Livewire::test(OrderComposer::class, ['presetCode' => 'leave', 'personnelId' => $personnel->id])
+            ->set('fields', ['var_2' => 'yarımçıq']);
+
+        Livewire::test(OrderComposer::class, ['presetCode' => 'leave', 'personnelId' => $personnel->id])
+            ->assertSet('draftRestored', true)
+            ->call('discardDraft')
+            ->assertSet('draftRestored', false)
+            ->assertSet('fields.var_2', null);
+
+        Livewire::test(OrderComposer::class, ['presetCode' => 'leave', 'personnelId' => $personnel->id])
+            ->assertSet('draftRestored', false);
+    }
+
     public function test_the_native_date_is_required_and_printed_in_long_form(): void
     {
         $this->seedTemplate();
