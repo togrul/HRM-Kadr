@@ -5,6 +5,7 @@ namespace App\Modules\Vacation\Providers;
 use App\Contracts\AbsenceSource;
 use App\Modules\Vacation\Application\Services\VacationAbsenceSource;
 use App\Modules\Vacation\Console\MigrateLegacyVacationBalancesCommand;
+use App\Modules\Vacation\Console\SeniorityFifteenFixCommand;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
 use Illuminate\Support\Facades\Gate;
@@ -19,6 +20,7 @@ class VacationServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 MigrateLegacyVacationBalancesCommand::class,
+                SeniorityFifteenFixCommand::class,
             ]);
         }
     }
@@ -47,6 +49,7 @@ class VacationServiceProvider extends ServiceProvider
         return [
             'vacations' => \App\Modules\Vacation\Livewire\Vacations::class,
             'vacation-norms' => \App\Modules\Vacation\Livewire\VacationNorms::class,
+            'seniority-fifteen-fix' => \App\Modules\Vacation\Livewire\SeniorityFifteenFix::class,
         ];
     }
 

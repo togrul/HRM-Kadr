@@ -83,6 +83,15 @@ class CivilEntitlementStrategy implements EntitlementStrategy
         return $this->evaluator->conditions($facts, $period, $this->norms(), $asOf);
     }
 
+    /**
+     * Ümumi əmək stajı (ƏM m.116.2) $date tarixinə düz $years ildən azdırsa -1, düz $years ildirsə 0,
+     * çoxdursa 1 (LeaveEntitlementFacts::compareSeniorityTo); işçinin faktları yoxdursa null.
+     */
+    public function compareSeniorityTo(Personnel $personnel, int $years, CarbonImmutable $date): ?int
+    {
+        return $this->factsFor($personnel)?->compareSeniorityTo($years, $date);
+    }
+
     public function availableFrom(Personnel $personnel, WorkYearPeriod $period): CarbonImmutable
     {
         if ($period->sequence !== 1) {

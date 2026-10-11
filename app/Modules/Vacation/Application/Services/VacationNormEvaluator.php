@@ -27,8 +27,20 @@ class VacationNormEvaluator
     /** m.131.6: əmək şəraitinə görə əlavə məzuniyyət hüququ — həmin şəraitdə üst-üstə 6 ay. */
     public const CONDITIONS_WAIT_MONTHS = 6;
 
-    /** NK 95, b.10: tam ay = cəmlənmiş günlər ÷ 30,4. */
+    /** NK 95, b.10: tam ay = cəmlənmiş günlər ÷ 30,4 (təqvim günlərinin orta aylıq sayı). */
     public const DAYS_PER_MONTH = 30.4;
+
+    /**
+     * NK 95, b.10: iş ilində şəraitdə sayılan TƏQVİM günlərindən tam aylar — günlər ÷ 30,4;
+     * qalıq 30,4-ün yarısından (15,2) azdırsa atılır, yarısı və çoxu tam ay sayılır; ildə 12-dən çox
+     * ola bilməz. Bəndin 1-ci cümləsindəki «iş günləri» təqvim günü kimi oxunur: bölən mətnin özündə
+     * «təqvim günlərinin orta aylıq sayı» adlanır, b.7-nin misalı (aprel–iyun = 3 ay) və b.11-in
+     * misalı aylarla sayır; iş günlərini 30,4-ə bölmək tam il üçün 8–9 ay verərdi (docs/vacation-legal-basis.md, (c-3)).
+     */
+    public static function fullMonths(int $calendarDays): int
+    {
+        return min(12, max(0, (int) round($calendarDays / self::DAYS_PER_MONTH, 0, PHP_ROUND_HALF_UP)));
+    }
 
     public function __construct(
         private readonly WorkYearCalendar $calendar,
@@ -187,7 +199,7 @@ class VacationNormEvaluator
         $total = 0.0;
 
         foreach ($daysByNorm as $id => $days) {
-            $months = min(12, (int) round($days / self::DAYS_PER_MONTH, 0, PHP_ROUND_HALF_UP));
+            $months = self::fullMonths($days);
             $total += (int) $norms->firstWhere('id', $id)?->days * $months / 12;
         }
 
