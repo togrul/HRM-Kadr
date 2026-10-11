@@ -3,6 +3,7 @@
 namespace Tests\Unit\Support;
 
 use App\Support\Language\AzerbaijaniDeclension;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class AzerbaijaniDeclensionTest extends TestCase
@@ -28,9 +29,8 @@ class AzerbaijaniDeclensionTest extends TestCase
     /**
      * Real names pulled from the customer's sample orders, declined the way the
      * documents actually write them.
-     *
-     * @dataProvider realNameCases
      */
+    #[DataProvider('realNameCases')]
     public function test_full_name_declension_matches_real_orders(string $nominative, string $case, string $expected): void
     {
         $this->assertSame($expected, $this->d->declineName($nominative, $case));
@@ -53,9 +53,7 @@ class AzerbaijaniDeclensionTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider surnameGenitiveCases
-     */
+    #[DataProvider('surnameGenitiveCases')]
     public function test_surname_genitive_vowel_harmony(string $surname, string $expected): void
     {
         $this->assertSame($expected, $this->d->genitive($surname));
@@ -74,9 +72,7 @@ class AzerbaijaniDeclensionTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider dativeCases
-     */
+    #[DataProvider('dativeCases')]
     public function test_dative_vowel_harmony(string $word, string $expected): void
     {
         $this->assertSame($expected, $this->d->dative($word));
@@ -92,9 +88,7 @@ class AzerbaijaniDeclensionTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider locativeAblativeCases
-     */
+    #[DataProvider('locativeAblativeCases')]
     public function test_locative_and_ablative(string $word, string $loc, string $abl): void
     {
         $this->assertSame($loc, $this->d->locative($word));
@@ -112,9 +106,8 @@ class AzerbaijaniDeclensionTest extends TestCase
     /**
      * Org-unit / position names carry the 3rd-person possessive suffix and inflect
      * with the -n- buffer — the genitive form is how structures appear in clauses.
-     *
-     * @dataProvider possessiveCases
      */
+    #[DataProvider('possessiveCases')]
     public function test_possessive_noun_declension(string $phrase, string $genitive, string $dative): void
     {
         $this->assertSame($genitive, $this->d->possessiveGenitive($phrase));

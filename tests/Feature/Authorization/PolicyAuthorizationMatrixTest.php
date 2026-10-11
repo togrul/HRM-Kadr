@@ -22,6 +22,7 @@ use App\Modules\Personnel\Policies\PersonnelPolicy;
 use App\Modules\Staff\Policies\StaffSchedulePolicy;
 use App\Modules\Vacation\Policies\VacationPolicy;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
@@ -106,9 +107,7 @@ class PolicyAuthorizationMatrixTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider policyMatrix
-     */
+    #[DataProvider('policyMatrix')]
     public function test_policy_ability_respects_required_permission(
         string $policyClass,
         string $method,

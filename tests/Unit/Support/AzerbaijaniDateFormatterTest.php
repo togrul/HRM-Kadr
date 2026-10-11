@@ -4,6 +4,7 @@ namespace Tests\Unit\Support;
 
 use App\Support\Language\AzerbaijaniDateFormatter;
 use Carbon\Carbon;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class AzerbaijaniDateFormatterTest extends TestCase
@@ -16,9 +17,7 @@ class AzerbaijaniDateFormatterTest extends TestCase
         $this->formatter = new AzerbaijaniDateFormatter;
     }
 
-    /**
-     * @dataProvider yearSuffixCases
-     */
+    #[DataProvider('yearSuffixCases')]
     public function test_year_suffix(int $year, string $expected): void
     {
         $this->assertSame($expected, $this->formatter->yearSuffix($year));
@@ -39,9 +38,7 @@ class AzerbaijaniDateFormatterTest extends TestCase
         $this->assertSame('06.06.2026-cı il', $this->formatter->longDate(Carbon::parse('2026-06-06')));
     }
 
-    /**
-     * @dataProvider parseCases
-     */
+    #[DataProvider('parseCases')]
     public function test_parse(string $input, ?string $expected): void
     {
         $result = $this->formatter->parse($input);
