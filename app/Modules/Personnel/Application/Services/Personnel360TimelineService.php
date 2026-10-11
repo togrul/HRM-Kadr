@@ -6,10 +6,12 @@ use App\Models\AuditActivity;
 use App\Models\Personnel;
 use App\Models\User;
 use App\Support\Database\InstalledTables;
+use Illuminate\Contracts\Auth\Access\Authorizable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use stdClass;
 
 class Personnel360TimelineService
 {
@@ -30,6 +32,12 @@ class Personnel360TimelineService
         'project',
     ];
 
+    /** Həssas intizam hadisələrini (intizam əmrləri) açan icazə. */
+    public const SENSITIVE_PERMISSION = 'view-personnel-360-sensitive';
+
+    /** Tibbi hadisələri (xəstəlik vərəqəsi olan icazələr) açan əlavə icazə. */
+    public const MEDICAL_PERMISSION = 'view-medical-diagnosis';
+
     /**
      * Small per-build lookup cache so repeated audit rows do not re-query the
      * same reference values such as structures, countries and positions.
@@ -44,6 +52,9 @@ class Personnel360TimelineService
         $dateTo = filled($filters['date_to'] ?? null) ? Carbon::parse($filters['date_to'])->endOfDay() : null;
 
         // A type filter reads only the source that produces that type.
+        $viewerGiven = array_key_exists('viewer', $filters);
+        $viewer = $filters['viewer'] ?? null;
+
         $sources = [
             'order' => fn (): Collection => $this->orders($personnel),
             'leave' => fn (): Collection => $this->leaves($personnel),
@@ -61,6 +72,8 @@ class Personnel360TimelineService
         return collect($sources)
             ->when($source !== null && isset($sources[$source]), fn (Collection $all) => $all->only($source))
             ->flatMap(fn (callable $read): Collection => $read())
+            // Redaksiya axtarışdan əvvəl: gizli mətn axtarış uyğunluğu ilə də sızmır.
+            ->when($viewerGiven, fn (Collection $items) => $this->redact($items, $viewer instanceof Authorizable ? $viewer : null))
             ->when($search, fn (Collection $items) => $items->filter(fn (array $item): bool => $this->matchesSearch($item, $search)))
             ->when($type, fn (Collection $items) => $items->filter(fn (array $item): bool => ($item['type'] ?? null) === $type))
             ->when($dateFrom, fn (Collection $items) => $items->filter(fn (array $item): bool => $this->itemDate($item)?->gte($dateFrom) ?? false))
@@ -70,13 +83,44 @@ class Personnel360TimelineService
             ->values();
     }
 
+    /**
+     * İcazə əsaslı redaksiya: həssas hadisə (intizam / tibbi) baxanın müvafiq icazəsi yoxdursa
+     * ümumi başlıqla qalır — tarix və növ görünür, məzmun (xülasə, status, icraçı, dəyişikliklər) gizlənir.
+     *
+     * @param  Collection<int, array<string, mixed>>  $items
+     * @return Collection<int, array<string, mixed>>
+     */
+    public function redact(Collection $items, ?Authorizable $viewer): Collection
+    {
+        $canSensitive = $viewer?->can(self::SENSITIVE_PERMISSION) === true;
+        $canMedical = $canSensitive || $viewer?->can(self::MEDICAL_PERMISSION) === true;
+
+        return $items->map(function (array $item) use ($canSensitive, $canMedical): array {
+            $sensitivity = $item['sensitivity'] ?? null;
+
+            if ($sensitivity === null || ($sensitivity === 'medical' ? $canMedical : $canSensitive)) {
+                return $item;
+            }
+
+            return [
+                ...$item,
+                'title' => __('personnel::portfolio.timeline_titles.redacted_'.$sensitivity),
+                'summary' => null,
+                'status' => null,
+                'role' => null,
+                'changes' => [],
+                'redacted' => true,
+            ];
+        });
+    }
+
     private function orders(Personnel $personnel): Collection
     {
         if (! InstalledTables::has('order_logs') || ! InstalledTables::has('order_log_personnels')) {
             return collect();
         }
 
-        return DB::table('order_logs')
+        $rows = DB::table('order_logs')
             ->join('order_log_personnels', 'order_log_personnels.order_no', '=', 'order_logs.order_no')
             ->where('order_log_personnels.tabel_no', $personnel->tabel_no)
             ->latest('order_logs.given_date')
@@ -86,15 +130,48 @@ class Personnel360TimelineService
                 'order_logs.order_no',
                 'order_logs.given_date',
                 'order_logs.description',
-            ])
-            ->map(fn ($row): array => $this->item(
-                type: 'order',
-                occurredAt: $row->given_date,
-                title: __('personnel::portfolio.timeline_titles.order', ['number' => $row->order_no ?: $row->id]),
-                summary: $this->stringify($row->description),
-                status: null,
-                recordId: (int) $row->id,
-            ));
+                ...(InstalledTables::hasColumn('order_logs', 'template_snapshot') ? ['order_logs.template_snapshot'] : []),
+            ]);
+
+        $effects = $this->orderEffects($rows);
+
+        return $rows->map(fn ($row): array => [...$this->item(
+            type: 'order',
+            occurredAt: $row->given_date,
+            title: __('personnel::portfolio.timeline_titles.order', ['number' => $row->order_no ?: $row->id]),
+            summary: $this->stringify($row->description),
+            status: null,
+            recordId: (int) $row->id,
+        ), 'sensitivity' => ($effects[(int) $row->id] ?? null) === 'disciplinary' ? 'disciplinary' : null]);
+    }
+
+    /**
+     * Əmrin effekti: təsdiqdə yazılan applied_effect, yoxdursa şablonun effekti (bir sorğu).
+     *
+     * @param  Collection<int, stdClass>  $rows
+     * @return array<int, string|null>
+     */
+    private function orderEffects(Collection $rows): array
+    {
+        $snapshots = $rows->mapWithKeys(function (stdClass $row): array {
+            $snapshot = isset($row->template_snapshot) ? json_decode((string) $row->template_snapshot, true) : null;
+
+            return [(int) $row->id => is_array($snapshot) ? $snapshot : []];
+        });
+
+        $codes = $snapshots
+            ->filter(fn (array $snapshot): bool => ! isset($snapshot['applied_effect']) && filled($snapshot['template_code'] ?? null))
+            ->map(fn (array $snapshot): string => (string) $snapshot['template_code'])
+            ->unique()
+            ->values();
+
+        $templateEffects = $codes->isNotEmpty() && InstalledTables::has('order_word_templates')
+            ? DB::table('order_word_templates')->whereIn('code', $codes->all())->pluck('effect', 'code')->all()
+            : [];
+
+        return $snapshots->map(fn (array $snapshot): ?string => isset($snapshot['applied_effect'])
+            ? (string) $snapshot['applied_effect']
+            : ($templateEffects[(string) ($snapshot['template_code'] ?? '')] ?? null))->all();
     }
 
     private function leaves(Personnel $personnel): Collection
@@ -103,12 +180,22 @@ class Personnel360TimelineService
             return collect();
         }
 
+        $hasCertificates = InstalledTables::has('leave_sick_certificates');
+
         return DB::table('leaves')
-            ->where('tabel_no', $personnel->tabel_no)
-            ->latest('starts_at')
+            ->where('leaves.tabel_no', $personnel->tabel_no)
+            ->when($hasCertificates, fn ($query) => $query->leftJoin('leave_sick_certificates', 'leave_sick_certificates.leave_id', '=', 'leaves.id'))
+            ->latest('leaves.starts_at')
             ->limit(25)
-            ->get(['id', 'starts_at', 'ends_at', 'reason', 'status_id'])
-            ->map(fn ($row): array => $this->item(
+            ->get([
+                'leaves.id',
+                'leaves.starts_at',
+                'leaves.ends_at',
+                'leaves.reason',
+                'leaves.status_id',
+                $hasCertificates ? 'leave_sick_certificates.id as sick_certificate_id' : DB::raw('NULL as sick_certificate_id'),
+            ])
+            ->map(fn ($row): array => [...$this->item(
                 type: 'leave',
                 occurredAt: $row->starts_at,
                 title: __('personnel::portfolio.timeline_titles.leave'),
@@ -118,7 +205,7 @@ class Personnel360TimelineService
                 ]))),
                 status: $row->status_id ? __('personnel::portfolio.timeline_status.status_id', ['id' => $row->status_id]) : null,
                 recordId: (int) $row->id,
-            ));
+            ), 'sensitivity' => $row->sick_certificate_id !== null ? 'medical' : null]);
     }
 
     private function vacations(Personnel $personnel): Collection
@@ -376,6 +463,7 @@ class Personnel360TimelineService
             'summary' => $summary,
             'status' => $status,
             'record_id' => $recordId,
+            'sensitivity' => null,
         ];
     }
 

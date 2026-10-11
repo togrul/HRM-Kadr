@@ -193,12 +193,23 @@ return [
         'probation_review' => 'Probation review',
         'internal_movement' => 'Internal movement',
         'offboarding_case' => 'Offboarding case',
+        'order_transfer' => 'Transfer order: role change',
+        'order_termination' => 'Termination order: offboarding',
     ],
     'checklist' => [
         'confirm_last_day_documents' => 'Confirm last working day and exit documents',
         'close_system_access' => 'Close system access',
         'verify_handover_assets' => 'Verify handover and assets',
         'complete_exit_interview' => 'Complete exit interview notes',
+        'update_access_rights' => 'Update access rights for the new role',
+        'reassign_equipment' => 'Hand over / collect equipment for the new role',
+        'handover_previous_role' => 'Complete the handover of the previous role',
+        'agree_new_role_goals' => 'Agree initial goals with the new manager',
+        'final_settlement' => 'Finalise the final settlement (pay, compensation)',
+    ],
+    'order_events' => [
+        'transfer_description' => 'Role change based on transfer order :order.',
+        'termination_description' => 'Offboarding based on termination order :order.',
     ],
     'errors' => [
         'template_not_found' => 'Lifecycle plan template was not found.',

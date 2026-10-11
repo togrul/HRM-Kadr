@@ -110,4 +110,35 @@ return [
         'plan_created' => 'Varislik planı yaradıldı.',
         'pool_created' => 'İstedad hovuzu yaradıldı.',
     ],
+    'readiness_score' => [
+        'title' => 'Karyera hazırlıq skoru',
+        'chip' => 'Hazırlıq :score',
+        'explain' => 'Skorun komponentlər üzrə izahını göstər',
+        'total' => 'Yekun skor (0–100)',
+        'no_data' => 'məlumat yoxdur',
+        'bands' => [
+            'ready' => 'hazırdır',
+            'developing' => 'inkişafdadır',
+            'early' => 'erkən mərhələ',
+        ],
+        'columns' => [
+            'component' => 'Komponent',
+            'value' => 'Göstərici',
+            'weight' => 'Çəki',
+            'contribution' => 'Töhfə',
+        ],
+        'components' => [
+            'performance' => 'Performans nəticəsi',
+            'training' => 'Tamamlanmış təlimlər',
+            'kpi' => 'KPI nəticəsi',
+            'portfolio' => 'Peşəkar portfolio',
+            'tenure' => 'Staj',
+        ],
+        'values' => [
+            'score' => 'bal :score',
+            'training' => 'son :years ildə :count təlim',
+            'portfolio' => ':count təsdiqlənmiş qeyd',
+            'tenure' => ':years il',
+        ],
+    ],
 ];

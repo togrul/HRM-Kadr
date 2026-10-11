@@ -193,12 +193,23 @@ return [
         'probation_review' => 'Sınaq müddəti baxışı',
         'internal_movement' => 'Daxili yerdəyişmə',
         'offboarding_case' => 'İşdən ayrılma prosesi',
+        'order_transfer' => 'Köçürmə əmri: rol dəyişikliyi',
+        'order_termination' => 'Xitam əmri: işdən ayrılma',
     ],
     'checklist' => [
         'confirm_last_day_documents' => 'Son iş günü və çıxış sənədlərini təsdiqlə',
         'close_system_access' => 'Sistem giriş hüquqlarını bağla',
         'verify_handover_assets' => 'Təhvil-təslim və aktivləri yoxla',
         'complete_exit_interview' => 'Çıxış müsahibəsi qeydlərini tamamla',
+        'update_access_rights' => 'Giriş hüquqlarını yeni rola uyğun yenilə',
+        'reassign_equipment' => 'Avadanlığı yeni rola uyğun təhvil ver / geri al',
+        'handover_previous_role' => 'Əvvəlki rol üzrə təhvil-təslimi tamamla',
+        'agree_new_role_goals' => 'Yeni rəhbərlə başlanğıc hədəflərini razılaşdır',
+        'final_settlement' => 'Son haqq-hesabı (əmək haqqı, kompensasiya) yekunlaşdır',
+    ],
+    'order_events' => [
+        'transfer_description' => ':order nömrəli köçürmə əmri əsasında rol dəyişikliyi.',
+        'termination_description' => ':order nömrəli xitam əmri əsasında işdən ayrılma.',
     ],
     'errors' => [
         'template_not_found' => 'Həyat dövrü plan şablonu tapılmadı.',

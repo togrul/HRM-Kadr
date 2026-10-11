@@ -5,6 +5,7 @@ namespace App\Modules\Personnel\Livewire;
 use App\Models\PersonnelVacation;
 use App\Modules\Attendance\Contracts\ManualEntryApprover;
 use App\Modules\Personnel\Application\Services\HomeOverviewService;
+use App\Modules\Personnel\Application\Services\HrCommandCenterReadService;
 use App\Modules\Personnel\Application\Services\MyHr\MyHrRequestReviewService;
 use App\Services\Absence\AbsenceOverlapException;
 use Illuminate\Contracts\View\View;
@@ -148,6 +149,17 @@ class Home extends Component
     public function structureFill(): array
     {
         return $this->overview()->structureFill(auth()->user());
+    }
+
+    /**
+     * HR Command Center panelləri (lazy island; struktur görünürlüyü ilə süzülür).
+     *
+     * @return list<array<string,mixed>>
+     */
+    #[Computed]
+    public function commandCenter(): array
+    {
+        return app(HrCommandCenterReadService::class)->panels(auth()->user());
     }
 
     public function render(): View

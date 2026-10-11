@@ -24,6 +24,21 @@
         </div>
     </x-ui.filter-panel>
 
+    @if (filled($exportLinks ?? []))
+        <div class="flex flex-wrap items-center justify-end gap-2" data-employee-360-export>
+            <x-pill-button variant="emerald" :href="$exportLinks['xlsx']" title="{{ __('personnel::portfolio.export.xlsx') }}">
+                <x-icons.excel-icon />
+                {{ __('personnel::portfolio.export.xlsx') }}
+            </x-pill-button>
+            @isset($exportLinks['pdf'])
+                <x-pill-button :href="$exportLinks['pdf']" title="{{ __('personnel::portfolio.export.pdf') }}">
+                    <x-icons.document-icon color="text-current" hover="text-current" />
+                    {{ __('personnel::portfolio.export.pdf') }}
+                </x-pill-button>
+            @endisset
+        </div>
+    @endif
+
     <x-surface-card :title="$panelTitle ?? __('personnel::portfolio.tabs.timeline')" content-class="p-0" clip>
         <div class="divide-y divide-zinc-100">
         @forelse ($this->timelineItems as $item)

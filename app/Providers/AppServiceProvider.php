@@ -70,6 +70,14 @@ class AppServiceProvider extends ServiceProvider
         // not the compensation module's provider is loaded.
         $this->app->bind(OrderCompensationSync::class, CompensationService::class);
 
+        // Same reason: transfer/termination effects open lifecycle events through this
+        // contract; the implementation itself is a no-op while the module is switched off.
+        $this->app->bind(\App\Modules\EmployeeLifecycle\Contracts\OrderLifecycleSync::class, \App\Modules\EmployeeLifecycle\Application\Services\OrderLifecycleEventService::class);
+
+        // DOCX → PDF (LibreOffice) — the same converter as an order's final PDF, shared with
+        // other modules (e.g. the employee 360 export) whether or not orders is switched on.
+        $this->app->bind(\App\Contracts\DocumentPdfConverter::class, \App\Modules\Orders\Application\Document\DocxToPdfConverter::class);
+
         // Same reason: undoing an approved order asks whether its month is closed for pay,
         // whether or not the payroll / attendance module providers are loaded.
         $this->app->bind(AttendanceMonthLock::class, AttendanceMonthLockReader::class);

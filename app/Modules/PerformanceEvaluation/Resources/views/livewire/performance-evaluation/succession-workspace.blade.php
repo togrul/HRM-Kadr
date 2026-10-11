@@ -14,6 +14,8 @@
     $readiness = ['ready_now', '1_2_years', '3_5_years'];
     $readinessChip = ['ready_now' => 'bg-emerald-50 text-emerald-600', '1_2_years' => 'bg-amber-50 text-amber-600', '3_5_years' => 'bg-zinc-100 text-zinc-500'];
     $riskChip = ['low' => 'bg-emerald-50 text-emerald-600', 'medium' => 'bg-amber-50 text-amber-600', 'high' => 'bg-rose-50 text-rose-600'];
+    $scoreChip = ['ready' => 'bg-emerald-50 text-emerald-600', 'developing' => 'bg-amber-50 text-amber-600', 'early' => 'bg-zinc-100 text-zinc-500'];
+    $readinessScores = $section === 'plans' ? $this->readinessScores : [];
 @endphp
 
 <div class="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6">
@@ -148,7 +150,9 @@
                         <p class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-zinc-400">{{ __('performance_evaluation::succession.fields.candidates') }}</p>
                         <div class="flex flex-col gap-1.5">
                             @forelse ($plan->candidates as $candidate)
-                                <div wire:key="succ-cand-{{ $candidate->id }}" class="flex items-center justify-between rounded-xl bg-zinc-50/70 px-3 py-2">
+                                @php $candidateScore = $readinessScores[(int) $candidate->personnel_id] ?? null; @endphp
+                                <div wire:key="succ-cand-{{ $candidate->id }}" x-data="{ scoreOpen: false }" class="rounded-xl bg-zinc-50/70 px-3 py-2">
+                                <div class="flex items-center justify-between">
                                     <span class="flex items-center gap-2 text-[13px] text-zinc-700">
                                         <span class="flex h-6 w-6 items-center justify-center rounded-md bg-white text-zinc-400 ring-1 ring-inset ring-zinc-200/60">
                                             <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -156,6 +160,14 @@
                                         {{ trim($candidate->personnel->surname.' '.$candidate->personnel->name) }}
                                     </span>
                                     <div class="flex items-center gap-2">
+                                        @if ($candidateScore)
+                                            <button type="button" x-on:click="scoreOpen = ! scoreOpen" x-bind:aria-expanded="scoreOpen.toString()"
+                                                data-readiness-score="{{ $candidateScore['score'] }}"
+                                                title="{{ __('performance_evaluation::succession.readiness_score.explain') }}"
+                                                class="rounded-md px-2 py-0.5 text-[11px] font-semibold {{ $scoreChip[$candidateScore['band']] ?? $scoreChip['early'] }}">
+                                                {{ __('performance_evaluation::succession.readiness_score.chip', ['score' => $candidateScore['score']]) }}
+                                            </button>
+                                        @endif
                                         @can('manage-performance-evaluation')
                                             <x-ui.select wire:change="setCandidateReadiness({{ $candidate->id }}, $event.target.value)" class="w-auto"
                                                 :trigger-class="'h-7 cursor-pointer rounded-lg border-0 py-0 pl-2.5 pr-8 text-[11px] font-semibold leading-7 '.($readinessChip[$candidate->readiness] ?? 'bg-zinc-100 text-zinc-500').' focus:outline-none focus:ring-2 focus:ring-zinc-200'">
@@ -171,6 +183,36 @@
                                             <span class="rounded-md px-2 py-0.5 text-[11px] font-semibold {{ $readinessChip[$candidate->readiness] ?? 'bg-zinc-100 text-zinc-500' }}">{{ __('performance_evaluation::succession.readiness.'.$candidate->readiness) }}</span>
                                         @endcan
                                     </div>
+                                </div>
+                                @if ($candidateScore)
+                                    <div x-cloak x-show="scoreOpen" class="mt-2 rounded-lg bg-white px-3 py-2 ring-1 ring-inset ring-zinc-200/60" data-readiness-breakdown>
+                                        <p class="text-[11px] font-semibold text-zinc-500">{{ __('performance_evaluation::succession.readiness_score.title') }} · {{ __('performance_evaluation::succession.readiness_score.bands.'.$candidateScore['band']) }}</p>
+                                        <table class="mt-1.5 w-full text-[11.5px] text-zinc-600">
+                                            <thead>
+                                                <tr class="text-left text-[10.5px] uppercase tracking-wide text-zinc-400">
+                                                    <th class="py-1 font-semibold">{{ __('performance_evaluation::succession.readiness_score.columns.component') }}</th>
+                                                    <th class="py-1 font-semibold">{{ __('performance_evaluation::succession.readiness_score.columns.value') }}</th>
+                                                    <th class="py-1 text-right font-semibold">{{ __('performance_evaluation::succession.readiness_score.columns.weight') }}</th>
+                                                    <th class="py-1 text-right font-semibold">{{ __('performance_evaluation::succession.readiness_score.columns.contribution') }}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($candidateScore['components'] as $component)
+                                                    <tr class="border-t border-zinc-100">
+                                                        <td class="py-1">{{ __('performance_evaluation::succession.readiness_score.components.'.$component['key']) }}</td>
+                                                        <td class="py-1">{{ $component['display'] }} <span class="text-zinc-400">({{ $component['normalized'] }}/100)</span></td>
+                                                        <td class="py-1 text-right">{{ rtrim(rtrim(number_format($component['weight'], 1, '.', ''), '0'), '.') }}%</td>
+                                                        <td class="py-1 text-right font-semibold text-zinc-700">+{{ number_format($component['contribution'], 1, '.', '') }}</td>
+                                                    </tr>
+                                                @endforeach
+                                                <tr class="border-t border-zinc-200">
+                                                    <td colspan="3" class="py-1 font-semibold text-zinc-700">{{ __('performance_evaluation::succession.readiness_score.total') }}</td>
+                                                    <td class="py-1 text-right font-semibold text-zinc-900">{{ $candidateScore['score'] }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @endif
                                 </div>
                             @empty
                                 <p class="text-[13px] text-zinc-400">{{ __('performance_evaluation::succession.no_candidates') }}</p>

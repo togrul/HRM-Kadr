@@ -273,6 +273,8 @@ return [
         'foreign' => 'abroad',
     ],
     'timeline_titles' => [
+        'redacted_disciplinary' => 'Confidential: disciplinary action',
+        'redacted_medical' => 'Confidential: medical leave',
         'funding_source' => 'Funding: :source',
         'order' => 'Order :number',
         'leave' => 'Leave request',
@@ -299,5 +301,25 @@ return [
     ],
     'timeline_status' => [
         'status_id' => 'Status #:id',
+    ],
+    'export' => [
+        'xlsx' => 'Export XLSX',
+        'pdf' => 'Export PDF',
+        'sheet_title' => '360 timeline',
+        'document_title' => 'Employee 360 timeline',
+        'tabel_no' => 'Staff no.: :tabel',
+        'generated' => 'Generated: :date · :user',
+        'redaction_note' => 'The content of sensitive events is hidden according to your permissions.',
+        'empty' => 'No events match the selected filters.',
+        'pdf_unavailable' => 'The PDF converter (LibreOffice) is not installed on this server. Use the XLSX export.',
+        'pdf_failed' => 'The PDF file could not be created. Please try again shortly.',
+        'columns' => [
+            'date' => 'Date',
+            'type' => 'Type',
+            'title' => 'Event',
+            'summary' => 'Details',
+            'status' => 'Status',
+            'actor' => 'Actor',
+        ],
     ],
 ];

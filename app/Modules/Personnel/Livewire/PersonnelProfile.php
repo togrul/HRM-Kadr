@@ -222,6 +222,7 @@ class PersonnelProfile extends Component
         return app(Personnel360TimelineService::class)
             ->build(Personnel::withTrashed()->findOrFail($this->personnelId), null, 10, [
                 'type' => in_array($this->recentType, Personnel360TimelineService::TYPES, true) ? $this->recentType : null,
+                'viewer' => auth()->user(),
             ])
             ->take(6)
             ->values()

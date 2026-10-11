@@ -7,6 +7,7 @@ use App\Models\OrderLog;
 use App\Models\OrderParticipant;
 use App\Models\Personnel;
 use App\Modules\Compensation\Contracts\OrderCompensationSync;
+use App\Modules\EmployeeLifecycle\Contracts\OrderLifecycleSync;
 use App\Modules\Orders\Contracts\DeferredTransferApplier;
 use App\Modules\Orders\Infrastructure\Document\OrderIntegrationPublisher;
 use App\Modules\Personnel\Contracts\GuardsPersonnelChanges;
@@ -28,6 +29,9 @@ use RuntimeException;
  * Köçürmənin qüvvəyə minmə tarixi (ƏM m.59: əmrdə göstərilən «... tarixdən») `effective_date`
  * rolundan götürülür, boşdursa əmrin tarixi; o, `effect_state.effective_date`-də saxlanılır və
  * vəzifə tarixçəsi (məzuniyyət hüququ, NK 95 b.7, b.11) həmin gündən yeni vəzifəni sayır.
+ *
+ * Köçürmə karta faktiki yazılanda (təsdiqdə və ya gələcək tarixli köçürmə qüvvəyə minəndə)
+ * həyat dövrü modulunda «rol dəyişikliyi» hadisəsi açılır; əmrin ləğvi onu ləğv edir.
  */
 class TransferEffect implements DeferredTransferApplier, OrderEffect
 {
@@ -36,6 +40,7 @@ class TransferEffect implements DeferredTransferApplier, OrderEffect
         private readonly GuardsPersonnelChanges $changes,
         private readonly AzerbaijaniDateFormatter $dates,
         private readonly OrderIntegrationPublisher $publisher,
+        private readonly OrderLifecycleSync $lifecycle,
     ) {}
 
     public function apply(OrderLog $order, array $fields, Personnel $personnel): void
@@ -105,11 +110,19 @@ class TransferEffect implements DeferredTransferApplier, OrderEffect
     /** @param array<string, int> $update */
     private function applyUpdate(OrderLog $order, Personnel $personnel, array $update, ?OrderParticipant $participant = null): void
     {
+        $from = ['from_structure_id' => $personnel->structure_id, 'from_position_id' => $personnel->position_id];
         $this->changes->allowForEffect('transfer', fn (): bool => $personnel->forceFill($update)->save());
         if (! empty($update['position_id'])) {
             $this->compensation->suggestRegradeFromTransfer($personnel->tabel_no, (int) $update['position_id'], $order->order_no);
         }
         $this->rememberPreState($order, ['transfer_pending' => false, 'transfer_applied_at' => now()->toIso8601String()], $participant);
+
+        $state = $participant !== null ? (array) $participant->effect_state : (array) data_get($order->template_snapshot, 'effect_state', []);
+        $this->lifecycle->transferApplied((int) $order->getKey(), $order->order_no !== null ? (string) $order->order_no : null, (int) $personnel->getKey(), is_string($state['effective_date'] ?? null) ? $state['effective_date'] : null, [
+            ...$from,
+            'to_structure_id' => isset($update['structure_id']) ? (int) $update['structure_id'] : null,
+            'to_position_id' => isset($update['position_id']) ? (int) $update['position_id'] : null,
+        ]);
     }
 
     public function reverse(OrderLog $order, array $fields, Personnel $personnel): void
@@ -120,6 +133,8 @@ class TransferEffect implements DeferredTransferApplier, OrderEffect
 
             return;
         }
+
+        $this->lifecycle->orderReversed((int) $order->getKey(), (int) $personnel->getKey(), 'transfer');
 
         $target = (array) ($state['transfer_target'] ?? []);
         $restore = [];

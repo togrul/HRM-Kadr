@@ -253,7 +253,7 @@ Tövsiyə olunan cədvəllər:
 - [x] rejection reason analytics — kod: RecruitmentAnalytics::rejectionReasonSummary()
 - [ ] interviewer calibration report — kodda tapılmadı
 - [x] talent pool / silver medalist bucket — kod: candidate_talent_pool_entries, CandidateAtsCompletionService::addToTalentPool()
-- [ ] requisition aging dashboard — qismən: CandidateAtsCompletionService::requisitionAging() var, UI-da göstərilmir
+- [x] requisition aging dashboard — Home «HR idarəetmə mərkəzi»: app/Modules/Personnel/Application/Services/HrCommandCenterReadService.php::requisitionAging()
 
 ### Nice-to-have to-do
 

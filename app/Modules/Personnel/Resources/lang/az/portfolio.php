@@ -273,6 +273,8 @@ return [
         'foreign' => 'xarici',
     ],
     'timeline_titles' => [
+        'redacted_disciplinary' => 'Məxfi qeyd: intizam tədbiri',
+        'redacted_medical' => 'Məxfi qeyd: tibbi səbəbli icazə',
         'funding_source' => 'Maliyyələşmə: :source',
         'order' => 'Əmr :number',
         'leave' => 'İcazə sorğusu',
@@ -299,5 +301,25 @@ return [
     ],
     'timeline_status' => [
         'status_id' => 'Status #:id',
+    ],
+    'export' => [
+        'xlsx' => 'XLSX ixrac',
+        'pdf' => 'PDF ixrac',
+        'sheet_title' => '360 zaman xətti',
+        'document_title' => 'Əməkdaş 360 zaman xətti',
+        'tabel_no' => 'Tabel №: :tabel',
+        'generated' => 'Hazırlanıb: :date · :user',
+        'redaction_note' => 'Həssas hadisələrin məzmunu icazəyə görə gizlədilib.',
+        'empty' => 'Seçilmiş süzgəclərə uyğun hadisə yoxdur.',
+        'pdf_unavailable' => 'PDF çeviricisi (LibreOffice) bu serverdə quraşdırılmayıb. XLSX ixracından istifadə edin.',
+        'pdf_failed' => 'PDF faylı yaradıla bilmədi. Bir az sonra yenidən cəhd edin.',
+        'columns' => [
+            'date' => 'Tarix',
+            'type' => 'Növ',
+            'title' => 'Hadisə',
+            'summary' => 'Təfərrüat',
+            'status' => 'Status',
+            'actor' => 'İcraçı',
+        ],
     ],
 ];

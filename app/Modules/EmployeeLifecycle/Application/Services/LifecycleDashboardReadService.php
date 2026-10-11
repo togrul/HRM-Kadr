@@ -51,6 +51,8 @@ class LifecycleDashboardReadService
         'probation_review' => ['Probation review', 'employee_lifecycle_probation_review', 'probation'],
         'internal_movement' => ['Internal movement', 'employee_lifecycle_movement', 'movement'],
         'offboarding_case' => ['Offboarding case', 'employee_lifecycle_offboarding_case', 'offboarding'],
+        'order_transfer' => ['Transfer order role change', 'order_transfer', 'movement'],
+        'order_termination' => ['Termination order offboarding', 'order_termination', 'offboarding'],
     ];
 
     /**

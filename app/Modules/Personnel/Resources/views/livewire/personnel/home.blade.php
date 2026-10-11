@@ -48,6 +48,7 @@
     $canActivity = $user?->can('show-audit-logs') === true;
     $canStructure = $user?->can('show-staff') === true;
     $canPersonnel = $user?->can('show-personnels') === true;
+    $canCommandCenter = app(\App\Modules\Personnel\Application\Services\HrCommandCenterReadService::class)->visibleTo($user);
 @endphp
 
 <div class="flex flex-col">
@@ -277,6 +278,75 @@
             @endif
         @endif
 
+        {{-- ==================== HR command center ==================== --}}
+        @if ($canCommandCenter)
+            @island(name: 'home-command-center', lazy: true)
+            @placeholder
+                @include('personnel::livewire.personnel.placeholders.home-card', ['rows' => 4, 'chart' => false])
+            @endplaceholder
+            @php
+                $commandPanels = $this->commandCenter;
+                $commandTones = [
+                    'rose' => 'bg-[#ffe4e6] text-[#be123c]',
+                    'amber' => 'bg-[#fef3c7] text-[#b45309]',
+                    'neutral' => 'bg-[#f4f4f5] text-[#52525b]',
+                ];
+            @endphp
+            @if (filled($commandPanels))
+                <section class="rounded-2xl border border-hairline bg-white p-4 shadow-card" data-home-block="command-center">
+                    <div class="min-w-0">
+                        <h2 class="text-[13.5px] font-semibold tracking-[-0.02em] text-ink">{{ __('personnel::home.command.title') }}</h2>
+                        <p class="mt-0.5 text-[11.5px] text-ink-faint">{{ __('personnel::home.command.subtitle') }}</p>
+                    </div>
+
+                    <div class="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                        @foreach ($commandPanels as $panel)
+                            <div wire:key="home-command-{{ $panel['key'] }}" class="flex flex-col rounded-xl border border-hairline-subtle p-3" data-command-panel="{{ $panel['key'] }}">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="min-w-0">
+                                        <p class="truncate text-[12.5px] font-semibold text-ink">{{ __('personnel::home.command.panels.'.$panel['key'].'.label') }}</p>
+                                        <p class="mt-0.5 truncate text-[11px] text-ink-faint">
+                                            @if ($panel['stale'] !== null && $panel['stale'] > 0)
+                                                {{ __('personnel::home.command.stale_count', ['count' => $panel['stale'], 'days' => (int) config('strategic_hr.command_center.requisition_stale_days', 14)]) }}
+                                            @else
+                                                {{ __('personnel::home.command.panels.'.$panel['key'].'.hint') }}
+                                            @endif
+                                        </p>
+                                    </div>
+                                    <span @class(['hrm-num shrink-0 text-[22px] font-semibold leading-none tracking-[-0.03em]', 'text-ink' => $panel['count'] > 0, 'text-ink-faint' => $panel['count'] === 0])>{{ $panel['count'] }}</span>
+                                </div>
+
+                                @if ($panel['rows'] === [])
+                                    <p class="mt-3 text-[12px] text-ink-faint">{{ __('personnel::home.command.empty') }}</p>
+                                @else
+                                    <ul class="mt-2 divide-y divide-hairline-subtle">
+                                        @foreach ($panel['rows'] as $row)
+                                            <li wire:key="home-command-{{ $panel['key'] }}-{{ $row['id'] }}" class="flex items-center gap-2 py-2">
+                                                <div class="min-w-0 flex-1">
+                                                    <p class="truncate text-[12.5px] font-medium text-ink">{{ $row['title'] }}</p>
+                                                    @if ($row['meta'] !== '')
+                                                        <p class="truncate text-[11px] text-ink-faint">{{ $row['meta'] }}</p>
+                                                    @endif
+                                                </div>
+                                                @if ($row['badge'])
+                                                    <span class="shrink-0 rounded-md px-1.5 py-0.5 text-[10.5px] font-semibold {{ $commandTones[$row['tone']] ?? $commandTones['neutral'] }}">{{ $row['badge'] }}</span>
+                                                @endif
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                @endif
+
+                                <a href="{{ route($panel['route'], $panel['params']) }}" wire:navigate class="mt-auto pt-2 text-[11.5px] font-medium text-ink-muted transition hover:text-ink">
+                                    {{ __('personnel::home.command.view_all') }}
+                                </a>
+                            </div>
+                        @endforeach
+                    </div>
+                </section>
+            @endif
+            @endisland
+        @endif
+
         {{-- ==================== away today ==================== --}}
         @if ($canPersonnel)
             @island(name: 'home-absent-today', lazy: true)
@@ -497,7 +567,7 @@
             @endisland
         @endif
 
-        @if (blank($attention) && ! $canAttendance && ! $canActivity && ! $canStructure && ! $canPersonnel)
+        @if (blank($attention) && ! $canAttendance && ! $canActivity && ! $canStructure && ! $canPersonnel && ! $canCommandCenter)
             <p class="rounded-2xl border border-hairline bg-white px-4 py-10 text-center text-[12.5px] text-ink-faint shadow-card">
                 {{ __('personnel::home.empty') }}
             </p>

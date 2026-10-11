@@ -2,6 +2,7 @@
 
 namespace App\Modules\Orders\Application\Document;
 
+use App\Contracts\DocumentPdfConverter;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -16,7 +17,7 @@ use Throwable;
  * isAvailable() is false and callers fall back to DocxToHtmlRenderer; a failed
  * conversion is logged with LibreOffice's own error output.
  */
-class DocxToPdfConverter implements PdfConverter
+class DocxToPdfConverter implements DocumentPdfConverter, PdfConverter
 {
     public function isAvailable(): bool
     {

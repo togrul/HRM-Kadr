@@ -542,6 +542,8 @@ class PersonnelSeeder extends Seeder
             'approve-leaves',
             'edit-closed-month-leaves',
             'view-medical-diagnosis',
+            'export-personnel-360',
+            'view-personnel-360-sensitive',
             'show-attendance',
             'show-attendance-daily-monitor',
             'show-attendance-puantaj',

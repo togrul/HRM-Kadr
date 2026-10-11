@@ -23,7 +23,7 @@ Must-have:
 - [x] offboarding case, exit checklist, exit interview
 - [x] lifecycle deadline reminder-ləri
 - [x] Candidates -> hired -> Personnel -> Lifecycle inteqrasiyası
-- [ ] Orders -> appointment/transfer/exit order inteqrasiyası — qismən: yalnız işə qəbul əmri → lifecycle (app/Modules/Candidates/Application/Services/CandidateHireConversionService.php::ensureOrderLifecycleForCandidate(), tests/Feature/Candidates/CandidateHireOrderFlowTest.php); transfer/xitam əmrləri lifecycle hadisəsi yaratmır (app/Modules/Orders-də lifecycle çağırışı yoxdur)
+- [x] Orders -> appointment/transfer/exit order inteqrasiyası — işə qəbul: CandidateHireConversionService::ensureOrderLifecycleForCandidate(); köçürmə/xitam: Orders effektləri (TransferEffect, TerminationEffect) → kontrakt app/Modules/EmployeeLifecycle/Contracts/OrderLifecycleSync.php → Application/Services/OrderLifecycleEventService.php (rol dəyişikliyi / offboarding checklist, gələcək tarixli köçürmə tətbiq anında, ləğvdə ləğv, idempotent); tests/Feature/EmployeeLifecycle/OrderLifecycleEventsTest.php
 
 Should-have:
 - [ ] onboarding SLA tracking — kodda tapılmadı (app/Modules/EmployeeLifecycle-də SLA izləmə yoxdur)
@@ -49,7 +49,7 @@ Must-have:
 - [x] source/rejection analytics — kod: app/Modules/Candidates/Livewire/RecruitmentAnalytics.php::sourceSummary()/rejectionReasonSummary()
 
 Should-have:
-- [ ] requisition aging dashboard — qismən: CandidateAtsCompletionService::requisitionAging() və tests/Feature/Candidates/CandidateAtsCompletionServiceTest.php var, amma UI-da göstərilmir (yalnız query-budget komandaları)
+- [x] requisition aging dashboard — Home «HR idarəetmə mərkəzi»: HrCommandCenterReadService::requisitionAging(), tests/Feature/Personnel/HrCommandCenterTest.php
 - [ ] interviewer calibration report — kodda tapılmadı
 - [x] talent pool / reserve candidates — kod: candidate_talent_pool_entries, CandidateAtsCompletionService::addToTalentPool()
 - [ ] recruitment SLA heatmap — kodda tapılmadı (RecruitmentAnalytics::timeToStageSummary() orta gün göstərir, heatmap yoxdur)
@@ -66,12 +66,12 @@ Must-have:
 - [x] Personnel profile UI-da ayrıca 360 tab və ya mövcud timeline tab-a HR 360 mode
 - [x] Audit dəyişiklikləri: kim nəyi dəyişib, nə vaxt dəyişib — kod: app/Modules/Personnel/Application/Services/Personnel360TimelineService.php::auditChanges(), tests/Feature/Personnel/Personnel360TimelineServiceTest.php
 - [x] Timeline filterləri: activity type, date range, search — kod: Personnel360TimelineService::build() ($filters type/date_from/date_to + search), app/Modules/Personnel/Livewire/Employee360Timeline.php
-- [ ] Export: employee 360 timeline PDF/XLSX — kodda tapılmadı (Employee360Timeline-da export yoxdur)
+- [x] Export: employee 360 timeline PDF/XLSX — kod: app/Modules/Personnel/Application/Services/Personnel360ExportService.php, Http/Controllers/Personnel360ExportController.php (marşrut personnel.360.export, icazə export-personnel-360; PDF = PhpWord DOCX + LibreOffice, App\Contracts\DocumentPdfConverter), tests/Feature/Personnel/Personnel360ExportTest.php
 
 Should-have:
 - [ ] risk markers: expired documents, pending approvals, low score, repeated absence — kodda tapılmadı (timeline-da risk marker yoxdur; sənəd müddəti riski yalnız Home attention kartında: HomeOverviewService::expiringDocuments())
 - [ ] manager-facing simplified timeline — kodda tapılmadı
-- [ ] sensitive events üçün permission-based redaction — kodda tapılmadı
+- [x] sensitive events üçün permission-based redaction — kod: Personnel360TimelineService::redact() (intizam əmrləri → view-personnel-360-sensitive; xəstəlik vərəqəli icazələr → həmçinin view-medical-diagnosis), UI və ixracda
 
 ## 4. HR Command Center Dashboard
 
@@ -81,11 +81,11 @@ Məqsəd: HR istifadəçisi login olanda günlük işi və riskləri bir ekranda
 
 Must-have:
 - [x] pending approvals panel — kod: app/Modules/Personnel/Application/Services/HomeOverviewService.php::attention()/queueItems() (vacation_requests, attendance_pending, unsigned_orders), app/Modules/Personnel/Livewire/Home.php::decide()
-- [ ] overdue lifecycle tasks — kodda tapılmadı Home-da; gecikmiş tapşırıqlar yalnız /employee-lifecycle dashboard-dadır
+- [x] overdue lifecycle tasks — kod: app/Modules/Personnel/Application/Services/HrCommandCenterReadService.php (Home «HR idarəetmə mərkəzi» lazy island-ı), tests/Feature/Personnel/HrCommandCenterTest.php
 - [x] expiring documents — kod: app/Modules/Personnel/Application/Services/HomeOverviewService.php::attention() 'expiring_documents' kartı, expiringDocuments()
-- [ ] probation review queue — kodda tapılmadı Home-da (probation review növbəsi yalnız lifecycle dashboard-da)
-- [ ] open vacancies / requisition aging — kodda tapılmadı Home-da
-- [ ] attendance exceptions — qismən: Home-da attendance_pending (gözləyən əl ilə daxiletmələr) var; istisna (AttendanceException) növbəsi yoxdur
+- [x] probation review queue — kod: HrCommandCenterReadService::probationReviews() (gecikmiş + yaxın 14 gün)
+- [x] open vacancies / requisition aging — kod: HrCommandCenterReadService::openVacancies(), requisitionAging() (köhnəlmə həddi config/strategic_hr.php)
+- [x] attendance exceptions — kod: HrCommandCenterReadService::attendanceExceptions() (açıq attendance_exceptions, struktur görünürlüyü ilə)
 - [ ] training/performance action queue — kodda tapılmadı
 
 Should-have:
@@ -102,10 +102,10 @@ Məqsəd: performance və training nəticələrini vəzifə readiness və succes
 Must-have:
 - [x] role competency profile — kod: app/Models/RoleCompetencyRequirement.php (position_id, training_competency_id, required_level_id)
 - [x] employee competency gap score — kod: app/Modules/TrainingNeeds/Application/Services/TrainingNeedSuggestionService.php::resolveGap(), app/Models/EmployeeCompetencyProfile.php
-- [ ] target role readiness score — qismən: succession_candidates.readiness əl ilə seçilir (ready_now/1_2_years/3_5_years); hesablanan readiness skoru yoxdur
+- [x] target role readiness score — kod: app/Modules/PerformanceEvaluation/Application/Services/CareerReadinessScoreService.php (0–100, çəkilər config/strategic_hr.php), SuccessionWorkspace-də varis üzrə komponent töhfələri; tests/Feature/PerformanceEvaluation/CareerReadinessScoreTest.php
 - [x] successor pool per critical role — kod: succession_plans/succession_candidates/talent_pools (app/Modules/PerformanceEvaluation/Database/Migrations/2026_06_24_120000_create_succession_tables.php), SuccessionService
 - [x] development action plan — kod: app/Modules/Personnel/Application/Services/MyHr/MyHrDevelopmentPlanReadService.php (TrainingNeedItem əsaslı), Livewire/MyHr/MyHrDevelopmentPlan.php
-- [ ] performance + training + portfolio integration — qismən: SuccessionService::syncPerformanceFromScore() performance-i bağlayır; training/portfolio inteqrasiyası yoxdur
+- [x] performance + training + portfolio integration — kod: CareerReadinessScoreService (performans forması, tamamlanmış təlimlər, KPI kartı, təsdiqlənmiş portfolio qeydləri, staj)
 
 Should-have:
 - [x] critical role risk dashboard — kod: succession_plans.risk_of_loss/impact_of_loss, SuccessionService::summary() (plans_no_ready), Livewire/SuccessionWorkspace.php

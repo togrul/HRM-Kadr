@@ -5,6 +5,8 @@ namespace App\Modules\PerformanceEvaluation\Livewire;
 use App\Livewire\Traits\SideModalAction;
 use App\Models\PerformanceCycle;
 use App\Models\Position;
+use App\Models\SuccessionCandidate;
+use App\Modules\PerformanceEvaluation\Application\Services\CareerReadinessScoreService;
 use App\Modules\PerformanceEvaluation\Application\Services\SuccessionService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
@@ -80,6 +82,19 @@ class SuccessionWorkspace extends Component
     public function getPlansProperty(): \Illuminate\Support\Collection
     {
         return app(SuccessionService::class)->plans();
+    }
+
+    /**
+     * Varislərin hesablanan karyera hazırlıq skoru (komponent töhfələri ilə), personnel_id üzrə.
+     * Yalnız baxanın struktur görünürlüyündəki işçilər üçün; bütün varislər bir partiyada.
+     *
+     * @return array<int, array{score: int, band: string, components: list<array<string, mixed>>}>
+     */
+    public function getReadinessScoresProperty(): array
+    {
+        $ids = SuccessionCandidate::query()->distinct()->pluck('personnel_id')->all();
+
+        return app(CareerReadinessScoreService::class)->scoresFor($ids, auth()->user());
     }
 
     public function getSummaryProperty(): array

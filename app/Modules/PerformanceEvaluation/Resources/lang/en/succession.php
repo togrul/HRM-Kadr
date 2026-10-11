@@ -110,4 +110,35 @@ return [
         'plan_created' => 'Succession plan created.',
         'pool_created' => 'Talent pool created.',
     ],
+    'readiness_score' => [
+        'title' => 'Career readiness score',
+        'chip' => 'Readiness :score',
+        'explain' => 'Show how the score is built from its components',
+        'total' => 'Total score (0–100)',
+        'no_data' => 'no data',
+        'bands' => [
+            'ready' => 'ready',
+            'developing' => 'developing',
+            'early' => 'early stage',
+        ],
+        'columns' => [
+            'component' => 'Component',
+            'value' => 'Measure',
+            'weight' => 'Weight',
+            'contribution' => 'Contribution',
+        ],
+        'components' => [
+            'performance' => 'Performance result',
+            'training' => 'Completed trainings',
+            'kpi' => 'KPI result',
+            'portfolio' => 'Professional portfolio',
+            'tenure' => 'Tenure',
+        ],
+        'values' => [
+            'score' => 'score :score',
+            'training' => ':count trainings in the last :years years',
+            'portfolio' => ':count verified records',
+            'tenure' => ':years years',
+        ],
+    ],
 ];

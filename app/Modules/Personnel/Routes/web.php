@@ -2,6 +2,7 @@
 
 use App\Modules\Personnel\Http\Controllers\LearningContentFileController;
 use App\Modules\Personnel\Http\Controllers\OnboardingTemplateFileController;
+use App\Modules\Personnel\Http\Controllers\Personnel360ExportController;
 use App\Modules\Personnel\Http\Controllers\PersonnelFileDownloadController;
 use App\Modules\Personnel\Http\Controllers\PersonnelPaletteSearchController;
 use App\Modules\Personnel\Http\Controllers\PersonnelPhotoController;
@@ -20,6 +21,12 @@ Route::middleware(['web', 'auth'])->group(function () {
         ->middleware('throttle:120,1')
         ->name('personnel.palette-search');
     Route::get('/personnel/{personnel}', PersonnelProfile::class)->name('personnel.show');
+    Route::get('/personnel/{personnel}/360/export/{format}', Personnel360ExportController::class)
+        ->whereNumber('personnel')
+        ->whereIn('format', ['pdf', 'xlsx'])
+        ->withTrashed()
+        ->middleware(['can:export-personnel-360', 'throttle:20,1'])
+        ->name('personnel.360.export');
     Route::get('/my-hr', MyHrDashboard::class)->name('my-hr');
     Route::get('/self-service-reviews', SelfServiceRequestReviews::class)->name('self-service-reviews');
     Route::get('/personnel/files/{document}/download', PersonnelFileDownloadController::class)
