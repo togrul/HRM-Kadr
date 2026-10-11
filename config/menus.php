@@ -203,7 +203,7 @@ return [
         [
             'id' => 21,
             'name' => 'ui::menu.items.employee_relations',
-            'icon' => 'shield-user-icon',
+            'icon' => 'relations-icon',
             'color' => 'zinc',
             'order' => 18,
             'is_active' => 1,
@@ -214,7 +214,7 @@ return [
         [
             'id' => 22,
             'name' => 'ui::menu.items.benefits',
-            'icon' => 'gift-icon',
+            'icon' => 'benefits-icon',
             'color' => 'zinc',
             'order' => 19,
             'is_active' => 1,

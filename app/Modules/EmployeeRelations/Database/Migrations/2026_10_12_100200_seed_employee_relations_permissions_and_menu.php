@@ -93,7 +93,7 @@ return new class extends Migration
             if (! $exists) {
                 DB::table('menus')->insert([
                     'name' => 'ui::menu.items.employee_relations',
-                    'icon' => 'shield-user-icon',
+                    'icon' => 'relations-icon',
                     'color' => 'zinc',
                     'order' => 18,
                     'is_active' => 1,

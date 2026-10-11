@@ -58,7 +58,7 @@ return new class extends Migration
         if (Schema::hasTable('menus') && ! DB::table('menus')->where('url', 'benefits')->exists()) {
             DB::table('menus')->insert([
                 'name' => 'ui::menu.items.benefits',
-                'icon' => 'gift-icon',
+                'icon' => 'benefits-icon',
                 'color' => 'zinc',
                 'order' => 19,
                 'is_active' => 1,
