@@ -26,6 +26,11 @@ return [
             'active' => 'Aktiv',
             'closed' => 'Bağlanıb',
         ],
+        'cap_note' => 'Hər ödənişdə bütün tutulmaların (kredit/avans taksiti daxil) cəmi işçiyə verilməli olan əmək haqqının (vergi və məcburi sosial ödənişlərdən sonra) 20 %-ni keçmir (ƏM m.176.1). Sığmayan hissə kreditdə qalır, qrafik uzanır.',
+        'last_repayment' => 'Son tutulma',
+        'months_left' => 'Təxmini qalan ay',
+        'no_repayment' => 'Hələ tutulmayıb',
+        'deferred' => ':amount həddə görə keçdi',
     ],
 
     'summary' => [
@@ -117,6 +122,7 @@ return [
 
     'loan' => [
         'line' => 'Kredit/avans tutulması',
+        'line_capped' => 'Kredit/avans tutulması (plan :requested AZN; ƏM m.176.1 həddinə görə :deferred AZN sonrakı aylara keçir)',
     ],
 
     'order_earnings' => [
@@ -139,6 +145,7 @@ return [
         'dsmf' => 'DSMF',
         'unemployment' => 'İşsizlik sığortası',
         'medical' => 'İcbari tibbi sığorta',
+        'relief' => ':name (vergidən azad olunan hissə :amount AZN — :basis)',
     ],
 
     'export' => [

@@ -47,6 +47,14 @@ interface CompensationReadRepository
     public function statutoryRatesFor(?int $regimeId = null, ?string $date = null): Collection;
 
     /**
+     * Effective income-tax exemptions/reliefs (Vergi Məcəlləsi m.102) for a regime on a date: the
+     * null-regime rows plus the regime's own; a regime row overrides a default row with the same code.
+     *
+     * @return Collection<int,\App\Models\StatutoryExemption>
+     */
+    public function statutoryExemptionsFor(?int $regimeId = null, ?string $date = null): Collection;
+
+    /**
      * @return Collection<int,CompensationComponent>
      */
     public function componentCatalog(): Collection;

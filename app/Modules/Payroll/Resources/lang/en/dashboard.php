@@ -26,6 +26,11 @@ return [
             'active' => 'Active',
             'closed' => 'Closed',
         ],
+        'cap_note' => 'On every payment all deductions together (loan/advance instalments included) stay within 20 % of the wage due after tax and mandatory social contributions (Labour Code art. 176.1). What does not fit stays on the loan and the schedule runs longer.',
+        'last_repayment' => 'Last deduction',
+        'months_left' => 'Months left (est.)',
+        'no_repayment' => 'Not deducted yet',
+        'deferred' => ':amount deferred by the cap',
     ],
 
     'summary' => [
@@ -117,6 +122,7 @@ return [
 
     'loan' => [
         'line' => 'Loan/advance repayment',
+        'line_capped' => 'Loan/advance repayment (scheduled :requested AZN; :deferred AZN moves to later months under the Labour Code art. 176.1 cap)',
     ],
 
     'order_earnings' => [
@@ -139,6 +145,7 @@ return [
         'dsmf' => 'DSMF',
         'unemployment' => 'Unemployment insurance',
         'medical' => 'Mandatory medical insurance',
+        'relief' => ':name (exempt part :amount AZN — :basis)',
     ],
 
     'export' => [

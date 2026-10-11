@@ -12,6 +12,8 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
  * @property string $tabel_no
+ * @property int|null $regime_id
+ * @property string $status
  * @property float|string $base_amount
  * @property string|null $currency
  * @property mixed $effective_from

@@ -5,9 +5,11 @@ namespace App\Modules\Compensation\Infrastructure\Persistence\Eloquent;
 use App\Models\CompensationComponent;
 use App\Models\EmployeeBankAccount;
 use App\Models\EmployeeCompensation;
+use App\Models\StatutoryExemption;
 use App\Modules\Compensation\Application\Services\AllowanceResolver;
 use App\Modules\Compensation\Application\Services\CompensationService;
 use App\Modules\Compensation\Domain\Contracts\CompensationReadRepository;
+use App\Support\Database\InstalledTables;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
@@ -90,6 +92,27 @@ class EloquentCompensationReadRepository implements CompensationReadRepository
             ->get()
             ->groupBy(fn ($rate) => $rate->component_code.'|'.$rate->payer)
             ->map(fn ($group) => $group->sortByDesc(fn ($rate) => $rate->regime_id === $regimeId ? 1 : 0)->first())
+            ->values();
+    }
+
+    public function statutoryExemptionsFor(?int $regimeId = null, ?string $date = null): Collection
+    {
+        if (! InstalledTables::has('statutory_exemptions')) {
+            return collect();
+        }
+
+        $on = ($date ? Carbon::parse($date) : now())->toDateString();
+
+        return StatutoryExemption::query()
+            ->where('is_active', true)
+            ->whereDate('effective_from', '<=', $on)
+            ->where(fn ($q) => $q->whereNull('effective_to')->orWhereDate('effective_to', '>=', $on))
+            ->where(fn ($q) => $q->whereNull('regime_id')->when($regimeId, fn ($qq) => $qq->orWhere('regime_id', $regimeId)))
+            ->orderByDesc('effective_from')
+            ->orderBy('id')
+            ->get()
+            ->groupBy(fn (StatutoryExemption $exemption): string => $exemption->code)
+            ->map(fn ($group) => $group->sortByDesc(fn (StatutoryExemption $exemption): int => $exemption->regime_id === $regimeId ? 1 : 0)->first())
             ->values();
     }
 

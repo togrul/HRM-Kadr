@@ -182,6 +182,102 @@ class LoanPayrollTest extends TestCase
     }
 
     /**
+     * ƏM m.176.1: adi aylıq taksit də «tutulan bütün məbləğlər»ə daxildir. 1000 AZN (özəl, 2026):
+     * vergi (1000 − 200) × 3% = 24, DSMF 86, işsizlik 5, tibbi 20 → verilməli 865 → 20 % = 173.
+     * Taksit 300 → 173 tutulur, 127 kreditdə qalır; növbəti ay yenə 173 (qrafik uzanır, ikiqat yox).
+     */
+    public function test_a_regular_instalment_is_capped_at_20_percent_and_the_schedule_runs_longer(): void
+    {
+        [$personnel, $regimeId] = $this->employeeWithPay('capped@example.test', 1000);
+        $loan = app(LoanService::class)->createLoan($personnel->tabel_no, ['principal' => 1000, 'monthly_installment' => 300, 'start_on' => '2026-01-01']);
+
+        $runs = app(PayrollRunService::class);
+        $periods = app(PayrollPeriodService::class);
+        $june = $runs->calculate($runs->createRun($periods->createPeriod(2026, 6), $regimeId));
+        $payslip = $june->payslips()->sole();
+        $line = $payslip->lines()->where('code', 'loan')->sole();
+
+        $this->assertSame('173.00', $line->amount);
+        $this->assertStringContainsString('300,00', $line->name);
+        $this->assertStringContainsString('127,00', $line->name);
+        $this->assertSame('692.00', $payslip->net); // 865 − 173
+
+        $runs->lock($runs->approve($june));
+        $loan->refresh();
+        $this->assertSame('827.00', $loan->remaining);
+        $repayment = $loan->repayments()->sole();
+        $this->assertSame(['173.00', '300.00'], [$repayment->amount, $repayment->scheduled_amount]);
+        $this->assertSame(127.0, $repayment->deferredAmount());
+
+        $july = $runs->lock($runs->approve($runs->calculate($runs->createRun($periods->createPeriod(2026, 7), $regimeId))));
+        $this->assertSame('173.00', $july->payslips()->sole()->lines()->where('code', 'loan')->value('amount'));
+        $this->assertSame('654.00', $loan->fresh()->remaining);
+        $this->assertSame(3, $loan->fresh()->monthsLeft());
+
+        // Kilid geri açılanda həm tutulma, həm «keçən» qeydi geri qaytarılır.
+        $runs->reopen($july->fresh());
+        $this->assertSame('827.00', $loan->fresh()->remaining);
+        $this->assertSame(1, $loan->repayments()->count());
+    }
+
+    public function test_an_instalment_that_fits_is_taken_in_full(): void
+    {
+        [$personnel] = $this->employeeWithPay('fits-regular@example.test', 1000);
+        app(LoanService::class)->createLoan($personnel->tabel_no, ['principal' => 1000, 'monthly_installment' => 100, 'start_on' => '2026-01-01']);
+
+        $this->assertSame(['requested' => 100.0, 'amount' => 100.0], app(LoanService::class)->installmentAmount($personnel->tabel_no, 865.0));
+        $line = collect(app(PayrollCalculator::class)->calculate($personnel->tabel_no, '2026-06-30', 2026, 6)['lines'])->firstWhere('code', 'loan');
+        $this->assertSame(100.0, (float) $line['amount']);
+        $this->assertSame(__('payroll::dashboard.loan.line'), $line['name']);
+    }
+
+    public function test_other_voluntary_deductions_share_the_same_20_percent_room(): void
+    {
+        [$personnel] = $this->employeeWithPay('shared@example.test', 1000);
+        $component = \App\Models\CompensationComponent::query()->create(['code' => 'club_fee', 'name' => 'Klub haqqı', 'type' => 'deduction', 'taxable' => false, 'affects_social' => false, 'is_statutory' => false]);
+        EmployeeCompensation::query()->where('tabel_no', $personnel->tabel_no)->sole()->lines()->create(['component_id' => $component->id, 'amount' => 50]);
+        app(LoanService::class)->createLoan($personnel->tabel_no, ['principal' => 1000, 'monthly_installment' => 300, 'start_on' => '2026-01-01']);
+
+        $lines = collect(app(PayrollCalculator::class)->calculate($personnel->tabel_no, '2026-06-30', 2026, 6)['lines']);
+
+        // 173 − 50 = 123.
+        $this->assertSame(123.0, (float) $lines->firstWhere('code', 'loan')['amount']);
+    }
+
+    public function test_the_cap_can_be_lowered_but_not_raised_above_the_legal_20_percent(): void
+    {
+        config(['payroll.deduction_cap_ratio' => 0.5]);
+        $this->assertSame(0.20, \App\Modules\Payroll\Application\Services\DeductionCap::ratio());
+
+        config(['payroll.deduction_cap_ratio' => 0.10]);
+        $this->assertSame(0.10, \App\Modules\Payroll\Application\Services\DeductionCap::ratio());
+        $this->assertSame(86.5, \App\Modules\Payroll\Application\Services\DeductionCap::room(865.0, 0.0));
+        $this->assertSame(0.0, \App\Modules\Payroll\Application\Services\DeductionCap::room(865.0, 100.0));
+    }
+
+    public function test_the_loans_tab_shows_the_deferred_part_and_months_left(): void
+    {
+        [$personnel, $regimeId] = $this->employeeWithPay('loan-tab@example.test', 1000);
+        app(LoanService::class)->createLoan($personnel->tabel_no, ['principal' => 1000, 'monthly_installment' => 300, 'start_on' => '2026-01-01']);
+        $runs = app(PayrollRunService::class);
+        $runs->lock($runs->approve($runs->calculate($runs->createRun(app(PayrollPeriodService::class)->createPeriod(2026, 6), $regimeId))));
+
+        $user = \App\Models\User::factory()->create();
+        // Struktur görünürlüyü fail closed-dur: bu istifadəçi bütün strukturları görür.
+        grantAllStructures($user);
+        foreach (['show-payroll', 'manage-payroll', 'view-compensation-amounts'] as $permission) {
+            $user->givePermissionTo(\Spatie\Permission\Models\Permission::findOrCreate($permission, 'web'));
+        }
+        $this->actingAs($user);
+
+        \Livewire\Livewire::test(\App\Modules\Payroll\Livewire\Tabs\LoansTab::class, ['tabelNo' => $personnel->tabel_no, 'label' => 'Doe Jane'])
+            ->assertSee(__('payroll::dashboard.loans.cap_note'))
+            ->assertSee('173,00')
+            ->assertSee(__('payroll::dashboard.loans.deferred', ['amount' => '127,00']))
+            ->assertSee(__('payroll::dashboard.loans.months_left'));
+    }
+
+    /**
      * @return array{0: Personnel, 1: int}
      */
     private function employeeWithPay(string $email, float $base): array

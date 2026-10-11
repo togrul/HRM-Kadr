@@ -21,22 +21,34 @@ return [
     */
     'recover_revoked_order_pay' => (bool) env('PAYROLL_RECOVER_REVOKED_ORDER_PAY', false),
 
-    /** ƏM m.176.1: all deductions together at most 20 % of the wage due per payment. */
-    'recovery_cap_ratio' => 0.20,
+    /**
+     * ƏM m.176.1: all deductions together at most 20 % of the wage due per payment. The
+     * recovery shares that room with the loan instalment and voluntary deductions of the
+     * same payment. Values above 0.20 are clamped to 0.20 (DeductionCap).
+     */
+    'recovery_cap_ratio' => (float) env('PAYROLL_DEDUCTION_CAP_RATIO', env('PAYROLL_FINAL_SETTLEMENT_LOAN_CAP_RATIO', 0.20)),
 
     /*
     |--------------------------------------------------------------------------
-    | Kredit/avans borcu son haqq-hesabda
+    | Tutulmaların ümumi həddi — ƏM m.176.1
     |--------------------------------------------------------------------------
     |
-    | Aylıq taksit yalnız adi (regular) run-da tutulur; off-cycle run-da tutulmur
-    | (ikiqat tutulma olmasın). İşçi ayın içində işdən çıxırsa, onun son əmək
-    | haqqını ödəyən run (adi run və ya `final_settlement` run-u) taksit yox,
-    | QALAN borcu tutur — amma hər ödənişdə bütün tutulmaların cəmi işçiyə
-    | verilməli olan əmək haqqının bu payını keçmir (ƏM m.176.1 — 20 %). Qalan
-    | hissə kreditdə borc olaraq qalır. Bax: docs/payroll-legal-basis.md §4.
+    | «Hər dəfə əmək haqqı verilərkən tutulan bütün məbləğlərin ümumi miqdarı
+    | işçiyə verilməli olan əmək haqqının iyirmi faizindən ... artıq ola
+    | bilməz.» Verilməli olan əmək haqqı = hesablanmış − vergi və məcburi sosial
+    | ödənişlər. Hədd bütün qeyri-statutor tutulmalara birlikdə tətbiq olunur:
+    |
+    |  - adi run-da aylıq kredit/avans taksiti (işçinin ərizəsi ilə olsa da);
+    |    sığmayan hissə kreditdə qalır, qrafik uzanır (növbəti ay yenə adi taksit);
+    |  - işçi bu ay çıxırsa onun son əmək haqqını ödəyən run QALAN borcu tutur,
+    |    sığmayan hissə borc olaraq qalır;
+    |  - off-cycle run taksit tutmur (ikiqat tutulma olmasın).
+    |
+    | Qanunda işçinin razılığı ilə həddin aşılmasına icazə yoxdur; ona görə dəyər
+    | yalnız aşağı salına bilər (0.20-dən böyük dəyər 0.20-yə sıxılır). Bax:
+    | docs/payroll-legal-basis.md §4.
     |
     */
-    'final_settlement_loan_cap_ratio' => (float) env('PAYROLL_FINAL_SETTLEMENT_LOAN_CAP_RATIO', 0.20),
+    'deduction_cap_ratio' => (float) env('PAYROLL_DEDUCTION_CAP_RATIO', env('PAYROLL_FINAL_SETTLEMENT_LOAN_CAP_RATIO', 0.20)),
 
 ];

@@ -5,7 +5,10 @@
 > <https://e-qanun.az/frameworks/46/f_46943.html>), 2026-10-09 tarixində oxunub.
 > Sitatlar həmin mətndən hərfi götürülüb. Kodda bu sənədə istinad edən yerlər:
 > `Payroll\Application\Services\OrderEarningsService`, `PayrollRunService`, `RetroService`,
-> `LoanService`, `PayrollCalculator`, `config/payroll.php`.
+> `LoanService`, `PayrollCalculator`, `config/payroll.php`; §4.1–§6 (11.10.2026): `DeductionCap`,
+> `StatutoryEngine`, `statutory_exemptions` və rejim dərəcələri miqrasiyaları. §5–§6 üçün əlavə mənbələr:
+> Vergi Məcəlləsi, «Sosial sığorta haqqında», «Tibbi sığorta haqqında», «İşsizlikdən sığorta haqqında»
+> qanunlar, DVX izahları — hər bölmədə link və oxunma tarixi ilə.
 >
 > İşarələr: ✅ — qanunun mətni ilə təsdiqlənib; ⚠️ — qanunda açıq yazılmayıb, təcrübəyə
 > və ya bizim şərhimizə əsaslanır (hüquqşünas/mühasib təsdiqi tövsiyə olunur).
@@ -162,23 +165,215 @@ işəgötürən onu öz sərəncamı ilə tuta bilməz (m.175.5); yalnız işçi
 
 ### Statuslar və açıq məsələlər
 
-- ✅ m.176.1 — 20 % həddi (mətn §3-də).
-- ⚠️ **50 % istisnası** (bir neçə icra sənədi, aliment və s. üzrə tutulmalarda daha yüksək hədd)
-  burada **tətbiq edilmir**: m.176-nın həmin hissəsinin dəqiq mətni bu sənəd hazırlanarkən
-  e-qanun.az-dan oxuna bilmədi (giriş bağlı idi) — **yoxlanmalıdır**. Kredit/avans icra sənədi
-  deyil, ona görə 20 % ümumi hədd seçilib. İcra sənədləri üçün ayrıca modul yoxdur.
-- ⚠️ Taksitin işçinin ərizəsi ilə tutulması (m.175.1 «yazılı razılıq»; §3-dəki m.175.6 istinadı)
-  — kreditin rəsmiləşdirilməsi zamanı yazılı razılığın alınması fərz olunur; sistem onu
-  saxlamır.
-- ⚠️ **Adi aylıq taksitə 20 % həddi tətbiq olunmur** (əvvəlki davranış saxlanılıb). m.176.1
-  «bütün məbləğlər» dediyi üçün ciddi oxunuşda adi taksit də həddə tabe olmalıdır — bu
-  davranış dəyişikliyi istifadəçi/hüquqşünas təsdiqi gözləyir.
-- ⚠️ `retro_recovery` (§3) öz 20 %-ni ayrıca hesablayır; eyni ödənişdə kredit hesablaşması ilə
-  birlikdə cəmi yoxlanmır (hər ikisi standart olaraq nadir: recovery söndürülüb).
-- ⚠️ Xitam zamanı qalan borcun tam (həddsiz) tutulmasına işçinin ayrıca yazılı razılığı olarsa
-  icazə verilib-verilmədiyi — hüquqşünas rəyi lazımdır; hazırda hədd hər halda tətbiq olunur.
+- ✅ m.176.1 — 20 % həddi (mətn §3-də). 11.10.2026-dan **adi aylıq taksitə də** tətbiq olunur — bax §4.1.
+- ✅ 50 % / 70 % hədlərinin mətni tapıldı (§4.1); icra sənədi reyestri olmadığı üçün tətbiq edilmir.
+- ⚠️ Taksitin işçinin ərizəsi ilə tutulması (m.175.1 «yazılı razılıq», m.175.6) — kreditin
+  rəsmiləşdirilməsi zamanı yazılı razılığın alınması fərz olunur; sistem onu saxlamır.
+- ✅ `retro_recovery` (§3) artıq ayrıca 20 % hesablamır: eyni ödənişin kredit taksiti və könüllü
+  tutulmaları ilə **bir ümumi** 20 % yerini bölüşür (əvvəl kredit, sonra geri tutulma).
+- ⚠️ Xitam zamanı qalan borcun tam (həddsiz) tutulmasına işçinin ayrıca yazılı razılığı — qanunda
+  belə istisna yoxdur (§4.1); hədd hər halda tətbiq olunur. Hüquqşünas fərqli rəy verərsə dəyişiklik
+  kodda edilməlidir (konfiqurasiya həddi yalnız aşağı sala bilər).
 
-## 5. Yoxlanılmamış / açıq qalan məsələlər
+### 4.1 Adi aylıq taksit və tutulmaların həddi (11.10.2026)
+
+**Mənbələr** (oxunma tarixi 11.10.2026):
+- Əmək Məcəlləsi, m.174–176 — <https://e-qanun.az/framework/46943> (konsolidasiya edilmiş mətn,
+  fayl 08.10.2026 tarixli redaksiya).
+- «İcra haqqında» Qanun, m.64–65 — e-qanun.az-da konsolidasiya edilmiş mətn açıla bilmədi; Azərbaycan
+  Standartlaşdırma İnstitutunun saytındakı nüsxə oxundu:
+  <https://azstand.gov.az/uploads/documents/468838918651c37b00ecdc.pdf> (PDF 11.08.2023 tarixlidir) ⚠️
+  sonrakı dəyişikliklər üçün rəsmi mətnlə tutuşdurulmalıdır.
+- Ali Məhkəmənin mülki və iqtisadi kollegiyalarının birgə qərarı haqqında xəbər (16.12.2022):
+  <https://www.e-huquq.az/az/news/mehkeme/59037.html> — köməkçi mənbə (qərarın öz mətni deyil).
+
+**Mətn ✅**
+
+> **ƏM m.175.6** İşçinin ərizəsində göstərdiyi məbləğdə və müddətlərdə əmək haqqının müvafiq hissəsi
+> kommunal xərclərin, bankdan aldığı ssudaların, kreditlərin və digər şəxsi borclarının ödənilməsi
+> üçün tutularaq kreditorlara göndərilə bilər.
+>
+> **ƏM m.176.1** Hər dəfə əmək haqqı verilərkən tutulan bütün məbləğlərin ümumi miqdarı işçiyə
+> verilməli olan əmək haqqının iyirmi faizindən və müvafiq qanunvericilikdə nəzərdə tutulmuş hallarda
+> isə əlli faizindən artıq ola bilməz.
+>
+> **ƏM m.176.2** Əmək haqqından bir neçə icra sənədinə əsasən məbləğlər tutularkən, bütün hallarda
+> işçinin əmək haqqının əlli faizi saxlanmalıdır.
+>
+> **ƏM m.176.3** … alimentlərin tutulması, sağlamlığa vurulmuş ziyanın ödənilməsi, ailəni dolandıranın
+> itkisi … və cinayət nəticəsində vurulmuş ziyanın ödənilməsi zamanı … tutulmaların məbləği işçiyə
+> verilməli olan əməkhaqqının 70 faizindən çox ola bilməz.
+>
+> **«İcra haqqında» m.64** … tutulan məbləğin (tutmanın) miqdarı vergilər tutulduqdan sonra qalan
+> məbləğdən hesablanır. **m.65.1** İcra sənədi icra edilərkən … tutmaların məbləği 50 faizdən çox ola
+> bilməz. **m.65.3** Alimentlərin tutulması … zamanı … 70 faizdən çox ola bilməz.
+
+**Nəticə.** İşəgötürənin işçiyə verdiyi kredit/avansın taksiti m.175.2-nin «işəgötürənin sərəncamı
+ilə» siyahısında yoxdur — yalnız işçinin yazılı razılığı (m.175.1) və ya ərizəsi (m.175.6) ilə tutulur.
+Amma m.176.1 tutulmanın əsasından asılı olmayaraq «tutulan **bütün** məbləğlər»dən danışır; razılıqla
+həddin aşılmasına icazə verən norma Məcəllədə yoxdur. Ali Məhkəmə də (2022) əmək haqqının 20 %-dən
+artığının akseptsiz tutulmasına qabaqcadan razılıq verən müqavilə şərtini etibarsız sayıb. Ona görə:
+
+| Qayda | Kod | Status |
+|---|---|---|
+| Adi run-da kredit/avans taksiti + könüllü tutulma komponentləri + retro geri tutulma birlikdə ≤ 20 % × (hesablanmış − vergi və məcburi sosial ödənişlər) | `DeductionCap::room()`, `LoanService::installmentAmount()`, `PayrollRunService::computePayslips()` | ✅ m.176.1 |
+| Sığmayan hissə kreditdə qalır; növbəti ay yenə **adi taksit** tutulur (iki aylıq yox) — qrafik uzanır | `LoanService::recordRepaymentsForRun()` (`loan_repayments.scheduled_amount`) | ⚠️ «növbəti ay ikiqat tutma yoxdur» seçimdir; ikiqat tutulma onsuz da həddə dirənərdi |
+| Hədd konfiq edilə bilər, amma yalnız **aşağı**: `payroll.deduction_cap_ratio` (env `PAYROLL_DEDUCTION_CAP_RATIO`, köhnə `PAYROLL_FINAL_SETTLEMENT_LOAN_CAP_RATIO` də oxunur); 0.20-dən böyük dəyər 0.20-yə sıxılır | `DeductionCap::ratio()` | ✅ qanunda razılıq istisnası yoxdur |
+| Yuvarlaqlaşdırma: yer qəpiyə **aşağı** yuvarlaqlaşdırılır (hədd bir qəpik də aşılmasın) | `DeductionCap::room()` | — |
+| Könüllü komponent tutulmaları (məs. həmkarlar ittifaqı) həddə sayılır, amma azaldılmır — yer qalmırsa kredit 0 olur | `PayrollCalculator::calculate()` | ⚠️ komponent tutulmalarının özünün həddə görə azaldılması (qalığın uçotu) yoxdur |
+| 50 % (bir neçə icra sənədi) və 70 % (aliment və s.) | tətbiq edilmir | ⚠️ icra sənədi reyestri (borc qalığı, növbəlilik, «İcra haqqında» m.64 bazası) yoxdur — ayrıca iş |
+
+**UI.** Payslip-də kredit sətri həddə görə azalanda adı belə olur: «Kredit/avans tutulması (plan 300,00
+AZN; ƏM m.176.1 həddinə görə 127,00 AZN sonrakı aylara keçir)». «Maaş → Kredit/avans» cədvəlində
+hər kredit üçün **son tutulma** (məbləğ, tarix, «… həddə görə keçdi») və **təxmini qalan ay** göstərilir,
+üstdə qaydanın izahı var.
+
+**Rəqəmli nümunə** (özəl qeyri-neft, 2026, əsas iş yeri; `LoanPayrollTest`):
+
+| | Əvvəl | İndi |
+|---|---|---|
+| Hesablanmış | 1 000,00 | 1 000,00 |
+| Vergi / DSMF / işsizlik / tibbi | 30 / 86 / 5 / 20 (vergi azadolmasız) | 24 / 86 / 5 / 20 (§5) |
+| Verilməli olan əmək haqqı | 859,00 | 865,00 |
+| 20 % həddi | tətbiq edilmirdi | 173,00 |
+| Kredit taksiti (plan 300) | 300,00 | **173,00** (127,00 kreditdə qalır) |
+| Ödənilən | 559,00 | 692,00 |
+| 1 000 AZN-lik kredit | 4 aya bağlanırdı | iyunda 173, iyulda 173 … (≈ 6 ay) |
+
+Əlavə könüllü tutulma 50 AZN olarsa kredit üçün yer 173 − 50 = 123 AZN-dir.
+
+## 5. Gəlir vergisi azadolmaları — Vergi Məcəlləsi m.102 (11.10.2026)
+
+**Mənbələr** (oxunma tarixi 11.10.2026):
+- Vergi Məcəlləsi — <https://e-qanun.az/framework/46948> (mətn
+  <https://e-qanun.az/frameworks/46/f_46948.html>, 18.09.2026 tarixli konsolidasiya). Qeyd:
+  `framework/46947` Cinayət Məcəlləsidir, Vergi Məcəlləsi deyil.
+- Vergilər (DVX) — «Qeyri-neft-qaz sektorunun özəl bölməsində fiziki şəxslərdən gəlir vergisi üzrə
+  yeni güzəşt mexanizmi»: <https://www.taxes.gov.az/az/post/4461>.
+- DVX, «Vergi Məcəlləsində edilmiş dəyişikliklər suallar və cavablarda» (2026), «Vergi
+  daxilolmalarının … tənzimlənməsi» bölməsi, sual 1 (s.18):
+  <https://www.taxes.gov.az/uploads/2026/faq/FAQ2026.pdf>.
+
+### 5.1 m.102.1.6 — 200 manat ✅
+
+> **102.1.6.** Fiziki şəxsin əsas iş yerində (əmək kitabçasının olduğu yerdə) hər hansı muzdlu işlə
+> əlaqədar əldə edilən aylıq gəliri 2500 manatadək olduqda, 200 manat, illik gəliri 30000 manatadək
+> olduqda, 2400 manat məbləğində olan hissəsi; [gəlir vergisindən azaddır]
+
+Redaksiya tarixçəsi (VM-in 726-cı qeydi): 200/2400 manat — 1356-VQD (30.11.2018, 2019-dan); 1195-VIQD
+(28.06.2024) bəndin mətnindən «(əmək kitabçasının olduğu yerdə)» sözlərini çıxarıb (konsolidasiya
+edilmiş mətndə hələ görünür); **297-VIIQD (09.12.2025) bu bəndi dəyişməyib**.
+
+> **DVX (post 4461):** «İşçinin aylıq gəliri 2500 manatadək olduqda həmin məbləğin 200 manat olan
+> hissəsindən gəlir vergisinin tutulmaması ilə bağlı güzəşt qüvvədə qalır.»
+>
+> **DVX (FAQ 2026, s.18):** «… qeyri-dövlət sektoruna aid edilən vergi ödəyicisində işləyən fiziki
+> şəxsin 2026-cı ilin yanvar ayı üzrə 2500 manatadək olan muzdlu işlə əlaqədar aylıq gəlirlərindən
+> Vergi Məcəlləsinin 102-ci maddəsində müəyyən olunmuş azadolmalar nəzərə alınmaqla 3 faiz dərəcə ilə
+> vergi tutulur …»
+
+| Sual | Cavab | Status |
+|---|---|---|
+| Kimə? | Hər hansı muzdlu işdən gəlir alan fiziki şəxsə — mətn sektor (dövlət/özəl, neft-qaz/qeyri-neft) və ya rejimlə məhdudlaşdırmır | ✅ |
+| 101.1-1 (özəl qeyri-neft güzəşt cədvəli) ilə birlikdə? | **Bəli** — DVX-nin həm xəbəri, həm FAQ-ı açıq deyir | ✅ |
+| Vergidən, yoxsa bazadan? | **Bazadan**: «200 manat məbləğində olan hissəsi» azaddır → `vergi = cədvəl(gəlir − 200)` | ✅ |
+| Hədd daxildirmi? | «2500 manatadək» — 2500,00 daxil, 2500,01 artıq güzəşt almır (101.1 cədvəlindəki «2500 manatadək / 2500 manatdan çox» qarşılaşdırması ilə eyni oxunuş) | ✅ |
+| Hansı «aylıq gəlir» ilə yoxlanır? | Həmin işəgötürənin ayın vergi tutulan qazancları (`taxable` komponentlər; hərbidə §6.2 süzgəcindən sonra) | ⚠️ vergidən azad ödənişlərin (məs. ezamiyyət) həddə sayılmaması bizim oxunuşdur |
+| Yalnız əsas iş yerində | İşçi kartında «İş yeri: əsas və ya əlavə» (`personnels.workplace_type`) `secondary` olanda güzəşt verilmir; boş və `primary` — əsas (standart: **əsas**) | ✅ m.102.1.6 + m.102.8 |
+| Natamam ay (proporsiya) | 200 manat tam verilir (mətndə mütənasiblik yoxdur) | ⚠️ |
+| Ayda bir dəfə | Off-cycle run (ayın ikinci ödənişi) güzəşti təkrar vermir; adi və son haqq-hesab run-u verir | ⚠️ ayın bütün ödənişlərini cəmləyib 2500-ü yoxlamaq hələ yoxdur |
+| İllik variant (30 000 / 2 400) | Tətbiq edilmir — aylıq əmək haqqı uçotunda aylıq variant işlənir | ⚠️ |
+
+**İmplementasiya.** Yeni cədvəl `statutory_exemptions` (Kompensasiya modulu; effektiv tarixli, rejim
+üzrə; növlər `fixed_amount` və `taxable_components`). Seed sətri: `vm_102_1_6`, bütün rejimlər, 200
+AZN, hədd 2500, yalnız əsas iş yeri. Ekranda: **Kompensasiya → Vergi/sığorta dərəcələri → Gəlir vergisi
+azadolmaları** — məbləğ, hədd, «yalnız əsas iş yerində», tarix dəyişdirilə bilər (yeni sətir əlavə
+olunur, əvvəlki sətir bir gün əvvəl bağlanır). Hesablama: `StatutoryEngine::reliefFor()` /
+`compute()`; payslip-də gəlir vergisi sətri «Gəlir vergisi (vergidən azad olunan hissə 200,00 AZN —
+VM 102.1.6)» kimi görünür.
+
+**Keçmiş aylar dəyişmir.** Retro mühərriki kilidli payslip-ləri cari qaydalarla yenidən hesabladığı
+üçün seed sətrinin `effective_from`-u miqrasiya zamanı **ən son kilidlənmiş adi run-un ayından sonrakı
+ayın 1-i** götürülür (kilidli ay yoxdursa 01.01.2019). Beləliklə ödənilmiş aylar üçün avtomatik
+«geri ödəniş» yaranmır. ⚠️ 01.01.2026-dan bu güzəşt verilməmiş aylar üzrə artıq tutulmuş vergi (məs.
+1 100 AZN-də ayda 6 AZN) mühasib tərəfindən bəyannamə/düzəliş qaydasında həll edilməlidir.
+
+**Nümunələr** (`tests/Feature/Payroll/IncomeTaxReliefTest.php`):
+
+| Aylıq gəlir (əsas iş yeri) | Özəl qeyri-neft 2026 — əvvəl | indi | 2027 (5%) | 2028 (7%) | Dövlət/hərbi (14%) — indi |
+|---|---|---|---|---|---|
+| 1 100 | 33,00 | **27,00** = 900 × 3% | 45,00 | 63,00 | 126,00 = 900 × 14% |
+| 2 400 | 72,00 | **66,00** = 2 200 × 3% | 110,00 | 154,00 | 308,00 |
+| 2 500 | 75,00 | **69,00** = 2 300 × 3% | 115,00 | 161,00 | 322,00 |
+| 2 501 | 75,10 | 75,10 (güzəşt yoxdur) | 125,10 | 175,10 | 350,25 |
+| 3 000 | 125,00 | 125,00 | 175,00 | 225,00 | 475,00 = 350 + 500 × 25% |
+
+Əlavə iş yerində 1 100 AZN → 33,00 (güzəşt yoxdur).
+
+### 5.2 Digər güzəştlər — sistemdə YOXDUR (işçi üzrə güzəşt kartı lazımdır)
+
+| Maddə | Kimə | Güzəşt | Qeyd |
+|---|---|---|---|
+| 102.1-1 | şəhid ailəsi (valideyn, dul arvad/ər, övlad) | aylıq vergi tutulan gəlir **800** AZN azaldılır | |
+| 102.2 | Vətən Müharibəsi və Milli Qəhrəmanlar, SSRİ/Sosialist Əməyi Qəhrəmanları, Şöhrət ordeninin 3 dərəcəsi, I–II qrup müharibə əlilləri, həlak olmuş döyüşçülərin dul arvadı/əri və övladları, müharibə veteranları, Çernobıl/şüa xəstəliyi, minatəmizləyənlərin ailəsi və s. | **400** AZN | |
+| 102.3 | 61–100 % funksiya pozuntusu ilə əlilliyi olanlar (müharibə əlilləri istisna), əlilliyi olan uşaqlar, belə uşağa/81–100 % əlilə baxan valideyn, ər/arvad, himayəçi, qəyyum | **200** AZN | 102.1.6 ilə eyni məbləğ, amma ayrıca güzəştdir |
+| 102.4 | həlak olmuş döyüşçülərin valideynləri, vəzifə icrasında həlak olmuş dövlət qulluqçusunun valideyni və həyat yoldaşı, 20 Yanvar şəhidlərinin ailəsi, Əfqanıstana göndərilmiş hərbçilər, daimi qulluq tələb edən uşağa baxan valideyn, məcburi köçkünlər | **100** AZN | |
+| 102.5 | himayəsində azı 3 nəfər olan ər/arvaddan biri | **50** AZN | |
+
+- **102.7:** 102.1-1, 102.2, 102.3, 102.4 üzrə bir neçə hüquq olduqda **yalnız ən böyüyü** verilir.
+  102.1.6 bu siyahıda yoxdur — onunla birlikdə tətbiq olunur ⚠️ (mətnin sözbəsöz oxunuşu; DVX FAQ-ı
+  «102-ci maddədə müəyyən olunmuş azadolmalar nəzərə alınmaqla» deyir).
+- **102.8:** güzəşt sənədlər təqdim edildiyi andan və yalnız əsas iş yerində tətbiq edilir; sənəd
+  müqavilədən sonra təqdim olunubsa — müqavilənin qüvvəyə mindiyi tarixdən.
+- Bunlar üçün işçi üzrə «güzəşt kartı» (növ, sənəd, tarix aralığı, əsas iş yeri) lazımdır. `statutory_exemptions`
+  cədvəli rejim səviyyəsindədir — işçi səviyyəli kart ayrıca iş kimi qalır.
+
+## 6. Dövlət qulluğu və hərbi rejimlərin dərəcələri (11.10.2026)
+
+**Əvvəl:** `statutory_rates`-də yalnız `regime_id = null` (özəl qeyri-neft-qaz sektoru) sətirləri var
+idi; `state` və `military` rejimindəki işçilərə də 3% / DSMF 10%-lik pillə / tibbi 2500-lük pillə tətbiq
+olunurdu.
+
+**Rejim işçiyə necə təyin olunur.** Kompensasiya → İşçi maaşları → maaş təyinatında «Rejim» seçimi
+məcburidir (`employee_compensations.regime_id`; `military`, `state`, `private`). Hesablama run-u da
+rejimə görə süzülə bilir. ⚠️ Neft-qaz sahəsində fəaliyyət göstərən **özəl** şirkət və dövlət şirkətləri
+də 101.1 / m.14.3 / m.15-10.1.2 dərəcələrinə tabedir — belə işçilər `state` rejimində olmalıdır
+(yaxud ayrıca «neft-qaz» rejimi açılmalıdır); `private` = qeyri-neft-qaz, qeyri-dövlət.
+
+### 6.1 Mətnlər ✅
+
+| Komponent | Rəsmi mətn | Mənbə |
+|---|---|---|
+| Gəlir vergisi | «2500 manatadək — 14 faiz; 2500 manatdan çox olduqda — 350 manat + 2500 manatdan çox olan məbləğin 25 faizi» (1-ci cədvəl; 509-IVQD ilə 2013-dən). 101.1-1 cədvəli yalnız «neft-qaz sahəsində fəaliyyəti olmayan və qeyri-dövlət sektoruna aid edilən» ödəyicilərə aiddir | VM m.101.1, 101.1-1 — <https://e-qanun.az/framework/46948> |
+| DSMF | «sığortaedən … əməyin ödənişi fondunun … 22 faizi; sığortaolunan … əməkhaqqının … 3 faizi» (m.14.4 pilləsi yalnız qeyri-dövlət, qeyri-neft-qaz); hərbi qulluqçular (müddətli həqiqi xidmət istisna) m.12 ilə sığortaolunandır | «Sosial sığorta haqqında» m.14.3, 12 — <https://e-qanun.az/framework/3813> |
+| İşsizlik | «sığortaedən … 0,5 faizi; sığortaolunan … 0,5 faizi»; sığortaolunan — «işəgötürənlə əmək müqaviləsi bağlamış … işçilər» | «İşsizlikdən sığorta haqqında» m.9.0, 2.0.3 — <https://e-qanun.az/framework/36310> |
+| İcbari tibbi | «muzdla işləyən fiziki şəxslər, hərbi qulluqçular (müddətli həqiqi hərbi xidmət … istisna olmaqla) … 8000 manatadək olan hissəsindən 2 faiz, 8000 manatdan yuxarı olan hissəsindən 0,5 faiz» (hər tərəf) | «Tibbi sığorta haqqında» m.15-10.1.2 — <https://e-qanun.az/framework/80> |
+| Hərbçinin vergi bazası | «hərbi qulluqçulara … ödənilən bütün növ ödənişlər (vəzifə və hərbi (xüsusi) rütbəyə görə maaşlar istisna olmaqla)» azaddır | VM m.102.1.14.15 |
+| Əmək Məcəlləsinin şamil olunmaması | «Aşağıdakı şəxslərə bu Məcəllə şamil edilmir: a) hərbi qulluqçulara» | ƏM m.6 — <https://e-qanun.az/framework/46943> |
+
+Qeyd: tapşırıqdakı «8000-ə qədər 14 %, yuxarı 1 120 + 25 %» köhnə məlumatdır — cari 1-ci cədvəldə
+hədd **2500**, sabit hissə **350** manatdır.
+
+### 6.2 Tətbiq
+
+Miqrasiya `2026_10_11_130100_seed_state_and_military_statutory_rates.php` — yalnız həmin rejim +
+komponent + ödəyən üçün heç bir sətir yoxdursa yazır (mühasibin sətirlərinə toxunmur), effective_from =
+01.01.2026, amma ən son kilidli aydan sonra (§5.1 ilə eyni səbəb):
+
+| Rejim | Gəlir vergisi | DSMF işçi / işəgötürən | İşsizlik | Tibbi (hər tərəf) |
+|---|---|---|---|---|
+| `state` | 2500-dək 14%, yuxarı 25% (+102.1.6) | 3% / 22% | 0,5% / 0,5% | 8000-dək 2%, yuxarı 0,5% |
+| `military` | eyni + **yalnız `base` və `rank_supplement`** vergiyə cəlb olunur (`statutory_exemptions`: `vm_102_1_14_15`, növ `taxable_components`) | 3% / 22% | **0% / 0%** ⚠️ | 8000-dək 2%, yuxarı 0,5% |
+
+**Nümunələr** (`IncomeTaxReliefTest`):
+- Dövlət qulluqçusu, 1 100 AZN: vergi 126 (özəl cədvəllə 27), DSMF 33 / 242, işsizlik 5,5 / 5,5, tibbi
+  22 / 22 → ödənilən **913,50** (əvvəl özəl dərəcələrlə və azadolmasız 943,50), işəgötürən xərci 269,50.
+- Dövlət qulluqçusu, 10 000 AZN: vergi 350 + 7 500 × 25% = **2 225** (özəl cədvəllə 905), DSMF 300 /
+  2 200, tibbi 160 + 10 = 170.
+- Hərbi qulluqçu: vəzifə maaşı 1 000 + rütbə 300 + dil bilik əlavəsi 200 = 1 500. Vergi bazası 1 300 →
+  102.1.6 ilə 1 100 × 14% = **154**; DSMF 45 / 330, tibbi 30 / 30, işsizlik yoxdur.
+
+## 7. Yoxlanılmamış / açıq qalan məsələlər
 
 1. ⚠️ Saatlıq vəzifə maaşının ayın fərdi normasına bölünməklə tapılması — rəsmi izahat
    (Nazirlik məktubu və ya metodik göstəriş) tapılmadı.
@@ -189,3 +384,22 @@ işəgötürən onu öz sərəncamı ilə tuta bilməz (m.175.5); yalnız işçi
    icazə/xəstəlik və ezamiyyət çıxılır.
 4. ⚠️ Kollektiv və ya əmək müqaviləsi m.164 və m.162.2 üzrə daha yüksək məbləğ müəyyən edə
    bilər — hazırda yalnız qanuni minimum (və əmrdəki razılaşma) tətbiq olunur.
+5. ⚠️ **Hərbi rejimdə işsizlik sığortası 0%** — «İşsizlikdən sığorta haqqında» m.2.0.3 (sığortaolunan
+   = əmək müqaviləsi bağlamış işçi) və ƏM m.6.a (Məcəllə hərbi qulluqçulara şamil edilmir) əsasında
+   çıxarılıb; DSMF/Məşğulluq agentliyinin açıq izahı tapılmadı — mühasib təsdiqi lazımdır.
+6. ⚠️ **Hərbi pul təminatında vergiyə cəlb olunan komponentlər** `base` (vəzifə maaşı) və
+   `rank_supplement` (rütbə maaşı) kimi götürülüb (VM m.102.1.14.15). Kataloqda başqa adla saxlanan
+   vəzifə/rütbə maaşı varsa `statutory_exemptions.component_codes` düzəldilməlidir. DSMF bazası üçün
+   «pul təminatına daxil edilməyən ödənişlər» («Sosial sığorta haqqında» m.15) komponent səviyyəsində
+   `affects_social` bayrağı ilə idarə olunur — rejimə görə ayrıca süzgəc yoxdur.
+7. ⚠️ VM m.102.1.6 «aylıq gəlir 2500 manatadək» şərti həmin run-un vergi tutulan qazancı ilə yoxlanır;
+   eyni ayda off-cycle ödəniş olarsa ayın cəmi ilə yenidən yoxlanmır (güzəşt off-cycle-da verilmir,
+   amma adi run-da verilmiş güzəşt geri alınmır).
+8. ⚠️ 01.01.2026-dan bu dəyişikliyə qədər kilidlənmiş aylarda verilməmiş 102.1.6 güzəşti və özəl
+   dərəcə ilə hesablanmış dövlət/hərbi işçilərin vergi/DSMF fərqi avtomatik düzəldilmir (retro
+   yaratmamaq üçün seed sətirləri son kilidli aydan sonra qüvvəyə minir) — mühasib bəyannamə
+   düzəlişi ilə həll etməlidir.
+9. ⚠️ VM m.102.1-1, 102.2–102.5 güzəştləri (800/400/200/100/50 AZN) üçün işçi üzrə güzəşt kartı yoxdur (§5.2).
+10. ⚠️ 50 % / 70 % tutulma hədləri (icra sənədləri, aliment) icra sənədi reyestri olmadığı üçün
+    tətbiq edilmir (§4.1); «İcra haqqında» Qanunun mətni e-qanun.az-dan deyil, azstand.gov.az
+    nüsxəsindən oxunub.

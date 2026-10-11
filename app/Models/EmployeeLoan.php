@@ -6,6 +6,7 @@ use App\Traits\PersonnelTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -49,6 +50,22 @@ class EmployeeLoan extends Model
     public function repayments(): HasMany
     {
         return $this->hasMany(LoanRepayment::class, 'employee_loan_id');
+    }
+
+    /** @return HasOne<LoanRepayment, $this> */
+    public function latestRepayment(): HasOne
+    {
+        return $this->hasOne(LoanRepayment::class, 'employee_loan_id')->latestOfMany();
+    }
+
+    /** Qalan borcun indiki taksitlə neçə aya bağlanacağı (təxmini; hədd səbəbindən uzana bilər). */
+    public function monthsLeft(): ?int
+    {
+        $installment = (float) $this->monthly_installment;
+
+        return $this->status === 'active' && $installment > 0 && (float) $this->remaining > 0
+            ? (int) ceil(round((float) $this->remaining / $installment, 6))
+            : null;
     }
 
     public function isActive(): bool

@@ -49,6 +49,7 @@ class LoansTab extends PayrollTab
 
         return EmployeeLoan::query()
             ->where('tabel_no', $this->selectedTabelNo)
+            ->with('latestRepayment')
             ->orderByDesc('id')
             ->get();
     }

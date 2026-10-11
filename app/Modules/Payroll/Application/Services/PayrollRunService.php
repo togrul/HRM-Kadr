@@ -222,7 +222,9 @@ class PayrollRunService
             // olmasın). İşçinin son əmək haqqını ödəyən run (bu ay çıxan işçi üçün adi run və
             // ya final_settlement) taksit yox, qalan borcu ƏM m.176.1 həddinə qədər tutur.
             $settleLoans = $run->run_type !== 'off_cycle' && isset($leavers[$tabelNo]);
-            $calc = $this->calculator->calculate($tabelNo, $onDate, $year, $month, $regular, null, (int) $run->id, $settleLoans);
+            // Aylıq gəlir vergisi güzəşti (VM m.102.1.6) ayda bir dəfədir: off-cycle run həmin ayın
+            // ikinci ödənişidir, ona görə orada verilmir.
+            $calc = $this->calculator->calculate($tabelNo, $onDate, $year, $month, $regular, null, (int) $run->id, $settleLoans, $run->run_type !== 'off_cycle');
 
             if (! $calc) {
                 continue;
@@ -259,10 +261,16 @@ class PayrollRunService
             // Order pay a locked month no longer stands behind (revoked order) is taken
             // back on the next regular run — only where the employee's written consent
             // allows it (ƏM m.175.1/175.5, config payroll.recover_revoked_order_pay) and
-            // never above 20 % of the wage due (m.176.1); the rest stays pending.
-            $recovery = $regular && config('payroll.recover_revoked_order_pay', false)
-                ? round(min($pendingRetro['recovery'], max(0.0, $net) * (float) config('payroll.recovery_cap_ratio', 0.20)), 2)
-                : 0.0;
+            // never above 20 % of the wage due (m.176.1) TOGETHER with every other
+            // non-statutory deduction of this payment (loan instalment, voluntary components);
+            // the rest stays pending.
+            $recovery = 0.0;
+            if ($regular && config('payroll.recover_revoked_order_pay', false)) {
+                $statutory = (float) collect($lines)->where('kind', 'deduction')->where('is_statutory', true)->sum('amount');
+                $taken = (float) collect($lines)->where('kind', 'deduction')->where('is_statutory', false)->sum('amount');
+                $room = DeductionCap::room($gross - $statutory, $taken, DeductionCap::ratio('payroll.recovery_cap_ratio'));
+                $recovery = round(min($pendingRetro['recovery'], $room), 2);
+            }
 
             if ($recovery >= 0.01) {
                 $lines[] = [
@@ -517,7 +525,7 @@ class PayrollRunService
                 ]);
             });
 
-            $this->loans->recordRepaymentsForRun($run);
+            $this->loans->recordRepaymentsForRun($run, $run->run_type === 'regular' ? array_map('strval', array_keys($this->leaversInPeriod($run->period))) : []);
             $this->retro->recordRetroPayments($run);
 
             if ($run->run_type === 'regular' && InstalledTables::has('payroll_one_off_earnings')) {

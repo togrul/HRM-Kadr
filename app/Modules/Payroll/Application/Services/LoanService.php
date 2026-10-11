@@ -39,15 +39,45 @@ class LoanService
     }
 
     /**
+     * Adi (aylıq) run-da tutulacaq taksit: aktiv kreditlərin taksitləri (hər biri qalan borcdan çox
+     * olmamaqla), amma ƏM m.176.1 həddinə qədər — bütün qeyri-statutor tutulmaların cəmi işçiyə
+     * verilməli olan əmək haqqının 20 %-ni keçmir. Könüllü (işçinin ərizəsi ilə, m.175.1/175.6)
+     * taksit də «tutulan bütün məbləğlər»ə daxildir. Sığmayan hissə kreditdə qalır və qrafik uzanır:
+     * növbəti aylarda yenə adi taksit tutulur (artıq tutulmur), borc bir neçə ay gec bağlanır.
+     *
+     * @param  float  $wageDue  gross − statutory deductions of this payment
+     * @param  float  $otherDeductions  non-statutory deductions already on the payslip
+     * @return array{requested: float, amount: float}
+     */
+    public function installmentAmount(string $tabelNo, float $wageDue, float $otherDeductions = 0.0): array
+    {
+        $requested = round($this->activeInstallmentTotal($tabelNo), 2);
+
+        if ($requested <= 0) {
+            return ['requested' => 0.0, 'amount' => 0.0];
+        }
+
+        return ['requested' => $requested, 'amount' => round(min($requested, DeductionCap::room($wageDue, $otherDeductions)), 2)];
+    }
+
+    /**
      * Son haqq-hesabda tutulacaq kredit/avans borcu: bütün aktiv kreditlərin QALAN məbləği,
      * amma hər ödənişdə qeyri-statutor tutulmaların cəmi işçiyə verilməli olan əmək haqqının
-     * (vergi və məcburi ödənişlərdən sonra) `payroll.final_settlement_loan_cap_ratio` payını
-     * keçmir (ƏM m.176.1 — 20 %). Sığmayan hissə kreditdə borc olaraq qalır.
+     * (vergi və məcburi ödənişlərdən sonra) `payroll.deduction_cap_ratio` payını (ƏM m.176.1 —
+     * 20 %) keçmir. Sığmayan hissə kreditdə borc olaraq qalır.
      *
      * @param  float  $wageDue  gross − statutory deductions of this payment
      * @param  float  $otherDeductions  non-statutory deductions already on the payslip
      */
     public function settlementAmount(string $tabelNo, float $wageDue, float $otherDeductions = 0.0): float
+    {
+        return $this->settlement($tabelNo, $wageDue, $otherDeductions)['amount'];
+    }
+
+    /**
+     * @return array{requested: float, amount: float}
+     */
+    public function settlement(string $tabelNo, float $wageDue, float $otherDeductions = 0.0): array
     {
         $outstanding = round((float) EmployeeLoan::query()
             ->where('tabel_no', $tabelNo)
@@ -56,14 +86,10 @@ class LoanService
             ->sum(fn (EmployeeLoan $loan): float => max(0.0, (float) $loan->remaining)), 2);
 
         if ($outstanding <= 0) {
-            return 0.0;
+            return ['requested' => 0.0, 'amount' => 0.0];
         }
 
-        $ratio = max(0.0, min(1.0, (float) config('payroll.final_settlement_loan_cap_ratio', 0.20)));
-        // Aşağı yuvarlaqlaşdırma: hədd bir qəpik də aşılmasın.
-        $room = floor((max(0.0, $wageDue) * $ratio - $otherDeductions) * 100 + 1e-6) / 100;
-
-        return round(max(0.0, min($outstanding, $room)), 2);
+        return ['requested' => $outstanding, 'amount' => round(min($outstanding, DeductionCap::room($wageDue, $otherDeductions)), 2)];
     }
 
     /**
@@ -73,24 +99,33 @@ class LoanService
      * What is booked is exactly the payslip's `loan` line (lock has just proved it matches a
      * fresh calculation): first each loan's instalment, then — on a final settlement — the
      * rest oldest loan first. Off-cycle runs deduct no instalment, so they repay nothing.
+     *
+     * Each repayment row also keeps what was scheduled for the loan in this run
+     * (`scheduled_amount`: the instalment, or the outstanding debt on a settlement). When the
+     * ƏM m.176.1 cap leaves less room, the difference stays on the loan and the schedule runs
+     * longer; a loan the cap left nothing for still gets a 0.00 row, so the deferral is visible.
+     *
+     * @param  list<string>  $settledTabelNos  employees the run settles (they leave this pay month)
      */
-    public function recordRepaymentsForRun(PayrollRun $run): void
+    public function recordRepaymentsForRun(PayrollRun $run, array $settledTabelNos = []): void
     {
         if (! in_array($run->run_type, ['regular', 'final_settlement'], true)) {
             return;
         }
 
         $paidOn = $run->period->ends_on->toDateString();
+        $paid = $run->payslips()->pluck('tabel_no')->map(fn ($tabelNo): string => (string) $tabelNo);
         $deducted = $run->payslips()
             ->join('payslip_lines', 'payslip_lines.payslip_id', '=', 'payslips.id')
             ->where('payslip_lines.code', 'loan')
             ->groupBy('payslips.tabel_no')
             ->selectRaw('payslips.tabel_no as tabel_no, sum(payslip_lines.amount) as amount')
             ->pluck('amount', 'tabel_no');
+        $settles = fn (string $tabelNo): bool => $run->run_type === 'final_settlement' || in_array($tabelNo, $settledTabelNos, true);
 
-        DB::transaction(function () use ($run, $deducted, $paidOn): void {
+        DB::transaction(function () use ($run, $paid, $deducted, $paidOn, $settles): void {
             EmployeeLoan::query()
-                ->whereIn('tabel_no', $deducted->keys())
+                ->whereIn('tabel_no', $paid->all())
                 ->where('status', 'active')
                 ->orderBy('start_on')
                 ->orderBy('id')
@@ -98,8 +133,9 @@ class LoanService
                 ->get()
                 ->reject(fn (EmployeeLoan $loan): bool => $loan->repayments()->where('payroll_run_id', $run->id)->exists())
                 ->groupBy('tabel_no')
-                ->each(function ($loans, $tabelNo) use ($run, $deducted, $paidOn): void {
+                ->each(function ($loans, $tabelNo) use ($run, $deducted, $paidOn, $settles): void {
                     $left = round((float) $deducted->get($tabelNo, 0), 2);
+                    $settlement = $settles((string) $tabelNo);
                     $take = [];
 
                     // 1) instalments, 2) the rest of a settlement, oldest loan first.
@@ -116,15 +152,24 @@ class LoanService
 
                     foreach ($loans as $loan) {
                         $amount = $take[$loan->id] ?? 0.0;
-                        if ($amount <= 0) {
+                        $scheduled = round($settlement
+                            ? max(0.0, (float) $loan->remaining)
+                            : min((float) $loan->monthly_installment, max(0.0, (float) $loan->remaining)), 2);
+
+                        if ($amount <= 0 && $scheduled <= 0) {
                             continue;
                         }
 
                         $loan->repayments()->create([
                             'payroll_run_id' => $run->id,
                             'amount' => $amount,
+                            'scheduled_amount' => max($scheduled, $amount),
                             'paid_on' => $paidOn,
                         ]);
+
+                        if ($amount <= 0) {
+                            continue;
+                        }
 
                         $remaining = round((float) $loan->remaining - $amount, 2);
                         $loan->update([

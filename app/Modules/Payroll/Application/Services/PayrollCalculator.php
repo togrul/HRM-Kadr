@@ -5,9 +5,13 @@ namespace App\Modules\Payroll\Application\Services;
 use App\Models\PayrollOneOffEarning;
 use App\Modules\Compensation\Domain\Contracts\CompensationReadRepository;
 use App\Support\Database\InstalledTables;
+use Illuminate\Support\Facades\DB;
 
 class PayrollCalculator
 {
+    /** @var array<string, bool> tabel_no → main workplace (memo for one run / retro pass) */
+    private array $mainWorkplace = [];
+
     public function __construct(
         private readonly CompensationReadRepository $compensation,
         private readonly StatutoryEngine $statutory,
@@ -36,11 +40,18 @@ class PayrollCalculator
      * loan line is the OUTSTANDING balance instead of the instalment, capped so that all
      * non-statutory deductions stay within `payroll.final_settlement_loan_cap_ratio` of the
      * wage due after tax (ƏM m.176.1); what does not fit stays on the loan as a debt.
+     * A regular run's instalment is held to the same cap (all deductions, voluntary ones
+     * included); what does not fit stays on the loan and the schedule runs longer.
+     *
+     * Income-tax reliefs (VM m.102 — e.g. m.102.1.6: 200 AZN off a main-workplace monthly
+     * income up to 2500 AZN) come from `statutory_exemptions`; the employee's main workplace is
+     * `personnels.workplace_type` (anything but `secondary`). $monthlyRelief = false (an
+     * off-cycle run, a second payment in the month) leaves the monthly relief out.
      *
      * @param  list<array<string,mixed>>|null  $orderLines
      * @return array{gross:float,total_deductions:float,net:float,employer_cost:float,proration_factor:float,currency:string,lines:array<int,array<string,mixed>>}|null
      */
-    public function calculate(string $tabelNo, ?string $onDate = null, ?int $year = null, ?int $month = null, bool $withOneOffs = true, ?array $orderLines = null, ?int $paidByRunId = null, bool $settleLoans = false): ?array
+    public function calculate(string $tabelNo, ?string $onDate = null, ?int $year = null, ?int $month = null, bool $withOneOffs = true, ?array $orderLines = null, ?int $paidByRunId = null, bool $settleLoans = false, bool $monthlyRelief = true): ?array
     {
         $current = $this->compensation->currentCompensation($tabelNo, $onDate);
 
@@ -122,25 +133,33 @@ class PayrollCalculator
 
         // Bases derive from the earning lines and their flags.
         $gross = $this->sumWhere($lines, fn ($l) => $l['kind'] === 'earning');
-        $taxableBase = $this->sumWhere($lines, fn ($l) => $l['kind'] === 'earning' && $l['taxable']);
+        $taxableBase = $this->statutory->taxableBase($lines, $current->regime_id, $onDate);
         $socialBase = $this->sumWhere($lines, fn ($l) => $l['kind'] === 'earning' && $l['affects_social']);
 
-        $statutoryLines = $this->statutory->compute($current->regime_id, $onDate, $taxableBase, $socialBase);
+        $statutoryLines = $this->statutory->compute($current->regime_id, $onDate, $taxableBase, $socialBase, $this->isMainWorkplace($tabelNo), $monthlyRelief);
         $lines = array_merge($lines, $statutoryLines);
 
-        // Loan / advance repayment — a flat deduction, not prorated, not statutory.
-        if ($settleLoans) {
-            $statutory = $this->sumWhere($lines, fn ($l) => $l['kind'] === 'deduction' && $l['is_statutory']);
-            $otherDeductions = $this->sumWhere($lines, fn ($l) => $l['kind'] === 'deduction' && ! $l['is_statutory']);
-            $loanTotal = $this->loans->settlementAmount($tabelNo, $gross - $statutory, $otherDeductions);
-        } else {
-            $loanTotal = $withOneOffs ? round($this->loans->activeInstallmentTotal($tabelNo), 2) : 0.0;
-        }
+        // Loan / advance repayment — a flat deduction, not prorated, not statutory. Every payment
+        // keeps all non-statutory deductions within ƏM m.176.1 (20 % of the wage due after tax).
+        $statutory = $this->sumWhere($lines, fn ($l) => $l['kind'] === 'deduction' && $l['is_statutory']);
+        $otherDeductions = $this->sumWhere($lines, fn ($l) => $l['kind'] === 'deduction' && ! $l['is_statutory']);
+        $loan = match (true) {
+            $settleLoans => $this->loans->settlement($tabelNo, $gross - $statutory, $otherDeductions),
+            $withOneOffs => $this->loans->installmentAmount($tabelNo, $gross - $statutory, $otherDeductions),
+            default => ['requested' => 0.0, 'amount' => 0.0],
+        };
+        $loanTotal = $loan['amount'];
+
         if ($loanTotal > 0) {
             $lines[] = [
                 'component_id' => null,
                 'code' => 'loan',
-                'name' => __('payroll::dashboard.loan.line'),
+                'name' => $loanTotal < $loan['requested']
+                    ? __('payroll::dashboard.loan.line_capped', [
+                        'requested' => number_format($loan['requested'], 2, ',', ' '),
+                        'deferred' => number_format($loan['requested'] - $loanTotal, 2, ',', ' '),
+                    ])
+                    : __('payroll::dashboard.loan.line'),
                 'kind' => 'deduction',
                 'amount' => $loanTotal,
                 'taxable' => false,
@@ -174,6 +193,19 @@ class PayrollCalculator
         $current = $this->compensation->currentCompensation($tabelNo, $onDate);
 
         return $current ? $this->orderEarnings->linesFor($tabelNo, (float) $current->base_amount, $year, $month) : [];
+    }
+
+    /**
+     * VM m.102.1.6 / 102.8: güzəşt yalnız əsas iş yerində. İşçi kartında «İş yeri: əsas və ya
+     * əlavə» (`personnels.workplace_type`) `secondary` deyilsə — boş da daxil — əsas iş yeri sayılır.
+     */
+    private function isMainWorkplace(string $tabelNo): bool
+    {
+        if (! InstalledTables::hasColumn('personnels', 'workplace_type')) {
+            return true;
+        }
+
+        return $this->mainWorkplace[$tabelNo] ??= DB::table('personnels')->where('tabel_no', $tabelNo)->value('workplace_type') !== 'secondary';
     }
 
     /**

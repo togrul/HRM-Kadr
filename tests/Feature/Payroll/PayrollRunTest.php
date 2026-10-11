@@ -53,12 +53,13 @@ class PayrollRunTest extends TestCase
         $this->assertSame('calculated', $run->status);
         $this->assertSame(1, $run->employee_count);
         $this->assertSame('1100.00', $run->gross_total);
-        // Statutory deductions are now applied: gross 1100 → net 943.50 (tax 33 + dsmf 96 + unemp 5.5 + medical 22).
-        $this->assertSame('943.50', $run->net_total);
+        // Statutory deductions: gross 1100 → net 949.50 (tax (1100 − 200 VM m.102.1.6) × 3% = 27
+        // + dsmf 96 + unemp 5.5 + medical 22). Without the 200 AZN relief the tax was 33 (net 943.50).
+        $this->assertSame('949.50', $run->net_total);
 
         $payslip = $run->payslips()->with('lines')->first();
         $this->assertSame('1100.00', $payslip->gross);
-        $this->assertSame('943.50', $payslip->net);
+        $this->assertSame('949.50', $payslip->net);
         // base + seniority + 4 employee statutory + 3 employer statutory = 9 lines.
         $this->assertCount(9, $payslip->lines);
         $this->assertTrue($payslip->lines->contains('code', 'income_tax_ee'));
@@ -193,7 +194,7 @@ class PayrollRunTest extends TestCase
         $this->assertStringContainsString("approveRun({$run->id})", $html);
         $this->assertStringNotContainsString("wire:click=\"approveRun({$run->id})\"", $html);
         $this->assertStringContainsString('confirm-action', $html);
-        $this->assertStringContainsString('943,50', $html);
+        $this->assertStringContainsString('949,50', $html);
         $this->assertStringContainsString(e(e($period->starts_on->translatedFormat('F Y'))), $html);
     }
 

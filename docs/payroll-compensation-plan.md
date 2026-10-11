@@ -231,6 +231,35 @@ Nümunə: 10 000 AZN brüt → DSMF işəgötürən 1 434 AZN (əvvəl 1 514), i
 3. Gəlir vergisi bazasına hansı ödənişlərin daxil olmadığı (VM m.102 digər bəndləri) komponent
    səviyyəsində (`taxable`) idarə olunur — bu yoxlamada baxılmayıb.
 
+> **Yeniləmə (11.10.2026, EK A.2):** 1-ci və 2-ci bəndlər rəsmi mətnlə yoxlanıb və tətbiq edilib.
+> Diqqət: 2-ci bənddəki «2500-dək 14%, yuxarı 350 + 25%» düzgündür; bəzi mənbələrdəki «8000-dək 14%,
+> 1 120 + 25%» köhnədir.
+
+### EK A.2 — VM m.102.1.6, dövlət/hərbi rejimlər və tutulma həddi (11.10.2026)
+
+Ətraflı hüquqi əsas, sitatlar və nümunələr: `docs/payroll-legal-basis.md` §4.1, §5, §6. Mənbələr
+11.10.2026 tarixində oxunub: Vergi Məcəlləsi <https://e-qanun.az/framework/46948> (18.09.2026
+konsolidasiyası; `46947` Cinayət Məcəlləsidir), DVX <https://www.taxes.gov.az/az/post/4461> və
+<https://www.taxes.gov.az/uploads/2026/faq/FAQ2026.pdf> (s.18), «Sosial sığorta haqqında»
+<https://e-qanun.az/framework/3813>, «Tibbi sığorta haqqında» <https://e-qanun.az/framework/80>,
+«İşsizlikdən sığorta haqqında» <https://e-qanun.az/framework/36310>, Əmək Məcəlləsi
+<https://e-qanun.az/framework/46943>.
+
+| Mövzu | Qərar | Kod / data |
+|---|---|---|
+| VM 102.1.6 — 200 AZN | Əsas iş yerində aylıq vergi tutulan gəlir ≤ 2500 olduqda gəlirdən 200 çıxılır, sonra cədvəl tətbiq olunur. Bütün rejimlərdə, 101.1-1 ilə birlikdə (DVX FAQ 2026). Off-cycle run-da təkrar verilmir | `statutory_exemptions` (`vm_102_1_6`), `StatutoryEngine::reliefFor()`; əsas iş yeri = `personnels.workplace_type ≠ secondary` |
+| Effektiv tarix | Seed sətirləri son kilidli adi run-un ayından sonrakı ayın 1-dən — kilidli aylar üçün retro yaranmır | miqrasiyalar `2026_10_11_130000`, `130100` |
+| Dövlət qulluğu (`state`) | gəlir vergisi 2500-dək 14%, yuxarı 25%; DSMF 3/22; işsizlik 0,5/0,5; tibbi 8000-dək 2%, yuxarı 0,5% | `statutory_rates` (regime_id = state) |
+| Hərbi (`military`) | dövlətlə eyni; vergiyə yalnız `base` + `rank_supplement` (VM 102.1.14.15); işsizlik 0% ⚠️ | `statutory_rates` (military), `statutory_exemptions` (`vm_102_1_14_15`, `taxable_components`) |
+| ƏM 176.1 — 20 % | Adi aylıq kredit taksiti də daxil olmaqla bütün qeyri-statutor tutulmalar ≤ 20 % × (hesablanmış − vergi/məcburi sosial). Sığmayan hissə kreditdə qalır, qrafik uzanır. Hədd yalnız aşağı salına bilər | `DeductionCap`, `LoanService::installmentAmount()`, `loan_repayments.scheduled_amount`, `payroll.deduction_cap_ratio` |
+| 50 % / 70 % | Tətbiq edilmir — icra sənədi reyestri yoxdur | — |
+| Digər güzəştlər (102.1-1, 102.2–102.5) | Sistemdə yoxdur; işçi üzrə güzəşt kartı lazımdır | — |
+
+Ekran: Kompensasiya → Vergi/sığorta dərəcələri (dərəcə kartlarında qüvvəyə minmə tarixi, yeni
+«Gəlir vergisi azadolmaları» bölməsi və «Azadolma əlavə et» paneli); Maaş → Kredit/avans (son
+tutulma, həddə görə keçən məbləğ, təxmini qalan ay). Testlər: `tests/Feature/Payroll/IncomeTaxReliefTest.php`,
+`LoanPayrollTest.php` (yeni 5 test), `PayrollRunTest.php` (1 100 AZN nümunəsi 943,50 → 949,50).
+
 ## 11.10.2026 — qabaqcıl payroll işlərinin hazırlıq sərhədi
 
 Çoxvalyutalı hesablamanın tamamlanması GL ixracında valyuta göstərilməsindən böyük işdir. Müqavilə valyutası, ödəniş valyutası və vergi/hesabat valyutası ayrı müəyyən edilməlidir. Məzənnə mənbəyi ARBAY olmalı, məzənnənin tarixi, nominalı, currency pair-i, dəyəri və source/version-u payslip snapshot-unda dondurulmalıdır. Köhnə locked run cari məzənnə ilə yenidən hesablanmamalıdır. Məzənnə tapılmasa səssiz 1 götürmək olmaz. Foreign currency üzrə vergi bazasına çevirmə qaydası mühasib təsdiqi tələb edir.

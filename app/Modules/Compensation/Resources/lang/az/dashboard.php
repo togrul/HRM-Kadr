@@ -42,6 +42,23 @@ return [
             'taxable' => 'Vergi bazası',
             'social' => 'Sosial baza',
         ],
+        'effective' => ':date tarixindən',
+    ],
+
+    'exemptions' => [
+        'title' => 'Gəlir vergisi azadolmaları (VM m.102)',
+        'hint' => 'Pillələr tətbiq edilməzdən əvvəl vergi tutulan gəlirdən çıxılır. Yeni sətir öz tarixindən tətbiq olunur; kilidlənmiş aylar köhnə qayda ilə qalır.',
+        'panel_hint' => 'Məs. VM m.102.1.6: əsas iş yerində aylıq gəlir 2500 AZN-dək olduqda 200 AZN azaddır. Eyni kodlu əvvəlki sətir yeni tarixdən bir gün əvvəl bağlanır.',
+        'add' => 'Azadolma əlavə et',
+        'empty' => 'Azadolma yoxdur',
+        'code' => 'Kod',
+        'legal_basis' => 'Hüquqi əsas',
+        'amount' => 'Azad məbləğ (AZN)',
+        'income_up_to' => 'Yalnız aylıq gəlir bu məbləğədək olduqda (AZN)',
+        'income_limit' => 'aylıq gəlir :amount AZN-dək',
+        'no_income_limit' => 'gəlir həddi yoxdur',
+        'main_workplace_only' => 'yalnız əsas iş yerində',
+        'taxable_only' => 'Vergiyə yalnız bu komponentlər cəlb olunur: :codes',
     ],
 
     'summary' => [

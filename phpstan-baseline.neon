@@ -3187,40 +3187,10 @@ parameters:
 			path: app/Modules/Compensation/Application/Services/AllowanceResolver.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\EmployeeCompensation\:\:\$regime_id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Compensation/Application/Services/CompensationService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\EmployeeCompensation\:\:\$status\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Application/Services/CompensationService.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\PayGrade\:\:\$base_amount\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Compensation/Application/Services/CompensationService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\StatutoryRate\:\:\$component_code\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Infrastructure/Persistence/Eloquent/EloquentCompensationReadRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\StatutoryRate\:\:\$payer\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Infrastructure/Persistence/Eloquent/EloquentCompensationReadRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\StatutoryRate\:\:\$regime_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Compensation/Infrastructure/Persistence/Eloquent/EloquentCompensationReadRepository.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\CompensationComponent\:\:\$name\.$#'
@@ -5137,12 +5107,6 @@ parameters:
 			path: app/Modules/Payroll/Application/Services/LoanService.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\EmployeeCompensation\:\:\$regime_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Payroll/Application/Services/PayrollCalculator.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\EmployeeBankAccount\:\:\$bank_name\.$#'
 			identifier: property.notFound
 			count: 1
@@ -5231,30 +5195,6 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Payroll/Application/Services/RetroService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\StatutoryRate\:\:\$base\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Payroll/Application/Services/StatutoryEngine.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\StatutoryRate\:\:\$brackets\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Modules/Payroll/Application/Services/StatutoryEngine.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\StatutoryRate\:\:\$component_code\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Payroll/Application/Services/StatutoryEngine.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\StatutoryRate\:\:\$payer\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Modules/Payroll/Application/Services/StatutoryEngine.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Payslip\:\:\$status\.$#'

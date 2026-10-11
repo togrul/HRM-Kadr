@@ -2,6 +2,7 @@
 
 namespace App\Modules\Compensation\Livewire\Tabs;
 
+use App\Models\StatutoryExemption;
 use App\Models\StatutoryRate;
 use App\Modules\Compensation\Application\Services\CompensationCatalogService;
 use Illuminate\Support\Collection;
@@ -22,6 +23,17 @@ class StatutoryTab extends CompensationTab
 
     public array $statutoryBrackets = [];
 
+    /** Sabit məbləğli gəlir vergisi azadolması (VM m.102.1.6 kimi). */
+    public array $exemptionForm = [
+        'regime_id' => null,
+        'code' => 'vm_102_1_6',
+        'legal_basis' => 'VM 102.1.6',
+        'amount' => '200',
+        'income_up_to' => '2500',
+        'main_workplace_only' => true,
+        'effective_from' => '',
+    ];
+
     protected function viewName(): string
     {
         return 'statutory';
@@ -29,12 +41,12 @@ class StatutoryTab extends CompensationTab
 
     protected function panels(): array
     {
-        return ['statutory'];
+        return ['statutory', 'exemption'];
     }
 
     protected function resetPanel(string $panel): void
     {
-        $this->resetStatutoryForm();
+        $panel === 'exemption' ? $this->resetExemptionForm() : $this->resetStatutoryForm();
     }
 
     #[Computed]
@@ -45,6 +57,58 @@ class StatutoryTab extends CompensationTab
             ->orderBy('component_code')
             ->orderBy('payer')
             ->get();
+    }
+
+    #[Computed]
+    public function statutoryExemptions(): Collection
+    {
+        return StatutoryExemption::query()
+            ->with('regime:id,name')
+            ->orderBy('code')
+            ->orderByDesc('effective_from')
+            ->get();
+    }
+
+    public function saveStatutoryExemption(CompensationCatalogService $service): void
+    {
+        $this->guardManage();
+
+        $data = $this->validate([
+            'exemptionForm.regime_id' => 'nullable|exists:compensation_regimes,id',
+            'exemptionForm.code' => 'required|string|max:40|regex:/^[a-z0-9_]+$/',
+            'exemptionForm.legal_basis' => 'required|string|max:60',
+            'exemptionForm.amount' => 'required|numeric|min:0.01|max:100000',
+            'exemptionForm.income_up_to' => 'nullable|numeric|min:0.01',
+            'exemptionForm.main_workplace_only' => 'boolean',
+            'exemptionForm.effective_from' => 'required|date',
+        ], attributes: [
+            'exemptionForm.regime_id' => __('compensation::dashboard.fields.regime'),
+            'exemptionForm.code' => __('compensation::dashboard.exemptions.code'),
+            'exemptionForm.legal_basis' => __('compensation::dashboard.exemptions.legal_basis'),
+            'exemptionForm.amount' => __('compensation::dashboard.exemptions.amount'),
+            'exemptionForm.income_up_to' => __('compensation::dashboard.exemptions.income_up_to'),
+            'exemptionForm.main_workplace_only' => __('compensation::dashboard.exemptions.main_workplace_only'),
+            'exemptionForm.effective_from' => __('compensation::dashboard.fields.effective_from'),
+        ])['exemptionForm'];
+
+        $service->createStatutoryExemption($data);
+
+        $this->resetExemptionForm();
+        $this->announce('saved');
+    }
+
+    public function resetExemptionForm(): void
+    {
+        $this->exemptionForm = ['regime_id' => null, 'code' => 'vm_102_1_6', 'legal_basis' => 'VM 102.1.6', 'amount' => '200', 'income_up_to' => '2500', 'main_workplace_only' => true, 'effective_from' => ''];
+        $this->panel = '';
+        $this->resetValidation();
+    }
+
+    public function deleteStatutoryExemption(int $id, CompensationCatalogService $service): void
+    {
+        $this->guardManage();
+        $service->deleteStatutoryExemption($id);
+        $this->announce('deleted');
     }
 
     public function addStatutoryBracket(): void

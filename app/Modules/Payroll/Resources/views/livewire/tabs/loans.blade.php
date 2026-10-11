@@ -60,11 +60,15 @@
                 </div>
             @endif
 
+            <p class="border-b border-hairline-subtle px-4 py-2.5 text-[11.5px] leading-relaxed text-ink-faint">{{ __('payroll::dashboard.loans.cap_note') }}</p>
+
             <x-table.tbl :headers="[
                 __('payroll::dashboard.fields.loan_type'),
                 __('payroll::dashboard.fields.principal'),
                 __('payroll::dashboard.fields.monthly_installment'),
                 __('payroll::dashboard.fields.remaining'),
+                __('payroll::dashboard.loans.last_repayment'),
+                __('payroll::dashboard.loans.months_left'),
                 __('payroll::dashboard.fields.status'),
                 __('payroll::dashboard.columns.actions'),
             ]">
@@ -76,6 +80,17 @@
                         <x-table.td><span class="hrm-num text-[13px] text-ink-soft">{{ $money($loan->principal) }} {{ $loan->currency }}</span></x-table.td>
                         <x-table.td><span class="hrm-num text-[13px] text-ink-soft">{{ $money($loan->monthly_installment) }}</span></x-table.td>
                         <x-table.td><span class="hrm-num text-[13px] font-semibold text-ink">{{ $money($loan->remaining) }}</span></x-table.td>
+                        <x-table.td>
+                            @if ($loan->latestRepayment)
+                                <span class="hrm-num block text-[13px] text-ink-soft">{{ $money($loan->latestRepayment->amount) }} <span class="text-[11px] text-ink-faint">· {{ $loan->latestRepayment->paid_on?->format('d.m.Y') }}</span></span>
+                                @if ($loan->latestRepayment->deferredAmount() > 0)
+                                    <span class="mt-0.5 block text-[11px] font-medium text-amber-700">{{ __('payroll::dashboard.loans.deferred', ['amount' => $money($loan->latestRepayment->deferredAmount())]) }}</span>
+                                @endif
+                            @else
+                                <span class="text-[12px] text-ink-faint">{{ __('payroll::dashboard.loans.no_repayment') }}</span>
+                            @endif
+                        </x-table.td>
+                        <x-table.td><span class="hrm-num text-[13px] text-ink-muted">{{ $loan->monthsLeft() ?? '—' }}</span></x-table.td>
                         <x-table.td><span class="text-[13px] text-ink-muted">{{ __('payroll::dashboard.loans.statuses.'.$loan->status) }}</span></x-table.td>
                         <x-table.td :isButton="true">
                             @if ($canManage)
@@ -85,7 +100,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="px-4 py-4">
+                        <td colspan="8" class="px-4 py-4">
                             <x-ui.empty-state icon="icons.document-icon" :title="__('payroll::dashboard.loans.empty')" />
                         </td>
                     </tr>

@@ -42,6 +42,23 @@ return [
             'taxable' => 'Taxable base',
             'social' => 'Social base',
         ],
+        'effective' => 'In force from :date',
+    ],
+
+    'exemptions' => [
+        'title' => 'Income tax exemptions (Tax Code art. 102)',
+        'hint' => 'Taken off the taxable base before the brackets apply. A new row applies from its own date; locked months keep the old rule.',
+        'panel_hint' => 'E.g. Tax Code art. 102.1.6: at the main workplace, a monthly income of up to 2500 AZN has 200 AZN exempt. The previous row with the same code ends the day before.',
+        'add' => 'Add exemption',
+        'empty' => 'No exemptions',
+        'code' => 'Code',
+        'legal_basis' => 'Legal basis',
+        'amount' => 'Exempt amount (AZN)',
+        'income_up_to' => 'Only if monthly income is up to (AZN)',
+        'income_limit' => 'monthly income up to :amount AZN',
+        'no_income_limit' => 'no income limit',
+        'main_workplace_only' => 'main workplace only',
+        'taxable_only' => 'Only these components are taxed: :codes',
     ],
 
     'summary' => [
