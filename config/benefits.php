@@ -17,6 +17,11 @@
 |                    («Sosial sığorta haqqında» Qanun m.15)
 |   basis          — benefits::dashboard.tax_basis.<basis> açarı (maddə + izah)
 |   exclusive      — işçinin eyni növdən yalnız bir aktiv paketi ola bilər (məs. tibbi A və ya B)
+|   exempt_daily_norm — (ixtiyari) işçi üzrə gündəlik azad norma, AZN. Təyin olunubsa `taxable` /
+|                    `affects_social` bayraqları nəzərə alınmır: norma × iş günü daxilindəki hissə nə
+|                    vergiyə, nə sığortaya cəlb olunmur; artıq hissə gəlir vergisinə və YALNIZ DSMF-ə
+|                    cəlb olunur (işsizlik və icbari tibbi sığorta haqqına heç vaxt).
+|                    Yemək kartı: VM m.119.2 + DVX izahı 10.07.2026 (5 AZN/gün).
 |
 */
 
@@ -25,7 +30,7 @@ return [
         'medical_insurance' => ['taxable' => false, 'affects_social' => false, 'basis' => 'vm_102_1_8_medical', 'exclusive' => true, 'allows_dependents' => true],
         'life_insurance' => ['taxable' => true, 'affects_social' => true, 'basis' => 'vm_98_2_5', 'exclusive' => true, 'allows_dependents' => false],
         'life_savings_insurance' => ['taxable' => false, 'affects_social' => false, 'basis' => 'vm_102_1_8_savings', 'exclusive' => true, 'allows_dependents' => false],
-        'meal_card' => ['taxable' => false, 'affects_social' => true, 'basis' => 'vm_98_5_meal', 'exclusive' => true, 'allows_dependents' => false],
+        'meal_card' => ['taxable' => false, 'affects_social' => true, 'basis' => 'vm_98_5_meal', 'exclusive' => true, 'allows_dependents' => false, 'exempt_daily_norm' => 5.0],
         'transport' => ['taxable' => true, 'affects_social' => true, 'basis' => 'vm_98_2_3', 'exclusive' => true, 'allows_dependents' => false],
         'mobile' => ['taxable' => false, 'affects_social' => false, 'basis' => 'business_expense', 'exclusive' => true, 'allows_dependents' => false],
         'gym' => ['taxable' => false, 'affects_social' => true, 'basis' => 'vm_98_5_social', 'exclusive' => true, 'allows_dependents' => true],
@@ -44,6 +49,9 @@ return [
         'employee_share_component' => 'benefit_employee_share',
         'imputed_code' => 'benefit_in_kind',
         'offset_code' => 'benefit_in_kind_offset',
+        // Norma üzrə artıq hissə: gəlir vergisinə və yalnız DSMF bazasına daxildir. Kod Payroll-da
+        // `StatutoryEngine::DSMF_ONLY_CODES` ilə eyni olmalıdır (dəyişdirilmir).
+        'imputed_dsmf_code' => 'benefit_in_kind_dsmf',
     ],
 
     'renewal' => [

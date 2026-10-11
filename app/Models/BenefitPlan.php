@@ -26,6 +26,8 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property int|null $max_dependents
  * @property bool $taxable
  * @property bool $affects_social
+ * @property string|null $exempt_daily_norm
+ * @property bool $norm_is_invoice_based
  * @property string|null $tax_basis
  * @property \Illuminate\Support\Carbon|null $contract_start
  * @property \Illuminate\Support\Carbon|null $contract_end
@@ -54,6 +56,8 @@ class BenefitPlan extends Model
         'max_dependents',
         'taxable',
         'affects_social',
+        'exempt_daily_norm',
+        'norm_is_invoice_based',
         'tax_basis',
         'contract_start',
         'contract_end',
@@ -74,6 +78,8 @@ class BenefitPlan extends Model
         'max_dependents' => 'integer',
         'taxable' => 'boolean',
         'affects_social' => 'boolean',
+        'exempt_daily_norm' => 'decimal:2',
+        'norm_is_invoice_based' => 'boolean',
         'contract_start' => 'date',
         'contract_end' => 'date',
         'renewal_window_days' => 'integer',

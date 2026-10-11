@@ -9,6 +9,13 @@ use Illuminate\Support\Collection;
 
 class StatutoryEngine
 {
+    /**
+     * Yalnız DSMF bazasına daxil olan qazanc sətirlərinin kodları: işsizlik və icbari tibbi
+     * sığorta bazasına düşmür (məs. yemək normasından artıq hissə — DVX izahı 10.07.2026).
+     * Kod config/benefits.php → payroll.imputed_dsmf_code ilə eynidir.
+     */
+    public const DSMF_ONLY_CODES = ['benefit_in_kind_dsmf'];
+
     /** @var array<string, Collection<int, StatutoryExemption>> */
     private array $exemptions = [];
 
@@ -113,6 +120,25 @@ class StatutoryEngine
     }
 
     /**
+     * Ümumi sosial baza (işsizlik, icbari tibbi və digər sosial əsaslı komponentlər): sosial
+     * sığortaya cəlb olunan qazanclar, yalnız DSMF-ə aid sətirlər (`DSMF_ONLY_CODES`) çıxılmaqla.
+     *
+     * @param  array<int,array<string,mixed>>  $lines
+     */
+    public function socialBase(array $lines): float
+    {
+        $sum = 0.0;
+
+        foreach ($lines as $line) {
+            if (($line['kind'] ?? null) === 'earning' && ($line['affects_social'] ?? false) && ! in_array((string) ($line['code'] ?? ''), self::DSMF_ONLY_CODES, true)) {
+                $sum += (float) $line['amount'];
+            }
+        }
+
+        return $sum;
+    }
+
+    /**
      * Per-component social bases where a `taxable_components` rule targets a social-based component
      * (e.g. `dsmf` for servicemen: only the listed pay codes count). Components without such a
      * rule are absent from the result and use the payslip's ordinary social base.
@@ -142,6 +168,22 @@ class StatutoryEngine
             }
 
             $bases[$component] = $sum;
+        }
+
+        // Yalnız DSMF-ə aid sətirlər: DSMF bazası = ümumi baza + bu sətirlər. Hərbçi qaydası
+        // (`dsmf` üçün kod siyahısı) artıq varsa, ona toxunulmur — siyahıda bu kodlar yoxdur.
+        if (! array_key_exists('dsmf', $bases)) {
+            $dsmfOnly = 0.0;
+
+            foreach ($lines as $line) {
+                if (($line['kind'] ?? null) === 'earning' && ($line['affects_social'] ?? false) && in_array((string) ($line['code'] ?? ''), self::DSMF_ONLY_CODES, true)) {
+                    $dsmfOnly += (float) $line['amount'];
+                }
+            }
+
+            if ($dsmfOnly != 0.0) {
+                $bases['dsmf'] = $this->socialBase($lines) + $dsmfOnly;
+            }
         }
 
         return $bases;

@@ -70,6 +70,8 @@ return [
         'max_dependents' => 'Maximum dependents',
         'taxable' => 'Subject to income tax',
         'affects_social' => 'Included in the social insurance base',
+        'exempt_daily_norm' => 'Daily exempt norm, AZN (per employee)',
+        'norm_is_invoice_based' => 'Public catering by e-invoice / prepared by the employer (fully exempt)',
         'tax_basis' => 'Legal basis',
         'contract_start' => 'Contract start',
         'contract_end' => 'Contract end',
@@ -121,6 +123,7 @@ return [
         'form_title' => 'Benefit plan',
         'cost_section' => 'Cost and shares',
         'tax_section' => 'Tax treatment',
+        'norm_hint' => 'When a norm is set the two flags above are ignored: the part within norm x working days is neither taxed nor subject to insurance; the excess is subject to income tax and DSMF only (never unemployment or compulsory medical insurance). In e-invoice mode nothing is charged regardless of the amount. With no norm the plan follows the flags above.',
         'contract_section' => 'Contract and renewal',
         'eligibility_section' => 'Eligibility rules',
         'eligibility_help' => 'All rules apply together; an empty rule sets no limit.',
@@ -151,7 +154,7 @@ return [
         ],
         'vm_98_5_meal' => [
             'title' => 'Tax Code art. 98.5, 109.3, 119.2 — meal expenses',
-            'body' => 'Income received as a result of the employer incurring expenses under art. 109.3 (employees\' social expenses — not deductible) and art. 119.2 (meal expenses within norms) is not taxable income (art. 98.5). Article 15 of the Law on Social Insurance does not list ordinary meals among payments exempt from contributions — by default they are in the social insurance base. If a meal card works like cash, the accountant should treat it as ordinary income.',
+            'body' => 'Under Tax Code art. 119.2 and the Cabinet of Ministers decision the daily meal norm is AZN 5 per employee (State Tax Service explanation, 10.07.2026). The amount within the norm is subject to neither income tax nor DSMF; the excess is the employee\'s income and is subject to income tax and DSMF. Meals bought from a public catering business on an e-invoice or prepared by the employer are not taxed regardless of the amount (the plan\'s "e-invoice" flag). Unemployment and compulsory medical insurance contributions are not charged either within or above the norm. The system calculates norm x the employee\'s working days of that month.',
             'url' => 'https://e-qanun.az/framework/46948',
         ],
         'vm_98_2_3' => [
@@ -229,6 +232,7 @@ return [
     ],
 
     'messages' => [
+        'norm_negative' => 'The daily norm cannot be negative.',
         'saved' => 'Saved.',
         'deleted' => 'Deleted.',
         'enrolled' => 'Enrollment created.',
@@ -335,6 +339,7 @@ return [
 
     'payroll' => [
         'imputed_line' => 'Benefit (income in kind): :plan',
+        'imputed_norm_line' => 'Benefit (income in kind), above the norm: :plan',
         'offset_line' => 'Benefit (in kind) — not paid in cash: :plan',
     ],
 ];

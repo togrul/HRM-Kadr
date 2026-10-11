@@ -846,7 +846,7 @@ Vergi Məcəlləsi <https://e-qanun.az/framework/46948>, «Sosial sığorta haqq
 | Tibbi sığorta (könüllü) | azad | azad | VM 102.1.8; Qanun m.15 |
 | Həyat sığortası (risk) | **vergiyə cəlb** | **daxil** | VM 98.2.5 (102.1.8 yalnız yığım/pensiyaya aiddir) |
 | Həyatın yığım / pensiya sığortası (≥ 3 il) | azad | azad | VM 102.1.8 — 3 il və 50 % həddini mühasib yoxlayır ⚠️ |
-| Yemək kartı | azad | **daxil** ⚠️ | VM 98.5 + 109.3/119.2; Qanun m.15 adi yeməyi istisna etmir |
+| Yemək kartı | norma × iş günü daxilində azad; **artıq hissə vergiyə cəlb** | norma daxilində azad; artıq hissə **yalnız DSMF**-ə daxil (işsizlik/tibbi heç vaxt) | VM 98.5 + 109.3/119.2; **DVX izahı 10.07.2026** (norma 5 AZN/gün); qaimə-fakturalı iaşə/öz hazırlanma — tam azad |
 | Nəqliyyat | **vergiyə cəlb** | **daxil** | VM 98.2.3 |
 | Mobil telefon limiti (xidməti) | gəlir deyil | gəlir deyil | işgüzar xərc; şəxsi istifadə/limitdən artıq — VM 98.2.2 ⚠️ |
 | İdman zalı | azad | **daxil** ⚠️ | VM 98.5 + 109.3 (sosial xarakterli xərc) |
@@ -863,12 +863,26 @@ Vergiyə cəlb olunan məbləğ **yalnız işəgötürən payıdır** — işçi
   (−məbləğ, vergisiz, sosial bazadan kənar). Nağd brüt/xalis dəyişmir, yalnız vergi/sığorta bazası artır. Açar
   `benefits:<qoşulma>:<YYYY-MM>:value|offset` — təkrar sinxron ikinci sətir yaratmır; ay kilidlidirsə hər iki sətir
   birlikdə növbəti aya keçir. Davamiyyət proporsiyası tətbiq olunmur (sığorta haqqı ay üzrə tam ödənilir).
+- **Gündəlik norma (yemək kartı, 12.10.2026).** DVX-in 10.07.2026 izahına (<https://www.taxes.gov.az/az/post/4909>)
+  görə VM m.119.2 üzrə gündəlik norma 5 AZN-dir: norma daxilində məbləğ gəlir vergisinə və DSMF-ə cəlb olunmur; normadan
+  artıq hissə gəlir vergisinə və DSMF-ə cəlb olunur; ictimai iaşə müəssisəsindən elektron qaimə-faktura ilə alınan və ya
+  işəgötürənin hazırladığı yemək məbləğdən asılı olmayaraq cəlb olunmur; işsizlik və icbari tibbi sığorta haqqı heç
+  vaxt hesablanmır. Paket sahələri `exempt_daily_norm` və `norm_is_invoice_based`; azad hissə = `min(işəgötürən payı,
+  norma × işçinin ay üzrə iş günü sayı)` (`attendance_monthly_summaries.total_workdays` — Payroll-un proratasiya
+  mənbəyi; yoxdursa qlobal davamiyyət təqvimi). Artıq hissə `benefit_in_kind_dsmf` kodu ilə (`taxable=true`,
+  `affects_social=true`) yazılır; `StatutoryEngine::socialBase()` bu kodu ümumi sosial bazadan (işsizlik, tibbi)
+  çıxarır, `socialBases()` isə DSMF bazasına əlavə edir (hərbçi `dsmf` kod siyahısı qaydası varsa ona toxunmur).
+  Norması olmayan paketlər (idman zalı və s.) əvvəlki kimi bayraqlara görə bütün sosial bazaya daxildir.
+  Ödənilmiş sətirlərə toxunulmur; yeni qayda yalnız cari ayın növbəti sinxronundan tətbiq olunur.
 - Nümunə (`tests/Feature/Benefits/BenefitPayrollIntegrationTest.php`): 1 500 AZN maaş, həyat sığortası 40 AZN
   (100 % işəgötürən) + tibbi 100 AZN (80/20): brüt dəyişmir, 20 AZN işçi payı tutulur, vergi/DSMF bazası 40 AZN artır.
 
 ### Açıq qalanlar ⚠️
 
-1. Yemək kartı və idman üçün DSMF tətbiqi Qanunun hərfi mətninə görə qurulub; DSMF təcrübəsi fərqli şərh edə bilər.
+1. Yemək kartı üzrə DVX izahı (10.07.2026) tətbiq olunub; DSMF-in öz izahı ayrıca yoxlanmayıb. İdman zalı üçün DSMF
+   tətbiqi Qanunun hərfi mətninə görə qurulub (açıq izah yoxdur) və DSMF təcrübəsi fərqli şərh edə bilər —
+   `docs/legal-confirmation-register.md` H-04. Qaimə-faktura rejimi paket səviyyəsindədir, işçi səviyyəsində izlənmir;
+   norma günlərinə qayıb/məzuniyyət günləri daxildir.
 2. VM 102.1.8 yığım/pensiya sığortası üçün «3 il» və «vergiyə cəlb olunan gəlirin 50 %-i» həddi avtomatik yoxlanmır.
 3. Mobil telefon üçün şəxsi istifadə hissəsinin ayrılması (VM 98.2.2) sistemdə yoxdur — paket bütövlükdə ya gəlir, ya
    işgüzar xərc sayılır.

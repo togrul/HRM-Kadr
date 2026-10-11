@@ -119,8 +119,9 @@ it('restores the deduction on a new compensation the daily job finds', function 
         ->and(benefitLines($this->compensation->id))->toHaveCount(1);
 });
 
-it('posts income in kind for social insurance only when the plan is income-tax exempt but in the DSMF base', function (): void {
-    $this->service->enroll($this->benefitsPlan('MEAL', 'meal_card', ['monthly_cost' => 60, 'employer_share_percent' => 100, 'allows_dependents' => false]), 'E-1', '2026-10-01');
+it('posts income in kind for social insurance only when a norm-less plan is income-tax exempt but in the DSMF base', function (): void {
+    // Norması olmayan paket (məs. idman zalı və ya norması silinmiş yemək kartı) əvvəlki kimi işlənir.
+    $this->service->enroll($this->benefitsPlan('MEAL', 'meal_card', ['monthly_cost' => 60, 'employer_share_percent' => 100, 'allows_dependents' => false, 'exempt_daily_norm' => null]), 'E-1', '2026-10-01');
 
     $value = PayrollOneOffEarning::query()->where('tabel_no', 'E-1')->where('amount', '>', 0)->firstOrFail();
 

@@ -2,10 +2,13 @@
 
 namespace App\Modules\Benefits\Application\Services;
 
+use App\Models\AttendanceCalendar;
 use App\Models\BenefitEnrollment;
+use App\Models\BenefitPlan;
 use App\Models\CompensationComponent;
 use App\Models\EmployeeCompensation;
 use App\Models\EmployeeCompensationLine;
+use App\Modules\Attendance\Domain\Contracts\PayrollAttendanceReadRepository;
 use App\Modules\Payroll\Domain\Contracts\PayrollOneOffEarnings;
 use App\Support\Database\InstalledTables;
 use Carbon\CarbonImmutable;
@@ -24,6 +27,14 @@ use Illuminate\Support\Collection;
  *     yalnız vergi və sığorta bazası imtiyazın dəyəri qədər artır. Aylıq qeyd mənbə açarı ilə
  *     idempotentdir; ay kilidlidirsə Payroll onu növbəti aya keçirir (hər iki sətir birlikdə).
  *
+ *  3. Gündəlik norması olan paket (yemək kartı — VM m.119.2, DVX izahı 10.07.2026): işəgötürən payının
+ *     norma × işçinin ay üzrə iş günü sayı daxilindəki hissəsi heç yerə yazılmır; artıq hissə gəlir
+ *     vergisinə və YALNIZ DSMF bazasına (`benefit_in_kind_dsmf` kodu — işsizlik və icbari tibbi sığorta
+ *     bazasına düşmür) cəlb olunur. «Qaimə-fakturalı» paketdə məbləğdən asılı olmayaraq heç nə yazılmır.
+ *     Norması olmayan paketlər (məs. idman zalı) əvvəlki kimi `taxable` / `affects_social` bayraqlarına
+ *     görə bütün sosial bazaya daxil olur. Ödənilmiş sətirlərə toxunulmur (PayrollOneOffEarnings), ona
+ *     görə norma dəyişikliyi yalnız hələ ödənilməmiş cari ay üçün qüvvəyə minir.
+ *
  * Bütün yollar idempotentdir: qoşulma yaranan/dəyişən/bitən anda və gündəlik `benefits:daily`
  * əmrində eyni nəticəni verir (HR kompensasiya sətirlərini əl ilə dəyişsə belə bərpa olunur).
  */
@@ -39,7 +50,7 @@ class BenefitPayrollSync
         $today ??= CarbonImmutable::today();
 
         $enrollments = BenefitEnrollment::query()
-            ->with('plan:id,name,taxable,affects_social')
+            ->with('plan:id,name,taxable,affects_social,exempt_daily_norm,norm_is_invoice_based')
             ->where('tabel_no', $tabelNo)
             ->get();
 
@@ -178,16 +189,17 @@ class BenefitPayrollSync
 
             $plan = $enrollment->plan;
             $amount = round((float) $enrollment->employer_amount, 2);
-            $qualifies = $touchesMonth
+            $treatment = $touchesMonth
                 && $enrollment->status !== BenefitEnrollment::STATUS_CANCELLED
                 && $plan !== null
                 && $amount > 0
-                && ($plan->taxable || $plan->affects_social);
+                ? $this->treatment($plan, $amount, $tabelNo, $monthStart)
+                : null;
 
             $valueKey = $this->sourceKey($enrollment, $monthStart, 'value');
             $offsetKey = $this->sourceKey($enrollment, $monthStart, 'offset');
 
-            if (! $qualifies) {
+            if ($treatment === null || $plan === null) {
                 $payroll->withdraw($valueKey);
                 $payroll->withdraw($offsetKey);
 
@@ -195,16 +207,17 @@ class BenefitPayrollSync
             }
 
             $name = (string) $plan->name;
+            $amount = $treatment['amount'];
             $stored = $payroll->record(
                 $tabelNo,
-                (string) config('benefits.payroll.imputed_code', 'benefit_in_kind'),
-                __('benefits::dashboard.payroll.imputed_line', ['plan' => $name], 'az'),
+                $treatment['code'],
+                __($treatment['line'], ['plan' => $name], 'az'),
                 $amount,
                 (int) $monthStart->year,
                 (int) $monthStart->month,
                 $valueKey,
-                (bool) $plan->taxable,
-                (bool) $plan->affects_social,
+                $treatment['taxable'],
+                $treatment['affects_social'],
             );
 
             if (! $stored) {
@@ -227,6 +240,83 @@ class BenefitPayrollSync
         }
 
         return $recorded;
+    }
+
+    /**
+     * Qoşulmanın bu ay üçün vergi/sığorta rejimi; null — heç nə yazılmır.
+     *
+     * @return array{amount: float, code: string, line: string, taxable: bool, affects_social: bool}|null
+     */
+    private function treatment(BenefitPlan $plan, float $amount, string $tabelNo, CarbonImmutable $month): ?array
+    {
+        if ($plan->norm_is_invoice_based) {
+            return null;
+        }
+
+        $norm = $plan->exempt_daily_norm;
+
+        if ($norm === null) {
+            return ($plan->taxable || $plan->affects_social) ? [
+                'amount' => $amount,
+                'code' => (string) config('benefits.payroll.imputed_code', 'benefit_in_kind'),
+                'line' => 'benefits::dashboard.payroll.imputed_line',
+                'taxable' => (bool) $plan->taxable,
+                'affects_social' => (bool) $plan->affects_social,
+            ] : null;
+        }
+
+        $exempt = round((float) $norm * $this->workingDays($tabelNo, $month), 2);
+        $excess = round($amount - min($amount, $exempt), 2);
+
+        if ($excess <= 0) {
+            return null;
+        }
+
+        return [
+            'amount' => $excess,
+            'code' => (string) config('benefits.payroll.imputed_dsmf_code', 'benefit_in_kind_dsmf'),
+            'line' => 'benefits::dashboard.payroll.imputed_norm_line',
+            'taxable' => true,
+            'affects_social' => true,
+        ];
+    }
+
+    /**
+     * Normanın vurulduğu iş günü sayı: Payroll-un proratasiyada işlətdiyi eyni mənbə (işçinin aylıq
+     * davamiyyət xülasəsi — `total_workdays`, qeyri-iş və bayram günləri çıxılmaqla; məzuniyyət və
+     * qayıb günləri daxildir). Xülasə yoxdursa — qlobal davamiyyət təqvimi (qeydsiz günlər üçün B–C
+     * iş günü sayılır).
+     */
+    private function workingDays(string $tabelNo, CarbonImmutable $month): int
+    {
+        if (app()->bound(PayrollAttendanceReadRepository::class)) {
+            $summary = app(PayrollAttendanceReadRepository::class)->monthlyAbsence($tabelNo, (int) $month->year, (int) $month->month);
+
+            if ($summary !== null && $summary['working_days'] > 0) {
+                return (int) $summary['working_days'];
+            }
+        }
+
+        $types = InstalledTables::has('attendance_calendars')
+            ? AttendanceCalendar::query()
+                ->where('scope_type', 'global')
+                ->whereBetween('date', [$month->startOfMonth()->toDateString(), $month->endOfMonth()->toDateString()])
+                ->get(['date', 'day_type'])
+                ->mapWithKeys(fn (AttendanceCalendar $day): array => [$day->date->toDateString() => $day->day_type])
+                ->all()
+            : [];
+
+        $count = 0;
+
+        for ($day = $month->startOfMonth(); $day->lte($month->endOfMonth()); $day = $day->addDay()) {
+            $count += match ($types[$day->toDateString()] ?? null) {
+                'workday' => 1,
+                'holiday', 'weekend' => 0,
+                default => $day->isWeekend() ? 0 : 1,
+            };
+        }
+
+        return $count;
     }
 
     /**

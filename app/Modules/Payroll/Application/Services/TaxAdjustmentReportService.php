@@ -128,10 +128,7 @@ class TaxAdjustmentReportService
             : [];
 
         $taxableBase = $this->engine->taxableBase($lines, $targetRegimeId, $rulesDate);
-        $socialBase = 0.0;
-        foreach ($lines as $line) {
-            $socialBase += $line['affects_social'] ? $line['amount'] : 0.0;
-        }
+        $socialBase = $this->engine->socialBase($lines);
 
         $recomputed = collect($this->engine->compute($targetRegimeId, $rulesDate, $taxableBase, $socialBase, $mainWorkplace, $monthlyRelief, $personal, $this->engine->socialBases($lines, $targetRegimeId, $rulesDate)))
             ->keyBy('code');

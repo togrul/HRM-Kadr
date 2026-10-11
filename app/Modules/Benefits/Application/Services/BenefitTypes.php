@@ -27,7 +27,7 @@ class BenefitTypes
     }
 
     /**
-     * @return array{taxable: bool, affects_social: bool, basis: string, exclusive: bool, allows_dependents: bool}
+     * @return array{taxable: bool, affects_social: bool, basis: string, exclusive: bool, allows_dependents: bool, exempt_daily_norm: float|null}
      */
     public static function defaults(string $type): array
     {
@@ -39,6 +39,7 @@ class BenefitTypes
             'basis' => (string) ($config['basis'] ?? 'vm_98_1'),
             'exclusive' => (bool) ($config['exclusive'] ?? false),
             'allows_dependents' => (bool) ($config['allows_dependents'] ?? false),
+            'exempt_daily_norm' => isset($config['exempt_daily_norm']) ? (float) $config['exempt_daily_norm'] : null,
         ];
     }
 

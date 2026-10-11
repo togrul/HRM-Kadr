@@ -150,7 +150,7 @@ class PayrollCalculator
         // Bases derive from the earning lines and their flags.
         $gross = $this->sumWhere($lines, fn ($l) => $l['kind'] === 'earning');
         $taxableBase = $this->statutory->taxableBase($lines, $current->regime_id, $onDate);
-        $socialBase = $this->sumWhere($lines, fn ($l) => $l['kind'] === 'earning' && $l['affects_social']);
+        $socialBase = $this->statutory->socialBase($lines);
 
         $statutoryLines = $this->statutory->compute($current->regime_id, $onDate, $taxableBase, $socialBase, $this->isMainWorkplace($tabelNo), $monthlyRelief, $monthlyRelief ? $this->personalReliefs($tabelNo, $onDate, $year, $month) : [], $this->statutory->socialBases($lines, $current->regime_id, $onDate));
         $lines = array_merge($lines, $statutoryLines);

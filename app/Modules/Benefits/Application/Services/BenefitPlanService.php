@@ -39,6 +39,11 @@ class BenefitPlanService
             'max_dependents' => ($data['max_dependents'] ?? '') === '' || $data['max_dependents'] === null ? null : (int) $data['max_dependents'],
             'taxable' => (bool) ($data['taxable'] ?? $defaults['taxable']),
             'affects_social' => (bool) ($data['affects_social'] ?? $defaults['affects_social']),
+            // Açar verilməyibsə növün standart normasına düşür; açıq null/boş — norma yoxdur.
+            'exempt_daily_norm' => array_key_exists('exempt_daily_norm', $data)
+                ? $this->nullableAmount($data['exempt_daily_norm'])
+                : $defaults['exempt_daily_norm'],
+            'norm_is_invoice_based' => (bool) ($data['norm_is_invoice_based'] ?? false),
             'tax_basis' => $this->nullableString($data['tax_basis'] ?? null) ?? $defaults['basis'],
             'contract_start' => $this->nullableString($data['contract_start'] ?? null),
             'contract_end' => $this->nullableString($data['contract_end'] ?? null),
@@ -94,6 +99,20 @@ class BenefitPlanService
             'vtisk_categories' => $strings($rules['vtisk_categories'] ?? []),
             'contract_types' => $strings($rules['contract_types'] ?? []),
         ];
+    }
+
+    /** Boş/null → null (norma yoxdur); mənfi məbləğ qəbul olunmur. */
+    private function nullableAmount(mixed $value): ?float
+    {
+        if ($value === null || trim((string) $value) === '') {
+            return null;
+        }
+
+        if (! is_numeric($value) || (float) $value < 0) {
+            throw ValidationException::withMessages(['exempt_daily_norm' => __('benefits::dashboard.messages.norm_negative')]);
+        }
+
+        return round((float) $value, 2);
     }
 
     private function nullableString(mixed $value): ?string

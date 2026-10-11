@@ -80,7 +80,7 @@ Seçilmiş ayda qüvvədə olan qoşulmalar üzrə: `İşəgötürən xərci`, `
 2. `Kod` (hərf, rəqəm, `_` və `-`; unikal), `Ad` və `Növ` seçin. Növü seçəndə vergi rejimi və ailə üzvü seçimi avtomatik standart dəyərlə dolur.
 3. `Aylıq dəyər (işçinin özü)` və `İşəgötürən payı, %` yazın.
 4. Ailə üzvləri varsa `Ailə üzvləri əlavə oluna bilər` işarəsini qoyun, dəyəri və payı yazın, istəsəniz `Ən çox ailə üzvü` verin.
-5. `Vergi rejimi`ni mühasiblə razılaşdırıb yoxlayın (aşağıda cədvəl).
+5. `Vergi rejimi`ni mühasiblə razılaşdırıb yoxlayın (aşağıda cədvəl). Yemək kartında `Gündəlik azad norma, AZN` (standart 5) və `Elektron qaimə-fakturalı ictimai iaşə / öz hazırlanma` sahələrini yoxlayın: norma təyin olunubsa `Gəlir vergisinə cəlb olunur` / `Məcburi sosial sığorta bazasına daxildir` bayraqları nəzərə alınmır (aşağıda «Yemək kartı — gündəlik norma»). Norma mənfi ola bilməz; boş buraxsanız paket yalnız bayraqlara görə işlənir.
 6. `Müqavilənin başlanğıcı` və `Müqavilənin sonu`nu verin — yenilənmə pəncərəsi buna əsasən açılır. Sonu `başlanğıcdan` əvvəl ola bilməz.
 7. `Uyğunluq qaydaları`nı doldurun (boş qayda məhdudiyyət qoymur).
 8. `Yadda saxla` basın.
@@ -199,13 +199,26 @@ Standart vergi rejimi (paket səviyyəsində mühasib dəyişə bilər):
 | `Tibbi sığorta` | azad | azad | VM m.102.1.8; «Sosial sığorta haqqında» Qanun m.15 |
 | `Həyat sığortası` (risk) | **vergiyə cəlb** | **daxil** | VM m.98.2.5 |
 | `Həyatın yığım / pensiya sığortası` | azad | azad | VM m.102.1.8 (3 il və 50% həddini mühasib yoxlayır) |
-| `Yemək kartı` | azad | **daxil** | VM m.98.5, 109.3, 119.2 |
+| `Yemək kartı` | norma daxilində azad, artıq hissə **cəlb** | norma daxilində azad; artıq hissə **yalnız DSMF** (işsizlik/tibbi heç vaxt) | VM m.98.5, 109.3, 119.2; DVX izahı 10.07.2026 |
 | `Nəqliyyat` | **vergiyə cəlb** | **daxil** | VM m.98.2.3 |
 | `Mobil telefon limiti` | gəlir deyil | gəlir deyil | işgüzar xərc; şəxsi istifadə və limitdən artıq hissə VM m.98.2.2 |
 | `İdman zalı` | azad | **daxil** | VM m.98.5, 109.3 |
 | `Digər` | **vergiyə cəlb** | **daxil** | VM m.98.1 |
 
 Vergiyə cəlb olunan məbləğ **yalnız işəgötürən payıdır** — işçinin özünün ödədiyi hissə gəlirdən çıxılır (VM m.98.2).
+
+### Yemək kartı — gündəlik norma
+DVX-in 10.07.2026 tarixli izahına görə (VM m.119.2) hər işçi üzrə gündəlik norma **5 AZN**-dir:
+
+- **norma daxilində** ödənilən məbləğ gəlir vergisinə, DSMF-ə, işsizlik və icbari tibbi sığorta haqqına cəlb olunmur — maaş vərəqəsində natura sətri yazılmır;
+- **normadan artıq hissə** işçinin gəlirinə aid edilir: gəlir vergisinə və **DSMF**-ə cəlb olunur (sətir `benefit_in_kind_dsmf`), işsizlik və tibbi sığorta bazasına düşmür;
+- `Elektron qaimə-fakturalı ictimai iaşə / öz hazırlanma` işarəsi olan paketdə məbləğdən asılı olmayaraq heç nə cəlb olunmur.
+
+Hesab: azad hissə = `min(işəgötürən payı, norma × işçinin həmin ay üzrə iş günü sayı)`. Nümunə: 22 iş günü × 5 = 110 AZN; kart 150 AZN → 40 AZN artıq hissə vergi və DSMF bazasına daxil olur; kart 100 AZN olsa heç bir baza dəyişmir.
+
+İş günü sayı payroll-un proratasiyada işlətdiyi aylıq davamiyyət xülasəsindəndir (qayıb və məzuniyyət günləri də sayılır); xülasə yoxdursa qlobal davamiyyət təqvimi (B–C, bayram və qeyri-iş günləri çıxılmaqla) işlənir.
+
+Köhnə paketlər: mövcud yemək kartı paketlərinə norma 5 AZN yazılıb. Bu yalnız **cari ay**dan hesablamaya təsir edir — ödənilmiş və ya kilidli aylar köhnə qaydada qalır, geri ödəniş yaranmır. Keçmiş aylarda artıq tutulmuş sığorta haqqının düzəlişi ayrıca mühasib qərarıdır (`Maaş → Vergi düzəliş hesabatı`).
 
 Texniki detallar:
 - Natura gəliri **cari ay** üçün yazılır; hər ay üçün açar `benefits:<qoşulma>:<YYYY-MM>:value|offset` ilədir — təkrar sinxron ikinci sətir yaratmır. Ay kilidlidirsə hər iki sətir birlikdə növbəti aya keçir.
@@ -217,7 +230,9 @@ Texniki detallar:
 Hüquqi mətnlər və açıq qalan məsələlər: `docs/payroll-legal-basis.md`, «İmtiyazlar — natura formasında gəlir» bölməsi. Sistem aşağıdakıları **avtomatik yoxlamır**:
 - yığım/pensiya sığortasında 3 il və vergiyə cəlb olunan gəlirin 50%-i həddi;
 - mobil telefonda şəxsi istifadə hissəsinin ayrılması — paket bütövlükdə ya gəlir, ya işgüzar xərc sayılır;
-- yemək kartının nağd pula bərabər istifadəsi.
+- yemək kartının nağd pula bərabər istifadəsi;
+- qaimə-faktura rejimini **işçi səviyyəsində** — işarə bütöv paketə aiddir; bir paketdə bəzi işçilər qaimə ilə, digərləri kartla alırsa, ayrı paketlər yaradın;
+- idman zalı üçün DSMF/işsizlik/tibbi qərarı hələ yoxlanmayıb: norması olmayan paket (idman zalı) əvvəlki kimi bütün sosial bazaya daxildir (`docs/legal-confirmation-register.md`, H-04).
 
 ## İşdən çıxma və qoşulmanın bitməsi
 İşçinin kartında işdən çıxma tarixi (xitam əmri ilə və ya əl ilə) yazılanda:
@@ -316,6 +331,9 @@ php artisan benefits:daily --date=2026-12-31
 | `Bitmə tarixi başlama tarixindən əvvəl ola bilməz.` | Tarix səhvi | Tarixi düzəldin |
 | İşçi payı maaşdan tutulmur | İşçinin həmin gün aktiv kompensasiyası yoxdur və ya qoşulma hələ başlamayıb | Kompensasiyanı yoxlayın; `benefits:daily` əmrini işə salın |
 | Natura gəliri hesablamada görünmür | Paket nə vergiyə, nə DSMF-ə cəlb olunmur; işəgötürən payı 0-dır; qoşulma həmin aya düşmür | Paketin vergi rejimini və məbləğini yoxlayın |
+| Yemək kartı üçün natura sətri yoxdur | Məbləğ norma × iş günü daxilindədir (və ya paket qaimə-fakturalıdır) — bu düzgündür | Gündəlik normanı və həmin ayın iş günü sayını yoxlayın |
+| Yemək kartında sətir hələ də bütün sığorta bazasındadır | Paketdə `Gündəlik azad norma` boşdur və ya sətir artıq ödənilib (kilidli ay) | Normanı doldurun; kilidli ay dəyişmir, yeni qayda növbəti sinxrondan tətbiq olunur |
+| `Gündəlik norma mənfi ola bilməz.` | Norma sahəsinə mənfi rəqəm yazılıb | 0 və ya müsbət rəqəm yazın; norma yoxdursa sahəni boş qoyun |
 | `İmtiyazlar` menyuda yoxdur | Modul şirkət növünə görə və ya admin tərəfindən bağlıdır; ya da `show-benefits` icazəsi yoxdur | `HR siyasət diaqnostikası`nda vəziyyəti və icazəni yoxlayın |
 | `/benefits` 404 verir | Modul bağlıdır | Yuxarıdakı üç qatı yoxlayın |
 | `/benefits` 403 verir | `show-benefits` yoxdur | İcazəni verin |
@@ -346,6 +364,12 @@ Maaş vərəqəsində tutulma sətri kimi (`İmtiyaz — işçi payı`). Kompens
 
 **İşəgötürən payı niyə maaş vərəqəsində «nağd» görünmür?**
 Çünki işçiyə nağd ödəniş yoxdur. Natura formasında gəlir həm artı, həm də eyni məbləğdə əvəzləmə sətri kimi yazılır: nağd məbləğ dəyişmir, yalnız vergi və sığorta bazası artır.
+
+**Yemək kartı üçün niyə vergi/sığorta sətri yoxdur?**
+Kartın işəgötürən payı norma (5 AZN) × iş günü daxilindədir; DVX izahına görə bu hissə vergiyə və sığortaya cəlb olunmur. Yalnız normadan artıq hissə yazılır — gəlir vergisinə və DSMF-ə (işsizlik və tibbi sığortaya yox).
+
+**Elektron qaimə-fakturalı iaşə nədir?**
+İctimai iaşə müəssisəsindən elektron qaimə-faktura ilə alınan və ya işəgötürənin özü hazırladığı yemək. Paketdə həmin işarəni qoyanda məbləğdən asılı olmayaraq vergi və sığorta hesablanmır. İşarə paket səviyyəsindədir, işçi səviyyəsində deyil.
 
 **Tibbi sığorta niyə vergi bazasını artırmır?**
 Standart rejimdə könüllü tibbi sığorta işəgötürən tərəfindən ödənildikdə gəlir vergisindən və məcburi sosial sığorta haqqından azaddır (VM m.102.1.8). Həyat sığortası (risk) isə vergiyə cəlb olunur.

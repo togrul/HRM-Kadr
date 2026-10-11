@@ -70,6 +70,8 @@ return [
         'max_dependents' => 'Ən çox ailə üzvü',
         'taxable' => 'Gəlir vergisinə cəlb olunur',
         'affects_social' => 'Məcburi sosial sığorta bazasına daxildir',
+        'exempt_daily_norm' => 'Gündəlik azad norma, AZN (işçi üzrə)',
+        'norm_is_invoice_based' => 'Elektron qaimə-fakturalı ictimai iaşə / öz hazırlanma (tam azad)',
         'tax_basis' => 'Hüquqi əsas',
         'contract_start' => 'Müqavilənin başlanğıcı',
         'contract_end' => 'Müqavilənin sonu',
@@ -121,6 +123,7 @@ return [
         'form_title' => 'İmtiyaz paketi',
         'cost_section' => 'Dəyər və paylar',
         'tax_section' => 'Vergi rejimi',
+        'norm_hint' => 'Norma təyin olunubsa yuxarıdakı iki bayraq nəzərə alınmır: norma × iş günü daxilindəki hissə nə vergiyə, nə sığortaya cəlb olunmur; artıq hissə gəlir vergisinə və yalnız DSMF-ə cəlb olunur (işsizlik və icbari tibbi sığorta haqqına heç vaxt). Qaimə-fakturalı rejimdə məbləğdən asılı olmayaraq heç nə tutulmur. Norma boşdursa paket yuxarıdakı bayraqlara görə işlənir.',
         'contract_section' => 'Müqavilə və yenilənmə',
         'eligibility_section' => 'Uyğunluq qaydaları',
         'eligibility_help' => 'Bütün qaydalar birlikdə tətbiq olunur; boş qayda məhdudiyyət qoymur.',
@@ -151,7 +154,7 @@ return [
         ],
         'vm_98_5_meal' => [
             'title' => 'VM m.98.5, 109.3, 119.2 — yemək xərcləri',
-            'body' => 'İşəgötürənin m.109.3 (işçilərin sosial xarakterli xərcləri — gəlirdən çıxılmır) və m.119.2 (normalar daxilində yemək xərcləri) üzrə çəkdiyi xərclərin nəticəsi kimi əldə edilən gəlir vergi tutulan gəlirə aid deyil (m.98.5). «Sosial sığorta haqqında» Qanunun 15-ci maddəsi isə adi yeməyi sosial sığorta haqqı hesablanmayan ödənişlər siyahısında saymır — standart olaraq DSMF bazasına daxildir. Yemək kartı nağd pula bərabər istifadə olunursa, mühasib bunu adi gəlir kimi qiymətləndirməlidir.',
+            'body' => 'VM m.119.2 və Nazirlər Kabinetinin qərarı ilə hər işçi üzrə gündəlik yemək norması 5 manatdır (DVX izahı, 10.07.2026). Norma daxilində ödənilən məbləğ gəlir vergisinə və DSMF haqqına cəlb olunmur; normadan artıq hissə işçinin gəlirinə aid edilir və gəlir vergisinə, DSMF-ə cəlb olunur. İctimai iaşə müəssisəsindən elektron qaimə-faktura ilə alınan və ya işəgötürənin özü hazırladığı yemək məbləğdən asılı olmayaraq cəlb olunmur (paketdə «qaimə-fakturalı» işarəsi). İşsizlikdən sığorta və icbari tibbi sığorta haqqı norma daxilində də, artıqda da hesablanmır. Sistem norma × işçinin həmin ayın iş günü sayı ilə hesablayır.',
             'url' => 'https://e-qanun.az/framework/46948',
         ],
         'vm_98_2_3' => [
@@ -230,6 +233,7 @@ return [
 
     'messages' => [
         'saved' => 'Yadda saxlanıldı.',
+        'norm_negative' => 'Gündəlik norma mənfi ola bilməz.',
         'deleted' => 'Silindi.',
         'enrolled' => 'Qoşulma yaradıldı.',
         'ended' => 'Qoşulmanın bitmə tarixi təyin edildi.',
@@ -336,5 +340,6 @@ return [
     'payroll' => [
         'imputed_line' => 'İmtiyaz (natura formasında gəlir): :plan',
         'offset_line' => 'İmtiyaz (natura) — nağd ödənilmir: :plan',
+        'imputed_norm_line' => 'İmtiyaz (natura), norma artığı: :plan',
     ],
 ];

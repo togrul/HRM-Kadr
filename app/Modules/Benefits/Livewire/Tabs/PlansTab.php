@@ -66,6 +66,8 @@ class PlansTab extends BenefitsTab
         $defaults = BenefitTypes::defaults($type);
         $this->planForm['taxable'] = $defaults['taxable'];
         $this->planForm['affects_social'] = $defaults['affects_social'];
+        $this->planForm['exempt_daily_norm'] = $defaults['exempt_daily_norm'] !== null ? (string) $defaults['exempt_daily_norm'] : '';
+        $this->planForm['norm_is_invoice_based'] = false;
         $this->planForm['tax_basis'] = $defaults['basis'];
         $this->planForm['allows_dependents'] = $defaults['allows_dependents'];
     }
@@ -130,6 +132,8 @@ class PlansTab extends BenefitsTab
             'max_dependents' => $plan->max_dependents !== null ? (string) $plan->max_dependents : '',
             'taxable' => $plan->taxable,
             'affects_social' => $plan->affects_social,
+            'exempt_daily_norm' => $plan->exempt_daily_norm !== null ? (string) $plan->exempt_daily_norm : '',
+            'norm_is_invoice_based' => $plan->norm_is_invoice_based,
             'tax_basis' => (string) $plan->tax_basis,
             'contract_start' => $plan->contract_start?->toDateString() ?? '',
             'contract_end' => $plan->contract_end?->toDateString() ?? '',
@@ -170,6 +174,8 @@ class PlansTab extends BenefitsTab
             'planForm.max_dependents' => ['nullable', 'integer', 'min:1', 'max:20'],
             'planForm.taxable' => ['boolean'],
             'planForm.affects_social' => ['boolean'],
+            'planForm.exempt_daily_norm' => ['nullable', 'numeric', 'min:0', 'max:9999'],
+            'planForm.norm_is_invoice_based' => ['boolean'],
             'planForm.tax_basis' => ['nullable', 'string', 'max:60'],
             'planForm.contract_start' => ['nullable', 'date'],
             'planForm.contract_end' => ['nullable', 'date', 'after_or_equal:planForm.contract_start'],
@@ -193,6 +199,7 @@ class PlansTab extends BenefitsTab
             'planForm.name' => 'name',
             'planForm.type' => 'type',
             'planForm.monthly_cost' => 'monthly_cost',
+            'planForm.exempt_daily_norm' => 'exempt_daily_norm',
             'planForm.employer_share_percent' => 'employer_share_percent',
             'planForm.dependent_monthly_cost' => 'dependent_monthly_cost',
             'planForm.dependent_employer_share_percent' => 'dependent_employer_share_percent',
@@ -241,6 +248,8 @@ class PlansTab extends BenefitsTab
             'max_dependents' => '',
             'taxable' => $defaults['taxable'],
             'affects_social' => $defaults['affects_social'],
+            'exempt_daily_norm' => $defaults['exempt_daily_norm'] !== null ? (string) $defaults['exempt_daily_norm'] : '',
+            'norm_is_invoice_based' => false,
             'tax_basis' => $defaults['basis'],
             'contract_start' => '',
             'contract_end' => '',

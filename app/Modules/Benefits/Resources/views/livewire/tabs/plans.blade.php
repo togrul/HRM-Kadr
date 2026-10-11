@@ -152,6 +152,16 @@
                             {{ __('benefits::dashboard.fields.affects_social') }}
                         </label>
                     </div>
+                    <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                        <x-ui.input-shell :label="__('benefits::dashboard.fields.exempt_daily_norm')" :error="$errors->first('planForm.exempt_daily_norm')">
+                            <x-ui.input type="number" step="0.01" min="0" wire:model="planForm.exempt_daily_norm" />
+                        </x-ui.input-shell>
+                        <label class="{{ $checkLabel }} self-end pb-2">
+                            <input type="checkbox" wire:model="planForm.norm_is_invoice_based" class="{{ $check }}" />
+                            {{ __('benefits::dashboard.fields.norm_is_invoice_based') }}
+                        </label>
+                    </div>
+                    <p class="mt-1.5 text-[11.5px] leading-relaxed text-ink-faint">{{ __('benefits::dashboard.plans.norm_hint') }}</p>
                     <x-ui.input-shell class="mt-3" :label="__('benefits::dashboard.fields.tax_basis')">
                         <x-ui.select wire:model.live="planForm.tax_basis">
                             @foreach ($bases as $basis)
