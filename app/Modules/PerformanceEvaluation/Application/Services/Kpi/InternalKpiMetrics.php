@@ -79,7 +79,7 @@ class InternalKpiMetrics
             $touched->put($card->id, $card);
         }
 
-        $touched->each(fn (PerformanceScorecard $card) => $this->scorecards->recalculate($card));
+        $touched->each(fn (PerformanceScorecard $card) => $this->scorecards->requestRecalculation($card));
         $this->recordConnectorState($items->pluck('kpi')->where('source_metric', 'rest')->unique('id'), $failures);
 
         return $items->count();

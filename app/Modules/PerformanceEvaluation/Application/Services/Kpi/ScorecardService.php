@@ -10,6 +10,7 @@ use App\Models\PerformanceScorecard;
 use App\Models\PerformanceScorecardItem;
 use App\Models\Personnel;
 use App\Models\User;
+use App\Modules\PerformanceEvaluation\Application\Jobs\RecalculateScorecardJob;
 use App\Modules\PerformanceEvaluation\Application\Services\SuccessionService;
 use App\Modules\Personnel\Contracts\ApprovalRouteResolver;
 use App\Services\StructureService;
@@ -436,7 +437,7 @@ class ScorecardService
         ]);
 
         if ($approved && $recalculate) {
-            $this->recalculate($card);
+            $this->requestRecalculation($card, $user);
         }
 
         return $actual;
@@ -455,7 +456,23 @@ class ScorecardService
         }
 
         $actual->update(['approved_by' => $user->id, 'approved_at' => now()]);
-        $this->recalculate($card);
+        $this->requestRecalculation($card, $user);
+    }
+
+    /**
+     * Faktdan sonrakı yenidən hesablama: `performance_evaluation.kpi.queue_recalculation`
+     * söndürülübsə əvvəlki kimi dərhal (sinxron), yanıqdırsa növbə job-u ilə. Nəticəni dərhal
+     * oxuyan yerlər (bağlanış, kalibrləmə, məzuniyyət) bunu yox, recalculate()-i çağırır.
+     */
+    public function requestRecalculation(PerformanceScorecard $card, ?User $actor = null): void
+    {
+        if (! config('performance_evaluation.kpi.queue_recalculation')) {
+            $this->recalculate($card);
+
+            return;
+        }
+
+        RecalculateScorecardJob::dispatch($card->id, $actor?->id);
     }
 
     /**
@@ -469,7 +486,6 @@ class ScorecardService
 
     private function rescore(PerformanceScorecard $card): void
     {
-        // ponytail: inline on each change; queue it if a card ever takes long enough to notice.
         $card->load(['items.kpi', 'items.kpiVersion', 'items.actuals', 'form:id,final_score', 'calibrations']);
 
         $definitions = $card->items->mapWithKeys(fn (PerformanceScorecardItem $item): array => [

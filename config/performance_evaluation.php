@@ -5,6 +5,12 @@ return [
         // Leave (sick, maternity, unpaid…) above this many days inside a card's period
         // scales its additive targets and bonus pro-rata to the days worked (spec §5.1).
         'long_leave_days' => (int) env('PERFORMANCE_KPI_LONG_LEAVE_DAYS', 30),
+        // true: faktın təsdiqi, idxal və sinxronizasiyadan sonra kartın yenidən hesablanması
+        // növbəyə atılır (QUEUE_CONNECTION=sync olduqda dərhal icra olunur). false: əvvəlki
+        // kimi sorğunun içində sinxron. Növbə üçün docs/queue-ops.md.
+        'queue_recalculation' => (bool) env('PERFORMANCE_KPI_QUEUE_RECALCULATION', false),
+        // Boş = standart növbə (`default`).
+        'queue_name' => env('PERFORMANCE_KPI_QUEUE_NAME'),
     ],
     'performance' => [
         'query_budget' => [

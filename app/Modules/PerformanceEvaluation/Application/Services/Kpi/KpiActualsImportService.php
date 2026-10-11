@@ -107,7 +107,7 @@ class KpiActualsImportService
 
             // One rescore per card, not one per imported row.
             foreach ($cards as $card) {
-                $this->scorecards->recalculate($card);
+                $this->scorecards->requestRecalculation($card, $user);
             }
         });
 
