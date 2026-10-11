@@ -40,6 +40,14 @@
                         :active="$section === PersonnelProfile::SICK_SECTION"
                     >{{ __('personnel::profile.sections.sick') }}</x-context-panel.item>
                 @endif
+                @if ($this->canViewTotalRewards)
+                    <x-context-panel.item
+                        wire:click.prevent="setSection('{{ PersonnelProfile::REWARDS_SECTION }}')"
+                        wire:loading.attr="disabled"
+                        wire:target="setSection"
+                        :active="$section === PersonnelProfile::REWARDS_SECTION"
+                    >{{ __('personnel::profile.sections.rewards') }}</x-context-panel.item>
+                @endif
             </x-context-panel.section>
 
             <x-context-panel.section :title="__('personnel::profile.groups.file')" :padded="true">
@@ -196,6 +204,8 @@
             </div>
         @elseif ($section === PersonnelProfile::SICK_SECTION && $this->canViewSickCertificates)
             <livewire:leaves.personnel-sick-certificates :tabel-no="(string) $personnel->tabel_no" :key="'profile-sick-certificates-'.$personnel->id" />
+        @elseif ($section === PersonnelProfile::REWARDS_SECTION && $this->canViewTotalRewards)
+            <livewire:benefits.total-rewards :tabel-no="(string) $personnel->tabel_no" :key="'profile-total-rewards-'.$personnel->id" />
         @else
             @include('personnel::livewire.personnel.profile-sections.overview', [
                 'personnel' => $personnel,

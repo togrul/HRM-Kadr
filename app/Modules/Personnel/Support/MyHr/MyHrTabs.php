@@ -2,6 +2,8 @@
 
 namespace App\Modules\Personnel\Support\MyHr;
 
+use App\Services\Modules\ModuleState;
+
 class MyHrTabs
 {
     /**
@@ -9,7 +11,7 @@ class MyHrTabs
      */
     public static function all(): array
     {
-        return [
+        $tabs = [
             'overview',
             'requests',
             'notifications',
@@ -20,5 +22,17 @@ class MyHrTabs
             'payslips',
             'hierarchy',
         ];
+
+        // İşçi münasibətləri modulu söndürüləndə onun bölməsi (və Livewire komponenti) yoxdur.
+        if (app(ModuleState::class)->enabled('employee-relations')) {
+            $tabs[] = 'employee-relations';
+        }
+
+        // İmtiyazlar: şirkət növünə/admin seçiminə görə bağlıdırsa ModuleState-də də bağlı görünür.
+        if (app(ModuleState::class)->enabled('benefits')) {
+            $tabs[] = 'benefits';
+        }
+
+        return $tabs;
     }
 }

@@ -124,6 +124,22 @@ class Kernel extends ConsoleKernel
                 ->withoutOverlapping();
         }
 
+        if ((bool) config('employee_relations.reminders.schedule_enabled', true)
+            && app(\App\Services\Modules\ModuleState::class)->enabled('employee-relations')) {
+            $schedule->command('employee-relations:sla-reminders')
+                ->dailyAt((string) config('employee_relations.reminders.daily_at', '06:10'))
+                ->withoutOverlapping();
+        }
+
+        // İmtiyazlar: bitən qoşulmalar, xitam, yenilənmə pəncərələri (bildirişlə) və payroll sinxronu.
+        // Modul runtime-da (şirkət növü/admin) söndürülübsə əmr yalnız tarix keçidlərini edir.
+        if ((bool) config('benefits.schedule.enabled', true)
+            && app(\App\Services\Modules\ModuleState::class)->enabled('benefits')) {
+            $schedule->command('benefits:daily')
+                ->dailyAt((string) config('benefits.schedule.daily_at', '05:10'))
+                ->withoutOverlapping();
+        }
+
         if ((bool) config('activitylog.retention.schedule_enabled', false)) {
             $schedule->command('activitylog:clean --force')
                 ->dailyAt((string) config('activitylog.retention.daily_at', '02:30'))

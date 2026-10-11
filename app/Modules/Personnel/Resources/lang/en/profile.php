@@ -6,6 +6,7 @@ return [
     'sections' => [
         'overview' => 'Overview',
         'sick' => 'Sickness',
+        'rewards' => 'Pay and benefits',
         'personal' => 'Personal details',
         'documents' => 'Documents',
         'education' => 'Education',

@@ -114,23 +114,23 @@ Should-have:
 
 ## 6. Employee Relations Case Management
 
-Status: planned (kodda yoxdur)
+Status: done (12.10.2026 — app/Modules/EmployeeRelations)
 
 Məqsəd: şikayət, intizam, araşdırma və qərar proseslərini auditli, məxfi və idarə olunan case workflow-a çevirmək.
 
 Must-have:
-- [ ] employee relation cases — kodda tapılmadı (employee relations modulu yoxdur; yalnız əmr təsiri DisciplinaryEffect və personnel_punishments qeydiyyatı var)
-- [ ] case category: grievance, investigation, disciplinary, conflict, ethics — kodda tapılmadı (employee relations modulu yoxdur; yalnız əmr təsiri DisciplinaryEffect və personnel_punishments qeydiyyatı var)
-- [ ] case participants və witness records — kodda tapılmadı (employee relations modulu yoxdur; yalnız əmr təsiri DisciplinaryEffect və personnel_punishments qeydiyyatı var)
-- [ ] evidence/document attachments — kodda tapılmadı (employee relations modulu yoxdur; yalnız əmr təsiri DisciplinaryEffect və personnel_punishments qeydiyyatı var)
-- [ ] decision workflow — kodda tapılmadı (employee relations modulu yoxdur; yalnız əmr təsiri DisciplinaryEffect və personnel_punishments qeydiyyatı var)
-- [ ] appeal flow — kodda tapılmadı (employee relations modulu yoxdur; yalnız əmr təsiri DisciplinaryEffect və personnel_punishments qeydiyyatı var)
-- [ ] confidential permission model — kodda tapılmadı (employee relations modulu yoxdur; yalnız əmr təsiri DisciplinaryEffect və personnel_punishments qeydiyyatı var)
+- [x] employee relation cases — kod: app/Modules/EmployeeRelations (employee_relation_cases, /employee-relations, işin kartı /employee-relations/cases/{id})
+- [x] case category: grievance, investigation, disciplinary, conflict, ethics — redaktə olunan soraqça employee_relation_case_types (şikayət, intizam pozuntusu, münaqişə, təhqir/ayrı-seçkilik, əmək təhlükəsizliyi), «İş növləri» bölməsi
+- [x] case participants və witness records — barəsində şikayət olunan, şikayətçi (anonim ola bilər), şahidlər (employee_relation_case_witnesses)
+- [x] evidence/document attachments — employee_relation_case_evidence (fayl/izahat/yazışma), özəl disk + EvidenceDownloadController, UploadRules::document
+- [x] decision workflow — CaseWorkflow (server tərəfli qraf + tarixçə), DecisionService: töhmət/şiddətli töhmət → OrderDrafter ilə intizam əmri qaralaması; ƏM Md.187 müddət bloku (DisciplinaryDeadline)
+- [x] appeal flow — AppealService, Şəxsi kabinet «Şikayət və müraciətlər» bölməsi (MyCases), yenidən baxış → yekun
+- [x] confidential permission model — CaseAccess (struktur görünürlüyü + sahib + araşdırıcı), anonim şikayətçinin kimliyi yalnız reveal-employee-relations-reporter ilə və audit-lə
 
 Should-have:
-- [ ] anonymized trend report — kodda tapılmadı (employee relations modulu yoxdur; yalnız əmr təsiri DisciplinaryEffect və personnel_punishments qeydiyyatı var)
-- [ ] repeat incident detection — kodda tapılmadı (employee relations modulu yoxdur; yalnız əmr təsiri DisciplinaryEffect və personnel_punishments qeydiyyatı var)
-- [ ] case SLA dashboard — kodda tapılmadı (employee relations modulu yoxdur; yalnız əmr təsiri DisciplinaryEffect və personnel_punishments qeydiyyatı var)
+- [x] anonymized trend report — StatisticsService (kiçik qruplar gizlədilir, min_group_size)
+- [x] repeat incident detection — statistikada «təkrarlanan hallar» (repeat_threshold)
+- [x] case SLA dashboard — mərhələ SLA-sı (config/employee_relations.php), gecikənlər filtri, employee-relations:sla-reminders
 
 ## 7. Document Expiry / Compliance Center
 

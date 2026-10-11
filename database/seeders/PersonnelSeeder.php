@@ -575,6 +575,9 @@ class PersonnelSeeder extends Seeder
             'lock-payroll',
             'reopen-payroll-period',
             'export-payroll',
+            'show-benefits',
+            'manage-benefits',
+            'show-benefit-costs',
         ];
 
         $now = now();

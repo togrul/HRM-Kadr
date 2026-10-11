@@ -6,6 +6,7 @@ return [
     'sections' => [
         'overview' => 'Ümumi',
         'sick' => 'Xəstəlik',
+        'rewards' => 'Maaş və imtiyazlar',
         'personal' => 'Şəxsi məlumatlar',
         'documents' => 'Vəsiqələr',
         'education' => 'Təhsil',

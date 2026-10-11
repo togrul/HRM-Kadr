@@ -135,6 +135,10 @@
             <livewire:personnel.my-hr.payslips :personnel-id="$personnelId" :key="'my-hr-payslips-'.$personnelId" />
         @elseif ($activeTab === 'hierarchy')
             <livewire:personnel.my-hr.hierarchy :personnel-id="$personnelId" :key="'my-hr-hierarchy-'.$personnelId" />
+        @elseif ($activeTab === 'employee-relations')
+            <livewire:employee-relations.my-cases :personnel-id="$personnelId" :key="'my-hr-employee-relations-'.$personnelId" />
+        @elseif ($activeTab === 'benefits')
+            <livewire:benefits.my-benefits :personnel-id="$personnelId" :key="'my-hr-benefits-'.$personnelId" />
         @endif
     </div>
 </div>

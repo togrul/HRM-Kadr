@@ -114,8 +114,9 @@ class MyHrHierarchyTest extends TestCase
             ->get(route('my-hr', ['tab' => 'hierarchy']))
             ->assertOk();
 
-        // Was 39 before the ancestor walks went to the flat chart map.
-        $this->assertLessThanOrEqual(32, count(DB::getQueryLog()));
+        // Was 39 before the ancestor walks went to the flat chart map. +1: İmtiyazlar modulunun
+        // admin seçimi (settings sətri) soyuq keşdə bir dəfə oxunur, sonra keşdən gəlir.
+        $this->assertLessThanOrEqual(33, count(DB::getQueryLog()));
     }
 
     private function makePersonnel(string $email, string $surname, string $name, string $patronymic, int $structureId, int $positionId): Personnel

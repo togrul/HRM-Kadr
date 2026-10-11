@@ -23,6 +23,8 @@ return [
         'employee_lifecycle' => 'Əməkdaş həyat dövrü',
         'compensation' => 'Kompensasiya',
         'payroll' => 'Əmək haqqı',
+        'benefits' => 'İmtiyazlar',
+        'employee_relations' => 'İşçi münasibətləri',
         'settings' => 'Tənzimləmələr',
     ],
     'rail' => [
@@ -35,6 +37,7 @@ return [
         'learning_library' => 'Tədris',
         'employee_lifecycle' => 'Həyat dövrü',
         'document_compliance' => 'Uyğunluq',
+        'employee_relations' => 'Münasibətlər',
     ],
     'shortcuts' => [
         'review_queue' => 'Tez baxış',

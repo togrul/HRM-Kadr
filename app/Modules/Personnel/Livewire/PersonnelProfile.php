@@ -43,6 +43,9 @@ class PersonnelProfile extends Component
     /** The «Xəstəlik» section: the Leaves module's sick-certificate list for this person. */
     public const SICK_SECTION = 'sick';
 
+    /** «Maaş və imtiyazlar»: Benefits modulunun total rewards bölgüsü (modul açıqdırsa). */
+    public const REWARDS_SECTION = 'rewards';
+
     #[Locked]
     public int $personnelId;
 
@@ -68,6 +71,14 @@ class PersonnelProfile extends Component
             return;
         }
 
+        if ($this->section === self::REWARDS_SECTION) {
+            if (! $this->canViewTotalRewards()) {
+                $this->section = $reader->defaultSection();
+            }
+
+            return;
+        }
+
         if (! in_array($this->section, $reader->sectionKeys(), true)) {
             $this->section = $reader->defaultSection();
         }
@@ -81,6 +92,14 @@ class PersonnelProfile extends Component
     {
         if ($section === self::SICK_SECTION) {
             if ($this->canViewSickCertificates()) {
+                $this->section = $section;
+            }
+
+            return;
+        }
+
+        if ($section === self::REWARDS_SECTION) {
+            if ($this->canViewTotalRewards()) {
                 $this->section = $section;
             }
 
@@ -202,6 +221,14 @@ class PersonnelProfile extends Component
     {
         return app(ModuleState::class)->enabled('leaves')
             && (auth()->user()?->can('show-leaves') ?? false);
+    }
+
+    /** «Maaş və imtiyazlar» bölməsi: İmtiyazlar modulu açıq və istifadəçinin baxış icazəsi var. */
+    #[Computed]
+    public function canViewTotalRewards(): bool
+    {
+        return app(ModuleState::class)->enabled('benefits')
+            && (auth()->user()?->can('show-benefits') ?? false);
     }
 
     #[Computed]

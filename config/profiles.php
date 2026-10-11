@@ -24,6 +24,8 @@ return [
                 'pension_cards' => true,
                 'disposal' => true,
                 'education' => true,
+                // İmtiyazlar modulu (Benefits): özəl/korporativ — açıq; admin Admin → HR siyasəti ekranında dəyişə bilər.
+                'benefits' => true,
             ],
         ],
         'military' => [
@@ -43,6 +45,8 @@ return [
                 'pension_cards' => true,
                 'disposal' => true,
                 'education' => true,
+                // Hərbi/dövlət qulluğunda imtiyaz paketləri qanunla müəyyən olunur — standart olaraq bağlı.
+                'benefits' => false,
             ],
         ],
         'public' => [
@@ -62,6 +66,8 @@ return [
                 'pension_cards' => false,
                 'disposal' => false,
                 'education' => true,
+                // Dövlət (Publik) profili: imtiyaz paketləri qanunla müəyyən olunur — standart olaraq bağlı.
+                'benefits' => false,
             ],
         ],
         'private' => [
@@ -81,6 +87,8 @@ return [
                 'pension_cards' => false,
                 'disposal' => false,
                 'education' => true,
+                // Özəl şirkət: imtiyaz paketləri (tibbi sığorta, yemək kartı…) standart olaraq açıq.
+                'benefits' => true,
             ],
         ],
     ],

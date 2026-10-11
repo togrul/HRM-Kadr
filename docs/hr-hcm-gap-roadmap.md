@@ -560,17 +560,17 @@ Alt bloklar:
 
 ### Must-have to-do
 
-- [ ] benefit plan və enrollment data model-i yarat — kodda tapılmadı (benefit/enrollment cədvəli yoxdur)
-- [ ] dependent registry qur — qismən: app/Models/PersonnelKinship.php ailə üzvləri reyestri var; dependent/benefit bayrağı yoxdur
-- [ ] employee benefit visibility ekranı yarat — kodda tapılmadı
+- [x] benefit plan və enrollment data model-i yarat — kod: app/Modules/Benefits (benefit_plans, benefit_enrollments, benefit_enrollment_dependents, benefit_renewal_windows — 2026_10_11_160000_create_benefits_tables.php)
+- [x] dependent registry qur — kod: qoşulmaya ailə üzvləri personnel_kinships qeydlərindən seçilir (benefit_enrollment_dependents, BenefitEnrollmentService)
+- [x] employee benefit visibility ekranı yarat — kod: Şəxsi kabinet → «İmtiyazlarım» (app/Modules/Benefits/Livewire/MyBenefits.php)
 - [x] allowance / perk registry əlavə et — kod: compensation_components (earning/deduction katalogu) — app/Modules/Compensation/Database/Migrations/2026_06_28_000100_create_compensation_foundation_tables.php, 2026_06_28_000200_seed_compensation_catalog.php, Application/Services/AllowanceResolver.php
-- [ ] total rewards summary ekranı yarat — qismən: Compensation modulunda işçi kompensasiya sətirləri var (employee_compensations/lines); benefit daxil total rewards xülasə ekranı yoxdur
+- [x] total rewards summary ekranı yarat — kod: app/Modules/Benefits/Livewire/TotalRewards.php (Şəxsi kabinet və əməkdaş profili → «Maaş və imtiyazlar»)
 
 ### Should-have to-do
 
-- [ ] payroll deduction integration — kodda tapılmadı
-- [ ] renewal cycle management — kodda tapılmadı
-- [ ] eligibility rules — kodda tapılmadı
+- [x] payroll deduction integration — kod: BenefitPayrollSync (işçi payı → Compensation komponenti; vergiyə cəlb olunan işəgötürən payı → PayrollOneOffEarnings + əvəzləmə), docs/payroll-legal-basis.md «İmtiyazlar — natura formasında gəlir»
+- [x] renewal cycle management — kod: BenefitRenewalService + `benefits:daily` (seçim pəncərəsi, bildiriş, yenilə/imtina/keçid)
+- [x] eligibility rules — kod: BenefitEligibilityService (sınaq müddəti, staj, vəzifə, struktur, VTİSK kateqoriyası, müqavilə növü)
 
 ### Nice-to-have to-do
 

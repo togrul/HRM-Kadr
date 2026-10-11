@@ -96,6 +96,13 @@ return [
             'enabled' => true,
             'migrations' => app_path('Modules/EmployeeLifecycle/Database/Migrations'),
         ],
+        // İşçi münasibətləri (şikayət və intizam araşdırması). Söndürüləndə marşrutlar,
+        // menyu, Şəxsi kabinet bölməsi və SLA xatırlatması işləmir.
+        'employee-relations' => [
+            'provider' => \App\Modules\EmployeeRelations\Providers\EmployeeRelationsServiceProvider::class,
+            'enabled' => (bool) env('MODULE_EMPLOYEE_RELATIONS_ENABLED', true),
+            'migrations' => app_path('Modules/EmployeeRelations/Database/Migrations'),
+        ],
         'structure' => [
             'provider' => \App\Modules\SidebarStructure\Providers\SidebarStructureServiceProvider::class,
             'enabled' => true,
@@ -130,6 +137,14 @@ return [
             'provider' => \App\Modules\OnboardingLibrary\Providers\OnboardingLibraryServiceProvider::class,
             'enabled' => true,
             'migrations' => app_path('Modules/OnboardingLibrary/Database/Migrations'),
+        ],
+        // Maaşdan kənar imtiyazlar. Provider burada yüklənir; modulun görünməsi şirkət növündən
+        // (config/profiles.php → features.benefits) və adminin seçimindən asılıdır
+        // (App\Modules\Benefits\Application\Services\BenefitsAvailability).
+        'benefits' => [
+            'provider' => \App\Modules\Benefits\Providers\BenefitsServiceProvider::class,
+            'enabled' => (bool) env('MODULE_BENEFITS_ENABLED', true),
+            'migrations' => app_path('Modules/Benefits/Database/Migrations'),
         ],
         'learning-library' => [
             'provider' => \App\Modules\LearningLibrary\Providers\LearningLibraryServiceProvider::class,

@@ -21,7 +21,9 @@ return [
         'learning' => 'Learning materials',
         'documents' => 'My documents',
         'payslips' => 'My payslips',
+        'benefits' => 'My benefits',
         'hierarchy' => 'My structure',
+        'employee_relations' => 'Complaints and reports',
     ],
 
     'payslips' => [

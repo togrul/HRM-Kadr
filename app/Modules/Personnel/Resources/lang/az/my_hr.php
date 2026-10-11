@@ -21,7 +21,9 @@ return [
         'learning' => 'Öyrənmə materialları',
         'documents' => 'Sənədlərim',
         'payslips' => 'Maaş vərəqələrim',
+        'benefits' => 'İmtiyazlarım',
         'hierarchy' => 'Mənim strukturum',
+        'employee_relations' => 'Şikayət və müraciətlər',
     ],
 
     'payslips' => [

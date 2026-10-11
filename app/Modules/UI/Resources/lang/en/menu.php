@@ -23,6 +23,8 @@ return [
         'employee_lifecycle' => 'Employee lifecycle',
         'compensation' => 'Compensation',
         'payroll' => 'Payroll',
+        'benefits' => 'Benefits',
+        'employee_relations' => 'Employee relations',
         'settings' => 'Settings',
     ],
     'rail' => [
@@ -35,6 +37,7 @@ return [
         'learning_library' => 'Learning',
         'employee_lifecycle' => 'Lifecycle',
         'document_compliance' => 'Compliance',
+        'employee_relations' => 'Relations',
     ],
     'shortcuts' => [
         'review_queue' => 'Quick access',
