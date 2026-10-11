@@ -178,7 +178,9 @@ Addımlar `Adi` hesablama ilə eynidir: `Yeni hesablama` → `Hesablama növü` 
 
 Bilməli olduqlarınız:
 - işçinin maaş şərti ayın sonuna qədər açıqdırsa, onu və kreditinin qalan borcunu `Adi` hesablama ödəyir; `Son haqq-hesab`da həmin işçi görünmür, ona görə ikiqat tutulma olmur;
-- birdəfəlik ödənişlər və əmr ödənişləri (qeyri-iş günü işi, əvəzetmə) `Son haqq-hesab`a düşmür — onlar `Adi` hesablamanın işidir. Çıxan işçi üçün belə ödəniş qalıbsa, hesablamadan əvvəl mühasiblə həll edin;
+- birdəfəlik ödənişlər (KPI bonusu, mükafat, kompensasiya) və əmr ödənişləri (qeyri-iş günü işi, əvəzetmə) də `Son haqq-hesab`a düşür: çıxan işçini `Adi` hesablama xitam tarixindən sonra tutmur, ona görə onun hələ ödənilməmiş bütün ödənişləri son haqq-hesabla verilir. Ödəniş yalnız bir dəfə verilir — `Kilidlə`dən sonra heç bir hesablama onu təkrar götürmür;
+- işçinin maaşı artıq kilidlənmiş `Son haqq-hesab`la ödənilibsə və sonradan ona yeni ödəniş (məsələn, xitamdan sonra imzalanmış mükafat əmri) gəlibsə, həmin və ya sonrakı dövr üçün yeni `Son haqq-hesab` yaradın: o işçini yalnız ödənilməmiş ödənişlərlə (əmək haqqı təkrar hesablanmadan) əhatə edir. Belə ödənişə aylıq vergi güzəşti təkrar verilmir;
+- xitam olunmuş işçiyə aid, heç bir hesablamaya düşməyən ödənişlər `Hesablamalar` səhifəsinin yuxarısında sarı xəbərdarlıq kimi göstərilir. Xəbərdarlıq görünürsə, müvafiq dövr üçün `Son haqq-hesab` yaradıb hesablayın — o hesablama silinənə və ya kilidlənənə qədər ödəniş «örtülmüş» sayılır, kilidləndikdən sonra xəbərdarlıq yox olur;
 - aylıq vergi azadolması və güzəşt kartları verilir (`Off-cycle`-dan fərqli olaraq);
 - kreditdə taksit yox, qalan borc tutulur, amma işçiyə ödəniləcək məbləğin 20 %-i həddinə qədər (bax: «Tutulmaların 20 % həddi»). Sığmayan hissə kreditdə borc kimi qalır (`Aktiv`, `Qalıq` sıfırdan çox) və sonrakı hesablamalarda avtomatik tutulmur — çünki işçi artıq maaş almır. Onu işçi ilə ayrıca (könüllü ödəniş və ya məhkəmə qaydasında) həll etmək lazımdır.
 
@@ -329,7 +331,7 @@ Hüquqi yol:
 **Nümunə 2.** Neft-qaz şirkətinin işçisi iyunda özəl rejimlə ödənilib, iyuldan `Dövlət və neft-qaz sektoru` rejiminə keçirilib. Hesabat: vergi az 93,00 (126 − 33), DSMF işçi artıq 63,00 (96 − 33), DSMF işəgötürən az 63,00 (242 − 179). Yalnız işçi tərəfinin artığı qaytarıla bilər; az tutulmuş hissələr üçün dəqiqləşdirilmiş hesabat verilir.
 
 ### KPI bonusu və faktların idxalı
-**KPI bonusu əmək haqqına necə düşür.** `KPI` → `Bonus` ekranında `Əmək haqqına ötür (Excel)` basılanda hesablanmış bonus `KPI bonusu (dövrün adı)` adı ilə birdəfəlik ödəniş kimi qeydə alınır: həmin ayın `Adi` hesablamasına vergiyə və sosial bazaya cəlb olunan qazanc kimi düşür. Ay artıq kilidlənibsə, növbəti aya keçir. Eyni bonus təkrar ötürülsə, ikinci dəfə ödənilmir. `Off-cycle` və `Son haqq-hesab` hesablamalarına birdəfəlik ödənişlər düşmür.
+**KPI bonusu əmək haqqına necə düşür.** `KPI` → `Bonus` ekranında `Əmək haqqına ötür (Excel)` basılanda hesablanmış bonus `KPI bonusu (dövrün adı)` adı ilə birdəfəlik ödəniş kimi qeydə alınır: həmin ayın `Adi` hesablamasına vergiyə və sosial bazaya cəlb olunan qazanc kimi düşür. Ay artıq kilidlənibsə, növbəti aya keçir. Eyni bonus təkrar ötürülsə, ikinci dəfə ödənilmir. `Off-cycle` hesablamasına birdəfəlik ödənişlər düşmür; `Son haqq-hesab` isə işdən çıxan işçinin ödənilməmiş birdəfəlik ödənişlərini verir.
 
 **İşdən çıxan əməkdaşın bonusu.** Dövr bitmədən işdən çıxma ilə bağlanmış KPI kartının bonusunu `KPI` → `Bonus` ekranında `İşdən çıxan əməkdaşın bonusu (dövr bitmədən)` seçimi müəyyən edir:
 - `İşlədiyi günlərə mütənasib (standart)` — bonus kartın işlənmiş günlərə uyğun əmsalına vurulur;

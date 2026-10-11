@@ -14,6 +14,7 @@ use App\Models\UserPersonnelLink;
 use App\Modules\EmployeeRelations\Application\Services\CaseService;
 use App\Modules\EmployeeRelations\Domain\Models\RelationCase;
 use App\Modules\EmployeeRelations\Domain\Models\RelationCaseType;
+use App\Modules\Orders\Contracts\LinkedOrderCancellation;
 use App\Modules\Orders\Contracts\OrderDrafter;
 use App\Services\StructureService;
 use App\Services\UserPersonnelLinkResolver;
@@ -33,6 +34,14 @@ trait BuildsEmployeeRelationCases
 
     /** @var array<string, string> */
     public array $fakeTemplates = ['intizam_tenbehi' => 'İntizam tənbehi'];
+
+    /**
+     * Saxta Orders: əmr id → vəziyyət (LinkedOrderCancellation::STATE_*). Göstərilməyən
+     * əmr «təsdiq gözləyir» sayılır; testlər əmrin ləğvini burada simulyasiya edir.
+     *
+     * @var array<int, string>
+     */
+    public array $fakeOrderStates = [];
 
     protected function erStructure(string $name): Structure
     {
@@ -113,6 +122,7 @@ trait BuildsEmployeeRelationCases
     protected function erFakeDrafter(): void
     {
         $test = $this;
+        $this->erFakeLinkedOrders();
 
         $this->app->instance(OrderDrafter::class, new class($test) implements OrderDrafter
         {
@@ -138,6 +148,50 @@ trait BuildsEmployeeRelationCases
                 ];
 
                 return (new OrderLog)->forceFill(['id' => 9000 + count($this->test->draftedOrders), 'order_no' => $orderNumber]);
+            }
+        });
+    }
+
+    /**
+     * Orders-un LinkedOrderCancellation kontraktının saxtası: yalnız `fakeOrderStates`-i
+     * oxuyur, heç nəyi ləğv etmir (real ləğv Orders axınındadır).
+     */
+    protected function erFakeLinkedOrders(): void
+    {
+        $test = $this;
+
+        $this->app->instance(LinkedOrderCancellation::class, new class($test) implements LinkedOrderCancellation
+        {
+            public function __construct(private readonly object $test) {}
+
+            public function stateOf(int $orderId): string
+            {
+                return $this->test->fakeOrderStates[$orderId] ?? self::STATE_PENDING;
+            }
+
+            public function isVoided(string $state): bool
+            {
+                return in_array($state, [self::STATE_CANCELLED, self::STATE_DELETED, self::STATE_MISSING], true);
+            }
+
+            public function orderNumber(int $orderId): ?string
+            {
+                return 'EMR-'.$orderId;
+            }
+
+            public function orderUrl(int $orderId, User $user): ?string
+            {
+                return '/orders?search[order_no]=EMR-'.$orderId;
+            }
+
+            public function cancellationOrderUrl(User $user): ?string
+            {
+                return '/orders?create=1&preset=emrin_legvi';
+            }
+
+            public function userMayCancel(User $user, int $orderId): bool
+            {
+                return true;
             }
         });
     }

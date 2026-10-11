@@ -32,6 +32,7 @@ Hər addım ayrıca icazə ilə bağlıdır. Standart rol paylanması (quraşdı
 | `create-employee-relations` | Görünən strukturların işçiləri barəsində iş açmaq (`Yeni iş`) | Bəli | Bəli | Xeyr |
 | `manage-employee-relations` | Görünən strukturların **bütün** işlərini görmək; araşdırıcı təyin etmək; mərhələni dəyişmək; qərar vermək; apellyasiyaya baxmaq; `İş növləri`ni idarə etmək | Bəli | Bəli | Xeyr |
 | `reveal-employee-relations-reporter` | Anonim şikayətçinin kimliyini səbəb yazaraq açmaq | Bəli | **Xeyr** | Xeyr |
+| `waive-employee-relations-order-cancellation` | Apellyasiya tənbehi ləğv etdikdən sonra bağlı əmr qüvvədə qalırsa, işi səbəb yazaraq bağlamağa icazə vermək (istisna təsdiqi) | Bəli | **Xeyr** | Xeyr |
 | `show-employee-relations-statistics` | `Statistika` bölməsi | Bəli | Bəli | Xeyr |
 | `submit-own-employee-relations` | Şəxsi kabinetdən öz adından və ya anonim müraciət göndərmək | Bəli | Xeyr | Bəli |
 
@@ -40,6 +41,7 @@ Qeydlər:
 - Statistika icazəsi tək başına da modulu açır — bu halda yalnız `Statistika` bölməsi görünür.
 - Rol cədvəli miqrasiya ilə yazılır (`Admin`, `HR Admin`, `Employee Self-Service` rolları quraşdırmada mövcud olduqda). Sizin quraşdırmada rol adı fərqlidirsə və ya rol yoxdursa, icazələri rol idarəsindən əl ilə verin.
 - Anonim şikayətçinin kimliyini açmaq icazəsini məqsədli şəkildə az sayda şəxsə verin (standartda yalnız `Admin`).
+- İstisna təsdiqi icazəsi (`waive-employee-relations-order-cancellation`) də standartda yalnız `Admin`dədir: yekun qərarı verən HR əməkdaşı nəzarəti özü yan keçə bilməsin deyə. Lazım olsa, rol idarəsindən ayrıca verin.
 
 ### Kim hansı işi görür?
 İşi yalnız aşağıdakılar görür, hamısı **struktur görünürlüyü** daxilində:
@@ -58,7 +60,7 @@ Görünməyən işin ünvanı açılanda səhifə 404 qaytarır — işin mövcu
 ### İşlər
 İşlərin siyahısı. Başlıqda `Yeni iş` düyməsi var (yalnız iş açmaq icazəsi olanlara).
 
-Süzgəclər: axtarış (`İş nömrəsi və ya təsvir`), `Bütün mərhələlər`, `Bütün növlər`, `Yalnız gecikənlər`.
+Süzgəclər: axtarış (`İş nömrəsi və ya təsvir`), `Bütün mərhələlər`, `Bütün növlər`, `Yalnız gecikənlər`, `Bağlı əmri ləğv gözləyənlər`. Əmri ləğv gözləyən işin `Mərhələ` sütununda `Əmrin ləğvi gözlənilir` nişanı görünür.
 
 Sütunlar: `İş`, `Növ`, `Barəsində`, `Mərhələ`, `Mərhələnin son tarixi`. Mərhələnin müddəti keçibsə sütunda `Gecikir: gg.aa.iiii` göstərilir.
 
@@ -69,6 +71,7 @@ Kart bölmələri:
 - `Faktlar və iştirakçılar` — təsvir, şikayətçi, daxil olma yolu (`İnsan resursları`, `Rəhbər`, `Şəxsi kabinet`), barəsində şikayət olunan, struktur, xətanın və aşkar edilmə tarixləri;
 - `Mərhələni dəyiş`;
 - `Qərar` (qərar verildikdən sonra) və `Qərar ver` (araşdırma mərhələsində, idarəçiyə);
+- səhifənin yuxarısında `Bağlı intizam əmri hələ ləğv edilməyib` zolağı (yalnız apellyasiya tənbehi ləğv edəndə, bax: 8-ci əməliyyat);
 - `Apellyasiyalar`;
 - `Sübutlar`;
 - `Araşdırıcılar`;
@@ -183,9 +186,23 @@ Cərimə (kollektiv müqavilədə nəzərdə tutulubsa) və əmək müqaviləsin
 4. `Şərh` yazın (məcburidir) və `Yekun qərarı ver` basın.
 5. İş `Yekun qərar` mərhələsinə keçir; apellyasiya verən şəxsə bildiriş gedir. Sonra `Mərhələni dəyiş` ilə işi `Bağlandı`ya keçirin.
 
-**Bağlı əmr haqqında vacib qeyd:** işə intizam əmri qaralaması bağlıdırsa və nəticə `Qərar ləğv edildi` olarsa, yaxud `Qərar dəyişdirildi` seçilib yeni qərar tənbeh deyilsə, sistem **əmri özü ləğv etmir**. Tarixçəyə `Bağlı əmr Əmrlər modulunda ləğv edilməlidir` qeydi düşür və ekranda xəbərdarlıq çıxır: `Bu işə bağlı intizam əmri var — onu Əmrlər modulunda ləğv edin.` Əmri `Əmrlər` modulunda əl ilə ləğv etməsəniz, tənbeh şəxsi işdə qalacaq (əmr təsdiqlənibsə).
+#### Qərar ləğv ediləndə bağlı əmrin taleyi
+Töhmət və ya sonuncu xəbərdarlıqla şiddətli töhmət `Əmrlər` modulunda təsdiqlənibsə, tənbeh işçinin şəxsi işinə yazılıb (`personnel_punishments`). Apellyasiya nəticəsi tənbehi ləğv edəndə (ƏM Md.190) o qeyd də götürülməlidir. Sistem təsdiqlənmiş sənədi (əmri) **özü ləğv etmir**: ləğv `Əmrlər` modulunun öz səlahiyyət və təsdiq qaydasından keçir (`revert-orders` icazəsi, yazılı səbəb, bağlanmış əmək haqqı dövrü yoxlaması). Əvəzində:
 
-Həmçinin: `Qərar ləğv edildi` seçiləndə işin `Qərar` sahəsi dəyişmir — ləğv `Apellyasiyalar` bölməsində və tarixçədə görünür.
+1. `Yekun qərarı ver` basanda (nəticə `Qərar ləğv edildi`, yaxud `Qərar dəyişdirildi` və yeni qərar tənbeh deyil) işin `Qərar` sahəsi `Əsassız`a keçir və iş **`Əmrin ləğvi gözlənilir`** vəziyyətinə düşür. Tarixçəyə `Bağlı əmrin ləğvi gözlənilir` qeydi yazılır, işi idarə edən HR əməkdaşlarına bildiriş gedir.
+2. İşin kartının yuxarısında qırmızı zolaq çıxır: əmrin nömrəsi və statusu (`təsdiq gözləyir`, `təsdiqlənib`) göstərilir. Zolaqdakı düymələr:
+   - `Əmrə keç (ləğv et)` — `Əmrlər` siyahısını həmin əmrə süzür; orada `Ləğv et` (təsdiq gözləyən əmr üçün) və ya `Ləğv et` / `Təsdiqi geri al` (təsdiqlənmiş əmr üçün) adi qaydada, səbəb yazılaraq icra olunur;
+   - `Ləğv əmri hazırla` — `Əmrin ləğvi` əmr növü seçilmiş formanı açır; həmin əmr təsdiqlənəndə hədəf əmr ləğv olunur və tənbeh qeydi silinir.
+   Düymələr yalnız `Əmrlər`də müvafiq icazəsi olan istifadəçiyə görünür.
+3. Əmr `Əmrlər`də ləğv olunan (və ya silinən) kimi iş avtomatik **`Ləğv tamamlandı`** vəziyyətinə keçir; tarixçəyə `Bağlı əmr ləğv edildi` yazılır, HR-a bildiriş gedir.
+4. **Əmr ləğv olunana qədər iş `Bağlandı`ya keçmir:** `Apellyasiya intizam qərarını ləğv edib, bağlı əmr isə hələ ləğv olunmayıb. ...`
+5. İstisna: əmrin qüvvədə qalması şüurlu qərardırsa, `waive-employee-relations-order-cancellation` icazəsi olan şəxs zolaqdakı `Əmrin qüvvədə saxlanılma səbəbi` xanasına səbəbi yazıb (ən azı 10 simvol) `İstisnanı təsdiq et` basır. Səbəb tarixçəyə və audit jurnalına düşür, HR-a bildiriş gedir, iş bağlana bilər. Bu halda tənbeh şəxsi işdə qalır — qərar istisna təsdiq edənin məsuliyyətindədir.
+
+Qeydlər:
+- Təsdiqi geri alınmış əmr (`Təsdiq gözləyən` statusuna qayıdıb) hələ ləğv sayılmır: yenidən təsdiqlənə bildiyi üçün onu da `Ləğv et` etmək lazımdır.
+- Apellyasiya nəticəsi `Qərar qüvvədə saxlanıldı` olarsa və ya bağlı əmr yoxdursa (xəbərdarlıq qərarı), gözləmə yaranmır, iş əvvəlki kimi bağlanır.
+- Tənbehin başqa tənbehlə əvəzlənməsi (məsələn, töhmətin şiddətli töhmətlə) Md.189.1 qaydasına görə bloklanır — ləğv və tənbehsiz qərara dəyişdirmə yeganə yoldur.
+- `Qərar ləğv edildi` işçinin kabinetində nəticəni `Əsassız` göstərir (`Barəmdə qərarlar`); ləğvin özü `Apellyasiyalar` bölməsində və tarixçədə qalır.
 
 ### 9. Anonim şikayətçinin kimliyini açmaq
 Yalnız `reveal-employee-relations-reporter` icazəsi olan və işi görə bilən istifadəçi edə bilər.
@@ -199,7 +216,7 @@ Ad ekranda `Şikayətçi: ...` kimi göstərilir. Hər açılış `Tarixçə`də
 ### 10. İşi bağlamaq
 - `Açıldı` mərhələsindən `Bağlandı`ya keçid əsassız və ya təkrar müraciət üçündür; `Şərh` məcburidir.
 - `Qərar verildi` mərhələsindən `Bağlandı`ya keçid yalnız apellyasiya müddəti bitəndən sonra və açıq apellyasiya yoxdursa mümkündür. Əks halda: `Apellyasiya müddəti gg.aa.iiii tarixinədək davam edir — iş bu tarixdən sonra bağlana bilər.` və ya `Baxılmamış apellyasiya var.`
-- `Yekun qərar` mərhələsindən `Bağlandı`ya keçid `Mərhələni dəyiş` ilə edilir.
+- `Yekun qərar` mərhələsindən `Bağlandı`ya keçid `Mərhələni dəyiş` ilə edilir. Apellyasiya tənbehi ləğv edibsə və bağlı əmr hələ ləğv olunmayıbsa, keçid bloklanır (8-ci əməliyyat): əvvəl əmri ləğv edin və ya icazəli şəxs istisna təsdiq etsin.
 
 ### 11. İş növlərini idarə etmək
 1. `İş növləri` bölməsini açın.
@@ -295,10 +312,10 @@ Bildirişin mətni şəxsi məlumat daşımır: yalnız iş nömrəsi, mərhəl�
 ## Audit və məxfilik qaydaları
 - İş yalnız `manage` icazəsi olanlara, təyin olunmuş araşdırıcılara və işin sahibinə görünür; hamısı struktur görünürlüyü daxilində.
 - Anonim işdə şikayətçinin kimliyi **araşdırıcılardan və idarəçilərdən də gizlidir**; yalnız ayrıca icazəsi olan şəxs səbəb yazaraq açır.
-- Əməliyyatlar audit jurnalına `employee_relations` adı ilə yazılır: iş açılması, mərhələ dəyişməsi, faktların yenilənməsi, şahid və araşdırıcı əlavə/çıxarma, sübut əlavəsi və **yüklənməsi**, qərar, apellyasiya, yenidən baxışın yekunu, şikayətçi kimliyinin açılması.
+- Əməliyyatlar audit jurnalına `employee_relations` adı ilə yazılır: iş açılması, mərhələ dəyişməsi, faktların yenilənməsi, şahid və araşdırıcı əlavə/çıxarma, sübut əlavəsi və **yüklənməsi**, qərar, apellyasiya, yenidən baxışın yekunu, bağlı əmrin ləğvinin gözlənilməsi, tamamlanması və istisna təsdiqi, şikayətçi kimliyinin açılması.
 - Audit jurnalına yalnız iş nömrəsi, mərhələ və texniki identifikatorlar düşür. Şikayətin məzmunu, şəxslərin adları və anonim şikayətçinin kimliyi jurnala **yazılmır**. Anonim müraciətdə səbəbkar (istifadəçi) də boş saxlanılır.
 - İşin `Tarixçə`si kimin nə etdiyini göstərir; anonim əməliyyatda ad yerinə `Sistem / anonim` yazılır.
-- Bildirişlər (`qərar`, `apellyasiyanın nəticəsi`, `gecikmə`) şəxsi məlumatsız mətnlə göndərilir.
+- Bildirişlər (`qərar`, `apellyasiyanın nəticəsi`, `gecikmə`, bağlı əmrin ləğvi) şəxsi məlumatsız mətnlə göndərilir.
 - Statistika kiçik saylarda şəxsi tanımağa imkan verməsin deyə sayları gizlədir: 3-dən kiçik hər say `<3` kimi göstərilir. Orta araşdırma müddəti də bu saydan az qərarlı iş olduqda `—` göstərilir.
 - Statistika yalnız sizin struktur görünürlüyünüzdəki işləri sayır.
 
@@ -353,6 +370,8 @@ Digər asılılıqlar:
 | `Dəyişdirilmiş qərar əvvəlkindən fərqli olmalıdır.` | Yenidən baxışda `Yeni qərar` əvvəlki qərarla eynidir | Fərqli qərar seçin və ya `Qərar qüvvədə saxlanıldı` nəticəsini verin |
 | `Apellyasiya müddəti bitib və ya apellyasiya artıq verilib.` | Etiraz müddəti keçib və ya işçi artıq etiraz verib | Müddət bitibsə etiraz mümkün deyil; işçinin məhkəməyə müraciət hüququ qalır |
 | `Bu istifadəçi araşdırıcı ola bilməz...` | İstifadəçinin modul icazəsi yoxdur və ya struktur görünürlüyü uyğun deyil | İcazəni yoxlayın və ya başqa araşdırıcı seçin |
+| `Apellyasiya intizam qərarını ləğv edib, bağlı əmr isə hələ ləğv olunmayıb...` | İş `Əmrin ləğvi gözlənilir` vəziyyətindədir | Zolaqdakı `Əmrə keç (ləğv et)` ilə əmri `Əmrlər`də ləğv edin; əmr qüvvədə qalmalıdırsa `waive-employee-relations-order-cancellation` icazəsi olan şəxs səbəb yazaraq istisna təsdiq etsin |
+| `Əmrə keç` / `Ləğv əmri hazırla` düymələri görünmür | `Əmrlər`də icazəniz yoxdur (`show-orders`; ləğv əmri üçün `add-orders` və `revert-orders`) | İcazəli həmkardan xahiş edin və ya icazəni rol idarəsindən verin |
 | Qərar verildi, iş bağlanmır (`Apellyasiya müddəti ... davam edir`) | Etiraz müddəti hələ bitməyib | Müddət bitənə qədər gözləyin; açıq apellyasiyaya əvvəl baxın |
 | Başqa istifadəçi işi görmür (404) | İş onun strukturunda deyil və ya araşdırıcı/sahib deyil | Normaldır — məxfilik qaydasıdır; lazımdırsa araşdırıcı təyin edin |
 | Anonim iş heç kimin siyahısında yoxdur | İş struktursuzdur (anonim müraciət) | «Bütün strukturlar» hüququ olan `manage` istifadəçisi görür; `Barəsində şikayət olunan` bilinəndən sonra iş həmin strukturda görünür |
@@ -366,7 +385,8 @@ Digər asılılıqlar:
 - **Məzuniyyətdə və ya xəstə olan işçiyə əmri həmin gün imzalamayın.** Xəbərdarlıq çıxırsa əmri işə çıxdığı gün imzalayın.
 - **Anonim şikayətçinin kimliyini maraq xatirinə açmayın.** Açmaq yalnız araşdırmanın zəruri tələbi olduqda və əsaslı səbəblə edilməlidir; hər açılış izlənir. Kimliyi açandan sonra şikayətçiyə qarşı mənfi hərəkətdən (təqib) çəkinin.
 - **Apellyasiya müddəti bitməmiş işi bağlamağa çalışmayın** və açıq etirazı nəzərə almadan qərarı icra etməyin.
-- **Qərarı ləğv etdikdən sonra bağlı əmri unutmayın.** Əmri `Əmrlər` modulunda əl ilə ləğv etməsəniz, tənbeh şəxsi işdə qalır.
+- **Qərarı ləğv etdikdən sonra bağlı əmri unutmayın.** Sistem əmri özü ləğv etmir; əmri `Əmrlər`də ləğv etməsəniz iş bağlanmır, istisna təsdiqi ilə bağlansa isə tənbeh şəxsi işdə qalır.
+- **İstisna təsdiqini rahatlıq üçün istifadə etməyin.** Ləğv olunmuş tənbeh şəxsi işdə qalırsa, bir il ərzində yeni tənbeh yoxlamalarına, atestasiya və mükafat məhdudiyyətlərinə təsir edir.
 - **Şikayətin məzmununu e-poçt və ya mesajla yaymayın.** Sübutlar yalnız bu modulda, gizli diskdə saxlanmalıdır.
 - **İş növünü passiv etməzdən əvvəl açıq işləri yoxlayın.** Passiv növ yeni işdə seçilmir; köhnə işlər saxlanılır, amma növ üzrə yeni müraciət göndərmək olmur.
 
@@ -390,6 +410,15 @@ Qərar verəndə barəsində şikayət olunan işçiyə və müraciət edənə b
 **Apellyasiya müddətini dəyişmək olarmı?**
 Yalnız administrator `EMPLOYEE_RELATIONS_APPEAL_DAYS` ilə ümumi müddəti dəyişir; ayrıca işə görə dəyişmək yoxdur. Dəyişiklik yalnız yeni qərarlara təsir edir.
 
+**Apellyasiya tənbehi ləğv etdi — bağlı əmr özü ləğv olunurmu?**
+Xeyr. Təsdiqlənmiş əmr hüquqi sənəddir; onu apellyasiya nəticəsi ilə avtomatik ləğv etmək `Əmrlər`in səlahiyyət zəncirini yan keçərdi. İş `Əmrin ləğvi gözlənilir` vəziyyətinə düşür, kartdakı zolaq sizi əmrə aparır. Əmr `Əmrlər`də ləğv olunan kimi iş `Ləğv tamamlandı`ya keçir və bağlana bilir.
+
+**Ləğv gözləyən iş bağlanmır, amma əmri ləğv etmək istəmirik.**
+`waive-employee-relations-order-cancellation` icazəsi olan şəxs səbəb yazaraq istisna təsdiq edir. Bu halda tənbeh şəxsi işdə qalır; səbəb tarixçədə və audit jurnalında saxlanılır.
+
+**Ləğv gözləyən işləri necə tapım?**
+`İşlər` siyahısında `Bağlı əmri ləğv gözləyənlər` süzgəcini seçin.
+
 **Bir iş üzrə bir neçə araşdırıcı ola bilərmi?**
 Bəli.
 
@@ -402,7 +431,7 @@ Bu, məxfilik qaydasıdır: kiçik qrupda şəxs tanınmasın deyə say gizlədi
 ## Yadda saxlayın
 - Tənbehdən əvvəl yazılı izahatı `Sübutlar`a əlavə edin və tarixləri düzgün doldurun — müddət yoxlaması bu tarixlərə əsaslanır.
 - Töhmət seçiləndə yaranan əmr yalnız qaralamadır: `Əmrlər` modulunda yoxlayıb təsdiqləmək sizin işinizdir.
-- Qərar ləğv olunsa, bağlı əmri `Əmrlər` modulunda əl ilə ləğv edin.
+- Qərar ləğv olunsa, iş `Əmrin ləğvi gözlənilir` vəziyyətinə düşür: bağlı əmri `Əmrlər` modulunda ləğv edin (zolaqdakı keçid ilə). Əmr ləğv olunmayınca iş bağlanmır; istisna yalnız xüsusi icazə və yazılı səbəblə mümkündür.
 - Anonim müraciətə tez araşdırıcı təyin edin — əks halda gecikmə xatırlatması getmir.
 - İşin kartında hər dəyişiklik `Tarixçə`də və audit jurnalında qalır; şikayətin məzmunu isə jurnala düşmür.
 - Sistem hüquqi məsləhət əvəzi deyil: müddət və qaydalar ƏM-ə əsaslanır, lakin son məsuliyyət qərar verən şəxsdədir.

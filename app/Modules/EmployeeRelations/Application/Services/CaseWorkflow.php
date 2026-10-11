@@ -21,6 +21,7 @@ class CaseWorkflow
         private readonly CaseAccess $access,
         private readonly CaseSla $sla,
         private readonly CaseAuditLogger $audit,
+        private readonly OrderCancellationTracker $orderCancellations,
     ) {}
 
     /**
@@ -74,6 +75,12 @@ class CaseWorkflow
 
             if (! $from->canMoveTo($target)) {
                 throw ValidationException::withMessages(['transition' => __('employee_relations::cases.messages.transition_not_allowed')]);
+            }
+
+            // Apellyasiya ilə ləğv olunmuş tənbehin əmri ləğv edilməmiş (və ya istisna
+            // təsdiqlənməmiş) iş bağlanmır — tənbeh şəxsi işdə qüvvədə qalardı.
+            if ($target === CaseStatus::Closed) {
+                $this->orderCancellations->guardClosable($locked);
             }
 
             $now = now();

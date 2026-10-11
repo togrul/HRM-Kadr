@@ -135,6 +135,11 @@ return [
         'substitution_for' => 'Əvəzetməyə görə əlavə ödəniş — :name (:days iş günü)',
     ],
 
+    'orphans' => [
+        'title' => 'Ödənilməmiş ödənişlər: xitam olunmuş işçilər',
+        'hint' => 'Bu ödənişlər heç bir hesablamaya düşməyib. Adi hesablama xitamdan sonra işçini tutmur — müvafiq dövr üçün «Son haqq-hesab» növü ilə hesablama yaradın.',
+    ],
+
     'run_types' => [
         'regular' => 'Adi',
         'off_cycle' => 'Off-cycle',

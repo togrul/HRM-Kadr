@@ -582,6 +582,7 @@ class PersonnelSeeder extends Seeder
             'create-employee-relations',
             'manage-employee-relations',
             'reveal-employee-relations-reporter',
+            'waive-employee-relations-order-cancellation',
             'show-employee-relations-statistics',
             'submit-own-employee-relations',
         ];

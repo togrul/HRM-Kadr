@@ -141,6 +141,7 @@ return [
         'create-employee-relations' => 'Görünən strukturların işçiləri barəsində şikayət və ya intizam işi açmaq icazəsi verir (HR və rəhbər).',
         'manage-employee-relations' => 'Görünən strukturların bütün işçi münasibətləri işlərini görmək, araşdırıcı təyin etmək, mərhələni dəyişmək, qərar vermək, apellyasiyaya baxmaq və iş növlərini idarə etmək icazəsi verir.',
         'reveal-employee-relations-reporter' => 'Anonim şikayətdə şikayətçinin kimliyini səbəb göstərərək açmaq icazəsi verir; hər açılış audit jurnalına yazılır.',
+        'waive-employee-relations-order-cancellation' => 'Apellyasiya ilə ləğv olunmuş intizam qərarının əmri qüvvədə qalarkən işi səbəb göstərərək bağlamaq (istisna təsdiqi) icazəsi verir; hər təsdiq audit jurnalına yazılır.',
         'show-employee-relations-statistics' => 'İşçi münasibətləri üzrə anonimləşdirilmiş statistikanı (struktur və növ üzrə say, təkrarlanan hallar, orta müddət, SLA pozuntusu) görmək icazəsi verir.',
         'submit-own-employee-relations' => 'Əməkdaşın Şəxsi kabinetdən öz adından və ya anonim şikayət/müraciət göndərmək icazəsi verir.',
     ],

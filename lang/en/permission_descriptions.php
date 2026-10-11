@@ -141,6 +141,7 @@ return [
         'create-employee-relations' => 'Allows opening a complaint or disciplinary case about employees of visible structures (HR and managers).',
         'manage-employee-relations' => 'Allows seeing all employee relations cases of visible structures, assigning investigators, changing stages, deciding, reviewing appeals and managing case types.',
         'reveal-employee-relations-reporter' => 'Allows revealing the complainant of an anonymous case with a stated reason; every reveal is written to the audit log.',
+        'waive-employee-relations-order-cancellation' => 'Allows closing a case whose appeal annulled a disciplinary decision while its order stays in force (exception approval) with a stated reason; every approval is written to the audit log.',
         'show-employee-relations-statistics' => 'Allows seeing anonymised employee relations statistics (counts by structure and type, repeat incidents, average duration, SLA breaches).',
         'submit-own-employee-relations' => 'Allows an employee to submit a complaint or report from My HR in their own name or anonymously.',
     ],

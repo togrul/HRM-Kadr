@@ -29,6 +29,7 @@ return [
         'employee_relations' => 'İşçi münasibətləri',
         'employee_relations_reporter' => 'İşçi münasibətləri - anonim şikayətçinin kimliyi',
         'employee_relations_statistics' => 'İşçi münasibətləri - statistika',
+        'employee_relations_order_cancellation' => 'İşçi münasibətləri - ləğv gözləyən əmrdən istisna',
         'own_employee_relations' => 'Şəxsi kabinet - şikayət və müraciətlər',
         'employee_content' => 'Öyrənmə materialı təyinatları',
         'employee_content_library' => 'Öyrənmə materialları kitabxanası',

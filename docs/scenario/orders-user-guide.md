@@ -169,7 +169,9 @@ Töhmət və ya sonuncu xəbərdarlıqla şiddətli töhmət `İşçi münasibə
 - sahələr avtomatik doldurulur: `Pozuntunun təsviri` — işin başlığı, `Tənbehin növü` — `töhmət` və ya `sonuncu xəbərdarlıqla şiddətli töhmət`, `Əsas mətni` — `… saylı xidməti araşdırmanın materialları və işçinin izahatı`
 - siz əmri `Önizləmə` ilə yoxlayıb təsdiqləyirsiniz; təsdiq edilməyənə qədər tənbeh şəxsi işə yazılmır
 - şifahi və yazılı xəbərdarlıq intizam tənbehi sayılmır (m.186.3), onlar üçün əmr yaradılmır
-- işə bağlı əmri ləğv etmək lazımdırsa, bunu `Əmrlər`də edirsiniz; İşçi münasibətləri ekranı `Bu işə bağlı intizam əmri var — onu Əmrlər modulunda ləğv edin.` xəbərdarlığını göstərir
+- işə bağlı əmri ləğv etmək lazımdırsa, bunu `Əmrlər`də edirsiniz: apellyasiya tənbehi ləğv edəndə İşçi münasibətləri işi `Əmrin ləğvi gözlənilir` vəziyyətinə düşür və işin kartındakı `Əmrə keç (ləğv et)` düyməsi sizi bu siyahıya həmin əmrə süzülmüş halda gətirir; `Ləğv əmri hazırla` düyməsi isə `Əmrin ləğvi` növünü seçilmiş halda formanı açır
+- əmri **özünüz** ləğv edirsiniz: `Ləğv et` / `Təsdiqi geri al` adi qaydada işləyir (təsdiqlənmiş əmr üçün `revert-orders` icazəsi və yazılı səbəb), İşçi münasibətləri modulu əmrə toxunmur
+- əmr ləğv olunan (və ya silinən) kimi İşçi münasibətləri işi avtomatik `Ləğv tamamlandı` vəziyyətinə keçir və HR-a bildiriş gedir; təsdiqi geri alınmış (`Təsdiq gözləyən`) əmr hələ ləğv sayılmır, onu da `Ləğv et` etmək lazımdır
 
 ## "⋯" menyusu
 Sətrin sağ ucundakı `⋯` (`Digər əməliyyatlar`) statusa və icazəyə görə dəyişir:

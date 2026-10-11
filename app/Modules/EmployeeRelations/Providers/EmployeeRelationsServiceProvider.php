@@ -2,11 +2,14 @@
 
 namespace App\Modules\EmployeeRelations\Providers;
 
+use App\Modules\EmployeeRelations\Application\Services\OrderCancellationTracker;
 use App\Modules\EmployeeRelations\Console\Commands\SendSlaRemindersCommand;
 use App\Modules\EmployeeRelations\Domain\Models\RelationCase;
 use App\Modules\EmployeeRelations\Policies\RelationCasePolicy;
+use App\Modules\Orders\Contracts\OrderStatusChanged;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -35,6 +38,10 @@ class EmployeeRelationsServiceProvider extends ServiceProvider
         }
 
         Gate::policy(RelationCase::class, RelationCasePolicy::class);
+
+        // Orders əmrin statusunu dəyişəndə apellyasiya ilə ləğv olunmuş tənbehin əmrini
+        // gözləyən iş yenilənir (kontrakt hadisəsi — Orders modelinə asılılıq yoxdur).
+        Event::listen(OrderStatusChanged::class, [OrderCancellationTracker::class, 'handleOrderStatusChanged']);
 
         $this->loadRoutesFrom(__DIR__.'/../Routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'employee-relations');

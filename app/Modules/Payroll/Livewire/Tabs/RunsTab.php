@@ -4,6 +4,7 @@ namespace App\Modules\Payroll\Livewire\Tabs;
 
 use App\Models\EmployeeCompensation;
 use App\Models\EmployeeLoan;
+use App\Models\PayrollOneOffEarning;
 use App\Models\PayrollRun;
 use App\Models\Payslip;
 use App\Models\PayslipLine;
@@ -57,6 +58,21 @@ class RunsTab extends PayrollTab
             ->orderByDesc('id')
             ->limit(40)
             ->get();
+    }
+
+    /**
+     * Xitam olunmuş işçilərə aid, heç bir run-a düşməyən ödənişlər (yetim ödənişlər): işçi
+     * pulunu almır, `Son haqq-hesab` run-ı yaradılana qədər heç yerdə görünmür.
+     *
+     * @return Collection<int, PayrollOneOffEarning>
+     */
+    #[Computed]
+    public function orphanedPayments(): Collection
+    {
+        return app(PayrollRunService::class)
+            ->orphanedOneOffs(fn ($query) => $this->scopeByPersonnel($query))
+            ->take(20)
+            ->values();
     }
 
     #[Computed]

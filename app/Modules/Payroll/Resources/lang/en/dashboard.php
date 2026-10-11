@@ -135,6 +135,11 @@ return [
         'substitution_for' => 'Substitution extra pay — :name (:days working day(s))',
     ],
 
+    'orphans' => [
+        'title' => 'Unpaid payments: terminated employees',
+        'hint' => 'These payments are in no run yet. The regular run does not pick up an employee after termination — create a "Final settlement" run for the matching period.',
+    ],
+
     'run_types' => [
         'regular' => 'Regular',
         'off_cycle' => 'Off-cycle',

@@ -26,6 +26,7 @@ class AppealService
         private readonly DecisionService $decisions,
         private readonly CaseNotifier $notifier,
         private readonly CaseAuditLogger $audit,
+        private readonly OrderCancellationTracker $orderCancellations,
     ) {}
 
     /**
@@ -114,7 +115,12 @@ class AppealService
      * Yenidən baxışın yekunu. «Dəyişdirildi» yeni qərar tələb edir; tənbehə dəyişdirmə
      * eyni müddət yoxlamasından keçir və əmr qaralaması yaradır.
      *
-     * @return array{case: RelationCase, order_follow_up: bool}
+     * «Qərar ləğv edildi» işin nəticəsini «əsassız»a çevirir. Bağlı intizam əmri (və ya
+     * başqa tənbehlə əvəz olunan köhnə əmr) avtomatik ləğv OLUNMUR: təsdiqlənmiş sənədin
+     * ləğvi Orders modulunun öz axınından keçir. İş «ləğv gözləyir» vəziyyətinə düşür
+     * (OrderCancellationTracker), əmr ləğv olunana və ya istisna təsdiqlənənə qədər bağlanmır.
+     *
+     * @return array{case: RelationCase, order_follow_up: bool, cancellation_pending: bool}
      *
      * @throws AuthorizationException
      * @throws ValidationException
@@ -147,9 +153,17 @@ class AppealService
 
         return DB::transaction(function () use ($case, $actor, $outcome, $comment, $newDecision, $modifiedTo): array {
             $hadOrder = $case->order_log_id !== null;
+            $previousOrderId = $case->order_log_id !== null ? (int) $case->order_log_id : null;
+            $previousOutcome = $case->decision_outcome;
 
             if ($modifiedTo instanceof DecisionOutcome) {
                 $this->decisions->applyOutcome($case, $actor, $modifiedTo, $comment);
+            }
+
+            if ($outcome === RelationCaseAppeal::OUTCOME_ANNULLED) {
+                // Ləğv edilmiş qərar işin qüvvədə olan nəticəsi deyil: heç bir tədbir görülmür.
+                $case->forceFill(['decision_outcome' => DecisionOutcome::Unfounded])->save();
+                $this->audit->log('decision_annulled', $case, ['previous_outcome' => $previousOutcome?->value], $actor);
             }
 
             $appeals = $case->appeals()->where('status', '!=', RelationCaseAppeal::STATUS_RESOLVED)->get();
@@ -173,14 +187,22 @@ class AppealService
 
             $orderFollowUp = $hadOrder && (
                 $outcome === RelationCaseAppeal::OUTCOME_ANNULLED
-                || ($newDecision !== null && ! $newDecision->isSanction())
+                || ($modifiedTo instanceof DecisionOutcome && ! $modifiedTo->isSanction())
             );
 
             if ($orderFollowUp) {
                 $this->workflow->record($case, 'order_follow_up', null, $actor);
             }
 
-            return ['case' => $case->refresh(), 'order_follow_up' => $orderFollowUp];
+            // Ləğv edilməli əmr işin bağlı əmridir. Tənbehin başqa tənbehlə əvəzlənməsi
+            // Md.189.1 yoxlamasında (bir xətaya görə bir tənbeh) bloklandığı üçün işin
+            // əmri yalnız ləğv və ya tənbehsiz qərarla köhnəlir.
+            $orderToCancel = $orderFollowUp ? $previousOrderId : null;
+
+            $cancellationPending = $orderToCancel !== null
+                && $this->orderCancellations->request($case, $orderToCancel, $actor);
+
+            return ['case' => $case->refresh(), 'order_follow_up' => $orderFollowUp, 'cancellation_pending' => $cancellationPending];
         });
     }
 }

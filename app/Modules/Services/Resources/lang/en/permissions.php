@@ -29,6 +29,7 @@ return [
         'employee_relations' => 'Employee relations',
         'employee_relations_reporter' => 'Employee relations - anonymous reporter identity',
         'employee_relations_statistics' => 'Employee relations - statistics',
+        'employee_relations_order_cancellation' => 'Employee relations - order cancellation waiver',
         'own_employee_relations' => 'My HR - complaints and reports',
         'employee_content' => 'Employee content assignments',
         'employee_content_library' => 'Employee content library',

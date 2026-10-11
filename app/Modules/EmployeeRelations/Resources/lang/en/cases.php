@@ -72,6 +72,9 @@ return [
         'evidence_added' => 'Evidence added',
         'order_drafted' => 'Disciplinary order draft created',
         'order_follow_up' => 'The linked order must be cancelled in Orders',
+        'order_cancellation_pending' => 'Linked order awaiting cancellation',
+        'order_cancellation_completed' => 'Linked order cancelled',
+        'order_cancellation_waived' => 'Keeping the order in force approved as an exception',
         'reporter_revealed' => 'Reporter identity revealed',
     ],
 
@@ -80,6 +83,7 @@ return [
         'title' => 'Short description',
         'description' => 'Details',
         'occurred_at' => 'Date of the incident (misconduct)',
+        'waive_reason' => 'Reason for keeping the order in force',
         'discovered_at' => 'Date discovered',
         'discovered_by_audit' => 'Official misconduct discovered by an audit/inspection',
         'subject_personnel_id' => 'Person complained about',
@@ -117,6 +121,7 @@ return [
         'discovered_at' => 'Labour Code Art. 187.2: a disciplinary sanction may be imposed within one month of the day the misconduct was discovered.',
         'anonymous' => 'In an anonymous case the complainant is hidden even from investigators; it is revealed only with a dedicated permission and a stated reason, and every reveal is written to the audit log.',
         'reveal' => 'Revealing the identity is written to the audit log and the case history.',
+        'waive_reason' => 'The appeal annulled the sanction but the order stays in force. The reason is written to the case history and the audit log (at least 10 characters).',
         'decision' => 'A reprimand and a severe reprimand are disciplinary sanctions (Labour Code Art. 186): the decision creates a disciplinary order draft that awaits approval in /orders.',
         'evidence_file' => 'PDF, Word, Excel, images; the content is checked against the extension, up to 10 MB.',
         'investigation_sla_days' => 'Leave empty to use the general setting.',
@@ -149,9 +154,51 @@ return [
             'subject' => 'Employee relations: appeal on :case reviewed',
             'body' => 'The outcome of your appeal on case :case is in My HR.',
         ],
+        'order_cancellation_pending' => [
+            'subject' => 'Employee relations: order of :case must be cancelled',
+            'body' => ':case: the appeal annulled the disciplinary decision. Cancel the linked order in Orders, otherwise the case cannot be closed.',
+        ],
+        'order_cancellation_completed' => [
+            'subject' => 'Employee relations: linked order of :case cancelled',
+            'body' => ':case: the linked disciplinary order has been cancelled; the case can be closed.',
+        ],
+        'order_cancellation_waived' => [
+            'subject' => 'Employee relations: order of :case kept in force by exception',
+            'body' => ':case: an exception was approved for cancelling the linked order; the reason is in the case history.',
+        ],
         'sla_overdue' => [
             'subject' => 'Employee relations: :case is overdue',
             'body' => 'The ":status" stage of case :case was due on :due_at.',
+        ],
+    ],
+
+    'order_cancellation' => [
+        'badge' => 'Order cancellation pending',
+        'title' => [
+            'pending' => 'The linked disciplinary order has not been cancelled',
+            'completed' => 'The linked disciplinary order is cancelled',
+            'waived' => 'Order kept in force (exception)',
+        ],
+        'text' => [
+            'pending' => 'The appeal annulled the decision, but order :order has not been cancelled yet (status: :order_state). The sanction leaves the employee\'s file only when the order is cancelled (Labour Code Art. 190). Cancel the order in Orders; the case cannot be closed until then.',
+            'completed' => 'Order :order is cancelled; the sanction is no longer in force.',
+            'waived' => 'Order :order was not cancelled: the case can be closed by an authorised person\'s exception approval.',
+        ],
+        'waive_reason' => 'Reason: :reason',
+        'open_order' => 'Go to the order (cancel it)',
+        'prepare_order' => 'Prepare a cancellation order',
+        'waive' => 'Approve the exception',
+        'states' => [
+            'pending' => 'Cancellation pending',
+            'completed' => 'Cancellation completed',
+            'waived' => 'Exception approved',
+        ],
+        'order_states' => [
+            'pending' => 'awaiting approval',
+            'approved' => 'approved',
+            'cancelled' => 'cancelled',
+            'deleted' => 'deleted',
+            'missing' => 'not found',
         ],
     ],
 
@@ -170,6 +217,7 @@ return [
         'all_types' => 'All types',
         'all_structures' => 'All visible structures',
         'overdue_only' => 'Overdue only',
+        'cancellation_pending' => 'Linked order awaiting cancellation',
     ],
 
     'placeholders' => [
@@ -288,8 +336,12 @@ return [
         'appeal_outcome_invalid' => 'Invalid review outcome.',
         'new_decision_required' => 'The modified decision must differ from the previous one.',
         'appeal_resolved' => 'Final decision given.',
-        'order_follow_up' => 'A disciplinary order is linked to this case — cancel it in the Orders module.',
+        'order_follow_up' => 'The appeal annulled the decision, but the linked disciplinary order may still be in force. Cancel it in Orders; the case cannot be closed until it is.',
         'reveal_reason_short' => 'Describe the reason in more detail (at least 10 characters).',
+        'order_cancellation_pending' => 'The appeal annulled the disciplinary decision but the linked order has not been cancelled. Cancel the order in Orders, or have an authorised person approve an exception with a stated reason.',
+        'order_cancellation_not_pending' => 'This case has no order awaiting cancellation.',
+        'waive_reason_short' => 'Describe the reason in more detail (at least :min characters).',
+        'order_cancellation_waived' => 'Exception approved: the case can be closed.',
     ],
 
     'my' => [

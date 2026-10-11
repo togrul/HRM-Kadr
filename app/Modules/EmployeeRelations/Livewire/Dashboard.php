@@ -12,6 +12,7 @@ use App\Modules\EmployeeRelations\Application\Services\StatisticsService;
 use App\Modules\EmployeeRelations\Domain\CaseStatus;
 use App\Modules\EmployeeRelations\Domain\Models\RelationCase;
 use App\Modules\EmployeeRelations\Domain\Models\RelationCaseType;
+use App\Modules\EmployeeRelations\Domain\OrderCancellationState;
 use App\Services\StructureService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
@@ -49,6 +50,9 @@ class Dashboard extends Component
     public ?string $typeId = '';
 
     public bool $overdueOnly = false;
+
+    /** Yalnız bağlı əmri ləğv gözləyən işlər (apellyasiya tənbehi ləğv edib). */
+    public bool $cancellationPending = false;
 
     public bool $showCreate = false;
 
@@ -108,14 +112,14 @@ class Dashboard extends Component
 
     public function updated(string $property): void
     {
-        if (in_array($property, ['search', 'status', 'typeId', 'overdueOnly'], true)) {
+        if (in_array($property, ['search', 'status', 'typeId', 'overdueOnly', 'cancellationPending'], true)) {
             $this->resetPage();
         }
     }
 
     public function resetFilters(): void
     {
-        $this->reset('search', 'status', 'typeId', 'overdueOnly');
+        $this->reset('search', 'status', 'typeId', 'overdueOnly', 'cancellationPending');
         $this->resetPage();
     }
 
@@ -138,6 +142,7 @@ class Dashboard extends Component
                 ->whereNotIn('status', [CaseStatus::Decided->value, CaseStatus::Closed->value])
                 ->whereNotNull('stage_due_at')
                 ->where('stage_due_at', '<', now()))
+            ->when($this->cancellationPending, fn ($query) => $query->where('order_cancellation_status', OrderCancellationState::Pending->value))
             ->latest('id')
             ->paginate(self::PER_PAGE);
     }

@@ -7,6 +7,7 @@ use App\Models\Structure;
 use App\Models\User;
 use App\Modules\EmployeeRelations\Domain\CaseStatus;
 use App\Modules\EmployeeRelations\Domain\DecisionOutcome;
+use App\Modules\EmployeeRelations\Domain\OrderCancellationState;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -46,6 +47,12 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $decided_at
  * @property int|null $decided_by
  * @property int|null $order_log_id
+ * @property OrderCancellationState|null $order_cancellation_status
+ * @property int|null $order_cancellation_order_id
+ * @property Carbon|null $order_cancellation_requested_at
+ * @property Carbon|null $order_cancellation_settled_at
+ * @property int|null $order_cancellation_waived_by
+ * @property string|null $order_cancellation_waive_reason
  * @property Carbon|null $decision_notified_at
  * @property Carbon|null $appeal_deadline
  * @property Carbon|null $closed_at
@@ -93,6 +100,12 @@ class RelationCase extends Model
         'decided_at',
         'decided_by',
         'order_log_id',
+        'order_cancellation_status',
+        'order_cancellation_order_id',
+        'order_cancellation_requested_at',
+        'order_cancellation_settled_at',
+        'order_cancellation_waived_by',
+        'order_cancellation_waive_reason',
         'decision_notified_at',
         'appeal_deadline',
         'closed_at',
@@ -110,6 +123,9 @@ class RelationCase extends Model
         return [
             'status' => CaseStatus::class,
             'decision_outcome' => DecisionOutcome::class,
+            'order_cancellation_status' => OrderCancellationState::class,
+            'order_cancellation_requested_at' => 'datetime',
+            'order_cancellation_settled_at' => 'datetime',
             'occurred_at' => 'date',
             'discovered_at' => 'date',
             'discovered_by_audit' => 'boolean',
@@ -208,6 +224,12 @@ class RelationCase extends Model
     public function appeals(): HasMany
     {
         return $this->hasMany(RelationCaseAppeal::class, 'case_id');
+    }
+
+    /** Apellyasiya tənbehi ləğv edib, bağlı əmr isə hələ ləğv edilməyib. */
+    public function hasPendingOrderCancellation(): bool
+    {
+        return $this->order_cancellation_status === OrderCancellationState::Pending;
     }
 
     public function isOverdue(): bool

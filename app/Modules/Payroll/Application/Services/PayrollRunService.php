@@ -11,8 +11,11 @@ use App\Modules\Compensation\Domain\Contracts\CompensationReadRepository;
 use App\Modules\Integration\Domain\Contracts\PayrollOwnership;
 use App\Services\StructureService;
 use App\Support\Database\InstalledTables;
+use Closure;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use RuntimeException;
@@ -213,18 +216,25 @@ class PayrollRunService
         $year = (int) $run->period->year;
         $month = (int) $run->period->month;
         $regular = $run->run_type === 'regular';
+        // Birdəfəlik və əmr əsaslı ödənişləri adi run və son haqq-hesab ödəyir; off-cycle yox
+        // (ikiqat ödəniş olmasın). Son haqq-hesab xitam olunmuş işçinin yeganə yoludur: adi run
+        // onu xitam tarixindən sonra tutmur.
+        $settlement = $run->run_type === 'final_settlement';
         $leavers = $this->leaversInPeriod($run->period);
+        $targets = $this->payTargets($run);
         $payslips = [];
 
-        foreach ($this->assignees($run) as $tabelNo => $onDate) {
+        foreach ($targets['full'] + $targets['extras'] as $tabelNo => $onDate) {
             $tabelNo = (string) $tabelNo;
+            // Əmək haqqı artıq ödənilib: yalnız ondan sonra gələn ödənilməmiş sətirlər.
+            $extrasOnly = isset($targets['extras'][$tabelNo]);
             // Kredit: adi run aylıq taksiti tutur; off-cycle heç nə tutmur (ikiqat tutulma
             // olmasın). İşçinin son əmək haqqını ödəyən run (bu ay çıxan işçi üçün adi run və
             // ya final_settlement) taksit yox, qalan borcu ƏM m.176.1 həddinə qədər tutur.
-            $settleLoans = $run->run_type !== 'off_cycle' && isset($leavers[$tabelNo]);
+            $settleLoans = $run->run_type !== 'off_cycle' && (isset($leavers[$tabelNo]) || $extrasOnly);
             // Aylıq gəlir vergisi güzəşti (VM m.102.1.6) ayda bir dəfədir: off-cycle run həmin ayın
-            // ikinci ödənişidir, ona görə orada verilmir.
-            $calc = $this->calculator->calculate($tabelNo, $onDate, $year, $month, $regular, null, (int) $run->id, $settleLoans, $run->run_type !== 'off_cycle');
+            // ikinci ödənişidir, xitamdan sonrakı əlavə ödəniş də — orada verilmir.
+            $calc = $this->calculator->calculate($tabelNo, $onDate, $year, $month, $regular || $settlement, null, (int) $run->id, $settleLoans, $run->run_type !== 'off_cycle' && ! $extrasOnly, $settlement, $extrasOnly);
 
             if (! $calc) {
                 continue;
@@ -333,6 +343,63 @@ class PayrollRunService
     }
 
     /**
+     * «Yetim ödənişlər»: xitam olunmuş işçiyə aid, hələ heç bir run-a düşməyən birdəfəlik və
+     * əmr əsaslı (mükafat, kompensasiya …) ödənişlər. Adi run xitamdan sonra işçini tutmur,
+     * ona görə bu sətirləri yalnız həmin dövr üçün hesablanan `Son haqq-hesab` run-ı götürür;
+     * o yaradılmayana qədər işçi pulunu almır və heç kim xəbər tutmur. Sətir «örtülmüş»
+     * sayılır, əgər işçi onu ödəyə biləcək (dövrü həmin aydan gec olmayan) hələ kilidlənməmiş
+     * run-ın maaş vərəqəsindədirsə.
+     *
+     * @param  (Closure(\Illuminate\Database\Eloquent\Builder<PayrollOneOffEarning>): mixed)|null  $scope  görünürlük məhdudiyyəti
+     * @return Collection<int, PayrollOneOffEarning>
+     */
+    public function orphanedOneOffs(?Closure $scope = null): Collection
+    {
+        if (! InstalledTables::has('payroll_one_off_earnings') || ! InstalledTables::has('personnels')) {
+            return collect();
+        }
+
+        $query = PayrollOneOffEarning::query()
+            ->whereNull('paid_payroll_run_id')
+            ->whereHas('personnel', fn ($personnel) => $personnel->whereNotNull('leave_work_date'))
+            ->with('personnel:id,tabel_no,surname,name,leave_work_date')
+            ->orderBy('pay_year')
+            ->orderBy('pay_month')
+            ->orderBy('id');
+
+        if ($scope !== null) {
+            $scope($query);
+        }
+
+        $terminated = $query->get()->filter(function (PayrollOneOffEarning $earning): bool {
+            $leftOn = $earning->personnel?->leave_work_date;
+
+            return $leftOn !== null
+                && Carbon::parse($leftOn)->startOfDay()->lte(Carbon::create((int) $earning->pay_year, (int) $earning->pay_month, 1)->endOfMonth());
+        });
+
+        if ($terminated->isEmpty()) {
+            return $terminated->values();
+        }
+
+        $open = DB::table('payslips')
+            ->join('payroll_runs', 'payroll_runs.id', '=', 'payslips.payroll_run_id')
+            ->join('payroll_periods', 'payroll_periods.id', '=', 'payroll_runs.payroll_period_id')
+            ->whereIn('payslips.tabel_no', $terminated->pluck('tabel_no')->unique()->all())
+            ->whereIn('payroll_runs.status', ['draft', 'calculated', 'approved'])
+            ->whereIn('payroll_runs.run_type', ['regular', 'final_settlement'])
+            ->get(['payslips.tabel_no as tabel_no', 'payroll_periods.year as year', 'payroll_periods.month as month'])
+            ->groupBy(fn ($row): string => (string) $row->tabel_no);
+
+        return $terminated->filter(function (PayrollOneOffEarning $earning) use ($open): bool {
+            $due = (int) $earning->pay_year * 12 + (int) $earning->pay_month;
+
+            return ! $open->get((string) $earning->tabel_no, collect())
+                ->contains(fn ($row): bool => (int) $row->year * 12 + (int) $row->month >= $due);
+        })->values();
+    }
+
+    /**
      * Whom the run pays, tabel_no → the date compensation is read on.
      *  - regular / off_cycle: everyone with an active compensation on the period's last day;
      *  - final_settlement: those who leave within the period and are NOT in the regular run
@@ -344,25 +411,101 @@ class PayrollRunService
      */
     private function assignees(PayrollRun $run): array
     {
+        $targets = $this->payTargets($run);
+
+        return $targets['full'] + $targets['extras'];
+    }
+
+    /**
+     * `full` — paid wage and everything else; `extras` — final_settlement only: terminated
+     * employees whose wage is not paid by this run (their month was settled by an earlier
+     * locked final_settlement run, or they left in an earlier month) but who still have
+     * unpaid one-off earnings (bonus, award, compensation handed over by orders) due by
+     * this period. No other run would ever pick those up: the regular run skips the employee
+     * from the day compensation ends, and an unpaid line only moves forward month by month.
+     *
+     * @return array{full: array<string,string>, extras: array<string,string>}
+     */
+    private function payTargets(PayrollRun $run): array
+    {
         $periodEnd = $run->period->ends_on->toDateString();
         $active = $this->compensation->activeAssignees($run->regime_id, $periodEnd)->map(fn ($tabelNo): string => (string) $tabelNo);
 
         if ($run->run_type !== 'final_settlement') {
-            return $active->mapWithKeys(fn (string $tabelNo): array => [$tabelNo => $periodEnd])->all();
+            return ['full' => $active->mapWithKeys(fn (string $tabelNo): array => [$tabelNo => $periodEnd])->all(), 'extras' => []];
         }
 
-        $assignees = [];
+        // Bu dövrün maaşını artıq kilidlənmiş başqa son haqq-hesab ödəyib: ikinci dəfə yox.
+        $settled = Payslip::query()
+            ->whereIn('payroll_run_id', PayrollRun::query()
+                ->where('payroll_period_id', $run->payroll_period_id)
+                ->where('run_type', 'final_settlement')
+                ->where('status', 'locked')
+                ->where('id', '!=', $run->id)
+                ->select('id'))
+            ->pluck('tabel_no')
+            ->map(fn ($tabelNo): string => (string) $tabelNo)
+            ->all();
+
+        $full = [];
         foreach ($this->leaversInPeriod($run->period) as $tabelNo => $lastDay) {
-            if ($active->contains($tabelNo)) {
+            if ($active->contains($tabelNo) || in_array($tabelNo, $settled, true)) {
                 continue;
             }
 
             if ($this->compensation->activeAssignees($run->regime_id, $lastDay)->map(fn ($no): string => (string) $no)->contains($tabelNo)) {
-                $assignees[$tabelNo] = $lastDay;
+                $full[$tabelNo] = $lastDay;
             }
         }
 
-        return $assignees;
+        return ['full' => $full, 'extras' => $this->extrasOnlyTargets($run, $active->all(), array_keys($full))];
+    }
+
+    /**
+     * @param  list<string>  $active  those the regular run pays (compensation open on period end)
+     * @param  list<int|string>  $full  those this run already pays in full
+     * @return array<string,string>
+     */
+    private function extrasOnlyTargets(PayrollRun $run, array $active, array $full): array
+    {
+        if (! InstalledTables::has('payroll_one_off_earnings') || ! InstalledTables::has('personnels')) {
+            return [];
+        }
+
+        $candidates = PayrollOneOffEarning::query()
+            ->whereNull('paid_payroll_run_id')
+            ->dueBy((int) $run->period->year, (int) $run->period->month)
+            ->distinct()
+            ->pluck('tabel_no')
+            ->map(fn ($tabelNo): string => (string) $tabelNo)
+            ->diff(array_map('strval', $full))
+            ->diff($active);
+
+        if ($candidates->isEmpty()) {
+            return [];
+        }
+
+        $terminated = DB::table('personnels')
+            ->whereNull('deleted_at')
+            ->whereNotNull('leave_work_date')
+            ->whereDate('leave_work_date', '<=', $run->period->ends_on->toDateString())
+            ->whereIn('tabel_no', $candidates->all())
+            ->pluck('leave_work_date', 'tabel_no')
+            ->mapWithKeys(fn ($date, $tabelNo): array => [(string) $tabelNo => substr((string) $date, 0, 10)]);
+
+        $extras = [];
+        foreach ($terminated->groupBy(fn (string $date): string => $date, true) as $date => $tabelNos) {
+            // Rejim yoxlaması: şərt çıxış günü həmin rejimdə aktiv idi.
+            $inRegime = $this->compensation->activeAssignees($run->regime_id, (string) $date)->map(fn ($no): string => (string) $no);
+
+            foreach ($tabelNos->keys() as $tabelNo) {
+                if ($inRegime->contains((string) $tabelNo)) {
+                    $extras[(string) $tabelNo] = (string) $date;
+                }
+            }
+        }
+
+        return $extras;
     }
 
     /**
@@ -466,15 +609,18 @@ class PayrollRunService
      */
     private function guardOneOffsUnchangedSinceCalculation(PayrollRun $run): void
     {
-        if ($run->run_type !== 'regular' || $run->calculated_at === null || ! InstalledTables::has('payroll_one_off_earnings')) {
+        if (! in_array($run->run_type, ['regular', 'final_settlement'], true) || $run->calculated_at === null || ! InstalledTables::has('payroll_one_off_earnings')) {
             return;
         }
 
         // ponytail: second-precision timestamps; a hand-off in the calculation's own second slips through.
         $changed = PayrollOneOffEarning::query()
             ->whereIn('tabel_no', $run->payslips()->select('tabel_no'))
-            ->where('pay_year', (int) $run->period->year)
-            ->where('pay_month', (int) $run->period->month)
+            ->when(
+                $run->run_type === 'final_settlement',
+                fn ($query) => $query->dueBy((int) $run->period->year, (int) $run->period->month),
+                fn ($query) => $query->where('pay_year', (int) $run->period->year)->where('pay_month', (int) $run->period->month),
+            )
             ->whereNull('paid_payroll_run_id')
             ->where('updated_at', '>', $run->calculated_at)
             ->exists();
@@ -494,21 +640,29 @@ class PayrollRunService
      */
     private function guardOrderEarningsUnchangedSinceCalculation(PayrollRun $run): void
     {
-        if ($run->run_type !== 'regular') {
+        if (! in_array($run->run_type, ['regular', 'final_settlement'], true)) {
             return;
         }
 
-        $onDate = $run->period->ends_on->toDateString();
+        $targets = $this->payTargets($run);
         $year = (int) $run->period->year;
         $month = (int) $run->period->month;
 
         foreach ($run->payslips()->with('lines')->get() as $payslip) {
+            $tabelNo = (string) $payslip->getAttribute('tabel_no');
+
+            // Yalnız xitamdan sonrakı ödənilməmiş sətirlər: aya bağlı əmr sətri yoxdur.
+            if (isset($targets['extras'][$tabelNo])) {
+                continue;
+            }
+
+            $onDate = $targets['full'][$tabelNo] ?? $run->period->ends_on->toDateString();
             $calculated = OrderEarningsService::signature($payslip->lines->map(fn ($line): array => [
                 'code' => $line->code,
                 'amount' => $line->amount,
                 'sources' => $line->sources,
             ]));
-            $now = OrderEarningsService::signature($this->calculator->orderEarningLines((string) $payslip->getAttribute('tabel_no'), $onDate, $year, $month));
+            $now = OrderEarningsService::signature($this->calculator->orderEarningLines($tabelNo, $onDate, $year, $month));
 
             if ($calculated !== $now) {
                 throw ValidationException::withMessages(['run' => __('payroll::dashboard.messages.order_earnings_changed')]);
@@ -554,11 +708,14 @@ class PayrollRunService
             $this->retro->recordRetroPayments($run);
             app(EnforcementService::class)->recordForRun($run);
 
-            if ($run->run_type === 'regular' && InstalledTables::has('payroll_one_off_earnings')) {
+            if (in_array($run->run_type, ['regular', 'final_settlement'], true) && InstalledTables::has('payroll_one_off_earnings')) {
                 PayrollOneOffEarning::query()
                     ->whereIn('tabel_no', $run->payslips()->pluck('tabel_no'))
-                    ->where('pay_year', (int) $run->period->year)
-                    ->where('pay_month', (int) $run->period->month)
+                    ->when(
+                        $run->run_type === 'final_settlement',
+                        fn ($query) => $query->dueBy((int) $run->period->year, (int) $run->period->month),
+                        fn ($query) => $query->where('pay_year', (int) $run->period->year)->where('pay_month', (int) $run->period->month),
+                    )
                     ->whereNull('paid_payroll_run_id')
                     ->update(['paid_payroll_run_id' => $run->id]);
             }

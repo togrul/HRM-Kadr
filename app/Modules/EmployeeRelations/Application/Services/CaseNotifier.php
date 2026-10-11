@@ -14,7 +14,10 @@ use App\Services\UserPersonnelLinkResolver;
  */
 class CaseNotifier
 {
-    public function __construct(private readonly UserPersonnelLinkResolver $links) {}
+    public function __construct(
+        private readonly UserPersonnelLinkResolver $links,
+        private readonly CaseAccess $access,
+    ) {}
 
     /** Qərar barəsində şikayət olunan işçiyə və müraciət edənə bildirilir. */
     public function decisionAnnounced(RelationCase $case): void
@@ -34,6 +37,26 @@ class CaseNotifier
     public function appealResolved(RelationCase $case, ?int $appellantUserId): void
     {
         $this->send(array_filter([$appellantUserId]), $case, 'appeal_resolved');
+    }
+
+    /**
+     * Ləğv gözləyən/tamamlanan/istisna təsdiqlənən bağlı əmr barədə işi idarə edən HR
+     * əməkdaşlarına (hərəkəti edən istisna olmaqla) bildiriş. `$kind`:
+     * order_cancellation_pending | order_cancellation_completed | order_cancellation_waived.
+     */
+    public function orderCancellation(RelationCase $case, string $kind, ?User $actor = null): int
+    {
+        $recipients = User::query()
+            ->permission(CaseAccess::MANAGE)
+            ->when($actor !== null, fn ($query) => $query->whereKeyNot($actor?->getKey()))
+            ->orderBy('id')
+            ->limit(200)
+            ->get()
+            ->filter(fn (User $user): bool => $this->access->canManage($user, $case))
+            ->map(fn (User $user): int => (int) $user->getKey())
+            ->all();
+
+        return $this->send($recipients, $case, $kind);
     }
 
     /**

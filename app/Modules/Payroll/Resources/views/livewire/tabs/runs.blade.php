@@ -1,4 +1,24 @@
 <div class="contents">
+    @if ($this->orphanedPayments->isNotEmpty())
+        <section class="overflow-hidden rounded-xl border border-amber-200 bg-amber-50">
+            <div class="px-4 py-3">
+                <h2 class="text-[13.5px] font-semibold tracking-[-0.02em] text-amber-900">{{ __('payroll::dashboard.orphans.title') }}</h2>
+                <p class="mt-0.5 text-[12px] text-amber-800">{{ __('payroll::dashboard.orphans.hint') }}</p>
+                <ul class="mt-2 space-y-1">
+                    @foreach ($this->orphanedPayments as $orphan)
+                        <li wire:key="payroll-orphan-{{ $orphan->id }}" class="flex flex-wrap items-baseline justify-between gap-x-3 text-[12.5px] text-amber-900">
+                            <span class="min-w-0 truncate">
+                                {{ trim(($orphan->personnel?->surname ?? '').' '.($orphan->personnel?->name ?? '')) ?: $orphan->tabel_no }}
+                                <span class="text-amber-700">— {{ $orphan->name }} · {{ sprintf('%02d.%04d', $orphan->pay_month, $orphan->pay_year) }}</span>
+                            </span>
+                            <span class="hrm-num shrink-0 font-semibold">{{ $money($orphan->amount) }}</span>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        </section>
+    @endif
+
     <section class="overflow-hidden rounded-xl border border-hairline bg-white">
         <div class="flex flex-col gap-1 border-b border-hairline-subtle px-4 py-3 sm:flex-row sm:items-start sm:justify-between">
             <div class="min-w-0">

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Traits\PersonnelTrait;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -21,6 +23,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class PayrollOneOffEarning extends Model
 {
+    use PersonnelTrait;
+
     protected $fillable = [
         'tabel_no',
         'code',
@@ -39,4 +43,19 @@ class PayrollOneOffEarning extends Model
         'taxable' => 'boolean',
         'affects_social' => 'boolean',
     ];
+
+    /**
+     * Ödəniş ayı verilən ayda və ya ondan əvvəl olan sətirlər. Son haqq-hesab run-u yalnız
+     * «öz» ayını yox, işçiyə hələ ödənilməmiş keçmiş aylardan irəli çəkilmiş sətirləri də
+     * götürür: işçi xitamdan sonra adi run-a düşmür, ona görə başqa yol yoxdur.
+     *
+     * @param  Builder<PayrollOneOffEarning>  $query
+     * @return Builder<PayrollOneOffEarning>
+     */
+    public function scopeDueBy(Builder $query, int $year, int $month): Builder
+    {
+        return $query->where(fn (Builder $due) => $due
+            ->where('pay_year', '<', $year)
+            ->orWhere(fn (Builder $same) => $same->where('pay_year', $year)->where('pay_month', '<=', $month)));
+    }
 }

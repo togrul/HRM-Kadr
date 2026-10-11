@@ -160,8 +160,30 @@ işəgötürən onu öz sərəncamı ilə tuta bilməz (m.175.5); yalnız işçi
   ödənişlər geri qaytarılır.
 - `final_settlement` run-u: dövrdə `leave_work_date`-i olan və həmin günə aktiv əmək haqqı
   şərti olan, lakin adi run-a (ayın son günü aktiv şərt) düşməyən işçiləri əhatə edir; maaş
-  çıxış gününə olan şərtlə hesablanır, birdəfəlik ödənişlər və əmr ödənişləri (adi run-un
-  işidir) daxil edilmir.
+  çıxış gününə olan şərtlə hesablanır.
+- **Birdəfəlik və əmr əsaslı ödənişlər (11.10.2026):** əvvəl `final_settlement` bunları daxil
+  etmirdi (`$regular=false`), adi run isə xitamdan sonra işçini tutmadığı üçün mükafat, kompensasiya
+  və s. heç bir run-a düşməyə bilərdi. İndi `final_settlement`: (1) işçinin çıxış ayının
+  birdəfəlik ödənişlərini və aya bağlı əmr sətirlərini (qeyri-iş günü işi, əvəzetmə) daxil edir;
+  (2) ödəniş ayı bu dövrə qədər olan, hələ ödənilməmiş (`paid_payroll_run_id` boş) birdəfəlik
+  sətirləri götürür — bağlı ayın sətri növbəti aya keçdiyi üçün xitamdan sonra gələn ödəniş də
+  tutulur; (3) maaşı artıq kilidli son haqq-hesabla ödənilmiş və ya əvvəlki ayda çıxmış işçini
+  yalnız bu sətirlərlə (əsas maaş, komponent, aya bağlı əmr sətri, aylıq vergi güzəşti olmadan)
+  əhatə edir. İkiqat ödəniş yoxdur: `lock` ödənilən sətirlərə `paid_payroll_run_id` yazır,
+  `reopen` geri qaytarır; eyni dövrün maaşı kilidli son haqq-hesabda varsa ikinci run onu
+  təkrar hesablamır; kilid əmr/birdəfəlik imza yoxlamalarını (`guard*UnchangedSinceCalculation`)
+  son haqq-hesab üçün də aparır.
+- **Yetim ödənişlər:** xitam olunmuş işçiyə aid, hələ heç bir run-a (qaralama, hesablanmış,
+  təsdiqlənmiş) düşməyən birdəfəlik sətirlər `Hesablamalar` səhifəsində xəbərdarlıq kimi çıxır
+  (`PayrollRunService::orphanedOneOffs`).
+- ⚠️ Xitamda işçiyə çatacaq bütün məbləğlərin son iş günü ödənilməsi qaydası: kodda
+  (`OrderLifecycleEventService`) «ƏM m.77» kimi istinad olunur, lakin maddənin mətni bu repoda
+  yoxlanılmayıb (docs-da m.77 yalnız staj pillələri kontekstində keçir) — maddə nömrəsi
+  hüquqşünasla dəqiqləşdirilməlidir. Sistem ödənişi son haqq-hesab run-u yaradılan kimi verir,
+  son iş gününə qədər ödəniş vaxtını izləmir.
+- ⚠️ Aya bağlı əmr sətirləri (qeyri-iş günü işi, əvəzetmə) xitamdan sonra kilidlənmiş aya
+  gecikmiş əmrlə gəlirsə, onların retro mexanizmi yalnız `regular` run-lara baxır — bu hal
+  yetim yoxlamasında görünmür (yalnız birdəfəlik ödənişlər izlənir).
 
 ### Statuslar və açıq məsələlər
 

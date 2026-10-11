@@ -72,6 +72,9 @@ return [
         'evidence_added' => 'Sübut əlavə edildi',
         'order_drafted' => 'İntizam əmri qaralaması yaradıldı',
         'order_follow_up' => 'Bağlı əmr Əmrlər modulunda ləğv edilməlidir',
+        'order_cancellation_pending' => 'Bağlı əmrin ləğvi gözlənilir',
+        'order_cancellation_completed' => 'Bağlı əmr ləğv edildi',
+        'order_cancellation_waived' => 'Əmrin qüvvədə saxlanılması istisna kimi təsdiqləndi',
         'reporter_revealed' => 'Şikayətçinin kimliyi açıldı',
     ],
 
@@ -80,6 +83,7 @@ return [
         'title' => 'Qısa təsvir',
         'description' => 'Ətraflı məlumat',
         'occurred_at' => 'Hadisənin (xətanın) tarixi',
+        'waive_reason' => 'Əmrin qüvvədə saxlanılma səbəbi',
         'discovered_at' => 'Aşkar edildiyi tarix',
         'discovered_by_audit' => 'Audit/təftişlə aşkar edilmiş vəzifə hüquqpozması',
         'subject_personnel_id' => 'Barəsində şikayət olunan',
@@ -117,6 +121,7 @@ return [
         'discovered_at' => 'ƏM Md.187.2: intizam tənbehi xətanın aşkar edildiyi gündən bir ay ərzində verilə bilər.',
         'anonymous' => 'Anonim işdə şikayətçinin kimliyi araşdırıcılardan da gizlidir; yalnız xüsusi icazə ilə, səbəb yazılaraq açılır və hər açılış audit jurnalına yazılır.',
         'reveal' => 'Kimliyin açılması audit jurnalına və işin tarixçəsinə yazılır.',
+        'waive_reason' => 'Apellyasiya tənbehi ləğv edib, amma əmr qüvvədə qalır. Səbəb tarixçəyə və audit jurnalına yazılır (ən azı 10 simvol).',
         'decision' => 'Töhmət və şiddətli töhmət intizam tənbehidir (ƏM Md.186): qərarla birlikdə intizam əmri qaralaması yaradılır və /orders-da təsdiq gözləyir.',
         'evidence_file' => 'PDF, Word, Excel, şəkil; faylın məzmunu uzantısı ilə yoxlanılır, ölçü 10 MB-dək.',
         'investigation_sla_days' => 'Boş qalsa ümumi tənzimləmə işlədilir.',
@@ -149,9 +154,51 @@ return [
             'subject' => 'İşçi münasibətləri: :case üzrə apellyasiyaya baxılıb',
             'body' => ':case saylı iş üzrə apellyasiyanızın nəticəsi Şəxsi kabinetdədir.',
         ],
+        'order_cancellation_pending' => [
+            'subject' => 'İşçi münasibətləri: :case üzrə əmr ləğv edilməlidir',
+            'body' => ':case saylı işdə apellyasiya intizam qərarını ləğv edib. Bağlı əmri Əmrlər modulunda ləğv edin — əks halda iş bağlanmır.',
+        ],
+        'order_cancellation_completed' => [
+            'subject' => 'İşçi münasibətləri: :case üzrə bağlı əmr ləğv edildi',
+            'body' => ':case saylı iş üzrə bağlı intizam əmri ləğv edilib; iş bağlana bilər.',
+        ],
+        'order_cancellation_waived' => [
+            'subject' => 'İşçi münasibətləri: :case üzrə əmrin qüvvədə saxlanılması təsdiqləndi',
+            'body' => ':case saylı işdə bağlı əmrin ləğvindən istisna təsdiq edilib, səbəb işin tarixçəsindədir.',
+        ],
         'sla_overdue' => [
             'subject' => 'İşçi münasibətləri: :case gecikir',
             'body' => ':case saylı işin «:status» mərhələsinin müddəti :due_at tarixində bitib.',
+        ],
+    ],
+
+    'order_cancellation' => [
+        'badge' => 'Əmrin ləğvi gözlənilir',
+        'title' => [
+            'pending' => 'Bağlı intizam əmri hələ ləğv edilməyib',
+            'completed' => 'Bağlı intizam əmri ləğv edilib',
+            'waived' => 'Əmr qüvvədə saxlanılıb (istisna)',
+        ],
+        'text' => [
+            'pending' => 'Apellyasiya qərarı ləğv edib, lakin :order saylı əmr hələ ləğv olunmayıb (status: :order_state). Tənbeh işçinin şəxsi işindən yalnız əmr ləğv olunanda çıxarılır (ƏM Md.190). Əmri Əmrlər modulunda ləğv edin — ləğv olunana qədər iş bağlanmır.',
+            'completed' => ':order saylı əmr ləğv edilib, tənbeh qüvvədə deyil.',
+            'waived' => ':order saylı əmr ləğv edilməyib: iş icazəli şəxsin istisna təsdiqi ilə bağlana bilər.',
+        ],
+        'waive_reason' => 'Səbəb: :reason',
+        'open_order' => 'Əmrə keç (ləğv et)',
+        'prepare_order' => 'Ləğv əmri hazırla',
+        'waive' => 'İstisnanı təsdiq et',
+        'states' => [
+            'pending' => 'Ləğv gözlənilir',
+            'completed' => 'Ləğv tamamlandı',
+            'waived' => 'İstisna təsdiqləndi',
+        ],
+        'order_states' => [
+            'pending' => 'təsdiq gözləyir',
+            'approved' => 'təsdiqlənib',
+            'cancelled' => 'ləğv edilib',
+            'deleted' => 'silinib',
+            'missing' => 'tapılmadı',
         ],
     ],
 
@@ -170,6 +217,7 @@ return [
         'all_types' => 'Bütün növlər',
         'all_structures' => 'Bütün görünən strukturlar',
         'overdue_only' => 'Yalnız gecikənlər',
+        'cancellation_pending' => 'Bağlı əmri ləğv gözləyənlər',
     ],
 
     'placeholders' => [
@@ -288,8 +336,12 @@ return [
         'appeal_outcome_invalid' => 'Yenidən baxışın nəticəsi düzgün deyil.',
         'new_decision_required' => 'Dəyişdirilmiş qərar əvvəlkindən fərqli olmalıdır.',
         'appeal_resolved' => 'Yekun qərar verildi.',
-        'order_follow_up' => 'Bu işə bağlı intizam əmri var — onu Əmrlər modulunda ləğv edin.',
+        'order_follow_up' => 'Apellyasiya qərarı ləğv etdi, lakin bağlı intizam əmri qüvvədə qala bilər — onu Əmrlər modulunda ləğv edin; ləğv olunana qədər iş bağlanmır.',
         'reveal_reason_short' => 'Səbəbi ətraflı yazın (ən azı 10 simvol).',
+        'order_cancellation_pending' => 'Apellyasiya intizam qərarını ləğv edib, bağlı əmr isə hələ ləğv olunmayıb. Əmri Əmrlər modulunda ləğv edin və ya icazəli şəxs səbəb yazmaqla istisna təsdiq etsin.',
+        'order_cancellation_not_pending' => 'Bu iş üzrə ləğv gözləyən əmr yoxdur.',
+        'waive_reason_short' => 'Səbəbi ətraflı yazın (ən azı :min simvol).',
+        'order_cancellation_waived' => 'İstisna təsdiq edildi: iş bağlana bilər.',
     ],
 
     'my' => [

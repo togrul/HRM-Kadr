@@ -50,10 +50,17 @@ class PayrollCalculator
      * `personnels.workplace_type` (anything but `secondary`). $monthlyRelief = false (an
      * off-cycle run, a second payment in the month) leaves the monthly relief out.
      *
+     * Son haqq-hesab run-u ($backlog): birdəfəlik ödənişlərdən yalnız ayın özünü deyil, ödəniş
+     * ayı bu aya qədər olan hələ ödənilməmiş bütün sətirləri götürür (xitam olunmuş işçi
+     * sonrakı adi run-lara düşmür). $extrasOnly: işçinin əmək haqqı artıq ödənilib (və ya
+     * şərti bağlanıb) — yalnız həmin ödənilməmiş sətirlər hesablanır; əsas maaş, komponentlər
+     * və aya bağlı əmr sətirləri (ikiqat ödəniş olmasın) daxil edilmir, ödənilməmiş sətir
+     * yoxdursa nəticə null-dur.
+     *
      * @param  list<array<string,mixed>>|null  $orderLines
      * @return array{gross:float,total_deductions:float,net:float,employer_cost:float,proration_factor:float,currency:string,lines:array<int,array<string,mixed>>}|null
      */
-    public function calculate(string $tabelNo, ?string $onDate = null, ?int $year = null, ?int $month = null, bool $withOneOffs = true, ?array $orderLines = null, ?int $paidByRunId = null, bool $settleLoans = false, bool $monthlyRelief = true): ?array
+    public function calculate(string $tabelNo, ?string $onDate = null, ?int $year = null, ?int $month = null, bool $withOneOffs = true, ?array $orderLines = null, ?int $paidByRunId = null, bool $settleLoans = false, bool $monthlyRelief = true, bool $backlog = false, bool $extrasOnly = false): ?array
     {
         $current = $this->compensation->currentCompensation($tabelNo, $onDate);
 
@@ -62,11 +69,11 @@ class PayrollCalculator
         }
 
         // Proration factor (paid days / working days) from attendance for the period.
-        $factor = ($year && $month) ? $this->proration->factorFor($tabelNo, $year, $month) : 1.0;
+        $factor = ($year && $month && ! $extrasOnly) ? $this->proration->factorFor($tabelNo, $year, $month) : 1.0;
 
         $base = round((float) $current->base_amount * $factor, 2);
 
-        $lines = [[
+        $lines = $extrasOnly ? [] : [[
             'component_id' => null,
             'code' => 'base',
             'name' => 'Baza maaş',
@@ -80,7 +87,7 @@ class PayrollCalculator
 
         $sort = 1;
 
-        foreach ($this->compensation->componentsFor($tabelNo, $onDate) as $component) {
+        foreach ($extrasOnly ? [] : $this->compensation->componentsFor($tabelNo, $onDate) as $component) {
             $kind = ($component['type'] ?? 'earning') === 'deduction' ? 'deduction' : 'earning';
             $amount = round((float) ($component['amount'] ?? 0), 2);
 
@@ -105,8 +112,11 @@ class PayrollCalculator
         if ($withOneOffs && $year && $month && InstalledTables::has('payroll_one_off_earnings')) {
             $oneOffs = PayrollOneOffEarning::query()
                 ->where('tabel_no', $tabelNo)
-                ->where('pay_year', $year)
-                ->where('pay_month', $month)
+                ->when(
+                    $backlog || $extrasOnly,
+                    fn ($query) => $query->dueBy($year, $month),
+                    fn ($query) => $query->where('pay_year', $year)->where('pay_month', $month),
+                )
                 ->where(fn ($query) => $query->whereNull('paid_payroll_run_id')
                     ->when($paidByRunId !== null, fn ($query) => $query->orWhere('paid_payroll_run_id', $paidByRunId)))
                 ->orderBy('id')
@@ -127,7 +137,11 @@ class PayrollCalculator
             }
         }
 
-        if ($withOneOffs && $year && $month) {
+        if ($extrasOnly && $lines === []) {
+            return null;
+        }
+
+        if ($withOneOffs && $year && $month && ! $extrasOnly) {
             foreach ($orderLines ?? $this->orderEarnings->linesFor($tabelNo, (float) $current->base_amount, $year, $month) as $line) {
                 $lines[] = $line;
             }

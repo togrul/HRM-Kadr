@@ -10,6 +10,7 @@ use App\Modules\EmployeeRelations\Application\Services\CaseWorkflow;
 use App\Modules\EmployeeRelations\Application\Services\DecisionService;
 use App\Modules\EmployeeRelations\Application\Services\DisciplinaryDeadline;
 use App\Modules\EmployeeRelations\Application\Services\EvidenceService;
+use App\Modules\EmployeeRelations\Application\Services\OrderCancellationTracker;
 use App\Modules\EmployeeRelations\Application\Services\PersonnelLookup;
 use App\Modules\EmployeeRelations\Application\Services\ReporterIdentityService;
 use App\Modules\EmployeeRelations\Domain\CaseStatus;
@@ -18,6 +19,7 @@ use App\Modules\EmployeeRelations\Domain\Models\RelationCase;
 use App\Modules\EmployeeRelations\Domain\Models\RelationCaseAppeal;
 use App\Modules\EmployeeRelations\Domain\Models\RelationCaseEvidence;
 use App\Modules\EmployeeRelations\Domain\Models\RelationCaseType;
+use App\Modules\Orders\Contracts\LinkedOrderCancellation;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -41,6 +43,7 @@ use Livewire\WithFileUploads;
  * @property-read Collection<int, RelationCaseAppeal> $appeals
  * @property-read list<array{id:int, name:string}> $eligibleInvestigators
  * @property-read array<string, mixed>|null $deadline
+ * @property-read array<string, mixed>|null $orderCancellation
  */
 class CaseDetail extends Component
 {
@@ -87,6 +90,8 @@ class CaseDetail extends Component
 
     public string $revealReason = '';
 
+    public string $waiveReason = '';
+
     /** Açılmış kimlik yalnız həmin cavabda göstərilir — snapshot-a yazılmır. */
     protected ?string $revealedName = null;
 
@@ -108,7 +113,42 @@ class CaseDetail extends Component
 
         abort_unless(app(CaseAccess::class)->canView($this->user(), $record), 404);
 
-        return $record;
+        // Bağlı əmr Orders-da artıq ləğv olunubsa «ləğv gözləyir» vəziyyəti burada bağlanır.
+        return app(OrderCancellationTracker::class)->sync($record, $this->user());
+    }
+
+    /**
+     * Apellyasiya ilə ləğv olunmuş tənbehin əmrinin taleyi (yoxdursa null): vəziyyət,
+     * Orders-a keçidlər və istisna təsdiqi imkanı.
+     *
+     * @return array<string, mixed>|null
+     */
+    #[Computed]
+    public function orderCancellation(): ?array
+    {
+        $record = $this->record;
+        $state = $record->order_cancellation_status;
+
+        if ($state === null || $record->order_cancellation_order_id === null) {
+            return null;
+        }
+
+        $orders = app(LinkedOrderCancellation::class);
+        $user = $this->user();
+        $orderId = (int) $record->order_cancellation_order_id;
+        $pending = $record->hasPendingOrderCancellation();
+
+        return [
+            'state' => $state->value,
+            'label' => $state->label(),
+            'order_no' => $orders->orderNumber($orderId) ?? '#'.$orderId,
+            'order_state' => $orders->stateOf($orderId),
+            'order_url' => $pending ? $orders->orderUrl($orderId, $user) : null,
+            'cancellation_url' => $pending ? $orders->cancellationOrderUrl($user) : null,
+            'can_waive' => app(OrderCancellationTracker::class)->canWaive($user, $record),
+            'waive_reason' => $record->order_cancellation_waive_reason,
+            'settled_at' => $record->order_cancellation_settled_at?->format('d.m.Y'),
+        ];
     }
 
     /**
@@ -405,6 +445,18 @@ class CaseDetail extends Component
         }
     }
 
+    public function waiveOrderCancellation(OrderCancellationTracker $tracker): void
+    {
+        $this->validate(['waiveReason' => ['required', 'string', 'min:'.OrderCancellationTracker::MIN_WAIVE_REASON, 'max:1000']], attributes: [
+            'waiveReason' => __('employee_relations::cases.fields.waive_reason'),
+        ]);
+
+        $tracker->waive($this->record, $this->user(), $this->waiveReason);
+
+        $this->reset('waiveReason');
+        $this->refreshCase(__('employee_relations::cases.messages.order_cancellation_waived'));
+    }
+
     public function revealReporter(ReporterIdentityService $identity): void
     {
         $this->validate(['revealReason' => ['required', 'string', 'min:10', 'max:500']], attributes: [
@@ -441,7 +493,7 @@ class CaseDetail extends Component
 
     private function refreshCase(string $message): void
     {
-        unset($this->record, $this->abilities, $this->timeline, $this->evidence, $this->witnesses, $this->investigators, $this->appeals, $this->eligibleInvestigators, $this->deadline);
+        unset($this->record, $this->abilities, $this->timeline, $this->evidence, $this->witnesses, $this->investigators, $this->appeals, $this->eligibleInvestigators, $this->deadline, $this->orderCancellation);
         $this->fillFacts($this->record);
         $this->resetValidation();
         $this->dispatch('notify', type: 'success', message: $message);

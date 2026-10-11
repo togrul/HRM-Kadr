@@ -40,6 +40,43 @@
         </div>
     </x-page-header>
 
+    @php $cancellation = $this->orderCancellation; @endphp
+    @if ($cancellation)
+        <div class="px-4 pt-4 sm:px-5" wire:key="er-order-cancellation">
+            <div class="flex flex-col gap-3 rounded-xl border px-4 py-3 {{ $cancellation['state'] === 'pending' ? $messageTone('error') : ($cancellation['state'] === 'waived' ? $messageTone('warning') : $messageTone('info')) }}">
+                <div>
+                    <p class="text-[13.5px] font-semibold tracking-[-0.02em]">{{ __('employee_relations::cases.order_cancellation.title.'.$cancellation['state']) }}</p>
+                    <p class="mt-1 text-[12.5px] leading-5">{{ __('employee_relations::cases.order_cancellation.text.'.$cancellation['state'], ['order' => $cancellation['order_no'], 'order_state' => __('employee_relations::cases.order_cancellation.order_states.'.$cancellation['order_state'])]) }}</p>
+                    @if ($cancellation['state'] === 'waived' && filled($cancellation['waive_reason']))
+                        <p class="mt-1 whitespace-pre-line text-[12.5px] leading-5">{{ __('employee_relations::cases.order_cancellation.waive_reason', ['reason' => $cancellation['waive_reason']]) }}</p>
+                    @endif
+                </div>
+
+                @if ($cancellation['state'] === 'pending' && ($cancellation['order_url'] || $cancellation['cancellation_url']))
+                    <div class="flex flex-wrap items-center gap-2">
+                        @if ($cancellation['order_url'])
+                            <x-pill-button variant="primary" :href="$cancellation['order_url']" wire:navigate>{{ __('employee_relations::cases.order_cancellation.open_order') }}</x-pill-button>
+                        @endif
+                        @if ($cancellation['cancellation_url'])
+                            <x-pill-button :href="$cancellation['cancellation_url']" wire:navigate>{{ __('employee_relations::cases.order_cancellation.prepare_order') }}</x-pill-button>
+                        @endif
+                    </div>
+                @endif
+
+                @if ($cancellation['can_waive'])
+                    <div class="flex flex-col gap-2 border-t border-current/20 pt-3" wire:key="er-waive-form">
+                        <x-ui.input-shell :label="__('employee_relations::cases.fields.waive_reason')" :hint="__('employee_relations::cases.hints.waive_reason')" :error="$errors->first('waiveReason')" containerClass="!space-y-0" :labelClass="$labelClass">
+                            <x-ui.textarea wire:model="waiveReason" :rows="2" />
+                        </x-ui.input-shell>
+                        <div class="flex justify-end">
+                            <x-pill-button wire:click="waiveOrderCancellation" wire:loading.attr="disabled" wire:target="waiveOrderCancellation">{{ __('employee_relations::cases.order_cancellation.waive') }}</x-pill-button>
+                        </div>
+                    </div>
+                @endif
+            </div>
+        </div>
+    @endif
+
     <div class="grid gap-4 px-4 py-4 sm:px-5 xl:grid-cols-3">
         <div class="flex min-w-0 flex-col gap-4 xl:col-span-2">
             {{-- ===================== facts ===================== --}}

@@ -65,6 +65,7 @@ class AppServiceProvider extends ServiceProvider
         // Bound here, not in OrdersServiceProvider: BonusService depends on it even when the
         // orders module is switched off (company mode never drafts an order).
         $this->app->bind(\App\Modules\Orders\Contracts\OrderDrafter::class, \App\Modules\Orders\Infrastructure\Document\OrderDraftService::class);
+        $this->app->bind(\App\Modules\Orders\Contracts\LinkedOrderCancellation::class, \App\Modules\Orders\Infrastructure\Document\LinkedOrderCancellationLookup::class);
 
         // Same reason: order effects (hire/transfer/termination) resolve this whether or
         // not the compensation module's provider is loaded.

@@ -10,6 +10,7 @@ use App\Models\Personnel;
 use App\Modules\Compensation\Contracts\OrderCompensationSync;
 use App\Modules\Orders\Application\Document\OrderParticipantFields;
 use App\Modules\Orders\Application\Document\OrderWordTemplateRepository;
+use App\Modules\Orders\Contracts\OrderStatusChanged;
 use App\Modules\Orders\Infrastructure\Document\Effects\OrderEffectCatalog;
 use App\Modules\Payroll\Contracts\ClosedPeriodCheck;
 use App\Modules\Personnel\Contracts\GuardsPersonnelChanges;
@@ -154,7 +155,7 @@ class OrderStatusTransitionService
             $this->guardMonthsOpen($order, 'period_closed_approve');
         }
 
-        DB::transaction(function () use ($order, $from, $target, $reason) {
+        $effectDirection = DB::transaction(function () use ($order, $from, $target, $reason): string {
             // Two requests holding the same pending copy must not both apply the effect:
             // re-read the row under a lock and continue only if it is still where we left it.
             $this->lockCurrentStatus($order, $from);
@@ -176,7 +177,13 @@ class OrderStatusTransitionService
 
             $this->recordTransition($order, $from, $target, $effectDirection, $reason);
             $this->publish($order, $effectDirection);
+
+            return $effectDirection;
         });
+
+        // Other modules (Employee Relations tracks an annulled sanction's order) follow
+        // the order through this event, never through its models. Dispatched after commit.
+        event(new OrderStatusChanged((int) $order->getKey(), $order->order_no !== null ? (string) $order->order_no : null, $from, $target, $effectDirection));
 
         if ($target === OrderStatusEnum::APPROVED->value) {
             $this->captureFinalPdf($order);

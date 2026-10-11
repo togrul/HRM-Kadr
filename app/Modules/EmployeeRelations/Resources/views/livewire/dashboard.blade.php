@@ -142,8 +142,9 @@
                         </x-ui.select>
                     </div>
                     <x-checkbox name="overdueOnly" model="overdueOnly">{{ __('employee_relations::cases.filters.overdue_only') }}</x-checkbox>
+                    <x-checkbox name="cancellationPending" model="cancellationPending">{{ __('employee_relations::cases.filters.cancellation_pending') }}</x-checkbox>
                     <div class="lg:ml-auto">
-                        <x-filter.reset :active="$search !== '' || filled($status) || filled($typeId) || $overdueOnly" action="resetFilters" />
+                        <x-filter.reset :active="$search !== '' || filled($status) || filled($typeId) || $overdueOnly || $cancellationPending" action="resetFilters" />
                     </div>
                 </div>
 
@@ -170,6 +171,9 @@
                             </x-table.td>
                             <x-table.td>
                                 <x-small-badge :mode="$statusTone($row->status->value)" dot>{{ $row->status->label() }}</x-small-badge>
+                                @if ($row->hasPendingOrderCancellation())
+                                    <x-small-badge mode="rose" class="mt-1">{{ __('employee_relations::cases.order_cancellation.badge') }}</x-small-badge>
+                                @endif
                             </x-table.td>
                             <x-table.td>
                                 @if ($row->isOverdue())
@@ -180,7 +184,7 @@
                             </x-table.td>
                         </tr>
                     @empty
-                        <x-table.empty :rows="5" :filtered="$search !== '' || filled($status) || filled($typeId) || $overdueOnly" />
+                        <x-table.empty :rows="5" :filtered="$search !== '' || filled($status) || filled($typeId) || $overdueOnly || $cancellationPending" />
                     @endforelse
                 </x-table.tbl>
 
