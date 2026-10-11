@@ -5,6 +5,12 @@ return [
         // Leave (sick, maternity, unpaid…) above this many days inside a card's period
         // scales its additive targets and bonus pro-rata to the days worked (spec §5.1).
         'long_leave_days' => (int) env('PERFORMANCE_KPI_LONG_LEAVE_DAYS', 30),
+        // İşdən çıxma ilə dövr bitmədən bağlanan kartın bonusu (yeni bonus qaydasının standartı;
+        // dövr üzrə qayda bonus ekranında dəyişdirilə bilər): `prorata` — işlənmiş günlər ÷ dövr
+        // günləri (standart), `full` — dövr sonuna qədər işləmiş kimi, `none` — bonus verilmir.
+        // ƏM KPI bonusunu tənzimləmir; seçim əmək/kollektiv müqavilə və ya daxili əsasnaməyə
+        // uyğun olmalıdır. Bax: docs/performance-evaluation-module-design.md.
+        'early_close_bonus' => env('PERFORMANCE_KPI_EARLY_CLOSE_BONUS', 'prorata'),
         // true: faktın təsdiqi, idxal və sinxronizasiyadan sonra kartın yenidən hesablanması
         // növbəyə atılır (QUEUE_CONNECTION=sync olduqda dərhal icra olunur). false: əvvəlki
         // kimi sorğunun içində sinxron. Növbə üçün docs/queue-ops.md.

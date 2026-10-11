@@ -509,6 +509,13 @@ return [
         ],
         'fields' => [
             'pay_in_probation' => 'Pay a bonus to people still on probation (default: no)',
+            'early_close_policy' => 'Bonus of a leaver (before the cycle ends)',
+            'early_close_policy_hint' => 'The Labour Code does not regulate KPI bonuses: follow the employment/collective agreement or the bonus regulation. The old card of a person who changed position is always pro-rated.',
+            'early_close_policies' => [
+                'prorata' => 'Pro-rata to the days worked (default)',
+                'full' => 'Full — as if they stayed to the end of the cycle',
+                'none' => 'No bonus',
+            ],
             'unit_hint' => 'Unit multiplier: a unit\'s result goes through the same gate and multiplier table and applies to everyone in that unit and its sub-units. Units without a result get 1.',
             'unit_results' => 'Unit results (unit → target achieved %)',
             'position_targets' => 'Target % by position (e.g. manager 20%, specialist 10%)',
@@ -597,6 +604,7 @@ return [
             'not_a_number' => 'Must be a positive number.',
             'wrong_mode' => 'This action does not apply to the current service area.',
             'order_template_missing' => 'The "Monetary award" order template is missing. Ask your system administrator to add it to the order templates.',
+            'early_close_policy_invalid' => 'Choose a valid policy.',
         ],
     ],
 

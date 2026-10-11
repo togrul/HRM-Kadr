@@ -29,6 +29,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property float|null $fund
  * @property bool $scale_to_fund
  * @property bool $pay_in_probation
+ * @property string $early_close_policy
  * @property string $currency
  * @property int|null $updated_by
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -39,6 +40,12 @@ class PerformanceBonusRule extends Model
     use LogsActivity;
 
     public const MODES = ['company', 'order'];
+
+    /**
+     * Vaxtından əvvəl (işdən çıxma ilə) bağlanan kartın bonusu: işlənmiş günlərə mütənasib,
+     * dövr sonuna qədər işləmiş kimi tam, və ya heç. Əsaslandırma: docs/performance-evaluation-module-design.md.
+     */
+    public const EARLY_CLOSE_POLICIES = ['prorata', 'full', 'none'];
 
     /** Spec §7 default payout matrix: final score from → payout %. */
     public const DEFAULT_PAYOUT_BANDS = [[0, 0], [80, 50], [90, 80], [100, 100], [110, 120]];
@@ -62,6 +69,7 @@ class PerformanceBonusRule extends Model
         'fund',
         'scale_to_fund',
         'pay_in_probation',
+        'early_close_policy',
         'currency',
         'updated_by',
     ];

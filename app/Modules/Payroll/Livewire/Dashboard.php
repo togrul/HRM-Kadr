@@ -346,7 +346,7 @@ class Dashboard extends Component
         $data = $this->validate([
             'runForm.payroll_period_id' => 'required|exists:payroll_periods,id',
             'runForm.regime_id' => 'nullable|exists:compensation_regimes,id',
-            'runForm.run_type' => 'required|in:regular,off_cycle',
+            'runForm.run_type' => 'required|in:'.implode(',', PayrollRun::RUN_TYPES),
         ], attributes: $this->fieldLabels([
             'runForm.payroll_period_id' => 'period',
             'runForm.regime_id' => 'regime',

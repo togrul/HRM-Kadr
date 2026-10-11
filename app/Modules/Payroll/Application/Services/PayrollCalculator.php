@@ -32,11 +32,15 @@ class PayrollCalculator
      * plus those paid by $paidByRunId (the run being recalculated, or the locked run whose
      * month retro prices). Loan instalments are deducted only by a regular run — an
      * off-cycle run in the same month would otherwise take the instalment a second time.
+     * $settleLoans (the employee leaves this pay month; the run paying their last wage): the
+     * loan line is the OUTSTANDING balance instead of the instalment, capped so that all
+     * non-statutory deductions stay within `payroll.final_settlement_loan_cap_ratio` of the
+     * wage due after tax (ƏM m.176.1); what does not fit stays on the loan as a debt.
      *
      * @param  list<array<string,mixed>>|null  $orderLines
      * @return array{gross:float,total_deductions:float,net:float,employer_cost:float,proration_factor:float,currency:string,lines:array<int,array<string,mixed>>}|null
      */
-    public function calculate(string $tabelNo, ?string $onDate = null, ?int $year = null, ?int $month = null, bool $withOneOffs = true, ?array $orderLines = null, ?int $paidByRunId = null): ?array
+    public function calculate(string $tabelNo, ?string $onDate = null, ?int $year = null, ?int $month = null, bool $withOneOffs = true, ?array $orderLines = null, ?int $paidByRunId = null, bool $settleLoans = false): ?array
     {
         $current = $this->compensation->currentCompensation($tabelNo, $onDate);
 
@@ -125,7 +129,13 @@ class PayrollCalculator
         $lines = array_merge($lines, $statutoryLines);
 
         // Loan / advance repayment — a flat deduction, not prorated, not statutory.
-        $loanTotal = $withOneOffs ? round($this->loans->activeInstallmentTotal($tabelNo), 2) : 0.0;
+        if ($settleLoans) {
+            $statutory = $this->sumWhere($lines, fn ($l) => $l['kind'] === 'deduction' && $l['is_statutory']);
+            $otherDeductions = $this->sumWhere($lines, fn ($l) => $l['kind'] === 'deduction' && ! $l['is_statutory']);
+            $loanTotal = $this->loans->settlementAmount($tabelNo, $gross - $statutory, $otherDeductions);
+        } else {
+            $loanTotal = $withOneOffs ? round($this->loans->activeInstallmentTotal($tabelNo), 2) : 0.0;
+        }
         if ($loanTotal > 0) {
             $lines[] = [
                 'component_id' => null,

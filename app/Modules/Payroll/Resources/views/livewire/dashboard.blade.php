@@ -243,6 +243,7 @@
                                 :model="[
                                     ['id' => 'regular', 'label' => __('payroll::dashboard.run_types.regular')],
                                     ['id' => 'off_cycle', 'label' => __('payroll::dashboard.run_types.off_cycle')],
+                                    ['id' => 'final_settlement', 'label' => __('payroll::dashboard.run_types.final_settlement')],
                                 ]"
                             />
                         </div>

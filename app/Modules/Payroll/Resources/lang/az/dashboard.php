@@ -129,6 +129,7 @@ return [
     'run_types' => [
         'regular' => 'Adi',
         'off_cycle' => 'Off-cycle',
+        'final_settlement' => 'Son haqq-hesab',
     ],
 
     'statutory' => [

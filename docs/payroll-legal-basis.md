@@ -5,7 +5,7 @@
 > <https://e-qanun.az/frameworks/46/f_46943.html>), 2026-10-09 tarixində oxunub.
 > Sitatlar həmin mətndən hərfi götürülüb. Kodda bu sənədə istinad edən yerlər:
 > `Payroll\Application\Services\OrderEarningsService`, `PayrollRunService`, `RetroService`,
-> `config/payroll.php`.
+> `LoanService`, `PayrollCalculator`, `config/payroll.php`.
 >
 > İşarələr: ✅ — qanunun mətni ilə təsdiqlənib; ⚠️ — qanunda açıq yazılmayıb, təcrübəyə
 > və ya bizim şərhimizə əsaslanır (hüquqşünas/mühasib təsdiqi tövsiyə olunur).
@@ -117,11 +117,68 @@ işəgötürən onu öz sərəncamı ilə tuta bilməz (m.175.5); yalnız işçi
   **20 %**-dən çox olmur (`recovery_cap_ratio`, m.176.1); qalan hissə sonrakı aylara keçir. ✅
 - ⚠️ 20 % həddi bütün tutulmaların cəminə aiddir; kod yalnız bu sətri məhdudlaşdırır, digər
   tutulmalar (kredit/avans, icra vərəqəsi) ilə birlikdə yoxlamır. Kredit tutulması işçinin
-  ərizəsi ilə (m.175.6) aparıldığı üçün ayrıca qiymətləndirilməlidir.
+  ərizəsi ilə (m.175.6) aparıldığı üçün ayrıca qiymətləndirilməlidir — bax §4.
 - ⚠️ Fərdi razılığın (hər işçi üzrə) qeydə alınması mexanizmi hələ yoxdur — parametr bütün
   qurulum üçündür.
 
-## 4. Yoxlanılmamış / açıq qalan məsələlər
+## 4. Kredit/avans taksiti: adi, off-cycle və son haqq-hesab run-ları — ƏM m.175–176
+
+### Əvvəlki vəziyyət
+
+- Aylıq taksit (`employee_loans.monthly_installment`, qalan borcdan çox olmamaqla) yalnız
+  **adi (regular)** run-da `loan` sətri kimi tutulur və run bağlananda (`lock`) kreditə yazılır.
+- `f25169e9` commitindən sonra **off-cycle** run taksit tutmur və ödəniş yazmır — eyni ayda
+  adi run artıq tutduğu üçün ikinci tutulma olardı.
+- «Son haqq-hesab» run növü yox idi; işdən çıxan işçinin qalan borcu heç vaxt tutulmurdu
+  (adi run yalnız aylıq taksiti tuturdu, sonrakı aylarda isə işçi run-a düşmür).
+- 20 % həddi yalnız ləğv olunmuş əmr üzrə geri tutulmaya (`retro_recovery`) tətbiq olunurdu.
+
+### Qəbul edilən qayda
+
+| Run | Kredit | Əsas |
+|---|---|---|
+| `regular` | aylıq taksit (dəyişməyib) | işçinin ərizəsi/razılığı ilə müəyyən olunmuş qrafik |
+| `off_cycle` (bonus, düzəliş, növbədənkənar ödəniş) | **tutulmur** | taksit ayda bir dəfədir; ikiqat tutulma olmamalıdır |
+| işçi bu ay çıxır → onun son əmək haqqını ödəyən run (`regular` və ya yeni `final_settlement`) | taksit yox, **qalan borc**, amma həddə qədər | xitamda haqq-hesab; ƏM m.176.1 həddi |
+
+- **Hədd** (`config/payroll.php` → `final_settlement_loan_cap_ratio`, env
+  `PAYROLL_FINAL_SETTLEMENT_LOAN_CAP_RATIO`, standart **0.20**): həmin ödənişdə bütün
+  qeyri-statutor tutulmaların cəmi (könüllü tutulma komponentləri + kredit) işçiyə verilməli
+  olan əmək haqqının — ümumi hesablanmış məbləğ çıxılsın vergi və məcburi sosial
+  ödənişlər — 20 %-ni keçmir (m.176.1, sitat §3-də ✅). Məbləğ qəpiyə **aşağı** yuvarlaqlaşdırılır
+  ki, hədd aşılmasın. Hesablama: `LoanService::settlementAmount()`.
+- **Sığmayan hissə** kreditdə qalır (`remaining` > 0, status `active`) — işçinin borcu kimi
+  qeydə alınır; ayrıca (könüllü ödəniş və ya məhkəmə qaydasında) tələb oluna bilər. Sistem onu
+  sonrakı run-larda avtomatik tutmur, çünki işçi artıq əmək haqqı almır.
+- **İkiqat tutulma yoxdur:** çıxan işçi ya adi run-da (əmək haqqı şərti ayın sonuna qədər
+  açıqdırsa), ya da `final_settlement` run-unda (şərt çıxış günü bağlanıbsa) olur — hər ikisində
+  yox. Run bağlananda kreditə **payslip-dəki `loan` sətri qədər** yazılır: əvvəl hər kreditin
+  taksiti, qalanı ən köhnə kreditdən başlayaraq. Run yenidən açılarsa (`reopen`) yazılan
+  ödənişlər geri qaytarılır.
+- `final_settlement` run-u: dövrdə `leave_work_date`-i olan və həmin günə aktiv əmək haqqı
+  şərti olan, lakin adi run-a (ayın son günü aktiv şərt) düşməyən işçiləri əhatə edir; maaş
+  çıxış gününə olan şərtlə hesablanır, birdəfəlik ödənişlər və əmr ödənişləri (adi run-un
+  işidir) daxil edilmir.
+
+### Statuslar və açıq məsələlər
+
+- ✅ m.176.1 — 20 % həddi (mətn §3-də).
+- ⚠️ **50 % istisnası** (bir neçə icra sənədi, aliment və s. üzrə tutulmalarda daha yüksək hədd)
+  burada **tətbiq edilmir**: m.176-nın həmin hissəsinin dəqiq mətni bu sənəd hazırlanarkən
+  e-qanun.az-dan oxuna bilmədi (giriş bağlı idi) — **yoxlanmalıdır**. Kredit/avans icra sənədi
+  deyil, ona görə 20 % ümumi hədd seçilib. İcra sənədləri üçün ayrıca modul yoxdur.
+- ⚠️ Taksitin işçinin ərizəsi ilə tutulması (m.175.1 «yazılı razılıq»; §3-dəki m.175.6 istinadı)
+  — kreditin rəsmiləşdirilməsi zamanı yazılı razılığın alınması fərz olunur; sistem onu
+  saxlamır.
+- ⚠️ **Adi aylıq taksitə 20 % həddi tətbiq olunmur** (əvvəlki davranış saxlanılıb). m.176.1
+  «bütün məbləğlər» dediyi üçün ciddi oxunuşda adi taksit də həddə tabe olmalıdır — bu
+  davranış dəyişikliyi istifadəçi/hüquqşünas təsdiqi gözləyir.
+- ⚠️ `retro_recovery` (§3) öz 20 %-ni ayrıca hesablayır; eyni ödənişdə kredit hesablaşması ilə
+  birlikdə cəmi yoxlanmır (hər ikisi standart olaraq nadir: recovery söndürülüb).
+- ⚠️ Xitam zamanı qalan borcun tam (həddsiz) tutulmasına işçinin ayrıca yazılı razılığı olarsa
+  icazə verilib-verilmədiyi — hüquqşünas rəyi lazımdır; hazırda hədd hər halda tətbiq olunur.
+
+## 5. Yoxlanılmamış / açıq qalan məsələlər
 
 1. ⚠️ Saatlıq vəzifə maaşının ayın fərdi normasına bölünməklə tapılması — rəsmi izahat
    (Nazirlik məktubu və ya metodik göstəriş) tapılmadı.

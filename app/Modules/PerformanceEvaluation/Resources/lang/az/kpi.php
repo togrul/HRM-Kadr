@@ -509,6 +509,13 @@ return [
         ],
         'fields' => [
             'pay_in_probation' => 'Sınaq müddətində olanlara da bonus ver (standart: verilmir)',
+            'early_close_policy' => 'İşdən çıxan əməkdaşın bonusu (dövr bitmədən)',
+            'early_close_policy_hint' => 'Əmək Məcəlləsi KPI bonusunu tənzimləmir: seçim əmək/kollektiv müqaviləyə və ya mükafatlandırma əsasnaməsinə uyğun olmalıdır. Vəzifəsi dəyişənin köhnə kartı həmişə mütənasib hesablanır.',
+            'early_close_policies' => [
+                'prorata' => 'İşlədiyi günlərə mütənasib (standart)',
+                'full' => 'Tam — dövr sonuna qədər işləmiş kimi',
+                'none' => 'Bonus verilmir',
+            ],
             'unit_hint' => 'Bölmə əmsalı: bölmənin nəticəsi eyni gate və əmsal cədvəli ilə əmsala çevrilir və həmin bölmədə, eləcə də onun alt bölmələrində işləyənlərə tətbiq olunur. Nəticəsi yazılmayan bölmədə əmsal 1-dir.',
             'unit_results' => 'Bölmələrin nəticəsi (bölmə → hədəfin yerinə yetirilməsi %)',
             'position_targets' => 'Vəzifəyə görə fərqli hədəf % (məs. rəhbər 20%, mütəxəssis 10%)',
@@ -597,6 +604,7 @@ return [
             'not_a_number' => 'Müsbət rəqəm olmalıdır.',
             'wrong_mode' => 'Bu əməliyyat cari xidmət növü üçün nəzərdə tutulmayıb.',
             'order_template_missing' => '"Pul mükafatı" əmr şablonu tapılmadı. Sistem administratoruna müraciət edin ki, bu şablonu əmr şablonlarına əlavə etsin.',
+            'early_close_policy_invalid' => 'Siyasət düzgün seçilməyib.',
         ],
     ],
 

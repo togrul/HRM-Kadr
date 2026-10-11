@@ -34,6 +34,14 @@ class PayrollRun extends Model
     use HasFactory;
     use LogsActivity;
 
+    /**
+     * regular — ayın əsas hesablaması (dövrdə bir dənə; aylıq kredit taksiti yalnız burada);
+     * off_cycle — növbədənkənar ödəniş (bonus, düzəliş): kredit tutulmur;
+     * final_settlement — ay içində işdən çıxan və adi run-a artıq düşməyən işçinin son haqq-hesabı:
+     * qalan kredit borcu ƏM m.176.1 həddinə qədər tutulur.
+     */
+    public const RUN_TYPES = ['regular', 'off_cycle', 'final_settlement'];
+
     protected $fillable = [
         'payroll_period_id',
         'regime_id',

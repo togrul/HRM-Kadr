@@ -256,3 +256,71 @@ System must support:
 - skill profile is generated
 - weak areas create training needs automatically
 - reports show individual and collective performance trends
+
+## 17. KPI siyasətləri: vaxtından əvvəl bağlanan kartın bonusu və faktların təkrar idxalı
+
+### 17.1 İşdən çıxan əməkdaşın bonusu (`early_close_policy`)
+
+**Əvvəlki davranış.** Gündəlik `ScorecardLifecycleService::syncPersonnel` işdən çıxma tarixi
+keçmiş əməkdaşın kartını `closeEarly(..., 'terminated', son iş günü)` ilə bağlayır: kart
+dondurulur, `valid_to` son iş gününə, `prorata_factor` isə `işlənmiş günlər ÷ dövr günləri`
+(məs. 90 günlük rübün 45 günü → 0.5) olur. Bağlı (`closed`) kart bonusa daxildir və
+`BonusService` həmin əmsalı vurur — yəni bonus artıq **pro-rata** idi, amma bu, şirkət
+tərəfindən seçilə bilmirdi. Vəzifə dəyişikliyində köhnə kart eyni qaydada bağlanır və dövrün
+qalanı üçün yeni kart açılır.
+
+**Qəbul edilən qayda.** Bonus dövr üzrə hesablanır; dövr bitmədən **işdən çıxma** ilə bağlanan
+kart üçün dövrün bonus qaydasında siyasət seçilir:
+
+| Dəyər | Mənası |
+|---|---|
+| `prorata` (standart) | işlənmiş günlərə mütənasib: kartın öz `prorata_factor`-u |
+| `full` | işçi dövrün sonuna qədər işləmiş kimi: kartın başlanğıcından dövr sonuna |
+| `none` | bonus verilmir |
+
+- Saxlanma yeri: `performance_bonus_rules.early_close_policy` (dövr üzrə «bonus qaydası» —
+  şirkətin mükafatlandırma siyasəti artıq burada saxlanır, məs. `pay_in_probation`). Ekranda:
+  KPI → Bonus → «İşdən çıxan əməkdaşın bonusu».
+- Yeni qaydanın standartı: `config/performance_evaluation.php` → `kpi.early_close_bonus`
+  (env `PERFORMANCE_KPI_EARLY_CLOSE_BONUS`, standart `prorata`). Mövcud qaydalar miqrasiya ilə
+  `prorata` alır — əvvəlki nəticələr dəyişmir.
+- **Vəzifə dəyişikliyi** ilə bağlanan kart siyasətdən asılı olmayaraq həmişə pro-rata qalır:
+  dövrün qalanını yeni kart əhatə edir, `full` eyni günləri iki dəfə ödəyərdi.
+- Sınaq müddəti (`pay_in_probation`), FTE, fond və məhdudiyyət faizi əvvəlki kimi tətbiq olunur.
+  Kod: `BonusService::bonusProrata()`.
+
+**Əsaslandırma.** Azərbaycan Respublikasının Əmək Məcəlləsi KPI bonusunu ayrıca tənzimləmir;
+əmək haqqı və mükafatlandırma (ƏM-in əmək haqqı fəsli) əmək müqaviləsi, kollektiv müqavilə və
+ya işəgötürənin daxili əsasnaməsi ilə müəyyən edilir. Ona görə qanunla sabitlənmiş tək «düzgün»
+qayda yoxdur və seçim şirkətin siyasəti olmalıdır. Standart olaraq `prorata` seçilib, çünki:
+(1) bonus dövrün nəticəsinə görə ödənilir və işçi dövrün yalnız bir hissəsində iştirak edib;
+(2) işə dövrün ortasında qəbul olunan əməkdaşa da eyni (mütənasib) qayda tətbiq olunur —
+simmetrikdir; (3) işlənmiş müddət üçün qazanılmış mükafatı əlindən almır (`none`-dan
+ədalətlidir) və işlənməmiş günlər üçün ödəmir (`full`-dan ehtiyatlıdır). ⚠️ Konkret maddə
+nömrələri bu sənəddə təsdiqlənməyib; müqavilə/əsasnamədə başqa qayda varsa, dövrün bonus
+qaydasında uyğun dəyər seçilməlidir.
+
+### 17.2 Faktların təkrar idxalı (Excel/CSV)
+
+**Əvvəlki davranış.** `KpiActualsImportService::import` hər sətir üçün yeni
+`performance_kpi_actuals` qeydi (`source = import`) yaradırdı. Kartın nəticəsi göstəricinin
+aqreqasiyasına görə bütün təsdiqlənmiş faktlardan hesablandığı üçün: `last` — sonuncu götürülür
+(praktikada əvəz edirdi); `sum` — eyni fayl iki dəfə yüklənəndə nəticə **ikiqat** olurdu; `avg`,
+`min`, `max` — köhnə idxal dəyərləri nəticəni təhrif edirdi.
+
+**Qəbul edilən qayda.** İdxal mənbə sistemdən **snapshot**-dur:
+
+- eyni kart bəndi (kart + göstərici; kart dövrə bağlıdır) və eyni mənbə (`import`) üçün təkrar
+  idxal əvvəlki idxal faktını **ƏVƏZ edir**, toplamır — eyni faylı neçə dəfə yükləsəniz də
+  nəticə eynidir (idempotent);
+- əvvəlki toplayan davranışdan qalmış eyni mənbəli dublikatlar ilk təkrar idxalda bir qeydə
+  endirilir;
+- əl ilə daxil edilən (`manual`) və sistem/inteqrasiya (`hrm`, `integration`) faktları ayrı
+  mənbədir və **toxunulmur** (sistem metrikləri də artıq eyni prinsiplə — mənbə üzrə bir
+  qeyd — `updateOrCreate` edilir);
+- köhnə dəyər **audit izində** qalır: `PerformanceKpiActual` activity log-a yazılır
+  (`performance_scorecard` log adı) — yeniləmə `old`/`attributes` dəyərləri ilə, silinən
+  dublikat isə silinmə qeydi ilə.
+
+Kod: `ScorecardService::recordActual(..., replace: true)`, `KpiActualsImportService::import`.
+Testlər: `tests/Feature/PerformanceEvaluation/KpiEarlyCloseAndReimportTest.php`.

@@ -37,10 +37,7 @@ class PayrollRunService
 
         $tabelNos = $run->payslips()->pluck('tabel_no');
         if ($includeAssignees) {
-            $tabelNos = $tabelNos->merge($this->compensation->activeAssignees(
-                $run->regime_id,
-                $run->period->ends_on->toDateString(),
-            ));
+            $tabelNos = $tabelNos->merge(array_map('strval', array_keys($this->assignees($run))));
         }
 
         if (! app(StructureService::class)->allowsAllTabelNos($actor, $tabelNos)) {
@@ -140,7 +137,7 @@ class PayrollRunService
     {
         $this->guardPeriodOpen($period);
 
-        $runType = in_array($runType, ['regular', 'off_cycle'], true) ? $runType : 'regular';
+        $runType = in_array($runType, PayrollRun::RUN_TYPES, true) ? $runType : 'regular';
 
         if ($runType === 'regular' && PayrollRun::query()->where('regular_slot', PayrollRun::regularSlotFor((int) $period->id, $regimeId))->exists()) {
             throw ValidationException::withMessages(['run' => __('payroll::dashboard.messages.regular_run_exists')]);
@@ -213,14 +210,19 @@ class PayrollRunService
      */
     private function computePayslips(PayrollRun $run): array
     {
-        $onDate = $run->period->ends_on->toDateString();
         $year = (int) $run->period->year;
         $month = (int) $run->period->month;
         $regular = $run->run_type === 'regular';
+        $leavers = $this->leaversInPeriod($run->period);
         $payslips = [];
 
-        foreach ($this->compensation->activeAssignees($run->regime_id, $onDate) as $tabelNo) {
-            $calc = $this->calculator->calculate($tabelNo, $onDate, $year, $month, $regular, null, (int) $run->id);
+        foreach ($this->assignees($run) as $tabelNo => $onDate) {
+            $tabelNo = (string) $tabelNo;
+            // Kredit: adi run aylıq taksiti tutur; off-cycle heç nə tutmur (ikiqat tutulma
+            // olmasın). İşçinin son əmək haqqını ödəyən run (bu ay çıxan işçi üçün adi run və
+            // ya final_settlement) taksit yox, qalan borcu ƏM m.176.1 həddinə qədər tutur.
+            $settleLoans = $run->run_type !== 'off_cycle' && isset($leavers[$tabelNo]);
+            $calc = $this->calculator->calculate($tabelNo, $onDate, $year, $month, $regular, null, (int) $run->id, $settleLoans);
 
             if (! $calc) {
                 continue;
@@ -295,6 +297,60 @@ class PayrollRunService
         }
 
         return $payslips;
+    }
+
+    /**
+     * Whom the run pays, tabel_no → the date compensation is read on.
+     *  - regular / off_cycle: everyone with an active compensation on the period's last day;
+     *  - final_settlement: those who leave within the period and are NOT in the regular run
+     *    any more (their compensation ended with the employment), priced on their last day.
+     *    Someone whose compensation still runs past month end is paid — and settled — by the
+     *    regular run, so the two never pay the same month twice.
+     *
+     * @return array<string,string>
+     */
+    private function assignees(PayrollRun $run): array
+    {
+        $periodEnd = $run->period->ends_on->toDateString();
+        $active = $this->compensation->activeAssignees($run->regime_id, $periodEnd)->map(fn ($tabelNo): string => (string) $tabelNo);
+
+        if ($run->run_type !== 'final_settlement') {
+            return $active->mapWithKeys(fn (string $tabelNo): array => [$tabelNo => $periodEnd])->all();
+        }
+
+        $assignees = [];
+        foreach ($this->leaversInPeriod($run->period) as $tabelNo => $lastDay) {
+            if ($active->contains($tabelNo)) {
+                continue;
+            }
+
+            if ($this->compensation->activeAssignees($run->regime_id, $lastDay)->map(fn ($no): string => (string) $no)->contains($tabelNo)) {
+                $assignees[$tabelNo] = $lastDay;
+            }
+        }
+
+        return $assignees;
+    }
+
+    /**
+     * Employees whose last working day falls in the pay month: tabel_no → last day.
+     *
+     * @return array<string,string>
+     */
+    private function leaversInPeriod(PayrollPeriod $period): array
+    {
+        if (! InstalledTables::has('personnels')) {
+            return [];
+        }
+
+        return DB::table('personnels')
+            ->whereNull('deleted_at')
+            ->whereNotNull('leave_work_date')
+            ->whereDate('leave_work_date', '>=', $period->starts_on->toDateString())
+            ->whereDate('leave_work_date', '<=', $period->ends_on->toDateString())
+            ->pluck('leave_work_date', 'tabel_no')
+            ->mapWithKeys(fn ($date, $tabelNo): array => [(string) $tabelNo => substr((string) $date, 0, 10)])
+            ->all();
     }
 
     /**

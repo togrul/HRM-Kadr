@@ -276,6 +276,16 @@
                             <input type="checkbox" wire:model.live="ruleForm.pay_in_probation" class="mt-0.5 h-4 w-4 rounded border-zinc-300 text-ink focus:ring-zinc-400">
                             <span>{{ __($b.'.fields.pay_in_probation') }}</span>
                         </label>
+                        <div class="mt-3">
+                            <x-label value="{{ __($b.'.fields.early_close_policy') }}" />
+                            <x-ui.select class="mt-1" wire:model.live="ruleForm.early_close_policy">
+                                @foreach (\App\Models\PerformanceBonusRule::EARLY_CLOSE_POLICIES as $policy)
+                                    <option value="{{ $policy }}">{{ __($b.'.fields.early_close_policies.'.$policy) }}</option>
+                                @endforeach
+                            </x-ui.select>
+                            <p class="mt-1 text-[11.5px] text-ink-faint">{{ __($b.'.fields.early_close_policy_hint') }}</p>
+                            @error('early_close_policy') <x-validation>{{ $message }}</x-validation> @enderror
+                        </div>
                     </div>
                 </div>
                 <div class="flex items-center justify-end gap-2 border-t border-hairline-subtle px-5 py-3">

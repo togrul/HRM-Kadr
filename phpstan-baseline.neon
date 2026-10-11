@@ -499,12 +499,6 @@ parameters:
 			path: app/Models/EmployeeContentAsset.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\EmployeeLoan\:\:\$status\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/EmployeeLoan.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Leave\:\:\$duration_unit\.$#'
 			identifier: property.notFound
 			count: 1
@@ -5129,18 +5123,6 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: app/Modules/Orders/Livewire/OrderTemplateDesigner.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\EmployeeLoan\:\:\$monthly_installment\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Modules/Payroll/Application/Services/LoanService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\EmployeeLoan\:\:\$remaining\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Modules/Payroll/Application/Services/LoanService.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\LoanRepayment\:\:\$amount\.$#'

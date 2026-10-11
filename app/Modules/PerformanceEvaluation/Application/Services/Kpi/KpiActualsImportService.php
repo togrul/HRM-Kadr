@@ -13,6 +13,10 @@ use Illuminate\Support\Facades\DB;
  * every active card in the cycle, fills the "value" column and uploads it back. The
  * file is checked in full first; one bad row imports nothing and every problem comes
  * back with its row number.
+ *
+ * Idxal mənbə sistemin snapshot-udur: eyni kart bəndi (kart + göstərici, kart isə dövrə
+ * bağlıdır) üçün təkrar idxal əvvəlki idxal faktını ƏVƏZ edir, toplamır. Əl ilə daxil
+ * edilən faktlar ayrı mənbədir və toxunulmaz qalır; köhnə dəyər activity log-dadır.
  */
 class KpiActualsImportService
 {
@@ -101,7 +105,8 @@ class KpiActualsImportService
             $cards = [];
 
             foreach ($accepted as [$item, $value, $note]) {
-                $this->scorecards->recordActual($item, $value, $user, null, $note, 'import', recalculate: false);
+                // Snapshot: eyni bənd üçün əvvəlki idxal əvəz olunur, əl faktlarına toxunulmur.
+                $this->scorecards->recordActual($item, $value, $user, null, $note, 'import', recalculate: false, replace: true);
                 $cards[$item->performance_scorecard_id] = $item->scorecard;
             }
 

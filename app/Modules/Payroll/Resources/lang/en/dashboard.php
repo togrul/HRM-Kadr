@@ -129,6 +129,7 @@ return [
     'run_types' => [
         'regular' => 'Regular',
         'off_cycle' => 'Off-cycle',
+        'final_settlement' => 'Final settlement',
     ],
 
     'statutory' => [

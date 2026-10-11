@@ -9,6 +9,18 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * @property int $id
+ * @property string $tabel_no
+ * @property string $type
+ * @property string $principal
+ * @property string $monthly_installment
+ * @property string $remaining
+ * @property string $currency
+ * @property string $status
+ * @property \Illuminate\Support\Carbon|null $start_on
+ * @property string|null $note
+ */
 class EmployeeLoan extends Model
 {
     use HasFactory;

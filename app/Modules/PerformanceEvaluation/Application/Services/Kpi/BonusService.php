@@ -31,6 +31,9 @@ use Illuminate\Validation\ValidationException;
  *  - `order` (military profile): payout(score) × monthly salary × reward months ×
  *    pro-rata, paid as a monetary award through a pending order (əmr) per person.
  *
+ * Pro-rata of a card closed early on termination follows the rule's `early_close_policy`
+ * (see bonusProrata()).
+ *
  * Only approved or closed cards earn a bonus. Exported and ordered lines are final:
  * recalculating leaves them alone, so a second export never pays twice.
  */
@@ -93,6 +96,7 @@ class BonusService
             'cap_pct' => 150,
             'scale_to_fund' => false,
             'currency' => 'AZN',
+            'early_close_policy' => $this->defaultEarlyClosePolicy(),
         ]);
         $rule->mode = $this->mode();
 
@@ -160,7 +164,7 @@ class BonusService
 
         $cycleEnd = Carbon::parse($cycle->period_end)->endOfDay();
 
-        $rows = $cards->map(function (PerformanceScorecard $card) use ($rule, $months, $bases, $companyMult, $positionTargets, $unitResult, $cycleEnd): array {
+        $rows = $cards->map(function (PerformanceScorecard $card) use ($cycle, $rule, $months, $bases, $companyMult, $positionTargets, $unitResult, $cycleEnd): array {
             if ($card->bonus?->isFinal()) {
                 return $this->storedRow($card);
             }
@@ -174,7 +178,8 @@ class BonusService
                 : $base * $months * $targetPct / 100);
             $payout = $this->payoutPct($score, $rule->payout_bands);
             $inProbation = ! $rule->pay_in_probation && $this->inProbationOn($card->personnel, $cycleEnd);
-            $amount = $inProbation ? 0.0 : min($target * $payout / 100 * $companyMult * $unitMult * (float) $card->prorata_factor * (float) $card->fte, $target * $rule->cap_pct / 100);
+            $prorata = $this->bonusProrata($card, $rule, $cycle);
+            $amount = $inProbation ? 0.0 : min($target * $payout / 100 * $companyMult * $unitMult * $prorata * (float) $card->fte, $target * $rule->cap_pct / 100);
 
             return [
                 'scorecard_id' => $card->id,
@@ -187,7 +192,7 @@ class BonusService
                 'payout_pct' => $payout,
                 'company_mult' => $companyMult,
                 'unit_mult' => $unitMult,
-                'prorata' => (float) $card->prorata_factor,
+                'prorata' => $prorata,
                 'scale_factor' => 1.0,
                 'amount' => round($amount, 2),
                 'status' => $card->bonus?->status,
@@ -255,7 +260,50 @@ class BonusService
         $target = $rule->mode === 'order' ? $base * $rule->reward_months : $base * $this->periodMonths($cycle) * $targetPct / 100;
         $multipliers = $rule->mode === 'order' ? 1.0 : $this->companyMultiplier($rule) * $this->multiplierFor(($this->unitResultResolver($rule))($card->personnel?->structure_id), $rule);
 
-        return round(min($target * $this->payoutPct($score, $rule->payout_bands) / 100 * $multipliers * (float) $card->prorata_factor * (float) $card->fte, $target * $rule->cap_pct / 100), 2);
+        return round(min($target * $this->payoutPct($score, $rule->payout_bands) / 100 * $multipliers * $this->bonusProrata($card, $rule, $cycle) * (float) $card->fte, $target * $rule->cap_pct / 100), 2);
+    }
+
+    /**
+     * Bonusun pro-rata əmsalı. Adi kartda kartın öz əmsalıdır (işə qəbul tarixi, uzun
+     * məzuniyyət nəzərə alınıb). İşdən çıxma ilə vaxtından əvvəl bağlanan kartda isə dövrün
+     * qaydası (`early_close_policy`) həlledicidir:
+     *  - `prorata` (standart): kartın işlənmiş günlərə qədər kəsilmiş əmsalı;
+     *  - `full`: işçi dövrün sonuna qədər işləmiş kimi — kartın başlanğıcından dövr sonuna;
+     *  - `none`: bonus yoxdur.
+     * Vəzifə dəyişikliyi ilə bağlanan kart həmişə pro-rata qalır: dövrün qalanını yeni kart
+     * əhatə edir, «tam» seçimi eyni günləri iki dəfə ödəyərdi.
+     */
+    public function bonusProrata(PerformanceScorecard $card, PerformanceBonusRule $rule, PerformanceCycle $cycle): float
+    {
+        $own = (float) $card->prorata_factor;
+
+        if ($card->status !== 'closed' || $card->closure_reason !== 'terminated') {
+            return $own;
+        }
+
+        return match ($rule->early_close_policy ?: $this->defaultEarlyClosePolicy()) {
+            'none' => 0.0,
+            'full' => $this->prorataToCycleEnd($card, $cycle),
+            default => $own,
+        };
+    }
+
+    /** Kartın başlanğıcından dövrün sonuna qədər əhatə etdiyi pay (işçi qalmış olsaydı). */
+    private function prorataToCycleEnd(PerformanceScorecard $card, PerformanceCycle $cycle): float
+    {
+        $cycleStart = Carbon::parse($cycle->period_start)->startOfDay();
+        $cycleEnd = Carbon::parse($cycle->period_end)->startOfDay();
+        $from = max($cycleStart, Carbon::parse($card->valid_from)->startOfDay());
+        $cycleDays = $cycleStart->diffInDays($cycleEnd) + 1;
+
+        return round(min(1.0, ($from->diffInDays($cycleEnd) + 1) / max(1, $cycleDays)), 4);
+    }
+
+    private function defaultEarlyClosePolicy(): string
+    {
+        $policy = (string) config('performance_evaluation.kpi.early_close_bonus', 'prorata');
+
+        return in_array($policy, PerformanceBonusRule::EARLY_CLOSE_POLICIES, true) ? $policy : 'prorata';
     }
 
     /**
@@ -539,6 +587,11 @@ class BonusService
             }
         }
 
+        $policy = (string) ($data['early_close_policy'] ?? $this->defaultEarlyClosePolicy());
+        if (! in_array($policy, PerformanceBonusRule::EARLY_CLOSE_POLICIES, true)) {
+            $errors['early_close_policy'] = __('performance_evaluation::kpi.bonus.errors.early_close_policy_invalid');
+        }
+
         if ($errors !== []) {
             throw ValidationException::withMessages($errors);
         }
@@ -557,6 +610,7 @@ class BonusService
             'fund' => $number('fund'),
             'scale_to_fund' => (bool) ($data['scale_to_fund'] ?? false),
             'pay_in_probation' => (bool) ($data['pay_in_probation'] ?? false),
+            'early_close_policy' => $policy,
         ];
     }
 

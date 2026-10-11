@@ -404,9 +404,14 @@ class ScorecardService
      * A manual actual. HR and the manager's entries count at once; the employee's wait
      * for the manager's approval. KPIs that require evidence refuse a value without a file.
      *
+     * $replace: mənbə sistemin snapshot-u (idxal) — eyni bənd və mənbə üçün əvvəlki fakt
+     * yenisi ilə ƏVƏZ olunur, toplanmır; təkrar idxal nəticəni dəyişmir (idempotent). Köhnə
+     * dəyər activity log-da qalır (yeniləmə «old» atributları ilə, artıq dublikatlar
+     * silinmə qeydi ilə). Başqa mənbədən (əl ilə daxil edilən) faktlara toxunulmur.
+     *
      * @throws AuthorizationException|ValidationException
      */
-    public function recordActual(PerformanceScorecardItem $item, float $value, User $user, ?UploadedFile $evidence = null, ?string $note = null, string $source = 'manual', bool $recalculate = true): PerformanceKpiActual
+    public function recordActual(PerformanceScorecardItem $item, float $value, User $user, ?UploadedFile $evidence = null, ?string $note = null, string $source = 'manual', bool $recalculate = true, bool $replace = false): PerformanceKpiActual
     {
         $card = $item->scorecard;
         $role = $this->authorizeRole($user, $card, ['hr', 'manager', 'employee']);
@@ -424,8 +429,7 @@ class ScorecardService
         }
 
         $approved = $role !== 'employee';
-
-        $actual = $item->actuals()->create([
+        $attributes = [
             'value' => $value,
             'source' => $source,
             'evidence_path' => $evidence?->store('performance/kpi-evidence/'.$card->id, 'local'),
@@ -434,7 +438,20 @@ class ScorecardService
             'entered_by' => $user->id,
             'approved_by' => $approved ? $user->id : null,
             'approved_at' => $approved ? now() : null,
-        ]);
+        ];
+
+        $previous = $replace
+            ? $item->actuals()->where('source', $source)->orderByDesc('id')->lockForUpdate()->get()
+            : collect();
+
+        if ($previous->isNotEmpty()) {
+            $actual = $previous->shift();
+            $actual->update($attributes);
+            // Əvvəlki (toplayan) davranışdan qalmış dublikatlar: snapshot birdir.
+            $previous->each(fn (PerformanceKpiActual $duplicate) => $duplicate->delete());
+        } else {
+            $actual = $item->actuals()->create($attributes);
+        }
 
         if ($approved && $recalculate) {
             $this->requestRecalculation($card, $user);

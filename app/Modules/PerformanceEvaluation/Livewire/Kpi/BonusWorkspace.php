@@ -287,6 +287,7 @@ class BonusWorkspace extends Component
             'fund' => $rule->fund,
             'scale_to_fund' => (bool) $rule->scale_to_fund,
             'pay_in_probation' => (bool) $rule->pay_in_probation,
+            'early_close_policy' => $rule->early_close_policy ?: 'prorata',
         ];
     }
 
@@ -317,6 +318,7 @@ class BonusWorkspace extends Component
             'fund' => $number('fund'),
             'scale_to_fund' => (bool) ($this->ruleForm['scale_to_fund'] ?? false),
             'pay_in_probation' => (bool) ($this->ruleForm['pay_in_probation'] ?? false),
+            'early_close_policy' => (string) ($this->ruleForm['early_close_policy'] ?? 'prorata'),
         ];
     }
 }
