@@ -9,6 +9,8 @@ Burada siz:
 - sizə təyin olunan uyğunlaşma sənədləri və öyrənmə materialları ilə tanış ola bilərsiniz
 - maaş vərəqələrinizə və sənədlərinizə baxa bilərsiniz
 - rəhbərinizi və müraciətlərinizin kimdən keçəcəyini görə bilərsiniz
+- iş yerindəki problem barədə şikayət və ya müraciət göndərə (istəsəniz anonim) və qərarlara etiraz edə bilərsiniz
+- imtiyaz paketlərinizi (tibbi sığorta, yemək kartı və s.) görə, onlara qoşula və ya yeniləyə bilərsiniz
 
 HR tərəfində isə əməkdaşların göndərdiyi müraciətlər ayrıca `Şəxsi kabinet müraciətləri` səhifəsində təsdiqlənir (bax aşağıda).
 
@@ -17,6 +19,8 @@ Sol dar menyuda `Kabinet` ikonunu seçin. Açılan səhifənin adı `Şəxsi kab
 
 Səhifənin solunda panel var. Panelin yuxarısında adınız, altında isə bölmələr görünür:
 `Xülasə`, `Ərizələrim`, `Bildirişlər`, `Uyğunlaşma sənədləri`, `Fərdi inkişaf planım`, `Öyrənmə materialları`, `Sənədlərim`, `Maaş vərəqələrim`, `Mənim strukturum`.
+
+Şirkətdə müvafiq modullar açıqdırsa siyahının sonunda daha iki bölmə görünür: `Şikayət və müraciətlər` (`İşçi münasibətləri` modulu) və `İmtiyazlarım` (`İmtiyazlar` modulu). Modul söndürülübsə həmin bölmə siyahıda yoxdur.
 
 Bölmənin yanında rəqəm görünürsə, orada diqqət tələb edən qeyd var. Panelin aşağısında `Məzuniyyət balansı` kartı qalan və istifadə olunmuş günlərinizi göstərir.
 
@@ -145,6 +149,38 @@ Burada yalnız rəsmiləşdirilmiş (bağlanmış) hesablamalar görünür. Cari
 
 Rəhbər tapılmayanda müraciət birbaşa HR-a düşür (`Yalnız HR xətti`).
 
+### 11. Şikayət və ya müraciət göndərmək
+`Şikayət və müraciətlər` bölməsində iş yerində pozuntu, münaqişə, təhqir, ayrı-seçkilik və ya təhlükəsizlik problemi barədə müraciət edə bilərsiniz.
+1. `Yeni müraciət` düyməsini basın (düymə yalnız müraciət göndərmək icazəsi olanlara görünür).
+2. `İş növü`nü seçin, `Qısa təsvir` və `Ətraflı məlumat` yazın (ən azı 20 simvol).
+3. İstəsəniz `Kim barəsində (sərbəst mətn)` və `Hadisənin (xətanın) tarixi` yazın, bir fayl əlavə edin.
+4. Adınızın araşdırıcılara göstərilməsini istəmirsinizsə `Anonim müraciət et` işarəsini qoyun.
+5. `Göndər` basın. Sistem `Müraciətiniz qeydə alındı: ER-...` xəbərini verir.
+
+Bölmədə iki siyahı var:
+- `Müraciətlərim` — göndərdiyiniz müraciətlərin nömrəsi və mərhələsi (`Açıldı`, `Araşdırılır`, `Qərar verildi`, `Apellyasiya`, `Yenidən baxış`, `Yekun qərar`, `Bağlandı`). Qərar veriləndən sonra yalnız ümumi nəticə görünür: `müraciət əsaslı sayıldı, tədbir görüldü` və ya `müraciət əsassız sayıldı`. Görülən tədbirin növü, araşdırıcılar və sübutlar göstərilmir.
+- `Barəmdə qərarlar` — barənizdə şikayət olunan işin qərarı (qərar sizə bildiriləndən sonra görünür): qərar, tarix və əsaslandırma. Şikayətçinin adı göstərilmir.
+
+Qərarla razı deyilsinizsə, müraciətin altında `Qərara etiraz et` düyməsini basın, `Etirazın səbəbi`ni yazın (ən azı 10 simvol) və `Apellyasiyanı göndər` basın. Etiraz yalnız göstərilən tarixədək verilir və hər iş üçün bir dəfə. Sonra siyahıda `Apellyasiya: Baxılmağı gözləyir`, `Baxılır` və ya `Baxılıb` statusu görünür.
+
+Anonim müraciətin mərhələsini yalnız siz burada görürsünüz. Ətraflı: `İşçi münasibətləri` bələdçisi.
+
+### 12. İmtiyazlarıma baxmaq və seçmək
+`İmtiyazlarım` bölməsində:
+- yuxarıda `Ümumi aylıq dəyər` bölgüsü: `Vəzifə maaşı`, `Daimi əlavələr`, `İmtiyazlar (işəgötürən)`; altında imtiyazlar üzrə sizin payınız (maaşdan tutulur);
+- `Paketlərim` — qoşulduğunuz paketlər: `İşəgötürən: ...` və `Sizin payınız: ...` məbləği, ailə üzvləri;
+- `Seçə biləcəyiniz paketlər` — uyğun olduğunuz və özünüz qoşula biləcəyiniz paketlər.
+
+Paketə qoşulmaq üçün:
+1. Paketin yanında `Qoşul` basın.
+2. `Başlama tarixi`ni seçin (bu gündən əvvəl ola bilməz).
+3. Paket ailə üzvlərinə icazə verirsə, `Ailə üzvləri`ni seçin (siyahı kartınızdakı qohumluq qeydlərindən gəlir).
+4. Yadda saxlayın.
+
+Paketin yenilənmə pəncərəsi açıqdırsa (`Seçim pəncərəsi açıqdır (son tarix ...)`), paketin yanında `Yenilə`, `İmtina` və `Başqa paketə keç` düymələri görünür. Qərarı son tarixədək dəyişə bilərsiniz; cavab verməsəniz paketin ayarına görə avtomatik yenilənir və ya bitir. Ailə üzvlərini `Ailə üzvləri` düyməsi ilə dəyişin.
+
+İşçi payınız hər ay maaşdan tutulur. Ətraflı: `İmtiyazlar` bələdçisi.
+
 ## Müraciətlərin təsdiqi (HR və rəhbər üçün)
 Əməkdaşların kabinetdən göndərdiyi müraciətlər ayrıca səhifədə toplanır. Sol dar menyuda `Müraciətlər` ikonunu seçin (tam adı `Şəxsi kabinet müraciətləri`). Eyni səhifəyə `Məzuniyyətlər` və `Ezamiyyətlər` səhifələrinin başlığındakı `Şəxsi kabinet müraciətləri` düyməsi ilə də keçmək olar. Səhifənin başlığı `Şəxsi kabinet müraciətlərinə baxış`-dır.
 
@@ -192,9 +228,23 @@ Sənəd tanışlıq təsdiqi tələb etmir və ya siz artıq təsdiqləmisiniz.
 ### HR olaraq müraciət siyahıda görünmür.
 `Növbə görünüşü`nün `Mənə gələnlər` olduğunu yoxlayın — orada yalnız sizə təyin edilən müraciətlər olur. Artıq qərar verilmiş müraciətlər bu səhifədə görünmür.
 
+### `Şikayət və müraciətlər` və ya `İmtiyazlarım` bölməsi niyə görünmür?
+Müvafiq modul (`İşçi münasibətləri` və ya `İmtiyazlar`) şirkətdə söndürülüb. `İmtiyazlar` modulu şirkət növünə görə də bağlı ola bilər. Kadrlar şöbəsinə müraciət edin.
+
+### `Yeni müraciət` düyməsi niyə yoxdur?
+Sizdə müraciət göndərmək icazəsi verilməyib. Siyahılar yenə də görünür.
+
+### Anonim müraciət etdim, nəticəni haradan görəcəyəm?
+`Şikayət və müraciətlər` → `Müraciətlərim` siyahısında, `Anonim` nişanı ilə. Adınız araşdırıcılara göstərilmir; yalnız xüsusi icazəsi olan məsul şəxs əsaslı səbəblə və audit qeydi ilə açıb bilər.
+
+### İmtiyaz paketinə niyə qoşula bilmirəm?
+Paket sizin vəzifənizə, stajınıza və ya müqavilə növünüzə uyğun olmaya bilər, ya da yalnız HR qoşa bilər. Eyni növdən (məsələn, tibbi sığorta) artıq paketiniz varsa, ikincisinə qoşulmaq olmur — yenilənmə pəncərəsində `Başqa paketə keç` seçin.
+
 ## Yadda saxlayın
 - Müraciəti göndərməzdən əvvəl tarixləri yoxlayın; sonradan dəyişmək üçün düzəliş müraciəti lazım olacaq.
 - `Məcburi` nişanlı sənəd və materialları son tarixdən əvvəl tamamlayın.
 - `Hamısını təmizlə` bildirişləri geri qaytarılmadan silir.
 - Rədd edərkən `Baxış qeydi`ndə səbəbi yazın ki, əməkdaş nəyi düzəltməli olduğunu bilsin.
 - Kabinet açılmırsa və ya məlumat səhvdirsə, Kadrlar şöbəsinə yazın.
+- Anonim müraciətdə adınız araşdırıcılara göstərilmir; qərara etiraz müddəti məhduddur, tarixi `Qərara etiraz et` düyməsinin yanında yoxlayın.
+- İmtiyaz paketinin yenilənmə pəncərəsi açılanda bildiriş gəlir — son tarixədək qərar verin.

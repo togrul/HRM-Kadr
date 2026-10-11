@@ -37,6 +37,59 @@ Bundan sonra yeni növ əmr yaratma panelindəki `Əmrin növü` siyahısında g
 
 Yeni fayl yükləyib yadda saxlayanda köhnə fayl avtomatik arxivlənir. Arxiv `Versiya tarixçəsi` siyahısında görünür (`v1`, `v2` …, tarix ilə). Hər köhnə versiyanı `Word-də yüklə (düzəliş üçün)` ilə endirmək olar.
 
+## İntizam tənbehi: müddət ayarı və şablon
+
+### Qüvvədə qalma müddəti
+İntizam tənbehinin müddəti ƏM Md.190.1 ilə müəyyən olunub: verildiyi gündən **6 ay**. 12 ay yoxdur.
+
+1. `Tənzimləmələr` bölməsində `İntizam tənbehinin qüvvədə qalma müddəti (ay)` ayarını tapın.
+2. Qiymət 1–6 arasında ola bilər. Boş, sıfır, mənfi və ya 6-dan böyük qiymət **6** kimi oxunur.
+3. Ayar yalnız **sonradan təsdiqlənən** əmrlərə təsir edir: tənbehin bitmə tarixi təsdiq anında yazılır.
+
+Nümunə: ayar `12` yazılıbsa sistem 6 ay götürür. Ayar `3`-dürsə, 15.03.2026 tarixli tənbeh 15.06.2026-da bitir (qanundan əlverişli, qısa müddət qəbul olunur). Ayar boşdursa 6 ay.
+
+#### Köhnə açıq tənbehlər
+Yeniləmə miqrasiyası:
+- 6-dan böyük ayarı 6-ya endirir;
+- əmr nömrəsi olan, hələ götürülməmiş və bitmə tarixi «verilmə + 6 ay»dan sonra olan tənbehlərin tarixini verilmə + 6 aya çəkir; artıq qısa (daha əlverişli) tarixlərə toxunmur;
+- artıq keçmiş tarixlər növbəti gündəlik işdə (`personnel:lift-expired-sanctions`, hər gün 00:20) «götürülmüş» olur;
+- geri qaytarılmır: 12 aylıq müddət qanunsuz idi.
+
+Gündəlik iş idempotentdir, `--date=Y-m-d` ilə xüsusi tarix üçün işlədilə bilər.
+
+### `intizam_tenbehi` şablonu
+İntizam əmri standart `intizam_tenbehi` kodlu şablonla çıxır. Təsdiq nəticəsi: `İntizam tənbehi (şəxsi işə yazılır)`. Əl ilə sahələr: `Pozuntunun təsviri`, `Tənbehin növü`, `Əsas mətni`.
+
+Dizayner ekranında bu təsir üçün rollar bunlardır: `Tənbehin növü`, `Pozuntu`, `Tənbeh tarixi`. Standart şablonda `Pozuntunun təsviri` sahəsi `Pozuntu`, `Tənbehin növü` sahəsi `Tənbehin növü` roluna bağlıdır; `Tənbeh tarixi` bağlanmayıbsa tənbehin tarixi əmrin tarixidir. Rol qoyulmayıbsa, tənbehin səbəb sətri boş qalır və kataloqda ümumi sətir (`Əmək intizamını pozduğuna görə`) istifadə olunur.
+
+### İşçi münasibətləri modulu ilə əlaqə
+`İşçi münasibətləri` modulunda işin qərarı `Töhmət` və ya `Sonuncu xəbərdarlıqla şiddətli töhmət` seçiləndə sistem `Əmrlər`də əmr yaradır:
+
+1. aktiv, təsiri `İntizam tənbehi (şəxsi işə yazılır)` olan şablonlar siyahısı alınır;
+2. `intizam_tenbehi` varsa o seçilir, yoxdursa bu təsirli şablonlardan adına görə ilk olan;
+3. heç bir aktiv intizam şablonu yoxdursa qərar verilmir: `«İntizam tənbehi» təsirli əmr şablonu tapılmadı — Əmrlər → Şablonlar bölməsində aktiv edin.`;
+4. şablon var, amma əmr yaradıla bilmirsə: `İntizam əmri qaralaması yaradıla bilmədi. Şablonu yoxlayın.`
+
+Yaranan əmr `Təsdiq gözləyən` statusundadır, əmr nömrəsi olaraq işin nömrəsi yazılır, `Əmr #` sütununda həmin nömrə görünür.
+
+#### Şablonu aktiv saxlamaq
+- `Əmr növü dizayneri`ndə şablonu `Yadda saxla` ilə saxlamaq şablonu aktiv edir.
+- `intizam_tenbehi` şablonunun təsir nəticəsini (`Yoxdur (yalnız sənəd)`, `Xitam` və s.) dəyişməyin: İşçi münasibətləri ekranı yalnız `İntizam tənbehi` təsirli şablonları axtarır. Təsir dəyişsə və başqa intizam şablonu yoxdursa, tənbeh seçimi «şablon tapılmadı» xətası verər.
+- Şablondakı `Pozuntunun təsviri`, `Tənbehin növü`, `Əsas mətni` adlarını dəyişməyin: İşçi münasibətləri modulu dəyərləri bu adlarla göndərir. Ad dəyişsə, sahələr boş çıxır.
+
+### Əmr tərtibçisinin avtomatik qaralaması
+Əmr tərtibçisi (`+ Əmrin tərtibatı`) istifadəçinin yarımçıq sahələrini avtomatik saxlayır:
+
+- açar: istifadəçi + işçi (işçi olmadan açılanda ayrıca ümumi qaralama)
+- müddət: 7 gün, hər dəyişiklikdə yenilənir
+- bərpa: formanı yenidən açanda `Yarımçıq qalmış qaralama bərpa olundu.` zolağı çıxır, `Təmizlə` silir
+- silinmə: əmr nəşr olunanda dərhal; boş sahələr yazılanda da
+- saxlanmır: əmr nömrəsi, tarix, iştirakçı siyahısı
+- redaktə rejimində saxlanmır
+- yer: sistem keşi; keş təmizlənəndə (`cache:clear`) bütün qaralamalar itir
+
+Admin üçün nəticə: bu, `Əmrlər` siyahısındakı `Qaralama` statusu deyil; verilənlər bazasında əmr sətri yaratmır.
+
 ## Riskli dəyişikliklər
 - **Təsdiq nəticəsini dəyişmək.** Bu, gələcəkdə təsdiqlənən bütün əmrlərin nə edəcəyini dəyişir.
 - **Dəyişəni silmək və ya adını dəyişmək.** Word-də mötərizədəki adı dəyişsəniz, yükləmədən sonra mənbəyini yenidən seçməlisiniz.
@@ -58,8 +111,20 @@ Kod yalnız yeni şablonda yazılır. Mövcud şablonun kodu sabitdir.
 **`⋯` menyusunda `Əmr növü dizayneri` yoxdur.**
 Sizdə əmrləri redaktə etmə icazəsi yoxdur.
 
+**İşçi münasibətləri modulunda töhmət seçəndə `«İntizam tənbehi» təsirli əmr şablonu tapılmadı` xətası çıxır.**
+Aktiv intizam təsirli şablon yoxdur. `Əmr növü dizayneri`ndə `intizam_tenbehi` şablonunu açıb təsir nəticəsini `İntizam tənbehi (şəxsi işə yazılır)` saxlayın və `Yadda saxla` basın.
+
+**Ayar 12 yazılıb, amma tənbeh 6 ay qüvvədədir.**
+Bu, qanundur (ƏM Md.190.1): 6-dan böyük qiymət 6 kimi oxunur. Qısa müddət yazmaq olar.
+
+**İstifadəçi yarımçıq əmrinin itdiyini deyir.**
+Qaralama yalnız həmin istifadəçi və həmin işçi üçün saxlanır, 7 gündən sonra silinir, keş təmizlənəndə itir. Əmr nömrəsi, tarix və iştirakçılar heç vaxt saxlanmır.
+
 ## Yadda saxlayın
 - Word faylını tam hazırlayıb yükləyin — sistem mətni dəyişmir, yalnız dəyişənləri doldurur.
 - Dəyişən adlarını `Dəyişən lüğəti`ndən kopyalayın ki, avtomatik tanınsın.
 - Hər dəyişiklikdən sonra sınaq əmri ilə yoxlayın.
 - Köhnə versiya lazım olsa, `Versiya tarixçəsi`ndən endirin.
+- İntizam tənbehi 6 ay qüvvədədir; ayarı 6-dan çox yazmaq təsir etmir.
+- `intizam_tenbehi` şablonunun təsirini və sahə adlarını dəyişməyin: İşçi münasibətləri modulu onlara bağlıdır.
+- Əmr tərtibçisinin qaralaması keşdədir: bu, siyahıdakı `Qaralama` əmri deyil.

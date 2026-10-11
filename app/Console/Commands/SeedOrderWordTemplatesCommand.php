@@ -499,7 +499,7 @@ class SeedOrderWordTemplatesCommand extends Command
 
             // ───────────────────────────── İntizam tənbehi ─────────────────────────────
             // Approval records the sanction in the personnel file; it lapses after the
-            // configured term (Admin → Settings, 12 months by default).
+            // configured term (Admin → Settings; 6 months by default and by law — ƏM Md.190.1).
             'intizam_tenbehi' => [
                 'label' => 'İntizam tənbehi',
                 'effect' => 'disciplinary',

@@ -133,7 +133,94 @@ Kağız yalnız əmri olan məzuniyyət üçün çıxır. Əmr hələ hazır dey
 - müraciət əmrlə bağlanır, `Self-service məzuniyyət üçün əmrlə bağlama tamamlandı.` mesajı görünür
 - bundan sonra əmr nömrəsi və `Məzuniyyət kağızı` ikonu çıxır
 
+### 8. Əlavə məzuniyyət günlərini (staj) yoxlamaq
+İşçinin illik haqqı əsas gündən və əlavə günlərdən (staja görə, uşağa görə, əmək şəraitinə görə) ibarətdir. Əmri yazmazdan əvvəl bunu görmək üçün:
+
+1. Əmr formasında `Məzuniyyət balansı` kartına baxın: `Cəmi haqq`, `İstifadə olunub`, `Qalan`.
+2. `İş illəri üzrə qalıq` siyahısında hər iş ili üçün `Haqq … gün, istifadə … gün` sətri görünür. Əmək şəraitinə görə əlavə məzuniyyət ayrıca `Şərait ili` sətrindədir.
+3. İşçinin kartındakı `Məzuniyyətlər` səhifəsində hər iş ilinin tərkibi `Əsas 21` və `Staj +6 (15 il)` kimi yazılır.
+
+Staj əlavəsi qanunla belədir (Əmək Məcəlləsi, m.116.1):
+
+| Ümumi əmək stajı | Əlavə məzuniyyət |
+|---|---|
+| 5 ildən az | yoxdur |
+| düz 5 il və 5–10 il arası | 2 təqvim günü |
+| düz 10 il və 10–15 il arası | 4 təqvim günü |
+| düz 15 il və daha çox | 6 təqvim günü |
+
+Vacib: **düz 15 il tamam olanda** əlavə gün 6-dır. «15 ildən çox» gözləmək lazım deyil.
+
+#### Sonra nə olur?
+- staj iş ilinin **başlanğıc tarixinə** görə hesablanır; iş ili ortasında 15 il tamam olsa, 6 gün növbəti iş ilindən tətbiq olunur
+- staj yalnız bu təşkilatda deyil, bütün işəgötürənlərdə faktiki işlənmiş müddətdir (əmək fəaliyyəti qeydlərindən)
+- balansda gözlədiyinizdən az gün görürsünüzsə, bax: aşağıda `Düz 15 il stajı olan işçinin balansı niyə 4 gün göstərir?`
+
+## Ekspert məlumatı: qanuni əsas və nümunələr
+
+### Staja nə daxildir
+Məcəllənin m.116.2-yə görə staja işçinin əmək müqaviləsi üzrə faktiki işlədiyi vaxt, müvəqqəti əmək qabiliyyətini itirdiyi dövr və m.179-da nəzərdə tutulan, iş yeri və orta əmək haqqı saxlanılan dövrlər daxildir. «Bir müəssisədə» məhdudiyyəti Konstitusiya Məhkəməsinin 29.11.2000 tarixli qərarı ilə qüvvədən düşüb: əvvəlki işəgötürənlərdə işlənmiş müddət də sayılır. Bu səbəbdən əvvəlki iş yerləri işçi kartında tam və düzgün yazılmayıbsa, staj əlavəsi az çıxa bilər.
+
+### Nümunələr (yalnız bu işəgötürəndə işləyən işçi, staj iş ilinin başlanğıcına)
+
+| İşə qəbul | İş ili başlayır | Staj | Staj əlavəsi |
+|---|---|---|---|
+| 01.12.2021 | 01.12.2026 | düz 5 il | 2 gün |
+| 01.12.2016 | 01.12.2026 | düz 10 il | 4 gün |
+| 01.12.2012 | 01.12.2026 | 14 il | 4 gün |
+| 01.12.2011 | 01.12.2026 | düz 15 il | 6 gün |
+
+Əsas 21 gündürsə, sonuncu işçinin illik haqqı 21 + 6 = 27 gündür. Vəzifəsi rəhbər və ya mütəxəssis kateqoriyasındadırsa (VTİSK üzrə), əsas gün 30-dur və cəm 36 olur.
+
+### Əmək şəraitinə görə əlavə məzuniyyət: aylar necə sayılır
+Zərərli və ağır şəraitdə işləyənin əlavə məzuniyyəti iş ilində həmin şəraitdə işlənmiş vaxta mütənasibdir (Nazirlər Kabinetinin 95 nömrəli qərarı, b.7). Tam ay belə tapılır: şəraitdə keçən **təqvim günləri ÷ 30,4**; qalıq 15,2 gündən azdırsa atılır, 15,2 və çoxdursa tam ay sayılır (b.10). Ildə 12 aydan çox ola bilməz.
+
+Nümunələr (illik norma 12 gün):
+
+| Şəraitdə keçən dövr | Təqvim günü | Tam ay | Əlavə məzuniyyət |
+|---|---|---|---|
+| 15 gün | 15 | 0 | 0 gün |
+| 16 gün | 16 | 1 | 1 gün |
+| aprel–iyun | 91 | 3 | 3 gün |
+| 01.03–30.06 | 122 | 4 | 4 gün |
+| 01.01–02.07 | 183 | 6 | 6 gün |
+| tam il | 365 | 12 | 12 gün |
+
+Formul: gün = norma × tam ay ÷ 12. Sistem «iş günləri» yox, təqvim günlərini sayır; bu, işçinin xeyrinədir və qaydaların öz misalları ilə uyğundur.
+
+### Şərait ilində fasilə olanda nə baş verir
+Nazirlər Kabinetinin 95 nömrəli qərarı fasilələrin hamısını açıq yazmır; sistem aşağıdakı kimi davranır:
+
+| Hal | Sistemin nəticəsi |
+|---|---|
+| Xəstəlik, ödənişli əmək məzuniyyəti, ezamiyyət, məcburi işburaxma (b.8) | şəraitli vəzifədə keçibsə **sayılır** |
+| Uşağa qulluq məzuniyyəti | **sayılmır**, amma şərait ili həmin müddət qədər uzanır (zəncir qırılmır) |
+| Ödənişsiz məzuniyyət | **sayılmır** və şərait ilini uzatmır |
+| Hamiləlik və doğuşa görə məzuniyyət | sayılır; hüquqşünas təsdiqi gözlənilir |
+| Şəraitdə üst-üstə 6 ay fasilə ilə tamamlanır | fasilə sayğacı sıfırlamır, əvvəlki aylar da sayılır |
+| Bütöv il şəraitdən kənarda, sonra qayıdış | zəncir qırılır, yeni şərait ili qayıdış günündən başlayır |
+
+Rəqəmli nümunə: 12 günlük norma; işçi 01.01–31.03.2025 şəraitdədir, 01.04–30.06 kənardadır, 01.07-dən yenə şəraitdədir. 30.09.2025-də cəmi 182 gün var (183-dən az) — hüquq yoxdur, əlavə məzuniyyət 0-dır. 01.10.2025-də hüquq yaranır; il üçün 90 + 184 = 274 gün, yəni 9 tam ay, **9 gün** (cari il üçün avans).
+
+### Xitamda kompensasiya
+İstifadə olunmamış məzuniyyət üçün pul yalnız əmək müqaviləsinə xitam verildikdə ödənilir (m.144.2). Xitam əmri təsdiqlənməyibsə `Məzuniyyət əmri` forması kompensasiyanı qəbul etmir, `Əvvəlcə bu işçi üçün xitam əmri tərtib edin` yazır. Bir günün məbləği orta aylıq əmək haqqı ÷ 30,4 ilə tapılır (m.140.3). Şərti nümunə: orta aylıq 1520 AZN olsa, bir gün 1520 ÷ 30,4 = 50 AZN, 2 gün fərq 100 AZN edir.
+
+### Tipik xətalar
+- **Əvvəlki əmək fəaliyyəti işçi kartında natamamdır.** Staj az hesablanır, əlavə gün azdır. Düzəlişi kartdan başlayın.
+- **Şərait ilini işə qəbul ili ilə qarışdırmaq.** Əsas məzuniyyət işə qəbul günündən, şəraitə görə əlavə isə şəraitdə işə başlama günündən sayılır; hər birinin öz iş ili var.
+- **Uşağa qulluq və ödənişsiz məzuniyyəti eyni saymaq.** Birincisi şərait ilini uzadır, ikincisi uzatmır.
+- **Kompensasiyanı xitam əmrindən əvvəl yazmağa çalışmaq.** Sistem bunu rədd edir.
+
 ## Tez-tez verilən suallar
+
+**Düz 15 il stajı olan işçinin balansı niyə 4 gün göstərir?**
+Sistemdə düz 15 il əvvəl 4 gün sayılırdı. Düzgün qayda 6 gündür (m.116.1). Yeni qayda yalnız ondan sonra başlayan iş illərinə tətbiq olunur; əvvəl başlamış iş illərinə fərq admin tərəfindən ayrıca `Düz 15 il düzəlişi` ilə +2 gün kimi yazılır. Bu barədə adminə yazın, balansı əl ilə dəyişməyin. Ətraflı: `Məzuniyyət Admin Bələdçisi`.
+
+**Düzəlişdən sonra balans necə görünür?**
+Yazılan +2 gün həmin iş ilinin haqqına əlavə olunur və `Cəmi haqq`da görünür. Kartdakı tərkib sətri köhnə `Staj +4` qala bilər, cəm isə düzgün olur.
+
+**VTİSK nədir və məzuniyyətə nə təsir edir?**
+Vəzifənin Vahid Tarif-İxtisas Sorğu Kitabçasındakı kateqoriyasıdır (rəhbər, mütəxəssis, texniki icraçı, fəhlə). Rəhbər və mütəxəssis kateqoriyasında əsas məzuniyyət 30 gündür (m.114.3 «b»). Vəzifənin kateqoriyası təyin olunmayıbsa, 21 gün hesablana bilər. Bunu admin `Vəzifə` siyahısında düzəldir.
 
 **`Məzuniyyət əmri` düyməsi niyə görünmür?**
 Bu düymə yalnız əmr əlavə etmək icazəsi olanlara görünür. İcazə üçün sistem adminə müraciət edin.
@@ -165,3 +252,7 @@ Siz yalnız sizə açıq olan strukturların məzuniyyətlərini görürsünüz.
 - Əmr yazmazdan əvvəl formadakı `Məzuniyyət balansı`na baxın.
 - Şəxsi kabinetdən gələn təsdiqlənmiş müraciəti `Əmr bağla` ilə bağlamağı unutmayın.
 - Mavi sətir — işçi bu gün məzuniyyətdədir.
+- Düz 15 il stajda əlavə məzuniyyət 6 gündür; balans 4 göstərirsə adminə yazın, əl ilə dəyişməyin.
+- Əmək şəraitinin tam ayı təqvim günləri ÷ 30,4 ilə tapılır; 16 gün 1 ay, 15 gün 0 aydır.
+- Uşağa qulluq məzuniyyəti şərait ilini uzadır, ödənişsiz məzuniyyət uzatmır; heç biri sayılmır.
+- Kompensasiya yalnız xitam əmri təsdiqləndikdən sonra yazılır.

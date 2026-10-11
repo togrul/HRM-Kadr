@@ -7,6 +7,7 @@
 - bu həftə davamiyyət necə gedir?
 - sistemdə son nə dəyişib?
 - strukturlar ştat üzrə nə qədər doludur?
+- HR baxımından hansı proseslər gecikib: həyat dövrü tapşırıqları, sınaq müddəti baxışları, açıq vakansiyalar, tələbnamələr, davamiyyət istisnaları, bitən sənədlər?
 
 Ən çox işlənən təsdiqləri (davamiyyət qeydi, məzuniyyət sorğusu) başqa modula keçmədən elə buradan edə bilərsiniz.
 
@@ -20,6 +21,8 @@ Səhifə hər istifadəçiyə yalnız öz icazələrinə uyğun blokları göst�
 - əmrlərə baxmaq icazəsi olan şəxs imzasız əmrləri görür;
 - məzuniyyət sorğularına baxan rəhbər gözləyən sorğuları görür;
 - kadr və ya uyğunluq məsulu vaxtı bitən sənədləri görür.
+
+- HR və ya rəhbər `HR idarəetmə mərkəzi` blokunda öz strukturları üzrə gecikən HR işlərini görür.
 
 Heç bir blok üçün icazəniz yoxdursa, səhifədə sadəcə `Göstəriləcək məlumat yoxdur.` yazısı görünür.
 
@@ -68,6 +71,27 @@ Sayı sıfır olan kartda `Burada bax` düyməsi olmur, onun əvəzinə modula k
 ### "Hər şey qaydasındadır" vəziyyəti
 Bütün kartlarda sayı sıfırdırsa, dörd boş kart əvəzinə yaşıl işarəli bir sakit sətir görünür: `Hər şey qaydasındadır`. Bu o deməkdir ki, sizin qərarınızı gözləyən heç nə yoxdur.
 
+### HR idarəetmə mərkəzi
+Diqqət kartlarının və növbə siyahısının altında `HR idarəetmə mərkəzi` bloku görünür (altında `Strukturlarınız üzrə diqqət tələb edən işlər` yazılıb). Bu blok sizin qərar verməli olduğunuz işləri yox, HR proseslərində **gecikən və ya vaxtı yaxınlaşan** işləri bir yerdə göstərir. Blok səhifə açılandan bir az sonra yüklənir.
+
+Hər panel ayrıca kartdır: solda adı və qısa izah, sağda böyük rəqəm (ümumi say), altında ən çox 5 sətir və `Hamısına bax` keçidi. Sətrin sağındakı rəngli nişan qalan və ya gecikən vaxtı göstərir: qırmızı — gecikib, sarı — yaxınlaşır, boz — neytral.
+
+| Panel | Nəyi göstərir | `Hamısına bax` hara aparır | Kimə görünür (icazə) |
+| --- | --- | --- | --- |
+| `Gecikmiş həyat dövrü tapşırıqları` | son tarixi keçmiş açıq tapşırıqlar (`3 gün gecikib`) | `Əməkdaş həyat dövrü` | həyat dövrünə baxış icazəsi |
+| `Sınaq müddəti baxışları` | gözləyən baxışlar: gecikmiş və növbəti 14 gün ərzində olanlar (`2 gün gecikib` / `5 gün qalıb`) | `Əməkdaş həyat dövrü` | həyat dövrünə baxış icazəsi |
+| `Açıq vakansiyalar` | açıq vakansiyalar, ən uzun açıq qalan əvvəl (`40 gündür açıqdır`, 30 gün və çox olduqda sarı) | `Vakansiyalar` | namizədlərə baxış icazəsi |
+| `Tələbnamə yaşı` | qaralama və ya təsdiq gözləyən tələbnamələr, ən köhnəsi əvvəl; 14 gündən çox gözləyən olduqda panelin adının altındakı izahın yerinə `N tələbnamə 14 gündən çox gözləyir` yazılır | `Tələbnamələr` | namizədlərə baxış icazəsi |
+| `Davamiyyət istisnaları` | həll gözləyən açıq istisnalar (`Giriş yoxdur`, `Çıxış yoxdur`, `Uyğunsuz giriş-çıxış qeydi`, `Digər istisna`) | `Davamiyyət` modulunun istisnalar bölməsi | davamiyyət istisnalarına baxış və ya redaktə icazəsi |
+| `Bitmək üzrə olan sənədlər` | bitmiş və 30 gün ərzində bitəcək sənədlər: `Xidməti vəsiqə`, `Pasport`, `Şəxsiyyət vəsiqəsi`, `Əmək müqaviləsi` (`Bitib` / `12 gün qalıb`) | `Sənəd uyğunluğu` | sənəd uyğunluğuna baxış icazəsi |
+
+Qaydalar:
+- İcazəniz olmayan panel göstərilmir. Heç bir panelə icazəniz yoxdursa, blokun özü görünmür.
+- Sətirlər və say yalnız sizə açıq olan strukturlar üzrə hesablanır. Struktura bağlı olmayan qeyd məhdud görünürlüyü olan istifadəçiyə göstərilmir.
+- Rəqəm tam sayı göstərir, siyahıda isə yalnız ilk 5 sətir olur. Qalanı üçün `Hamısına bax` keçidindən istifadə edin.
+- Panel boşdursa `Hazırda diqqət tələb edən qeyd yoxdur.` yazılır, rəqəm sönük görünür.
+- Əməkdaş həyat dövrü modulu və ya müvafiq modul qurulmayıbsa, uyğun panel göstərilmir.
+
 ### Aşağıdakı bloklar
 Kartların altında (icazənizə görə) bu bloklar görünür. Onlar səhifə açılandan bir az sonra yüklənir, bu müddətdə boz "yer tutucu" görünə bilər.
 
@@ -113,7 +137,25 @@ Siyahıda yalnız sizin baxa biləcəyiniz sorğular görünür.
 ### İmzasız əmrə baxmaq
 `İmzasız əmr` növbəsində təsdiq düymələri yoxdur. Hər sətirdə `Aç` düyməsi var, o, həmin əmri `Əmrlər` modulunda açır. Əmr orada təsdiqlənir.
 
+### Gecikməni HR idarəetmə mərkəzindən araşdırmaq
+1. `HR idarəetmə mərkəzi` blokunda qırmızı rəqəmi olan paneli tapın.
+2. Sətirlərdə kimin və hansı işin gecikdiyini oxuyun (məs. `Əli Məmmədov · Köçürmə əmri: rol dəyişikliyi`).
+3. Tam siyahı üçün panelin altındakı `Hamısına bax` düyməsini basın — uyğun modul açılır.
+4. Orada tapşırığı bağlayın, baxışı tamamlayın və ya sənədi yeniləyin; ana səhifəyə qayıdanda rəqəm azalır.
+
 ## Tez-tez verilən suallar
+
+**`HR idarəetmə mərkəzi` bloku görünmür. Niyə?**
+Blok yalnız həyat dövrünə, namizədlərə, davamiyyət istisnalarına və ya sənəd uyğunluğuna baxış icazələrindən ən azı biri olanlara görünür. Heç bir panelə icazəniz yoxdursa blok tamamilə gizlənir. İcazələr üçün administratora müraciət edin.
+
+**Panel rəqəmi var, amma siyahıda yalnız 5 sətir görünür.**
+Rəqəm tam sayıdır, siyahı isə ilk 5 sətirlə məhdudlaşır. Qalanı `Hamısına bax` keçidində açılır.
+
+**Panelin rəqəmi başqa istifadəçidə fərqlidir.**
+Panel hər istifadəçinin struktur görünürlüyünə görə hesablanır. Fərqli strukturlara icazəsi olan iki nəfər fərqli rəqəm görür.
+
+**Köçürmə və ya xitam əmrindən sonra `Gecikmiş həyat dövrü tapşırıqları` panelində yeni sətirlər çıxdı.**
+Təsdiqlənmiş köçürmə və xitam əmrləri həyat dövrü modulunda avtomatik proses və yoxlama siyahısı açır. Tapşırıqların vaxtı keçəndə bu panelə düşür. Ətraflı: `Əməkdaş həyat dövrü` bələdçisi.
 
 **Kartlardan biri görünmür. Niyə?**
 Hər kart ayrıca icazə ilə açılır. Məsələn, `Vaxtı bitən sənəd` kartı yalnız sənəd uyğunluğuna baxmaq icazəsi olanlara görünür. Lazımdırsa, administratora müraciət edin.
@@ -139,3 +181,11 @@ Ya icazəniz yoxdur, ya da göstəriləcək məlumat yoxdur (məsələn, son əm
 - Növbəni `Burada bax` ilə açıb qərarı yerindəcə verin; ən köhnə elementlər yuxarıdadır.
 - Davamiyyət qeydini rədd edərkən səbəbi mütləq yazın.
 - Əmrlər burada təsdiqlənmir — `Aç` ilə əmrin öz səhifəsinə keçin.
+- `HR idarəetmə mərkəzi` gecikən işləri göstərir, qərar vermək üçün deyil: oradan `Hamısına bax` ilə uyğun modula keçin.
+- Mərkəzdəki rəqəmlər yalnız sizə açıq strukturlar üzrədir; hər panel öz icazəsi ilə açılır.
+
+## Administrator üçün
+- `HR idarəetmə mərkəzi` panellərinin icazələri: `Gecikmiş həyat dövrü tapşırıqları` və `Sınaq müddəti baxışları` — `show-employee-lifecycle`; `Açıq vakansiyalar` və `Tələbnamə yaşı` — `show-candidates`; `Davamiyyət istisnaları` — `show-attendance-exceptions` və ya `edit-attendance-exceptions`; `Bitmək üzrə olan sənədlər` — `show-document-compliance`.
+- Panel başına sətir sayı `HR_COMMAND_CENTER_ROWS` dəyişəni ilə dəyişir (standart 5). Sınaq baxışı pəncərəsi (14 gün), sənəd pəncərəsi (30 gün) və tələbnamənin «köhnəlmiş» sayılma həddi (14 gün) `config/strategic_hr.php` faylındadır.
+- Hər panel iki sorğudur (tam say və məhdud sətirlər). Blok səhifə açılandan sonra ayrıca yüklənir və kodda ayrıca keş yoxdur.
+- Panelin mənbə cədvəli (məs. həyat dövrü və ya tələbnamə cədvəli) yoxdursa, həmin panel səssiz göstərilmir.

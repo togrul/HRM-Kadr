@@ -222,7 +222,46 @@ Daha detallı əməliyyat üçün:
 - [Təlim və Performans Ümumi Bələdçisi](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/training-performance-user-guide.md)
 - [Training / Performance Admin Ops Guide](/Users/togruljalalli/Desktop/projects/HRM/docs/scenario/training-performance-admin-ops-guide.md)
 
-## 11. Qısa nəticə
+## 11. KPI və varislik üzrə əlavə qeydlər
+
+### KPI xalının yenidən hesablanması
+
+Fakt təsdiqləndikdən, idxal edildikdən və ya sistemdən yeniləndikdən sonra kartın xalı yenidən hesablanır.
+
+- Standart rejimdə bu, sorğunun içində dərhal olur.
+- `PERFORMANCE_KPI_QUEUE_RECALCULATION=true` olanda hesablama növbəyə atılır və xal bir neçə saniyə sonra yenilənir.
+- Növbə rejimi üçün serverdə `queue:work` prosesi işləməlidir; düstur dəyişmir, yalnız hesablama vaxtı dəyişir.
+- Bağlanmış kart yenidən hesablanmır.
+
+Ətraflı əməliyyat qaydası üçün `docs/queue-ops.md` sənədinə baxın.
+
+### Faktların təkrar idxalı
+
+Excel ilə idxal mənbə sistemin cari vəziyyəti sayılır: eyni kart bəndi üçün təkrar idxal əvvəlki idxal olunmuş dəyəri əvəz edir, toplamır. Əl ilə yazılmış faktlara toxunulmur, köhnə dəyər fəaliyyət jurnalında qalır.
+
+### İşdən çıxan əməkdaşın bonusu
+
+Dövr bitməmiş işdən çıxan əməkdaşın bonusu dövrün bonus qaydasındakı `early_close_policy` seçimi ilə hesablanır:
+
+- `prorata` — işlədiyi günlərə mütənasib (standart)
+- `full` — dövr sonuna qədər işləmiş kimi
+- `none` — bonus verilmir
+
+Vəzifə dəyişikliyi ilə bağlanan kart həmişə mütənasibdir. Ekranda bu seçim `Bonus` bölməsində `İşdən çıxan əməkdaşın bonusu (dövr bitmədən)` adı ilə görünür.
+
+### Karyera hazırlıq skoru
+
+`Varislik planları` hissəsində hər namizədin 0–100 arası karyera hazırlıq skoru göstərilir. Skor beş komponentin çəkili cəmidir:
+
+- performans nəticəsi — 35
+- tamamlanmış təlimlər — 20
+- KPI nəticəsi — 20
+- peşəkar portfolio — 10
+- staj — 15
+
+Məlumatı olmayan komponent 0 bal verir. Zolaqlar: 75 və yuxarı `hazırdır`, 50–74 `inkişafdadır`, 50-dən aşağı `erkən mərhələ`. Ətraflı izah `Performance Evaluation User Guide` sənədindədir.
+
+## 12. Qısa nəticə
 
 `Performans qiymətləndirməsi` modulu sadəcə bal yazmaq üçün deyil.
 

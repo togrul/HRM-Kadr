@@ -41,6 +41,8 @@ class GuideRegistry
         'professional-portfolio' => ['label' => 'Peşəkar portfel', 'tone' => 'violet', 'icon' => 'work_history', 'markdown' => 'professional-portfolio-user-guide.md', 'route' => null, 'routes' => [], 'partial' => true],
         'compensation' => ['label' => 'Kompensasiya', 'tone' => 'sky', 'icon' => 'payments', 'markdown' => 'compensation-user-guide.md', 'route' => 'compensation', 'routes' => ['compensation*']],
         'payroll' => ['label' => 'Əmək haqqı', 'tone' => 'emerald', 'icon' => 'request_quote', 'markdown' => 'payroll-user-guide.md', 'route' => 'payroll', 'routes' => ['payroll*']],
+        'employee-relations' => ['label' => 'İşçi münasibətləri', 'tone' => 'rose', 'icon' => 'gavel', 'markdown' => 'employee-relations-user-guide.md', 'route' => 'employee-relations', 'routes' => ['employee-relations*']],
+        'benefits' => ['label' => 'İmtiyazlar', 'tone' => 'amber', 'icon' => 'redeem', 'markdown' => 'benefits-user-guide.md', 'route' => 'benefits', 'routes' => ['benefits*']],
         'reports' => ['label' => 'Hesabatlar', 'tone' => 'indigo', 'icon' => 'bar_chart', 'markdown' => 'reports-user-guide.md', 'route' => 'reports', 'routes' => ['reports*']],
         'audit' => ['label' => 'Audit jurnalı', 'tone' => 'zinc', 'icon' => 'policy', 'markdown' => 'audit-user-guide.md', 'route' => 'audit.logs', 'routes' => ['audit.*']],
         'notifications' => ['label' => 'Bildirişlər', 'tone' => 'rose', 'icon' => 'notifications', 'markdown' => 'notifications-module-guide.md', 'route' => 'notifications', 'routes' => ['notifications*'], 'partial' => true],

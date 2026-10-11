@@ -283,4 +283,33 @@ class IncomeTaxReliefTest extends TestCase
             DB::table('work_norms')->insert(['id' => 1, 'name_az' => 'Tam iş günü', 'name_en' => 'Full time', 'name_ru' => 'Full time']);
         }
     }
+
+    public function test_the_fixed_amount_form_cannot_replace_or_delete_a_card_based_exemption(): void
+    {
+        $personal = StatutoryExemption::query()->where('kind', StatutoryExemption::KIND_PERSONAL)->first();
+
+        if ($personal === null) {
+            $this->markTestSkipped('Kart əsaslı azadolma seed olunmayıb.');
+        }
+
+        $user = \App\Models\User::factory()->create();
+        foreach (['show-compensation', 'manage-compensation'] as $permission) {
+            $user->givePermissionTo(Permission::findOrCreate($permission, 'web'));
+        }
+        $this->actingAs($user);
+
+        Livewire::test(StatutoryTab::class)
+            ->call('openPanel', 'exemption')
+            ->set('exemptionForm.code', $personal->code)
+            ->set('exemptionForm.legal_basis', 'VM test')
+            ->set('exemptionForm.amount', '999')
+            ->set('exemptionForm.effective_from', '2027-01-01')
+            ->call('saveStatutoryExemption')
+            ->assertHasErrors('exemptionForm.code')
+            ->call('deleteStatutoryExemption', $personal->id)
+            ->assertHasErrors('exemptionForm.code');
+
+        $this->assertNull($personal->fresh()->effective_to);
+        $this->assertSame(1, StatutoryExemption::where('code', $personal->code)->count());
+    }
 }

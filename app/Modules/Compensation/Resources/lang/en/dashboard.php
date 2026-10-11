@@ -48,6 +48,8 @@ return [
     ],
 
     'exemptions' => [
+        'code_reserved' => 'This code belongs to a card-based or component rule; the fixed-amount form does not replace it.',
+        'delete_reserved' => 'A card-based or component rule cannot be deleted from this screen; it would be removed for everyone.',
         'title' => 'Income tax exemptions (Tax Code art. 102)',
         'hint' => 'Taken off the taxable base before the brackets apply. A new row applies from its own date; locked months keep the old rule.',
         'panel_hint' => 'E.g. Tax Code art. 102.1.6: at the main workplace, a monthly income of up to 2500 AZN has 200 AZN exempt. The previous row with the same code ends the day before.',

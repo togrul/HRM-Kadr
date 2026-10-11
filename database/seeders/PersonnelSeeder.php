@@ -578,6 +578,12 @@ class PersonnelSeeder extends Seeder
             'show-benefits',
             'manage-benefits',
             'show-benefit-costs',
+            'show-employee-relations',
+            'create-employee-relations',
+            'manage-employee-relations',
+            'reveal-employee-relations-reporter',
+            'show-employee-relations-statistics',
+            'submit-own-employee-relations',
         ];
 
         $now = now();

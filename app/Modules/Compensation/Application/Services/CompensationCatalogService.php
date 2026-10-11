@@ -7,6 +7,7 @@ use App\Models\StatutoryExemption;
 use App\Models\StatutoryRate;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Master data behind payroll: the pay component catalog and the statutory rate table.
@@ -77,6 +78,19 @@ class CompensationCatalogService
             $from = Carbon::parse((string) $data['effective_from'])->toDateString();
             $code = trim((string) $data['code']);
 
+            // Bu forma yalnız sabit məbləğli azadolma yaradır. Kart tələb edən («personal») və ya
+            // vergi tutulan komponent növlü kodu bununla əvəz etmək onu hamıya tətbiq olunan sətrə çevirərdi.
+            $reservedKind = StatutoryExemption::query()
+                ->where('code', $code)
+                ->where('kind', '!=', StatutoryExemption::KIND_FIXED_AMOUNT)
+                ->exists();
+
+            if ($reservedKind) {
+                throw ValidationException::withMessages([
+                    'exemptionForm.code' => __('compensation::dashboard.exemptions.code_reserved'),
+                ]);
+            }
+
             StatutoryExemption::query()
                 ->where('code', $code)
                 ->where('regime_id', $regimeId)
@@ -101,6 +115,19 @@ class CompensationCatalogService
 
     public function deleteStatutoryExemption(int $exemptionId): void
     {
-        StatutoryExemption::whereKey($exemptionId)->delete();
+        $exemption = StatutoryExemption::query()->find($exemptionId);
+
+        if ($exemption === null) {
+            return;
+        }
+
+        // Kart əsaslı və komponent növlü qaydalar bu ekrandan silinmir: silinəndə hamıdan götürülərdi.
+        if ($exemption->kind !== StatutoryExemption::KIND_FIXED_AMOUNT) {
+            throw ValidationException::withMessages([
+                'exemptionForm.code' => __('compensation::dashboard.exemptions.delete_reserved'),
+            ]);
+        }
+
+        $exemption->delete();
     }
 }

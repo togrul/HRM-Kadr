@@ -9,6 +9,7 @@ Sadə dildə bu modul sizə bu suallara cavab verir:
 - kim başqa struktura və ya vəzifəyə keçir?
 - kim işdən ayrılır və çıxış müsahibəsi keçirilibmi?
 - hansı tapşırıqların vaxtı keçib?
+- təsdiqlənmiş köçürmə və xitam əmrlərindən sonra hansı işlər görülməlidir?
 
 ## Harada açılır?
 Sol menyudan `Əməkdaş həyat dövrü` bölməsini açın (qısa menyuda `Həyat dövrü` kimi görünə bilər). Səhifənin başlığı `Əməkdaş həyat dövrü mərkəzi`-dir.
@@ -93,6 +94,25 @@ Diqqət: tamamlananda əməkdaşın strukturu və vəzifəsi hədəf struktur/v�
 2. İstəsəniz `Çıxış xülasəsi` yazın — yazsanız, çıxış müsahibəsi tamamlanmış sayılır.
 3. `İşdən ayrılmanı tamamla` düyməsini basın.
 
+### Əmrdən avtomatik yaranan proseslər
+Köçürmə və ya xitam əmri təsdiqlənəndə sistem həyat dövrü modulunda prosesi özü açır, əl ilə başlatmağa ehtiyac yoxdur. Cədvəlin `Proses` sütununda belə proses `Əmr: <nömrə>` nişanı ilə seçilir.
+
+| Əmr | Açılan proses | Başlıq | Yoxlama siyahısı (şablon yoxdursa) |
+| --- | --- | --- | --- |
+| Köçürmə əmri | `Daxili yerdəyişmə` (status `İcradadır`, yerdəyişmə qeydi isə tamamlanmış) | `Köçürmə əmri: rol dəyişikliyi` | `Giriş hüquqlarını yeni rola uyğun yenilə` (İT/Admin, +1 gün), `Avadanlığı yeni rola uyğun təhvil ver / geri al` (İT/Admin, +3 gün), `Əvvəlki rol üzrə təhvil-təslimi tamamla` (Rəhbər, +3 gün), `Yeni rəhbərlə başlanğıc hədəflərini razılaşdır` (Rəhbər, +7 gün) |
+| Xitam əmri | `İşdən ayrılma` (açıq işdən ayrılma prosesi) | `Xitam əmri: işdən ayrılma` | `Təhvil-təslim və aktivləri yoxla` (Rəhbər), `Sistem giriş hüquqlarını bağla` (İT/Admin), `Son haqq-hesabı (əmək haqqı, kompensasiya) yekunlaşdır` (İnsan resursları) — hamısı son iş günü; `Çıxış müsahibəsi qeydlərini tamamla` (İnsan resursları, +3 gün) |
+
+Bilmək lazımdır:
+- Aktiv `Daxili yerdəyişmə` və ya `İşdən ayrılma` plan şablonu varsa, yoxlama siyahısı və müddət ondan götürülür. Şablon yoxdursa, yuxarıdakı standart siyahı və müddət (köçürmə üçün 7 gün, xitam üçün son iş günündən sonra 10 gün) tətbiq olunur.
+- Xitam prosesində `Son haqq-hesabı ... yekunlaşdır` tapşırığı şablon nə olursa olsun yaranır.
+- Tapşırıqların son tarixi köçürmənin qüvvəyə minmə tarixindən və ya son iş günündən hesablanır.
+- Gələcək tarixli köçürmə üçün proses əmr təsdiqlənəndə yox, köçürmə faktiki qüvvəyə mindiyi gün açılır.
+- Eyni əmr və eyni əməkdaş üçün ikinci proses yaranmır; təkrar təsdiq mövcud prosesi dəyişmir.
+- Əmr ləğv edilsə və ya gözləməyə qaytarılsa, həmin əmrin prosesi, açıq tapşırıqları və bağlı yerdəyişmə / işdən ayrılma qeydi `Ləğv edilib` statusuna keçir. Əmr yenidən təsdiqlənsə, ləğv edilmiş proses və onun ləğv edilmiş tapşırıqları yenidən açılır.
+- Prosesin məsul icraçısı əmri təsdiqləyən istifadəçi olur.
+
+Əmrdən yaranan proses əməkdaşın `HR 360` zaman xəttində `Həyat dövrü` növü ilə də görünür.
+
 ### Yeni proses başlatmaq
 `Proses başlat` düyməsini basın. Panelin yuxarısında dörd seçim var:
 - `Planı əməkdaşa başlat` — `Şablon`, `Əməkdaş`, `Başlama tarixi`, `Məsul icraçı` seçib `Planı başlat` basın. Şablondakı tapşırıqlar əməkdaşa avtomatik yaradılır.
@@ -130,6 +150,15 @@ Uzatma prosesi bağlamır, o `İcradadır` statusunda qalır. Yeni baxış tarix
 ### Yerdəyişmə tamamlandı, əməkdaşın vəzifəsi niyə dəyişdi?
 Yerdəyişmənin tamamlanması hədəf struktur və vəzifəni əməkdaşın kartına yazır. Ona görə tamamlamazdan əvvəl hədəfin düzgün olduğunu yoxlayın.
 
+### Köçürmə əmrini təsdiqlədim, amma həyat dövrü cədvəlində proses yoxdur.
+Yoxlayın: `Əməkdaş həyat dövrü` modulu şirkət üçün aktivdirmi; köçürmə gələcək tarixlidirsə, qüvvəyə minmə tarixi çatıbmı (proses həmin gün açılır); `Proses tipi` və `Status` süzgəcləri `Bütün proseslər` və `Bütün statuslar`dadırmı.
+
+### Xitam əmri üçün proses iki dəfə görünür.
+Əmrdən avtomatik açılan prosesdən başqa siz `İşdən ayrılma aç` ilə də proses başlatmısınızsa, bunlar ayrı proseslərdir (əmrdən yaranan `Əmr: <nömrə>` nişanı daşıyır). Əmr təsdiqləndikdən sonra əl ilə ikinci proses açmayın, əmrdən yaranan prosesi tamamlayın.
+
+### Əmri ləğv etdim, proses nə oldu?
+Proses və açıq tapşırıqları `Ləğv edilib` olur. Artıq tamamlanmış tapşırıqlar olduğu kimi qalır.
+
 ### Şablonu silmək istəyirəm, amma yalnız `Arxivlə` görünür.
 Şablon artıq proseslərdə istifadə olunub. Tarixçə itməsin deyə, o silinmir, deaktiv edilir.
 
@@ -139,3 +168,13 @@ Yerdəyişmənin tamamlanması hədəf struktur və vəzifəni əməkdaşın kar
 - Yerdəyişməni tamamlamaq əməkdaşın strukturunu və vəzifəsini dəyişir.
 - Qırmızı `Gecikir` yazısı və `Gecikmiş həyat dövrü tapşırıqları` bloku gündəlik yoxlanmalıdır.
 - Çıxış xülasəsini yazın — o, çıxış müsahibəsinin keçirildiyini göstərir.
+- Köçürmə və xitam əmrləri təsdiqlənəndə proses və yoxlama siyahısı avtomatik açılır — əl ilə təkrar açmayın.
+- Əmr ləğv olunanda proses də `Ləğv edilib` olur; yenidən təsdiqdə yenidən açılır.
+
+## Administrator üçün
+- Əmr → proses əlaqəsi `OrderLifecycleSync` müqaviləsi ilə qurulub: əmr effekti (köçürmə, xitam) əmrin öz tranzaksiyasının içində həyat dövrü hadisəsini yaradır. Effekt geri qaytarılarsa, proses də yaranmır.
+- `Əməkdaş həyat dövrü` modulu söndürülübsə və ya cədvəllər yoxdursa, əmr normal işləyir, sadəcə proses yaranmır (xəta yoxdur). Modulu sonradan yandırmaq keçmiş əmrlər üçün proses yaratmır.
+- Gələcək tarixli köçürmələr `orders:apply-due-transfers` əmri ilə (scheduler hər 5 dəqiqə, `Əmrlər` modulu aktiv olduqda) qüvvəyə minir və proses də o anda açılır. Scheduler (`schedule:run`) qurulmayıbsa, nə köçürmə, nə proses yaranır.
+- Standart yoxlama siyahısını dəyişmək üçün `Daxili yerdəyişmə` və ya `İşdən ayrılma` tipində aktiv plan şablonu yaradın (`Şablonlar`). Eyni tipdə bir neçə aktiv şablon varsa, ən köhnəsi (ən kiçik nömrəlisi) götürülür.
+- Əmrdən yaranan proses `Gecikmiş həyat dövrü tapşırıqları` və ana səhifədəki `HR idarəetmə mərkəzi` blokuna eyni qaydada düşür.
+- Məhdudiyyət: sistem əmrdən yaranan proseslə əl ilə başladılmış prosesi birləşdirmir.

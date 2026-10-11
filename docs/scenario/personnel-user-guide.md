@@ -8,7 +8,8 @@ Burada siz:
 - onun şəxsi işinə baxırsınız və məlumatlarını redaktə edirsiniz;
 - yeni əməkdaş əlavə edirsiniz;
 - şəxsi işdən birbaşa əmr verir və ya icazə yazırsınız;
-- əməkdaşla bağlı son hadisələri (əmr, icazə, məzuniyyət, dəyişiklik və s.) izləyirsiniz.
+- əməkdaşla bağlı son hadisələri (əmr, icazə, məzuniyyət, dəyişiklik və s.) izləyirsiniz;
+- əməkdaşın bütün hadisələrini `HR 360` zaman xəttində görür və PDF / XLSX kimi ixrac edirsiniz.
 
 ## Harada açılır?
 Sol menyudan `Əməkdaşlar` bölməsini açın. Siyahı səhifəsinin sol panelində əməkdaş qrupları və struktur ağacı, şəxsi iş səhifəsində isə şəxsi işin bölmələri görünür. Bu bələdçini isə sol paneldəki `İstifadə təlimatı` keçidindən aça bilərsiniz.
@@ -117,10 +118,16 @@ Təsdiq icazəniz yoxdursa, yeni qeyd `Təsdiq gözləyir` statusu ilə yaranır
 2. Forma səhifənin içində açılır, sol panel addım göstəricisinə çevrilir: keçilmiş bölmələr tamamlanmış, cari bölmə aktiv görünür.
 3. Səhifənin aşağısında həmişə görünən zolaq var: solda qara `Yadda saxla`, sağda `Geri` və `Növbəti`. Uzun bölmədə aşağı sürüşdürsəniz də bu düymələr əlinizin altında qalır.
 4. Bölmələr arasında keçəndə sistem cari bölməni yoxlayır. Məlumatlar isə yalnız `Yadda saxla` basanda yazılır.
+   - Sol paneldə başqa bölməni basanda həmin bölmənin nömrəsi yerinə qısa müddət dönən işarə görünür. Keçid hazır olanda cari bölmə dəyişir.
+   - Cari bölmədə səhv varsa, keçid olmur: işarə dayanır, siz həmin bölmədə qalırsınız və səhvlər sahələrin yanında qırmızı ilə yazılır. Əvvəlcə səhvi düzəldin, sonra yenidən keçin.
+   - Keçid gedərkən başqa bölməni basmaq olmur; bir neçə saniyə gözləyin.
+   - `Ümumi` bölməsi isə əvvəlki kimi səhifəni yeniləməklə açılır.
 5. Uğurlu yadda saxlamadan sonra "Əməkdaş uğurla yeniləndi!" mesajı çıxır.
 6. Redaktəni bitirmək üçün `Baxışa qayıt` düyməsini basın.
 
 Zolaqda qıfıl ikonu və "Redaktə etmək üçün icazəniz yoxdur." yazısı görünürsə, məlumatı yadda saxlamaq hüququnuz yoxdur.
+
+Uğurlu `Yadda saxla`dan sonra səhifənin başlığı və bölmələrin yanındakı say (məs. vəsiqələrin sayı) avtomatik yenilənir.
 
 Bəzi sahələrin etiketində nişan ola bilər — bunu qurumun `Dəyişiklik siyasəti` (Tənzimləmələr) müəyyən edir:
 - `(əmrlə)` — sahə kilidlidir, yalnız əmrlə dəyişir (məsələn struktur/vəzifə köçürmə əmri ilə, soyad soyadın dəyişdirilməsi əmri ilə). Sahənin altındakı `Əmr yarat` keçidi uyğun əmri açır.
@@ -141,6 +148,36 @@ Təsdiqdən sonra əməkdaş aktiv siyahıya keçir. İşə başlama tarixi boş
 
 `Əməliyyat` düyməsi yalnız icazə yazmaq və ya əmr vermək hüququ olanlara görünür; menyuda da yalnız sizə açıq olan bəndlər çıxır.
 
+### Əməkdaşın HR 360 zaman xəttinə baxmaq
+`HR 360` zaman xətti əməkdaşla bağlı bütün hadisələri (əmr, icazə, məzuniyyət, ezamiyyət, təlim ehtiyacı, təlim, performans, tədbir, media, layihə, həyat dövrü və dəyişikliklər) bir siyahıda göstərir.
+1. Şəxsi işin `Ümumi` görünüşündə `Son hadisələr` kartının altındakı `Bütün xronologiya` keçidini basın (keçid yalnız redaktə icazəsi olanlara görünür) və ya `Daha çox` menyusunda `Məlumat` bəndini açın.
+2. Açılan paneldə `HR 360` tabını seçin.
+3. Lazım olsa süzün: `Axtarış`, `Hadisə tipi`, `Tarixdən`, `Tarixədək`. `Sıfırla` düyməsi süzgəcləri təmizləyir.
+
+`Həyat dövrü` hadisələri siyahıda görünür, amma `Hadisə tipi` siyahısında ayrıca seçim kimi yoxdur — onları `Bütün hadisələr` görünüşündə axtarın.
+
+### HR 360 zaman xəttini PDF və ya XLSX kimi ixrac etmək
+`HR 360` tabında süzgəc panelinin altında iki düymə ola bilər: `XLSX ixrac` və `PDF ixrac`. Düymələr yalnız `Əməkdaş 360 - ixrac` icazəsi olanlara görünür.
+1. `HR 360` tabını açın və lazım olan süzgəcləri seçin.
+2. `XLSX ixrac` və ya `PDF ixrac` düyməsini basın.
+3. Fayl cari süzgəclərlə hazırlanır: yalnız ekranda süzülmüş hadisələr ixrac olunur.
+
+Faylın məzmunu:
+- sütunlar: `Tarix`, `Növ`, `Hadisə`, `Təfərrüat`, `Status`, `İcraçı`;
+- PDF yuxarıda `Əməkdaş 360 zaman xətti` başlığı, əməkdaşın adı və `Tabel №`, `Hazırlanıb: <tarix> · <istifadəçi>` sətri ilə, yatay vərəqdə hazırlanır;
+- fayl adı `employee-360-<tabel>-<tarix>` formatında olur;
+- bir ixracda ən çox 500 hadisə olur.
+
+`PDF ixrac` düyməsi yalnız serverdə PDF çeviricisi (LibreOffice) quraşdırılıbsa göstərilir. Çevirici yoxdursa yalnız `XLSX ixrac` qalır. Çevirmə uğursuz olsa, `PDF faylı yaradıla bilmədi. Bir az sonra yenidən cəhd edin.` mesajı ilə xəta səhifəsi açılır.
+
+**Həssas hadisələr necə görünür**
+Zaman xətti və ixrac icazəyə görə redaksiya olunur. İntizam əmrləri və xəstəlik vərəqəsi olan icazələr həssas sayılır:
+- müvafiq icazəniz yoxdursa, belə hadisə `Məxfi qeyd: intizam tədbiri` və ya `Məxfi qeyd: tibbi səbəbli icazə` başlığı ilə qalır. Tarix və növ görünür, təfərrüat, status və icraçı gizlədilir. PDF faylında belə sətirlərin başlığı kursivlə verilir və `Həssas hadisələrin məzmunu icazəyə görə gizlədilib.` qeydi əlavə olunur;
+- `Əməkdaş 360 - həssas hadisələr` icazəsi həm intizam, həm tibbi hadisələri redaksiyasız açır;
+- tibbi hadisələri isə həmçinin diaqnoz baxışı icazəsi (`view-medical-diagnosis`) açır.
+
+Gizli mətn axtarışda da tapılmır.
+
 ### Əməkdaşı silmək
 1. Siyahıda sətrin sağındakı zibil qabı ikonunu (`Sil`) basın.
 2. Sistem təsdiq soruşur: "Bu məlumatı silmək istədiyinizə əminsiniz?" — təsdiqləyin.
@@ -155,6 +192,7 @@ Silinmiş əməkdaş itmir, `Silinmiş` qrupuna keçir. Silmək yalnız həm red
 
 ### Çap və ixrac
 - Siyahını Excel-ə çıxarmaq üçün başlıqdakı yaşıl Excel ikonunu basın.
+- Əməkdaşın `HR 360` zaman xəttini ixrac etmək üçün yuxarıdakı "HR 360 zaman xəttini PDF və ya XLSX kimi ixrac etmək" bölməsinə baxın.
 - Şəxsi işi, CV-ni və ya CV-nin Word variantını çap etmək üçün `Daha çox` menyusundan istifadə edin (aşağıya baxın). Bunlar yeni vərəqdə açılır.
 
 ## Sətirdəki düymələr
@@ -200,9 +238,42 @@ Bu qrup yalnız adminlərə açıqdır.
 **`Əməliyyat` düyməsi niyə yoxdur?**
 Sizin nə icazə yazmaq, nə də əmr vermək hüququnuz var.
 
+**`HR 360` tabında `XLSX ixrac` / `PDF ixrac` düymələri yoxdur.**
+Sizin `Əməkdaş 360 - ixrac` icazəniz yoxdur. `PDF ixrac` yalnız `XLSX ixrac` görünəndə, üstəlik serverdə PDF çeviricisi olduqda göstərilir.
+
+**Zaman xəttində `Məxfi qeyd: ...` yazılıb, məzmunu görə bilmirəm.**
+Bu hadisə intizam və ya tibbi səbəbli icazədir və sizin `Əməkdaş 360 - həssas hadisələr` icazəniz yoxdur. Tibbi icazələr üçün diaqnoz baxışı icazəsi də kifayətdir. İcazə administratordan istənilir.
+
+**İxrac faylında hadisələr ekrandakından azdır.**
+Fayl cari süzgəclərlə (`Axtarış`, `Hadisə tipi`, `Tarixdən`, `Tarixədək`) hazırlanır və ən çox 500 hadisə daşıyır. Süzgəcləri sıfırlayıb yenidən ixrac edin; 500-dən çox hadisə varsa, tarix aralığı ilə hissələrə bölün.
+
+**İxrac "icazə yoxdur" xətası verir.**
+Əməkdaş sizə açıq strukturda deyil. Hər ixrac əməkdaşa baxış hüququnu (struktur görünürlüyü) ayrıca yoxlayır.
+
+**Bölmə düyməsini basdım, yerindən tərpənmədi.**
+Cari bölmədə səhv var. Səhvlər sahələrin yanında qırmızı ilə yazılıb; onları düzəldib yenidən keçin.
+
+## Administrator üçün (HR 360 ixracı və icazələr)
+
+| İcazə | Nə verir | İlkin rollar |
+| --- | --- | --- |
+| `export-personnel-360` (`Əməkdaş 360 - ixrac`) | `HR 360` zaman xəttini PDF və XLSX ixrac etmək | `Admin`, `HR Admin` |
+| `view-personnel-360-sensitive` (`Əməkdaş 360 - həssas hadisələr`) | intizam və tibbi hadisələri zaman xəttində və ixracda redaksiyasız görmək | `Admin`, `HR Admin` |
+| `view-medical-diagnosis` | yalnız tibbi hadisələri redaksiyasız görmək | — |
+
+Qaydalar və əməliyyat detalları:
+- İxrac yolu `can:export-personnel-360` ilə qorunur və dəqiqədə ən çox 20 sorğu ilə məhdudlaşdırılıb. Əməkdaşın baxanın struktur görünürlüyündə olması (`view` siyasəti) ayrıca yoxlanılır; əks halda 403 qaytarılır.
+- Hər ixrac `Profil baxışları` (`personnel_access`) audit jurnalına yazılır: hadisə `timeline_exported`; format, tətbiq edilən süzgəclər, sətir sayı, redaksiya olunmuş sətir sayı və əməkdaşın tabel nömrəsi qeyd olunur.
+- XLSX hər zaman işləyir. PDF əmrlərin yekun PDF-i ilə eyni çevirici (LibreOffice, `ORDERS_SOFFICE_PATH`) ilə hazırlanır: əvvəlcə DOCX, sonra PDF. Çeviricinin mövcudluğu 10 dəqiqə keşlənir — LibreOffice quraşdırandan sonra `PDF ixrac` düyməsi 10 dəqiqəyə qədər gec görünə bilər. Çevirici yoxdursa və ya çevirmə uğursuz olsa, sorğu 503 qaytarır.
+- Redaksiya yalnız baxanın icazəsinə görə aparılır; axtarış redaksiyadan əvvəl icra olunduğu üçün gizli mətn axtarış uyğunluğu ilə sızmır.
+- İxrac marşrutu silinmiş əməkdaş qeydini də qəbul edir; baxış hüququ yenə də struktur görünürlüyü siyasəti ilə yoxlanılır.
+
 ## Yadda saxlayın
 - Dəyişikliklər yalnız `Yadda saxla` basanda yazılır — addımlar arasında keçmək kifayət deyil.
 - Yeni əməkdaşda yalnız ulduzlu sahələr məcburidir; qalanını sonra şəxsi işdən tamamlaya bilərsiniz.
 - Silinmiş əməkdaş `Silinmiş` qrupundan bərpa oluna bilər, `Tam sil` isə geri qaytarılmır.
 - Əmr və icazəni şəxsi işdən başlasanız, əməkdaşı yenidən axtarmağa ehtiyac qalmır.
 - Təsdiq etməzdən əvvəl gözləyən qeydin məlumatlarını diqqətlə yoxlayın.
+- Redaktədə bölməni dəyişəndə cari bölmədə səhv varsa keçid olmur — əvvəlcə səhvi düzəldin.
+- `HR 360` ixracı yalnız ekranda süzülmüş hadisələri verir (ən çox 500) və həssas hadisələri icazəyə görə gizlədir.
+- Hər 360 ixracı audit jurnalına düşür.

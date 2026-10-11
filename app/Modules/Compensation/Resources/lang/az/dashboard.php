@@ -48,6 +48,8 @@ return [
     ],
 
     'exemptions' => [
+        'code_reserved' => 'Bu kod kart tələb edən və ya komponent növlü qaydaya aiddir; sabit məbləğli forma ilə əvəz edilmir. Məbləği «Vergi güzəştləri» bölməsindən dəyişin.',
+        'delete_reserved' => 'Kart tələb edən və ya komponent növlü qayda bu ekrandan silinmir; silinsə hamıdan götürülərdi.',
         'title' => 'Gəlir vergisi azadolmaları (VM m.102)',
         'hint' => 'Pillələr tətbiq edilməzdən əvvəl vergi tutulan gəlirdən çıxılır. Yeni sətir öz tarixindən tətbiq olunur; kilidlənmiş aylar köhnə qayda ilə qalır.',
         'panel_hint' => 'Məs. VM m.102.1.6: əsas iş yerində aylıq gəlir 2500 AZN-dək olduqda 200 AZN azaddır. Eyni kodlu əvvəlki sətir yeni tarixdən bir gün əvvəl bağlanır.',
