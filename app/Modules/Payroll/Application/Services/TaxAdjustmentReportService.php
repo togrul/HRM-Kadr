@@ -4,7 +4,9 @@ namespace App\Modules\Payroll\Application\Services;
 
 use App\Models\CompensationRegime;
 use App\Models\EmployeeCompensation;
+use App\Models\PayrollOneOffEarning;
 use App\Models\Payslip;
+use App\Modules\Benefits\Contracts\ImputedIncomeRestatement;
 use App\Modules\Compensation\Domain\Contracts\TaxReliefReadRepository;
 use App\Modules\Payroll\Domain\Contracts\PayrollOneOffEarnings;
 use App\Services\StructureScope;
@@ -22,7 +24,8 @@ use Illuminate\Validation\ValidationException;
  * işsizlikdən sığorta, icbari tibbi sığorta. Heç bir payslip, run və ya ledger dəyişmir.
  *
  * «Cari qaydalar»:
- *  - qazanc sətirləri — payslip-in özündən (ödənilmiş fakt; bayraqları — vergi/sosial — ilə);
+ *  - qazanc sətirləri — payslip-in özündən (ödənilmiş fakt; bayraqları — vergi/sosial — ilə); imtiyazın
+ *    natura formasında gəlir sətri isə Benefits-in indiki qaydası ilə (yemək kartının gündəlik norması);
  *  - rejim — işçinin bu günkü aktiv təyinatının rejimi (rejim düzəlişindən sonra düzgün olan), yoxdursa
  *    ödəniş anındakı rejim;
  *  - dərəcə və azadolmalar — «qayda tarixi» = min(bu gün, həmin ilin 31 dekabrı), amma ayın sonundan tez
@@ -115,6 +118,7 @@ class TaxAdjustmentReportService
             ])
             ->values()
             ->all();
+        $lines = $this->restateImputedIncome($payslip, $lines);
 
         $paidRegimeId = $this->regimeOn($tabelNo, $periodEnd) ?? ($payslip->getAttribute('regime_id') === null ? null : (int) $payslip->getAttribute('regime_id'));
         $targetRegimeId = $this->regimeOn($tabelNo, $today->toDateString(), true) ?? $paidRegimeId;
@@ -245,6 +249,42 @@ class TaxAdjustmentReportService
         }
 
         return ['recorded' => $recorded, 'total' => round($total, 2)];
+    }
+
+    /**
+     * İmtiyazın natura formasında gəlir sətirləri Benefits-in indiki qaydası ilə (məs. yemək kartının
+     * gündəlik norması — DVX izahı 10.07.2026): norma tətbiq olunmazdan əvvəl ödənilmiş aylarda bütün
+     * məbləğ DSMF, işsizlik və tibbi bazasına düşüb; hesabat artıq tutulanı göstərir, qaytarma
+     * `recordRefunds` ilə mühasibin açıq qərarıdır.
+     *
+     * @param  list<array<string, mixed>>  $lines
+     * @return list<array<string, mixed>>
+     */
+    private function restateImputedIncome(Payslip $payslip, array $lines): array
+    {
+        if (! app()->bound(ImputedIncomeRestatement::class) || ! InstalledTables::has('payroll_one_off_earnings')) {
+            return $lines;
+        }
+
+        $restatement = app(ImputedIncomeRestatement::class);
+        $paid = PayrollOneOffEarning::query()
+            ->where('tabel_no', $payslip->tabel_no)
+            ->where('paid_payroll_run_id', $payslip->payroll_run_id)
+            ->where('source_key', 'like', 'benefits:%')
+            ->get(['source_key', 'code', 'amount']);
+
+        foreach ($paid as $earning) {
+            $restated = $restatement->restate((string) $earning->source_key, (string) $earning->code, (float) $earning->amount);
+            $index = collect($lines)->search(fn (array $line): bool => $line['code'] === $earning->code && abs($line['amount'] - (float) $earning->amount) < 0.005);
+
+            if ($restated === null || $index === false) {
+                continue;
+            }
+
+            array_splice($lines, $index, 1, array_map(fn (array $line): array => ['kind' => 'earning'] + $line, $restated));
+        }
+
+        return $lines;
     }
 
     public function sourceKey(Payslip $payslip): string

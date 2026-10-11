@@ -2,11 +2,16 @@
 
 use App\Models\AttendanceMonthlySummary;
 use App\Models\PayrollOneOffEarning;
+use App\Models\User;
 use App\Modules\Benefits\Application\Services\BenefitEnrollmentService;
 use App\Modules\Benefits\Application\Services\BenefitPayrollSync;
 use App\Modules\Benefits\Application\Services\BenefitPlanService;
 use App\Modules\Payroll\Application\Services\PayrollCalculator;
+use App\Modules\Payroll\Application\Services\PayrollPeriodService;
+use App\Modules\Payroll\Application\Services\PayrollRunService;
+use App\Modules\Payroll\Application\Services\TaxAdjustmentReportService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Tests\Feature\Benefits\Concerns\BuildsBenefitsFixtures;
 
@@ -165,6 +170,59 @@ it('falls back to the global attendance calendar when no monthly summary exists'
     expect(PayrollOneOffEarning::query()->where('tabel_no', 'E-1')->count())->toBe(0);
 });
 
+it('counts only the days the employee was at work, not vacation days', function (): void {
+    // 5–9 oktyabr məzuniyyət (5 iş günü): norma 5 × (22 − 5) = 85 AZN; 110 AZN kart → 25 AZN artıq.
+    DB::table('personnel_vacations')->insert([
+        'tabel_no' => 'E-1', 'vacation_places' => 'Bakı', 'duration' => 5,
+        'start_date' => '2026-10-05', 'end_date' => '2026-10-09', 'return_work_date' => '2026-10-12',
+        'order_given_by' => 'HR', 'added_by' => User::factory()->create()->id,
+        'created_at' => now(), 'updated_at' => now(),
+    ]);
+
+    $this->service->enroll(mealPlan($this, ['monthly_cost' => 110]), 'E-1', '2026-10-01');
+
+    $value = PayrollOneOffEarning::query()->where('tabel_no', 'E-1')->where('amount', '>', 0)->sole();
+    expect($value->amount)->toBe(25.0)->and($value->code)->toBe('benefit_in_kind_dsmf');
+});
+
+it('exempts one employee who eats on e-invoice while the plan stays card based for the rest', function (): void {
+    $this->benefitsPersonnel('E-2');
+    $this->benefitsCompensation('E-2', 1500);
+    $plan = mealPlan($this);
+    $mine = $this->service->enroll($plan, 'E-1', '2026-10-01');
+    $this->service->enroll($plan, 'E-2', '2026-10-01');
+    expect(PayrollOneOffEarning::query()->where('tabel_no', 'E-1')->count())->toBe(2);
+
+    $this->service->setInvoiceBased($mine, true);
+
+    expect(PayrollOneOffEarning::query()->where('tabel_no', 'E-1')->count())->toBe(0)
+        ->and(PayrollOneOffEarning::query()->where('tabel_no', 'E-2')->count())->toBe(2);
+
+    $this->service->setInvoiceBased($mine->refresh(), false);
+    expect(PayrollOneOffEarning::query()->where('tabel_no', 'E-1')->count())->toBe(2);
+});
+
 it('rejects a negative daily norm', function (): void {
     app(BenefitPlanService::class)->save(['code' => 'NEG', 'name' => 'Mənfi', 'type' => 'meal_card', 'monthly_cost' => 10, 'exempt_daily_norm' => -1]);
 })->throws(ValidationException::class);
+
+it('shows the social insurance over-withheld in a paid month before the norm in the tax adjustment report', function (): void {
+    $plan = mealPlan($this, ['exempt_daily_norm' => null]);
+    $this->service->enroll($plan, 'E-1', '2026-10-01');
+
+    $runs = app(PayrollRunService::class);
+    $regime = (int) $this->compensation->regime_id;
+    $runs->lock($runs->approve($runs->calculate($runs->createRun(app(PayrollPeriodService::class)->createPeriod(2026, 10), $regime))));
+
+    // Norma sonradan: 22 × 5 = 110 AZN azad, 40 AZN yalnız DSMF + gəlir vergisi; işsizlik/tibbi heç vaxt.
+    app(BenefitPlanService::class)->save(['code' => $plan->code, 'name' => $plan->name, 'type' => 'meal_card', 'monthly_cost' => 150, 'employer_share_percent' => 100, 'exempt_daily_norm' => 5], $plan->id);
+
+    $row = collect(app(TaxAdjustmentReportService::class)->build('2026-10', '2026-10'))->sole();
+
+    expect($row['unemployment_ee_diff'])->toBe(0.75)
+        ->and($row['medical_ee_diff'])->toBeGreaterThan(0.0)
+        // Özəl sektor: 200 AZN-dən yuxarı hissəyə DSMF 10% — 110 × 10% = 11.
+        ->and($row['dsmf_ee_diff'])->toBe(11.0)
+        ->and($row['dsmf_er_diff'])->toBeGreaterThan(0.0)
+        ->and(PayrollOneOffEarning::query()->where('amount', '>', 0)->sole()->amount)->toBe(150.0);
+});

@@ -88,7 +88,7 @@ class EnrollmentsTab extends BenefitsTab
         $term = trim($this->search);
 
         return $this->scopeByPersonnel(BenefitEnrollment::query())
-            ->with(['plan:id,name,type,currency,allows_dependents', 'personnel:id,tabel_no,surname,name,patronymic,structure_id'])
+            ->with(['plan:id,name,type,currency,allows_dependents,exempt_daily_norm', 'personnel:id,tabel_no,surname,name,patronymic,structure_id'])
             ->withCount('dependents')
             ->when(in_array($this->statusFilter, ['active', 'ended', 'cancelled'], true), fn ($query) => $query->where('status', $this->statusFilter))
             ->when((int) $this->planFilter > 0, fn ($query) => $query->where('benefit_plan_id', (int) $this->planFilter))
@@ -227,6 +227,15 @@ class EnrollmentsTab extends BenefitsTab
         $this->closePanel();
         unset($this->enrollments);
         $this->announce('ended');
+    }
+
+    public function toggleInvoice(int $id, BenefitEnrollmentService $service): void
+    {
+        $this->guardManage();
+        $enrollment = $this->findEnrollment($id);
+        $service->setInvoiceBased($enrollment, ! $enrollment->invoice_based);
+        unset($this->enrollments);
+        $this->announce('invoice_saved');
     }
 
     public function cancelEnrollment(int $id, BenefitEnrollmentService $service): void

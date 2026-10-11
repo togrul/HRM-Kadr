@@ -8,7 +8,9 @@ use App\Models\BenefitPlan;
 use App\Models\CompensationComponent;
 use App\Models\EmployeeCompensation;
 use App\Models\EmployeeCompensationLine;
+use App\Modules\Attendance\Contracts\PayrollWorkedDays;
 use App\Modules\Attendance\Domain\Contracts\PayrollAttendanceReadRepository;
+use App\Modules\Benefits\Contracts\ImputedIncomeRestatement;
 use App\Modules\Payroll\Domain\Contracts\PayrollOneOffEarnings;
 use App\Support\Database\InstalledTables;
 use Carbon\CarbonImmutable;
@@ -28,9 +30,10 @@ use Illuminate\Support\Collection;
  *     idempotentdir; ay kilidlidirsə Payroll onu növbəti aya keçirir (hər iki sətir birlikdə).
  *
  *  3. Gündəlik norması olan paket (yemək kartı — VM m.119.2, DVX izahı 10.07.2026): işəgötürən payının
- *     norma × işçinin ay üzrə iş günü sayı daxilindəki hissəsi heç yerə yazılmır; artıq hissə gəlir
+ *     norma × işçinin ay üzrə iş yerində olduğu gün sayı daxilindəki hissəsi heç yerə yazılmır; artıq hissə gəlir
  *     vergisinə və YALNIZ DSMF bazasına (`benefit_in_kind_dsmf` kodu — işsizlik və icbari tibbi sığorta
- *     bazasına düşmür) cəlb olunur. «Qaimə-fakturalı» paketdə məbləğdən asılı olmayaraq heç nə yazılmır.
+ *     bazasına düşmür) cəlb olunur. «Qaimə-fakturalı» paketdə və ya qoşulmada (`invoice_based` — eyni
+ *     paketdə yalnız bəzi işçilər qaimə ilə alırsa) məbləğdən asılı olmayaraq heç nə yazılmır.
  *     Norması olmayan paketlər (məs. idman zalı) əvvəlki kimi `taxable` / `affects_social` bayraqlarına
  *     görə bütün sosial bazaya daxil olur. Ödənilmiş sətirlərə toxunulmur (PayrollOneOffEarnings), ona
  *     görə norma dəyişikliyi yalnız hələ ödənilməmiş cari ay üçün qüvvəyə minir.
@@ -38,7 +41,7 @@ use Illuminate\Support\Collection;
  * Bütün yollar idempotentdir: qoşulma yaranan/dəyişən/bitən anda və gündəlik `benefits:daily`
  * əmrində eyni nəticəni verir (HR kompensasiya sətirlərini əl ilə dəyişsə belə bərpa olunur).
  */
-class BenefitPayrollSync
+class BenefitPayrollSync implements ImputedIncomeRestatement
 {
     public const LINE_MARKER = 'benefits#';
 
@@ -193,7 +196,7 @@ class BenefitPayrollSync
                 && $enrollment->status !== BenefitEnrollment::STATUS_CANCELLED
                 && $plan !== null
                 && $amount > 0
-                ? $this->treatment($plan, $amount, $tabelNo, $monthStart)
+                ? $this->treatment($plan, $enrollment, $amount, $tabelNo, $monthStart)
                 : null;
 
             $valueKey = $this->sourceKey($enrollment, $monthStart, 'value');
@@ -247,9 +250,10 @@ class BenefitPayrollSync
      *
      * @return array{amount: float, code: string, line: string, taxable: bool, affects_social: bool}|null
      */
-    private function treatment(BenefitPlan $plan, float $amount, string $tabelNo, CarbonImmutable $month): ?array
+    private function treatment(BenefitPlan $plan, BenefitEnrollment $enrollment, float $amount, string $tabelNo, CarbonImmutable $month): ?array
     {
-        if ($plan->norm_is_invoice_based) {
+        // Qaimə-fakturalı iaşə paket üzrə (hamı) və ya yalnız bu işçi üçün qeyd oluna bilər.
+        if ($plan->norm_is_invoice_based || ($plan->exempt_daily_norm !== null && $enrollment->invoice_based)) {
             return null;
         }
 
@@ -282,12 +286,22 @@ class BenefitPayrollSync
     }
 
     /**
-     * Normanın vurulduğu iş günü sayı: Payroll-un proratasiyada işlətdiyi eyni mənbə (işçinin aylıq
-     * davamiyyət xülasəsi — `total_workdays`, qeyri-iş və bayram günləri çıxılmaqla; məzuniyyət və
-     * qayıb günləri daxildir). Xülasə yoxdursa — qlobal davamiyyət təqvimi (qeydsiz günlər üçün B–C
-     * iş günü sayılır).
+     * Normanın vurulduğu gün sayı — işçinin iş yerində olduğu (yemək aldığı) iş günləri: ayın iş
+     * günlərindən məzuniyyət, buraxılış/xəstəlik və ezamiyyət (gündəlik xərc yeməyi əhatə edir) günləri
+     * çıxılır (Attendance `PayrollWorkedDays`). Ayın iş günləri Payroll-un proratasiyada işlətdiyi eyni
+     * mənbədəndir (aylıq davamiyyət xülasəsi — `total_workdays`); xülasə yoxdursa — qlobal davamiyyət
+     * təqvimi (qeydsiz günlər üçün B–C iş günü sayılır).
      */
     private function workingDays(string $tabelNo, CarbonImmutable $month): int
+    {
+        $away = app()->bound(PayrollWorkedDays::class)
+            ? count(app(PayrollWorkedDays::class)->workdays($tabelNo, $month->startOfMonth()->toDateString(), $month->endOfMonth()->toDateString())['absent'])
+            : 0;
+
+        return max(0, $this->monthWorkdays($tabelNo, $month) - $away);
+    }
+
+    private function monthWorkdays(string $tabelNo, CarbonImmutable $month): int
     {
         if (app()->bound(PayrollAttendanceReadRepository::class)) {
             $summary = app(PayrollAttendanceReadRepository::class)->monthlyAbsence($tabelNo, (int) $month->year, (int) $month->month);
@@ -344,6 +358,33 @@ class BenefitPayrollSync
             'sort' => 900,
             'is_active' => true,
         ])->getKey();
+    }
+
+    /**
+     * Yalnız köhnə qayda ilə yazılmış (`benefit_in_kind`, bütün məbləğ) dəyər sətirləri yenidən ifadə
+     * olunur; norma ilə yazılmış sətir (`benefit_in_kind_dsmf`) artıq indiki qaydadadır.
+     */
+    public function restate(string $sourceKey, string $code, float $amount): ?array
+    {
+        if ($code !== (string) config('benefits.payroll.imputed_code', 'benefit_in_kind')
+            || preg_match('/^benefits:(\d+):(\d{4})-(\d{2}):value$/', $sourceKey, $matches) !== 1) {
+            return null;
+        }
+
+        $enrollment = BenefitEnrollment::query()->with('plan')->find((int) $matches[1]);
+
+        if ($enrollment === null || $enrollment->plan === null) {
+            return null;
+        }
+
+        $treatment = $this->treatment($enrollment->plan, $enrollment, $amount, (string) $enrollment->tabel_no, CarbonImmutable::create((int) $matches[2], (int) $matches[3], 1));
+
+        return $treatment === null ? [] : [[
+            'code' => $treatment['code'],
+            'amount' => $treatment['amount'],
+            'taxable' => $treatment['taxable'],
+            'affects_social' => $treatment['affects_social'],
+        ]];
     }
 
     public function inForce(BenefitEnrollment $enrollment, CarbonImmutable $on): bool

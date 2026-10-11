@@ -5,8 +5,10 @@ namespace App\Modules\Benefits\Providers;
 use App\Models\Personnel;
 use App\Models\Setting;
 use App\Modules\Benefits\Application\Services\BenefitLifecycleService;
+use App\Modules\Benefits\Application\Services\BenefitPayrollSync;
 use App\Modules\Benefits\Application\Services\BenefitsAvailability;
 use App\Modules\Benefits\Console\Commands\BenefitsDailyCommand;
+use App\Modules\Benefits\Contracts\ImputedIncomeRestatement;
 use App\Modules\Benefits\Http\Middleware\SyncBenefitsModuleState;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
@@ -31,6 +33,7 @@ class BenefitsServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->scoped(BenefitsAvailability::class);
+        $this->app->bind(ImputedIncomeRestatement::class, BenefitPayrollSync::class);
 
         if ($this->app->runningInConsole()) {
             $this->commands([

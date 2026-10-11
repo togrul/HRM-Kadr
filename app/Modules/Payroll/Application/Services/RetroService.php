@@ -2,6 +2,7 @@
 
 namespace App\Modules\Payroll\Application\Services;
 
+use App\Models\PayrollPeriod;
 use App\Models\PayrollRun;
 use App\Models\Payslip;
 use App\Models\RetroPayment;
@@ -28,6 +29,9 @@ class RetroService
      * to what was paid, and subtract any retro already settled for that source period.
      * Positive remainders are owed (`total`).
      *
+     * A month paid by a final_settlement run is a source only for order-derived pay that
+     * arose after it was locked (settlementOrderBackPay).
+     *
      * Off-cycle payslips are not sources: they pay a supplement, not the month, so comparing
      * them with a recomputed month would invent a difference. $excludeRunId leaves a run's
      * own payslips out (the run being calculated or locked never owes itself retro). Loan
@@ -51,7 +55,7 @@ class RetroService
         $payslips = Payslip::query()
             ->where('tabel_no', $tabelNo)
             ->where('status', 'locked')
-            ->whereHas('run', fn ($query) => $query->where('run_type', 'regular'))
+            ->whereHas('run', fn ($query) => $query->whereIn('run_type', ['regular', 'final_settlement']))
             ->when($excludeRunId !== null, fn ($query) => $query->where('payroll_run_id', '!=', $excludeRunId))
             ->with(['run.period', 'lines'])
             ->orderBy('payroll_run_id')
@@ -62,6 +66,17 @@ class RetroService
             $sourceRunId = (int) $payslip->payroll_run_id;
 
             if (! $period) {
+                continue;
+            }
+
+            if ($payslip->run->run_type === 'final_settlement') {
+                $line = $this->settlementOrderBackPay($payslip, $tabelNo, $period);
+
+                if ($line !== null) {
+                    $lines[] = $line;
+                    $total += $line['delta'];
+                }
+
                 continue;
             }
 
@@ -197,7 +212,93 @@ class RetroService
      */
     private function orderRecovery(Payslip $payslip, string $tabelNo, string $onDate, int $year, int $month, float $recalcNet, float $delta): float
     {
-        $paidOrderLines = $payslip->lines
+        $paidSources = $this->sources($payslip->lines->map(fn ($line): array => ['code' => $line->code, 'sources' => $line->sources])->all());
+        $currentSources = $this->sources($this->calculator->orderEarningLines($tabelNo, $onDate, $year, $month));
+
+        if ($paidSources === $currentSources) {
+            return 0.0;
+        }
+
+        $asPaid = $this->calculator->calculate($tabelNo, $onDate, $year, $month, true, $this->paidOrderLines($payslip), (int) $payslip->payroll_run_id);
+
+        if (! $asPaid) {
+            return 0.0;
+        }
+
+        $orderDelta = round($recalcNet - $asPaid['net'] - $this->sumCode($asPaid['lines'], self::LOAN) - $this->sumCode($asPaid['lines'], self::ENFORCEMENT), 2);
+
+        return $orderDelta < 0 ? max($delta, $orderDelta) : 0.0;
+    }
+
+    /**
+     * Son haqq-hesabla ödənilmiş ay: işçi xitam olunub, sonrakı heç bir adi run onu tutmur. Həmin ay
+     * üçün xitamdan sonra təsdiqlənən (və ya dəyişən) qeyri-iş günü işi / əvəzetmə əmri burada
+     * «geri ödəniş» kimi yaranır və növbəti son haqq-hesab run-u onu ödəyir. Fərq yalnız əmr
+     * sətirlərindən götürülür: ay həm indiki əmr faktları, həm ödənilmiş əmr sətirləri ilə eyni
+     * girişlərlə (birdəfəlik ödənişlər, maaş) hesablanır və xalis fərq alınır — sonradan gələn
+     * ödənilməmiş birdəfəlik sətir onsuz da son haqq-hesaba düşür, ikinci dəfə sayılmır. Mənfi fərq
+     * (əmr ləğv edilib) xitam olunmuş işçidən tutulmur. Yalnız birdəfəlik sətir ödəyən (maaşsız)
+     * payslip mənbə deyil.
+     *
+     * @return array<string,mixed>|null
+     */
+    private function settlementOrderBackPay(Payslip $payslip, string $tabelNo, PayrollPeriod $period): ?array
+    {
+        if ($payslip->lines->firstWhere('code', 'base') === null) {
+            return null;
+        }
+
+        $year = (int) $period->year;
+        $month = (int) $period->month;
+        $leftOn = DB::table('personnels')->where('tabel_no', $tabelNo)->value('leave_work_date');
+        $onDate = $leftOn !== null && substr((string) $leftOn, 0, 10) >= $period->starts_on->toDateString() && substr((string) $leftOn, 0, 10) <= $period->ends_on->toDateString()
+            ? substr((string) $leftOn, 0, 10)
+            : $period->ends_on->toDateString();
+
+        $paidSources = $this->sources($payslip->lines->map(fn ($line): array => ['code' => $line->code, 'sources' => $line->sources])->all());
+        $current = $this->calculator->orderEarningLines($tabelNo, $onDate, $year, $month);
+
+        if ($paidSources === $this->sources($current)) {
+            return null;
+        }
+
+        $sourceRunId = (int) $payslip->payroll_run_id;
+        $now = $this->calculator->calculate($tabelNo, $onDate, $year, $month, true, $current, $sourceRunId, false, true, true);
+        $asPaid = $this->calculator->calculate($tabelNo, $onDate, $year, $month, true, $this->paidOrderLines($payslip), $sourceRunId, false, true, true);
+
+        if (! $now || ! $asPaid) {
+            return null;
+        }
+
+        $net = fn (array $calc): float => $calc['net'] + $this->sumCode($calc['lines'], self::LOAN) + $this->sumCode($calc['lines'], self::ENFORCEMENT);
+        $alreadyPaid = (float) RetroPayment::query()
+            ->where('tabel_no', $tabelNo)
+            ->where('source_payroll_run_id', $sourceRunId)
+            ->sum('amount');
+        $delta = round($net($now) - $net($asPaid) - $alreadyPaid, 2);
+
+        if ($delta < 0.01) {
+            return null;
+        }
+
+        return [
+            'source_run_id' => $sourceRunId,
+            'period_code' => $period->code,
+            'paid_net' => round($net($asPaid), 2),
+            'recomputed_net' => round($net($now), 2),
+            'delta' => $delta,
+            'kind' => 'payment',
+        ];
+    }
+
+    /**
+     * Ödənilmiş payslip-in əmr sətirləri — ayı «ödənildiyi kimi» qiymətləndirmək üçün.
+     *
+     * @return list<array<string,mixed>>
+     */
+    private function paidOrderLines(Payslip $payslip): array
+    {
+        return $payslip->lines
             ->filter(fn ($line): bool => in_array($line->code, OrderEarningsService::CODES, true))
             ->map(fn ($line): array => [
                 'component_id' => null,
@@ -212,23 +313,6 @@ class RetroService
             ])
             ->values()
             ->all();
-
-        $paidSources = $this->sources($payslip->lines->map(fn ($line): array => ['code' => $line->code, 'sources' => $line->sources])->all());
-        $currentSources = $this->sources($this->calculator->orderEarningLines($tabelNo, $onDate, $year, $month));
-
-        if ($paidSources === $currentSources) {
-            return 0.0;
-        }
-
-        $asPaid = $this->calculator->calculate($tabelNo, $onDate, $year, $month, true, $paidOrderLines, (int) $payslip->payroll_run_id);
-
-        if (! $asPaid) {
-            return 0.0;
-        }
-
-        $orderDelta = round($recalcNet - $asPaid['net'] - $this->sumCode($asPaid['lines'], self::LOAN) - $this->sumCode($asPaid['lines'], self::ENFORCEMENT), 2);
-
-        return $orderDelta < 0 ? max($delta, $orderDelta) : 0.0;
     }
 
     /**

@@ -67,6 +67,9 @@
                             @if ($enrollment->eligibility_overridden)
                                 <x-small-badge mode="amber">{{ __('benefits::dashboard.enrollments.overridden') }}</x-small-badge>
                             @endif
+                            @if ($enrollment->invoice_based)
+                                <x-small-badge mode="secondary">{{ __('benefits::dashboard.enrollments.invoice_based') }}</x-small-badge>
+                            @endif
                             @if ($enrollment->end_reason === 'termination')
                                 <x-small-badge mode="secondary">{{ __('benefits::dashboard.end_reasons.termination') }}</x-small-badge>
                             @endif
@@ -78,6 +81,11 @@
                                 @if ($enrollment->plan?->allows_dependents)
                                     <button type="button" wire:click="editDependents({{ $enrollment->id }})" title="{{ __('benefits::dashboard.actions.dependents') }}" class="{{ $editBtn }}">
                                         <svg class="h-[17px] w-[17px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                    </button>
+                                @endif
+                                @if ($enrollment->plan?->exempt_daily_norm !== null)
+                                    <button type="button" wire:click="toggleInvoice({{ $enrollment->id }})" title="{{ __('benefits::dashboard.actions.'.($enrollment->invoice_based ? 'invoice_off' : 'invoice_on')) }}" class="{{ $editBtn }}">
+                                        <svg class="h-[17px] w-[17px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l3-2 3 2 2-2 2 2 3-2 3 2V2l-3 2-3-2-2 2-2-2-3 2Z"/><path d="M8 9h8M8 13h6"/></svg>
                                     </button>
                                 @endif
                                 <button type="button" wire:click="startEnd({{ $enrollment->id }})" title="{{ __('benefits::dashboard.actions.end') }}" class="{{ $editBtn }}">

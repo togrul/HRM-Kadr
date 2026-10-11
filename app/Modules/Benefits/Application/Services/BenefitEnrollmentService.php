@@ -176,6 +176,29 @@ class BenefitEnrollmentService
     }
 
     /**
+     * Yemək paketində bu işçinin yeməyi ictimai iaşədən elektron qaimə-faktura ilə alınır (və ya
+     * işəgötürən özü hazırlayır): işəgötürən payı məbləğdən asılı olmayaraq vergiyə və DSMF-ə cəlb
+     * olunmur. Cari ayın ödənilməmiş sətirləri dərhal yenidən hesablanır; ödənilmişlərə toxunulmur.
+     *
+     * @throws ValidationException
+     */
+    public function setInvoiceBased(BenefitEnrollment $enrollment, bool $invoiceBased): BenefitEnrollment
+    {
+        if ($enrollment->status !== BenefitEnrollment::STATUS_ACTIVE) {
+            throw ValidationException::withMessages(['enrollment' => __('benefits::dashboard.messages.enrollment_closed')]);
+        }
+
+        if ($enrollment->plan?->exempt_daily_norm === null) {
+            throw ValidationException::withMessages(['enrollment' => __('benefits::dashboard.messages.invoice_needs_norm')]);
+        }
+
+        $enrollment->update(['invoice_based' => $invoiceBased]);
+        $this->payroll->syncEmployee($enrollment->tabel_no);
+
+        return $enrollment->refresh();
+    }
+
+    /**
      * Səhvən yaradılmış qoşulma: heç vaxt qüvvədə olmamış sayılır, ödənilməmiş sətirlər geri çəkilir.
      */
     public function cancel(BenefitEnrollment $enrollment, ?string $note = null): BenefitEnrollment

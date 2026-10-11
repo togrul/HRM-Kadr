@@ -24,6 +24,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property string $source
  * @property string $employee_amount
  * @property string $employer_amount
+ * @property bool $invoice_based
  * @property string $currency
  * @property bool $eligibility_overridden
  * @property string|null $renewal_decision
@@ -57,6 +58,7 @@ class BenefitEnrollment extends Model
         'source',
         'employee_amount',
         'employer_amount',
+        'invoice_based',
         'currency',
         'eligibility_overridden',
         'renewal_decision',
@@ -73,6 +75,7 @@ class BenefitEnrollment extends Model
         'employee_amount' => 'decimal:2',
         'employer_amount' => 'decimal:2',
         'eligibility_overridden' => 'boolean',
+        'invoice_based' => 'boolean',
     ];
 
     /** @return BelongsTo<BenefitPlan, $this> */

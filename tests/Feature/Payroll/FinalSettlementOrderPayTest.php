@@ -153,6 +153,32 @@ class FinalSettlementOrderPayTest extends TestCase
         $this->assertSame(0, $again->payslips()->count());
     }
 
+    public function test_rest_day_work_approved_after_the_settlement_was_locked_is_paid_by_the_next_final_settlement_once(): void
+    {
+        $leaver = $this->employee(1680);
+        $this->leaves($leaver, '2026-11-20');
+        $runs = app(PayrollRunService::class);
+        $periods = app(PayrollPeriodService::class);
+        $runs->lock($runs->approve($runs->calculate($runs->createRun($periods->createPeriod(2026, 11), $this->regimeId, null, 'final_settlement'))));
+
+        // Xitamdan sonra təsdiqlənən əmr: noyabr artıq son haqq-hesabla bağlanıb.
+        app(OrderRestDayWork::class)->record($leaver->tabel_no, CarbonImmutable::parse('2026-11-08'), OrderRestDayWork::COMPENSATION_DOUBLE_PAY, 'Əmr № T-2');
+
+        $december = $periods->createPeriod(2026, 12);
+        $settlement = $runs->calculate($runs->createRun($december, $this->regimeId, null, 'final_settlement'));
+        $payslip = $settlement->payslips()->with('lines')->sole();
+
+        $this->assertSame($leaver->tabel_no, $payslip->tabel_no);
+        $this->assertNull($payslip->lines->firstWhere('code', 'base'));
+        $backPay = (float) $payslip->lines->firstWhere('code', 'retro')?->amount;
+        $this->assertGreaterThan(0.0, $backPay);
+        $this->assertSame($backPay, (float) $payslip->net);
+
+        $runs->lock($runs->approve($settlement));
+
+        $this->assertSame(0, $runs->calculate($runs->createRun($december, $this->regimeId, null, 'final_settlement'))->payslips()->count());
+    }
+
     private function leaves(Personnel $personnel, string $lastDay): void
     {
         $personnel->forceFill(['leave_work_date' => $lastDay])->saveQuietly();

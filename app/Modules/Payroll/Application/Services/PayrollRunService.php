@@ -234,7 +234,8 @@ class PayrollRunService
             $settleLoans = $run->run_type !== 'off_cycle' && (isset($leavers[$tabelNo]) || $extrasOnly);
             // Aylıq gəlir vergisi güzəşti (VM m.102.1.6) ayda bir dəfədir: off-cycle run həmin ayın
             // ikinci ödənişidir, xitamdan sonrakı əlavə ödəniş də — orada verilmir.
-            $calc = $this->calculator->calculate($tabelNo, $onDate, $year, $month, $regular || $settlement, null, (int) $run->id, $settleLoans, $run->run_type !== 'off_cycle' && ! $extrasOnly, $settlement, $extrasOnly);
+            $calc = $this->calculator->calculate($tabelNo, $onDate, $year, $month, $regular || $settlement, null, (int) $run->id, $settleLoans, $run->run_type !== 'off_cycle' && ! $extrasOnly, $settlement, $extrasOnly)
+                ?? ($extrasOnly ? $this->emptyPayslip($tabelNo, $onDate) : null);
 
             if (! $calc) {
                 continue;
@@ -306,6 +307,11 @@ class PayrollRunService
                 $deductions = round($deductions + $recovery, 2);
             }
 
+            // Xitamdan sonra yalnız geri ödəniş üçün götürülmüş işçi: ödəniləcək heç nə qalmayıbsa payslip yoxdur.
+            if ($extrasOnly && $lines === []) {
+                continue;
+            }
+
             $payslips[(string) $tabelNo] = [
                 'attributes' => [
                     'regime_id' => $run->regime_id,
@@ -321,6 +327,18 @@ class PayrollRunService
         }
 
         return $payslips;
+    }
+
+    /**
+     * Maaşsız, birdəfəlik sətirsiz son haqq-hesab payslip-i — üzərinə yalnız geri ödəniş (retro) düşür.
+     *
+     * @return array{gross:float,total_deductions:float,net:float,employer_cost:float,proration_factor:float,currency:string,lines:array<int,array<string,mixed>>}|null
+     */
+    private function emptyPayslip(string $tabelNo, string $onDate): ?array
+    {
+        $current = $this->compensation->currentCompensation($tabelNo, $onDate);
+
+        return $current ? ['gross' => 0.0, 'total_deductions' => 0.0, 'net' => 0.0, 'employer_cost' => 0.0, 'proration_factor' => 1.0, 'currency' => $current->currency, 'lines' => []] : null;
     }
 
     /**
@@ -421,7 +439,8 @@ class PayrollRunService
      * employees whose wage is not paid by this run (their month was settled by an earlier
      * locked final_settlement run, or they left in an earlier month) but who still have
      * unpaid one-off earnings (bonus, award, compensation handed over by orders) due by
-     * this period. No other run would ever pick those up: the regular run skips the employee
+     * this period, or order pay for a month already settled that arose after its run was locked
+     * (rest-day work / substitution approved late — RetroService). No other run would ever pick those up: the regular run skips the employee
      * from the day compensation ends, and an unpaid line only moves forward month by month.
      *
      * @return array{full: array<string,string>, extras: array<string,string>}
@@ -472,12 +491,31 @@ class PayrollRunService
             return [];
         }
 
-        $candidates = PayrollOneOffEarning::query()
+        $withOneOffs = PayrollOneOffEarning::query()
             ->whereNull('paid_payroll_run_id')
             ->dueBy((int) $run->period->year, (int) $run->period->month)
             ->distinct()
             ->pluck('tabel_no')
+            ->map(fn ($tabelNo): string => (string) $tabelNo);
+
+        // Xitamdan sonra kilidli aya düşən əmr ödənişi (qeyri-iş günü işi, əvəzetmə) birdəfəlik sətir
+        // deyil, geri ödənişdir (RetroService) — onu da yalnız bu run ödəyə bilər.
+        // ponytail: son 12 ayda çıxanlar yoxlanılır (hər biri üçün retro hesabı); daha köhnə xitam üçün əmr gəlsə, pəncərəni genişləndir.
+        $recentLeavers = DB::table('personnels')
+            ->whereNull('deleted_at')
+            ->whereNotNull('leave_work_date')
+            ->whereDate('leave_work_date', '<=', $run->period->ends_on->toDateString())
+            ->whereDate('leave_work_date', '>=', $run->period->starts_on->copy()->subMonthsNoOverflow(12)->toDateString())
+            ->pluck('tabel_no')
             ->map(fn ($tabelNo): string => (string) $tabelNo)
+            ->diff($withOneOffs)
+            ->diff(array_map('strval', $full))
+            ->diff($active)
+            ->filter(fn (string $tabelNo): bool => $this->retro->pendingRetro($tabelNo, (int) $run->id)['total'] >= 0.01);
+
+        $candidates = $withOneOffs
+            ->merge($recentLeavers)
+            ->unique()
             ->diff(array_map('strval', $full))
             ->diff($active);
 

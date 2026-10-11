@@ -173,6 +173,11 @@ işəgötürən onu öz sərəncamı ilə tuta bilməz (m.175.5); yalnız işçi
   `reopen` geri qaytarır; eyni dövrün maaşı kilidli son haqq-hesabda varsa ikinci run onu
   təkrar hesablamır; kilid əmr/birdəfəlik imza yoxlamalarını (`guard*UnchangedSinceCalculation`)
   son haqq-hesab üçün də aparır.
+- **Xitamdan sonra təsdiqlənən əmr ödənişi (12.10.2026):** son haqq-hesabla bağlanmış ay üçün sonradan
+  təsdiqlənən (və ya dəyişən) qeyri-iş günü işi / əvəzetmə əmri retro mühərrikində «geri ödəniş» kimi yaranır
+  (`RetroService::settlementOrderBackPay` — ay indiki və ödənilmiş əmr sətirləri ilə eyni girişlərlə hesablanır,
+  xalis fərq götürülür) və növbəti `final_settlement` run-u onu ödəyir; son 12 ayda çıxmış, retro borcu olan işçi
+  maaşsız payslip-lə əhatə olunur. Mənfi fərq (əmr ləğvi) xitam olunmuş işçidən tutulmur.
 - **Yetim ödənişlər:** xitam olunmuş işçiyə aid, hələ heç bir run-a (qaralama, hesablanmış,
   təsdiqlənmiş) düşməyən birdəfəlik sətirlər `Hesablamalar` səhifəsində xəbərdarlıq kimi çıxır
   (`PayrollRunService::orphanedOneOffs`).
@@ -881,8 +886,13 @@ Vergiyə cəlb olunan məbləğ **yalnız işəgötürən payıdır** — işçi
 
 1. Yemək kartı üzrə DVX izahı (10.07.2026) tətbiq olunub; DSMF-in öz izahı ayrıca yoxlanmayıb. İdman zalı üçün DSMF
    tətbiqi Qanunun hərfi mətninə görə qurulub (açıq izah yoxdur) və DSMF təcrübəsi fərqli şərh edə bilər —
-   `docs/legal-confirmation-register.md` H-04. Qaimə-faktura rejimi paket səviyyəsindədir, işçi səviyyəsində izlənmir;
-   norma günlərinə qayıb/məzuniyyət günləri daxildir.
+   `docs/legal-confirmation-register.md` H-04. Qaimə-faktura rejimi həm paketdə, həm qoşulmada (işçi səviyyəsində,
+   `benefit_enrollments.invoice_based`, **Benefits → Qoşulmalar** — qəbz ikonu) qeyd olunur. Norma günləri işçinin iş
+   yerində olduğu günlərdir: ayın iş günlərindən məzuniyyət, buraxılış/xəstəlik və ezamiyyət günləri çıxılır
+   (Attendance `PayrollWorkedDays`); sənədləşdirilməmiş qayıb günləri hələ çıxılmır.
+   Norma tətbiq olunmazdan əvvəl ödənilmiş aylarda artıq tutulmuş DSMF/işsizlik/tibbi **Vergi düzəliş hesabatında**
+   görünür: natura sətri Benefits-in indiki qaydası ilə yenidən ifadə olunur (`ImputedIncomeRestatement`);
+   işçi payının qaytarılması mövcud `recordRefunds` ilə mühasibin açıq qərarıdır (H-08).
 2. VM 102.1.8 yığım/pensiya sığortası üçün «3 il» və «vergiyə cəlb olunan gəlirin 50 %-i» həddi avtomatik yoxlanmır.
 3. Mobil telefon üçün şəxsi istifadə hissəsinin ayrılması (VM 98.2.2) sistemdə yoxdur — paket bütövlükdə ya gəlir, ya
    işgüzar xərc sayılır.
