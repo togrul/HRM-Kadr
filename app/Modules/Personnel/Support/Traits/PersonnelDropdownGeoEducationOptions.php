@@ -61,7 +61,7 @@ trait PersonnelDropdownGeoEducationOptions
         return $this->countryOptions(
             searchTerm: $this->dropdownSearch('searchDocumentNationality'),
             selectedId: $this->documentValue('nationality_id'),
-            cacheKeySuffix: 'document-nationality'
+            cacheKeySuffix: 'document'
         );
     }
 
@@ -71,7 +71,7 @@ trait PersonnelDropdownGeoEducationOptions
         return $this->countryOptions(
             searchTerm: $this->dropdownSearch('searchDocumentBornCountry'),
             selectedId: $this->documentValue('born_country_id'),
-            cacheKeySuffix: 'document-born-country'
+            cacheKeySuffix: 'document'
         );
     }
 
@@ -82,14 +82,25 @@ trait PersonnelDropdownGeoEducationOptions
             ->select('id', DB::raw('name as label'))
             ->orderBy('name');
 
-        if ($countryId = $this->documentValue('born_country_id')) {
+        $countryId = $this->documentValue('born_country_id');
+        if ($countryId) {
             $base->where('country_id', $countryId);
+        }
+
+        $searchTerm = $this->dropdownSearch('searchDocumentCity');
+        if ($searchTerm === '') {
+            return $this->cachedOptionsWithSelected(
+                cacheKey: 'personnel:city:'.((int) $countryId ?: 'all'),
+                base: $base,
+                selectedId: $this->documentValue('born_city_id'),
+                limit: 80
+            );
         }
 
         return $this->optionsWithSelected(
             base: $base,
             searchCol: 'name',
-            searchTerm: $this->dropdownSearch('searchDocumentCity'),
+            searchTerm: $searchTerm,
             selectedId: $this->documentValue('born_city_id'),
             limit: 80
         );

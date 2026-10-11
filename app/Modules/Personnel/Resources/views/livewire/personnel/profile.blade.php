@@ -13,6 +13,7 @@
     $steps = PersonnelProfile::SECTION_STEPS;
     $currentStep = $this->wizardStep();
     $editing = $this->wizardIsMounted();
+    $childSteps = array_keys(app(\App\Modules\Personnel\Services\PersonnelStepState::class)->childComponentMap());
 @endphp
 
 <div class="flex flex-col">
@@ -42,6 +43,40 @@
             </x-context-panel.section>
 
             <x-context-panel.section :title="__('personnel::profile.groups.file')" :padded="true">
+                {{-- Wizard açıqdırsa addım düyməsi serverə ara sorğu göndərmir: hadisə birbaşa
+                     aktiv addıma gedir (2–8 ayrıca komponentdir, 1 EditPersonnel-in içindədir).
+                     Aktiv addım validasiya edib təsdiqləyir, wizard yeni addımı yükləyir və
+                     `step-changed` yayır; panel vəziyyəti (aktiv/tamamlanmış, spinner) brauzerdə
+                     həmin hadisədən yenilənir, profil yenidən render olunmur. Açar `editing`-ə
+                     bağlıdır ki, wizard açılıb-bağlananda Alpine vəziyyəti serverdən yenidən başlasın. --}}
+                <div
+                    wire:key="profile-file-steps-{{ $editing ? 'edit' : 'view' }}"
+                    x-data="{
+                        current: {{ $editing ? $currentStep : 0 }},
+                        childSteps: @js($childSteps),
+                        pendingStep: null,
+                        timer: null,
+                        stateOf(step) {
+                            if (step < this.current) return 'completed';
+                            return step === this.current ? 'active' : 'upcoming';
+                        },
+                        go(step) {
+                            if (this.current === 0 || step === this.current || this.pendingStep !== null) return;
+                            this.pendingStep = step;
+                            clearTimeout(this.timer);
+                            this.timer = setTimeout(() => this.clear(), 10000);
+                            this.childSteps.includes(this.current)
+                                ? Livewire.dispatch('personnel-crud:request-select', { targetStep: step })
+                                : Livewire.dispatch('personnel-profile:goto-step', { targetStep: step });
+                        },
+                        clear() {
+                            clearTimeout(this.timer);
+                            this.pendingStep = null;
+                        },
+                    }"
+                    x-on:personnel-crud:step-changed.window="current = $event.detail.step; clear()"
+                    x-on:personnel-crud:navigate-rejected.window="clear()"
+                >
                 @foreach ($steps as $key => $number)
                     @php
                         // Same completed / active / upcoming semantics as the wizard's stepper.
@@ -53,16 +88,30 @@
                         };
                     @endphp
 
-                    <x-context-panel.step
-                        wire:click.prevent="setSection('{{ $key }}')"
-                        wire:loading.attr="disabled"
-                        wire:target="setSection"
-                        :number="$number"
-                        :state="$state"
-                        :count="$counts[$key] ?: null"
-                        :disabled="! $this->canEdit"
-                    >{{ __('personnel::profile.sections.'.$key) }}</x-context-panel.step>
+                    @if ($editing)
+                        <x-context-panel.step
+                            x-on:click.prevent="go({{ $number }})"
+                            x-bind:disabled="{{ $this->canEdit ? 'pendingStep !== null' : 'true' }}"
+                            :live="'stateOf('.$number.')'"
+                            :pending="'pendingStep === '.$number"
+                            :number="$number"
+                            :state="$state"
+                            :count="$counts[$key] ?: null"
+                            :disabled="! $this->canEdit"
+                        >{{ __('personnel::profile.sections.'.$key) }}</x-context-panel.step>
+                    @else
+                        <x-context-panel.step
+                            wire:click.prevent="setSection('{{ $key }}')"
+                            wire:loading.attr="disabled"
+                            wire:target="setSection"
+                            :number="$number"
+                            :state="$state"
+                            :count="$counts[$key] ?: null"
+                            :disabled="! $this->canEdit"
+                        >{{ __('personnel::profile.sections.'.$key) }}</x-context-panel.step>
+                    @endif
                 @endforeach
+                </div>
             </x-context-panel.section>
 
             <x-slot name="footer">

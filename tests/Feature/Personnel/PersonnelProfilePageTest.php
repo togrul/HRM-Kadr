@@ -108,6 +108,46 @@ class PersonnelProfilePageTest extends TestCase
             ->assertSet('section', 'military');
     }
 
+    public function test_in_edit_mode_the_panel_steps_go_straight_to_the_wizard(): void
+    {
+        $personnel = $this->seedPersonnel();
+        $this->actingAsEditor();
+
+        // Redaktədə addım düyməsi profilə (setSection) ara sorğu göndərmir: hadisə brauzerdən
+        // birbaşa aktiv addıma gedir, panel vəziyyəti isə step-changed ilə yenilənir.
+        Livewire::withUrlParams(['section' => 'personal'])
+            ->test(PersonnelProfile::class, ['personnel' => $personnel])
+            ->assertSeeHtml('go(3)')
+            ->assertSeeHtml('personnel-crud:request-select')
+            ->assertDontSeeHtml("setSection('education')")
+            // Ümumi bölmə wizard-dan kənardadır və əvvəlki kimi serverdən açılır.
+            ->assertSeeHtml("setSection('overview')");
+    }
+
+    public function test_the_view_mode_panel_still_opens_sections_on_the_server(): void
+    {
+        $personnel = $this->seedPersonnel();
+        $this->actingAsEditor();
+
+        Livewire::test(PersonnelProfile::class, ['personnel' => $personnel])
+            ->assertSeeHtml("setSection('education')")
+            ->assertDontSeeHtml('go(3)');
+    }
+
+    public function test_a_wizard_save_refreshes_the_profile_header(): void
+    {
+        $personnel = $this->seedPersonnel();
+        $this->actingAsEditor();
+
+        $component = Livewire::withUrlParams(['section' => 'personal'])
+            ->test(PersonnelProfile::class, ['personnel' => $personnel])
+            ->assertSee('Elçin');
+
+        DB::table('personnels')->where('id', $personnel->id)->update(['name' => 'Elnur']);
+
+        $component->dispatch('personnelAdded', 'saxlandı')->assertSee('Elnur');
+    }
+
     public function test_sections_and_wizard_steps_are_one_to_one(): void
     {
         $steps = PersonnelProfile::SECTION_STEPS;

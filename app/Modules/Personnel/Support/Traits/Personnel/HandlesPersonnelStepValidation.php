@@ -74,7 +74,10 @@ trait HandlesPersonnelStepValidation
             return $specialConditions[0];
         }
 
-        return array_intersect_assoc(...$specialConditions);
+        // Hər süzülmüş massiv eyni qayda dəstinin alt çoxluğudur; ortaq açarlar qalır.
+        // Qiymətlə müqayisə (array_intersect_assoc) massiv qaydalarında (məs. valid_date)
+        // "Array to string conversion" atırdı və addım keçidi 500 ilə donurdu.
+        return array_intersect_key(...$specialConditions);
     }
 
     protected function validateNavigationStepIfNeeded(): void

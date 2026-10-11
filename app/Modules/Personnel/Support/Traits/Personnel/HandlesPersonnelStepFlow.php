@@ -5,6 +5,7 @@ namespace App\Modules\Personnel\Support\Traits\Personnel;
 use App\Modules\Personnel\Services\PersonnelStepNavigationService;
 use App\Modules\Personnel\Services\PersonnelStepState;
 use Error;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 
@@ -284,16 +285,28 @@ trait HandlesPersonnelStepFlow
     public function gotoStepFromProfile(int $targetStep): void
     {
         if ((int) $this->step === $targetStep) {
+            $this->skipRender();
+            $this->dispatch('personnel-crud:navigate-rejected', step: (int) $this->step);
+
             return;
         }
 
         if ($this->activeStepUsesChildComponent()) {
+            // Bu sorğuda wizard dəyişmir — yalnız aktiv addım komponentinə ötürülür.
+            $this->skipRender();
             $this->dispatch('personnel-crud:request-select', targetStep: $targetStep);
 
             return;
         }
 
-        $this->selectStep($targetStep);
+        try {
+            $this->selectStep($targetStep);
+        } catch (ValidationException $exception) {
+            // Panelin gözləmə göstəricisi sönsün; xətalar adi qaydada göstərilir.
+            $this->dispatch('personnel-crud:navigate-rejected', step: (int) $this->step);
+
+            throw $exception;
+        }
     }
 
     public function isCurrentStepLoaded(): bool

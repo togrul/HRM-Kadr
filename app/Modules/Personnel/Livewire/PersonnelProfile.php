@@ -88,6 +88,8 @@ class PersonnelProfile extends Component
         }
 
         if ($section === $this->section || ! in_array($section, app(PersonnelProfileReadService::class)->sectionKeys(), true)) {
+            $this->skipRender();
+
             return;
         }
 
@@ -101,6 +103,10 @@ class PersonnelProfile extends Component
         // step can validate and save first; the panel follows the step the wizard
         // actually lands on, not the one that was requested.
         if ($targetStep !== null && $this->wizardIsMounted()) {
+            // Bu sorğuda profil dəyişmir: panel addımın real keçidindən sonra
+            // syncSectionFromWizard ilə yenilənir. Tam profili (≈87 KB, 7 SQL) iki dəfə
+            // render etməyə ehtiyac yoxdur.
+            $this->skipRender();
             $this->dispatch('personnel-profile:goto-step', targetStep: $targetStep);
 
             return;
@@ -109,14 +115,31 @@ class PersonnelProfile extends Component
         $this->section = $section;
     }
 
+    /**
+     * Wizard addımı dəyişdi: yalnız `section` (URL və sonrakı kliklər üçün) yenilənir.
+     * Panelin aktiv/tamamlanmış vəziyyəti brauzerdə eyni hadisədən hesablanır, ona görə
+     * profili (≈90 KB) yenidən render etmirik.
+     */
     #[On('personnel-crud:step-changed')]
     public function syncSectionFromWizard(int $step): void
     {
+        $this->skipRender();
+
         $section = array_search($step, self::SECTION_STEPS, true);
 
         if ($section !== false) {
             $this->section = $section;
         }
+    }
+
+    /**
+     * Wizard saxladı: başlıq və bölmə sayları (məs. vəsiqələrin sayı) dəyişmiş ola bilər.
+     * Addım keçidi profili artıq render etmədiyi üçün yenilənmə burada olur.
+     */
+    #[On('personnelAdded')]
+    public function refreshAfterSave(): void
+    {
+        unset($this->personnel);
     }
 
     /** The wizard only exists while an editable section is open. */

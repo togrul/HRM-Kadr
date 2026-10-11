@@ -110,14 +110,23 @@ class PersonnelDropdownCache
         $suffixes = [
             'current',
             'previous',
-            'document-nationality',
-            'document-born-country',
+            'document',
         ];
 
         foreach (self::locales() as $locale) {
             foreach ($suffixes as $suffix) {
                 Cache::forget("personnel:country:{$suffix}:{$locale}");
             }
+        }
+    }
+
+    /** Vəsiqə addımının doğum şəhəri siyahısı: ölkəyə görə və ölkəsiz keşlər. */
+    public static function forgetCities(mixed ...$countryIds): void
+    {
+        Cache::forget('personnel:city:all');
+
+        foreach (array_unique(array_filter(array_map('intval', $countryIds))) as $countryId) {
+            Cache::forget("personnel:city:{$countryId}");
         }
     }
 

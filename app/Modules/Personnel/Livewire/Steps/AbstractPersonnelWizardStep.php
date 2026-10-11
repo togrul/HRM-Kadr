@@ -24,6 +24,7 @@ use App\Services\EducationDurationService;
 use App\Traits\NormalizesDropdownPayloads;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -153,8 +154,9 @@ abstract class AbstractPersonnelWizardStep extends Component
     #[On('personnel-crud:request-next')]
     public function requestNext(): void
     {
-        $this->validateNavigationStepIfNeeded();
+        $this->validateNavigationOrReject();
 
+        $this->approveNavigation();
         $this->dispatch(
             'personnel-crud:navigate-approved',
             step: $this->stepNumber(),
@@ -166,8 +168,9 @@ abstract class AbstractPersonnelWizardStep extends Component
     #[On('personnel-crud:request-previous')]
     public function requestPrevious(): void
     {
-        $this->validateNavigationStepIfNeeded();
+        $this->validateNavigationOrReject();
 
+        $this->approveNavigation();
         $this->dispatch(
             'personnel-crud:navigate-approved',
             step: $this->stepNumber(),
@@ -180,17 +183,45 @@ abstract class AbstractPersonnelWizardStep extends Component
     public function requestSelect(int $targetStep): void
     {
         if ($targetStep === $this->stepNumber()) {
+            $this->skipRender();
+            $this->dispatch('personnel-crud:navigate-rejected', step: $this->stepNumber());
+
             return;
         }
 
-        $this->validateNavigationStepIfNeeded();
+        $this->validateNavigationOrReject();
 
+        $this->approveNavigation();
         $this->dispatch(
             'personnel-crud:navigate-approved',
             step: $this->stepNumber(),
             targetStep: $targetStep,
             payload: $this->stepPayloadForParent()
         );
+    }
+
+    /**
+     * Addım validasiyadan keçmədisə panel/stepper gözləmə göstəricisini söndürsün deyə
+     * xəbər verilir; xətalar adi qaydada render olunur.
+     */
+    protected function validateNavigationOrReject(): void
+    {
+        try {
+            $this->validateNavigationStepIfNeeded();
+        } catch (ValidationException $exception) {
+            $this->dispatch('personnel-crud:navigate-rejected', step: $this->stepNumber());
+
+            throw $exception;
+        }
+    }
+
+    /**
+     * Keçid təsdiqləndi: bu komponent növbəti cavabda valideyn tərəfindən yeni addımla
+     * əvəz olunur, ona görə onun HTML-ini yenidən göndərmək (33–207 KB) boş işdir.
+     */
+    protected function approveNavigation(): void
+    {
+        $this->skipRender();
     }
 
     #[On('personnel-crud:request-save')]
