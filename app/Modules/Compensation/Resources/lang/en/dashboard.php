@@ -12,6 +12,8 @@ return [
         'bank' => 'Bank',
         'history' => 'History',
         'statutory' => 'Tax/insurance rates',
+        'regimes' => 'Regime & sector',
+        'reliefs' => 'Tax reliefs',
     ],
 
     'statutory' => [
@@ -59,6 +61,8 @@ return [
         'no_income_limit' => 'no income limit',
         'main_workplace_only' => 'main workplace only',
         'taxable_only' => 'Only these components are taxed: :codes',
+        'base_only' => 'Only these components enter the :component base: :codes',
+        'personal' => 'with the employee\'s relief card (Compensation → Tax reliefs)',
     ],
 
     'summary' => [
@@ -85,6 +89,9 @@ return [
 
     'components' => [
         'title' => 'Component catalog',
+        'military_taxed' => 'Taxed for servicemen',
+        'military_exempt' => 'Tax-exempt for servicemen',
+        'military_no_dsmf' => 'Outside the SSPF base for servicemen',
         'list' => 'Components',
         'empty' => 'No components',
     ],
@@ -192,6 +199,7 @@ return [
         'add_grade' => 'Add grade',
         'add_component' => 'Add component',
         'add_bank' => 'Add bank account',
+        'add_relief' => 'Add relief card',
         'add_rate' => 'Add rate',
         'open_catalog' => 'Catalog',
         'edit' => 'Edit',

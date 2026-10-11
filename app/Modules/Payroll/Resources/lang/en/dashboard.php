@@ -9,6 +9,8 @@ return [
         'runs' => 'Runs',
         'payslips' => 'Payslips',
         'loans' => 'Loans/advances',
+        'enforcement' => 'Enforcement orders',
+        'adjustments' => 'Tax adjustment report',
     ],
 
     'loans' => [
@@ -104,6 +106,7 @@ return [
         'clear' => 'Clear',
         'print' => 'Print',
         'save' => 'Save',
+        'record_refund' => 'Add refund',
         'delete' => 'Delete',
     ],
 
@@ -178,6 +181,8 @@ return [
         'lock' => 'The run will be locked and payslips frozen. Continue?',
         'reopen' => 'The run will be reopened. Continue?',
         'delete' => 'Are you sure you want to delete this record?',
+        'tax_adjustment_refund' => 'The over-withheld amount of the selected rows will be added to the next run as a payment outside tax and written to the audit log. The corrected return must be filed separately. Continue?',
+        'enforcement_status' => 'The enforcement order status will change and the reason will be recorded. Continue?',
     ],
 
     'messages' => [

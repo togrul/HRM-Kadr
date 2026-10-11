@@ -3,7 +3,10 @@
 namespace App\Modules\Compensation\Livewire\Tabs;
 
 use App\Models\CompensationComponent;
+use App\Models\CompensationRegime;
+use App\Models\StatutoryExemption;
 use App\Modules\Compensation\Application\Services\CompensationCatalogService;
+use App\Modules\Compensation\Domain\Contracts\CompensationReadRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
@@ -47,6 +50,28 @@ class ComponentsTab extends CompensationTab
     protected function resetPanel(string $panel): void
     {
         $this->cancelComponent();
+    }
+
+    /**
+     * Hərbi rejimdə bu gün qüvvədə olan baza qaydaları (VM m.102.1.14.15 — vergi; «Sosial sığorta haqqında»
+     * m.15 — DSMF): statutor komponent kodu → bazaya daxil olan qazanc kodları. Komponent bayrağı
+     * (`taxable`, `affects_social`) ümumi qaydadır; hərbçidə əlavə olaraq bu siyahı tətbiq olunur.
+     *
+     * @return array<string, list<string>>
+     */
+    #[Computed]
+    public function militaryBases(): array
+    {
+        $militaryId = CompensationRegime::query()->where('code', 'military')->value('id');
+
+        if ($militaryId === null) {
+            return [];
+        }
+
+        return app(CompensationReadRepository::class)->statutoryExemptionsFor((int) $militaryId, now()->toDateString())
+            ->filter(fn (StatutoryExemption $exemption): bool => $exemption->kind === StatutoryExemption::KIND_TAXABLE_COMPONENTS && (int) $exemption->regime_id === (int) $militaryId)
+            ->mapWithKeys(fn (StatutoryExemption $exemption): array => [(string) $exemption->component_code => array_map('strval', (array) $exemption->component_codes)])
+            ->all();
     }
 
     #[Computed]

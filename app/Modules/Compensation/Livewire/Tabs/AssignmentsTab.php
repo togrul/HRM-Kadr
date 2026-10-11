@@ -4,6 +4,7 @@ namespace App\Modules\Compensation\Livewire\Tabs;
 
 use App\Models\CompensationComponent;
 use App\Models\EmployeeCompensation;
+use App\Modules\Compensation\Application\Services\CompanySectorSettings;
 use App\Modules\Compensation\Application\Services\CompensationService;
 use App\Modules\Orders\Contracts\OrderDrafter;
 use App\Support\Currency;
@@ -34,9 +35,32 @@ class AssignmentsTab extends CompensationTab
     /** Əmək haqqı jurnal rejimindədirsə dəyişikliyin səbəbi (dəyişiklik siyasəti). */
     public string $changeReason = '';
 
+    public function mount(): void
+    {
+        parent::mount();
+
+        // Yeni təyinat şirkət sektorunun standart rejimi ilə açılır (CompanySectorSettings).
+        $this->assignmentForm['regime_id'] = app(CompensationService::class)->defaultRegimeId();
+    }
+
     protected function viewName(): string
     {
         return 'assignments';
+    }
+
+    /** Şirkət standartı rejiminin adı — formada ipucu kimi. */
+    #[Computed]
+    public function defaultRegimeName(): ?string
+    {
+        $id = app(CompanySectorSettings::class)->defaultRegimeId();
+
+        foreach ($this->regimeOptions() as $option) {
+            if ($option['id'] === $id) {
+                return $option['label'];
+            }
+        }
+
+        return null;
     }
 
     #[Computed]
@@ -147,7 +171,7 @@ class AssignmentsTab extends CompensationTab
         );
 
         $this->assignmentForm = [
-            'regime_id' => null, 'pay_grade_id' => null, 'base_amount' => '',
+            'regime_id' => $service->defaultRegimeId(), 'pay_grade_id' => null, 'base_amount' => '',
             'currency' => Currency::DEFAULT, 'effective_from' => '', 'order_no' => '', 'note' => '',
         ];
         $this->assignmentLines = [];

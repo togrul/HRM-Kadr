@@ -10,9 +10,10 @@ namespace App\Modules\Payroll\Application\Services;
  * Məhkəmə də 20 %-dən artıq tutulmaya qabaqcadan razılıq verən müqavilə şərtini etibarsız sayıb —
  * ona görə konfiqurasiya həddi yalnız AŞAĞI sala bilər, 20 %-dən yuxarı qaldıra bilməz.
  *
- * 50 % (bir neçə icra sənədi — ƏM m.176.2, «İcra haqqında» m.65.1–65.2) və 70 % (aliment, sağlamlığa
- * vurulmuş ziyan və s. — ƏM m.176.3, m.65.3) hədləri icra sənədi üzrə tutulmalara aiddir; sistemdə
- * icra sənədi reyestri olmadığı üçün burada tətbiq edilmir (docs/payroll-legal-basis.md §4).
+ * 50 % (icra sənədləri — ƏM m.176.1–176.2, «İcra haqqında» m.65.1–65.2) və 70 % (aliment, sağlamlığa
+ * vurulmuş ziyan, ailəni dolandıranın itkisi, cinayətlə vurulmuş ziyan — ƏM m.176.3, m.65.3) hədləri icra
+ * sənədi reyestri üzrə tutulmalara aiddir: EnforcementService onları `room()`-a ratio kimi ötürür; icra sənədi
+ * olan ödənişdə kredit/könüllü tutulmalar həm 20 %-də, həm də ümumi 50/70 %-də qalır (docs/payroll-legal-basis.md §10).
  */
 final class DeductionCap
 {

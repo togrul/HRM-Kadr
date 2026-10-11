@@ -267,8 +267,14 @@ class PayrollRunService
             $recovery = 0.0;
             if ($regular && config('payroll.recover_revoked_order_pay', false)) {
                 $statutory = (float) collect($lines)->where('kind', 'deduction')->where('is_statutory', true)->sum('amount');
-                $taken = (float) collect($lines)->where('kind', 'deduction')->where('is_statutory', false)->sum('amount');
+                $enforced = (float) collect($lines)->where('code', EnforcementService::LINE_CODE)->sum('amount');
+                $taken = (float) collect($lines)->where('kind', 'deduction')->where('is_statutory', false)->sum('amount') - $enforced;
                 $room = DeductionCap::room($gross - $statutory, $taken, DeductionCap::ratio('payroll.recovery_cap_ratio'));
+
+                // İcra sənədi varsa bütün tutulmalar birlikdə onun 50 % / 70 % həddində qalır.
+                if ($enforced > 0) {
+                    $room = min($room, DeductionCap::room($gross - $statutory, $taken + $enforced, $this->enforcementRatio($lines)));
+                }
                 $recovery = round(min($pendingRetro['recovery'], $room), 2);
             }
 
@@ -305,6 +311,25 @@ class PayrollRunService
         }
 
         return $payslips;
+    }
+
+    /**
+     * İcra sənədi sətirlərinin ümumi həddi: 70 %-lik növ (aliment və s.) varsa 0,70, əks halda 0,50.
+     *
+     * @param  array<int, array<string, mixed>>  $lines
+     */
+    private function enforcementRatio(array $lines): float
+    {
+        $documentIds = collect($lines)
+            ->where('code', EnforcementService::LINE_CODE)
+            ->map(fn (array $line): ?int => EnforcementService::decodeSource($line['sources'] ?? null)[0])
+            ->filter()
+            ->values()
+            ->all();
+
+        $seventy = \App\Models\EnforcementDocument::query()->whereKey($documentIds)->whereIn('kind', \App\Models\EnforcementDocument::SEVENTY_PERCENT_KINDS)->exists();
+
+        return $seventy ? 0.70 : 0.50;
     }
 
     /**
@@ -527,6 +552,7 @@ class PayrollRunService
 
             $this->loans->recordRepaymentsForRun($run, $run->run_type === 'regular' ? array_map('strval', array_keys($this->leaversInPeriod($run->period))) : []);
             $this->retro->recordRetroPayments($run);
+            app(EnforcementService::class)->recordForRun($run);
 
             if ($run->run_type === 'regular' && InstalledTables::has('payroll_one_off_earnings')) {
                 PayrollOneOffEarning::query()
@@ -564,6 +590,7 @@ class PayrollRunService
 
             $this->loans->reverseRepaymentsForRun($run);
             $this->retro->reverseRetroPayments($run);
+            app(EnforcementService::class)->reverseForRun($run);
 
             if (InstalledTables::has('payroll_one_off_earnings')) {
                 PayrollOneOffEarning::query()->where('paid_payroll_run_id', $run->id)->update(['paid_payroll_run_id' => null]);

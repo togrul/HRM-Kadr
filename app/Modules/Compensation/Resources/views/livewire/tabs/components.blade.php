@@ -39,6 +39,16 @@
                             @if ($component->affects_social)
                                 <x-small-badge mode="secondary">{{ __('compensation::dashboard.fields.affects_social') }}</x-small-badge>
                             @endif
+                            @if ($component->type === 'earning' && isset($this->militaryBases['income_tax']))
+                                @if (in_array($component->code, $this->militaryBases['income_tax'], true))
+                                    <x-small-badge mode="secondary" title="VM 102.1.14.15">{{ __('compensation::dashboard.components.military_taxed') }}</x-small-badge>
+                                @else
+                                    <x-small-badge mode="green" title="VM 102.1.14.15">{{ __('compensation::dashboard.components.military_exempt') }}</x-small-badge>
+                                @endif
+                            @endif
+                            @if ($component->type === 'earning' && isset($this->militaryBases['dsmf']) && ! in_array($component->code, $this->militaryBases['dsmf'], true))
+                                <x-small-badge mode="green" title="SS m.15">{{ __('compensation::dashboard.components.military_no_dsmf') }}</x-small-badge>
+                            @endif
                         </div>
                     </x-table.td>
                     <x-table.td :isButton="true">

@@ -11,6 +11,7 @@
         'scales' => ['scale', 'add_scale'],
         'components' => ['component', 'add_component'],
         'bank' => $selectedTabelNo ? ['bank', 'add_bank'] : null,
+        'reliefs' => $selectedTabelNo ? ['relief', 'add_relief'] : null,
         'statutory' => ['statutory', 'add_rate'],
         default => null,
     };
@@ -91,7 +92,7 @@
     <div class="flex flex-col gap-4 px-4 py-4 sm:px-5">
 
         {{-- ========= ASSIGNMENTS / BANK / HISTORY share the personnel picker ========= --}}
-        @if (in_array($activeTab, ['assignments', 'bank', 'history'], true))
+        @if (in_array($activeTab, ['assignments', 'bank', 'history', 'reliefs'], true))
             <section class="rounded-xl border border-hairline bg-white px-4 py-3.5">
                 <p class="hrm-eyebrow">{{ __('compensation::dashboard.fields.personnel') }}</p>
                 <div class="relative mt-2 max-w-xl" x-data="{ open: false }" x-on:click.outside="open = false">
@@ -130,7 +131,7 @@
         @php
             $tabProps = match ($activeTab) {
                 'scales' => ['scaleCount' => $stat('scales'), 'gradeCount' => $stat('grades')],
-                'assignments', 'bank', 'history' => ['tabelNo' => $selectedTabelNo],
+                'assignments', 'bank', 'history', 'reliefs' => ['tabelNo' => $selectedTabelNo],
                 default => [],
             };
         @endphp

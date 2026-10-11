@@ -19,6 +19,9 @@ class RetroService
     /** Code of the loan instalment line (PayrollCalculator). */
     public const LOAN = 'loan';
 
+    /** Code of an enforcement-document deduction line (EnforcementService). */
+    public const ENFORCEMENT = EnforcementService::LINE_CODE;
+
     /**
      * Outstanding retro for an employee: for each LOCKED (paid) payslip of a regular run,
      * recompute the net with the compensation/rates now effective as-of that period, compare
@@ -28,7 +31,8 @@ class RetroService
      * Off-cycle payslips are not sources: they pay a supplement, not the month, so comparing
      * them with a recomputed month would invent a difference. $excludeRunId leaves a run's
      * own payslips out (the run being calculated or locked never owes itself retro). Loan
-     * instalments are left out of both sides: a loan closed or taken since is not pay.
+     * instalments and enforcement-document deductions are left out of both sides: a loan or a
+     * court order closed or received since is not pay.
      *
      * A negative remainder is recovered (`recovery`, a deduction on the next regular run) only
      * for the part caused by order-derived earnings that no longer stand — e.g. a rest-day
@@ -67,13 +71,15 @@ class RetroService
                 continue;
             }
 
-            $recalcNet = round($recalc['net'] + $this->sumCode($recalc['lines'], self::LOAN), 2);
+            // Kredit taksiti və icra sənədi tutulmaları əmək haqqı deyil — hər iki tərəfdən çıxarılır.
+            $recalcNet = round($recalc['net'] + $this->sumCode($recalc['lines'], self::LOAN) + $this->sumCode($recalc['lines'], self::ENFORCEMENT), 2);
 
             // The paying run's own retro lines settle other periods; they are not this period's pay.
             $paidNet = round((float) ($payslip->snapshot['net'] ?? $payslip->net)
                 - (float) $payslip->lines->where('code', self::RETRO)->sum('amount')
                 + (float) $payslip->lines->where('code', self::RECOVERY)->sum('amount')
-                + (float) $payslip->lines->where('code', self::LOAN)->sum('amount'), 2);
+                + (float) $payslip->lines->where('code', self::LOAN)->sum('amount')
+                + (float) $payslip->lines->where('code', self::ENFORCEMENT)->sum('amount'), 2);
             $alreadyPaid = (float) RetroPayment::query()
                 ->where('tabel_no', $tabelNo)
                 ->where('source_payroll_run_id', $sourceRunId)
@@ -220,7 +226,7 @@ class RetroService
             return 0.0;
         }
 
-        $orderDelta = round($recalcNet - $asPaid['net'] - $this->sumCode($asPaid['lines'], self::LOAN), 2);
+        $orderDelta = round($recalcNet - $asPaid['net'] - $this->sumCode($asPaid['lines'], self::LOAN) - $this->sumCode($asPaid['lines'], self::ENFORCEMENT), 2);
 
         return $orderDelta < 0 ? max($delta, $orderDelta) : 0.0;
     }

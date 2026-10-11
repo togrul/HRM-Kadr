@@ -36,6 +36,9 @@
                         <div class="min-w-0">
                             <x-ui.select-dropdown :label="__('compensation::dashboard.fields.regime')" mode="gray" direction="auto" wire:model.live="assignmentForm.regime_id" :model="$this->regimeOptions" />
                             @error('assignmentForm.regime_id') <x-validation>{{ $message }}</x-validation> @enderror
+                            @if ($this->defaultRegimeName)
+                                <p class="mt-1 text-[11.5px] leading-4 text-ink-faint">{{ __('compensation::regimes.assignment_hint', ['regime' => $this->defaultRegimeName]) }}</p>
+                            @endif
                         </div>
                         <x-ui.input-shell :label="__('compensation::dashboard.fields.base_amount')" :error="$errors->first('assignmentForm.base_amount')">
                             <x-ui.input type="number" step="0.01" wire:model="assignmentForm.base_amount" />

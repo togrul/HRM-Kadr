@@ -2,6 +2,7 @@
 
 namespace App\Modules\Payroll\Application\Services;
 
+use App\Models\EmployeeTaxRelief;
 use App\Models\StatutoryExemption;
 use App\Modules\Compensation\Domain\Contracts\CompensationReadRepository;
 use Illuminate\Support\Collection;
@@ -22,18 +23,28 @@ class StatutoryEngine
      * income of at most 2500 AZN. A monthly relief is given once per month, so an off-cycle run
      * (a second payment in the same month) passes $monthlyRelief = false.
      *
+     * Personal reliefs (VM m.102.1-1, 102.2–102.5 — the employee's relief cards, `personal`
+     * exemptions) are passed as $personalReliefs (exemption codes in force for the employee this
+     * month). Of 102.1-1 / 102.2 / 102.3 / 102.4 only the largest is given (m.102.7); 102.5 and the
+     * 102.1.6 allowance are not in that list and are added on top.
+     *
+     * $socialBases lets a social-based rate use its own base, keyed by component code (e.g. a
+     * serviceman's DSMF base); a component missing from it uses $socialBase.
+     *
+     * @param  list<string>  $personalReliefs
+     * @param  array<string, float>  $socialBases
      * @return array<int,array<string,mixed>>
      */
-    public function compute(?int $regimeId, ?string $date, float $taxableBase, float $socialBase, bool $mainWorkplace = true, bool $monthlyRelief = true): array
+    public function compute(?int $regimeId, ?string $date, float $taxableBase, float $socialBase, bool $mainWorkplace = true, bool $monthlyRelief = true, array $personalReliefs = [], array $socialBases = []): array
     {
         $lines = [];
         $sort = 100;
         $exemptions = $this->exemptionsFor($regimeId, $date);
 
         foreach ($this->compensation->statutoryRatesFor($regimeId, $date) as $rate) {
-            $base = $rate->base === 'taxable' ? $taxableBase : $socialBase;
+            $base = $rate->base === 'taxable' ? $taxableBase : ($socialBases[(string) $rate->component_code] ?? $socialBase);
             $relief = $rate->base === 'taxable'
-                ? $this->reliefFor((string) $rate->component_code, $base, $exemptions, $mainWorkplace, $monthlyRelief)
+                ? $this->reliefFor((string) $rate->component_code, $base, $exemptions, $mainWorkplace, $monthlyRelief, $personalReliefs)
                 : ['amount' => 0.0, 'basis' => []];
             $amount = round($this->applyBrackets(max(0.0, $base - $relief['amount']), (array) $rate->brackets), 2);
 
@@ -102,22 +113,86 @@ class StatutoryEngine
     }
 
     /**
+     * Per-component social bases where a `taxable_components` rule targets a social-based component
+     * (e.g. `dsmf` for servicemen: only the listed pay codes count). Components without such a
+     * rule are absent from the result and use the payslip's ordinary social base.
+     *
+     * @param  array<int,array<string,mixed>>  $lines
+     * @return array<string, float>
+     */
+    public function socialBases(array $lines, ?int $regimeId, ?string $date): array
+    {
+        $only = [];
+
+        foreach ($this->exemptionsFor($regimeId, $date) as $exemption) {
+            if ($exemption->kind === StatutoryExemption::KIND_TAXABLE_COMPONENTS && $exemption->component_code !== 'income_tax') {
+                $only[(string) $exemption->component_code] = array_merge($only[(string) $exemption->component_code] ?? [], array_map('strval', (array) $exemption->component_codes));
+            }
+        }
+
+        $bases = [];
+
+        foreach ($only as $component => $codes) {
+            $sum = 0.0;
+
+            foreach ($lines as $line) {
+                if (($line['kind'] ?? null) === 'earning' && ($line['affects_social'] ?? false) && in_array((string) ($line['code'] ?? ''), $codes, true)) {
+                    $sum += (float) $line['amount'];
+                }
+            }
+
+            $bases[$component] = $sum;
+        }
+
+        return $bases;
+    }
+
+    /**
      * Fixed-amount reliefs that apply to this component and income.
      *
+     * Personal (`personal`) exemptions count only when their code is among $personalReliefs; of
+     * those in the m.102.7 group (EmployeeTaxRelief::LARGEST_ONLY) only the largest is taken.
+     *
      * @param  Collection<int, StatutoryExemption>  $exemptions
+     * @param  list<string>  $personalReliefs
      * @return array{amount: float, basis: list<string>}
      */
-    public function reliefFor(string $componentCode, float $income, Collection $exemptions, bool $mainWorkplace = true, bool $monthlyRelief = true): array
+    public function reliefFor(string $componentCode, float $income, Collection $exemptions, bool $mainWorkplace = true, bool $monthlyRelief = true, array $personalReliefs = []): array
     {
         $amount = 0.0;
         $basis = [];
+        $largest = null;
 
         if (! $monthlyRelief || $income <= 0) {
             return ['amount' => 0.0, 'basis' => []];
         }
 
         foreach ($exemptions as $exemption) {
-            if ($exemption->kind !== StatutoryExemption::KIND_FIXED_AMOUNT || $exemption->component_code !== $componentCode) {
+            if ($exemption->component_code !== $componentCode) {
+                continue;
+            }
+
+            if ($exemption->kind === StatutoryExemption::KIND_PERSONAL) {
+                // VM m.102.8: yalnız əsas iş yerində; kart işçidə həmin ay qüvvədə olmalıdır.
+                if (! in_array($exemption->code, $personalReliefs, true) || ($exemption->main_workplace_only && ! $mainWorkplace)) {
+                    continue;
+                }
+
+                if (in_array($exemption->code, EmployeeTaxRelief::LARGEST_ONLY, true)) {
+                    if ($largest === null || (float) $exemption->amount > (float) $largest->amount) {
+                        $largest = $exemption;
+                    }
+
+                    continue;
+                }
+
+                $amount += (float) $exemption->amount;
+                $basis[] = $exemption->legal_basis;
+
+                continue;
+            }
+
+            if ($exemption->kind !== StatutoryExemption::KIND_FIXED_AMOUNT) {
                 continue;
             }
 
@@ -132,6 +207,11 @@ class StatutoryEngine
 
             $amount += (float) $exemption->amount;
             $basis[] = $exemption->legal_basis;
+        }
+
+        if ($largest !== null) {
+            $amount += (float) $largest->amount;
+            $basis[] = $largest->legal_basis;
         }
 
         return ['amount' => round(min($amount, $income), 2), 'basis' => $basis];

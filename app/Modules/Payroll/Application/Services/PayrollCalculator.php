@@ -4,7 +4,9 @@ namespace App\Modules\Payroll\Application\Services;
 
 use App\Models\PayrollOneOffEarning;
 use App\Modules\Compensation\Domain\Contracts\CompensationReadRepository;
+use App\Modules\Compensation\Domain\Contracts\TaxReliefReadRepository;
 use App\Support\Database\InstalledTables;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class PayrollCalculator
@@ -136,18 +138,53 @@ class PayrollCalculator
         $taxableBase = $this->statutory->taxableBase($lines, $current->regime_id, $onDate);
         $socialBase = $this->sumWhere($lines, fn ($l) => $l['kind'] === 'earning' && $l['affects_social']);
 
-        $statutoryLines = $this->statutory->compute($current->regime_id, $onDate, $taxableBase, $socialBase, $this->isMainWorkplace($tabelNo), $monthlyRelief);
+        $statutoryLines = $this->statutory->compute($current->regime_id, $onDate, $taxableBase, $socialBase, $this->isMainWorkplace($tabelNo), $monthlyRelief, $monthlyRelief ? $this->personalReliefs($tabelNo, $onDate, $year, $month) : [], $this->statutory->socialBases($lines, $current->regime_id, $onDate));
         $lines = array_merge($lines, $statutoryLines);
 
-        // Loan / advance repayment — a flat deduction, not prorated, not statutory. Every payment
-        // keeps all non-statutory deductions within ƏM m.176.1 (20 % of the wage due after tax).
+        // Enforcement documents (icra sənədləri — aliment, məhkəmə qərarı …) come first: within
+        // 50 % / 70 % of the wage due after tax (ƏM m.176.2–176.3, «İcra haqqında» m.64–65), by
+        // priority. A fixed monthly amount is taken only by the month's own payment; a percentage
+        // by every payment, off-cycle included.
         $statutory = $this->sumWhere($lines, fn ($l) => $l['kind'] === 'deduction' && $l['is_statutory']);
-        $otherDeductions = $this->sumWhere($lines, fn ($l) => $l['kind'] === 'deduction' && ! $l['is_statutory']);
+        $wageDue = $gross - $statutory;
+        // «İcra haqqında» m.68.1.4: ağır və zərərli əmək şəraitinə görə ödənişə tutma yönəldilmir.
+        $protected = $this->sumWhere($lines, fn ($l) => $l['kind'] === 'earning' && in_array($l['code'], EnforcementService::PROTECTED_EARNINGS, true));
+        $enforcement = $this->enforcement($tabelNo, max(0.0, $wageDue - $protected), $onDate, $year, $month, $monthlyRelief);
+
+        foreach ($enforcement['lines'] as $index => $line) {
+            if ($line['amount'] < 0.01) {
+                continue;
+            }
+
+            $lines[] = [
+                'component_id' => null,
+                'code' => EnforcementService::LINE_CODE,
+                'name' => $line['name'],
+                'kind' => 'deduction',
+                'amount' => $line['amount'],
+                'taxable' => false,
+                'affects_social' => false,
+                'is_statutory' => false,
+                'sort' => 150 + $index,
+                'sources' => EnforcementService::encodeSource($line['document_id'], $line['requested']),
+            ];
+        }
+
+        // Loan / advance repayment — a flat deduction, not prorated, not statutory. Every payment
+        // keeps the ordinary non-statutory deductions within ƏM m.176.1 (20 % of the wage due after
+        // tax) and, with enforcement documents, all deductions together within their 50 % / 70 %.
+        $enforcementTotal = $this->sumWhere($lines, fn ($l) => $l['code'] === EnforcementService::LINE_CODE);
+        $otherDeductions = $this->sumWhere($lines, fn ($l) => $l['kind'] === 'deduction' && ! $l['is_statutory'] && $l['code'] !== EnforcementService::LINE_CODE);
         $loan = match (true) {
-            $settleLoans => $this->loans->settlement($tabelNo, $gross - $statutory, $otherDeductions),
-            $withOneOffs => $this->loans->installmentAmount($tabelNo, $gross - $statutory, $otherDeductions),
+            $settleLoans => $this->loans->settlement($tabelNo, $wageDue, $otherDeductions),
+            $withOneOffs => $this->loans->installmentAmount($tabelNo, $wageDue, $otherDeductions),
             default => ['requested' => 0.0, 'amount' => 0.0],
         };
+
+        if ($enforcementTotal > 0) {
+            $loan['amount'] = round(min($loan['amount'], DeductionCap::room($wageDue, $otherDeductions + $enforcementTotal, $enforcement['ratio'])), 2);
+        }
+
         $loanTotal = $loan['amount'];
 
         if ($loanTotal > 0) {
@@ -206,6 +243,37 @@ class PayrollCalculator
         }
 
         return $this->mainWorkplace[$tabelNo] ??= DB::table('personnels')->where('tabel_no', $tabelNo)->value('workplace_type') !== 'secondary';
+    }
+
+    /**
+     * @return array{ratio: float, room: float, lines: list<array{document_id: int, requested: float, amount: float, name: string}>}
+     */
+    private function enforcement(string $tabelNo, float $wageDue, ?string $onDate, ?int $year, ?int $month, bool $monthlyPayment): array
+    {
+        $start = ($year && $month)
+            ? Carbon::create($year, $month, 1)->startOfDay()
+            : Carbon::parse($onDate ?? now()->toDateString())->startOfMonth();
+
+        return app(EnforcementService::class)->plan($tabelNo, $wageDue, $start->toDateString(), $start->copy()->endOfMonth()->toDateString(), $monthlyPayment);
+    }
+
+    /**
+     * İşçinin həmin ay qüvvədə olan güzəşt kartları (VM m.102.1-1, 102.2–102.5) — `payroll_from`
+     * tarixindən, yəni kilidlənmiş aylardan sonra (TaxReliefService).
+     *
+     * @return list<string>
+     */
+    private function personalReliefs(string $tabelNo, ?string $onDate, ?int $year, ?int $month): array
+    {
+        if (! app()->bound(TaxReliefReadRepository::class)) {
+            return [];
+        }
+
+        $start = ($year && $month)
+            ? Carbon::create($year, $month, 1)->startOfDay()
+            : Carbon::parse($onDate ?? now()->toDateString())->startOfMonth();
+
+        return app(TaxReliefReadRepository::class)->codesFor($tabelNo, $start->toDateString(), $start->copy()->endOfMonth()->toDateString());
     }
 
     /**

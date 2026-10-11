@@ -128,7 +128,8 @@ class CompensationService implements OrderCompensationSync
      */
     public function createDraftForHire(string $tabelNo, float $baseAmount, ?string $currency, ?Carbon $effectiveFrom, ?string $orderNo): ?EmployeeCompensation
     {
-        $regimeId = \App\Models\CompensationRegime::query()->where('is_active', true)->orderBy('sort')->value('id');
+        // Şirkət sektorunun standart rejimi (CompanySectorSettings); kataloqda yoxdursa — ilk aktiv rejim.
+        $regimeId = $this->defaultRegimeId();
 
         if (! $regimeId) {
             return null;
@@ -253,8 +254,7 @@ class CompensationService implements OrderCompensationSync
 
         $current = $this->currentFor($tabelNo, $effectiveFrom)
             ?? EmployeeCompensation::query()->where('tabel_no', $tabelNo)->where('status', 'active')->orderByDesc('effective_from')->with('lines')->first();
-        $regimeId = $current?->getAttribute('regime_id')
-            ?? CompensationRegime::query()->where('is_active', true)->orderBy('sort')->value('id');
+        $regimeId = $current?->getAttribute('regime_id') ?? $this->defaultRegimeId();
 
         if (! $regimeId) {
             return null;
@@ -367,6 +367,18 @@ class CompensationService implements OrderCompensationSync
             ->orderByDesc('effective_from')
             ->with(['regime', 'payGrade'])
             ->get();
+    }
+
+    /**
+     * Yeni təyinatın standart rejimi: şirkət sektorundan (CompanySectorSettings), o rejim kataloqda
+     * yoxdursa və ya deaktivdirsə — sıralamada ilk aktiv rejim (əvvəlki davranış).
+     */
+    public function defaultRegimeId(): ?int
+    {
+        $id = app(CompanySectorSettings::class)->defaultRegimeId()
+            ?? CompensationRegime::query()->where('is_active', true)->orderBy('sort')->value('id');
+
+        return $id === null ? null : (int) $id;
     }
 
     private function activeFor(string $tabelNo): ?EmployeeCompensation

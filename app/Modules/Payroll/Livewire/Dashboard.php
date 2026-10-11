@@ -102,7 +102,14 @@ class Dashboard extends Component
 
     protected function allowedTabs(): array
     {
-        return ['runs', 'payslips', 'loans'];
+        $tabs = ['runs', 'payslips', 'loans', 'enforcement'];
+
+        // Vergi düzəliş hesabatı yalnız məbləğləri görən istifadəçi üçündür.
+        if ($this->canViewAmounts()) {
+            $tabs[] = 'adjustments';
+        }
+
+        return $tabs;
     }
 
     #[Computed]

@@ -9,6 +9,8 @@ return [
         'runs' => 'Hesablamalar',
         'payslips' => 'Maaş vərəqələri',
         'loans' => 'Kredit/avans',
+        'enforcement' => 'İcra sənədləri',
+        'adjustments' => 'Vergi düzəliş hesabatı',
     ],
 
     'loans' => [
@@ -104,6 +106,7 @@ return [
         'clear' => 'Təmizlə',
         'print' => 'Çap et',
         'save' => 'Yadda saxla',
+        'record_refund' => 'Qaytarmanı əlavə et',
         'delete' => 'Sil',
     ],
 
@@ -178,6 +181,8 @@ return [
         'lock' => 'Hesablama kilidlənəcək və maaş vərəqələri dondurulacaq. Davam edilsin?',
         'reopen' => 'Hesablama yenidən açılacaq. Davam edilsin?',
         'delete' => 'Bu qeydi silmək istədiyinizə əminsiniz?',
+        'tax_adjustment_refund' => 'Seçilmiş sətirlər üzrə artıq tutulmuş məbləğ növbəti run-a vergidən kənar ödəniş kimi əlavə olunacaq və audit jurnalına yazılacaq. Dəqiqləşdirilmiş bəyannamə ayrıca verilməlidir. Davam edilsin?',
+        'enforcement_status' => 'İcra sənədinin statusu dəyişdiriləcək və səbəb qeydə yazılacaq. Davam edilsin?',
     ],
 
     'messages' => [

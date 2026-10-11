@@ -9,7 +9,9 @@ use App\Modules\Compensation\Console\Commands\CompensationQueryBudgetCommand;
 use App\Modules\Compensation\Console\Commands\CompensationRenderBenchmarkCommand;
 use App\Modules\Compensation\Contracts\SubstitutionRegister;
 use App\Modules\Compensation\Domain\Contracts\CompensationReadRepository;
+use App\Modules\Compensation\Domain\Contracts\TaxReliefReadRepository;
 use App\Modules\Compensation\Infrastructure\Persistence\Eloquent\EloquentCompensationReadRepository;
+use App\Modules\Compensation\Infrastructure\Persistence\Eloquent\EloquentTaxReliefReadRepository;
 use App\Providers\Concerns\RegistersLivewireAliases;
 use App\Services\Modules\ModuleState;
 use Illuminate\Support\ServiceProvider;
@@ -29,6 +31,7 @@ class CompensationServiceProvider extends ServiceProvider
 
         $this->app->bind(CompensationReadRepository::class, EloquentCompensationReadRepository::class);
         $this->app->bind(SubstitutionRegister::class, SubstitutionRegisterService::class);
+        $this->app->bind(TaxReliefReadRepository::class, EloquentTaxReliefReadRepository::class);
 
         $this->app->tag([CompensationEmployeeRecordSource::class], EmployeeRecordSource::TAG);
     }
@@ -65,6 +68,8 @@ class CompensationServiceProvider extends ServiceProvider
             'tabs.bank' => \App\Modules\Compensation\Livewire\Tabs\BankTab::class,
             'tabs.history' => \App\Modules\Compensation\Livewire\Tabs\HistoryTab::class,
             'tabs.statutory' => \App\Modules\Compensation\Livewire\Tabs\StatutoryTab::class,
+            'tabs.regimes' => \App\Modules\Compensation\Livewire\Tabs\RegimesTab::class,
+            'tabs.reliefs' => \App\Modules\Compensation\Livewire\Tabs\ReliefsTab::class,
         ];
     }
 }

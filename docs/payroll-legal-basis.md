@@ -310,7 +310,7 @@ ayın 1-i** götürülür (kilidli ay yoxdursa 01.01.2019). Beləliklə ödənil
 
 Əlavə iş yerində 1 100 AZN → 33,00 (güzəşt yoxdur).
 
-### 5.2 Digər güzəştlər — sistemdə YOXDUR (işçi üzrə güzəşt kartı lazımdır)
+### 5.2 Digər güzəştlər — 11.10.2026-dan işçi üzrə güzəşt kartı ilə tətbiq olunur (§9)
 
 | Maddə | Kimə | Güzəşt | Qeyd |
 |---|---|---|---|
@@ -373,6 +373,69 @@ komponent + ödəyən üçün heç bir sətir yoxdursa yazır (mühasibin sətir
 - Hərbi qulluqçu: vəzifə maaşı 1 000 + rütbə 300 + dil bilik əlavəsi 200 = 1 500. Vergi bazası 1 300 →
   102.1.6 ilə 1 100 × 14% = **154**; DSMF 45 / 330, tibbi 30 / 30, işsizlik yoxdur.
 
+### 6.3 Hərbi qulluqçular — yoxlama (11.10.2026, ikinci mərhələ)
+
+**Mənbələr** (oxunma 11.10.2026): «İşsizlikdən sığorta haqqında» <https://e-qanun.az/framework/36310>; «Sosial
+sığorta haqqında» <https://e-qanun.az/framework/3813>; «Əmək pensiyaları haqqında» <https://e-qanun.az/framework/11566>;
+«Hərbi qulluqçuların statusu haqqında» <https://e-qanun.az/framework/6998>; Əmək Məcəlləsi
+<https://e-qanun.az/framework/46943>; Vergi Məcəlləsi <https://e-qanun.az/framework/46948>.
+
+**(a) İşsizlikdən sığorta — 0 % saxlanılır ⚠️**
+
+> **m.2.0.3** sığortaolunan – … işəgötürənlə **əmək müqaviləsi bağlamış** və işsizlikdən sığorta olunan işçilər;
+> **m.2.0.13** işçi – işəgötürənlə fərdi qaydada yazılı əmək müqaviləsi bağlayaraq … çalışan fiziki şəxs;
+> **m.1.3** Bu Qanun siyasi vəzifə tutan şəxslərə şamil edilmir.
+> **ƏM m.6** Aşağıdakı şəxslərə bu Məcəllə şamil edilmir: a) hərbi qulluqçulara; …
+
+Qanunda hərbi qulluqçuların adı ilə nə daxil edilməsi, nə də çıxarılması yoxdur; dövlət qulluqçuları isə açıq
+əhatə olunur (m.13.1.2). Hərbi qulluq əmək müqaviləsi ilə deyil, hərbi qulluq haqqında qanunvericiliklə keçildiyi
+üçün nəticə — **0 %** (`statutory_rates`, `military`, `unemployment`). Bu, mətnin açıq istisnası deyil, sistemli
+şərhdir: DSMF/Məşğulluq Agentliyinin rəsmi izahı tapılmadı — **mühasib təsdiqi tələb olunur** (xüsusən
+kontrakt əsasında hərbi qulluqçular üçün).
+
+**(b) Gəlir vergisi — VM m.102.1.14.15 ✅ (kod düzgün idi)**
+
+> **102.1.14.15.** hərbi qulluqçulara, hakimlərə, prokurorluq orqanlarının prokurorluq işçilərinə və prokurorluq
+> işçiləri olmayan hərbi qulluqçularına, hüquq mühafizə … orqanlarının … xüsusi rütbəsi olan əməkdaşlarına ödənilən
+> bütün növ ödənişlər (**vəzifə və hərbi (xüsusi) rütbəyə görə maaşlar istisna olmaqla**) …
+
+Kataloqla tutuşdurma: `base` (hesablamada vəzifə maaşı sətri) və `rank_supplement` («Rütbə əlavəsi» — hərbi
+qulluqçu üçün **hərbi rütbəyə görə maaş** mənasındadır) vergiyə cəlb olunur; qalan bütün qazanclar — staj,
+zərərlilik, məxfilik, dil əlavəsi, birdəfəlik mükafat, əmr ödənişləri (istirahət günü işi, əvəzetmə) — azaddır.
+Uyğunsuzluq tapılmadı. Komponent səviyyəsində məntiq: komponentin `taxable` bayrağı **ümumi** qaydadır; hərbi
+rejimdə əlavə olaraq `statutory_exemptions` (`vm_102_1_14_15`, `taxable_components`) siyahısı tətbiq olunur —
+bazaya yalnız həm `taxable`, həm də siyahıda olan kod düşür. Kompensasiya → Kataloq-da hər qazanc komponentində
+«Hərbçidə vergiyə cəlb olunur / vergidən azad» nişanı görünür (mənbə — həmin siyahı; ayrıca bayraq yaradılmadı ki,
+iki həqiqət mənbəyi olmasın). ⚠️ Hərbi rütbə maaşı kataloqda başqa kodla saxlanırsa siyahı «Vergi/sığorta
+dərəcələri» ekranında düzəldilməlidir. Qeyd: 102.1.14.16 («bəzi kateqoriyalı hərbi qulluqçuların xüsusi xidmət
+şəraitinə görə … əlavə») 2006-cı ildə çıxarılıb (VM qeydi 742).
+
+**(c) DSMF bazası — «pul təminatı» ✅ (düzəldildi)**
+
+> **«Sosial sığorta haqqında» m.12** … hərbi qulluqçular və xüsusi rütbəli şəxslər (müddətli həqiqi hərbi xidmət
+> hərbi qulluqçuları istisna olmaqla) … məcburi dövlət sosial sığortası ilə əhatə olunurlar.
+> **m.14.3** … sığortaedən … 22 faizi; … sığortaolunan … 3 faizi. (m.14.4 pilləsi yalnız neft-qaz sahəsində
+> fəaliyyəti olmayan qeyri-dövlət sektoru üçündür.)
+> **m.15** [haqq bütün əmək ödənişlərindən hesablanır, istisnalar sırasında:] «hərbi qulluqçulara və xüsusi rütbəli
+> şəxslərə verilən və «Əmək pensiyaları haqqında» Azərbaycan Respublikasının Qanunu ilə müəyyən edilən təminat
+> xərcliyinə (pul təminatına) daxil edilməyən ödənişlər»;
+> **«Əmək pensiyaları haqqında» m.1.0.5** təminat xərcliyi (pul təminatı) – hərbi qulluqçuların … aylıq vəzifə
+> maaşından, rütbə maaşından, xidmət illərinə görə əlavədən, ərzaq payı əvəzinə verilən pul kompensasiyasından,
+> vəzifə maaşından hesablanan digər əlavələrdən (büdcədənkənar vəsaitlər hesabına hesablanan əlavələr və digər
+> ödənişlər istisna olmaqla), artımlardan ibarət olan məbləğdir;
+
+| | Əvvəl | İndi |
+|---|---|---|
+| Dərəcə | 22 % / 3 % | eyni ✅ |
+| Baza | bütün `affects_social` qazanclar (birdəfəlik mükafat və əmr ödənişləri də) | yalnız pul təminatı: `base`, `rank_supplement`, `seniority`, `hazard`, `secrecy`, `language` (miqrasiya `2026_10_11_150300`, `statutory_exemptions` `military_dsmf_pay_allowance`, növ `taxable_components`, komponent `dsmf`) |
+
+Mühərrik: `StatutoryEngine::socialBases()` — sosial bazalı komponent üçün `taxable_components` qaydası varsa həmin
+komponentin bazası ayrıca hesablanır. Nümunə (`MilitaryPayStatutoryTest`): vəzifə 1 000 + rütbə 300 + dil 200 +
+birdəfəlik mükafat 500 → vergi 154,00; DSMF bazası 1 500 → 45,00 / 330,00 (əvvəl 2 000 → 60,00 / 440,00).
+⚠️ Mühasib təsdiqi: (1) «ərzaq payı əvəzinə pul kompensasiyası» kataloqda yoxdur — varsa siyahıya əlavə edilməlidir;
+(2) büdcədənkənar vəsait hesabına olan əlavələr siyahıdan çıxarılmalıdır; (3) icbari tibbi sığortanın hərbçi
+üçün bazası bu yoxlamada oxunmadı — tibbi sığorta hələ ümumi sosial bazadan hesablanır.
+
 ## 7. Yoxlanılmamış / açıq qalan məsələlər
 
 1. ⚠️ Saatlıq vəzifə maaşının ayın fərdi normasına bölünməklə tapılması — rəsmi izahat
@@ -384,10 +447,10 @@ komponent + ödəyən üçün heç bir sətir yoxdursa yazır (mühasibin sətir
    icazə/xəstəlik və ezamiyyət çıxılır.
 4. ⚠️ Kollektiv və ya əmək müqaviləsi m.164 və m.162.2 üzrə daha yüksək məbləğ müəyyən edə
    bilər — hazırda yalnız qanuni minimum (və əmrdəki razılaşma) tətbiq olunur.
-5. ⚠️ **Hərbi rejimdə işsizlik sığortası 0%** — «İşsizlikdən sığorta haqqında» m.2.0.3 (sığortaolunan
+5. ⚠️ **Hərbi rejimdə işsizlik sığortası 0%** (11.10.2026 yenidən oxundu — §6.3(a), açıq istisna yoxdur, sistemli şərh) — «İşsizlikdən sığorta haqqında» m.2.0.3 (sığortaolunan
    = əmək müqaviləsi bağlamış işçi) və ƏM m.6.a (Məcəllə hərbi qulluqçulara şamil edilmir) əsasında
    çıxarılıb; DSMF/Məşğulluq agentliyinin açıq izahı tapılmadı — mühasib təsdiqi lazımdır.
-6. ⚠️ **Hərbi pul təminatında vergiyə cəlb olunan komponentlər** `base` (vəzifə maaşı) və
+6. ✅ **Hərbi pul təminatında vergiyə cəlb olunan komponentlər** — 102.1.14.15 mətni ilə tutuşduruldu, DSMF bazası «pul təminatı» ilə məhdudlaşdırıldı (§6.3(b)–(c)). Əvvəlki qeyd: `base` (vəzifə maaşı) və
    `rank_supplement` (rütbə maaşı) kimi götürülüb (VM m.102.1.14.15). Kataloqda başqa adla saxlanan
    vəzifə/rütbə maaşı varsa `statutory_exemptions.component_codes` düzəldilməlidir. DSMF bazası üçün
    «pul təminatına daxil edilməyən ödənişlər» («Sosial sığorta haqqında» m.15) komponent səviyyəsində
@@ -395,11 +458,397 @@ komponent + ödəyən üçün heç bir sətir yoxdursa yazır (mühasibin sətir
 7. ⚠️ VM m.102.1.6 «aylıq gəlir 2500 manatadək» şərti həmin run-un vergi tutulan qazancı ilə yoxlanır;
    eyni ayda off-cycle ödəniş olarsa ayın cəmi ilə yenidən yoxlanmır (güzəşt off-cycle-da verilmir,
    amma adi run-da verilmiş güzəşt geri alınmır).
-8. ⚠️ 01.01.2026-dan bu dəyişikliyə qədər kilidlənmiş aylarda verilməmiş 102.1.6 güzəşti və özəl
+8. ✅ (§11 — «Vergi düzəliş hesabatı») 01.01.2026-dan bu dəyişikliyə qədər kilidlənmiş aylarda verilməmiş 102.1.6 güzəşti və özəl
    dərəcə ilə hesablanmış dövlət/hərbi işçilərin vergi/DSMF fərqi avtomatik düzəldilmir (retro
    yaratmamaq üçün seed sətirləri son kilidli aydan sonra qüvvəyə minir) — mühasib bəyannamə
    düzəlişi ilə həll etməlidir.
-9. ⚠️ VM m.102.1-1, 102.2–102.5 güzəştləri (800/400/200/100/50 AZN) üçün işçi üzrə güzəşt kartı yoxdur (§5.2).
-10. ⚠️ 50 % / 70 % tutulma hədləri (icra sənədləri, aliment) icra sənədi reyestri olmadığı üçün
+9. ✅ (§9 — güzəşt kartı) VM m.102.1-1, 102.2–102.5 güzəştləri (800/400/200/100/50 AZN) üçün işçi üzrə güzəşt kartı yoxdur (§5.2).
+10. ✅ (§10 — icra sənədləri reyestri) 50 % / 70 % tutulma hədləri (icra sənədləri, aliment) icra sənədi reyestri olmadığı üçün
     tətbiq edilmir (§4.1); «İcra haqqında» Qanunun mətni e-qanun.az-dan deyil, azstand.gov.az
     nüsxəsindən oxunub.
+
+## 8. Şirkətin vergi sektoru və standart rejim (11.10.2026)
+
+**Mənbələr** (oxunma tarixi 11.10.2026):
+- Vergi Məcəlləsi m.101.1, 101.1-1, 101.1-4 — <https://e-qanun.az/framework/46948> (fayl
+  <https://e-qanun.az/frameworks/46/f_46948.html>, Word faylı 18.09.2026; ən son dəyişdirici qanun 14.07.2026 № 470-VIIQD).
+- Nazirlər Kabinetinin 18 fevral 2019-cu il tarixli 56 nömrəli Qərarı «Neft-qaz sahəsində fəaliyyətin və
+  qeyri-dövlət sektorunun Meyarları» — DVX: <https://www.taxes.gov.az/az/post/321>; imzalı mətnin PDF-i:
+  <https://audit.gov.az/uploads/nk_qerar_2019.pdf>. Hər iki nüsxədə dəyişiklik qeydi yoxdur.
+
+### 8.1 Mətn ✅
+
+> **VM m.101.1-1.** Neft-qaz sahəsində fəaliyyəti olmayan və qeyri-dövlət sektoruna aid edilən vergi
+> ödəyicilərində işləyən fiziki şəxslərin muzdlu işdən aylıq gəlirlərindən vergi aşağıdakı dərəcələrlə tutulur: …
+>
+> **VM m.101.1-4.** Bu Məcəllənin məqsədləri üçün neft-qaz sahəsində fəaliyyətin və qeyri-dövlət sektorunun
+> meyarları müvafiq icra hakimiyyəti orqanının müəyyən etdiyi orqan (qurum) tərəfindən müəyyən edilir.
+
+VM m.13.2-də (anlayışlar) «neft-qaz sahəsində fəaliyyət», «dövlət sektoru» anlayışı **yoxdur** — meyarlar
+NK-nın 56 nömrəli Qərarındadır (2019-01-01-dən tətbiq olunur; eyni meyarlar «Sosial sığorta haqqında» Qanunun
+m.14.7-si üçün də tətbiq edilir):
+
+> **2.1.1.** Azərbaycan Respublikasının Dövlət Neft Şirkəti və onun strukturuna daxil olan müəssisələr, habelə
+> hasilatın pay bölgüsü haqqında, əsas boru kəməri haqqında və digər bu qəbildən olan sazişlər üzrə podratçılar
+> və əməliyyat şirkətləri fəaliyyət növündən asılı olmayaraq tam tərkibdə;
+> **2.1.2.1.** [subpodratçılar] … əvvəlki təqvim ili ərzində əldə olunan illik gəlirlərin … həcmi məcmu illik
+> gəlirlərin 50 faizindən çox olduğu təqdirdə; **2.1.2.2.** il ərzində yeni yaradılacaq subpodratçılar … 50 faizdən
+> çox olduğu təqdirdə, növbəti ayın 1-dən etibarən təqvim ilinin sonunadək güzəşt hüququnu itirir …
+>
+> **2.2.** Qeyri-dövlət sektoru – dövlət adından yaradılan publik hüquqi şəxslər, büdcə təşkilatları, dövlət
+> büdcəsindən və dövlətə məxsus digər fondlardan maliyyələşən digər orqan və qurumlar, habelə səhmlərinin və ya
+> paylarının 51 və daha artıq faizi birbaşa və ya dolayısilə dövlətə məxsus olan hüquqi şəxslər istisna olmaqla,
+> … hüquqi şəxslər və vergi ödəyicisi olan fiziki şəxslər.
+
+**Nəticə.** Sektor işçinin deyil, **işəgötürənin** xüsusiyyətidir. Neft-qaz sahəsində fəaliyyəti olan özəl
+şirkət də, dövlət sektoruna aid olan şirkət də ümumi qaydalara tabedir: VM m.101.1 1-ci cədvəl (2500-dək 14%,
+yuxarı 350 + 25%), DSMF m.14.3 (22/3), tibbi sığorta 8000-lük pillə (§6). Sistemdə bu `state` rejimidir; ad
+«Dövlət və neft-qaz sektoru» oldu (`private` — «Özəl qeyri-neft-qaz sektoru»; miqrasiya yalnız seed adını
+dəyişir).
+
+### 8.2 Tətbiq
+
+| Əvvəl | İndi |
+|---|---|
+| Rejim yalnız işçinin maaş təyinatında seçilirdi; işə qəbul qaralaması (`createDraftForHire`) və əmrlə maaş dəyişikliyində rejim yoxdursa **sıralamada ilk aktiv rejim** — `military` (sort = 1) — götürülürdü | Şirkət sektoru: `private_non_oil` → `private`, `oil_gas` → `state`, `state` → `state`, `military` → `military` (`CompanySectorSettings`). Yeni təyinat formu, işə qəbul qaralaması və əmrlə maaş dəyişikliyi bu standartı alır |
+| — | Sektor seçilməyibsə quraşdırma profilindən (APP_TYPE, `config/profiles.php`; Admin → «Publik» profili — HRM-55): `military` → hərbi, `public` → dövlət, qalanları → özəl qeyri-neft-qaz |
+| — | Sektor `settings` cədvəlində (`Payroll company sector`) saxlanır; dəyişiklik səbəblə və audit jurnalına (`company_sector_changed`) yazılır |
+
+**Ekran:** Kompensasiya → **Rejim və sektor**: sektor seçimi (NK 56 meyarlarının qısa izahı ilə, təsdiq modalı),
+«Rejimi şirkət standartından fərqli olan işçilər» siyahısı (struktur görünürlüyü ilə), toplu düzəliş.
+
+### 8.3 Mövcud işçilər — toplu düzəliş
+
+- Avtomatik dəyişmə **yoxdur**: sektor dəyişəndə yalnız yeni təyinatların standartı dəyişir.
+- Toplu düzəliş (`RegimeAlignmentService::realign`): seçilmiş işçilər, qüvvəyə minmə tarixi (**ayın 1-i**),
+  məcburi səbəb, təsdiq modalı. Hər işçi üçün **yeni effektiv təyinat** yaranır (eyni baza, valyuta, pillə,
+  komponent sətirləri, yalnız rejim fərqli), köhnəsi bir gün əvvəl bağlanır; audit — `regime_realigned`
+  (köhnə/yeni rejim, tarix, səbəb, sektor).
+- Tarix işçinin **son kilidlənmiş ayından sonra** olmalıdır; əks halda işçi «keçirilmədi» siyahısına düşür
+  (səbəb ekranda). Gələcək tarixli başqa təyinatı olan işçi də keçirilmir (onu bağlamamaq üçün).
+- Kilidlənmiş aylar köhnə təyinatla qalır; retro mühərriki də köhnə təyinatı görür — avtomatik «geri ödəniş»
+  yaranmır. Keçmiş aylar üzrə fərq — §11.
+
+**Nümunə** (`CompanyRegimeTest`, `TaxAdjustmentReportTest`): neft-qaz subpodratçısı, işçi səhvən özəl rejimdə,
+1 100 AZN, iyun kilidli → 01.07.2026-dan `state`. İyun üçün düzgün: vergi (1100 − 200) × 14% = 126 (tutulmuş 33),
+DSMF işçi 3% = 33 (tutulmuş 96), DSMF işəgötürən 22% = 242 (ödənilmiş 179).
+
+⚠️ **Mühasib/hüquqşünas təsdiqi:** (1) şirkətin NK 56 üzrə statusu (xüsusən subpodratçının 50% həddi il
+ərzində dəyişə bilər — 2.1.2.2-yə görə status növbəti ayın 1-dən dəyişir; sistem bunu avtomatik izləmir,
+sektor əl ilə dəyişdirilməli və toplu düzəliş edilməlidir); (2) bir quraşdırmada bir şirkət fərz olunur —
+çox şirkətli quraşdırma üçün sektor struktur səviyyəsində saxlanmalıdır.
+
+## 9. İşçi üzrə gəlir vergisi güzəşti kartı — VM m.102.1-1, 102.2–102.8 (11.10.2026)
+
+**Mənbə:** Vergi Məcəlləsi — <https://e-qanun.az/framework/46948> (yuxarıdakı redaksiya), oxunma 11.10.2026.
+
+### 9.1 Mətnlər ✅
+
+> **102.1-1.** şəhid statusu almış şəxslərin valideynlərinin, dul arvadlarının (ərlərinin) və övladlarının hər
+> hansı muzdlu işdən vergi tutulmalı olan aylıq gəliri 800 manat məbləğində azaldılır.
+>
+> **102.2.** Aşağıdakı fiziki şəxslərin … aylıq gəliri 400 manat məbləğində azaldılır: 102.2.1 Vətən Müharibəsi
+> Qəhrəmanları; 102.2.1-1 Milli Qəhrəmanlar; 102.2.2 Sovet İttifaqı və Sosialist Əməyi Qəhrəmanları; 102.2.3 Şöhrət
+> ordeninin üç dərəcəsi; 102.2.4 I və II qrup müharibə ilə əlaqədar əlilliyi olan şəxslər; 102.2.5 həlak olmuş,
+> yaxud sonralar vəfat etmiş döyüşçülərin (şəhid statusu almış şəxslər istisna olmaqla) dul arvadları (ərləri) və
+> övladları; 102.2.6 1941–1945-ci illərdə arxa cəbhə; 102.2.7 müharibə veteranları; 102.2.8 Çernobıl, şüa xəstəliyi;
+> 102.2.9 minatəmizləmə zamanı həlak olanların valideynləri, dul arvadları (ərləri) və övladları (27.04.2026
+> № 396-VIIQD ilə əlavə).
+>
+> **102.3.** Orqanizmin funksiyalarının 61–100 faiz pozulmasına görə əlilliyi müəyyən edilmiş şəxslərin (müharibə ilə
+> əlaqədar … istisna olmaqla), əlilliyi olan uşaqların, daimi qulluq tələb edən əlilliyi olan uşağa və ya … 81–100
+> faiz pozulmasına görə əlilliyi müəyyən edilmiş şəxsə baxan və onunla birlikdə yaşayan valideynlərdən birinin …,
+> arvadın (ərin), himayəçinin və ya qəyyumun … aylıq gəliri 200 manat məbləğində azaldılır.
+>
+> **102.4.** … 100 manat: 102.4.1 həlak olmuş döyüşçülərin valideynləri, vəzifə icrasında həlak olmuş dövlət
+> qulluqçularının valideynləri və arvadları (ərləri) (təkrar nikaha girməyiblərsə); 102.4.2 20 Yanvar və ərazi
+> bütövlüyünün müdafiəsi zamanı həlak olanların ailəsi; 102.4.3 Əfqanıstana … göndərilmiş hərbi qulluqçular;
+> 102.4.4 daimi qulluq tələb edən uşağa və ya I dərəcə əlilliyi olan şəxsə baxan …; 102.4.5 məcburi köçkünlər …
+>
+> **102.5.** … himayəsində azı üç nəfər, o cümlədən gündüz təhsil alan 23 yaşınadək şagirdlər və tələbələr olan ər
+> və ya arvaddan birinin vergi tutulmalı olan aylıq gəliri 50 manat məbləğində azaldılır. … uşağın doğulduğu və
+> himayədə olanın himayəyə götürüldüyü aydan başlayaraq azaldılır. … sayı azaldıqda … azaldığı aydan sonrakı aydan
+> başlayaraq … xitam verilir. (102.6 — kimlər himayədə sayılmır.)
+>
+> **102.7.** Fiziki şəxsin bu Məcəllənin 102.1-1-ci, 102.2-ci, 102.3-cü və 102.4-cü maddələri üzrə güzəşt hüququ
+> olduqda, ona bu güzəştlərdən biri, məbləğcə ən böyük olanı verilir.
+>
+> **102.8.** Əmək haqqından tutulan vergi hesablanarkən fiziki şəxslərin bu maddədə sadalanan vergi güzəştləri
+> hüququ müvafiq icra hakimiyyəti orqanı tərəfindən müəyyənləşdirilmiş sənədlərin təqdim edildiyi andan tətbiq edilir
+> və yalnız fiziki şəxsin əsas iş yerində … həyata keçirilir. Fiziki şəxsin … statusu olduğu, lakin … sənədləri
+> əmək müqaviləsi (kontraktı) hüquqi qüvvəyə mindikdən sonra təqdim etdiyi halda vergi güzəşti həmin fiziki şəxsin
+> əmək müqaviləsi (kontraktı) hüquqi qüvvəyə mindiyi tarixdən hesablanır.
+
+Qeyd: konsolidasiya edilmiş mətndə 102.1.6 və 102.8-də «(əmək kitabçasının olduğu yerdə)» hələ görünür, amma
+28.06.2024 № 1195-VIQD ilə çıxarılıb (VM-in 726 və 790-cı qeydləri) — qüvvədə olan mətn «əsas iş yerində»dir.
+
+### 9.2 Birləşmə qaydası
+
+| Sual | Cavab | Status |
+|---|---|---|
+| 102.1-1/102.2/102.3/102.4 bir neçəsi | yalnız məbləğcə ən böyüyü (102.7) | ✅ mətn |
+| 102.1.6 (200, ≤ 2500) ilə | 102.7-nin siyahısında **yoxdur** → üstəgəl verilir (məs. 61–100% əlil, gəlir ≤ 2500: 200 + 200) | ⚠️ siyahının sözbəsöz oxunuşu; DVX FAQ 2026-da bu barədə izah yoxdur |
+| 102.5 (50) ilə | 102.7-nin siyahısında yoxdur → üstəgəl | ⚠️ eyni |
+| 102.1.6-nın 2500 həddi | kartların çıxılmasından **əvvəlki** aylıq vergi tutulan gəlirlə yoxlanır | ⚠️ |
+| Vergidən, yoxsa bazadan | bazadan: «aylıq gəliri … azaldılır» | ✅ |
+| Hansı iş yerində | yalnız əsas iş yerində (`personnels.workplace_type ≠ secondary`) | ✅ 102.8 |
+| Off-cycle ödəniş | verilmir (aylıq güzəşt ayda bir dəfə — §5.1 ilə eyni) | ⚠️ |
+| Natamam ay | kart ayın hər hansı günü qüvvədədirsə tam məbləğ | ⚠️ 102.5 «aydan başlayaraq» deyir; digərləri üçün mətn yoxdur |
+
+### 9.3 Tarixlər — VM 102.8
+
+- `legal_from` (qanuni başlanğıc): status işə qəbul (əmək müqaviləsinin qüvvəyə minməsi — `join_work_date`)
+  tarixində və ya ondan əvvəl var idisə → **işə qəbul tarixi**; status sonra yaranıbsa → **sənədlərin təqdim
+  edildiyi tarix** (statusdan tez olmayaraq).
+- `payroll_from` (maaşda tətbiq): `legal_from`, amma işçinin **son kilidlənmiş ayından sonra**. Aradakı (ödənilmiş)
+  aylar avtomatik yenidən hesablanmır — ekranda xəbərdarlıq çıxır, fərq §11 hesabatında görünür.
+- `valid_to`: sənədin müddəti və ya statusun itirilməsi. «Güzəşti bitir» kilidli aya düşən tarixi qəbul etmir;
+  kilidli ayda tətbiq olunmuş kart silinmir.
+
+### 9.4 Tətbiq
+
+- Cədvəl `employee_tax_reliefs` (kateqoriya, dəqiq bənd/izah, sənəd nömrəsi/tarixi/verən orqan, **fayl — özəl
+  disk** `local`, `tax-reliefs/<tabel>`; açılış `compensation.tax-relief.document` route-u ilə, yalnız
+  `show-compensation` + struktur görünürlüyü), status/təqdim/son tarixlər, `legal_from`, `payroll_from`. Audit —
+  Spatie activitylog (`compensation`).
+- Məbləğlər kodda deyil: `statutory_exemptions`, yeni növ `personal` (kodlar `vm_102_1_1` 800, `vm_102_2` 400,
+  `vm_102_3` 200, `vm_102_4` 100, `vm_102_5` 50; effektiv tarixli, mühasib dəyişə bilər).
+- Hesablama: `StatutoryEngine::reliefFor()` — 102.1.6 + max(102.1-1/102.2/102.3/102.4) + 102.5; payslip sətri
+  «Gəlir vergisi (vergidən azad olunan hissə 600,00 AZN — VM 102.1.6, VM 102.2)».
+- Ekran: Kompensasiya → **Vergi güzəştləri** (işçi seçilir, kart əlavə et / bitir / sil).
+
+**Nümunələr** (`tests/Feature/Payroll/TaxReliefCardTest.php`, özəl qeyri-neft 2026, əsas iş yeri):
+
+| Gəlir | Kartlar | Azad olunan | Vergi (əvvəl → indi) |
+|---|---|---|---|
+| 1 100 | — | 200 | 27,00 → 27,00 |
+| 1 100 | 102.3 | 200 + 200 | 27,00 → **21,00** |
+| 1 100 | 102.2 + 102.3 | 200 + 400 | 27,00 → **15,00** |
+| 1 100 | 102.2 + 102.3 + 102.5 | 200 + 400 + 50 | 27,00 → **13,50** |
+| 1 100 | 102.1-1 + 102.2 | 200 + 800 | 27,00 → **3,00** |
+| 3 000 | 102.2 | 400 (102.1.6 yoxdur) | 125,00 → **85,00** |
+| 1 100, dövlət/neft-qaz | 102.3 | 400 | 126,00 → **98,00** |
+| 1 100, əlavə iş yeri | 102.2 | 0 | 33,00 → 33,00 |
+
+⚠️ **Təsdiq tələb edən:** 102.1.6 və 102.5-in 102.7 ən böyük güzəşti ilə toplanması; 102.8-də «müvafiq icra
+hakimiyyəti orqanı tərəfindən müəyyənləşdirilmiş sənədlər»in siyahısı (sistem sənəd növünü yoxlamır, yalnız
+qeyd edir); natamam ay qaydası; 102.5 üçün himayədəkilərin sayının izlənməsi (sistem yalnız kartın tarixlərini bilir).
+
+## 10. İcra sənədləri reyestri və 50 % / 70 % hədləri (11.10.2026)
+
+**Mənbələr** (oxunma 11.10.2026):
+- Əmək Məcəlləsi m.174–176 — <https://e-qanun.az/framework/46943> (rəsmi konsolidasiya).
+- «İcra haqqında» Qanun — e-qanun.az-da framework id tapılmadı; **qeyri-rəsmi nüsxə** oxundu:
+  <https://azstand.gov.az/uploads/documents/468838918651c37b00ecdc.pdf> (son dəyişiklik qeydi 2023). 2025–2026-cı il
+  dəyişiklikləri (189-VIIQD, 249-VIIQD, 389-VIIQD, 469-VIIQD) bu nüsxədə yoxdur ⚠️ — maddə nömrələri və mətn rəsmi
+  redaksiya ilə tutuşdurulmalıdır.
+
+### 10.1 Mətn
+
+> **ƏM m.175.1** Əmək haqqından müvafiq məbləğlər … yalnız işçinin yazılı razılığı ilə, yaxud qanunvericiliklə
+> nəzərdə tutulmuş icra sənədləri üzrə tutulur. **175.2** İşəgötürənin sərəncamı ilə … a) vergilər, sosial sığorta
+> haqları …; b) icra sənədləri üzrə müəyyən edilmiş məbləğ; …
+> **ƏM m.176.1** Hər dəfə əmək haqqı verilərkən tutulan bütün məbləğlərin ümumi miqdarı işçiyə verilməli olan əmək
+> haqqının iyirmi faizindən və müvafiq qanunvericilikdə nəzərdə tutulmuş hallarda isə əlli faizindən artıq ola bilməz.
+> **176.2** … bir neçə icra sənədinə əsasən məbləğlər tutularkən, bütün hallarda işçinin əmək haqqının əlli faizi
+> saxlanmalıdır. **176.3** … alimentlərin tutulması, sağlamlığa vurulmuş ziyanın ödənilməsi, ailəni dolandıranın
+> itkisi … və cinayət nəticəsində vurulmuş ziyanın ödənilməsi zamanı … tutulmaların məbləği işçiyə verilməli olan
+> əməkhaqqının 70 faizindən çox ola bilməz.
+>
+> **«İcra haqqında» m.64** Borclunun əmək haqqından … tutulan məbləğin (tutmanın) miqdarı vergilər tutulduqdan sonra
+> qalan məbləğdən hesablanır. **m.65.1** … tutmaların məbləği 50 faizdən çox ola bilməz. **65.2** … bir neçə icra
+> sənədi üzrə … qazancın 50 faizi borcluda qalmalıdır. **65.3** Alimentlərin tutulması, sağlamlığa vurulmuş ziyanın …,
+> ailəni dolandıranın itkisi … və cinayət nəticəsində vurulmuş ziyanın ödənilməsi zamanı … 65.1 və 65.2 …
+> məhdudiyyətlər tətbiq edilmir. Belə hallarda … 70 faizdən çox ola bilməz.
+> **m.68.1** [tutma yönəldilə bilməz:] … 68.1.4. ağır və zərərli əmək şəraitində işə görə ödənilən məbləğlərə;
+> 68.1.5. işdənçıxarma müavinətinin məbləğinə; 68.1.6. aliment öhdəlikləri üzrə ödənilən məbləğlərə; …
+> **m.75.2** Birinci növbədə alimentlərin tutulması, sağlamlığa vurulmuş ziyanın, habelə ailəni dolandıranın itkisi
+> nəticəsində … ziyanın ödənilməsi üzrə tələblər; **75.3** İkinci növbədə əmək hüququ münasibətlərindən əmələ gələn
+> tələblər …; **75.4** Üçüncü növbədə məcburi dövlət sosial sığorta haqları və işsizlikdən sığorta haqları …, habelə
+> icbari tibbi sığorta haqları …; **75.5** Dördüncü növbədə dövlət büdcəsinə və … büdcədənkənar dövlət fondlarına
+> ödənişlər; **75.6** Bütün qalan tələblər beşinci növbədə … icra sənədlərinin daxil olma ardıcıllığı əsas götürülür.
+> **75.7** Hər sonrakı növbədən olan tələblər əvvəlki növbədən olan tələblər tam ödənildikdən sonra təmin edilir.
+> **75.8** … bir növbədən olan bütün tələbləri tam təmin etmək üçün yetərli olmadıqda, … mütənasib olaraq təmin edilir.
+
+### 10.2 Qərarlar
+
+| Qayda | Tətbiq | Status |
+|---|---|---|
+| Baza | hesablanmış − vergi və məcburi sosial ödənişlər (m.64; ƏM 176.1 ilə eyni), **çıxılsın** zərərli əmək şəraitinə görə ödəniş (`hazard`, m.68.1.4) | ✅ / ⚠️ m.64 yalnız «vergilər» deyir; sosial haqların da çıxılması əvvəlki qərarla (§4.1) eynidir. Zərərlilik əlavəsi brüt məbləği ilə çıxılır (vergi payı ayrılmır) |
+| Hədd | yalnız adi icra sənədləri — 50 %; aliment / sağlamlıq / ailə başçısı / cinayət ziyanı varsa — 70 % | ✅ 176.1–176.3, 65.1–65.3 |
+| Qarışıq hal | ümumi 70 %; adi (50 %-lik) sənədlər öz aralarında 50 %-i keçmir | ⚠️ mətndə birbaşa yoxdur, ehtiyatlı oxunuş |
+| Növbə | 1 — aliment, sağlamlıq, ailə başçısı; 2 — əmək tələbləri; 3 — sosial/işsizlik/tibbi sığorta haqları; 4 — büdcə; 5 — qalanları (cinayətlə vurulmuş ziyan da) | ✅ m.75 (cinayət ziyanı 70 %-lik hədd alır, amma növbəsi 5-dir) |
+| Növbə daxilində | 1–4: yer çatmırsa mütənasib (75.8, qəpiyə aşağı); 5: daxil olma tarixi ilə ardıcıl (75.6) | ✅ |
+| Kredit/avans, könüllü tutulma | öz 20 %-i daxilində (ƏM 176.1) **və** icra sənədləri ilə birlikdə ümumi 50/70 %-i keçmir; icra sənədi birinci tutulur | ⚠️ «ümumi tavan» oxunuşu — mətn «bütün məbləğlərin ümumi miqdarı» deyir |
+| Retro geri tutulma | eyni qayda (20 % + ümumi hədd) | ⚠️ |
+| Sabit/faiz | sabit aylıq məbləğ yalnız ayın öz ödənişində (adi və son haqq-hesab run-u); faizlə olan sənəd hər ödənişdən (off-cycle da) | ⚠️ «hər dəfə əmək haqqı verilərkən» (176.1) |
+| Qalıq borc | `total_debt` verilibsə tutulma qalıqdan çox olmur; kilidlə azalır, qalıq 0 olanda sənəd «Bitib»; run yenidən açılanda bərpa | ✅ |
+| Retro | kilidli ayın yenidən hesablanmasında icra tutulması (kredit kimi) hər iki tərəfdən çıxarılır — bağlanmış sənəd ödənilmiş ayı «geri ödəmir» | ✅ |
+| İşəgötürənin köçürmə müddəti, xitamda icra məmuruna bildiriş | **tapılmadı** — sistem yalnız siyahını hazırlayır | ⚠️ |
+
+### 10.3 Tətbiq
+
+- Cədvəllər: `enforcement_documents` (növ, növbə, sənədi verən — məhkəmə/icra məmuru/notarius, nömrə, tarix, daxil
+  olma tarixi, sabit məbləğ və ya faiz, alıcı və hesabı, ümumi borc/qalıq, başlama/bitmə, status, qeyd; audit —
+  activitylog `payroll`), `enforcement_deductions` (run üzrə faktiki tutulma, tələb olunan, baza, qalıq — unikal
+  sənəd+run).
+- Hesablama: `EnforcementService::plan()` → `PayrollCalculator` (statutor tutulmalardan sonra, kreditdən əvvəl);
+  payslip sətri «İcra sənədi üzrə tutulma — Aliment, № İV-77», hədd/növbəyə görə azalanda «(tələb 700,00 AZN;
+  hədd/növbəyə görə azaldıldı)». Kilid — `recordForRun()`, yenidən açma — `reverseForRun()`.
+- Ekran: Maaş → **İcra sənədləri**: işçi seçilir, sənəd əlavə et / dayandır / bitir / bərpa et (səbəblə, təsdiq
+  modalı), sənəd üzrə tarixçə və qalıq; **İcra məmuruna göndəriləcək tutulma siyahısı** (kilidli run üzrə, XLSX:
+  tabel №, FİN, növ, məhkəmə/icra məmuru, sənəd, alıcı və hesabı, baza, tələb, tutulub, qalıq, tarix).
+
+**Nümunələr** (`tests/Feature/Payroll/EnforcementPayrollTest.php`; 1 000 AZN, özəl, statutor 135 → baza 865,00):
+
+| Hal | Tutulma | Ödənilən |
+|---|---|---|
+| Aliment 25 % | 216,25 | 648,75 |
+| Aliment sabit 700 | 605,50 (70 % həddi) | — |
+| Adi icra sənədi sabit 700 | 432,50 (50 % həddi) | — |
+| Adi 500 (yanvarda daxil olub) + aliment 25 % (martda) | aliment 216,25 əvvəl (1-ci növbə), adi 389,25 (70 %-dən qalan) | 259,50 |
+| İki aliment 40 % + 40 % (692 > 605,50) | 302,75 + 302,75 (mütənasib) | — |
+| İki adi 300 + 300 | 300,00 (əvvəl daxil olan) + 132,50 | — |
+| Aliment 25 % + kredit 300 | 216,25 + 173,00 (kredit 20 %-də) | 475,75 |
+| Baza 1 000 + zərərlilik 200, aliment 25 % | (1 034 − 200) × 25 % = 208,50 | — |
+
+## 11. Keçmiş aylar — «Vergi düzəliş hesabatı» (11.10.2026)
+
+**Problem.** 01.01.2026-dan bu yeniləməyədək kilidlənmiş (ödənilmiş) aylarda: VM 102.1.6 (200 AZN) güzəşti
+verilməyib (seed sətri son kilidli aydan sonra qüvvəyə minib — §5.1), dövlət/neft-qaz və hərbi işçilərə özəl
+qeyri-neft dərəcələri tətbiq olunub (§6), işçi güzəşt kartları (§9) yox idi. **Avtomatik retro düzəliş
+edilmir** — aylar ödənilib, bəyannamələr verilib.
+
+### 11.1 Qanun ✅
+
+Mənbə: Vergi Məcəlləsi <https://e-qanun.az/framework/46948>, oxunma 11.10.2026. (Tapşırıqdakı «VM 34 / 86»
+nömrələri cari mətnə uyğun deyil: m.34 — uçot, m.86 — vergilərin ödənildiyi yer; düzgün maddələr aşağıdadır.)
+
+> **72.5.** … əvvəlki hesabat dövrləri üzrə təqdim edilmiş hesabatlardakı məlumatlar ilkin uçot sənədləri üzrə
+> məlumatlara uyğun olmadığı hallarda vergi ödəyiciləri tərəfindən həmin hesabat dövrü üçün dəqiqləşdirilmiş
+> hesabat təqdim edilməlidir. Dəqiqləşdirilmiş hesabat üzrə büdcəyə ödənilməli vergi məbləği əvvəl təqdim edilmiş
+> hesabat üzrə … çox olduqda, əlavə hesablanmış vergi məbləği faizlərlə birlikdə büdcəyə ödənilir, az olduqda isə
+> hesablanmış vergi və faiz məbləğləri azaldılır. … dəqiqləşdirilmiş və ya vaxtında təqdim edilməmiş hesabatlar
+> vergi ödəyicisində səyyar vergi yoxlamasının başlandığı günədək təqdim edilə bilər.
+>
+> **87.1.** … artıq ödənilmiş məbləğlər: 87.1.1. digər vergilərin, faizlərin, maliyyə sanksiyalarının və inzibati
+> cərimələr üzrə borcların ödənilməsi hesabına aid edilir; 87.1.2. vergi ödəyicisinin razılığı ilə sonrakı öhdəliklər
+> üzrə ödəmələrin hesabına aid edilir. **87.3.** … qalan məbləğləri vergi ödəyicisinin yazılı ərizəsinə əsasən 45 gün
+> ərzində vergi ödəyicisinə qaytarılır.
+>
+> **150.3.1.** … fiziki şəxslərin hesablanmış aylıq gəlirinə gəlir vergisini hesablamağa və hesablanmış vergini
+> növbəti ayın 20-dən gec olmayaraq büdcəyə köçürməyə; **150.3.3.** … ödəmə mənbəyində tutulan vergilər barədə …
+> bəyannaməni rüb başa çatdıqdan sonra növbəti ayın 20-dən gec olmayaraq vergi orqanına verməyə borcludurlar.
+>
+> **149.5.** Bəyannamə verməli olmayan fiziki şəxs verginin yenidən hesablanması və vəsaitlərin qaytarılması haqqında
+> tələb irəli sürülən bəyannamə verə bilər. **150.4.** … Vergi ödəyicisi bu Məcəllənin 149.5-ci maddəsində nəzərdə
+> tutulmuş hüquqlardan istifadə etmirsə, tutulmuş vergi gəlir vergisinin tam məbləği sayılır.
+>
+> **58.1.** Verginin (o cümlədən ödəmə mənbəyində verginin) hesabatda göstərilən məbləği … azaldılmışdırsa …
+> azaldılmış … vergi məbləğinin … 50 faizi miqdarında maliyyə sanksiyası tətbiq edilir. (85.5 — yenidən hesablama və
+> qaytarma tələbi dövr bitdikdən sonra 5 il ərzində.)
+
+**Nəticə.** İşəgötürən (vergi agenti) həmin rüb/ay üçün **dəqiqləşdirilmiş hesabat** verir (72.5): az tutulmuş vergi
+faizlə ödənilir, artıq ödənilmiş vergi sonrakı öhdəliklərə aid edilir və ya ərizə ilə qaytarılır (87). İşəgötürənin
+artıq tutduğu vergini işçiyə necə qaytarması VM-də açıq yazılmayıb ⚠️ — praktik yol: dəqiqləşdirmədən sonra məbləğ
+işçiyə əmək haqqı ilə qaytarılır; işçi özü də 149.5 üzrə bəyannamə verə bilər. Az tutulmuş vergi üçün 58.1 sanksiyası
+və «yoxlamadan əvvəl düzəliş» istisnası haqqında açıq norma tapılmadı ⚠️ (yalnız 72.5-1/72.5-2 könüllü açıqlama).
+DSMF/işsizlik/tibbi sığorta haqları üzrə hesabat düzəlişi ayrıca qaydadadır — bu sənəddə yoxlanmayıb ⚠️.
+
+### 11.2 Hesabat — `TaxAdjustmentReportService`
+
+- Seçilmiş dövrün (ay–ay) **kilidlənmiş** payslip-ləri yaddaşda yenidən hesablanır; heç bir cədvələ yazılmır.
+- Qazanc sətirləri payslip-in özündəndir (ödənilmiş fakt, `taxable` / `affects_social` bayraqları ilə; `retro`
+  sətri xaric — o, xalis məbləğin əlavəsidir).
+- Rejim: işçinin **bugünkü** aktiv təyinatının rejimi (§8.3 düzəlişindən sonra düzgün olan); yoxdursa ödəniş
+  anındakı rejim.
+- Dərəcə/azadolmalar: «qayda tarixi» = min(bu gün, həmin ilin 31 dekabrı), ayın sonundan tez olmayaraq. Səbəb:
+  seed sətirləri kilidli aylardan sonraya çəkilib; ilin sonundakı qayda dəsti həmin il qüvvədə olan qanunu əks
+  etdirir. ⚠️ Fərziyyə: il ərzində qanun dəyişməyib (2026-da bütün dəyişikliklər 01.01.2026-dan qüvvədədir — 297-VIIQD).
+- Güzəşt kartları: qanuni başlanğıcdan (`legal_from`, §9.3).
+- Komponentlər: gəlir vergisi, DSMF işçi/işəgötürən, işsizlik işçi/işəgötürən, tibbi işçi/işəgötürən — hər biri
+  üçün «tutulmuş → düzgün» və fərq (müsbət — artıq tutulub/ödənilib).
+- Ekran: Maaş → **Vergi düzəliş hesabatı** (yalnız `view-compensation-amounts`; struktur görünürlüyü), XLSX ixracı
+  (`export-payroll`).
+
+### 11.3 Qaytarma — ayrıca, açıq təsdiqli əməliyyat
+
+- Mühasib sətirləri seçir, komponentləri (standart: yalnız gəlir vergisi; işçi tərəfi DSMF/işsizlik/tibbi
+  isteğe bağlı), ödəniş ayını və səbəbi yazır, təsdiq modalı ilə `recordRefunds()` çağırır.
+- Yalnız **müsbət** fərq (artıq tutulmuş) qaytarılır; az tutulmuş məbləğ işçidən avtomatik tutulmur.
+- Qaytarma mövcud birdəfəlik ödəniş mexanizmi ilə (`PayrollOneOffEarnings::record`, kod `tax_adjustment_refund`,
+  **vergidən və sosial bazadan kənar**) seçilmiş ayın adi run-una düşür; ay kilidlidirsə növbəti aya keçir. Mənbə
+  açarı payslip üzrədir (`tax_adjustment:payslip:<id>`) — təkrar əməliyyat ikinci ödəniş yaratmır; hesabatda
+  «qaytarma əlavə olunub» görünür. Audit — `tax_adjustment_refund_recorded`.
+- ⚠️ Qaytarma payslip-də «qazanc» sətri kimi görünür (brüt cəmə düşür, vergi/sosial bazaya düşmür) — dövlət
+  hesabatında brüt sütunu bunu da göstərir; mühasib qaytarmanı dəqiqləşdirilmiş bəyannamə ilə uzlaşdırmalıdır.
+
+**Nümunələr** (`tests/Feature/Payroll/TaxAdjustmentReportTest.php`):
+- Özəl qeyri-neft, 1 100 AZN, iyun kilidli (102.1.6 verilməyib: vergi 33,00), sonradan 102.3 kartı (status 2025-dən):
+  düzgün (1100 − 200 − 200) × 3% = 21,00 → **artıq 12,00**; qaytarma iyul run-una 12,00 AZN vergidən kənar sətir.
+- Neft-qaz şirkəti, işçi iyunda özəl rejimlə ödənilib, iyuldan `state`: vergi az 93,00 (126 − 33), DSMF işçi artıq
+  63,00 (96 − 33), DSMF işəgötürən az 63,00 (242 − 179).
+
+---
+
+## İmtiyazlar — natura formasında gəlir (Benefits modulu, 11.10.2026)
+
+Mənbələr 11.10.2026 tarixində e-qanun.az-ın konsolidasiya edilmiş mətnindən oxunub:
+Vergi Məcəlləsi <https://e-qanun.az/framework/46948>, «Sosial sığorta haqqında» Qanun
+<https://e-qanun.az/framework/3813>. Kod: `app/Modules/Benefits`, standartlar `config/benefits.php`.
+
+### Mətnlər ✅
+
+- **VM m.98.1** — muzdlu işlə əlaqədar gəlir «əmək haqqı, bu işdən alınan hər hansı ödəmə və ya fayda»dır.
+- **VM m.98.2** — gəlirin məbləği «işçinin əldə etdiyi gəlirə görə ödədiyi hər hansı xərc çıxıldıqdan sonra qalan
+  məbləğ»dir; o cümlədən **98.2.2** (işəgötürənin verdiyi mal/iş/xidmət — bazar qiyməti ilə), **98.2.3** (xərclərin
+  əvəzi, m.119.2 istisna olmaqla), **98.2.5** («İşəgötürən tərəfindən ödənilən sığorta haqları»).
+- **VM m.98.5** — «İşə götürən tərəfindən bu Məcəllənin 109.3-cü və 119.2-ci maddələrində nəzərdə tutulmuş xərclərin
+  çəkilməsinin nəticəsi kimi əldə edilən gəlir vergi tutulan gəlirə aid deyildir.»
+- **VM m.109.3** — 119.2 istisna olmaqla, «işçilərin və onların ailə üzvlərinin sosial xarakterli xərclərinin və
+  əyləncə xərclərinin gəlirdən çıxılmasına yol verilmir». **m.119.2** — işçilərlə bağlı yemək (və s.) xərclərinin
+  gəlirdən çıxılması normaları müvafiq orqan tərəfindən müəyyən olunur.
+- **VM m.102.1.8** — gəlir vergisindən azaddır: «…həmçinin işəgötürən tərəfindən ödənilən bütün növ icbari sığorta və
+  könüllü tibbi sığorta haqları, 3 ildən az olmayan müddətə bağlanan müqavilə ilə həyatın yığım sığortası və pensiya
+  sığortası üzrə qeyri-dövlət sektoruna aid edilən işəgötürənin sığortaolunanın vergiyə cəlb olunan gəlirlərinin
+  50 faizindən çox olmayan hissəsindən Azərbaycan Respublikasının sığortaçılarına ödədikləri sığorta haqları…».
+- **«Sosial sığorta haqqında» Qanun m.15** — məcburi dövlət sosial sığorta haqqı «sosial sığorta haqqı hesablanmayan
+  … gəlir növləri istisna olunmaqla əmək ödənişinin və gəlirlərin bütün növləri üzrə hesablanır»; istisnalar
+  siyahısında işəgötürənin ödədiyi icbari və könüllü tibbi sığorta haqları, 3 ildən az olmayan yığım/pensiya sığortası
+  (50 % həddi ilə) və zərərli işlərdə verilən müalicə-profilaktik yemək var; adi yemək, idman, nəqliyyat yoxdur.
+
+### Standart vergi rejimi (mühasib paket səviyyəsində dəyişə bilər)
+
+| Növ | Gəlir vergisi | DSMF/işsizlik/tibbi bazası | Əsas |
+|---|---|---|---|
+| Tibbi sığorta (könüllü) | azad | azad | VM 102.1.8; Qanun m.15 |
+| Həyat sığortası (risk) | **vergiyə cəlb** | **daxil** | VM 98.2.5 (102.1.8 yalnız yığım/pensiyaya aiddir) |
+| Həyatın yığım / pensiya sığortası (≥ 3 il) | azad | azad | VM 102.1.8 — 3 il və 50 % həddini mühasib yoxlayır ⚠️ |
+| Yemək kartı | azad | **daxil** ⚠️ | VM 98.5 + 109.3/119.2; Qanun m.15 adi yeməyi istisna etmir |
+| Nəqliyyat | **vergiyə cəlb** | **daxil** | VM 98.2.3 |
+| Mobil telefon limiti (xidməti) | gəlir deyil | gəlir deyil | işgüzar xərc; şəxsi istifadə/limitdən artıq — VM 98.2.2 ⚠️ |
+| İdman zalı | azad | **daxil** ⚠️ | VM 98.5 + 109.3 (sosial xarakterli xərc) |
+| Digər | **vergiyə cəlb** | **daxil** | VM 98.1, 98.2.2 |
+
+Vergiyə cəlb olunan məbləğ **yalnız işəgötürən payıdır** — işçinin özünün ödədiyi hissə VM 98.2-yə görə çıxılır.
+
+### Tətbiq (Payroll koduna toxunmadan)
+
+- **İşçi payı** → Compensation kataloqunda `benefit_employee_share` (tutulma, vergisiz) komponenti ilə işçinin cari aktiv
+  kompensasiyasına sətir (`note = benefits#<qoşulma id>`). Payroll onu digər könüllü tutulmalar kimi hər ay çıxır.
+- **Natura formasında gəlir** (işəgötürən payı, paket «vergiyə cəlb» və ya «DSMF bazası» qeyd olunubsa) → hər ay
+  `PayrollOneOffEarnings::record()` ilə `benefit_in_kind` (+məbləğ, paketin bayraqları ilə) və `benefit_in_kind_offset`
+  (−məbləğ, vergisiz, sosial bazadan kənar). Nağd brüt/xalis dəyişmir, yalnız vergi/sığorta bazası artır. Açar
+  `benefits:<qoşulma>:<YYYY-MM>:value|offset` — təkrar sinxron ikinci sətir yaratmır; ay kilidlidirsə hər iki sətir
+  birlikdə növbəti aya keçir. Davamiyyət proporsiyası tətbiq olunmur (sığorta haqqı ay üzrə tam ödənilir).
+- Nümunə (`tests/Feature/Benefits/BenefitPayrollIntegrationTest.php`): 1 500 AZN maaş, həyat sığortası 40 AZN
+  (100 % işəgötürən) + tibbi 100 AZN (80/20): brüt dəyişmir, 20 AZN işçi payı tutulur, vergi/DSMF bazası 40 AZN artır.
+
+### Açıq qalanlar ⚠️
+
+1. Yemək kartı və idman üçün DSMF tətbiqi Qanunun hərfi mətninə görə qurulub; DSMF təcrübəsi fərqli şərh edə bilər.
+2. VM 102.1.8 yığım/pensiya sığortası üçün «3 il» və «vergiyə cəlb olunan gəlirin 50 %-i» həddi avtomatik yoxlanmır.
+3. Mobil telefon üçün şəxsi istifadə hissəsinin ayrılması (VM 98.2.2) sistemdə yoxdur — paket bütövlükdə ya gəlir, ya
+   işgüzar xərc sayılır.
+4. `benefit_in_kind_offset` mənfi «qazanc» sətridir: GL/dövlət hesabatı ixracında `benefit_in_kind` ilə birlikdə
+   uzlaşdırılmalıdır (cəmi sıfırdır).

@@ -32,7 +32,7 @@ class Dashboard extends Component
 
     protected function allowedTabs(): array
     {
-        return ['scales', 'components', 'assignments', 'bank', 'history', 'statutory'];
+        return ['scales', 'components', 'assignments', 'bank', 'history', 'statutory', 'regimes', 'reliefs'];
     }
 
     #[Computed]

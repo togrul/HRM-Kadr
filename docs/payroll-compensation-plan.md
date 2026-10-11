@@ -252,8 +252,11 @@ konsolidasiyası; `46947` Cinayət Məcəlləsidir), DVX <https://www.taxes.gov.
 | Dövlət qulluğu (`state`) | gəlir vergisi 2500-dək 14%, yuxarı 25%; DSMF 3/22; işsizlik 0,5/0,5; tibbi 8000-dək 2%, yuxarı 0,5% | `statutory_rates` (regime_id = state) |
 | Hərbi (`military`) | dövlətlə eyni; vergiyə yalnız `base` + `rank_supplement` (VM 102.1.14.15); işsizlik 0% ⚠️ | `statutory_rates` (military), `statutory_exemptions` (`vm_102_1_14_15`, `taxable_components`) |
 | ƏM 176.1 — 20 % | Adi aylıq kredit taksiti də daxil olmaqla bütün qeyri-statutor tutulmalar ≤ 20 % × (hesablanmış − vergi/məcburi sosial). Sığmayan hissə kreditdə qalır, qrafik uzanır. Hədd yalnız aşağı salına bilər | `DeductionCap`, `LoanService::installmentAmount()`, `loan_repayments.scheduled_amount`, `payroll.deduction_cap_ratio` |
-| 50 % / 70 % | Tətbiq edilmir — icra sənədi reyestri yoxdur | — |
-| Digər güzəştlər (102.1-1, 102.2–102.5) | Sistemdə yoxdur; işçi üzrə güzəşt kartı lazımdır | — |
+| 50 % / 70 % | 11.10.2026-dan icra sənədləri reyestri: 50 % / 70 %, «İcra haqqında» m.75 növbəliliyi, m.68.1.4 qorunan gəlir, kredit 20 % + ümumi hədd (legal-basis §10) | `enforcement_documents`, `EnforcementService`, Maaş → İcra sənədləri |
+| Digər güzəştlər (102.1-1, 102.2–102.5) | 11.10.2026-dan işçi üzrə güzəşt kartı; 102.7 — ən böyüyü; 102.8 — tarix və əsas iş yeri (legal-basis §9) | `employee_tax_reliefs`, `statutory_exemptions` (`personal`), Kompensasiya → Vergi güzəştləri |
+| Şirkət sektoru (neft-qaz / dövlət / özəl / hərbi) | Yeni təyinatlar şirkət standartı rejimini alır; mövcudlar üçün siyahı + təsdiqli toplu düzəliş (legal-basis §8; NK 56 meyarları) | `CompanySectorSettings`, `RegimeAlignmentService`, Kompensasiya → Rejim və sektor |
+| Hərbçi — DSMF bazası | yalnız «pul təminatı» (SS m.15, ƏP m.1.0.5); işsizlik 0 % ⚠️ (legal-basis §6.3) | `statutory_exemptions` `military_dsmf_pay_allowance` |
+| Keçmiş aylar | «Vergi düzəliş hesabatı» — yalnız oxu, XLSX; qaytarma ayrıca təsdiqlə (VM m.72.5, 87; legal-basis §11) | `TaxAdjustmentReportService`, Maaş → Vergi düzəliş hesabatı |
 
 Ekran: Kompensasiya → Vergi/sığorta dərəcələri (dərəcə kartlarında qüvvəyə minmə tarixi, yeni
 «Gəlir vergisi azadolmaları» bölməsi və «Azadolma əlavə et» paneli); Maaş → Kredit/avans (son

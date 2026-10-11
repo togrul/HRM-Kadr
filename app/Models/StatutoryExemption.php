@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *    həmin həddədək (daxil) olduqda; `main_workplace_only` — yalnız əsas iş yerində (VM 102.1.6, 102.8).
  *  - taxable_components: vergi bazasına yalnız `component_codes` siyahısındakı qazanclar daxil olur
  *    (VM 102.1.14.15 — hərbi qulluqçular).
+ *  - personal: işçinin güzəşt kartı olduqda (VM 102.1-1, 102.2–102.5; m.102.7 — ən böyüyü).
  *
  * @property int $id
  * @property int|null $regime_id
@@ -35,6 +36,12 @@ class StatutoryExemption extends Model
     public const KIND_FIXED_AMOUNT = 'fixed_amount';
 
     public const KIND_TAXABLE_COMPONENTS = 'taxable_components';
+
+    /**
+     * İşçi üzrə güzəşt (VM m.102.1-1, 102.2–102.5): `amount` vergi tutulan aylıq gəlirdən yalnız işçinin
+     * həmin ay qüvvədə olan güzəşt kartı (`employee_tax_reliefs.category` = `code`) olduqda çıxılır.
+     */
+    public const KIND_PERSONAL = 'personal';
 
     protected $fillable = [
         'regime_id',

@@ -65,6 +65,8 @@ class PayrollServiceProvider extends ServiceProvider
             'tabs.runs' => \App\Modules\Payroll\Livewire\Tabs\RunsTab::class,
             'tabs.payslips' => \App\Modules\Payroll\Livewire\Tabs\PayslipsTab::class,
             'tabs.loans' => \App\Modules\Payroll\Livewire\Tabs\LoansTab::class,
+            'tabs.enforcement' => \App\Modules\Payroll\Livewire\Tabs\EnforcementTab::class,
+            'tabs.tax-adjustment' => \App\Modules\Payroll\Livewire\Tabs\TaxAdjustmentTab::class,
         ];
     }
 }

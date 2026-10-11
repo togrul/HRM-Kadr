@@ -145,6 +145,10 @@
             ], key('payroll-tab-runs'))
         @elseif ($activeTab === 'payslips')
             @livewire('payroll.tabs.payslips', ['runId' => $selectedRunId], key('payroll-tab-payslips-'.$selectedRunId))
+        @elseif ($activeTab === 'enforcement')
+            @livewire('payroll.tabs.enforcement', ['periodId' => $period?->id], key('payroll-tab-enforcement-'.$period?->id))
+        @elseif ($activeTab === 'adjustments')
+            @livewire('payroll.tabs.tax-adjustment', [], key('payroll-tab-adjustments'))
         @else
             @livewire('payroll.tabs.loans', ['tabelNo' => $loanTabelNo, 'label' => $loanPersonnelLabel], key('payroll-tab-loans-'.$loanTabelNo))
         @endif

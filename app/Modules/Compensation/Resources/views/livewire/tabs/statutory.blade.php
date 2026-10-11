@@ -71,7 +71,13 @@
                         </div>
 
                         @if ($exemption->kind === \App\Models\StatutoryExemption::KIND_TAXABLE_COMPONENTS)
-                            <p class="mt-2 text-[12.5px] text-ink-soft">{{ __('compensation::dashboard.exemptions.taxable_only', ['codes' => implode(', ', (array) $exemption->component_codes)]) }}</p>
+                            <p class="mt-2 text-[12.5px] text-ink-soft">
+                                @if ($exemption->component_code === 'income_tax')
+                                    {{ __('compensation::dashboard.exemptions.taxable_only', ['codes' => implode(', ', (array) $exemption->component_codes)]) }}
+                                @else
+                                    {{ __('compensation::dashboard.exemptions.base_only', ['component' => __('compensation::dashboard.statutory.components.'.$exemption->component_code), 'codes' => implode(', ', (array) $exemption->component_codes)]) }}
+                                @endif
+                            </p>
                         @else
                             <p class="mt-2 flex items-baseline gap-1.5">
                                 <span class="hrm-num text-[22px] font-semibold leading-none tracking-[-0.035em] text-ink">{{ number_format((float) $exemption->amount, 2, ',', ' ') }}</span>
@@ -81,6 +87,9 @@
                                 {{ $exemption->income_up_to !== null ? __('compensation::dashboard.exemptions.income_limit', ['amount' => number_format((float) $exemption->income_up_to, 2, ',', ' ')]) : __('compensation::dashboard.exemptions.no_income_limit') }}
                                 @if ($exemption->main_workplace_only)
                                     <span class="px-0.5">·</span>{{ __('compensation::dashboard.exemptions.main_workplace_only') }}
+                                @endif
+                                @if ($exemption->kind === \App\Models\StatutoryExemption::KIND_PERSONAL)
+                                    <span class="px-0.5">·</span>{{ __('compensation::dashboard.exemptions.personal') }}
                                 @endif
                             </p>
                         @endif

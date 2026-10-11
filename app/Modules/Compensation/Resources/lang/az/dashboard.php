@@ -12,6 +12,8 @@ return [
         'bank' => 'Bank',
         'history' => 'Tarixçə',
         'statutory' => 'Vergi/sığorta dərəcələri',
+        'regimes' => 'Rejim və sektor',
+        'reliefs' => 'Vergi güzəştləri',
     ],
 
     'statutory' => [
@@ -59,6 +61,8 @@ return [
         'no_income_limit' => 'gəlir həddi yoxdur',
         'main_workplace_only' => 'yalnız əsas iş yerində',
         'taxable_only' => 'Vergiyə yalnız bu komponentlər cəlb olunur: :codes',
+        'base_only' => ':component bazasına yalnız bu komponentlər daxildir: :codes',
+        'personal' => 'işçinin güzəşt kartı ilə (Kompensasiya → Vergi güzəştləri)',
     ],
 
     'summary' => [
@@ -85,6 +89,9 @@ return [
 
     'components' => [
         'title' => 'Komponent kataloqu',
+        'military_taxed' => 'Hərbçidə vergiyə cəlb olunur',
+        'military_exempt' => 'Hərbçidə vergidən azad',
+        'military_no_dsmf' => 'Hərbçidə DSMF bazasına daxil deyil',
         'list' => 'Komponentlər',
         'empty' => 'Komponent yoxdur',
     ],
@@ -192,6 +199,7 @@ return [
         'add_grade' => 'Pillə əlavə et',
         'add_component' => 'Komponent əlavə et',
         'add_bank' => 'Bank hesabı əlavə et',
+        'add_relief' => 'Güzəşt kartı əlavə et',
         'add_rate' => 'Dərəcə əlavə et',
         'open_catalog' => 'Kataloq',
         'edit' => 'Redaktə et',
