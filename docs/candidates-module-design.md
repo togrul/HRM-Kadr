@@ -1,5 +1,9 @@
 # Candidates Module Design
 
+> **Status (10.10.2026):** bu sənədin işarələri fevral–may aylarından sonra yenilənməyib; açıq qalan bəndlərin çoxu real vəziyyəti əks etdirməyə bilər. Aktiv iş siyahısı `~/Desktop/projects/ISLER_PLANI.md`-dir. Bəndi icra etməzdən əvvəl kodda yoxlayın.
+>
+> **Tutuşdurma (11.10.2026):** 22/22 bənd kodla yoxlanıb. 15 bənd `[x]` (dəlil bəndin yanında), 7 bənd açıq qalır (3 qismən, 4 kodda tapılmadı). Bölmə 1–9 köhnə vəziyyəti təsvir edir, bölmə 10 aktualdır.
+
 This document defines the target professional design for the `Candidates` module
 for three deployment profiles:
 
@@ -393,34 +397,34 @@ Each pack should define:
 
 ## Must-have
 
-- [ ] Split candidate master from application pipeline.
-- [ ] Add `job_requisitions` and `job_openings`.
-- [ ] Add `candidate_applications`.
-- [ ] Keep only the deployment-relevant workflow pack visible in UI using config/profile pack resolution.
-- [ ] Add stage history model instead of only current status.
-- [ ] Move military-only checks into dedicated assessment tables.
-- [ ] Add candidate source tracking.
-- [ ] Add application-level decision and rejection reason model.
-- [ ] Add hire conversion flow from candidate to personnel.
-- [ ] Replace binary `military/civilian` design with `private/public/military` pack model.
+- [x] Split candidate master from application pipeline. — kod: app/Modules/Candidates/Database/Migrations/2026_03_30_120000_create_candidate_recruitment_foundation_tables.php (candidate_applications ayrıca cədvəl), app/Models/CandidateApplication.php
+- [x] Add `job_requisitions` and `job_openings`. — kod: eyni miqrasiya (job_requisitions, job_openings), app/Models/JobRequisition.php, app/Models/JobOpening.php, app/Modules/Candidates/Livewire/RequisitionList.php, OpeningList.php
+- [x] Add `candidate_applications`. — kod: eyni miqrasiya (candidate_applications), app/Modules/Candidates/Livewire/ApplicationPipeline.php
+- [x] Keep only the deployment-relevant workflow pack visible in UI using config/profile pack resolution. — kod: app/Modules/Candidates/Support/CandidateWorkflowPackResolver.php::available(), tests/Unit/Modules/Candidates/CandidateWorkflowPackResolverTest.php
+- [x] Add stage history model instead of only current status. — kod: candidate_stage_events cədvəli, app/Models/CandidateStageEvent.php, CandidateApplicationStageService::moveToStage()
+- [ ] Move military-only checks into dedicated assessment tables. — qismən: candidate_application_assessments cədvəli var, amma hərbi sütunlar (hhk_*, physical_fitness_exam…) hələ candidates cədvəlindədir
+- [x] Add candidate source tracking. — kod: candidate_sources cədvəli, candidate_applications.candidate_source_id, app/Models/CandidateSource.php
+- [x] Add application-level decision and rejection reason model. — kod: candidate_rejection_reasons cədvəli, candidate_applications.rejection_reason_id/final_decision, app/Models/CandidateRejectionReason.php
+- [x] Add hire conversion flow from candidate to personnel. — kod: app/Modules/Candidates/Application/Services/CandidateHireConversionService.php, CandidateHireOrderService.php, tests/Feature/Candidates/CandidateHireOrderFlowTest.php
+- [x] Replace binary `military/civilian` design with `private/public/military` pack model. — kod: CandidateWorkflowPackResolver::MILITARY/PUBLIC/PRIVATE (köhnə CandidateModeResolver hələ də mövcuddur)
 
 ## Should-have
 
-- [ ] Add interview scheduling and scorecards.
-- [ ] Add reserve list / talent pool logic.
-- [ ] Add offer and appointment approval flow.
-- [ ] Add profile-based document checklist.
-- [ ] Add recruiter / commission ownership on stages.
-- [ ] Add audit-focused decision notes and evidence support.
-- [ ] Add source analytics and funnel analytics.
+- [x] Add interview scheduling and scorecards. — kod: candidate_interviews, candidate_scorecards, CandidateAtsCompletionService::scheduleInterview()/submitScorecard(), tests/Feature/Candidates/CandidateAtsCompletionServiceTest.php
+- [x] Add reserve list / talent pool logic. — kod: candidate_talent_pool_entries, CandidateAtsCompletionService::addToTalentPool()
+- [x] Add offer and appointment approval flow. — kod: candidate_offers, CandidateAtsCompletionService::createOffer()/updateOfferStatus(), CandidateHireOrderService (təyinat əmri)
+- [x] Add profile-based document checklist. — kod: CandidateApplicationStageService::DOCUMENT_CHECKLISTS (pack üzrə), candidate_application_document_checks cədvəli
+- [ ] Add recruiter / commission ownership on stages. — qismən: yalnız candidate_applications.assigned_recruiter_id (müraciət səviyyəsində); mərhələ/komissiya üzrə sahiblik tapılmadı
+- [x] Add audit-focused decision notes and evidence support. — kod: candidate_stage_events.note/payload, candidate_documents.candidate_application_id/stage_key/document_key (2026_03_30_170000_extend_candidate_recruitment_artifacts.php)
+- [x] Add source analytics and funnel analytics. — kod: app/Modules/Candidates/Livewire/RecruitmentAnalytics.php::sourceEffectivenessSummary()/stageSummary(), marşrut candidates.analytics
 
 ## Nice-to-have
 
-- [ ] Add SLA / aging metrics per vacancy and stage.
-- [ ] Add interviewer calibration analytics.
-- [ ] Add candidate communication templates.
-- [ ] Add referral tracking.
-- [ ] Add candidate duplicate merge tools.
+- [ ] Add SLA / aging metrics per vacancy and stage. — qismən: app/Modules/Candidates/Livewire/RecruitmentAnalytics::timeToStageSummary() (mərhələ üzrə orta gün) və CandidateAtsCompletionService::requisitionAging() var; vakansiya+mərhələ SLA yoxdur
+- [ ] Add interviewer calibration analytics. — kodda tapılmadı
+- [ ] Add candidate communication templates. — kodda tapılmadı (yalnız scorecard-da 'communication' meyarı var)
+- [ ] Add referral tracking. — kodda tapılmadı
+- [ ] Add candidate duplicate merge tools. — kodda tapılmadı
 
 ## 11. Professional workflow proposal
 

@@ -1,5 +1,9 @@
 # HR Strategic Roadmap TODO
 
+> **Status (10.10.2026):** bu sənədin işarələri fevral–may aylarından sonra yenilənməyib; açıq qalan bəndlərin çoxu real vəziyyəti əks etdirməyə bilər. Aktiv iş siyahısı `~/Desktop/projects/ISLER_PLANI.md`-dir. Bəndi icra etməzdən əvvəl kodda yoxlayın.
+>
+> **Tutuşdurma (11.10.2026):** 57/57 açıq bənd kodla yoxlanıb; 23 bənd `[x]`-ə keçdi (dəlil bəndin yanında), 34 bənd açıq qalır. Əvvəlki 17 `[x]` toxunulmayıb. Employee relations bölməsi kodda tamamilə yoxdur.
+
 Bu sənəd HRM layihəsini əməliyyat HR sistemindən daha tam HCM platformasına çevirmək üçün icra siyahısıdır. Prioritet ardıcıllığı mövcud modul bazasına, riskə və HR üçün real dəyərə görə verilib.
 
 ## 1. Employee Lifecycle Module
@@ -19,36 +23,36 @@ Must-have:
 - [x] offboarding case, exit checklist, exit interview
 - [x] lifecycle deadline reminder-ləri
 - [x] Candidates -> hired -> Personnel -> Lifecycle inteqrasiyası
-- [ ] Orders -> appointment/transfer/exit order inteqrasiyası
+- [ ] Orders -> appointment/transfer/exit order inteqrasiyası — qismən: yalnız işə qəbul əmri → lifecycle (app/Modules/Candidates/Application/Services/CandidateHireConversionService.php::ensureOrderLifecycleForCandidate(), tests/Feature/Candidates/CandidateHireOrderFlowTest.php); transfer/xitam əmrləri lifecycle hadisəsi yaratmır (app/Modules/Orders-də lifecycle çağırışı yoxdur)
 
 Should-have:
-- [ ] onboarding SLA tracking
-- [ ] overdue lifecycle task dashboard
-- [ ] asset/access handover checklist
-- [ ] exit reason analytics
+- [ ] onboarding SLA tracking — kodda tapılmadı (app/Modules/EmployeeLifecycle-də SLA izləmə yoxdur)
+- [x] overdue lifecycle task dashboard — kod: app/Modules/EmployeeLifecycle/Application/Services/LifecycleDashboardReadService.php::overdueTasks(), Livewire/Dashboard.php
+- [x] asset/access handover checklist — kod: LifecyclePlanTemplateService::defaultOffboardingChecklist() (close_system_access, verify_handover_assets); onboarding üçün şablon tapşırıqları
+- [ ] exit reason analytics — qismən: offboarding_cases.reason saxlanır və siyahıda göstərilir (LifecycleDashboardReadService::offboardingCases()), amma səbəb üzrə analitika yoxdur
 
 ## 2. Candidate ATS Completion
 
-Status: planned
+Status: əsasən tamamlanıb (11.10.2026)
 
 Məqsəd: Candidates modulunu tam recruitment CRM / ATS səviyyəsinə çatdırmaq.
 
 Must-have:
-- [ ] job requisition entity
-- [ ] requisition approval workflow
-- [ ] vacancy/opening board
-- [ ] candidate pipeline stage board
-- [ ] interview scheduling
-- [ ] interviewer panel və scorecard
-- [ ] offer management
+- [x] job requisition entity — kod: job_requisitions cədvəli (app/Models/JobRequisition.php), Livewire/RequisitionList.php
+- [x] requisition approval workflow — kod: app/Modules/Candidates/Application/Services/CandidateAtsCompletionService.php::submitRequisition()/approveRequisition()/rejectRequisition(), Livewire/RequisitionDetail.php
+- [x] vacancy/opening board — kod: app/Modules/Candidates/Livewire/OpeningList.php, OpeningDetail.php, marşrut candidates.openings
+- [x] candidate pipeline stage board — kod: app/Modules/Candidates/Livewire/ApplicationPipeline.php, marşrut candidates.applications
+- [x] interview scheduling — kod: CandidateAtsCompletionService::scheduleInterview(), candidate_interviews cədvəli, Livewire/ApplicationAtsPanel.php
+- [x] interviewer panel və scorecard — kod: candidate_scorecards (reviewer_id, criterion, score), CandidateAtsCompletionService::submitScorecard(); interview-da tək interviewer_id, panel qiymətləndirmə reviewer_id ilə
+- [x] offer management — kod: candidate_offers, CandidateAtsCompletionService::createOffer()/updateOfferStatus()
 - [x] hired candidate conversion flow
-- [ ] source/rejection analytics
+- [x] source/rejection analytics — kod: app/Modules/Candidates/Livewire/RecruitmentAnalytics.php::sourceSummary()/rejectionReasonSummary()
 
 Should-have:
-- [ ] requisition aging dashboard
-- [ ] interviewer calibration report
-- [ ] talent pool / reserve candidates
-- [ ] recruitment SLA heatmap
+- [ ] requisition aging dashboard — qismən: CandidateAtsCompletionService::requisitionAging() və tests/Feature/Candidates/CandidateAtsCompletionServiceTest.php var, amma UI-da göstərilmir (yalnız query-budget komandaları)
+- [ ] interviewer calibration report — kodda tapılmadı
+- [x] talent pool / reserve candidates — kod: candidate_talent_pool_entries, CandidateAtsCompletionService::addToTalentPool()
+- [ ] recruitment SLA heatmap — kodda tapılmadı (RecruitmentAnalytics::timeToStageSummary() orta gün göstərir, heatmap yoxdur)
 
 ## 3. Employee 360 Profile / Timeline
 
@@ -60,73 +64,73 @@ Must-have:
 - [x] HR 360 timeline read service foundation
 - [x] Timeline scope: orders, leave, vacation, business trip, training, performance, portfolio
 - [x] Personnel profile UI-da ayrıca 360 tab və ya mövcud timeline tab-a HR 360 mode
-- [ ] Audit dəyişiklikləri: kim nəyi dəyişib, nə vaxt dəyişib
-- [ ] Timeline filterləri: activity type, date range, search
-- [ ] Export: employee 360 timeline PDF/XLSX
+- [x] Audit dəyişiklikləri: kim nəyi dəyişib, nə vaxt dəyişib — kod: app/Modules/Personnel/Application/Services/Personnel360TimelineService.php::auditChanges(), tests/Feature/Personnel/Personnel360TimelineServiceTest.php
+- [x] Timeline filterləri: activity type, date range, search — kod: Personnel360TimelineService::build() ($filters type/date_from/date_to + search), app/Modules/Personnel/Livewire/Employee360Timeline.php
+- [ ] Export: employee 360 timeline PDF/XLSX — kodda tapılmadı (Employee360Timeline-da export yoxdur)
 
 Should-have:
-- [ ] risk markers: expired documents, pending approvals, low score, repeated absence
-- [ ] manager-facing simplified timeline
-- [ ] sensitive events üçün permission-based redaction
+- [ ] risk markers: expired documents, pending approvals, low score, repeated absence — kodda tapılmadı (timeline-da risk marker yoxdur; sənəd müddəti riski yalnız Home attention kartında: HomeOverviewService::expiringDocuments())
+- [ ] manager-facing simplified timeline — kodda tapılmadı
+- [ ] sensitive events üçün permission-based redaction — kodda tapılmadı
 
 ## 4. HR Command Center Dashboard
 
-Status: planned
+Status: in progress (qismən: Personnel Home)
 
 Məqsəd: HR istifadəçisi login olanda günlük işi və riskləri bir ekranda görsün.
 
 Must-have:
-- [ ] pending approvals panel
-- [ ] overdue lifecycle tasks
-- [ ] expiring documents
-- [ ] probation review queue
-- [ ] open vacancies / requisition aging
-- [ ] attendance exceptions
-- [ ] training/performance action queue
+- [x] pending approvals panel — kod: app/Modules/Personnel/Application/Services/HomeOverviewService.php::attention()/queueItems() (vacation_requests, attendance_pending, unsigned_orders), app/Modules/Personnel/Livewire/Home.php::decide()
+- [ ] overdue lifecycle tasks — kodda tapılmadı Home-da; gecikmiş tapşırıqlar yalnız /employee-lifecycle dashboard-dadır
+- [x] expiring documents — kod: app/Modules/Personnel/Application/Services/HomeOverviewService.php::attention() 'expiring_documents' kartı, expiringDocuments()
+- [ ] probation review queue — kodda tapılmadı Home-da (probation review növbəsi yalnız lifecycle dashboard-da)
+- [ ] open vacancies / requisition aging — kodda tapılmadı Home-da
+- [ ] attendance exceptions — qismən: Home-da attendance_pending (gözləyən əl ilə daxiletmələr) var; istisna (AttendanceException) növbəsi yoxdur
+- [ ] training/performance action queue — kodda tapılmadı
 
 Should-have:
-- [ ] HR workload by owner
-- [ ] SLA breach trend
-- [ ] drill-down links to source modules
+- [ ] HR workload by owner — kodda tapılmadı
+- [ ] SLA breach trend — kodda tapılmadı
+- [x] drill-down links to source modules — kod: app/Modules/Personnel/Application/Services/HomeOverviewService.php::attention() hər kart üçün 'route' (mənbə moduluna keçid)
 
 ## 5. Career Path + Succession
 
-Status: planned
+Status: in progress (succession var, career path yox)
 
 Məqsəd: performance və training nəticələrini vəzifə readiness və successor planlamasına bağlamaq.
 
 Must-have:
-- [ ] role competency profile
-- [ ] employee competency gap score
-- [ ] target role readiness score
-- [ ] successor pool per critical role
-- [ ] development action plan
-- [ ] performance + training + portfolio integration
+- [x] role competency profile — kod: app/Models/RoleCompetencyRequirement.php (position_id, training_competency_id, required_level_id)
+- [x] employee competency gap score — kod: app/Modules/TrainingNeeds/Application/Services/TrainingNeedSuggestionService.php::resolveGap(), app/Models/EmployeeCompetencyProfile.php
+- [ ] target role readiness score — qismən: succession_candidates.readiness əl ilə seçilir (ready_now/1_2_years/3_5_years); hesablanan readiness skoru yoxdur
+- [x] successor pool per critical role — kod: succession_plans/succession_candidates/talent_pools (app/Modules/PerformanceEvaluation/Database/Migrations/2026_06_24_120000_create_succession_tables.php), SuccessionService
+- [x] development action plan — kod: app/Modules/Personnel/Application/Services/MyHr/MyHrDevelopmentPlanReadService.php (TrainingNeedItem əsaslı), Livewire/MyHr/MyHrDevelopmentPlan.php
+- [ ] performance + training + portfolio integration — qismən: SuccessionService::syncPerformanceFromScore() performance-i bağlayır; training/portfolio inteqrasiyası yoxdur
 
 Should-have:
-- [ ] critical role risk dashboard
-- [ ] promotion readiness history
-- [ ] succession scenario comparison
+- [x] critical role risk dashboard — kod: succession_plans.risk_of_loss/impact_of_loss, SuccessionService::summary() (plans_no_ready), Livewire/SuccessionWorkspace.php
+- [ ] promotion readiness history — kodda tapılmadı
+- [ ] succession scenario comparison — kodda tapılmadı
 
 ## 6. Employee Relations Case Management
 
-Status: planned
+Status: planned (kodda yoxdur)
 
 Məqsəd: şikayət, intizam, araşdırma və qərar proseslərini auditli, məxfi və idarə olunan case workflow-a çevirmək.
 
 Must-have:
-- [ ] employee relation cases
-- [ ] case category: grievance, investigation, disciplinary, conflict, ethics
-- [ ] case participants və witness records
-- [ ] evidence/document attachments
-- [ ] decision workflow
-- [ ] appeal flow
-- [ ] confidential permission model
+- [ ] employee relation cases — kodda tapılmadı (employee relations modulu yoxdur; yalnız əmr təsiri DisciplinaryEffect və personnel_punishments qeydiyyatı var)
+- [ ] case category: grievance, investigation, disciplinary, conflict, ethics — kodda tapılmadı (employee relations modulu yoxdur; yalnız əmr təsiri DisciplinaryEffect və personnel_punishments qeydiyyatı var)
+- [ ] case participants və witness records — kodda tapılmadı (employee relations modulu yoxdur; yalnız əmr təsiri DisciplinaryEffect və personnel_punishments qeydiyyatı var)
+- [ ] evidence/document attachments — kodda tapılmadı (employee relations modulu yoxdur; yalnız əmr təsiri DisciplinaryEffect və personnel_punishments qeydiyyatı var)
+- [ ] decision workflow — kodda tapılmadı (employee relations modulu yoxdur; yalnız əmr təsiri DisciplinaryEffect və personnel_punishments qeydiyyatı var)
+- [ ] appeal flow — kodda tapılmadı (employee relations modulu yoxdur; yalnız əmr təsiri DisciplinaryEffect və personnel_punishments qeydiyyatı var)
+- [ ] confidential permission model — kodda tapılmadı (employee relations modulu yoxdur; yalnız əmr təsiri DisciplinaryEffect və personnel_punishments qeydiyyatı var)
 
 Should-have:
-- [ ] anonymized trend report
-- [ ] repeat incident detection
-- [ ] case SLA dashboard
+- [ ] anonymized trend report — kodda tapılmadı (employee relations modulu yoxdur; yalnız əmr təsiri DisciplinaryEffect və personnel_punishments qeydiyyatı var)
+- [ ] repeat incident detection — kodda tapılmadı (employee relations modulu yoxdur; yalnız əmr təsiri DisciplinaryEffect və personnel_punishments qeydiyyatı var)
+- [ ] case SLA dashboard — kodda tapılmadı (employee relations modulu yoxdur; yalnız əmr təsiri DisciplinaryEffect və personnel_punishments qeydiyyatı var)
 
 ## 7. Document Expiry / Compliance Center
 
@@ -135,16 +139,16 @@ Status: in progress
 Məqsəd: personal sənədlərinin vaxtı keçməmiş HR xəbərdar olsun və uyğunluq riski azalsın.
 
 Must-have:
-- [ ] identity/passport/contract/medical/certificate expiry registry
+- [ ] identity/passport/contract/medical/certificate expiry registry — qismən: DocumentExpiryReadService::DOCUMENT_SOURCES — service_card, passport, id_card, contract; medical/certificate yoxdur
 - [x] document expiry dashboard foundation
-- [ ] reminder rules
+- [x] reminder rules — kod: compliance_document_requirements.warning_days/critical_days (2026_04_30_130000_create_compliance_document_requirements_table.php), app/Console/Commands/ComplianceDocumentReminderCommand.php (Kernel-də cədvəl)
 - [x] missing document report
-- [ ] employee/self-service renewal request
+- [ ] employee/self-service renewal request — kodda tapılmadı
 
 Should-have:
 - [x] compliance score per structure
-- [ ] bulk reminder dispatch
-- [ ] audit export
+- [x] bulk reminder dispatch — kod: app/Modules/Compliance/Application/Services/ComplianceReminderNotifier.php::notify(), `compliance:document-reminders --notify`
+- [ ] audit export — qismən: Livewire/DocumentExpiryDashboard.php::exportCsv() sənəd siyahısını ixrac edir; audit-məqsədli export yoxdur
 
 ## İcra Ardıcıllığı
 

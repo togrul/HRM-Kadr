@@ -1,5 +1,9 @@
 # HR CRM / HCM boşluq analizi və inkişaf yol xəritəsi
 
+> **Status (10.10.2026):** bu sənədin işarələri fevral–may aylarından sonra yenilənməyib; açıq qalan bəndlərin çoxu real vəziyyəti əks etdirməyə bilər. Aktiv iş siyahısı `~/Desktop/projects/ISLER_PLANI.md`-dir. Bəndi icra etməzdən əvvəl kodda yoxlayın.
+>
+> **Tutuşdurma (11.10.2026):** 82/82 bənd kodla yoxlanıb: 36 `[x]` (dəlil bəndin yanında), 46 açıq. Lifecycle, ATS, My HR, goals/succession əsasən qurulub; benefits, employee relations və bir sıra analitika/avtomatlaşdırma bəndləri kodda yoxdur.
+
 Bu sənəd mövcud HRM layihəsində artıq olan əsas İK nüvəsini daha tam `HR CRM / HCM` səviyyəsinə çıxarmaq üçün çatışmayan sahələri və onların necə qurulmalı olduğunu izah edir.
 
 Hazırkı sistemin güclü tərəfləri:
@@ -129,28 +133,28 @@ Lazım olan əsas ekranlar:
 
 ### Must-have to-do
 
-- [ ] `Employee Lifecycle` modulunu yarat
-- [ ] onboarding entity-lərini və migration-ları əlavə et
-- [ ] onboarding checklist template məntiqi qur
-- [ ] role-based task owner məntiqi qur
-- [ ] probation period və probation review data model-i əlavə et
-- [ ] exit case + exit checklist + exit interview model-lərini əlavə et
-- [ ] employee detail ilə lifecycle timeline əlaqəsini qur
-- [ ] notification və deadline reminder axını əlavə et
+- [x] `Employee Lifecycle` modulunu yarat — kod: app/Modules/EmployeeLifecycle/ (marşrut /employee-lifecycle, Livewire/Dashboard.php)
+- [x] onboarding entity-lərini və migration-ları əlavə et — kod: app/Modules/EmployeeLifecycle/Database/Migrations/2026_05_03_120000_create_employee_lifecycle_tables.php
+- [x] onboarding checklist template məntiqi qur — kod: app/Modules/EmployeeLifecycle/Database/Migrations/2026_05_03_122000_create_employee_lifecycle_plan_templates.php, Application/Services/LifecyclePlanTemplateService.php
+- [x] role-based task owner məntiqi qur — kod: LifecyclePlanTemplateService::launchForPersonnel() (owner_type hr/manager/it/employee, ownerUserId)
+- [x] probation period və probation review data model-i əlavə et — kod: app/Modules/EmployeeLifecycle/Database/Migrations/2026_05_03_123000_create_employee_lifecycle_probation_reviews.php, LifecyclePlanTemplateService::scheduleProbationReview()/completeProbationReview()
+- [x] exit case + exit checklist + exit interview model-lərini əlavə et — kod: app/Modules/EmployeeLifecycle/Database/Migrations/2026_05_03_125000_create_employee_lifecycle_offboarding_cases.php, LifecyclePlanTemplateService::openOffboardingCase()/completeOffboardingCase()
+- [x] employee detail ilə lifecycle timeline əlaqəsini qur — kod: app/Modules/Personnel/Application/Services/Personnel360TimelineService.php::lifecycleEvents()
+- [x] notification və deadline reminder axını əlavə et — kod: app/Modules/EmployeeLifecycle/Application/Services/LifecycleReminderService.php, Console/Commands/SendLifecycleDeadlineRemindersCommand.php, tests/Feature/EmployeeLifecycle/LifecycleDeadlineReminderCommandTest.php
 
 ### Should-have to-do
 
-- [ ] onboarding SLA tracking
-- [ ] overdue task analytics
-- [ ] probation extension decision flow
-- [ ] exit səbəb kateqoriyaları və trend report
-- [ ] asset return integration
+- [ ] onboarding SLA tracking — kodda tapılmadı (EmployeeLifecycle-də SLA izləmə yoxdur)
+- [ ] overdue task analytics — qismən: LifecycleDashboardReadService::overdueTasks() gecikmiş tapşırıq siyahısını verir; trend/analitika yoxdur
+- [x] probation extension decision flow — kod: app/Modules/EmployeeLifecycle/Livewire/Dashboard.php (`probation_decision` in:confirm,extend,terminate), LifecyclePlanTemplateService::completeProbationReview()
+- [ ] exit səbəb kateqoriyaları və trend report — qismən: offboarding_cases.reason sərbəst mətn saxlanır; səbəb kateqoriyası və trend hesabatı yoxdur
+- [ ] asset return integration — qismən: offboarding checklist-də 'verify_handover_assets' tapşırığı var (LifecyclePlanTemplateService::defaultOffboardingChecklist()); aktiv/inventar modulu ilə inteqrasiya yoxdur
 
 ### Nice-to-have to-do
 
-- [ ] onboarding buddy assignment
-- [ ] e-signature workflow
-- [ ] survey-based onboarding feedback
+- [ ] onboarding buddy assignment — kodda tapılmadı
+- [ ] e-signature workflow — kodda tapılmadı (yalnız OnboardingDocumentReceipt qəbz qeydi var, e-imza yoxdur)
+- [ ] survey-based onboarding feedback — kodda tapılmadı
 
 ---
 
@@ -234,28 +238,28 @@ Tövsiyə olunan cədvəllər:
 
 ### Must-have to-do
 
-- [ ] `Candidates` modulunu route və IA baxımından parçala
-- [ ] requisition entity və approval flow əlavə et
-- [ ] candidate stage pipeline modeli qur
-- [ ] vacancy ilə candidate əlaqəsini qur
-- [ ] interview scheduling və panel scorecard əlavə et
-- [ ] offer entity və approval flow qur
-- [ ] hired candidate -> personnel / lifecycle keçidi əlavə et
-- [ ] basic conversion analytics əlavə et
+- [x] `Candidates` modulunu route və IA baxımından parçala — kod: app/Modules/Candidates/Routes/web.php (candidates.requisitions/openings/applications/analytics ayrıca marşrutlar)
+- [x] requisition entity və approval flow əlavə et — kod: job_requisitions, app/Modules/Candidates/Application/Services/CandidateAtsCompletionService.php::submitRequisition()/approveRequisition()
+- [x] candidate stage pipeline modeli qur — kod: candidate_stage_events, app/Modules/Candidates/Application/Services/CandidateApplicationStageService.php::moveToStage(), Livewire/ApplicationPipeline.php
+- [x] vacancy ilə candidate əlaqəsini qur — kod: candidate_applications.job_opening_id → job_openings.job_requisition_id
+- [x] interview scheduling və panel scorecard əlavə et — kod: candidate_interviews, candidate_scorecards, CandidateAtsCompletionService::scheduleInterview()/submitScorecard()
+- [x] offer entity və approval flow qur — kod: candidate_offers, CandidateAtsCompletionService::createOffer()/updateOfferStatus() (status axını; təsdiq əmr axını CandidateHireOrderService vasitəsilədir)
+- [x] hired candidate -> personnel / lifecycle keçidi əlavə et — kod: app/Modules/Candidates/Application/Services/CandidateHireConversionService.php::convert()/ensureLifecycleEvent()
+- [x] basic conversion analytics əlavə et — kod: app/Modules/Candidates/Livewire/RecruitmentAnalytics.php (summaryCards/stageSummary)
 
 ### Should-have to-do
 
-- [ ] source effectiveness report
-- [ ] rejection reason analytics
-- [ ] interviewer calibration report
-- [ ] talent pool / silver medalist bucket
-- [ ] requisition aging dashboard
+- [x] source effectiveness report — kod: RecruitmentAnalytics::sourceEffectivenessSummary()
+- [x] rejection reason analytics — kod: RecruitmentAnalytics::rejectionReasonSummary()
+- [ ] interviewer calibration report — kodda tapılmadı
+- [x] talent pool / silver medalist bucket — kod: candidate_talent_pool_entries, CandidateAtsCompletionService::addToTalentPool()
+- [ ] requisition aging dashboard — qismən: CandidateAtsCompletionService::requisitionAging() var, UI-da göstərilmir
 
 ### Nice-to-have to-do
 
-- [ ] email template automation
-- [ ] calendar integration
-- [ ] recruitment SLA and bottleneck heatmap
+- [ ] email template automation — kodda tapılmadı
+- [ ] calendar integration — kodda tapılmadı
+- [ ] recruitment SLA and bottleneck heatmap — kodda tapılmadı
 
 ### İcra ardıcıllığı
 
@@ -351,26 +355,26 @@ Bu portal 2 əsas görünüşlə işləməlidir:
 
 ### Must-have to-do
 
-- [ ] `My HR` portal route və navigation yarat
-- [ ] user-personnel mapping-i bütün modullərdə vahid contract ilə standartlaşdır
-- [ ] `my requests` timeline ekranı qur
-- [ ] leave / vacation / business trip request summary-ni employee portal-a çıxar
-- [ ] training history və performance result summary-ni employee portal-a çıxar
-- [ ] manager approvals inbox qur
-- [ ] team attendance / leave snapshot qur
+- [x] `My HR` portal route və navigation yarat — kod: app/Modules/Personnel/Routes/web.php (`/my-hr`, name my-hr), Livewire/MyHr/MyHrDashboard.php
+- [x] user-personnel mapping-i bütün modullərdə vahid contract ilə standartlaşdır — kod: app/Models/UserPersonnelLink.php + app/Modules/Personnel/Support/MyHr/MyHrAccess.php::resolvePersonnelId(), Livewire/MyHr/Concerns/ResolvesOwnPersonnel.php; Leaves/Performance modullarında da istifadə olunur
+- [x] `my requests` timeline ekranı qur — kod: app/Modules/Personnel/Application/Services/MyHr/MyHrRequestsReadService.php, tab `requests`
+- [x] leave / vacation / business trip request summary-ni employee portal-a çıxar — kod: MyHrDashboard (leaves/vacations/trips sayğacları), MyHrRequestsReadService::build()
+- [ ] training history və performance result summary-ni employee portal-a çıxar — qismən: təlim tarixçəsi — MyHrLearningReadService, MyHrDevelopmentPlanReadService; performans nəticəsi My HR-da yoxdur
+- [x] manager approvals inbox qur — kod: app/Modules/Personnel/Livewire/MyHr/SelfServiceRequestReviews.php (marşrut self-service-reviews), Application/Services/MyHr/MyHrRequestReviewService.php
+- [ ] team attendance / leave snapshot qur — qismən: MyHrHierarchyReadService birbaşa tabeliklər; komanda davamiyyət/məzuniyyət snapshot-u My HR-da yoxdur
 
 ### Should-have to-do
 
-- [ ] profile update request workflow
-- [ ] downloadable employee documents
-- [ ] personal KPI summary
-- [ ] manager escalation reminders
+- [ ] profile update request workflow — qismən: MyHrRequestCorrectionService yalnız məzuniyyət/ezamiyyət sorğularının düzəlişini qəbul edir; profil məlumatı dəyişmə sorğusu yoxdur
+- [x] downloadable employee documents — kod: app/Modules/Personnel/Application/Services/MyHr/MyHrDocumentsReadService.php, marşrut personnel.files.download
+- [ ] personal KPI summary — kodda tapılmadı (My HR tablarında KPI yoxdur)
+- [ ] manager escalation reminders — kodda tapılmadı (menecer eskalasiya xatırlatması yoxdur)
 
 ### Nice-to-have to-do
 
-- [ ] mobile-first quick actions
-- [ ] chatbot / assistant entrypoint
-- [ ] personalized recommendations
+- [ ] mobile-first quick actions — yoxlanmadı (MyHrDashboard::goto() sürətli keçidlər var, mobile-first quick action ayrıca yoxlanmayıb)
+- [ ] chatbot / assistant entrypoint — kodda tapılmadı
+- [ ] personalized recommendations — kodda tapılmadı
 
 ---
 
@@ -464,26 +468,26 @@ Bu hissə ayrıca `Talent Management` kimi düşünülməlidir.
 
 ### Must-have to-do
 
-- [ ] `Goals` data model-i və cycle məntiqini qur
-- [ ] organization -> department -> employee cascade model-i yarat
-- [ ] progress update və check-in ekranları əlavə et
-- [ ] `IDP` entity-lərini qur
-- [ ] training need ilə IDP arasında əlaqə yarat
-- [ ] `critical_roles` və `succession_candidates` modeli qur
-- [ ] readiness review ekranı əlavə et
+- [x] `Goals` data model-i və cycle məntiqini qur — kod: app/Modules/PerformanceEvaluation/Database/Migrations/2026_06_23_120000_create_performance_goal_tables.php (performance_goals + performance_cycles), Livewire/GoalsWorkspace.php
+- [x] organization -> department -> employee cascade model-i yarat — kod: performance_goals.parent_goal_id, personnel_id=null təşkilat səviyyəsi (departament üçün ayrıca səviyyə yoxdur)
+- [x] progress update və check-in ekranları əlavə et — kod: performance_goal_checkins, performance_scorecard_checkins (2026_09_21_140000_add_kpi_full_cycle_tables.php)
+- [ ] `IDP` entity-lərini qur — qismən: ayrıca IDP cədvəli yoxdur; inkişaf planı TrainingNeedItem-dən qurulur (app/Modules/Personnel/Application/Services/MyHr/MyHrDevelopmentPlanReadService.php)
+- [ ] training need ilə IDP arasında əlaqə yarat — qismən: performance_training_need_links və TrainingNeedItem əsaslı inkişaf planı var; IDP entity-si olmadığı üçün tam əlaqə yoxdur
+- [x] `critical_roles` və `succession_candidates` modeli qur — kod: succession_plans (kritik rol), succession_candidates — app/Modules/PerformanceEvaluation/Database/Migrations/2026_06_24_120000_create_succession_tables.php (`critical_roles` adlı cədvəl yoxdur)
+- [x] readiness review ekranı əlavə et — kod: app/Modules/PerformanceEvaluation/Livewire/SuccessionWorkspace.php, SuccessionService::setCandidateReadiness()
 
 ### Should-have to-do
 
-- [ ] KPI weighting
-- [ ] calibration session notes
-- [ ] high-potential pool
-- [ ] career aspiration capture
+- [x] KPI weighting — kod: performance_goals.weight_percent, performance_kpi_template_items weight, kpi_weight_share/competency_weight_share (2026_09_21_130000_create_performance_kpi_tables.php)
+- [x] calibration session notes — kod: performance_calibration_adjustments (delta, reason) — 2026_09_21_140000_add_kpi_full_cycle_tables.php, app/Models/PerformanceCalibrationAdjustment.php (sessiya anlayışı yoxdur)
+- [x] high-potential pool — kod: talent_pools.pool_type=hipo, talent_pool_members, SuccessionService::createPool()/addMember()
+- [ ] career aspiration capture — kodda tapılmadı
 
 ### Nice-to-have to-do
 
-- [ ] 9-box potential/performance matrix
-- [ ] succession risk heatmap
-- [ ] AI-assisted development suggestion
+- [x] 9-box potential/performance matrix — kod: app/Modules/PerformanceEvaluation/Application/Services/SuccessionService.php::nineBox(), talent_assessments
+- [ ] succession risk heatmap — qismən: succession_plans.risk_of_loss/impact_of_loss saxlanır, heatmap vizuallaşması yoxdur
+- [ ] AI-assisted development suggestion — kodda tapılmadı
 
 ### İcra prinsipi
 
@@ -556,22 +560,22 @@ Alt bloklar:
 
 ### Must-have to-do
 
-- [ ] benefit plan və enrollment data model-i yarat
-- [ ] dependent registry qur
-- [ ] employee benefit visibility ekranı yarat
-- [ ] allowance / perk registry əlavə et
-- [ ] total rewards summary ekranı yarat
+- [ ] benefit plan və enrollment data model-i yarat — kodda tapılmadı (benefit/enrollment cədvəli yoxdur)
+- [ ] dependent registry qur — qismən: app/Models/PersonnelKinship.php ailə üzvləri reyestri var; dependent/benefit bayrağı yoxdur
+- [ ] employee benefit visibility ekranı yarat — kodda tapılmadı
+- [x] allowance / perk registry əlavə et — kod: compensation_components (earning/deduction katalogu) — app/Modules/Compensation/Database/Migrations/2026_06_28_000100_create_compensation_foundation_tables.php, 2026_06_28_000200_seed_compensation_catalog.php, Application/Services/AllowanceResolver.php
+- [ ] total rewards summary ekranı yarat — qismən: Compensation modulunda işçi kompensasiya sətirləri var (employee_compensations/lines); benefit daxil total rewards xülasə ekranı yoxdur
 
 ### Should-have to-do
 
-- [ ] payroll deduction integration
-- [ ] renewal cycle management
-- [ ] eligibility rules
+- [ ] payroll deduction integration — kodda tapılmadı
+- [ ] renewal cycle management — kodda tapılmadı
+- [ ] eligibility rules — kodda tapılmadı
 
 ### Nice-to-have to-do
 
-- [ ] benefits comparison wizard
-- [ ] benefit utilization analytics
+- [ ] benefits comparison wizard — kodda tapılmadı
+- [ ] benefit utilization analytics — kodda tapılmadı
 
 ### Risk və diqqət nöqtələri
 
@@ -642,24 +646,24 @@ Alt bloklar:
 
 ### Must-have to-do
 
-- [ ] case model-i və case type registry yarat
-- [ ] case detail timeline qur
-- [ ] evidence upload və audit log əlavə et
-- [ ] investigator / owner assignment əlavə et
-- [ ] decision və closure flow qur
-- [ ] disciplinary action linkage əlavə et
+- [ ] case model-i və case type registry yarat — kodda tapılmadı (employee relations case modulu yoxdur)
+- [ ] case detail timeline qur — kodda tapılmadı (employee relations case modulu yoxdur)
+- [ ] evidence upload və audit log əlavə et — kodda tapılmadı (employee relations case modulu yoxdur)
+- [ ] investigator / owner assignment əlavə et — kodda tapılmadı (employee relations case modulu yoxdur)
+- [ ] decision və closure flow qur — kodda tapılmadı (employee relations case modulu yoxdur)
+- [ ] disciplinary action linkage əlavə et — qismən: intizam tədbiri yalnız əmr təsiri kimi var (app/Modules/Orders/Infrastructure/Document/Effects/DisciplinaryEffect.php); case ilə əlaqə yoxdur
 
 ### Should-have to-do
 
-- [ ] SLA and escalation
-- [ ] recurring issue analytics
-- [ ] policy breach taxonomy
+- [ ] SLA and escalation — kodda tapılmadı (employee relations case modulu yoxdur)
+- [ ] recurring issue analytics — kodda tapılmadı (employee relations case modulu yoxdur)
+- [ ] policy breach taxonomy — kodda tapılmadı (employee relations case modulu yoxdur)
 
 ### Nice-to-have to-do
 
-- [ ] anonymized whistleblowing intake
-- [ ] mediation workflow
-- [ ] legal hold support
+- [ ] anonymized whistleblowing intake — kodda tapılmadı (employee relations case modulu yoxdur)
+- [ ] mediation workflow — kodda tapılmadı (employee relations case modulu yoxdur)
+- [ ] legal hold support — kodda tapılmadı (employee relations case modulu yoxdur)
 
 ### Əsas prinsip
 

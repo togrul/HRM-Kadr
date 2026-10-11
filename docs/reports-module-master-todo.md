@@ -1,5 +1,9 @@
 # Hesabatlar Modulu Master To-Do
 
+> **Status (10.10.2026):** bu sənədin işarələri fevral–may aylarından sonra yenilənməyib; açıq qalan bəndlərin çoxu real vəziyyəti əks etdirməyə bilər. Aktiv iş siyahısı `~/Desktop/projects/ISLER_PLANI.md`-dir. Bəndi icra etməzdən əvvəl kodda yoxlayın.
+>
+> **Tutuşdurma (11.10.2026):** 64/64 bənd kodla yoxlanıb: 32 `[x]`, 32 açıq. Əsas modul (standart/dinamik/müqayisəli hesabat, Excel/CSV/print) hazırdır; preset, audit, konsolidə/executive paket, scheduled/queue export, unit testlər və 7 permission modeli yoxdur.
+
 Bu sənəd müştərinin verdiyi aşağıdakı tələb əsasında hazırlanıb:
 
 - İR prosesləri üzrə bütün məlumatların sistemləşdirilmiş formada çıxarılması
@@ -555,68 +559,68 @@ Bu modul başlanğıcdan performanslı qurulmalıdır.
 
 ### Phase 0. Kəşf və data müqaviləsi
 
-- [ ] standard report kataloqunu təsdiqlə
-- [ ] hər report üçün source module və owner təyin et
-- [ ] eyni anlayışlar üçün canonical metric dictionary qur
-- [ ] period anlayışlarını sabitlə: gün / ay / rüb / il
-- [ ] headcount, attendance, training, performance üçün ortaq filter dilini yaz
+- [x] standard report kataloqunu təsdiqlə — kod: app/Modules/Reports/Application/Services/StandardReportCatalogService.php::all() (6 hesabat: headcount, demographics, movements, attendance, training, performance)
+- [ ] hər report üçün source module və owner təyin et — yoxlanmadı (kodda hesabat→mənbə modul/owner xəritəsi yoxdur; sənəd qərarıdır)
+- [ ] eyni anlayışlar üçün canonical metric dictionary qur — qismən: app/Modules/Reports/Application/Services/DynamicReportBuilderService.php::metricOptions() mənbə üzrə metrikləri sadalayır; vahid metric lüğəti yoxdur
+- [ ] period anlayışlarını sabitlə: gün / ay / rüb / il — qismən: ay/il filtri var (Livewire/Dashboard.php), app/Modules/Reports/Application/Services/ReportsSqlDialectService.php::quarterExpression() var, amma rüb/gün periodu UI-da yoxdur
+- [x] headcount, attendance, training, performance üçün ortaq filter dilini yaz — kod: ortaq year/month/structure_id filtri — app/Modules/Reports/Livewire/Dashboard.php (panel dövrü Comparisons/Standard/Dynamic-ə ötürülür), tests/Feature/Reports/ReportsDashboardTest.php::test_comparisons_take_the_panel_period
 
 ### Phase 1. MVP standard reports
 
-- [ ] yeni `Reports` modul skeletini yarat
-- [ ] provider, routes, alias map əlavə et
-- [ ] reports dashboard qur
-- [ ] standard reports ekranını qur
-- [ ] headcount report servisini yaz
-- [ ] demographics report servisini yaz
-- [ ] workforce movement report servisini yaz
-- [ ] attendance summary report servisini yaz
-- [ ] training summary report servisini yaz
-- [ ] performance summary report servisini yaz
-- [ ] Excel export əlavə et
-- [ ] CSV export əlavə et
-- [ ] print-friendly PDF çıxışı əlavə et
-- [ ] permission seed və role matrix yaz
-- [ ] audit log hadisələrini əlavə et
+- [x] yeni `Reports` modul skeletini yarat — kod: app/Modules/Reports/ modulu
+- [x] provider, routes, alias map əlavə et — kod: app/Modules/Reports/Providers/ReportsServiceProvider.php::componentMap(), app/Modules/Reports/Routes/web.php
+- [x] reports dashboard qur — kod: app/Modules/Reports/Livewire/Dashboard.php, Livewire/Overview.php, marşrut reports
+- [x] standard reports ekranını qur — kod: app/Modules/Reports/Livewire/StandardReports.php
+- [x] headcount report servisini yaz — kod: app/Modules/Reports/Application/Services/StandardReportService.php::headcount()
+- [x] demographics report servisini yaz — kod: StandardReportService::demographics()
+- [x] workforce movement report servisini yaz — kod: StandardReportService::movements()
+- [x] attendance summary report servisini yaz — kod: StandardReportService::attendance()
+- [x] training summary report servisini yaz — kod: StandardReportService::training()
+- [x] performance summary report servisini yaz — kod: StandardReportService::performance()
+- [x] Excel export əlavə et — kod: app/Modules/Reports/Exports/ReportsTableExport.php, StandardReports::exportExcel()
+- [x] CSV export əlavə et — kod: StandardReports::exportCsv(), DynamicBuilder::exportCsv()
+- [x] print-friendly PDF çıxışı əlavə et — kod: app/Modules/Reports/Resources/views/print/report.blade.php, marşrut reports.print-standard/reports.print-dynamic (brauzer print; server-side PDF mühərriki yoxdur)
+- [ ] permission seed və role matrix yaz — qismən: show-reports və export-reports seed olunub (app/Modules/Reports/Database/Migrations/2026_03_15_100000_seed_reports_permissions_and_update_menu.php); sənəddəki 7 permission/rol matrisi yoxdur
+- [ ] audit log hadisələrini əlavə et — kodda tapılmadı (app/Modules/Reports-da audit/activity yazısı yoxdur)
 
 ### Phase 2. Dynamic builder və müqayisə
 
-- [ ] dynamic report builder ekranını qur
-- [ ] source / metric / grouping whitelist-i yaz
-- [ ] comparative report ekranını qur
-- [ ] year-over-year müqayisələri əlavə et
-- [ ] structure comparison əlavə et
-- [ ] saved presets əlavə et
-- [ ] chart panel komponentlərini yaz
-- [ ] chart export / print uyğunluğu əlavə et
+- [x] dynamic report builder ekranını qur — kod: app/Modules/Reports/Livewire/DynamicBuilder.php
+- [x] source / metric / grouping whitelist-i yaz — kod: DynamicReportBuilderService::sourceOptions()/groupOptions()/metricOptions() (match ilə whitelist)
+- [x] comparative report ekranını qur — kod: app/Modules/Reports/Livewire/Comparisons.php, Application/Services/ComparativeReportService.php
+- [x] year-over-year müqayisələri əlavə et — kod: ComparativeReportService::headcountYearComparison()/trainingYearComparison(), attendanceMonthComparison()
+- [ ] structure comparison əlavə et — qismən: ComparativeReportService::build() structureId süzgəci var, strukturlar arası müqayisə kartı yoxdur; DynamicBuilder 'structure' üzrə qruplaşdırır
+- [ ] saved presets əlavə et — kodda tapılmadı (preset saxlama və manage-report-presets yoxdur)
+- [ ] chart panel komponentlərini yaz — qismən: app/Modules/Reports/Resources/views/livewire/reports/overview.blade.php-də inline bar chart var; ayrıca chart komponenti yoxdur
+- [ ] chart export / print uyğunluğu əlavə et — kodda tapılmadı
 
 ### Phase 3. Konsolidə və rəhbərlik paketi
 
-- [ ] rüblük konsolidə hesabat
-- [ ] illik konsolidə hesabat
-- [ ] rəhbərlik executive dashboard
-- [ ] cross-module combined KPI
-- [ ] department scorecard
-- [ ] queue-based heavy export center
+- [ ] rüblük konsolidə hesabat — kodda tapılmadı
+- [ ] illik konsolidə hesabat — kodda tapılmadı
+- [ ] rəhbərlik executive dashboard — qismən: Overview dashboard (Livewire/Overview.php) var; ayrıca executive dashboard yoxdur
+- [x] cross-module combined KPI — kod: app/Modules/Reports/Application/Services/ReportsOverviewService.php::build() (headcount + attendanceReportKpis + trainingKpis + performanceKpis)
+- [ ] department scorecard — kodda tapılmadı
+- [ ] queue-based heavy export center — kodda tapılmadı (export sinxrondur, queue job yoxdur)
 
 ### Phase 4. Advanced maturity
 
-- [ ] scheduled report generation
-- [ ] email / notification-based report delivery
-- [ ] server-side PDF engine
-- [ ] deeper snapshot strategy
-- [ ] anomaly / trend insight layer
+- [ ] scheduled report generation — kodda tapılmadı
+- [ ] email / notification-based report delivery — kodda tapılmadı
+- [ ] server-side PDF engine — kodda tapılmadı
+- [ ] deeper snapshot strategy — kodda tapılmadı
+- [ ] anomaly / trend insight layer — kodda tapılmadı
 
 ---
 
 ## 17. UX to-do
 
-- [ ] reports dashboard üçün ayrıca vizual istiqamət seç
-- [ ] standart report kartlarını vahid dizayn dilinə sal
-- [ ] chart komponentləri üçün reusable card pattern qur
-- [ ] filter panelini bütün report ekranlarında eyni saxla
-- [ ] empty state və no-data state-ləri ayrıca dizayn et
-- [ ] export progress və file-ready notification göstər
+- [ ] reports dashboard üçün ayrıca vizual istiqamət seç — yoxlanmadı (dizayn qərarı, kodla yoxlanmır)
+- [ ] standart report kartlarını vahid dizayn dilinə sal — yoxlanmadı
+- [ ] chart komponentləri üçün reusable card pattern qur — kodda tapılmadı (ayrıca reusable chart card yoxdur)
+- [x] filter panelini bütün report ekranlarında eyni saxla — kod: app/Modules/Reports/Livewire/Dashboard.php (ortaq panel: dövr/struktur), tests/Feature/Reports/ReportsDashboardTest.php::test_header_print_and_export_follow_the_tabs_current_selection
+- [x] empty state və no-data state-ləri ayrıca dizayn et — kod: x-ui.empty-state `reports::dashboard.empty.no_report_data` — standard-reports.blade.php, dynamic-builder.blade.php, comparisons.blade.php, overview.blade.php
+- [ ] export progress və file-ready notification göstər — kodda tapılmadı (export sinxron yükləmədir)
 
 ---
 
@@ -624,34 +628,34 @@ Bu modul başlanğıcdan performanslı qurulmalıdır.
 
 ### Unit tests
 
-- [ ] metric formatter
-- [ ] filter normalization
-- [ ] grouping builder
-- [ ] comparison period resolver
-- [ ] export payload builder
+- [ ] metric formatter — kodda tapılmadı
+- [ ] filter normalization — kodda tapılmadı (normalizeFilters ayrıca test olunmur)
+- [ ] grouping builder — kodda tapılmadı
+- [ ] comparison period resolver — qismən: tests/Feature/Reports/ReportsDashboardTest.php::test_comparisons_take_the_panel_period (feature səviyyəsində)
+- [ ] export payload builder — kodda tapılmadı
 
 ### Feature tests
 
-- [ ] headcount report render
-- [ ] attendance report render
-- [ ] training report render
-- [ ] performance report render
-- [ ] dynamic builder filter scenario
-- [ ] export permission checks
+- [x] headcount report render — kod: tests/Feature/Reports/ReportsServiceRegressionTest.php::test_personnel_reports_use_selected_report_date_snapshot (headcount build; ekran render testi yoxdur)
+- [ ] attendance report render — kodda tapılmadı (attendance standart hesabatı üçün test yoxdur; yalnız query-budget probe)
+- [x] training report render — kod: tests/Feature/Reports/ReportsServiceRegressionTest.php::test_standard_training_report_does_not_duplicate_participants_or_hours_when_session_has_multiple_feedback_rows
+- [x] performance report render — kod: tests/Feature/Reports/ReportsServiceRegressionTest.php::test_performance_reports_respect_selected_period_overlap
+- [x] dynamic builder filter scenario — kod: tests/Feature/Reports/ReportsDashboardTest.php::test_dynamic_builder_accepts_preset_filters_from_parent_route_context, tests/Feature/Security/ScopeReportsTest.php
+- [x] export permission checks — kod: tests/Feature/Reports/ReportsDashboardTest.php::test_header_export_requires_export_permission
 
 ### Performance tests
 
-- [ ] `reports:query-budget`
-- [ ] `reports:render-benchmark`
-- [ ] böyük filter kombinasiyaları üçün regression
+- [x] `reports:query-budget` — kod: app/Modules/Reports/Console/Commands/ReportsQueryBudgetCommand.php (`reports:query-budget`), tests/Feature/Console/ReportsQueryBudgetCommandTest.php
+- [x] `reports:render-benchmark` — kod: app/Modules/Reports/Console/Commands/ReportsRenderBenchmarkCommand.php (`reports:render-benchmark`), tests/Feature/Console/ReportsRenderBenchmarkCommandTest.php
+- [ ] böyük filter kombinasiyaları üçün regression — kodda tapılmadı
 
 ### Smoke checks
 
-- [ ] standard report açılır
-- [ ] filter dəyişir
-- [ ] chart görünür
-- [ ] export başlayır
-- [ ] PDF print görünüşü işləyir
+- [x] standard report açılır — kod: tests/Feature/Reports/ReportsDashboardTest.php::test_standard_reports_component_renders_catalog_and_table_view
+- [x] filter dəyişir — kod: tests/Feature/Reports/ReportsDashboardTest.php::test_dynamic_builder_accepts_preset_filters_from_parent_route_context, test_comparisons_take_the_panel_period
+- [ ] chart görünür — yoxlanmadı (chart görünüşü üçün test yoxdur)
+- [x] export başlayır — kod: tests/Feature/Reports/ReportsDashboardTest.php::test_header_export_downloads_the_report_behind_the_active_tab
+- [ ] PDF print görünüşü işləyir — yoxlanmadı (print görünüşü üçün test yoxdur; marşrut reports.print-standard var)
 
 ---
 
