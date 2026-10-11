@@ -205,6 +205,42 @@ class OrderAdditionalEffectsTest extends TestCase
         $this->assertFalse($outcome->isSaved());
     }
 
+    public function test_a_sanction_term_above_the_legal_six_months_is_capped(): void
+    {
+        // ƏM Md.190.1: tənbeh verildiyi gündən altı ay qüvvədədir; daha uzun ayar qanunsuzdur.
+        $term = app(DisciplinarySanctionTerm::class);
+
+        Setting::query()->updateOrCreate(['name' => DisciplinarySanctionTerm::SETTING], ['value' => '12', 'type' => 'number']);
+        $this->assertSame(6, $term->months());
+
+        Setting::query()->where('name', DisciplinarySanctionTerm::SETTING)->update(['value' => '3']);
+        $this->assertSame(3, $term->months());
+
+        Setting::query()->where('name', DisciplinarySanctionTerm::SETTING)->update(['value' => '']);
+        $this->assertSame(6, $term->months());
+    }
+
+    public function test_the_migration_brings_open_sanctions_back_to_the_legal_term(): void
+    {
+        $personnel = $this->makePersonnel();
+        Setting::query()->updateOrCreate(['name' => DisciplinarySanctionTerm::SETTING], ['value' => '12', 'type' => 'number']);
+
+        $order = $this->approve('intizam_tenbehi', $personnel, [
+            'Pozuntunun təsviri' => 'Gecikmə', 'Tənbehin növü' => 'töhmət', 'Əsas mətni' => 'izahat',
+        ]);
+        $record = PersonnelPunishment::query()->sole();
+        // Köhnə kodla yazılmış 12 aylıq qeydi təqlid edirik.
+        $record->forceFill(['expired_date' => $order->given_date->copy()->addMonthsNoOverflow(12)->toDateString()])->save();
+
+        (require base_path('app/Modules/Orders/Database/Migrations/2026_10_12_120000_limit_disciplinary_sanction_term_to_law.php'))->up();
+
+        $this->assertSame('6', (string) Setting::query()->where('name', DisciplinarySanctionTerm::SETTING)->value('value'));
+        $this->assertSame(
+            $order->given_date->copy()->addMonthsNoOverflow(6)->toDateString(),
+            $record->fresh()->getRawOriginal('expired_date'),
+        );
+    }
+
     public function test_a_disciplinary_sanction_is_recorded_for_the_configured_term_and_lifted_when_it_expires(): void
     {
         $personnel = $this->makePersonnel();

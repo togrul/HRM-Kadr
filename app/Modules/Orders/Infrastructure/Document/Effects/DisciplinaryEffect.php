@@ -14,7 +14,7 @@ use Carbon\Carbon;
 /**
  * Imposes a disciplinary sanction (intizam tənbehi): records it in the employee's file
  * with the sanction type and the violation, dated the sanction day and expiring after
- * the configured term (Admin → Settings, 12 months by default). The daily
+ * the configured term (Admin → Settings; ƏM Md.190.1 — six months at most). The daily
  * `personnel:lift-expired-sanctions` run marks it lifted once that date passes.
  * Reversal removes the record.
  */
