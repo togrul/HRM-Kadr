@@ -237,6 +237,17 @@ it('enforces tabel number uniqueness in the database too', function (): void {
     expect(fn () => secondPersonnel('CRUD-BENCH-001'))->toThrow(QueryException::class);
 });
 
+it('refreshes the isolated table when an employee is deleted', function (): void {
+    personnelListUser();
+
+    $personnel = fixturePersonnel();
+    $table = Livewire::test(TablePanel::class)->assertSee($personnel->surname);
+
+    $personnel->delete();
+
+    $table->dispatch('personnelWasDeleted')->assertDontSee($personnel->surname);
+});
+
 // --- 6. Silinmiş əməkdaşın statusu ---------------------------------------------------
 
 it('shows deleted employees as deleted in the deleted list', function (): void {

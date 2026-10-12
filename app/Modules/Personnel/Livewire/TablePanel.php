@@ -15,10 +15,16 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Isolate;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
 
+/**
+ * Isolate-lənmiş uşaq komponent valideyn yenilənəndə props dəyişmədikcə yenidən render olunmur;
+ * silmə/bərpa/əlavə hadisələri sətirləri özü yeniləməlidir.
+ */
 #[Isolate]
+#[On(['personnelAdded', 'fileAdded', 'personnelWasDeleted'])]
 class TablePanel extends Component
 {
     use AuthorizesRequests;
