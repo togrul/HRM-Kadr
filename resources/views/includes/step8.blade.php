@@ -29,13 +29,13 @@
                 <x-label for="miscForm.language.knowledge_status">{{ __('personnel::common.labels.knowledge_status') }}</x-label>
                 <div class="flex flex-wrap gap-2">
                     @foreach($knowledges as $knw)
-                        <label class="inline-flex items-center px-2 py-2 bg-zinc-100 rounded shadow-sm">
+                        <label class="hrm-radio">
                             <input type="radio"
-                                   class="form-radio"
+                                   
                                    name="miscForm.language.knowledge_status"
                                    wire:model="miscForm.language.knowledge_status"
                                    value="{{ $knw }}">
-                            <span class="ml-2 text-sm">{{ $knowledgeStatusLabels[$knw] ?? $knw }}</span>
+                            <span>{{ $knowledgeStatusLabels[$knw] ?? $knw }}</span>
                         </label>
                     @endforeach
                 </div>

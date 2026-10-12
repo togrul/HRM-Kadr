@@ -148,14 +148,14 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
             <div class="flex flex-col">
                 <x-label for="historyForm.injury.injury_type">{{ __('personnel::common.labels.injury_type') }}</x-label>
-                <div class="flex flex-row">
-                    <label class="inline-flex items-center w-full px-2 py-2 bg-zinc-100 rounded shadow-sm">
-                        <input type="radio" class="form-radio" name="historyForm.injury.injury_type" wire:model="historyForm.injury.injury_type" value="other">
-                        <span class="ml-2 text-sm">{{ __('personnel::wizard.options.injury_types.other') }}</span>
+                <div class="flex gap-2">
+                    <label class="hrm-radio flex-1">
+                        <input type="radio" name="historyForm.injury.injury_type" wire:model="historyForm.injury.injury_type" value="other">
+                        <span>{{ __('personnel::wizard.options.injury_types.other') }}</span>
                     </label>
-                    <label class="inline-flex items-center w-full px-2 py-2 ml-4 bg-zinc-100 rounded shadow-sm">
-                        <input type="radio" class="form-radio" name="historyForm.injury.injury_type" wire:model="historyForm.injury.injury_type" value="contusion">
-                        <span class="ml-2 text-sm">{{ __('personnel::wizard.options.injury_types.contusion') }}</span>
+                    <label class="hrm-radio flex-1">
+                        <input type="radio" name="historyForm.injury.injury_type" wire:model="historyForm.injury.injury_type" value="contusion">
+                        <span>{{ __('personnel::wizard.options.injury_types.contusion') }}</span>
                     </label>
                 </div>
                 @error('historyForm.injury.injury_type')

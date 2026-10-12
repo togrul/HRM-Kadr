@@ -46,9 +46,9 @@
                         <x-label :required="(bool) ($field['required'] ?? false)" for="candidate.{{ $fieldKey }}">{{ $fieldLabel }}</x-label>
                         <div class="flex flex-row flex-wrap gap-2">
                             @foreach ($this->candidateFieldOptions($field) as $option)
-                                <label class="inline-flex items-center rounded bg-zinc-100 px-2 py-2 shadow-sm">
-                                    <input type="radio" class="form-radio" name="candidate.{{ $fieldKey }}" wire:model.live="candidate.{{ $fieldKey }}" value="{{ $option }}">
-                                    <span class="ml-2 text-sm">{{ $option }}</span>
+                                <label class="hrm-radio">
+                                    <input type="radio" name="candidate.{{ $fieldKey }}" wire:model.live="candidate.{{ $fieldKey }}" value="{{ $option }}">
+                                    <span>{{ $option }}</span>
                                 </label>
                             @endforeach
                         </div>

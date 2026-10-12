@@ -441,17 +441,10 @@ class SettingsList extends Component
 
     private function loadChiefGovernance(): void
     {
-        $manualChief = Setting::query()
-            ->whereIn('name', ['Chief personnel id', 'Chief personnel_id', 'chief_personnel_id'])
-            ->pluck('value', 'name')
-            ->toArray();
-
-        $selected = collect(['Chief personnel id', 'Chief personnel_id', 'chief_personnel_id'])
-            ->map(fn (string $key) => $manualChief[$key] ?? null)
-            ->first(fn ($value) => is_numeric($value));
-
-        $this->chiefPersonnelId = is_numeric($selected) ? (int) $selected : null;
         $this->chiefSnapshot = app(ChiefResolver::class)->current();
+        $this->chiefPersonnelId = data_get($this->chiefSnapshot, 'permanent_chief_selection') === 'manual'
+            ? (int) data_get($this->chiefSnapshot, 'permanent_chief_personnel_id')
+            : null;
     }
 
     private function syncLegacyChiefSettings(): void

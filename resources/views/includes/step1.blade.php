@@ -129,13 +129,13 @@
                     aria-labelledby="personnel-gender-label"
                     aria-required="true"
                     @if ($genderInvalid) aria-invalid="true" @endif
-                    @class(['flex flex-row rounded', 'ring-1 ring-rose-300' => $genderInvalid])
+                    class="flex flex-wrap gap-2"
                 >
                     @foreach(\App\Enums\GenderEnum::genderOptions() as $value => $label)
-                        <label @class(['inline-flex items-center px-2 py-2 rounded shadow-sm', 'bg-rose-50' => $genderInvalid, 'bg-zinc-100' => ! $genderInvalid])>
+                        <label @class(['hrm-radio', 'hrm-radio-invalid' => $genderInvalid])>
                             {{-- aria-invalid on the first radio lets the wizard focus the group after Next. --}}
-                            <input type="radio" class="form-radio" name="personnel.gender" wire:model="personalForm.personnel.gender" value="{{ $value }}" @if ($genderInvalid && $loop->first) aria-invalid="true" @endif>
-                            <span class="ml-2 text-sm">{{ $label }}</span>
+                            <input type="radio" name="personnel.gender" wire:model="personalForm.personnel.gender" value="{{ $value }}" @if ($genderInvalid && $loop->first) aria-invalid="true" @endif>
+                            <span>{{ $label }}</span>
                         </label>
                     @endforeach
                 </div>

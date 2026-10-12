@@ -131,14 +131,14 @@
                         </div>
                         <div class="flex flex-col gap-1 lg:col-span-4 xl:col-span-2">
                             <x-label for="filter.is_married">{{ __('personnel::common.labels.family_status') }}</x-label>
-                            <div class="flex flex-row">
+                            <div class="flex flex-wrap gap-2">
                                 <x-ui.radio model="filter.is_married" value="0" :label="__('personnel::common.labels.single')" />
                                 <x-ui.radio model="filter.is_married" value="1" :label="__('personnel::common.labels.married')" />
                             </div>
                         </div>
                         <div class="flex flex-col lg:col-span-4 xl:col-span-4">
                             <x-label for="filter.gender">{{ __('personnel::common.labels.gender') }}</x-label>
-                            <div class="flex flex-col lg:flex-row lg:flex-wrap lg:gap-3">
+                            <div class="flex flex-wrap gap-2">
                                 @foreach(\App\Enums\GenderEnum::genderOptions() as $value => $label)
                                     <x-ui.radio model="filter.gender" :$value :$label />
                                 @endforeach

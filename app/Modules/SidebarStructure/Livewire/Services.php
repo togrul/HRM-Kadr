@@ -44,20 +44,30 @@ class Services extends Component
             $sections[] = ['key' => 'change-policy', 'label' => __('services::common.labels.change_policy'), 'count' => null];
         }
 
-        $sections[] = ['key' => 'menus', 'label' => __('services::common.labels.menus'), 'count' => (string) Menu::query()->count()];
+        $sections[] = ['key' => 'menus', 'label' => __('services::common.labels.menus'), 'count' => self::countOf(Menu::class)];
 
         // Rollar və istifadəçilər ayrıca icazələrlə (manage-roles / manage-users) görünür.
         if (auth()->user()?->can('manage-roles') ?? false) {
-            $sections[] = ['key' => 'roles', 'label' => __('services::common.navigation.roles_and_permissions'), 'count' => (string) Role::query()->count()];
+            $sections[] = ['key' => 'roles', 'label' => __('services::common.navigation.roles_and_permissions'), 'count' => self::countOf(Role::class)];
         }
 
         if (auth()->user()?->can('manage-users') ?? false) {
-            $sections[] = ['key' => 'users', 'label' => __('services::common.labels.users'), 'count' => (string) User::query()->count()];
+            $sections[] = ['key' => 'users', 'label' => __('services::common.labels.users'), 'count' => self::countOf(User::class)];
         }
 
-        $sections[] = ['key' => 'ranks', 'label' => __('services::common.labels.ranks'), 'count' => (string) Rank::query()->count()];
+        $sections[] = ['key' => 'ranks', 'label' => __('services::common.labels.ranks'), 'count' => self::countOf(Rank::class)];
 
         return $sections;
+    }
+
+    /**
+     * The panel renders twice (side panel + compact mobile menu); count each table once per request.
+     *
+     * @param  class-string<\Illuminate\Database\Eloquent\Model>  $model
+     */
+    private static function countOf(string $model): string
+    {
+        return once(fn (): string => (string) $model::query()->count());
     }
 
     public function render(): View

@@ -114,14 +114,14 @@
             </div>
             <div class="flex flex-col">
                 <x-label for="documentForm.document.is_married">{{ __('personnel::common.labels.family_status') }}</x-label>
-                <div class="flex items-center">
-                    <label class="inline-flex items-center bg-zinc-100 rounded shadow-sm py-2 px-2">
-                        <input type="radio" class="form-radio" name="documentForm.document.is_married" wire:model="documentForm.document.is_married" value="0">
-                        <span class="ml-2 text-sm">{{ __('personnel::common.labels.single') }}</span>
+                <div class="flex flex-wrap gap-2">
+                    <label class="hrm-radio">
+                        <input type="radio" name="documentForm.document.is_married" wire:model="documentForm.document.is_married" value="0">
+                        <span>{{ __('personnel::common.labels.single') }}</span>
                     </label>
-                    <label class="inline-flex items-center ml-4 bg-zinc-100 rounded shadow-sm py-2 px-2">
-                        <input type="radio" class="form-radio" name="documentForm.document.is_married" wire:model="documentForm.document.is_married" value="1">
-                        <span class="ml-2 text-sm">{{ __('personnel::common.labels.married') }}</span>
+                    <label class="hrm-radio">
+                        <input type="radio" name="documentForm.document.is_married" wire:model="documentForm.document.is_married" value="1">
+                        <span>{{ __('personnel::common.labels.married') }}</span>
                     </label>
                 </div>
                 @error('documentForm.document.is_married')
