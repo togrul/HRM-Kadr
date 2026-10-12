@@ -19,6 +19,6 @@
 
 @can('delete-personnels')
     <div>
-        <livewire:personnel.delete-personnel />
+        <livewire:personnel.delete-personnel key="personnel-delete-modal" />
     </div>
 @endcan

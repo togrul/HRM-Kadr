@@ -248,6 +248,21 @@ it('refreshes the isolated table when an employee is deleted', function (): void
     $table->dispatch('personnelWasDeleted')->assertDontSee($personnel->surname);
 });
 
+it('keeps the delete modal component identity across list re-renders', function (): void {
+    personnelListUser();
+
+    $deleteId = fn (string $html): ?string => preg_match('/wire:name="personnel\.delete-personnel"/', $html)
+        && preg_match('/wire:id="([^"]+)"[^>]*wire:name="personnel\.delete-personnel"/', $html, $m) ? $m[1] : null;
+
+    $list = Livewire::test(AllPersonnel::class);
+    $before = $deleteId($list->html());
+
+    $list->call('handleRowAction', 'delete', ['type' => 'delete', 'value' => (string) fixturePersonnel()->id]);
+
+    expect($before)->not->toBeNull()
+        ->and($deleteId($list->html()))->toBe($before);
+});
+
 // --- 6. Silinmiş əməkdaşın statusu ---------------------------------------------------
 
 it('shows deleted employees as deleted in the deleted list', function (): void {
